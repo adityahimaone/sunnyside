@@ -54,22 +54,26 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock motion
-jest.mock('motion/react', () => ({
-  m: {
-    div: 'div',
-    p: 'p',
-    h1: 'h1',
-    span: 'span',
-  },
-  useScroll: () => ({
-    scrollYProgress: { current: 0 },
-  }),
-  useTransform: () => 0,
-  AnimatePresence: ({ children }) => children,
-  // `motion.create(Component)` wraps a component; several booth components use
-  // it at module scope, so it has to exist for anything importing them.
-  create: (Component) => Component,
-}))
+jest.mock('motion/react', () => {
+  const handler = {
+    get: (_target, prop) => prop,
+  }
+  const motionProxy = new Proxy({}, handler)
+  return {
+    motion: motionProxy,
+    m: motionProxy,
+    useReducedMotion: () => false,
+    useScroll: () => ({
+      scrollYProgress: { current: 0 },
+    }),
+    useTransform: () => 0,
+    useSpring: (v) => v,
+    AnimatePresence: ({ children }) => children,
+    // `motion.create(Component)` wraps a component; several booth components use
+    // it at module scope, so it has to exist for anything importing them.
+    create: (Component) => Component,
+  }
+})
 
 // Clear mocks between tests
 beforeEach(() => {

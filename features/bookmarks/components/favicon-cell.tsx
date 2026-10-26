@@ -2,7 +2,7 @@
 
 import { Globe } from 'lucide-react'
 
-import { VolLoader } from '@/features/landing-page/vol-loader'
+import { VolLoader } from './vol-loader'
 import { cn } from '@/lib/utils'
 
 import { getFaviconUrl } from '../utils/favicon'

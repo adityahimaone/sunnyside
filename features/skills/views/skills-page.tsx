@@ -544,7 +544,7 @@ function SkillsPageContent({ initialCatalog }: SkillsPageProps) {
                           }`}
                         >
                           <span className={styles.statusLed} />
-                          {skill.installed ? 'IN USE' : 'AVAILABLE'}
+                          {skill.installed ? 'In use' : 'Available'}
                         </span>
 
                         {isAdmin && (
@@ -591,6 +591,7 @@ function SkillsPageContent({ initialCatalog }: SkillsPageProps) {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={styles.skillTitle}
+                      title={cmd}
                     >
                       <span>{skill.name}</span>
                       <ArrowUpRight size={14} style={{ opacity: 0.5 }} />
@@ -647,7 +648,11 @@ function SkillsPageContent({ initialCatalog }: SkillsPageProps) {
                       </div>
 
                       <a
-                        href={skillUrl(skill)}
+                        href={
+                          skill.repo.startsWith('http')
+                            ? skill.repo
+                            : `https://github.com/${skill.repo}`
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
