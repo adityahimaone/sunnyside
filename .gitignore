@@ -1,0 +1,84 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# next.js
+/.next/
+/\.next.failed-*/
+/out/
+
+# opennext build output (Cloudflare Workers)
+/.open-next/
+/.cloudflare/
+
+# wrangler's generated local state
+/.wrangler/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+# ...except the committed template that documents which variables are required
+!.env.example
+# wrangler local secrets for `wrangler dev` / opennextjs-cloudflare preview.
+# Only NEXTJS_ENV lives here today, but it is the same class of file and would
+# be the obvious place to paste a real secret by accident.
+.dev.vars
+.dev.vars.*
+
+# runtime data
+.views.json
+
+# generated blog content (rebuilt by scripts/generate-blog-content.mjs on build)
+/features/blog/lib/generated-content.ts
+
+# generated D1 seed input (one-off migration artifact)
+/.bookmarks-seed.sql
+/.bookmarks-seed.json
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local agent tooling state
+.commandcode/
+
+# generated repo snapshots
+artifacts/
+
+# Screenshot scratch (pad sea verification captures)
+/.padsea-check/
+
+# Screenshot scratch (arrangement hero verification captures)
+/.riddim-verify/

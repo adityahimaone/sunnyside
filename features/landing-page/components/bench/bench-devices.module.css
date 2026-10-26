@@ -1,0 +1,452 @@
+/* The flying devices.
+
+   Real solids in a 3D rendering context: the layer carries the perspective,
+   and every element between it and a face keeps `preserve-3d`. Two rules the
+   file is built around:
+
+   1. **Opacity is a custom property.** `--o` is written on each anchor by the
+      hook and read by the faces. An `opacity` on any ancestor of a face would
+      force `transform-style: flat` and flatten the solid mid-fade.
+   2. **Only transforms move.** The hook writes the anchor's and the rot's
+      transform and `--o`; the idle float is a compositor-only keyframe. Nothing
+      here changes layout, filter or shadow per frame. */
+
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  perspective: 1100px;
+  perspective-origin: 50% 46%;
+  pointer-events: none;
+  --dev-ink: var(--foreground);
+  --dev-body: color-mix(in srgb, var(--background) 90%, var(--foreground));
+  --dev-body-deep: color-mix(in srgb, var(--background) 78%, var(--foreground));
+  --dev-edge: color-mix(in srgb, var(--foreground) 34%, transparent);
+  --dev-lcd: color-mix(in srgb, var(--primary) 32%, var(--background));
+}
+
+/* Zero-size: the hook's transform is about the point the device flies through,
+   not about the middle of a box. */
+.anchor {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+  --o: 0;
+}
+
+.bob,
+.rot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.bob {
+  animation: bench-bob ease-in-out infinite alternate;
+}
+
+@keyframes bench-bob {
+  from {
+    transform: translate3d(0, -7px, 0);
+  }
+  to {
+    transform: translate3d(0, 7px, 0);
+  }
+}
+
+/* ── Cuboid ──────────────────────────────────────────────── */
+
+.solid {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.face {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  opacity: var(--o, 1);
+  background: var(--dev-body);
+  border: 1px solid var(--dev-edge);
+  border-radius: 7px;
+  box-shadow:
+    inset 0 1px 1.5px rgb(255 255 255 / 0.35),
+    inset 0 -1px 2px rgb(0 0 0 / 0.15);
+}
+
+.front,
+.back {
+  width: var(--w);
+  height: var(--h);
+}
+
+.front {
+  transform: translate(-50%, -50%) translateZ(calc(var(--d) / 2));
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--background) 96%, var(--foreground)),
+    var(--dev-body-deep)
+  );
+}
+
+.back {
+  transform: translate(-50%, -50%) rotateY(180deg)
+    translateZ(calc(var(--d) / 2));
+  background: var(--dev-body-deep);
+}
+
+.left,
+.right {
+  width: var(--d);
+  height: var(--h);
+  background: var(--dev-body-deep);
+}
+
+.left {
+  transform: translate(-50%, -50%) rotateY(-90deg)
+    translateZ(calc(var(--w) / 2));
+}
+
+.right {
+  transform: translate(-50%, -50%) rotateY(90deg) translateZ(calc(var(--w) / 2));
+}
+
+.top,
+.bottom {
+  width: var(--w);
+  height: var(--d);
+  background: var(--dev-body-deep);
+}
+
+.top {
+  transform: translate(-50%, -50%) rotateX(90deg) translateZ(calc(var(--h) / 2));
+}
+
+.bottom {
+  transform: translate(-50%, -50%) rotateX(-90deg)
+    translateZ(calc(var(--h) / 2));
+}
+
+/* ── Sampler ─────────────────────────────────────────────── */
+
+.samplerLcd {
+  position: absolute;
+  left: 8%;
+  top: 9%;
+  width: 46%;
+  height: 20%;
+  border-radius: 3px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary) 42%, var(--background)),
+    color-mix(in srgb, var(--primary) 26%, var(--background))
+  );
+  border: 1px solid color-mix(in srgb, var(--foreground) 22%, transparent);
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.35),
+    0 0 10px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.samplerKnob {
+  position: absolute;
+  right: 9%;
+  top: 8%;
+  width: 18%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 38% 34%,
+    color-mix(in srgb, var(--background) 96%, #ffffff) 0%,
+    var(--dev-body) 45%,
+    var(--dev-body-deep) 100%
+  );
+  border: 1px solid var(--dev-edge);
+  box-shadow:
+    0 3px 6px rgb(0 0 0 / 0.22),
+    inset 0 1px 1px rgb(255 255 255 / 0.6);
+}
+
+.pads {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 9%;
+  top: 38%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3.5px;
+}
+
+.pad {
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--foreground) 18%, var(--background));
+  border: 1px solid color-mix(in srgb, var(--foreground) 16%, transparent);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.1),
+    0 1px 2px rgb(0 0 0 / 0.2);
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.padAccent {
+  background: var(--primary);
+  border-color: transparent;
+  box-shadow:
+    0 0 10px var(--primary),
+    inset 0 1px 1.5px rgb(255 255 255 / 0.6);
+}
+
+/* ── Cassette ────────────────────────────────────────────── */
+
+.tapeLabel {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 10%;
+  height: 26%;
+  border-radius: 3px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary) 30%, var(--background)),
+    color-mix(in srgb, var(--primary) 18%, var(--background))
+  );
+  border: 1px solid var(--dev-edge);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.2);
+}
+
+.tapeWindow {
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: 10%;
+  height: 40%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7%;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 26%, var(--background));
+  border: 1px solid var(--dev-edge);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.35);
+}
+
+.reel {
+  width: 38%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--dev-body) 0 24%, transparent 26%),
+    conic-gradient(
+      var(--foreground) 0 12%,
+      transparent 12% 33%,
+      var(--foreground) 33% 45%,
+      transparent 45% 66%,
+      var(--foreground) 66% 78%,
+      transparent 78%
+    );
+  box-shadow: 0 0 4px rgb(0 0 0 / 0.3);
+  transform: rotate(calc(var(--bench-spin, 0) * 1deg));
+}
+
+/* ── Player ──────────────────────────────────────────────── */
+
+.playerScreen {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 8%;
+  height: 40%;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 0 8%;
+  border-radius: 3px;
+  background: var(--dev-lcd);
+  border: 1px solid var(--dev-edge);
+}
+
+.playerScreen b {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--foreground);
+  opacity: 0.55;
+}
+
+.playerScreen b:nth-child(2) {
+  width: 62%;
+}
+
+.playerScreen b:nth-child(3) {
+  width: 38%;
+  background: var(--primary);
+  opacity: 1;
+}
+
+.playerWheel {
+  position: absolute;
+  left: 50%;
+  bottom: 9%;
+  width: 56%;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--primary) 0 16%,
+    var(--dev-body-deep) 18%
+  );
+  border: 1px solid var(--dev-edge);
+}
+
+/* ── Knob: a stack of discs, so it has a side ────────────── */
+
+.knob {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.knobLayer,
+.knobCap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  opacity: var(--o);
+  backface-visibility: hidden;
+}
+
+.knobLayer {
+  transform: translate(-50%, -50%) translateZ(calc(var(--i) * -3px));
+  background: var(--dev-body-deep);
+  border: 1px solid var(--dev-edge);
+}
+
+.knobCap {
+  transform: translate(-50%, -50%) translateZ(3px);
+  background: conic-gradient(
+    from 0deg,
+    var(--dev-body),
+    var(--dev-body-deep),
+    var(--dev-body),
+    var(--dev-body-deep),
+    var(--dev-body)
+  );
+  border: 1px solid var(--dev-edge);
+}
+
+.knobCap b {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 3px;
+  height: 30%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: var(--primary);
+}
+
+/* ── Vinyl: two faces back to back ───────────────────────── */
+
+.vinyl {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.disc {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  opacity: var(--o, 1);
+  backface-visibility: hidden;
+  background: radial-gradient(
+      circle,
+      transparent 0 28%,
+      rgb(0 0 0 / 0.2) 29% 30%,
+      transparent 31%
+    ),
+    repeating-radial-gradient(circle, #18181b 0 1.5px, #262629 1.5px 3px);
+  border: 1px solid color-mix(in srgb, var(--foreground) 24%, transparent);
+  box-shadow:
+    0 6px 18px -2px rgb(0 0 0 / 0.35),
+    inset 0 0 6px rgb(0 0 0 / 0.5);
+}
+
+/* The sheen: a conic wedge that turns with the scroll. */
+.disc::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 8%,
+    rgb(255 255 255 / 0.2) 12%,
+    transparent 18% 58%,
+    rgb(255 255 255 / 0.14) 62%,
+    transparent 68%
+  );
+  transform: rotate(calc(var(--bench-spin, 0) * 1.6deg));
+}
+
+.discFront {
+  transform: translate(-50%, -50%) translateZ(1px);
+}
+
+.discBack {
+  transform: translate(-50%, -50%) rotateY(180deg) translateZ(1px);
+}
+
+.discLabel {
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--dev-body) 0 12%, var(--primary) 14%);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--primary) 40%, transparent);
+  z-index: 1;
+}
+
+/* ── Chapter mode ────────────────────────────────────────
+   The same solids, driven by `--p` (0 → 1 across a chapter) instead of by the
+   flight. `.live` is set by the chapter; nothing here runs on the flying ones. */
+
+.live .pad {
+  background: color-mix(
+    in srgb,
+    var(--primary) calc(clamp(0, var(--p, 0.5) * 22 - var(--i), 1) * 100%),
+    color-mix(in srgb, var(--foreground) 18%, var(--background))
+  );
+  border-color: transparent;
+  box-shadow: 0 0 calc(clamp(0, var(--p, 0.5) * 22 - var(--i), 1) * 8px)
+    var(--primary);
+}
+
+.live.vinyl .disc::after {
+  transform: rotate(calc(var(--bench-spin, 0) * 1deg));
+}

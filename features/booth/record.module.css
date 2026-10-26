@@ -1,0 +1,81 @@
+.record {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+      circle,
+      transparent 0 4px,
+      rgba(255, 255, 255, 0.08) 4px 5px
+    ),
+    radial-gradient(
+      circle,
+      var(--record-label, var(--primary)) 0 18%,
+      #141614 18.5% 21%,
+      #1a1d1c 21.5% 100%
+    );
+  box-shadow: 0 8px 22px -12px rgba(0, 0, 0, 0.7);
+}
+
+/* Declared here rather than only in each container's stylesheet.
+   `.record` ships in the shared layout bundle while a container's override
+   lives in a page's CSS module, so when the container only set `position`
+   through its own class, stylesheet order decided the winner and the disc fell
+   into normal flow. Setting it on the element itself removes the dependency. */
+.record[data-position='absolute'] {
+  position: absolute;
+}
+
+.record[data-position='flow'] {
+  position: relative;
+}
+
+.grooves {
+  position: absolute;
+  border-radius: 50%;
+  inset: 0;
+  background: repeating-radial-gradient(
+    circle,
+    transparent 0 3px,
+    rgba(255, 255, 255, 0.04) 3px 4px
+  );
+}
+
+.label {
+  position: absolute;
+  border-radius: 50%;
+  inset: 31%;
+  overflow: hidden;
+  background: var(--record-label, var(--primary));
+}
+
+.label:empty {
+  display: none;
+}
+
+.spindle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--card, #d9d6cc);
+  transform: translate(-50%, -50%);
+}
+
+.record[data-spinning] {
+  animation: booth-spin 6s linear infinite;
+  will-change: transform;
+}
+
+@keyframes booth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .record[data-spinning] {
+    animation: none;
+  }
+}

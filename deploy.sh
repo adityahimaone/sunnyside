@@ -1,0 +1,272 @@
+#!/bin/bash
+set -e
+
+# Portfolio Auto-Deploy Script with Rollback & Notifications
+# Triggered by GitHub Actions
+
+# pnpm and node are installed through nvm, so they only exist on the PATH of an
+# interactive login shell. GitHub Actions reaches this script over a bare SSH
+# command, which is not one, and `pnpm` came back "command not found" and failed
+# the deploy. Prepending the nvm bin directory makes the script find its own
+# tools whether or not a login profile was sourced. The version is spelled out
+# rather than globbed so this cannot silently bind to a different toolchain.
+NVM_BIN_DIR="/home/adityahimaone/.nvm/versions/node/v24.19.0/bin"
+export PATH="$NVM_BIN_DIR:$PATH"
+
+APP_DIR="/home/adityahimaone/apps/next-portfolio-blog"
+LOG_FILE="$HOME/portfolio-deploy.log"
+# This project installs with pnpm (pnpm-lock.yaml is the real lockfile).
+# Running `npm ci` here fails outright against the stale package-lock.json.
+PKG_MANAGER="pnpm"
+ROLLBACK_DIR="$HOME/portfolio-rollback"
+TELEGRAM_BOT_TOKEN="$1"  # passed from GitHub Actions
+TELEGRAM_CHAT_ID="$2"    # passed from GitHub Actions
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# ── Log Rotation Setup ───────────────────────────────────────────────────
+# Keep max 5 rotated logs (portfolio-deploy.log.1, .2, ...), each ~1MB max
+rotate_logs() {
+    local logfile="$1"
+    local max_size=$((1024 * 1024))  # 1 MB
+    local max_rotates=5
+
+    if [[ ! -f "$logfile" ]]; then
+        return 0
+    fi
+
+    local size=$(stat -c%s "$logfile" 2>/dev/null || echo 0)
+    if [[ $size -lt $max_size ]]; then
+        return 0
+    fi
+
+    # Rotate: .5 → delete, .4 → .5, .3 → .4, .2 → .3, .1 → .2, current → .1
+    for ((i = max_rotates; i >= 1; i--)); do
+        local next=$((i + 1))
+        if [[ -f "${logfile}.${i}" ]]; then
+            if [[ $i -eq $max_rotates ]]; then
+                rm -f "${logfile}.${i}"
+            else
+                mv -f "${logfile}.${i}" "${logfile}.${next}"
+            fi
+        fi
+    done
+
+    if [[ -f "$logfile" ]]; then
+        mv -f "$logfile" "${logfile}.1"
+    fi
+}
+
+# Rotate logs before starting (best effort, don't fail if rotation error)
+rotate_logs "$LOG_FILE" || true
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+send_telegram() {
+    local message="$1"
+    if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "text=${message}" \
+            -d "parse_mode=Markdown" > /dev/null 2>&1 || true
+    fi
+}
+
+send_telegram_photo() {
+    local photo_url="$1"
+    local caption="$2"
+    if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "photo=${photo_url}" \
+            -d "caption=${caption}" \
+            -d "parse_mode=Markdown" > /dev/null 2>&1 || true
+    fi
+}
+
+log "=== Deploy started ==="
+
+cd "$APP_DIR"
+
+# ── Pre-deploy checks ──────────────────────────────────────────────────────
+log "Running pre-deploy checks..."
+
+# Check disk space
+DISK_FREE=$(df -h "$APP_DIR" | awk 'NR==2 {print $5}' | tr -d '%')
+if [[ "$DISK_FREE" -gt 90 ]]; then
+    log "⚠️  WARNING: Low disk space (${DISK_FREE}% used)"
+    send_telegram "🚨 *Portfolio Deploy Blocked*\nDisk space critical: ${DISK_FREE}% used"
+    exit 1
+fi
+
+# Check Node.js version
+NODE_VERSION=$(node -v)
+log "Node.js version: $NODE_VERSION"
+
+# Check PM2 status
+if ! pm2 list | grep -q portfolio-blog; then
+    log "❌ PM2 process 'portfolio-blog' not found!"
+    send_telegram "🚨 *Deploy Failed*\nPM2 process 'portfolio-blog' not found"
+    exit 1
+fi
+
+# Save current commit for rollback
+CURRENT_COMMIT=$(git rev-parse HEAD)
+log "Current commit: $CURRENT_COMMIT"
+mkdir -p "$ROLLBACK_DIR"
+echo "$CURRENT_COMMIT" > "$ROLLBACK_DIR/last_known_good.commit"
+
+# ── Pull latest code ───────────────────────────────────────────────────────
+log "Pulling latest changes..."
+
+# Ensure we have full history (unshallow if needed)
+if [ -f ".git/shallow" ]; then
+    log "Repository is shallow, fetching full history..."
+    git fetch --unshallow || true
+fi
+
+# Fetch only the main branch from origin (clean, no tag/other branch noise)
+git fetch origin main
+
+# Get the commit we just fetched
+REMOTE_COMMIT=$(git rev-parse FETCH_HEAD)
+log "Remote commit: $REMOTE_COMMIT"
+
+# Compare with current HEAD
+CURRENT_HEAD=$(git rev-parse HEAD)
+log "Local commit: $CURRENT_HEAD"
+
+# Always ensure local matches remote exactly
+git reset --hard FETCH_HEAD
+NEW_COMMIT=$(git rev-parse HEAD)
+log "Active commit after reset: $NEW_COMMIT"
+
+if [ "$CURRENT_HEAD" = "$REMOTE_COMMIT" ]; then
+    log "No new commits, but forcing rebuild to ensure latest content (blog posts, etc.)"
+else
+    log "New commits detected, rebuilding..."
+fi
+
+# ── Install dependencies ────────────────────────────────────────────────────
+log "Installing dependencies..."
+$PKG_MANAGER install --frozen-lockfile
+
+# ── Snapshot the running server before building ─────────────────────────────
+# `prebuild` deletes .next outright, and with output:'standalone' the running
+# server lives inside .next/standalone. PM2 is not restarted until after the
+# build finishes, so for the whole duration of the build the live process is
+# running from a directory that no longer exists -- a rollback build failure
+# would leave nothing to restart. Keep the assembled bundle aside and put it
+# back if the build fails.
+LIVE_STANDALONE="$ROLLBACK_DIR/standalone"
+log "Snapshotting current standalone bundle for rollback..."
+rm -rf "$LIVE_STANDALONE"
+if [[ -d "$APP_DIR/.next/standalone" ]]; then
+    cp -r "$APP_DIR/.next/standalone" "$LIVE_STANDALONE"
+    log "✓ Snapshot saved ($(du -sh "$LIVE_STANDALONE" | cut -f1))"
+else
+    log "⚠️  No existing standalone bundle (first standalone deploy?)"
+fi
+
+restore_standalone() {
+    if [[ -d "$LIVE_STANDALONE" ]]; then
+        rm -rf "$APP_DIR/.next/standalone"
+        mkdir -p "$APP_DIR/.next"
+        cp -r "$LIVE_STANDALONE" "$APP_DIR/.next/standalone"
+        log "✓ Restored the previous standalone bundle"
+    fi
+}
+
+# ── Build ───────────────────────────────────────────────────────────────────
+# The build is the memory peak on this host, not the running app. V8 would
+# otherwise size old space against total system RAM and grow into swap, which
+# is slower than collecting and stalls every other service on the box while it
+# happens. Cap it and let V8 collect early instead. next.config.mjs also pins
+# experimental.cpus and staticGenerationMaxConcurrency for the same reason.
+log "Building Next.js app (max-old-space-size=1536)..."
+if ! NODE_OPTIONS="--max-old-space-size=1536" $PKG_MANAGER run build; then
+    log "❌ Build failed! Initiating rollback..."
+    send_telegram "🚨 *Deploy Failed - Build Error*\nCommit: \`$NEW_COMMIT\`\nRolling back to \`$CURRENT_COMMIT\`"
+
+    # Rollback
+    git reset --hard "$CURRENT_COMMIT"
+    $PKG_MANAGER install --frozen-lockfile
+    if NODE_OPTIONS="--max-old-space-size=1536" $PKG_MANAGER run build; then
+        log "✓ Rollback build succeeded"
+    else
+        # Even a rollback build failed, so there is no new bundle to serve. The
+        # pre-build snapshot is the last thing that was known to work.
+        log "❌ Rollback build also failed, restoring the last known good bundle"
+        restore_standalone
+    fi
+    pm2 restart ecosystem.config.js --only portfolio-blog --update-env
+    log "✓ Rollback completed"
+    send_telegram "✅ *Rollback Complete*\nRestored to \`$CURRENT_COMMIT\`"
+    exit 1
+fi
+
+if [[ ! -f "$APP_DIR/.next/standalone/server.js" ]]; then
+    log "❌ Build reported success but .next/standalone/server.js is missing!"
+    restore_standalone
+    pm2 restart ecosystem.config.js --only portfolio-blog --update-env
+    send_telegram "🚨 *Deploy Failed - No standalone server.js*\nCommit: \`$NEW_COMMIT\`\nServing the previous bundle"
+    exit 1
+fi
+
+# ── Pre-restart health check (old version) ─────────────────────────────────
+log "Checking old version health before reload..."
+sleep 2
+if curl -sf -o /dev/null -w "%{http_code}" http://127.0.0.1:3000 | grep -q "^2"; then
+    log "✓ Old version healthy (HTTP 2xx)"
+else
+    log "⚠️  Old version not responding (might be first deploy)"
+fi
+
+# ── Restart PM2 ─────────────────────────────────────────────────────────────
+log "Reloading PM2 process (zero-downtime)..."
+pm2 reload ecosystem.config.js --only portfolio-blog --update-env
+
+# ── Post-deploy health check ────────────────────────────────────────────────
+# Retry: on a cold start Next needs a moment to bind the port, and a single
+# failed probe here would trigger a pointless rollback.
+HTTP_CODE="000"
+for attempt in 1 2 3 4 5 6 7 8 9 10; do
+    HTTP_CODE=$(curl -s -o /dev/null -m 10 -w "%{http_code}" http://127.0.0.1:3000 || echo "000")
+    if [[ "$HTTP_CODE" =~ ^2 ]]; then
+        break
+    fi
+    log "Health check attempt ${attempt}/10 -> HTTP ${HTTP_CODE}, retrying in 3s..."
+    sleep 3
+done
+
+if [[ "$HTTP_CODE" =~ ^2 ]]; then
+    log "✅ Deploy SUCCESS - Portfolio responding (HTTP $HTTP_CODE)"
+    send_telegram "✅ *Portfolio Deploy Success*\nCommit: \`$NEW_COMMIT\`\nHTTP Status: $HTTP_CODE\nURL: https://adityahimaone.space"
+else
+    log "❌ Deploy FAILED - Portfolio NOT responding (HTTP $HTTP_CODE)"
+    send_telegram "🚨 *Deploy Failed - Health Check*\nCommit: \`$NEW_COMMIT\`\nHTTP Status: $HTTP_CODE\nInitiating rollback..."
+
+    # Rollback. The health check failed on the bundle we just built, so rebuild
+    # the previous commit; if even that build fails, fall back to the snapshot
+    # taken before this build started rather than leaving nothing to serve.
+    git reset --hard "$CURRENT_COMMIT"
+    $PKG_MANAGER install --frozen-lockfile
+    if NODE_OPTIONS="--max-old-space-size=1536" $PKG_MANAGER run build; then
+        log "✓ Rollback build succeeded"
+    else
+        log "❌ Rollback build also failed, restoring the last known good bundle"
+        restore_standalone
+    fi
+    pm2 restart ecosystem.config.js --only portfolio-blog --update-env
+    log "✓ Rollback completed"
+    send_telegram "✅ *Rollback Complete*\nRestored to \`$CURRENT_COMMIT\`"
+    exit 1
+fi
+
+log "=== Deploy completed successfully ==="

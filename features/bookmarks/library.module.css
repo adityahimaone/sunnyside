@@ -1,0 +1,1899 @@
+/* Library — /bookmarks (docs/DESIGN_BOOTH.md §5).
+   The sidebar is the one blurred surface; everything else is flat. */
+
+.page {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  /* Clears the fixed dock. The magnetic magnify grows a 36px icon to ~50px,
+     so the capsule is ~62px tall before the 1.25rem offset. */
+  padding: 4rem 1.5rem 10rem;
+  background: var(--room-base);
+}
+
+@media (min-width: 768px) {
+  .page {
+    padding: 5rem 2.5rem 10rem;
+  }
+}
+
+/* The dock wraps to two rows below 720px, so the reservation shrinks with it.
+   The 767px ceiling rather than 640px is deliberate: between the two the page
+   would have kept its 10rem reservation *and* picked up the footer's, which is
+   the stacking this is here to avoid. The footer that follows gives up its
+   half, so these two sum to one reservation rather than two. */
+@media (max-width: 767px) {
+  .page {
+    /* Matches the trim on /projects and /blog: the 4rem top gutter only pushed
+       the eyebrow below the fold on a phone. */
+    padding: 2.5rem 1rem 5.5rem;
+  }
+}
+
+.library {
+  display: grid;
+  /* The single column below 1024px was implicit, which means it is sized by
+     its widest child rather than by the container. The chip row carries 24
+     channels of `white-space: nowrap`, so the column resolved to 2222px on a
+     360px screen and dragged the whole document out to that width — the
+     channel filter's own scroller never engaged because its parent was the
+     thing that had grown. minmax(0, 1fr) caps the column at the container and
+     hands the overflow back to .scroller, which is already overflow-x: auto. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem;
+  padding-top: 3rem;
+}
+
+/* The 3rem of leading belongs to a header that reads as a band of its own. On
+   a phone the header is already tight against the trimmed page padding, and the
+   grid gap below it compounds into a single tall gap before the first control. */
+@media (max-width: 767px) {
+  .library {
+    gap: 1.5rem;
+    padding-top: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .library {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* ─── Skills entry point ─────────────────────────────────────── */
+
+/*
+  /skills has no dock entry on purpose — the dock holds the five destinations
+  that are their own place, and this one is a footnote to the library. It is
+  therefore linked from here or not at all, so the card sits above the grid
+  rather than inside the sidebar where it would read as a channel.
+
+  Low intensity: a hairline and a faint tint, no plate, no glow.
+*/
+.skillsCta {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 16px;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 2rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--hairline));
+  border-radius: var(--booth-r-panel);
+  background: color-mix(in srgb, var(--primary) 4%, transparent);
+  color: var(--booth-ink);
+  text-decoration: none;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.skillsCta:hover {
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--hairline));
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+
+.skillsCta:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.skillsCtaIcon {
+  color: var(--primary);
+}
+
+.skillsCtaTitle {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.skillsCtaText {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--booth-ink-muted);
+  font-size: 0.8125rem;
+}
+
+.skillsCtaArrow {
+  color: var(--booth-ink-dim);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.skillsCta:hover .skillsCtaArrow {
+  color: var(--primary);
+}
+
+/* ─── Playlist sidebar (control layer) ───────────────────────── */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem;
+  border-radius: var(--booth-r-panel);
+  color: var(--booth-ink);
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    position: sticky;
+    top: 2rem;
+    /* The catalogue carries 24 channels, so the panel is capped to the
+       viewport and the channel list scrolls inside it. The dock sits ~4rem
+       above the bottom edge, hence the clearance in the max-height. */
+    max-height: calc(100svh - 2rem - 5.5rem);
+  }
+}
+
+.sidebarTitle {
+  padding: 0.25rem 0.5rem 0.6rem;
+  color: var(--booth-ink-muted);
+  font: var(--silkscreen);
+}
+
+/* The scrollable region: the channel list plus the admin row, so the admin
+   buttons stay pinned below the list rather than scrolling away. */
+.sidebarScroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline) transparent;
+}
+
+.sidebarScroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebarScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebarScroll::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--hairline);
+}
+
+.playlist {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.6rem;
+  border: 0;
+  border-radius: var(--booth-r-control);
+  background: transparent;
+  color: var(--booth-ink-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  /* The hover fill moved to the shared-layout pill, which glides between rows
+     instead of crossfading in place. What is left to transition here is the
+     ink, which the pill cannot do. */
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+/* Only the selected row keeps its own background. `:hover` deliberately does
+   not — if it filled in place as well as moving the pill, the row would flash a
+   second fill underneath the pill arriving over it. */
+.playlist[aria-pressed='true'] {
+  background: var(--flat-fill-hover);
+  color: var(--booth-ink);
+}
+
+.playlistLed {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--led, var(--primary));
+  opacity: 0.5;
+  /* The glow was un-animated, so the selected playlist's halo popped from
+     nothing to full in one frame while the opacity crossfaded. */
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.playlist[aria-pressed='true'] .playlistLed {
+  opacity: 1;
+  box-shadow: 0 0 8px var(--led, var(--primary));
+}
+
+.playlistName {
+  flex: 1;
+  min-width: 0;
+}
+
+.playlistCount {
+  color: var(--booth-ink-dim);
+  font: var(--silkscreen);
+  font-size: 0.6875rem;
+}
+
+/* ─── Channel chip row (mobile substitute for the sidebar) ────── */
+
+/* Hidden from 1024px up, where the sidebar carries the same filter. It only
+   needs to give the FilterRow room; the row does its own scrolling. */
+.chipRow {
+  min-width: 0;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .chipRow {
+    display: none;
+  }
+}
+
+/* Below 1024px the panel and the chip row are two renderings of one filter,
+   and the panel was the wrong one to keep: twenty-four stacked buttons above
+   the search box, pushing the first result roughly a thousand pixels down. The
+   chip row stays as the glanceable filter, and the full list with its counts
+   moves into the sheet the trigger below opens. */
+@media (max-width: 1023px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+/* Below 1024px the sidebar, the chip row and the sheet's own list are three
+   renderings of one filter. The trigger is the only one that can be reached
+   without a horizontal swipe across twenty-four nowrap chips — a scroller the
+   reader cannot see has more than it has on screen — so on a phone it is the
+   one that stays and the chip row stands down.
+
+   Capped at 768px, not the 1024px the sidebar uses: the trigger is gated on
+   `useIsMobile()`, so between 769 and 1023 the chip row is still the only
+   filter on the page and hiding it there would leave none. */
+@media (max-width: 768px) {
+  .chipRow {
+    display: none;
+  }
+
+  /* The chip row used to sit between these two and carry the gap. With it gone
+     the search field and the trigger were separated by two stacked margins
+     that now read as one dead band, so the space is given back to the rhythm
+     below rather than left hanging above the results. */
+  .searchWrap {
+    margin-bottom: 0.75rem;
+  }
+
+  .channelTrigger {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* The trigger stands in for the panel's title row. */
+.channelTrigger {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--booth-r-control);
+  background: var(--flat-fill);
+  color: var(--booth-ink);
+  font: var(--silkscreen);
+  text-align: left;
+  transition: background-color var(--dur-fast) ease;
+}
+
+.channelTrigger:hover {
+  background: var(--flat-fill-hover);
+}
+
+.channelTrigger:active {
+  transform: scale(0.99);
+}
+
+.channelTrigger:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.channelTriggerName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.channelTriggerCount {
+  color: var(--booth-ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Channel sheet ────────────────────────────────────────────── */
+
+/* The second of the two permitted blurred surfaces, and only while it is open
+   — the dock is the other. Rows inside are flat, as everywhere else. */
+.channelSheetBackdrop {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  background: color-mix(in srgb, #0b0c0b 52%, transparent);
+}
+
+.channelSheet {
+  position: fixed;
+  z-index: 71;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  /* Capped rather than full height: the list is twenty-four rows, and a sheet
+     that reaches the top of the screen stops reading as a sheet. */
+  max-height: 72svh;
+  padding: 0.5rem 0.9rem calc(0.9rem + env(safe-area-inset-bottom));
+  border-radius: var(--booth-r-panel) var(--booth-r-panel) 0 0;
+  color: var(--booth-ink);
+  /* The list scrolls; the page behind must not, or a flick past the end of the
+     list scrolls the library out from under the sheet. */
+  overscroll-behavior: contain;
+}
+
+.channelSheet:focus-visible {
+  outline: none;
+}
+
+.channelSheetHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.15rem 0.7rem;
+}
+
+.channelSheetTitle {
+  color: var(--booth-ink-muted);
+  font: var(--silkscreen);
+}
+
+.channelSheetClose {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--booth-r-control);
+  background: transparent;
+  color: var(--booth-ink);
+}
+
+.channelSheetClose:hover {
+  background: var(--flat-fill-hover);
+}
+
+.channelSheetClose:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.channelSheetList {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 0.2rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.chip {
+  display: inline-flex;
+  min-height: 40px;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--glass-edge);
+  border-radius: 12px;
+  background: var(--flat-fill);
+  color: var(--booth-ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  /* Matches the dock's chip surface: a 12px card with the same rim and fill,
+     so the shuffle control reads as part of the control layer. */
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.chip:hover {
+  color: var(--booth-ink);
+  background: var(--flat-fill-hover);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* ─── Pinned shelf ───────────────────────────────────────────── */
+
+.pinned {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+
+.pinned::-webkit-scrollbar {
+  display: none;
+}
+
+.pinnedHead {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  color: var(--booth-ink-muted);
+  font: var(--silkscreen);
+}
+
+.pinnedTile {
+  position: relative;
+  display: grid;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: var(--booth-r-cover);
+  background: var(--flat-fill);
+  text-decoration: none;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+/* Press feedback: the tile is a link, so it needs to acknowledge the press the
+   way the rest of the sheet does. Gated on a real pointer — on touch, :hover
+   sticks after the first tap and the lift would stay raised. */
+@media (hover: hover) and (pointer: fine) {
+  .pinnedTile:hover {
+    background: var(--flat-fill-hover);
+    transform: translateY(-2px);
+  }
+
+  .track:hover {
+    background: transparent;
+  }
+}
+
+.pinnedTile:active {
+  transform: scale(0.96);
+}
+
+.pinnedTile:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* The star overhangs the tile by 4px on both axes. It was positioned at
+   top/right -4px inside a container that scrolls, which clipped the top and
+   right edges. Pulling it inside the tile's own bounds and inset to the edge
+   keeps it fully visible while still reading as a corner badge. */
+.pinnedStar {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: grid;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--primary);
+  font-size: 0.625rem;
+  line-height: 1;
+  place-items: center;
+}
+
+/* ─── Search ─────────────────────────────────────────────────── */
+
+.searchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--booth-ink-muted);
+  pointer-events: none;
+}
+
+.search {
+  width: 100%;
+  height: 48px;
+  padding: 0 2.6rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--booth-r-control);
+  background: var(--flat-fill);
+  color: var(--booth-ink);
+  font-size: 0.9375rem;
+  /* The field had no transition at all, so its focus snapped on and off while
+     every other control on the page crossfaded. It is also the primary entry
+     point into the feature — the `/` shortcut focuses it — so that snap is the
+     first thing a visitor meets. */
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.search::placeholder {
+  color: var(--booth-ink-dim);
+}
+
+.search:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.searchClear {
+  position: absolute;
+  right: 0.6rem;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--booth-ink-muted);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+
+.searchClear:hover {
+  color: var(--booth-ink);
+  background: var(--flat-fill-hover);
+}
+
+.searchClear:active {
+  transform: scale(0.94);
+}
+
+.searchClear:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* The field reserves 2.6rem on each side for the search glyph and the clear
+   button. On a 360px screen that is ~230px of actual text, which cuts the
+   placeholder mid-word. Below 480px the reservations come in to 2rem and the
+   glyph moves with them. */
+@media (max-width: 480px) {
+  .search {
+    padding: 0 2rem;
+  }
+
+  .searchIcon {
+    left: 0.6rem;
+  }
+
+  .searchClear {
+    right: 0.35rem;
+  }
+}
+
+/* ─── Track rows ─────────────────────────────────────────────── */
+
+.trackHead {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.trackTitle {
+  color: var(--booth-ink);
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.trackCount {
+  color: var(--booth-ink-dim);
+  font: var(--silkscreen);
+  font-size: 0.625rem;
+}
+
+/*
+  The pill for the bookmark row list.
+
+  The row's own radius is 10px, not the pill-shaped --booth-r-control the
+  shared-layout component defaults to, and the tint has to read as the row
+  filling rather than as a floating capsule. The frosted ::after this replaces
+  used `border-radius: inherit` off the row, so 10px is the radius that matches
+  what the row looked like before.
+
+  `!important` is needed only because both classes land on the same node and the
+  component's own `.pill` rule is the one that has to lose. CSS modules emit both
+  selectors at equal specificity, so without it the winner is decided by which
+  stylesheet comes later, not by which rule is meant to apply.
+*/
+.trackPill {
+  border-radius: 10px !important;
+  /* Slightly stronger than the sidebar pill: a bookmark row is a wide, sparse
+     target, so the fill has to carry further to read as a hover at all. */
+  background: color-mix(
+    in srgb,
+    var(--led, var(--primary)) 10%,
+    transparent
+  ) !important;
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--led, var(--primary)) 24%, transparent) !important;
+}
+
+.trackList {
+  margin: 0 0 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+/* The imported catalogue runs to 550+ rows. Letting the browser skip layout and
+   paint for off-screen rows keeps the list scrollable without windowing it.
+
+   The intrinsic height must match what a row actually renders at. It said 52px
+   while a row is 44px (min-height 44 with box-sizing: border-box already
+   includes the padding), so every off-screen row was laid out 8px too tall and
+   then snapped 8px shorter the moment it scrolled into view. At 60 rows a page
+   that is a 480px hole moving under the reader, and the document height churned
+   on every append — which is exactly the jitter reported on fast scrolls.
+   `auto 44px` records the real size after the first paint and keeps it.
+
+   `is-content-visibility: hidden` was tried here, to keep that skipping while
+   dropping the re-measure a row pays every time it becomes relevant — which is
+   what the pill does on each hover. It measured no better in the built app (15
+   dropped frames per sweep either way) despite looking like a 24 -> 10 win when
+   injected as a stylesheet override. Not kept: no measured benefit, and it is
+   one more containment rule between the row and its own layout. */
+.trackList > li {
+  /* The shared-layout item. `position: relative` is what the pill is positioned
+     against; it was harmless to leave off before because the row's plate was a
+     pseudo-element of the anchor and measured the anchor instead. */
+  position: relative;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 44px;
+}
+
+.track {
+  position: relative;
+  /* Establishes a stacking context so the shared-layout pill (a sibling, on
+     the <li>) stays behind this row's own content without escaping behind the
+     list behind it. */
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 26px 32px minmax(0, 1fr) minmax(7rem, 11rem) 16px;
+  gap: 0.85rem;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+/*
+  The hover plate used to be a frosted ::after on the row itself. It is now the
+  shared-layout pill rendered on the <li> by SharedLayoutBg, which glides between
+  rows rather than fading in under each one.
+
+  The two cannot coexist: the ::after was a filled, rounded plate at the row's
+  own bounds, so a pill arriving over it would show a second fill edge sitting a
+  few pixels proud of the first. The frosted ::after is therefore removed rather
+  than supplemented, and the row itself keeps only the ::before rail.
+
+  `.trackList > li` below is the item the pill is injected into, so it needs the
+  same `position: relative` the pill is positioned against.
+*/
+
+.track::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--led, var(--primary));
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+/* The keyboard-selected row has no pointer over it, so its rail still has to
+   read. This is not gated on the hover media query. */
+.track[data-active='true']::before {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .track:hover::before {
+    opacity: 1;
+  }
+}
+
+.index {
+  position: relative;
+  display: grid;
+  place-items: center;
+  color: var(--booth-ink-dim);
+  font: var(--silkscreen);
+  font-size: 0.75rem;
+}
+
+.playGlyph {
+  position: absolute;
+  display: none;
+  color: var(--booth-ink);
+}
+
+.track:hover .num,
+.track[data-active='true'] .num {
+  display: none;
+}
+
+.track:hover .playGlyph,
+.track[data-active='true'] .playGlyph {
+  display: block;
+}
+
+.art {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--flat-fill);
+  overflow: hidden;
+}
+
+/* All three favicon states share one centred cell, so swapping between them
+   never reflows the row. The image stays mounted underneath the loader and
+   the fallback rather than being replaced, which keeps its decode and its
+   hover transition.
+
+   Sizes and tint are variables so the pinned tile can scale the cell and show
+   the icon in full colour from one place. */
+.faviconCell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  --favicon-size: 20px;
+  --favicon-loader-size: 18px;
+  --favicon-fallback-size: 15px;
+  /* Rows desaturate to a single ink so 550 of them read as one list; the
+     pinned tiles invert that and show the real mark. */
+  --favicon-filter: grayscale(1);
+  --favicon-opacity: 0.75;
+}
+
+.faviconImg {
+  grid-area: 1 / 1;
+  width: var(--favicon-size);
+  height: var(--favicon-size);
+  object-fit: contain;
+  filter: var(--favicon-filter);
+  opacity: var(--favicon-opacity);
+  transition:
+    filter var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.faviconLoader {
+  grid-area: 1 / 1;
+  width: var(--favicon-loader-size);
+  height: var(--favicon-loader-size);
+  color: var(--booth-ink-dim);
+}
+
+.faviconFallback {
+  grid-area: 1 / 1;
+  width: var(--favicon-fallback-size);
+  height: var(--favicon-fallback-size);
+  color: var(--booth-ink-dim);
+  opacity: 0.7;
+}
+
+/* Hidden until it actually has pixels: a not-yet-loaded <img> would otherwise
+   render as a broken-image box on top of the loader. */
+.faviconImg[data-state='loading'] {
+  opacity: 0;
+}
+
+.faviconImg[data-state='error'] {
+  display: none;
+}
+
+/* Hover reveals the mark in full colour, which is why the base is desaturated
+   rather than merely dimmed: the reveal has somewhere to go. */
+.track:hover .faviconImg,
+.track[data-active='true'] .faviconImg {
+  filter: none;
+  opacity: 1;
+}
+
+.name {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--booth-ink);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    text-decoration-color var(--dur-fast) var(--ease-out);
+}
+
+.nameText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track:hover .name,
+.track[data-active='true'] .name {
+  color: var(--primary);
+  text-decoration-color: color-mix(in srgb, var(--primary) 50%, transparent);
+}
+
+.pinStar {
+  flex-shrink: 0;
+  color: var(--primary);
+  font-size: 0.75rem;
+}
+
+.host {
+  /* A fixed width, not a flex basis: the row is a grid, so the host needs
+     an explicit track or the ellipsis bites at a few characters. */
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--booth-ink-dim);
+  font: var(--silkscreen);
+  font-size: 0.6875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arrow {
+  color: var(--booth-ink-dim);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.track:hover .arrow,
+.track[data-active='true'] .arrow {
+  opacity: 1;
+}
+
+.rowActions {
+  display: flex;
+  gap: 0.15rem;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.track:hover .rowActions,
+.track:focus-within .rowActions,
+.track[data-admin='true'] .rowActions {
+  opacity: 1;
+}
+
+.rowAction {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--booth-ink-dim);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.rowAction:hover {
+  color: var(--primary);
+}
+
+.rowAction:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ─── Empty + admin ──────────────────────────────────────────── */
+
+.empty {
+  padding: 3.5rem 1.5rem;
+  border: 1px dashed var(--hairline);
+  border-radius: var(--booth-r-panel);
+  text-align: center;
+}
+
+.emptyTitle {
+  margin: 0.7rem 0 0;
+  color: var(--booth-ink);
+  font-size: 1.0625rem;
+  font-weight: 650;
+}
+
+.emptyText {
+  max-width: 34rem;
+  margin: 0.4rem auto 0;
+  color: var(--booth-ink-muted);
+  font-size: 0.9375rem;
+}
+
+.status {
+  margin: 0 0 1rem;
+  color: var(--booth-ink-muted);
+  font-size: 0.875rem;
+}
+
+.adminRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.adminButton {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.95rem;
+  border-radius: var(--booth-r-control);
+  background: var(--flat-fill);
+  border: 1px solid var(--hairline);
+  color: var(--booth-ink);
+  font: var(--silkscreen);
+  font-size: 0.725rem;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.adminButton:hover {
+  background: var(--flat-fill-hover);
+  border-color: var(--glass-edge);
+  transform: translateY(-1px);
+}
+
+.adminButton:active {
+  transform: translateY(0);
+}
+
+.adminButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.solidButton {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.solidButton:hover {
+  filter: brightness(1.08);
+  border-color: var(--primary);
+}
+
+.bulkButton {
+  background: color-mix(in srgb, var(--primary) 14%, var(--flat-fill));
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--hairline));
+  color: var(--primary);
+}
+
+.bulkButton:hover {
+  background: color-mix(in srgb, var(--primary) 22%, var(--flat-fill));
+  border-color: var(--primary);
+}
+
+/* ─── Load more ───────────────────────────────────────────────── */
+
+.loadMore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0 2.5rem;
+}
+
+/* The observer's target. No pixels of its own — it only has to occupy a point
+   the reader reaches after the rows above it, and taking layout space here
+   would push the button down for everyone who is waiting to see it. */
+.loadMore > [aria-hidden='true'] {
+  width: 1px;
+  height: 1px;
+}
+
+/* Off-screen rather than `display: none` or `visibility: hidden`, both of
+   which would drop the link from the accessibility tree and take the crawl
+   path with it. It stays focusable, so a keyboard reader can jump to a real
+   page — the same reason the button beside it is not `aria-hidden`. */
+.srOnly {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.loadMoreButton {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 0 1.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--booth-r-control);
+  background: var(--flat-fill);
+  color: var(--booth-ink);
+  font: var(--silkscreen);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.loadMoreButton:hover:not(:disabled) {
+  border-color: var(--booth-ink-muted);
+}
+
+.loadMoreButton:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.loadMoreMeta {
+  margin: 0;
+  color: var(--booth-ink-dim);
+  font: var(--silkscreen);
+  font-size: 0.625rem;
+}
+
+/* ─── Loading skeleton ────────────────────────────────────────── */
+
+/* A neutral block in the shape of a row. `currentColor` at low opacity rather
+   than a fixed grey, so it sits correctly in both themes without a second
+   rule, and it pulses once rather than looping — a permanently animating
+   loading state is noise for anyone who lands on a slow page. */
+.skeletonRow {
+  height: 52px;
+  margin-bottom: 0.5rem;
+  border-radius: var(--booth-r-control);
+  background: currentColor;
+  opacity: 0.08;
+  animation: skeleton-pulse 1.2s var(--ease-out) both;
+}
+
+@keyframes skeleton-pulse {
+  from {
+    opacity: 0.04;
+  }
+  to {
+    opacity: 0.1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonRow {
+    animation: none;
+    opacity: 0.08;
+  }
+}
+
+/* ─── Live site peek ─────────────────────────────────────────── */
+
+/* Positioned against the viewport from the hovered row's measured rect, so it
+   is a fixed overlay rather than a child of the scrolling list. */
+.peek {
+  position: fixed;
+  z-index: 60;
+  /* Width is set inline from the measured viewport, so the card can give up
+     width on a narrow window instead of claiming 320px of a 360px screen.
+     Height stays fixed, and the frame's scale is derived from that width. */
+  width: 320px;
+  height: 208px;
+  overflow: hidden;
+  border-radius: var(--booth-r-panel);
+  background: var(--flat-fill);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32);
+  pointer-events: none;
+  animation: peek-in var(--dur-fast) var(--ease-out);
+}
+
+.peekFrame {
+  display: block;
+  /* Width, height and scale are set inline from PAGE_WIDTH / VIEW_HEIGHT, so
+     the page is laid out at a real desktop width and shrunk into the card
+     rather than being squeezed to 320px and served its mobile layout. */
+  border: 0;
+  background: var(--flat-fill);
+  transform-origin: top left;
+}
+
+/* Clips the oversized frame to the card and reveals it as the page paints. The
+   clip is on the window, not the frame, because the frame is transformed. */
+.peekWindow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  opacity: 0;
+  animation: peek-reveal 0.45s ease forwards;
+}
+
+@keyframes peek-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.peekHost {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.4rem;
+  max-width: calc(100% - 0.8rem);
+  overflow: hidden;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #f4f1e6;
+  font: var(--silkscreen);
+  font-size: 0.625rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes peek-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peek {
+    animation: none;
+  }
+
+  /* Without the animation the window would stay at opacity 0 forever. */
+  .peekWindow {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* Every motion in this sheet is a hover response, which is exactly what
+     reduced-motion asks to keep as an instant state change. */
+  .track,
+  .track::before,
+  .pinnedTile,
+  .playlist,
+  .playlistLed,
+  .faviconImg,
+  .name,
+  .arrow,
+  .rowActions {
+    transition-duration: 0.01ms;
+  }
+}
+
+/*
+  Glass is decoration. The row's frosted ::after is gone, so these branches used
+  to strip the blur off it no longer have one to strip — the shared-layout pill
+  it replaced is a flat tint with no backdrop-filter at all, which is already the
+  reduced-transparency appearance. Nothing to override here.
+*/
+
+/* The row's five tracks carry 74px of fixed columns, a 7rem (112px) host
+   column and 40px of gaps — 226px of chrome before the name gets a single
+   pixel. That fits a 360px phone but not comfortably, and this block used to
+   start at 720px, so between 720 and 768 the host column was still there and
+   the name was squeezed to an ellipsis on the narrow tablets and large phones
+   that the booth shell already treats as mobile at 768. Aligned to 767. */
+@media (max-width: 767px) {
+  /* Three columns, not four: the host and the trailing affordance both go,
+     so the name runs to the row's right edge. */
+  .track {
+    grid-template-columns: 22px 28px minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .host {
+    display: none;
+  }
+
+  /* The last column was a decorative arrow for readers and an edit/delete pair
+     for the admin. Neither is reachable by hover on touch, and the arrow
+     spends a 16px track plus 0.6rem of gap to say nothing.
+
+     The admin pair is hidden rather than resized because it is `opacity: 0`
+     until focus-within: a 32px-wide pair of invisible tap targets is worse
+     than no targets, because the reader taps, nothing appears, and the row
+     navigates instead. Admin edits are a desktop activity, and the row is not
+     the place to reach them from a phone. */
+  .arrow,
+  .rowActions {
+    display: none;
+  }
+
+  .track[data-admin='true'] .rowActions {
+    display: flex;
+    opacity: 1;
+  }
+}
+
+/* ─── Admin modal & confirm dialog ───────────────────────────── */
+
+.dialogBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(10, 12, 16, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.modal {
+  position: relative;
+  width: min(34rem, 100%);
+  /* dvh, not vh: on a phone the vh unit is the height with the browser chrome
+     retracted, so a vh-based cap lets the bottom of the dialog sit under the
+     toolbar and under the dock. */
+  max-height: calc(100dvh - 3rem);
+  overflow-y: auto;
+  /* A flick that runs past the end of a dialog should not scroll the page
+     behind it. */
+  overscroll-behavior: contain;
+  padding: 1.75rem;
+  color: var(--booth-ink);
+  background: var(--card);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--booth-r-panel);
+  box-shadow:
+    0 24px 60px -12px rgba(0, 0, 0, 0.45),
+    var(--glass-shadow);
+}
+
+.chassisScrew {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--flat-fill);
+  border: 1px solid var(--hairline);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+.chassisScrew::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 2px;
+  width: 4px;
+  height: 1px;
+  background: var(--hairline);
+}
+
+.chassisScrewTL {
+  top: 10px;
+  left: 10px;
+}
+
+.chassisScrewTR {
+  top: 10px;
+  right: 10px;
+}
+
+.chassisScrewBL {
+  bottom: 10px;
+  left: 10px;
+}
+
+.chassisScrewBR {
+  bottom: 10px;
+  right: 10px;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.modalMeta {
+  font: var(--silkscreen);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  color: var(--primary);
+  margin-bottom: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.modalTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--booth-ink);
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.modalTitle svg {
+  color: var(--primary);
+}
+
+.modalClose {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--flat-fill);
+  color: var(--booth-ink-muted);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.modalClose:hover {
+  color: var(--booth-ink);
+  background: var(--flat-fill-hover);
+  border-color: var(--glass-edge);
+}
+
+.modalHint {
+  margin: 0 0 1rem;
+  color: var(--booth-ink-muted);
+  font-size: 0.875rem;
+}
+
+.grid {
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+@media (min-width: 620px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* The admin modal's paired fields — title with URL, channel with tags — ask
+   for a two-column pair on a wide screen and a stacked one on a phone. That
+   rule lived in bookmarks.module.css, which nothing imports, so
+   `styles.grid2` resolved to undefined and the pairs rendered as bare block
+   stacks at every width. */
+.grid2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+@media (min-width: 620px) {
+  .grid2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.fieldLabel {
+  color: var(--primary);
+  font: var(--silkscreen);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--hairline);
+  border-radius: 9px;
+  background: var(--flat-fill);
+  color: var(--booth-ink);
+  font-family: inherit;
+  font-size: 0.875rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.input::placeholder {
+  color: var(--booth-ink-dim);
+}
+
+textarea.input {
+  line-height: 1.5;
+  resize: none;
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.08),
+    0 0 0 1px var(--primary),
+    0 0 12px color-mix(in srgb, var(--primary) 25%, transparent);
+  outline: none;
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.85rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid color-mix(in srgb, #d25555 55%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, #d25555 12%, transparent);
+  color: color-mix(in srgb, #d25555 55%, var(--booth-ink));
+  font-size: 0.875rem;
+}
+
+.preview {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.previewLabel {
+  color: var(--primary);
+  font: var(--silkscreen);
+}
+
+.previewValue {
+  color: var(--booth-ink);
+  font-size: 0.875rem;
+}
+
+.checkRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.tactileCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tactileCheck input {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--flat-fill);
+  border: 1px solid var(--hairline);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--dur-fast);
+}
+
+.tactileCheck input:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 10px var(--primary);
+}
+
+.tactileCheck input:checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--primary-foreground);
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.tactileCheckLabel {
+  font: var(--silkscreen);
+  font-size: 0.725rem;
+  letter-spacing: 0.05em;
+  color: var(--booth-ink);
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.ghost {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 1.1rem;
+  border: 1px solid var(--hairline);
+  border-radius: 9px;
+  background: var(--flat-fill);
+  color: var(--booth-ink-muted);
+  font: var(--silkscreen);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all var(--dur-fast);
+}
+
+.ghost:hover {
+  color: var(--booth-ink);
+  border-color: var(--glass-edge);
+  background: var(--flat-fill-hover);
+}
+
+.submit {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 1.25rem;
+  border: 1px solid var(--primary);
+  border-radius: 9px;
+  background: var(--primary);
+  box-shadow:
+    0 4px 14px color-mix(in srgb, var(--primary) 35%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  color: var(--primary-foreground);
+  font: var(--silkscreen);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--dur-fast);
+}
+
+.submit:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 18px color-mix(in srgb, var(--primary) 45%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.submit:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.submit:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+/* ─── Admin Bar & Tabs ────────────────────────────────────────── */
+
+.adminBar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--booth-r-panel);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.adminBarStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.adminStatusGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.adminStatusTitle {
+  font: var(--silkscreen);
+  font-size: 0.75rem;
+  color: var(--booth-ink);
+  letter-spacing: 0.06em;
+}
+
+.adminStatusSub {
+  font: var(--silkscreen);
+  font-size: 0.625rem;
+  color: var(--booth-ink-muted);
+  letter-spacing: 0.04em;
+}
+
+.adminLed {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 12px var(--primary);
+  animation: adminPulse 2s ease-in-out infinite;
+}
+
+@keyframes adminPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+.adminBarActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.adminTabs {
+  display: flex;
+  padding: 3px;
+  margin-bottom: 1.25rem;
+  background: var(--flat-fill);
+  border-radius: 12px;
+  border: 1px solid var(--hairline);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  gap: 3px;
+}
+
+.adminTab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--booth-ink-muted);
+  font: var(--silkscreen);
+  font-size: 0.725rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.adminTab:hover {
+  color: var(--booth-ink);
+  background: var(--flat-fill-hover);
+}
+
+.adminTabActive {
+  color: var(--booth-ink);
+  background: var(--card);
+  border-color: var(--glass-edge);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.tabPip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+}
+
+.bulkSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  margin-bottom: 0.65rem;
+  font-size: 0.8125rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font: var(--silkscreen);
+  font-size: 0.75rem;
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+}
+
+.bulkPreviewList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 140px;
+  overflow-y: auto;
+  padding: 0.6rem;
+  margin-bottom: 0.85rem;
+  border-radius: 8px;
+  background: var(--flat-fill);
+  border: 1px solid var(--hairline);
+}
+
+.bulkPreviewItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--booth-ink);
+}
+
+.bulkPreviewTitle {
+  font-weight: 550;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bulkPreviewCategory {
+  font: var(--silkscreen);
+  font-size: 0.7rem;
+  color: var(--booth-ink-muted);
+  flex-shrink: 0;
+}
+
+.bulkHint {
+  font-size: 0.8125rem;
+  color: var(--booth-ink-muted);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.codeExample {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+/* ─── Pinned favicon sizing ────────────────────────────────────
+   The tile modifier lands on the FaviconCell, so these scale the cell's own
+   children. Pinned tiles are 64px rather than the row's 32px, and the loader
+   has to grow with the tile or it reads as a list-row spinner on a hero tile.
+
+   These are the few marks on the page shown in full colour: a pinned tile is
+   an individual showcase, and a handful of them in a row is what the desaturate
+   on list rows exists to make legible. */
+.pinnedFavicon {
+  --favicon-size: 32px;
+  --favicon-loader-size: 28px;
+  --favicon-fallback-size: 22px;
+  --favicon-filter: none;
+  --favicon-opacity: 1;
+}
+
+/* ─── Phones: the dialogs stop paying for a margin they cannot spare ──
+   The backdrop reserves 1.5rem on every side before the dialog is even sized,
+   so a 360x640 phone gives the dialog 552px of height and 312px of width, and
+   the dialog then spends another 1.5rem of that on its own padding. Below
+   480px both come in, and the dialog runs to the bottom edge the way a phone
+   dialog should. */
+@media (max-width: 480px) {
+  .dialogBackdrop {
+    align-items: end;
+    padding: 0.75rem;
+  }
+
+  .modal {
+    max-height: calc(100dvh - 1.5rem);
+    padding: 1.1rem;
+    border-radius: var(--booth-r-panel) var(--booth-r-panel) 0 0;
+  }
+}

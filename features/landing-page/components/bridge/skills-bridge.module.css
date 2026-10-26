@@ -1,0 +1,393 @@
+/* The bridge from About to Skills.
+
+   Two layouts share one DOM, selected by the same media query the hook gates
+   on (`use-skills-bridge.ts`):
+
+   - The BASE rules are the static composition, and they are a finished page:
+     the sentence and three devices on the dark ground, with the Skills section
+     following in ordinary flow. It is what a phone, a reduced-motion visitor
+     and a page with no script get.
+   - The `@media (motion)` block at the bottom makes it the pinned scene. The
+     stage sticks; the sheet is masked by a hole; and `.lift` pulls the Skills
+     section up one viewport so that it is *under* the stage while it is
+     pinned. That is the whole trick of the transition: nothing is drawn to
+     look like the Skills section, the hole is cut in the sheet and the real
+     section is behind it.
+
+   The script writes only custom properties and transforms on small nodes.
+   Every default below is the *resting* value, so with the script absent the
+   scene is at its end, not its start. */
+
+.bridge {
+  --dev-body: #e7e2d8;
+  --dev-body-deep: #cfc9bc;
+  --dev-edge: rgb(20 20 20 / 0.34);
+  --dev-lcd: color-mix(in srgb, var(--signal-orange, #ff5a1f) 32%, #e7e2d8);
+  position: relative;
+  color: var(--room-ink, #f1eee5);
+  background:
+    radial-gradient(
+      65% 55% at 50% 44%,
+      color-mix(in srgb, var(--deck-orange, #ff5a1f) 24%, transparent) 0%,
+      color-mix(in srgb, var(--deck-orange, #ff5a1f) 10%, transparent) 45%,
+      transparent 75%
+    ),
+    radial-gradient(
+      75% 55% at 50% 0%,
+      color-mix(in srgb, var(--deck-orange, #ff5a1f) 22%, transparent) 0%,
+      color-mix(in srgb, var(--deck-orange, #ff5a1f) 8%, transparent) 50%,
+      transparent 75%
+    ),
+    linear-gradient(
+        90deg,
+        var(--deck-grid-line, rgb(255 255 255 / 0.05)) 1px,
+        transparent 1px
+      )
+      0 0 / var(--deck-grid-cell, 30px) var(--deck-grid-cell, 30px),
+    linear-gradient(
+        0deg,
+        var(--deck-grid-line, rgb(255 255 255 / 0.05)) 1px,
+        transparent 1px
+      )
+      0 0 / var(--deck-grid-cell, 30px) var(--deck-grid-cell, 30px),
+    var(--deck-ground, #14161a);
+  padding: clamp(3.5rem, 8vw, 6.5rem) clamp(1.25rem, 5vw, 4rem);
+}
+
+.stage {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  max-width: 80rem;
+  margin-inline: auto;
+}
+
+/* ── The sheet and its sentence ──────────────────────────── */
+
+.sheet {
+  order: 1;
+}
+
+.statement {
+  --s: 1;
+  max-width: 13ch;
+  margin: 0;
+  font-family: var(--deck-font-display);
+  font-size: clamp(2.6rem, 8vw, 7.2rem);
+  font-weight: 750;
+  line-height: 0.96;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.sw {
+  display: inline-block;
+  overflow: clip;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+  vertical-align: top;
+}
+
+.swIn {
+  display: inline-block;
+  --k: clamp(0, (var(--s) * (var(--n) + 2) - var(--i)) / 2, 1);
+  translate: 0 calc((1 - var(--k)) * 112%);
+  rotate: calc((1 - var(--k)) * 5deg);
+  transform-origin: 0 100%;
+}
+
+/* ── The devices ─────────────────────────────────────────── */
+
+.devices {
+  order: 2;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  perspective: 1100px;
+  pointer-events: none;
+  /* Device parts read `--foreground` / `--background` / `--primary`; pinned
+     here so the hardware is the same cream chassis in either theme. */
+  --foreground: var(--deck-cream-ink);
+  --background: var(--deck-cream);
+  --primary: var(--deck-orange);
+}
+
+.anchor {
+  --o: 1;
+  position: relative;
+  height: 9.5rem;
+  transform-style: preserve-3d;
+}
+
+.bob,
+.rot,
+.fit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.rot {
+  transform: rotateX(-14deg) rotateY(20deg);
+}
+
+.anchor:has([data-glass='on']) .rot {
+  transform: none !important;
+}
+
+.fit {
+  left: 0;
+  top: 0;
+  transform: scale(1.2);
+}
+
+/* Decoration that exists only in the pinned scene. */
+.core,
+.horizon {
+  display: none;
+}
+
+/* The static composition has no lift. */
+.lift {
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .bridge {
+    padding: clamp(3rem, 7vw, 5rem) clamp(1rem, 4vw, 2rem);
+  }
+  .stage {
+    gap: 1.5rem;
+  }
+  .devices {
+    order: 2;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    height: 7.5rem;
+    perspective: 1100px;
+    pointer-events: none;
+    margin-top: 1rem;
+  }
+  .anchor {
+    position: relative;
+    height: 7.5rem;
+  }
+  .fit {
+    transform: scale(0.65);
+  }
+  .statement {
+    font-size: clamp(2rem, 7vw, 3.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+  }
+}
+
+/* ── The pinned scene ────────────────────────────────────── */
+
+@media (min-width: 769px) and (min-height: 600px) and (prefers-reduced-motion: no-preference) {
+  /* A little over two viewports: one is the stage, the rest is the scene's
+     travel. The travel is also exactly how far the Skills section has to rise
+     to arrive, which is why it is not shorter: the section must start below
+     the screen and finish aligned with it, and it moves at the speed of the
+     scroll. */
+  .bridge {
+    height: 210svh;
+    padding: 0;
+    background:
+      radial-gradient(
+        65% 55% at 50% 44%,
+        color-mix(in srgb, var(--deck-orange, #ff5a1f) 24%, transparent) 0%,
+        color-mix(in srgb, var(--deck-orange, #ff5a1f) 10%, transparent) 45%,
+        transparent 75%
+      ),
+      radial-gradient(
+        75% 55% at 50% 0%,
+        color-mix(in srgb, var(--deck-orange, #ff5a1f) 22%, transparent) 0%,
+        color-mix(in srgb, var(--deck-orange, #ff5a1f) 8%, transparent) 50%,
+        transparent 75%
+      ),
+      linear-gradient(
+          90deg,
+          var(--deck-grid-line, rgb(255 255 255 / 0.05)) 1px,
+          transparent 1px
+        )
+        0 0 / var(--deck-grid-cell, 30px) var(--deck-grid-cell, 30px),
+      linear-gradient(
+          0deg,
+          var(--deck-grid-line, rgb(255 255 255 / 0.05)) 1px,
+          transparent 1px
+        )
+        0 0 / var(--deck-grid-cell, 30px) var(--deck-grid-cell, 30px),
+      var(--deck-ground, var(--room-base, #14161a));
+  }
+
+  .stage {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: block;
+    height: 100svh;
+    max-width: none;
+    overflow: clip;
+    /* The stage is above the Skills section for the whole of the scene; it
+       must never take a click meant for it. */
+    pointer-events: none;
+  }
+
+  /* The Skills section, lifted to sit under the stage (see `SkillsLift`). Its
+     z-index puts it above the bridge's own background and below the stage. */
+  .lift {
+    z-index: 1;
+    margin-top: -100svh;
+  }
+
+  /* The sheet is the About's own: the same ground, the same graph paper, so at
+     progress 0 it is indistinguishable from where the About ended. A hole is
+     cut in it by a mask whose radius is a number written per frame; the mask is
+     the only thing that repaints. */
+  .sheet {
+    --r: 0;
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--foreground);
+    background:
+      linear-gradient(
+          color-mix(in srgb, var(--foreground) 6%, transparent) 1px,
+          transparent 1px
+        )
+        0 0 / 48px 48px,
+      linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--foreground) 6%, transparent) 1px,
+          transparent 1px
+        )
+        0 0 / 48px 48px,
+      var(--background);
+    -webkit-mask-image: radial-gradient(
+      circle at 50% 44%,
+      transparent calc(var(--r, 0) * 1%),
+      #000 calc(var(--r, 0) * 1% + 0.6%)
+    );
+    mask-image: radial-gradient(
+      circle at 50% 44%,
+      transparent calc(var(--r, 0) * 1%),
+      #000 calc(var(--r, 0) * 1% + 0.6%)
+    );
+  }
+
+  .statement {
+    --s: 0;
+    text-align: center;
+    margin-top: -6svh;
+  }
+
+  /* The light at the singularity: under the sheet, so it is seen only through
+     the hole, and gone by the time the section has arrived. */
+  .core {
+    --core: 0;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 44%;
+    width: 60vmin;
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--deck-orange, #ff5a1f) 70%, white 15%),
+      color-mix(in srgb, var(--deck-orange, #ff5a1f) 40%, transparent) 38%,
+      color-mix(in srgb, var(--deck-orange, #ff5a1f) 14%, transparent) 60%,
+      transparent 75%
+    );
+    opacity: var(--core, 0);
+    transform: scale(calc(0.4 + 0.6 * var(--core, 0)));
+    filter: blur(8px);
+  }
+
+  /* The hole's rim: a lit ring and a shimmer that turns as it grows, drawn on
+     top of the sheet (a mask would cut it off) at the same radius the mask
+     has. It fades as the radius passes the corners of the screen, so the rim
+     leaves rather than being cropped. */
+  .horizon {
+    --r: 0;
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: clamp(0, calc((104 - var(--r, 0)) / 14), 1);
+    background: radial-gradient(
+      circle at 50% 44%,
+      transparent calc(var(--r, 0) * 1% - 2.6%),
+      rgb(255 176 110 / 0.85) calc(var(--r, 0) * 1% - 0.5%),
+      rgb(255 90 31 / 0.5) calc(var(--r, 0) * 1% + 0.3%),
+      transparent calc(var(--r, 0) * 1% + 4.5%)
+    );
+  }
+
+  .horizon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(
+      from calc(var(--r, 0) * 9deg) at 50% 44%,
+      transparent,
+      rgb(255 214 170 / 0.5) 12%,
+      transparent 30%,
+      rgb(255 90 31 / 0.4) 58%,
+      transparent 78%
+    );
+    -webkit-mask-image: radial-gradient(
+      circle at 50% 44%,
+      transparent calc(var(--r, 0) * 1% - 5%),
+      #000 calc(var(--r, 0) * 1% - 0.5%),
+      #000 calc(var(--r, 0) * 1% + 0.5%),
+      transparent calc(var(--r, 0) * 1% + 5%)
+    );
+    mask-image: radial-gradient(
+      circle at 50% 44%,
+      transparent calc(var(--r, 0) * 1% - 5%),
+      #000 calc(var(--r, 0) * 1% - 0.5%),
+      #000 calc(var(--r, 0) * 1% + 0.5%),
+      transparent calc(var(--r, 0) * 1% + 5%)
+    );
+  }
+
+  .devices {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: block;
+    perspective-origin: 50% 46%;
+  }
+
+  .anchor {
+    --o: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    will-change: transform;
+  }
+
+  .bob {
+    left: 0;
+    top: 0;
+  }
+
+  .rot {
+    left: 0;
+    top: 0;
+    transform: none;
+  }
+
+  .fit {
+    transform: none;
+  }
+}
