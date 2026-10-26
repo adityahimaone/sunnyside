@@ -1,205 +1,184 @@
+<div align="center">
+
 # Sunnyside
 
-Personal portfolio and blog featuring the **Sunnyside** design system & studio redesign (Side A: warm paper, cobalt room, felt-tip markers, tactile stickers, and track timeline) — built with Next.js 16 (App Router, Turbopack), React 19, Tailwind CSS v4, and feature-sliced architecture.
+**A portfolio, blog, and design-system playground for the details that make interfaces feel alive.**
 
-**Live:** [adityahimaone.space](https://adityahimaone.space)
+[Live site](https://adityahimaone.space) · [Design system](https://adityahimaone.space/sunnyside) · [Projects](https://adityahimaone.space/projects) · [Blog](https://adityahimaone.space/blog)
+
+</div>
+
+<p align="center">
+  <img src="public/readme/landing-page.png" alt="Sunnyside portfolio landing page: a warm paper studio with cobalt accents and sticker-like illustrations" width="100%" />
+</p>
+
+<p align="center"><sub>Side A — the studio landing page. The hero artwork is drawn in the interface, not a flattened background image.</sub></p>
+
+<p align="center">
+  <a href="https://adityahimaone.space/sunnyside">
+    <img src="public/readme/design-system.png" alt="Sunnyside design-system specimen showing its paper palette, bold typography, and sticker artwork" width="100%" />
+  </a>
+</p>
+
+<p align="center"><sub><a href="https://adityahimaone.space/sunnyside">Sunnyside</a> — the live design-system specimen behind Side A.</sub></p>
+
+> A design-engineering portfolio built around one idea: the small decisions are the interface.
+
+## What’s inside
+
+- **Studio landing page** — six chapters: Intro, About, Show & tell, Work, Skills, and Contact.
+- **Sunnyside** — a browsable design-system guide with palette, type, components, motion, voice, applications, and copyable/downloadable tokens.
+- **Projects archive** — project releases, case studies, and GitHub activity.
+- **Blog and guides** — Markdown writing about frontend work, self-hosting, and infrastructure, with filters, reading aids, RSS, and generated social images.
+- **Bookmarks** — a searchable, paginated catalogue backed by Cloudflare D1, with an admin editor.
+- **Music experiments** — interactive audio tools, visualizers, and a now-playing player.
+
+## Sunnyside design system
+
+Sunnyside is the visual language behind the studio landing page and archive surfaces. The `/sunnyside` route is its **reference and interactive specimen**, not a separately published component library. It documents the intended rules and provides CSS/JSON token exports; implementation styles remain scoped to their owning features rather than being forced through one global component package.
+
+| Foundation        | Direction                                                                                                                                 |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Palette**       | Warm paper (`#f3ecdf`), ink (`#191a2e`), and one deliberate cobalt field (`#3d53d6`); tangerine, butter, pink, mint, and sky are accents. |
+| **Typography**    | Syne for display, Geist for reading, Geist Mono for labels, and a small custom marker script for annotations.                             |
+| **Shape**         | Dark outlines, paper layers, modest radii, and directional hard shadows instead of generic floating-card blur.                            |
+| **Composition**   | Paper-first layouts, considered offsets, one loud field at a time; stickers punctuate content, never carry its structure.                 |
+| **Motion**        | Movement should explain a change, orient the reader, or return feedback. Reduced-motion preferences are respected.                        |
+| **Accessibility** | Contrast pairs and focus treatments are documented; decorative accent colours are not used as small body text.                            |
+
+The archive uses namespaced `--ss-*` tokens to avoid collisions with Tailwind/shadcn and page-local styles. The landing page and other areas still have their own scoped styling; the specimen is the clearest design reference, not a single runtime source consumed identically by every route.
+
+## Routes
+
+| Route                            | Contents                           |
+| -------------------------------- | ---------------------------------- |
+| `/`                              | Studio landing page                |
+| `/sunnyside`                     | Design-system specimen             |
+| `/projects` · `/projects/[slug]` | Project catalogue and case studies |
+| `/blog` · `/blog/[slug]`         | Blog index and articles            |
+| `/bookmarks`                     | Searchable bookmark catalogue      |
+| `/skills`                        | Skills catalogue                   |
+| `/music`                         | Audio playground                   |
+| `/notes` · `/notes/[slug]`       | Notes                              |
+| `/rss.xml`                       | Blog feed                          |
 
 ## Stack
 
-| Layer        | Tech                                |
-| ------------ | ----------------------------------- |
-| Framework    | Next.js 16.3.7 (App Router, Turbopack) |
-| UI runtime   | React 19.3                          |
-| Styling      | Tailwind CSS v4 + CSS Modules       |
-| Animation    | GSAP (scroll), Motion (components)  |
-| Smooth scroll| Lenis                               |
-| Icons        | Lucide React                        |
-| Theme        | next-themes (dark/light)            |
-| Blog         | Raw Markdown + gray-matter          |
-| Audio        | Tone.js (lazy-loaded)               |
-| Language     | TypeScript 5                        |
+| Area               | Tools                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| Framework          | Next.js 16 App Router, React 19, TypeScript 5                                      |
+| Styling            | Tailwind CSS v4, CSS Modules                                                       |
+| Motion             | Motion, GSAP, Lenis, browser animation APIs                                        |
+| Graphics and audio | Three.js / React Three Fiber, Tone.js                                              |
+| Content            | Markdown, generated at build time; `gray-matter`, `react-markdown`, `reading-time` |
+| Data               | Cloudflare D1 for bookmarks; GitHub API for project activity                       |
+| Deployment         | OpenNext for Cloudflare Workers; standalone Next.js build also supported           |
+| Testing            | Jest, Testing Library, Playwright, ESLint                                          |
 
-**Requirements:** Node.js 20.9+ (Next 16 floor), pnpm.
+**Requirements:** Node.js 20.9 or newer and pnpm.
 
-## Project Structure
+## Project layout
 
-Every piece of UI belongs to the feature that owns it. `components/ui/` holds
-genuine primitives shared across features; `hooks/` and `lib/` hold logic used
-by more than one.
-
-```
-next-portfolio-blog/
-├── app/                          # Next.js routes — thin, they delegate
-│   ├── page.tsx                  # Homepage
-│   ├── layout.tsx                # Root layout, fonts, theme + audio providers
-│   ├── globals.css               # Tailwind theme tokens, glass material
-│   ├── (booth)/                  # Shared archive chrome (projects, bookmarks, blog)
-│   ├── blog/[slug]/              # Post + its opengraph image
-│   ├── music/  projects/  bookmarks/  contact/  ui/  spotify-setup/
-│   └── api/                      # Route handlers (bookmarks, Spotify, views)
-│
-├── features/                     # One folder per feature
-│   ├── landing-page/             # The homepage
-│   │   ├── rack-01/              # Section components + useRackAnimations
-│   │   ├── components/hero/      # DawHero, broken-light-text, text-cascade
-│   │   ├── work/                 # The listening-booth work section
-│   │   ├── spotify/  constants/  lib/
-│   │   └── views/landing-page.tsx
-│   ├── booth/                    # Archive shell: room, dock, cover, filter row
-│   ├── blog/                     # views, components, lib/blog.ts
-│   ├── projects/                 # views, components, constants, lib/github.ts
-│   ├── bookmarks/                # views, components, hooks, constants
-│   ├── layout/                   # Top bar, magnetic dock, theme toggle
-│   ├── music/  mixtape/          # Audio playgrounds and the mixtape UI
-│   └── index.ts per feature      # Named exports only — routes import through this
-│
-├── components/ui/                # Cross-feature primitives (knob, slider, screw, footer)
-├── hooks/                        # Shared hooks (use-media, click-outside, hide-interface)
-├── lib/                          # cn(), dates, easing, waveform data
-├── content/blog/                 # Markdown posts
-├── content/bookmarks.json        # Bookmark archive
-├── data/                         # Project/track data
-├── types/                        # Shared types
-├── e2e/                          # Playwright specs
-├── tests/                        # Jest unit tests
-└── docs/                         # Design and planning documents
+```text
+app/                          App Router routes, layouts, metadata, API handlers
+features/
+  landing-page/studio/         Landing page chapters, art, and scoped styles
+  design-system/              Sunnyside specimen, system data, token exports
+  archive/                    Shared archive shell and namespaced design tokens
+  blog/                       Markdown blog views and content logic
+  projects/                    Project catalogue and detail views
+  bookmarks/                  Search, pagination, and admin UI
+  music/  mixtape/             Audio experiments and playback interfaces
+components/ui/                Cross-feature UI primitives
+content/blog/                 Markdown posts and frontmatter
+public/                       Static assets and README screenshots
+scripts/                      Content generation, CSS checks, build helpers
+tests/  e2e/                   Jest unit tests and Playwright browser tests
 ```
 
-## Features
+UI belongs to the feature that owns it. `components/ui/` is reserved for primitives shared across features; `hooks/` and `lib/` contain logic used by multiple features. Routes stay thin and compose feature views.
 
-### Landing Page
+## Run locally
 
-Seven sections composed in `rack-01/rack-01.tsx`, with every scroll-linked
-animation isolated in `use-rack-animations.ts`:
+```bash
+pnpm install
+cp .env.example .env.local
+pnpm generate:content
+pnpm dev
+```
 
-- Hero with a hardware-styled device wall and a boot sequence
-- About, Skills, Experience and Contact strips that scrub off scroll position
-- Smooth scrolling via Lenis, disabled entirely under `prefers-reduced-motion`
-- Music player and now-playing surface
+Open `http://localhost:3000`. `pnpm build` also generates blog content before building. The bookmark API uses Cloudflare D1; to exercise bookmark reads and writes locally, run the app with the project's Wrangler/OpenNext bindings configured.
 
-> The GSAP timelines select elements by **CSS-module class name**, not by ref.
-> Renaming a class in `rack-01.module.css` breaks the animation without a type
-> error. `e2e/landing-page.spec.ts` guards the section count for this reason.
+### Environment
 
-### Shared Archive Chrome
+Set local values in `.env.local` and production secrets in the deployment environment. Never commit real credentials.
 
-`/projects`, `/bookmarks` and `/blog` share one system, specified in [`design.md`](./design.md):
+| Variable                                                              | Required                  | Purpose                                                                                                |
+| --------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `ADMIN_USER`, `ADMIN_PASS`                                            | For bookmark admin writes | Admin login credentials. In production, missing credentials disable authenticated writes.              |
+| `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN` | No                        | Enables the Spotify now-playing surface; without them it degrades gracefully.                          |
+| `NEXT_PUBLIC_SITE_URL`                                                | No                        | Canonical site origin; defaults to `https://adityahimaone.space`. Set explicitly for previews/staging. |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID`                                       | No                        | Enables GA4 when provided.                                                                             |
+| `NEXT_PUBLIC_GSC_VERIFICATION`                                        | No                        | Adds the Google Search Console verification token.                                                     |
 
-- Liquid-glass material with a two-layer blur budget
-- `SignalArchiveHeader` — a glass transport, a record that turns only while audio
-  is actually playing, and a timeline derived from the page's own data
-- Global `prefers-reduced-motion` and `prefers-reduced-transparency` guards
+See [`.env.example`](./.env.example) for the current template and notes.
 
-### Blog
+## Content
 
-- Markdown posts in `content/blog/` with a tracklist, filter dock, and
-  `?tag=` / `?q=` / `?sort=` shareable URLs
-- Waveform traces generated deterministically from each article's reading time
-- Transport scrub bar, sticky cue-sheet TOC, scoped "Paper" reading mode
-- LCD-tinted code blocks with a copy control, `max-w-[68ch]` measure
-- Static generation, with async `params` per the Next 16 request APIs
+### Add a blog post
 
-### Projects
-
-- Featured projects as release-shelf rows: catalogue spine, typed credits, a
-  record that slides out of the sleeve on hover
-- Recent GitHub pushes as a session-log data table
-
-### Bookmarks
-
-- `content/bookmarks.json` grouped into channels, rendered as a dense index
-- Single search field (⌘K) across title, description, URL, category and tags
-- `j` / `k` keyboard navigation — additive, never the only way to reach a link
-- Admin add/edit/delete behind a login-gated modal
-
-## Adding Content
-
-### New Blog Post
-
-1. Create `content/blog/my-post.md`
-2. Add frontmatter:
+Create `content/blog/my-post.md` with frontmatter:
 
 ```markdown
 ---
-title: 'My Post Title'
+title: 'A useful title'
 slug: my-post
-date: 2026-04-15
-description: 'Short description'
+date: 2026-10-26
+description: 'A concise summary.'
 tags: [nextjs, typescript]
 published: true
 ---
 
-Content here...
+Write the post in Markdown.
 ```
 
-3. Done — the route is generated at `/blog/my-post`
+`pnpm generate:content` turns the Markdown files into the generated module used by the app. Keep that generated file out of commits; it is build output.
 
-### New Featured Project
+### Update projects and bookmarks
 
-1. Open `features/projects/constants/index.ts`
-2. Add an entry to `FEATURED_PROJECTS`:
+- Featured project metadata lives in `features/projects/constants/index.ts`; project case-study data lives in `data/`.
+- Bookmarks are stored in D1 and maintained through the admin UI on `/bookmarks`; they are not edited in a checked-in JSON catalogue.
+- Landing-page chapters, palette, and principles are in `features/landing-page/studio/`.
+- Sunnyside specimen content and token exports are in `features/design-system/sunnyside-data.ts`.
 
-```typescript
-{
-  name: 'Project Name',
-  slug: 'project-slug',
-  githubSlug: 'repo-name',
-  description: 'What it does',
-  tech: ['Next.js', 'TypeScript'],
-  demo: 'https://demo.url', // optional
-}
-```
+## Commands
 
-3. Done — shows in the Projects section
+| Command                 | What it does                                                                |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `pnpm dev`              | Start the local Next.js development server                                  |
+| `pnpm generate:content` | Generate the blog content module                                            |
+| `pnpm build`            | Generate content and build the production app, then run critical-CSS checks |
+| `pnpm start`            | Start the built Next.js server                                              |
+| `pnpm preview`          | Build and preview the Cloudflare Worker locally                             |
+| `pnpm deploy`           | Build and deploy through OpenNext/Wrangler                                  |
+| `pnpm test`             | Run Jest unit tests                                                         |
+| `pnpm test:e2e`         | Run Playwright browser tests (requires a built app)                         |
+| `pnpm lint`             | Run ESLint                                                                  |
 
-## Development
+For Playwright’s browser, install Chromium with `pnpm exec playwright install chromium` if it is not already available.
 
-```bash
-pnpm install
-pnpm dev          # dev server
-pnpm build        # production build
-pnpm start        # serve the build
-```
+## Deployment
 
-## Checks
+The primary deployment target is Cloudflare Workers via OpenNext. Configure the Worker, D1 database, R2 incremental-cache bucket, and production environment variables in Cloudflare, then use `pnpm deploy` (or the configured CI workflow). `pnpm preview` builds the same adapter output for local verification.
 
-```bash
-pnpm test         # Jest — unit tests for pure logic and data
-pnpm test:e2e     # Playwright — builds, serves, and drives a real browser
-pnpm lint         # ESLint (Next 16 removed `next lint`)
-```
+A standalone Next.js build is also available through `pnpm build:standalone`. The repository includes a separate VPS deployment script and rollback flow in [`deploy.sh`](./deploy.sh); its server-specific paths and secrets must be configured for that host.
 
-`pnpm test:e2e` runs against a production build, so run `pnpm build` first if
-you have changed anything. It needs Playwright's Chromium: `pnpm exec playwright install chromium`.
+## Conventions
 
-> There is a known intermittent failure in `pnpm build` on some machines —
-> a missing `.next/server/functions-config-manifest.json` during "Collecting
-> page data". Re-running the build resolves it. Pre-existing, not introduced by
-> the Next 16 upgrade.
-
-## Architecture Notes
-
-**Barrels name their exports.** Feature `index.ts` files export explicitly
-rather than `export *`, so a route importing `BookmarksPage` cannot accidentally
-pull in a component's internals. Routes import through the barrel; files inside a
-feature import by relative path.
-
-**Unreachability is the test for dead code.** A component is dead when no route
-can reach it by following imports, not when its name is absent from a search —
-`layout`, `header` and `hooks` are ordinary words, and a barrel re-export keeps
-dead code reachable.
-
-**Animations move, they don't get rewritten.** The GSAP timelines in
-`use-rack-animations.ts` were extracted from the old monolithic component
-verbatim and verified by diff. They are tuned to the decimal; a "clean"
-reimplementation is a silent regression.
-
-## Documentation
-
-Design and planning documents in [`docs/`](./docs/), including
-[design.md](./design.md) and [docs/DESIGN_BOOTH.md](./docs/DESIGN_BOOTH.md).
-Several of the other files there are historical planning notes and no longer
-describe the current code.
+- **Keep feature boundaries clear.** Cross-feature UI goes in `components/ui/`; feature-specific styling stays with the feature.
+- **Prefer explicit exports.** Feature entry points name the exports they expose; internal files use relative imports.
+- **Respect reduced motion.** Scroll and interaction effects should have an accessible reduced-motion path.
+- **Treat design-system tokens as guidance with context.** Use the `/sunnyside` specimen for the system rules while preserving each feature’s scoped ownership.
 
 ## License
 
