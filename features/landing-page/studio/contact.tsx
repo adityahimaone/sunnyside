@@ -122,7 +122,12 @@ export function Contact() {
 
           <Reveal delay={0.1} y={34}>
             <div data-contact-postcard>
-              <Tilt className={styles.postcardTilt} max={6} perspective={1000}>
+              <Tilt
+                className={styles.postcardTilt}
+                max={4}
+                perspective={1000}
+                lift={4}
+              >
                 <div className={styles.postcardWrap}>
                   <div className={styles.postcard}>
                     <div className={styles.postcardInner}>

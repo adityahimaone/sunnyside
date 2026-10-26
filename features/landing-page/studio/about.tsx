@@ -74,7 +74,7 @@ export function About() {
           <div className={styles.aboutSide}>
             <Reveal delay={0.06} y={32}>
               <div data-about-photo>
-                <Tilt className={styles.photoTilt} max={5}>
+                <Tilt className={styles.photoTilt} max={3.5} lift={4}>
                   <div className={styles.photoCard}>
                     <span
                       className={cn(

@@ -88,7 +88,7 @@ function ProjectCard({
   compact?: boolean
 }) {
   return (
-    <Tilt className={styles.cardTilt} max={3.5} perspective={1200}>
+    <Tilt className={styles.cardTilt} max={2.4} perspective={1400} lift={4}>
       <article
         data-project-card
         className={`${styles.projectCard} ${lead ? styles.projectCardLead : ''} ${

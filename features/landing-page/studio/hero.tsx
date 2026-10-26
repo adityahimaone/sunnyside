@@ -166,7 +166,12 @@ export function Hero() {
             onPointerMove={onMove}
             onPointerLeave={reset}
           >
-            <Tilt className={styles.artStage} max={4} perspective={1000}>
+            <Tilt
+              className={styles.artStage}
+              max={3.5}
+              perspective={1000}
+              lift={2}
+            >
               <motion.div
                 style={{ x: noteX, y: noteY, rotate: -5 }}
                 className={cn(styles.sheetNote, 'z-[7]')}

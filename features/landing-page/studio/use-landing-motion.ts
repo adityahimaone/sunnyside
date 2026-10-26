@@ -199,9 +199,10 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
             if (!image) return
             gsap.fromTo(
               image,
-              { yPercent: -5 },
+              { yPercent: -4, scale: 1.08 },
               {
-                yPercent: 5,
+                yPercent: 4,
+                scale: 1.08,
                 ease: 'none',
                 scrollTrigger: {
                   trigger: card,
