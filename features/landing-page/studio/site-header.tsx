@@ -156,7 +156,7 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
               <button
                 ref={triggerRef}
                 type="button"
-                className={archive.menuButton}
+                className={cn(archive.menuButton, archive.menuButtonWide)}
                 aria-label="Open the chapter menu"
                 aria-expanded={open}
                 aria-controls="chapter-menu"

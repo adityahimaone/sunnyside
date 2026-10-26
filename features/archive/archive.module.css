@@ -369,6 +369,13 @@
   }
 }
 
+/* Side A has no route index in its desktop bar, so its menu stays available at
+   every width. The room pages already show the four rooms, hence the default
+   hides the button once the nav fits. */
+.menuButtonWide {
+  display: grid;
+}
+
 /* ── Phone menu ────────────────────────────────────────────────────────── */
 
 .menuPanel {
