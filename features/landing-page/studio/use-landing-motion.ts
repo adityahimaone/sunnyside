@@ -245,7 +245,6 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
 
       revert = () => {
         mm.revert()
-        ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
       }
     }
 
