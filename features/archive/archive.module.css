@@ -128,6 +128,9 @@
   position: sticky;
   z-index: 50;
   top: 0;
+  transition:
+    transform 0.35s var(--ss-ease),
+    opacity 0.25s ease;
 }
 
 .progress {
@@ -252,12 +255,14 @@
   color: var(--ss-ink);
 }
 
-.navLink[aria-current='page'] {
+.navLink[aria-current='page'],
+.navLink[aria-current='location'] {
   color: var(--ss-ink);
   font-weight: 600;
 }
 
-.navLink[aria-current='page']::after {
+.navLink[aria-current='page']::after,
+.navLink[aria-current='location']::after {
   content: '';
   position: absolute;
   right: 0.7rem;
@@ -291,9 +296,11 @@
   background: var(--ss-cobalt);
   box-shadow: var(--ss-shadow-card);
   color: var(--ss-paper-hi);
+  font-family: var(--ss-ui);
   font-size: 0.8125rem;
   font-weight: 600;
   text-decoration: none;
+  cursor: pointer;
   transition:
     transform var(--ss-fast) var(--ss-ease),
     box-shadow var(--ss-fast) var(--ss-ease),

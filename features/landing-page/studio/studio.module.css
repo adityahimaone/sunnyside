@@ -17,6 +17,15 @@
   --sky: #a9c8ff;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
+  /* The header reuses the archive chrome's classes. Those classes read the
+     --ss-* font aliases, which the archive shell declares on itself; the
+     landing page is outside that shell, so declare them here, one level inside
+     <body> where next/font puts the raw --font-* variables. */
+  --ss-display: var(--font-syne), var(--font-space-grotesk), system-ui,
+    sans-serif;
+  --ss-ui: var(--font-geist), system-ui, sans-serif;
+  --ss-mono: var(--font-geist-mono), ui-monospace, monospace;
+
   position: relative;
   min-height: 100svh;
   overflow-x: clip;
@@ -236,6 +245,58 @@
   font-size: 10px;
   letter-spacing: 0.18em;
   opacity: 0.5;
+}
+
+.menuLinkCopy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.menuLinkNote {
+  color: color-mix(in srgb, var(--paper-hi) 84%, var(--cobalt));
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.menuChapters {
+  width: 100%;
+  max-width: var(--ss-shell);
+  margin-inline: auto;
+  border-top: 1px solid var(--ss-paper-line);
+  padding-top: 0.65rem;
+}
+
+.menuChapterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.95rem;
+  margin-top: 0.15rem;
+}
+
+.menuChapter {
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: color-mix(in srgb, var(--paper-hi) 84%, var(--cobalt));
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.menuChapter:hover,
+.menuChapter:focus-visible {
+  color: var(--butter);
+}
+
+.menuChapter:focus-visible {
+  outline-color: var(--butter);
 }
 
 /* ── Chapter rail ───────────────────────────────────────────────────────── */

@@ -6,11 +6,12 @@ import {
   useReducedMotion,
   useScroll,
 } from 'motion/react'
-import { Menu, X } from 'lucide-react'
+import { ArrowUpRight, Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
 import { cn } from '@/lib/utils'
+import archive from '@/features/archive/archive.module.css'
 
 import { CHAPTERS, SOCIALS, scrollToSection } from './studio-data'
 import styles from './studio.module.css'
@@ -22,6 +23,26 @@ type Props = {
 }
 
 const NAV = CHAPTERS.filter((chapter) => chapter.id !== 'home')
+
+/**
+ * The menu's destinations.
+ *
+ * These are places, not chapters: the design system and the archive's four
+ * rooms. The chapter list still exists, one step below, because a phone reader
+ * loses every section jump if the only menu becomes a route index.
+ */
+const DESTINATIONS = [
+  {
+    href: '/sunnyside',
+    label: 'Sunnyside',
+    note: 'the design system',
+    number: '00',
+  },
+  { href: '/projects', label: 'Projects', note: 'the shelf', number: '01' },
+  { href: '/bookmarks', label: 'Bookmarks', note: 'the crate', number: '02' },
+  { href: '/skills', label: 'Skills', note: 'the toolbox', number: '03' },
+  { href: '/blog', label: 'Blog', note: 'field notes', number: '04' },
+] as const
 
 export function SiteHeader({ active, scrolled, footerVisible }: Props) {
   const reduced = useReducedMotion() ?? false
@@ -75,55 +96,47 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
   return (
     <>
       <header
-        className={cn(styles.header, footerVisible && styles.headerHidden)}
+        className={cn(archive.header, footerVisible && styles.headerHidden)}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+        }}
         inert={footerVisible}
       >
         <motion.div
           aria-hidden
-          className="fixed inset-x-0 top-0 z-[60] h-[3px] origin-left"
-          style={{
-            scaleX: scrollYProgress,
-            backgroundColor: 'var(--tangerine)',
-          }}
+          className={archive.progress}
+          style={{ scaleX: scrollYProgress }}
         />
-        <div
-          className={cn(styles.headerBar, scrolled && styles.headerBarScrolled)}
-        >
-          <div
-            className={cn(
-              styles.shell,
-              'flex h-16 items-center justify-between gap-4',
-            )}
-          >
+        <div className={cn(archive.bar, scrolled && archive.barScrolled)}>
+          <div className={archive.inner}>
             <a
               href="#home"
-              className={cn(styles.brand, 'group flex items-center gap-2.5')}
+              className={archive.brand}
+              aria-label="Aditya Himawan, back to the top"
               onClick={(event) => {
                 event.preventDefault()
                 go('home')
               }}
             >
-              <span className={styles.brandMark} aria-hidden>
+              <span className={archive.mark} aria-hidden>
                 AH
               </span>
-              <span className="font-[family-name:var(--font-geist-mono)] text-[10px] leading-tight tracking-[0.16em] uppercase">
-                <span className="block font-semibold">Aditya Himawan</span>
-                <span className="block text-[var(--muted)]">
-                  design engineer
-                </span>
+              <span className={archive.brandText}>
+                <span className={archive.brandName}>Aditya Himawan</span>
+                <span className={archive.brandRole}>design engineer</span>
               </span>
             </a>
 
-            <nav
-              className="hidden items-center gap-6 lg:flex"
-              aria-label="Chapters"
-            >
+            <nav className={archive.nav} aria-label="Chapters">
               {NAV.map((chapter) => (
                 <button
                   key={chapter.id}
                   type="button"
-                  className={styles.navLink}
-                  data-active={active === chapter.id}
+                  className={archive.navLink}
+                  aria-current={active === chapter.id ? 'location' : undefined}
                   onClick={() => go(chapter.id)}
                 >
                   {chapter.label}
@@ -131,25 +144,25 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
               ))}
             </nav>
 
-            <div className="flex items-center gap-2.5">
+            <div className={archive.headerTools}>
               <button
                 type="button"
-                className={styles.headerCta}
+                className={archive.cta}
                 onClick={() => go('contact')}
               >
-                Say hi
-                <span aria-hidden>↗</span>
+                <span className={archive.ctaLabel}>Say hi</span>
+                <ArrowUpRight size={15} strokeWidth={2} aria-hidden />
               </button>
               <button
                 ref={triggerRef}
                 type="button"
-                className={cn(styles.menuButton, 'lg:hidden')}
+                className={archive.menuButton}
                 aria-label="Open the chapter menu"
                 aria-expanded={open}
                 aria-controls="chapter-menu"
                 onClick={() => setOpen(true)}
               >
-                <Menu size={17} strokeWidth={2} />
+                <Menu size={17} strokeWidth={2} aria-hidden />
               </button>
             </div>
           </div>
@@ -161,33 +174,31 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
           <motion.div
             ref={panelRef}
             id="chapter-menu"
-            className={styles.menuPanel}
+            className={archive.menuPanel}
             initial={reduced ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             role="dialog"
             aria-modal="true"
-            aria-label="Chapters"
+            aria-label="Site navigation"
           >
-            <div className="flex items-center justify-between">
-              <span className="font-[family-name:var(--font-geist-mono)] text-[9px] tracking-[0.2em] uppercase opacity-60">
-                Side A · {CHAPTERS.length} chapters
-              </span>
+            <div className={archive.menuTop}>
+              <span className={archive.menuLabel}>Aditya Himawan, Side A</span>
               <button
                 ref={closeRef}
                 type="button"
-                className="grid size-11 place-items-center rounded-full border border-[var(--paper)]/40 text-[var(--paper)]"
+                className={archive.menuClose}
                 onClick={() => setOpen(false)}
-                aria-label="Close the chapter menu"
+                aria-label="Close the menu"
               >
-                <X size={19} />
+                <X size={19} aria-hidden />
               </button>
             </div>
 
             <motion.nav
-              className="mt-8 flex flex-1 flex-col justify-center"
-              aria-label="All chapters"
+              className={archive.menuNav}
+              aria-label="Site"
               initial={reduced ? false : { y: 16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{
@@ -196,59 +207,62 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
                 ease: [0.22, 1, 0.36, 1],
               }}
             >
-              {NAV.map((chapter) => (
-                <button
-                  key={chapter.id}
-                  type="button"
-                  className={styles.menuLink}
-                  onClick={() => go(chapter.id)}
+              {DESTINATIONS.map((destination) => (
+                <Link
+                  key={destination.href}
+                  href={destination.href}
+                  className={archive.menuLink}
+                  onClick={() => setOpen(false)}
                 >
-                  {chapter.label}
-                  <small>{chapter.number}</small>
-                </button>
+                  <span className={styles.menuLinkCopy}>
+                    {destination.label}
+                    <small className={styles.menuLinkNote}>
+                      {destination.note}
+                    </small>
+                  </span>
+                  <span className={archive.menuNum}>{destination.number}</span>
+                </Link>
               ))}
             </motion.nav>
 
-            <div className="mt-8 grid gap-4 border-t border-[var(--paper)]/20 pt-5 sm:grid-cols-2">
-              <div className="flex flex-wrap gap-x-5 gap-y-2">
-                <Link
-                  href="/projects"
-                  className="font-[family-name:var(--font-geist-mono)] text-[10px] tracking-[0.14em] uppercase opacity-75 hover:opacity-100"
-                >
-                  All projects ↗
-                </Link>
-                <Link
-                  href="/blog"
-                  className="font-[family-name:var(--font-geist-mono)] text-[10px] tracking-[0.14em] uppercase opacity-75 hover:opacity-100"
-                >
-                  Notes ↗
-                </Link>
-                <Link
-                  href="/bookmarks"
-                  className="font-[family-name:var(--font-geist-mono)] text-[10px] tracking-[0.14em] uppercase opacity-75 hover:opacity-100"
-                >
-                  Bookmarks ↗
-                </Link>
+            <div className={styles.menuChapters}>
+              <span className={archive.menuLabel}>On this page</span>
+              <div className={styles.menuChapterRow}>
+                {NAV.map((chapter) => (
+                  <button
+                    key={chapter.id}
+                    type="button"
+                    className={styles.menuChapter}
+                    onClick={() => go(chapter.id)}
+                  >
+                    {chapter.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={archive.menuFoot}>
+              <div className={archive.menuFootLinks}>
                 <Link
                   href="/music"
-                  className="font-[family-name:var(--font-geist-mono)] text-[10px] tracking-[0.14em] uppercase opacity-75 hover:opacity-100"
+                  className={archive.menuFootLink}
+                  onClick={() => setOpen(false)}
                 >
-                  Mixtape ↗
+                  Mixtape
                 </Link>
-              </div>
-              <div className="flex flex-wrap gap-x-5 gap-y-2 sm:justify-end">
                 {SOCIALS.map((social) => (
                   <a
                     key={social.label}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-[family-name:var(--font-geist-mono)] text-[10px] tracking-[0.14em] uppercase opacity-75 hover:opacity-100"
+                    className={archive.menuFootLink}
                   >
-                    {social.label} ↗
+                    {social.label}
                   </a>
                 ))}
               </div>
+              <span className={archive.menuNote}>Jakarta, GMT+7</span>
             </div>
           </motion.div>
         ) : null}
