@@ -388,21 +388,10 @@
   padding: 1.1rem clamp(1rem, 4vw, 3.5rem) 2rem;
   background: var(--ss-cobalt);
   color: var(--ss-paper-hi);
-  animation: menu-in 180ms var(--ss-ease) both;
 }
 
 .menuPanel:focus-visible {
   outline: none;
-}
-
-@keyframes menu-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 
 .menuTop {
@@ -1035,7 +1024,6 @@
     transition: none;
   }
 
-  .menuPanel,
   .rise {
     animation: none;
   }
