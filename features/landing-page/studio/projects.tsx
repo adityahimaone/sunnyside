@@ -5,9 +5,10 @@ import Link from 'next/link'
 
 import { WORK_PROJECTS, type WorkProject } from '@/data/projects'
 
-import { ArrowUpRight } from './doodles'
+import { ArrowUpRight, Sun } from './doodles'
 import { Reveal } from './reveal'
 import { SectionHead, SectionNext } from './section-head'
+import { Tilt } from './tilt'
 import styles from './studio.module.css'
 
 /** All six releases, in the order they belong on the shelf. */
@@ -87,51 +88,56 @@ function ProjectCard({
   compact?: boolean
 }) {
   return (
-    <article
-      className={`${styles.projectCard} ${lead ? styles.projectCardLead : ''} ${
-        compact ? styles.projectCardCompact : ''
-      }`}
-    >
-      <span className={styles.projectTape} aria-hidden />
-      <Link className={styles.projectLink} href={`/projects/${project.slug}`}>
-        <div className={styles.projectMedia}>
-          {project.cover ? (
-            <Image
-              src={project.cover}
-              alt={`${project.title} interface`}
-              fill
-              sizes={
-                lead
-                  ? '(min-width: 1024px) 58vw, 100vw'
-                  : '(min-width: 1024px) 34vw, 100vw'
-              }
-              className="object-cover"
-            />
-          ) : (
-            <GeneratedCover project={project} index={index} />
-          )}
-        </div>
-        <div className={styles.projectBody}>
-          <div className={styles.projectKicker}>
-            <span>
-              <b>{String(index + 1).padStart(2, '0')}</b> · {project.genre}
-            </span>
-            <span>{project.year}</span>
+    <Tilt className={styles.cardTilt} max={3.5} perspective={1200}>
+      <article
+        data-project-card
+        className={`${styles.projectCard} ${lead ? styles.projectCardLead : ''} ${
+          compact ? styles.projectCardCompact : ''
+        }`}
+      >
+        <span className={styles.projectTape} aria-hidden />
+        <Link className={styles.projectLink} href={`/projects/${project.slug}`}>
+          <div className={styles.projectMedia} data-project-media>
+            {project.cover ? (
+              <Image
+                src={project.cover}
+                alt={`${project.title} interface`}
+                fill
+                sizes={
+                  lead
+                    ? '(min-width: 1024px) 58vw, 100vw'
+                    : '(min-width: 1024px) 34vw, 100vw'
+                }
+                className="object-cover"
+              />
+            ) : (
+              <GeneratedCover project={project} index={index} />
+            )}
           </div>
-          <h3 className={styles.projectTitle}>{project.title}</h3>
-          <p className={styles.projectDesc}>{project.description}</p>
-          <ul className={styles.stack}>
-            {project.stack.slice(0, lead ? 5 : compact ? 2 : 3).map((tech) => (
-              <li key={tech}>{tech}</li>
-            ))}
-          </ul>
-          <span className={styles.projectCta}>
-            Read the notes
-            <ArrowUpRight className="size-4" />
-          </span>
-        </div>
-      </Link>
-    </article>
+          <div className={styles.projectBody}>
+            <div className={styles.projectKicker}>
+              <span>
+                <b>{String(index + 1).padStart(2, '0')}</b> · {project.genre}
+              </span>
+              <span>{project.year}</span>
+            </div>
+            <h3 className={styles.projectTitle}>{project.title}</h3>
+            <p className={styles.projectDesc}>{project.description}</p>
+            <ul className={styles.stack}>
+              {project.stack
+                .slice(0, lead ? 5 : compact ? 2 : 3)
+                .map((tech) => (
+                  <li key={tech}>{tech}</li>
+                ))}
+            </ul>
+            <span className={styles.projectCta}>
+              Read the notes
+              <ArrowUpRight className="size-4" />
+            </span>
+          </div>
+        </Link>
+      </article>
+    </Tilt>
   )
 }
 
@@ -144,6 +150,9 @@ export function Projects() {
       className={`${styles.work} scroll-mt-24`}
       aria-labelledby="work-title"
     >
+      <span className={styles.workSun} aria-hidden data-work-sun>
+        <Sun className="w-full" />
+      </span>
       <div className={styles.shell}>
         <SectionHead
           onDark

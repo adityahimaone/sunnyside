@@ -519,6 +519,19 @@
   border-radius: 50%;
   transform: rotate(-3deg);
   pointer-events: none;
+  animation: pulse-ring 1.15s var(--ease-out) 1.45s both;
+}
+
+@keyframes pulse-ring {
+  from {
+    transform: rotate(-13deg) scale(0.76);
+    opacity: 0;
+  }
+
+  to {
+    transform: rotate(-3deg) scale(1);
+    opacity: 1;
+  }
 }
 
 .heroLede {
@@ -648,6 +661,7 @@
   position: relative;
   width: min(100%, 29rem);
   aspect-ratio: 0.9;
+  transform-style: preserve-3d;
 }
 
 .sheet {
@@ -1168,6 +1182,7 @@
 
 .showcaseTrack {
   display: flex;
+  perspective: 1400px;
   gap: clamp(1rem, 2vw, 1.6rem);
   margin-top: 2.2rem;
   padding: 0.7rem
@@ -1707,9 +1722,36 @@
 
 .work {
   position: relative;
+  overflow: hidden;
   padding-block: clamp(5.5rem, 11vw, 9rem);
   background: var(--cobalt);
   color: var(--paper);
+}
+
+.work > .shell {
+  position: relative;
+  z-index: 1;
+}
+
+.workSun {
+  position: absolute;
+  z-index: 0;
+  top: clamp(-2rem, -2vw, 0rem);
+  right: -10%;
+  width: min(44vw, 33rem);
+  opacity: 0.09;
+  pointer-events: none;
+  transform-origin: center;
+  will-change: transform;
+}
+
+@media (max-width: 700px) {
+  .workSun {
+    top: -1rem;
+    right: -26%;
+    width: 70vw;
+    opacity: 0.08;
+  }
 }
 
 .workGrid {
@@ -1728,7 +1770,8 @@
     min-width: 0;
   }
 
-  .workGrid > * > article {
+  .workGrid > * > article,
+  .workGrid > * > .cardTilt > article {
     width: 100%;
     height: 100%;
   }
@@ -2185,7 +2228,7 @@
 }
 
 .skillCard:hover {
-  transform: translateY(-5px);
+  transform: perspective(1200px) rotateX(1.2deg) rotateY(-2deg) translateY(-5px);
   box-shadow: 10px 13px 0 rgb(25 26 46 / 0.13);
 }
 
@@ -3000,5 +3043,38 @@
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+  }
+}
+
+/* ── 3D paper tilts ─────────────────────────────────────────────────────── */
+
+.tilt {
+  transform-style: preserve-3d;
+}
+
+.photoTilt,
+.postcardTilt {
+  width: 100%;
+}
+
+.cardTilt {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+.cardTilt > article {
+  width: 100%;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulseWord::after {
+    animation: none;
+  }
+
+  .skillCard:hover {
+    transform: none;
   }
 }

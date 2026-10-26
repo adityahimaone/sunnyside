@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 
 import { Squiggle } from './doodles'
 import { Reveal } from './reveal'
+import { Tilt } from './tilt'
 import { SectionHead, SectionNext } from './section-head'
 import { ABOUT_FACTS, PRINCIPLES } from './studio-data'
 import styles from './studio.module.css'
@@ -72,42 +73,48 @@ export function About() {
 
           <div className={styles.aboutSide}>
             <Reveal delay={0.06} y={32}>
-              <div className={styles.photoCard}>
-                <span
-                  className={cn(
-                    styles.tape,
-                    'top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-3',
-                  )}
-                  aria-hidden
-                />
-                <div className={styles.photoFrame}>
-                  <Image
-                    src="/memoji-1.png"
-                    alt="Aditya's memoji, half hidden behind a laptop"
-                    width={420}
-                    height={420}
-                    sizes="(min-width: 1024px) 22rem, 80vw"
-                    priority={false}
-                  />
-                </div>
-                <div className={styles.photoCaption}>
-                  <span>
-                    <b>that&apos;s me</b>
-                    <br />
-                    probably debugging
-                  </span>
-                  <span>JKT / 2026</span>
-                </div>
+              <div data-about-photo>
+                <Tilt className={styles.photoTilt} max={5}>
+                  <div className={styles.photoCard}>
+                    <span
+                      className={cn(
+                        styles.tape,
+                        'top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-3',
+                      )}
+                      aria-hidden
+                    />
+                    <div className={styles.photoFrame}>
+                      <Image
+                        src="/memoji-1.png"
+                        alt="Aditya's memoji, half hidden behind a laptop"
+                        width={420}
+                        height={420}
+                        sizes="(min-width: 1024px) 22rem, 80vw"
+                        priority={false}
+                      />
+                    </div>
+                    <div className={styles.photoCaption}>
+                      <span>
+                        <b>that&apos;s me</b>
+                        <br />
+                        probably debugging
+                      </span>
+                      <span>JKT / 2026</span>
+                    </div>
+                  </div>
+                </Tilt>
               </div>
             </Reveal>
 
             <Reveal delay={0.14} y={32}>
-              <div className={styles.nowCard}>
-                <b>Now</b>
-                Latest release: <strong>Habit Tracker</strong>, a streak that
-                survives a missed day.
-                <br />
-                Next: more small tools, fewer dashboards.
+              <div data-about-now>
+                <div className={styles.nowCard}>
+                  <b>Now</b>
+                  Latest release: <strong>Habit Tracker</strong>, a streak that
+                  survives a missed day.
+                  <br />
+                  Next: more small tools, fewer dashboards.
+                </div>
               </div>
             </Reveal>
           </div>

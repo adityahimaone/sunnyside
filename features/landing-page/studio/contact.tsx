@@ -6,6 +6,7 @@ import { ArrowUpRight, Sun } from './doodles'
 import { Reveal } from './reveal'
 import { ScriptWord } from './script-word'
 import { SectionHead } from './section-head'
+import { Tilt } from './tilt'
 import { CONTACT, SOCIALS, WORK_NOTES } from './studio-data'
 import styles from './studio.module.css'
 
@@ -120,51 +121,55 @@ export function Contact() {
           </div>
 
           <Reveal delay={0.1} y={34}>
-            <div className={styles.postcardWrap}>
-              <div className={styles.postcard}>
-                <div className={styles.postcardInner}>
-                  <div className={styles.postcardTop}>
-                    <span>
-                      Airmail · par avion
-                      <br />
-                      <b>Side A / 2026</b>
-                    </span>
-                    <span className="grid size-[4.6rem] place-items-center border border-dashed border-[var(--paper)]/50 p-2">
-                      <Sun className="w-full" title="Sun stamp" />
-                    </span>
+            <div data-contact-postcard>
+              <Tilt className={styles.postcardTilt} max={6} perspective={1000}>
+                <div className={styles.postcardWrap}>
+                  <div className={styles.postcard}>
+                    <div className={styles.postcardInner}>
+                      <div className={styles.postcardTop}>
+                        <span>
+                          Airmail · par avion
+                          <br />
+                          <b>Side A / 2026</b>
+                        </span>
+                        <span className="grid size-[4.6rem] place-items-center border border-dashed border-[var(--paper)]/50 p-2">
+                          <Sun className="w-full" title="Sun stamp" />
+                        </span>
+                      </div>
+
+                      <ScriptWord
+                        text="say hi"
+                        className={styles.postcardScript}
+                        label="Say hi"
+                      />
+
+                      <p className={styles.postcardTo}>To</p>
+                      <p className={styles.postcardName}>
+                        A team with
+                        <br />a stubborn problem
+                      </p>
+                      <div className={styles.postcardLines} aria-hidden>
+                        <span />
+                        <span />
+                        <span />
+                      </div>
+
+                      <div className={styles.postcardFoot}>
+                        <span>From: Aditya · Jakarta · GMT+7</span>
+                        <span>{CONTACT.email}</span>
+                      </div>
+
+                      <span className={styles.postmark} aria-hidden>
+                        Jakarta
+                        <br />
+                        26 · X
+                        <br />
+                        design engineer
+                      </span>
+                    </div>
                   </div>
-
-                  <ScriptWord
-                    text="say hi"
-                    className={styles.postcardScript}
-                    label="Say hi"
-                  />
-
-                  <p className={styles.postcardTo}>To</p>
-                  <p className={styles.postcardName}>
-                    A team with
-                    <br />a stubborn problem
-                  </p>
-                  <div className={styles.postcardLines} aria-hidden>
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-
-                  <div className={styles.postcardFoot}>
-                    <span>From: Aditya · Jakarta · GMT+7</span>
-                    <span>{CONTACT.email}</span>
-                  </div>
-
-                  <span className={styles.postmark} aria-hidden>
-                    Jakarta
-                    <br />
-                    26 · X
-                    <br />
-                    design engineer
-                  </span>
                 </div>
-              </div>
+              </Tilt>
             </div>
           </Reveal>
         </div>

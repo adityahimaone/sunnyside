@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 
 import { Bolt, Burst, Daisy, Smiley, Sun } from './doodles'
 import { Reveal } from './reveal'
+import { Tilt } from './tilt'
 import { HERO_FACTS, CHAPTERS, scrollToSection } from './studio-data'
 import styles from './studio.module.css'
 
@@ -58,8 +59,8 @@ export function Hero() {
       className={styles.hero}
       aria-labelledby="hero-title"
     >
-      <div className={styles.heroHalo} aria-hidden />
-      <div className={styles.heroDots} aria-hidden />
+      <div className={styles.heroHalo} aria-hidden data-hero-halo />
+      <div className={styles.heroDots} aria-hidden data-hero-dots />
 
       <div className={cn(styles.shell, styles.heroGrid)}>
         <div>
@@ -161,10 +162,11 @@ export function Hero() {
           <div
             ref={artRef}
             className={styles.heroArt}
+            data-hero-art
             onPointerMove={onMove}
             onPointerLeave={reset}
           >
-            <div className={styles.artStage}>
+            <Tilt className={styles.artStage} max={4} perspective={1000}>
               <motion.div
                 style={{ x: noteX, y: noteY, rotate: -5 }}
                 className={cn(styles.sheetNote, 'z-[7]')}
@@ -237,7 +239,7 @@ export function Hero() {
                   <Bolt className="w-full" title="Lightning bolt sticker" />
                 </span>
               </div>
-            </div>
+            </Tilt>
           </div>
         </Reveal>
       </div>

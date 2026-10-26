@@ -44,6 +44,7 @@ export function SectionHead({
           )}
         >
           <span
+            data-head-number
             className={cn(
               'grid size-7 place-items-center rounded-full border text-[10px] tracking-normal',
               onDark
@@ -53,7 +54,7 @@ export function SectionHead({
           >
             {number}
           </span>
-          <span className="h-px w-8 bg-current/40" aria-hidden />
+          <span className="h-px w-8 bg-current/40" aria-hidden data-head-rule />
           <span>{label}</span>
         </div>
       </Reveal>

@@ -1,5 +1,7 @@
 'use client'
 
+import { useRef } from 'react'
+
 import { About } from './about'
 import { ChapterRail } from './chapter-rail'
 import { Contact } from './contact'
@@ -10,6 +12,7 @@ import { Showcase } from './showcase'
 import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
 import { Skills } from './skills'
+import { useLandingMotion } from './use-landing-motion'
 import { usePagePosition } from './use-page-position'
 import styles from './studio.module.css'
 
@@ -50,9 +53,11 @@ function Marquee() {
  */
 export default function Studio() {
   const { active, scrolled, footerVisible } = usePagePosition()
+  const rootRef = useRef<HTMLDivElement>(null)
+  useLandingMotion(rootRef)
 
   return (
-    <div className={`${styles.root} ${styles.grain}`}>
+    <div ref={rootRef} className={`${styles.root} ${styles.grain}`}>
       <a
         href="#about"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[90] focus:rounded-full focus:bg-[var(--butter)] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-[var(--ink)]"

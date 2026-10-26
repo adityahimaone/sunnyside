@@ -69,7 +69,7 @@ export function Skills() {
               </div>
               <h3 className={styles.skillTitle}>{build.title}</h3>
               <p className={styles.skillLine}>{build.line}</p>
-              <ul className={styles.skillChips}>
+              <ul className={styles.skillChips} data-skill-chips>
                 {build.skills.map((skill) => (
                   <li key={skill} className={styles.chip}>
                     {skill}
@@ -140,7 +140,7 @@ export function Skills() {
                   hover · focus · active · disabled
                 </span>
               </div>
-              <ul className={styles.skillChips}>
+              <ul className={styles.skillChips} data-skill-chips>
                 {systems.skills.map((skill) => (
                   <li key={skill} className={styles.chip}>
                     {skill}
@@ -165,7 +165,7 @@ export function Skills() {
                   </span>
                 ))}
               </div>
-              <ul className={styles.skillChips}>
+              <ul className={styles.skillChips} data-skill-chips>
                 <li className={styles.chip}>
                   currently poking: view transitions
                 </li>
