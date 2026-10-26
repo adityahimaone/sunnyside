@@ -213,9 +213,24 @@
   z-index: 70;
   display: flex;
   flex-direction: column;
-  padding: 1rem;
+  overflow-y: auto;
   background: var(--cobalt);
   color: var(--paper);
+}
+
+.menuContent {
+  display: flex;
+  width: 100%;
+  max-width: 80rem;
+  min-height: 100%;
+  flex: 1;
+  flex-direction: column;
+  margin-inline: auto;
+  padding: 0 clamp(1rem, 4vw, 3.5rem) 2rem;
+}
+
+.menuTop {
+  min-height: 4rem;
 }
 
 .menuLink {
@@ -1803,7 +1818,7 @@
     padding: 1.2rem 1rem 1.2rem 0.6rem;
   }
 
-    .projectCardCompact .projectTitle {
+  .projectCardCompact .projectTitle {
     font-size: clamp(1.3rem, 1.7vw, 1.8rem);
   }
 
@@ -2059,7 +2074,6 @@
   font-size: 0.82rem;
   font-weight: 600;
 }
-
 
 .projectTape {
   position: absolute;
@@ -3051,5 +3065,4 @@
   .skillCard:hover {
     transform: none;
   }
-
 }

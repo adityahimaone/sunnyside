@@ -148,44 +148,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
-      <head>
-        {/* Put the boot's first frame up before the first paint.
-
-            The landing page's preloader is a client component, so the server
-            can only ship the hero: the overlay appears after hydration, which
-            means the visitor sees the hero, then sees a boot land on top of it
-            that was supposed to have been there all along. The gap is one frame
-            on a fast machine and most of a second on a phone.
-
-            Two things are written here, before the body is parsed:
-
-            - `data-boot="on"`, which shows the boot cover (`StickerBootCover`,
-              in the landing page's HTML, hidden by default). The cover is the
-              preloader's own first frame: the same cobalt room and cream
-              sticker sheet the live overlay mounts, which is why handing over a
-              moment later is invisible.
-            - `--boot-play: paused`, the variable the retired arrangement hero
-              read. The new hero does not use it, but the gate still clears it
-              so a client-side return to this route cannot leave a stale value
-              behind.
-
-            The 8s failsafe is the price of painting the cover before knowing
-            whether the app will ever hydrate. If the boot never mounts, the
-            cover comes down and the page underneath is exactly the page, so
-            the worst case is a slow reveal rather than a cobalt room with no
-            way out. With no JavaScript at all this block never runs, no
-            attribute is written, the cover stays hidden and the page is the
-            page.
-
-            The attribute goes on last. Everything above it can only fail by
-            throwing, and if it does, no cover is shown — rather than a cover
-            that is shown with no failsafe behind it. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{if(location.pathname==='/'&&!/Lighthouse|PageSpeed|Googlebot/i.test(navigator.userAgent)&&sessionStorage.getItem('aditya-landing-session-boot')!=='1'){var d=document.documentElement,m=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(!m)d.style.setProperty('--boot-play','paused');setTimeout(function(){if(d.getAttribute('data-boot')==='on'){d.removeAttribute('data-boot');d.style.removeProperty('--boot-play')}},8000);d.setAttribute('data-boot','on')}}catch(e){}`,
-          }}
-        />
-      </head>
       <body
         className={`${geist.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${syne.variable} ${orbitron.variable} ${inter.variable} bg-background text-foreground tracking-tight antialiased`}
       >

@@ -183,86 +183,92 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
             aria-modal="true"
             aria-label="Site navigation"
           >
-            <div className={archive.menuTop}>
-              <span className={archive.menuLabel}>Aditya Himawan, Side A</span>
-              <button
-                ref={closeRef}
-                type="button"
-                className={archive.menuClose}
-                onClick={() => setOpen(false)}
-                aria-label="Close the menu"
+            <div className={styles.menuContent}>
+              <div className={cn(archive.menuTop, styles.menuTop)}>
+                <span className={archive.menuLabel}>
+                  Aditya Himawan, Side A
+                </span>
+                <button
+                  ref={closeRef}
+                  type="button"
+                  className={archive.menuClose}
+                  onClick={() => setOpen(false)}
+                  aria-label="Close the menu"
+                >
+                  <X size={19} aria-hidden />
+                </button>
+              </div>
+
+              <motion.nav
+                className={archive.menuNav}
+                aria-label="Site"
+                initial={reduced ? false : { y: 16, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{
+                  duration: 0.28,
+                  delay: 0.04,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
               >
-                <X size={19} aria-hidden />
-              </button>
-            </div>
-
-            <motion.nav
-              className={archive.menuNav}
-              aria-label="Site"
-              initial={reduced ? false : { y: 16, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{
-                duration: 0.28,
-                delay: 0.04,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-            >
-              {DESTINATIONS.map((destination) => (
-                <Link
-                  key={destination.href}
-                  href={destination.href}
-                  className={archive.menuLink}
-                  onClick={() => setOpen(false)}
-                >
-                  <span className={styles.menuLinkCopy}>
-                    {destination.label}
-                    <small className={styles.menuLinkNote}>
-                      {destination.note}
-                    </small>
-                  </span>
-                  <span className={archive.menuNum}>{destination.number}</span>
-                </Link>
-              ))}
-            </motion.nav>
-
-            <div className={styles.menuChapters}>
-              <span className={archive.menuLabel}>On this page</span>
-              <div className={styles.menuChapterRow}>
-                {NAV.map((chapter) => (
-                  <button
-                    key={chapter.id}
-                    type="button"
-                    className={styles.menuChapter}
-                    onClick={() => go(chapter.id)}
+                {DESTINATIONS.map((destination) => (
+                  <Link
+                    key={destination.href}
+                    href={destination.href}
+                    className={archive.menuLink}
+                    onClick={() => setOpen(false)}
                   >
-                    {chapter.label}
-                  </button>
+                    <span className={styles.menuLinkCopy}>
+                      {destination.label}
+                      <small className={styles.menuLinkNote}>
+                        {destination.note}
+                      </small>
+                    </span>
+                    <span className={archive.menuNum}>
+                      {destination.number}
+                    </span>
+                  </Link>
                 ))}
-              </div>
-            </div>
+              </motion.nav>
 
-            <div className={archive.menuFoot}>
-              <div className={archive.menuFootLinks}>
-                <Link
-                  href="/music"
-                  className={archive.menuFootLink}
-                  onClick={() => setOpen(false)}
-                >
-                  Mixtape
-                </Link>
-                {SOCIALS.map((social) => (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+              <div className={styles.menuChapters}>
+                <span className={archive.menuLabel}>On this page</span>
+                <div className={styles.menuChapterRow}>
+                  {NAV.map((chapter) => (
+                    <button
+                      key={chapter.id}
+                      type="button"
+                      className={styles.menuChapter}
+                      onClick={() => go(chapter.id)}
+                    >
+                      {chapter.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={archive.menuFoot}>
+                <div className={archive.menuFootLinks}>
+                  <Link
+                    href="/music"
                     className={archive.menuFootLink}
+                    onClick={() => setOpen(false)}
                   >
-                    {social.label}
-                  </a>
-                ))}
+                    Mixtape
+                  </Link>
+                  {SOCIALS.map((social) => (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={archive.menuFootLink}
+                    >
+                      {social.label}
+                    </a>
+                  ))}
+                </div>
+                <span className={archive.menuNote}>Jakarta, GMT+7</span>
               </div>
-              <span className={archive.menuNote}>Jakarta, GMT+7</span>
             </div>
           </motion.div>
         ) : null}
