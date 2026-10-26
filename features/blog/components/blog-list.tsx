@@ -1,44 +1,27 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { RefreshCw, X } from 'lucide-react'
+import {
+  ArrowDownUp,
+  ArrowUpRight,
+  ChevronRight,
+  RefreshCw,
+  Search,
+  Sparkles,
+  X,
+} from 'lucide-react'
 import type { BlogMeta } from '../lib/blog'
-import {
-  BoothControl,
-  Cover,
-  FilterRow,
-  PageHeader,
-  useDockSlot,
-  useRoomChannel,
-} from '@/features/booth'
-import {
-  formatRuntime,
-  minutesFromReadingTime,
-  waveformFromReadingTime,
-} from '@/lib/waveform-data'
+import { useDockSlot } from '@/features/booth/dock-slot'
+import { waveformFromReadingTime } from '@/lib/waveform-data'
 import { formatDate } from '@/lib/date'
 import { ViewCounter } from './view-counter'
-import styles from '../releases.module.css'
-
-const SIDE_SIZE = 6
-const COVER_HUES = [
-  '#ff5a1f',
-  '#5cd6a3',
-  '#c9a574',
-  '#9b6cff',
-  '#d9895b',
-  '#2e3f5c',
-]
+import { ScriptWord } from '@/features/landing-page/studio/script-word'
+import styles from '../sunnyside-blog.module.css'
 
 type Sort = 'desc' | 'asc'
 
-/**
- * The guide paths, surfaced on the blog index rather than behind their own
- * route. The guide pages themselves stay — the links below resolve to them —
- * but the index no longer treats them as somewhere else to go.
- */
 const GUIDES = [
   {
     href: '/guides/self-hosting-nextjs',
@@ -56,12 +39,6 @@ const GUIDES = [
   },
 ] as const
 
-/**
- * The questions these notes keep getting asked, answered on the page rather
- * than behind a separate route. `details`/`summary` means the answer is in the
- * DOM for a crawler and for anyone reading with JS disabled, without paying for
- * an accordion component in a file that is already a client component.
- */
 const BLOG_FAQ = [
   {
     question: 'How much does it cost to self-host Next.js on a VPS?',
@@ -89,9 +66,7 @@ export function BlogList({ posts }: { posts: BlogMeta[] }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const setHue = useRoomChannel()
 
-  // Filters live in the URL, so a filtered view stays shareable.
   const query = searchParams.get('q') ?? ''
   const tag = searchParams.get('tag')
   const sort: Sort = searchParams.get('sort') === 'asc' ? 'asc' : 'desc'
@@ -139,296 +114,367 @@ export function BlogList({ posts }: { posts: BlogMeta[] }) {
   }, [sorted, query, tag])
 
   const isFiltered = Boolean(query || tag)
-  const leads = isFiltered ? [] : filtered.filter((post) => post.pinned)
-  const tracks = isFiltered ? filtered : filtered.filter((post) => !post.pinned)
-
-  // The room takes a colour from the post currently in focus.
-  useEffect(() => {
-    const source = leads[0] ?? tracks[0]
-    if (!source) return
-    setHue(COVER_HUES[source.tags.length % COVER_HUES.length])
-  }, [leads, tracks, setHue])
+  const leadPost = isFiltered ? null : filtered.find((post) => post.pinned)
+  const remainingPosts = isFiltered
+    ? filtered
+    : filtered.filter((post) => post.slug !== leadPost?.slug)
 
   useDockSlot(
-    <span className={styles.scrubMeta}>
-      {posts.length} posts · {tagCounts.length} tags
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.4rem',
+        padding: '0.35rem 0.75rem',
+        background: 'var(--paper-hi)',
+        border: '1.5px solid var(--ink)',
+        borderRadius: '999px',
+        boxShadow: '2px 2px 0 var(--ink)',
+        fontFamily: 'var(--mono)',
+        fontSize: '0.7rem',
+        color: 'var(--ink)',
+      }}
+    >
+      {posts.length} articles · {tagCounts.length} topics
     </span>,
     [posts.length, tagCounts.length],
   )
 
   return (
-    <>
-      <main className={styles.page} id="main-content">
-        <PageHeader
-          index="03"
-          eyebrow="Releases"
-          title="Notes from the build."
-          description="Frontend engineering, interface systems, and the decisions behind the work."
-          hint={
-            <>
-              {posts.length} posts · {tagCounts.length} tags
-            </>
-          }
-        />
+    <main className={styles.page} id="main-content">
+      <div className={styles.shell}>
+        {/* Header */}
+        <header className={styles.header}>
+          <div className={styles.headerMeta}>
+            <span className={styles.pill}>
+              <span className={styles.pillDot} />
+              02 / DISPATCHES
+            </span>
+            <span>Field Notes & Engineering Log</span>
+            <span>·</span>
+            <span>{posts.length} Documented Essays</span>
+          </div>
 
-        <div className={styles.releases}>
-          <div className={`${styles.dock} glass`}>
-            <div className={styles.searchWrap}>
-              <svg
-                className={styles.searchIcon}
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
+          <div className={styles.headerTitleStack}>
+            <ScriptWord text="field notes" className={styles.headerScript} />
+            <h1 className={styles.headerTitle}>
+              Notes from the build.
+              <span className={styles.headerTitleTape}>DEV & OPS</span>
+            </h1>
+          </div>
+
+          <p className={styles.headerIntro}>
+            Frontend architecture, production incident postmortems, and
+            deployment infrastructure. Every post here is something that
+            actually failed, broke, or required a clean solution in production.
+          </p>
+        </header>
+
+        {/* Asymmetric 4-column / 8-column grid */}
+        <div className={styles.asymmetricGrid}>
+          {/* Left Column: Guides & Topic Filters */}
+          <aside className={styles.sidebarSticky}>
+            {/* Curated Guides */}
+            <div className={styles.sidebarCard}>
+              <div className={styles.sidebarHead}>
+                <span>FIELD GUIDES</span>
+                <span>STEP-BY-STEP</span>
+              </div>
+              <p
+                style={{
+                  fontSize: '0.8rem',
+                  lineHeight: 1.5,
+                  color: 'var(--muted)',
+                  marginBottom: '1rem',
+                }}
               >
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" />
-              </svg>
+                Structured walk-throughs for production deployment and ops:
+              </p>
+              <div className={styles.guideList}>
+                {GUIDES.map((guide) => (
+                  <Link
+                    key={guide.href}
+                    href={guide.href}
+                    className={styles.guideCard}
+                  >
+                    <span className={styles.guideMeta}>
+                      {guide.steps} steps
+                    </span>
+                    <h3 className={styles.guideTitle}>{guide.title}</h3>
+                    <p className={styles.guideDesc}>{guide.description}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Topic Filter Matrix */}
+            <div className={styles.sidebarCard}>
+              <div className={styles.sidebarHead}>
+                <span>TOPIC INDEX</span>
+                <span>{tagCounts.length} TAGS</span>
+              </div>
+              <div className={styles.tagGrid}>
+                <button
+                  type="button"
+                  className={`${styles.tagChip} ${
+                    !tag ? styles.tagChipActive : ''
+                  }`}
+                  onClick={() => updateParam('tag', null)}
+                >
+                  <span>All Dispatches</span>
+                  <span className={styles.tagChipCount}>({posts.length})</span>
+                </button>
+                {tagCounts.map(([tagName, count]) => (
+                  <button
+                    key={tagName}
+                    type="button"
+                    className={`${styles.tagChip} ${
+                      tag === tagName ? styles.tagChipActive : ''
+                    }`}
+                    onClick={() =>
+                      updateParam('tag', tag === tagName ? null : tagName)
+                    }
+                  >
+                    <span>{tagName}</span>
+                    <span className={styles.tagChipCount}>({count})</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Editorial Rule Note */}
+            <div
+              style={{
+                padding: '1rem',
+                borderRadius: '12px',
+                border: '1.5px dashed var(--line)',
+                background: 'var(--paper-lo)',
+                fontFamily: 'var(--mono)',
+                fontSize: '0.7rem',
+                lineHeight: 1.5,
+                color: 'var(--muted)',
+              }}
+            >
+              <b style={{ color: 'var(--ink)' }}>EDITORIAL CONSTRAINT:</b>
+              <br />
+              If a post could sit on any generic engineering blog without
+              shipped codebase evidence, it gets cut.
+            </div>
+          </aside>
+
+          {/* Right Column: Search, Lead Story & Posts List */}
+          <section className={styles.contentColumn} aria-label="Essays feed">
+            {/* Search and Sort Toolbar */}
+            <div className={styles.searchBar}>
+              <Search size={16} style={{ color: 'var(--muted)' }} />
               <input
                 type="search"
                 value={query}
-                onChange={(event) =>
-                  updateParam('q', event.target.value || null)
-                }
-                className={styles.search}
-                aria-label="Search notes"
-                placeholder="Search titles and tags…"
+                onChange={(e) => updateParam('q', e.target.value || null)}
+                placeholder="Search essays by title, keyword, or technology..."
+                className={styles.searchInput}
+                aria-label="Search articles"
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => updateParam('q', null)}
-                  className={styles.searchClear}
-                  aria-label="Clear search"
+                  className={styles.searchBtn}
                 >
-                  <X size={15} />
+                  <X size={12} />
+                  Clear
                 </button>
+              )}
+              <button
+                type="button"
+                onClick={() =>
+                  updateParam('sort', sort === 'desc' ? 'asc' : 'desc')
+                }
+                className={styles.searchBtn}
+              >
+                <ArrowDownUp size={12} />
+                {sort === 'desc' ? 'Newest First' : 'Oldest First'}
+              </button>
+            </div>
+
+            {/* Lead Pinned Article (if not filtered and exists) */}
+            {leadPost && (
+              <article className={styles.leadCard}>
+                <div className={styles.leadTape} />
+                <div className={styles.leadStamp}>
+                  <Sparkles size={11} />
+                  FEATURED DISPATCH
+                </div>
+
+                <Link
+                  href={`/blog/${leadPost.slug}`}
+                  className={styles.leadTitle}
+                >
+                  {leadPost.title}
+                </Link>
+
+                <p className={styles.leadDesc}>{leadPost.description}</p>
+
+                <div className={styles.leadFooter}>
+                  <span>{formatDate(leadPost.date)}</span>
+                  <span className={styles.waveform} aria-hidden>
+                    {waveformFromReadingTime(leadPost.readingTime).map(
+                      (h, i) => (
+                        <span
+                          key={i}
+                          className={styles.waveBar}
+                          style={{ height: `${h}%` }}
+                        />
+                      ),
+                    )}
+                  </span>
+                  <span>{leadPost.readingTime}</span>
+                  <ViewCounter slug={leadPost.slug} />
+                  <Link
+                    href={`/blog/${leadPost.slug}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.2rem',
+                      color: 'var(--cobalt)',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    Read article <ArrowUpRight size={13} />
+                  </Link>
+                </div>
+              </article>
+            )}
+
+            {/* Chronological Posts Deck */}
+            <div className={styles.postDeck}>
+              {remainingPosts.map((post, idx) => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className={styles.postCard}
+                >
+                  <div className={styles.postCardTop}>
+                    <span>
+                      DISPATCH {String(idx + 1).padStart(2, '0')} ·{' '}
+                      {post.tags.slice(0, 2).join(' / ')}
+                    </span>
+                    <span>{formatDate(post.date)}</span>
+                  </div>
+
+                  <h3 className={styles.postTitle}>{post.title}</h3>
+                  <p className={styles.postDesc}>{post.description}</p>
+
+                  <div className={styles.postFooter}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                      }}
+                    >
+                      <span className={styles.waveform} aria-hidden>
+                        {waveformFromReadingTime(post.readingTime).map(
+                          (h, i) => (
+                            <span
+                              key={i}
+                              className={styles.waveBar}
+                              style={{ height: `${h}%` }}
+                            />
+                          ),
+                        )}
+                      </span>
+                      <span>{post.readingTime}</span>
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                      }}
+                    >
+                      <ViewCounter slug={post.slug} />
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.2rem',
+                          color: 'var(--cobalt)',
+                          fontWeight: 700,
+                        }}
+                      >
+                        Read <ArrowUpRight size={12} />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+
+              {filtered.length === 0 && (
+                <div
+                  style={{
+                    padding: '3rem 2rem',
+                    textAlign: 'center',
+                    background: 'var(--paper-hi)',
+                    border: '2px dashed var(--ink)',
+                    borderRadius: '14px',
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontFamily: 'var(--display)',
+                      fontSize: '1.3rem',
+                      fontWeight: 800,
+                      marginBottom: '0.5rem',
+                    }}
+                  >
+                    No dispatches match &quot;{query || tag}&quot;
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: '0.9rem',
+                      color: 'var(--muted)',
+                      marginBottom: '1.25rem',
+                    }}
+                  >
+                    Try searching for another topic or clear the active query.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => router.replace(pathname, { scroll: false })}
+                    className={styles.searchBtn}
+                  >
+                    <RefreshCw size={13} />
+                    Reset filters
+                  </button>
+                </div>
               )}
             </div>
 
-            <BoothControl
-              onClick={() =>
-                updateParam('sort', sort === 'desc' ? 'asc' : 'desc')
-              }
-              className={styles.sortBtn}
-            >
-              {sort === 'desc' ? 'Latest' : 'Oldest'}
-            </BoothControl>
-          </div>
-
-          <FilterRow
-            label="Filter by tag"
-            value={tag ?? ''}
-            onChange={(next) => updateParam('tag', next || null)}
-            options={[
-              { value: '', label: 'All' },
-              ...tagCounts.map(([name, count]) => ({
-                value: name,
-                label: name,
-                count,
-              })),
-            ]}
-          />
-
-          {/*
-                    The guide cluster that used to live on a standalone `/guides` route,
-                    surfaced here because the posts it assembles are on this page. The
-                    links still resolve to the guide pages — only the index moved.
-
-                    Hidden while a filter is active: a filtered list of two posts sitting
-                    under a block of unrelated guides reads as broken rather than as
-                    context, and the filter's own empty state already explains itself.
-                  */}
-          {!isFiltered && (
-            <section className={styles.guides} aria-labelledby="guides-title">
-              <div className={styles.guidesHead}>
-                <h2 id="guides-title" className={styles.guidesTitle}>
-                  Start here
+            {/* FAQ Dossier Section */}
+            {!isFiltered && (
+              <section className={styles.faqSection} aria-labelledby="faq-head">
+                <h2 id="faq-head" className={styles.faqHead}>
+                  Production Decisions & FAQ
                 </h2>
-                <p className={styles.guidesNote}>
-                  Ordered paths through the notes, for when a search is not the
-                  thing you want.
-                </p>
-              </div>
-              <ul className={styles.guidesList}>
-                {GUIDES.map((guide) => (
-                  <li key={guide.href}>
-                    <Link href={guide.href} className={styles.guide}>
-                      <span className={styles.guideMeta}>
-                        {guide.steps} steps
-                      </span>
-                      <b>{guide.title}</b>
-                      <span className={styles.guideDesc}>
-                        {guide.description}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {leads.map((post) => (
-            <LeadRelease key={post.slug} post={post} />
-          ))}
-
-          <Side
-            title="Side A"
-            posts={tracks.slice(0, SIDE_SIZE)}
-            offset={0}
-            code="A"
-            total={filtered.length}
-          />
-          <Side
-            title="Side B"
-            posts={tracks.slice(SIDE_SIZE)}
-            offset={SIDE_SIZE}
-            code="B"
-            total={filtered.length}
-          />
-
-          {/*
-            The questions that were answering "should I self-host?" on a
-            separate page, asked on the page where the writing is. Native
-            `<details>` rather than a state-driven accordion: it works before
-            hydration, is keyboard-reachable for free, and needs no client
-            state in a list that is already a client component.
-          */}
-          {!isFiltered && (
-            <section className={styles.faq} aria-labelledby="faq-title">
-              <h2 id="faq-title" className={styles.faqTitle}>
-                Common questions
-              </h2>
-              <dl className={styles.faqList}>
-                {BLOG_FAQ.map((entry) => (
-                  <div key={entry.question} className={styles.faqItem}>
-                    <dt>
-                      <details className={styles.faqDetails}>
-                        <summary className={styles.faqSummary}>
-                          {entry.question}
-                        </summary>
-                        <dd className={styles.faqAnswer}>{entry.answer}</dd>
-                      </details>
-                    </dt>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          )}
-
-          {filtered.length === 0 && (
-            <div className={styles.empty}>
-              <h2 className={styles.emptyTitle}>No notes match that filter</h2>
-              <p className={styles.emptyText}>
-                Try another search or tag, or clear the filters to see all
-                notes.
-              </p>
-              <button
-                type="button"
-                onClick={() => router.replace(pathname, { scroll: false })}
-                className={styles.resetBtn}
-              >
-                <RefreshCw size={14} />
-                Clear filters
-              </button>
-            </div>
-          )}
+                <div>
+                  {BLOG_FAQ.map((faq) => (
+                    <details key={faq.question} className={styles.faqItem}>
+                      <summary className={styles.faqSummary}>
+                        <span>{faq.question}</span>
+                        <ChevronRight size={16} />
+                      </summary>
+                      <p className={styles.faqAnswer}>{faq.answer}</p>
+                    </details>
+                  ))}
+                </div>
+              </section>
+            )}
+          </section>
         </div>
-      </main>
-    </>
-  )
-}
-
-function LeadRelease({ post }: { post: BlogMeta }) {
-  const minutes = minutesFromReadingTime(post.readingTime)
-  return (
-    <section className={styles.lead}>
-      <div className={styles.leadArt}>
-        <Cover
-          seed={post.slug}
-          title={post.title}
-          catalog="LEAD"
-          sizes="(max-width: 820px) 40vw, 190px"
-          priority
-        />
       </div>
-      <div>
-        <p className={styles.leadKicker}>Lead release · {post.readingTime}</p>
-        <h2 className={styles.leadTitle}>
-          <Link href={`/blog/${post.slug}`}>{post.title}</Link>
-        </h2>
-        <p className={styles.leadDesc}>{post.description}</p>
-        <p className={styles.leadMeta}>
-          <span>{formatDate(post.date)}</span>
-          <span className={styles.wave} aria-hidden="true">
-            {waveformFromReadingTime(post.readingTime).map((h, i) => (
-              <span key={i} style={{ height: `${h}%` }} />
-            ))}
-          </span>
-          <span>{formatRuntime(minutes)}</span>
-          <ViewCounter slug={post.slug} />
-        </p>
-      </div>
-    </section>
-  )
-}
-
-function Side({
-  title,
-  posts,
-  offset,
-  code,
-  total,
-}: {
-  title: string
-  posts: BlogMeta[]
-  offset: number
-  code: string
-  total: number
-}) {
-  if (posts.length === 0) return null
-
-  return (
-    <section>
-      <div className={styles.sideHead}>
-        <h2 className={styles.sideTitle}>{title}</h2>
-        <span className={styles.sideCount}>
-          {posts.length} of {total} tracks
-        </span>
-      </div>
-      <ul className={styles.trackList}>
-        {posts.map((post, index) => (
-          <li key={post.slug}>
-            <Link href={`/blog/${post.slug}`} className={styles.track}>
-              <span className={styles.trackIndex}>
-                {code}
-                {offset + index + 1}
-              </span>
-              <span className={styles.trackArt}>
-                <Cover seed={post.slug} title={post.title} sizes="44px" />
-              </span>
-              <span className={styles.trackBody}>
-                <span className={styles.trackTitle} title={post.title}>
-                  {post.title}
-                </span>
-                <span className={styles.trackMeta}>
-                  {formatDate(post.date)}
-                  <ViewCounter slug={post.slug} />
-                </span>
-              </span>
-              <span className={styles.wave} aria-hidden="true">
-                {waveformFromReadingTime(post.readingTime).map((h, i) => (
-                  <span key={i} style={{ height: `${h}%` }} />
-                ))}
-              </span>
-              <span className={styles.runtime}>{post.readingTime}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
+    </main>
   )
 }

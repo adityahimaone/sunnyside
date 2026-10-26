@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect } from 'react'
+import Image from 'next/image'
 import { AnimatePresence, motion } from 'motion/react'
 import { ArrowUpRight, Github, X } from 'lucide-react'
-import { Cover } from '@/features/booth/cover'
 import type { WorkProject } from '@/data/projects'
 import { trackLabel } from '@/data/projects'
-import styles from '../crate.module.css'
+import styles from '../sunnyside-projects.module.css'
 
 interface LinerSheetProps {
   project: WorkProject | null
@@ -15,9 +15,8 @@ interface LinerSheetProps {
 }
 
 /**
- * The back of the album: tracklist of highlights, personnel, and the link
- * out. Optional by design — a project with no extra data simply has no
- * "Details" affordance and the sheet never opens.
+ * The back of the album: tracklist of highlights, personnel, and links.
+ * Styled in the Sunnyside archival liner sheet specification.
  */
 export function LinerSheet({ project, index, onClose }: LinerSheetProps) {
   useEffect(() => {
@@ -38,93 +37,146 @@ export function LinerSheet({ project, index, onClose }: LinerSheetProps) {
     <AnimatePresence>
       {project && (
         <motion.div
-          className={styles.sheetBackdrop}
+          className={styles.modalBackdrop}
           role="presentation"
-          onMouseDown={onClose}
+          onClick={onClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className={`${styles.sheet} glass`}
+            className={styles.modalSheet}
             role="dialog"
             aria-modal="true"
             aria-labelledby="liner-title"
-            onMouseDown={(event) => event.stopPropagation()}
-            initial={{ scale: 0.97, y: 14, opacity: 0 }}
+            onClick={(event) => event.stopPropagation()}
+            initial={{ scale: 0.95, y: 16, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
-            exit={{ scale: 0.98, opacity: 0 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            exit={{ scale: 0.96, opacity: 0 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           >
+            <div className={styles.modalTape} />
+
             <button
               type="button"
               onClick={onClose}
-              className={styles.sheetClose}
+              className={styles.modalClose}
               aria-label="Close liner notes"
             >
-              <X size={18} />
+              <X size={16} />
             </button>
 
-            <motion.div layoutId={`cover-${project.slug}`}>
-              <div className={styles.sheetArt}>
-                <Cover
-                  seed={project.slug}
-                  title={project.title}
-                  src={project.cover}
-                  sizes="(max-width: 720px) 70vw, 280px"
-                />
-              </div>
-            </motion.div>
-
-            <div>
-              <p className={styles.sheetKicker}>
-                {trackLabel(index)} · {project.genre} · {project.year}
-              </p>
-              <h2 className={styles.sheetTitle} id="liner-title">
-                {project.title}
-              </h2>
-              <p className={styles.sheetDesc}>{project.description}</p>
-
-              <h3 className={styles.sheetLabel}>Tracklist</h3>
-              <ol className={styles.sheetList}>
-                {project.highlights.map((highlight) => (
-                  <li key={highlight}>{highlight}</li>
-                ))}
-              </ol>
-
-              <h3 className={styles.sheetLabel}>Personnel</h3>
-              <p className={styles.sheetDesc}>{project.role}</p>
-              <ul className={styles.chips}>
-                {project.stack.map((tool) => (
-                  <li key={tool} className={styles.chip}>
-                    {tool}
-                  </li>
-                ))}
-              </ul>
-
-              <div className={styles.nsActions}>
-                <a
-                  href={project.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.genre}
-                  style={{ textDecoration: 'none' }}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+              <div>
+                <p
+                  style={{
+                    fontFamily: 'var(--mono)',
+                    fontSize: '0.72rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.12em',
+                    color: 'var(--muted)',
+                    marginBottom: '0.25rem',
+                  }}
                 >
-                  <ArrowUpRight size={14} aria-hidden="true" />
-                  Open project
-                </a>
-                {project.url.includes('github.com') && (
+                  SIDE {trackLabel(index)[0]} · {trackLabel(index)} · {project.genre} · {project.year}
+                </p>
+                <h2
+                  id="liner-title"
+                  style={{
+                    fontFamily: 'var(--display)',
+                    fontWeight: 800,
+                    fontSize: '1.8rem',
+                    letterSpacing: '-0.03em',
+                    color: 'var(--ink)',
+                    marginBottom: '0.75rem',
+                  }}
+                >
+                  {project.title}
+                </h2>
+                <p
+                  style={{
+                    fontSize: '0.95rem',
+                    lineHeight: 1.6,
+                    color: 'var(--muted)',
+                    marginBottom: '1.5rem',
+                  }}
+                >
+                  {project.description}
+                </p>
+
+                {/* Highlights / Tracklist */}
+                <h3
+                  style={{
+                    fontFamily: 'var(--mono)',
+                    fontSize: '0.75rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.14em',
+                    color: 'var(--ink)',
+                    borderBottom: '1.5px solid var(--ink)',
+                    paddingBottom: '0.35rem',
+                    marginBottom: '0.75rem',
+                  }}
+                >
+                  Key Architectural Decisions
+                </h3>
+                <ol
+                  style={{
+                    paddingLeft: '1.25rem',
+                    marginBottom: '1.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem',
+                    fontSize: '0.9rem',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {project.highlights.map((h) => (
+                    <li key={h} style={{ color: 'var(--ink)' }}>
+                      {h}
+                    </li>
+                  ))}
+                </ol>
+
+                {/* Role & Personnel */}
+                <h3
+                  style={{
+                    fontFamily: 'var(--mono)',
+                    fontSize: '0.75rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.14em',
+                    color: 'var(--ink)',
+                    borderBottom: '1.5px solid var(--ink)',
+                    paddingBottom: '0.35rem',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  Engineering Scope
+                </h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', marginBottom: '1rem' }}>
+                  {project.role}
+                </p>
+
+                {/* Tech stack */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '1.5rem' }}>
+                  {project.stack.map((t) => (
+                    <span key={t} className={styles.stackTag}>
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Action buttons */}
+                <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
                   <a
                     href={project.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={styles.genre}
-                    style={{ textDecoration: 'none' }}
+                    className={`${styles.tactileBtn} ${styles.tactileBtnPrimary}`}
                   >
-                    <Github size={14} aria-hidden="true" />
-                    Source
+                    Open live application
+                    <ArrowUpRight size={13} />
                   </a>
-                )}
+                </div>
               </div>
             </div>
           </motion.div>

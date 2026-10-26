@@ -42,8 +42,15 @@
   z-index: 1;
   width: 100%;
   min-height: 100vh;
-  background: transparent;
-  color: var(--booth-ink);
+  background: var(--paper, #f3ecdf);
+  color: var(--ink, #191a2e);
+  --booth-ink: #191a2e;
+  --booth-ink-muted: #5f5b6e;
+  --booth-ink-dim: #7d798a;
+  --hairline: rgba(25, 26, 46, 0.16);
+  --glass-edge: rgba(25, 26, 46, 0.2);
+  --flat-fill: #fffaf1;
+  --flat-fill-hover: #ffffff;
 }
 
 .page {

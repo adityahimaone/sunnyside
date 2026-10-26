@@ -1,18 +1,21 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { AnimatePresence, motion } from 'motion/react'
-import { ArrowUpRight, Github, Pause, Play, Star } from 'lucide-react'
 import {
-  Cover,
-  FilterRow,
-  PageHeader,
-  Record,
-  useRoomChannel,
-} from '@/features/booth'
+  ArrowUpRight,
+  ExternalLink,
+  Github,
+  Info,
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
+  Star,
+} from 'lucide-react'
+import { useRoomChannel } from '@/features/booth'
 import { useDockSlot } from '@/features/booth/dock-slot'
-import { formatRelative } from '@/lib/date'
 import {
   PROJECT_PREVIEW_DURATION,
   WORK_PROJECTS,
@@ -20,21 +23,18 @@ import {
   trackLabel,
 } from '@/data/projects'
 import type { ContributionDay, FeaturedProject, GitHubRepo } from '../index'
-import { Sleeve } from '../components/sleeve'
 import { LinerSheet } from '../components/liner-sheet'
 import ContributionSkyline from '@/components/ui/contribution-skyline'
-import { GITHUB_USER } from '../lib/github'
-import styles from '../crate.module.css'
+import { ScriptWord } from '@/features/landing-page/studio/script-word'
+import { Sparkle } from '@/features/landing-page/studio/doodles'
+import styles from '../sunnyside-projects.module.css'
 
-/** One "playback" track per release, so progress is real and per-project. */
 const ELAPSED = new Map<number, number>()
 
 export function ProjectsPage({
-  repos,
-  featuredProjects,
+  repos = [],
+  featuredProjects = [],
   contributions = [],
-  contributionsFailed = false,
-  feedFailed = false,
 }: {
   repos: GitHubRepo[]
   featuredProjects: FeaturedProject[]
@@ -45,10 +45,6 @@ export function ProjectsPage({
   const setHue = useRoomChannel()
   const [activeId, setActiveId] = useState(WORK_PROJECTS[0].id)
   const [playing, setPlaying] = useState(true)
-  // Filters by problem shape rather than by genre. Every project's `genre` is
-  // unique, so the old genre filter rendered seven chips for six projects and
-  // each one narrowed the crate to a single sleeve — a control that looked like
-  // a filter but could not group anything.
   const [problem, setProblem] = useState('All')
   const [elapsed, setElapsed] = useState(0)
   const [linerId, setLinerId] = useState<number | null>(null)
@@ -61,8 +57,6 @@ export function ProjectsPage({
     [problem],
   )
 
-  // Ordered by size so the buckets read as a shape rather than alphabetically,
-  // and counted so each chip can show how much is behind it.
   const problems = useMemo(() => {
     const counts = new Map<string, number>()
     for (const p of WORK_PROJECTS) {
@@ -73,11 +67,6 @@ export function ProjectsPage({
     )
   }, [])
 
-  // The selection follows the filter during render rather than being corrected
-  // in an effect. An effect needed a second pass to notice the active project
-  // had been filtered out, so the panel showed a sleeve that was no longer in
-  // the crate for one frame; deriving it here is correct on the first paint and
-  // costs no extra render.
   const selectedId = visible.some((p) => p.id === activeId)
     ? activeId
     : (visible[0]?.id ?? WORK_PROJECTS[0].id)
@@ -91,7 +80,6 @@ export function ProjectsPage({
     setHue(project.palette.a)
   }, [project, setHue])
 
-  // Each release has its own elapsed clock, so switching back resumes it.
   useEffect(() => {
     if (!playing) return
     const id = window.setInterval(() => {
@@ -118,321 +106,538 @@ export function ProjectsPage({
     select(WORK_PROJECTS[next].id)
   }
 
+  // Mount transport indicator into bottom dock slot
   useDockSlot(
-    <div className={styles.transport} role="group" aria-label="Crate transport">
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.4rem',
+        padding: '0.35rem 0.75rem',
+        background: 'var(--paper-hi)',
+        border: '1.5px solid var(--ink)',
+        borderRadius: '999px',
+        boxShadow: '2px 2px 0 var(--ink)',
+        fontFamily: 'var(--mono)',
+        fontSize: '0.7rem',
+        color: 'var(--ink)',
+      }}
+      role="group"
+      aria-label="Crate transport"
+    >
       <button
         type="button"
         onClick={() => go(-1)}
-        className={styles.transportBtn}
+        style={{ cursor: 'pointer', background: 'none', border: 'none' }}
         aria-label="Previous release"
       >
-        <Play
-          size={13}
-          aria-hidden="true"
-          style={{ transform: 'rotate(180deg)' }}
-        />
+        <SkipBack size={12} />
       </button>
       <button
         type="button"
         onClick={() => setPlaying((v) => !v)}
-        className={styles.transportPlay}
+        style={{ cursor: 'pointer', background: 'none', border: 'none' }}
         aria-label={playing ? 'Pause' : 'Play'}
       >
-        {playing ? <Pause size={15} /> : <Play size={15} fill="currentColor" />}
+        {playing ? <Pause size={12} /> : <Play size={12} fill="currentColor" />}
       </button>
-      <span className={styles.transportMeta}>
+      <span>
         {project.title} · {formatProjectTime(elapsed)} /{' '}
         {formatProjectTime(PROJECT_PREVIEW_DURATION)}
       </span>
       <button
         type="button"
         onClick={() => go(1)}
-        className={styles.transportBtn}
+        style={{ cursor: 'pointer', background: 'none', border: 'none' }}
         aria-label="Next release"
       >
-        <Play size={13} aria-hidden="true" />
+        <SkipForward size={12} />
       </button>
     </div>,
     [project.id, elapsed, playing],
   )
 
+  const progressPercent = Math.min(
+    100,
+    (elapsed / PROJECT_PREVIEW_DURATION) * 100,
+  )
+
   return (
-    <>
-      <main className={styles.page} id="main-content">
-        <PageHeader
-          index="01"
-          eyebrow="Selected work"
-          title="Proof in the product."
-          description="Six shipped releases, strongest first. Pick one to put it on the turntable."
-          hint={
-            <>
-              SIDE {trackLabel(index)[0]} · {trackLabel(index)} /{' '}
-              {String(WORK_PROJECTS.length).padStart(2, '0')}
-            </>
-          }
-        />
+    <main className={styles.page} id="main-content">
+      <div className={styles.shell}>
+        {/* Header */}
+        <header className={styles.header}>
+          <div className={styles.headerMeta}>
+            <span className={styles.pill}>
+              <span className={styles.pillDot} />
+              01 / ARCHIVE
+            </span>
+            <span>Selected Work · 2022–2026</span>
+            <span>·</span>
+            <span>{WORK_PROJECTS.length} Shipped Releases</span>
+          </div>
 
-        <div className={styles.crate}>
-          <section
-            className={`${styles.nowSpinning} glass`}
-            aria-label="Now spinning"
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={project.id}
-                className={styles.nsArt}
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -18 }}
-                transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <Record
-                  className={styles.nsRecord}
-                  label={project.palette.b}
-                  position="absolute"
-                  spinning={playing}
-                />
-                <Cover
-                  seed={project.slug}
-                  title={project.title}
-                  catalog={trackLabel(index)}
-                  src={project.cover}
-                  sizes="(max-width: 900px) 40vw, 230px"
-                  priority
-                />
-              </motion.div>
-            </AnimatePresence>
+          <div className={styles.headerTitleStack}>
+            <ScriptWord
+              text="the discography"
+              className={styles.headerScript}
+            />
+            <h1 className={styles.headerTitle}>
+              Proof in the product.
+              <span className={styles.headerTitleTape}>SIDE A</span>
+            </h1>
+          </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={project.id}
-                className={styles.nsBody}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+          <p className={styles.headerIntro}>
+            Six production frontend systems, interfaces and experiments built
+            with Next.js, React and TypeScript. Pick a release on the shelf to
+            cue it into the console, inspect its architectural breakdown, and
+            read the field notes.
+          </p>
+
+          {/* Problem filter chips */}
+          <div className={styles.filterRow}>
+            <span className={styles.filterLabel}>Problem Shape:</span>
+            <button
+              type="button"
+              className={`${styles.filterChip} ${
+                problem === 'All' ? styles.filterChipActive : ''
+              }`}
+              onClick={() => setProblem('All')}
+            >
+              <span>All Releases</span>
+              <span className={styles.filterChipCount}>
+                {WORK_PROJECTS.length}
+              </span>
+            </button>
+            {problems.map(([pName, count]) => (
+              <button
+                key={pName}
+                type="button"
+                className={`${styles.filterChip} ${
+                  problem === pName ? styles.filterChipActive : ''
+                }`}
+                onClick={() => setProblem(pName)}
               >
-                <p className={styles.nsKicker}>
-                  {project.problem} · {project.genre} · {project.year}
+                <span>{pName}</span>
+                <span className={styles.filterChipCount}>{count}</span>
+              </button>
+            ))}
+          </div>
+        </header>
+
+        {/* Asymmetric 5-column / 7-column layout */}
+        <div className={styles.asymmetricGrid}>
+          {/* Left Column: Master Console (Sticky) */}
+          <aside className={styles.consoleSticky}>
+            <section
+              className={styles.consoleBox}
+              aria-label="Mastering console"
+            >
+              <div className={`${styles.screw} ${styles.screwTL}`} />
+              <div className={`${styles.screw} ${styles.screwTR}`} />
+              <div className={`${styles.screw} ${styles.screwBL}`} />
+              <div className={`${styles.screw} ${styles.screwBR}`} />
+
+              <div className={styles.consoleTopBar}>
+                <div className={styles.consoleLed}>
+                  <span className={styles.ledDot} />
+                  <span>NOW CUED · TRACK {trackLabel(index)}</span>
+                </div>
+                <span>REV {project.year}</span>
+              </div>
+
+              {/* Turntable / Disc Preview */}
+              <div className={styles.turntableStage}>
+                <div
+                  className={`${styles.vinylDisc} ${
+                    playing ? styles.vinylSpin : ''
+                  }`}
+                >
+                  <div className={styles.vinylGrooves} />
+                  <div className={styles.vinylCenter}>
+                    <span>AH-{trackLabel(index)}</span>
+                    <span style={{ fontSize: '0.45rem', opacity: 0.8 }}>
+                      33 RPM
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.turntableSleeve}>
+                  {project.cover ? (
+                    <Image
+                      src={project.cover}
+                      alt={project.title}
+                      fill
+                      className="object-cover"
+                      sizes="180px"
+                      priority
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        background: project.palette.a,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--ink)',
+                        fontFamily: 'var(--display)',
+                        fontWeight: 800,
+                        fontSize: '1.2rem',
+                        padding: '1rem',
+                        textAlign: 'center',
+                      }}
+                    >
+                      {project.title}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Scrubber Tape Ribbon */}
+              <div className={styles.scrubberRibbon}>
+                <span>{formatProjectTime(elapsed)}</span>
+                <div className={styles.scrubberTrack}>
+                  <div
+                    className={styles.scrubberFill}
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+                <span>{formatProjectTime(PROJECT_PREVIEW_DURATION)}</span>
+              </div>
+
+              {/* Console Info Body */}
+              <div className={styles.consoleBody} style={{ marginTop: '1rem' }}>
+                <div className={styles.consoleKicker}>
+                  <span>
+                    {project.problem} · {project.genre}
+                  </span>
                   {repo && repo.stargazers_count > 0 && (
-                    <span>
-                      <Star size={12} aria-hidden="true" />{' '}
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                      }}
+                    >
+                      <Star size={11} fill="currentColor" />
                       {repo.stargazers_count}
                     </span>
                   )}
-                </p>
-                <h2 className={styles.nsTitle}>{project.title}</h2>
-                <p className={styles.nsDesc}>{project.description}</p>
-                <p className={styles.nsCredits}>{project.stack.join(' · ')}</p>
+                </div>
 
-                <div className={styles.nsActions}>
-                  {/* Two destinations, deliberately separate. This link is the
-                      internal case study at /projects/[slug]; the one beside it
-                      is the artefact itself. Before the detail pages existed the
-                      only link out was "Open", which sent every visitor off-site
-                      and left nothing on this domain describing the work.
+                <h2 className={styles.consoleTitle}>{project.title}</h2>
+                <p className={styles.consoleDesc}>{project.description}</p>
 
-                      Anchor text carries the project name and, for the outbound
-                      link, what is actually on the other end. Six identical
-                      "Open" labels read as six identical links to a crawler,
-                      which is a weaker signal than six named ones — and "read the
-                      Switchyard case study" is also a better label for anyone
-                      scanning the page. */}
+                <div className={styles.consoleStack}>
+                  {project.stack.map((t) => (
+                    <span key={t} className={styles.stackTag}>
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Direct Action Buttons */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem',
+                    marginTop: '0.75rem',
+                  }}
+                >
                   <Link
                     href={`/projects/${project.slug}`}
-                    className={styles.genre}
-                    style={{ textDecoration: 'none' }}
+                    className={`${styles.tactileBtn} ${styles.tactileBtnPrimary}`}
                   >
-                    {project.title} case study
+                    Read case study
+                    <ArrowUpRight size={14} />
                   </Link>
+
                   <a
                     href={project.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={styles.genre}
-                    style={{ textDecoration: 'none' }}
+                    className={`${styles.tactileBtn} ${styles.tactileBtnSecondary}`}
                   >
-                    <ArrowUpRight size={14} aria-hidden="true" />
-                    {project.url.includes('github.com')
-                      ? `${project.title} on GitHub`
-                      : `${project.title} live`}
+                    Open live app
+                    <ExternalLink size={13} />
                   </a>
+
                   <button
                     type="button"
                     onClick={() => setLinerId(project.id)}
-                    className={styles.genre}
+                    className={styles.tactileBtn}
                   >
-                    <Github size={14} aria-hidden="true" />
+                    <Info size={13} />
                     Liner notes
                   </button>
                 </div>
-              </motion.div>
-            </AnimatePresence>
-          </section>
+              </div>
 
-          <section>
-            <div className={styles.crateHead}>
-              <h2 className={styles.crateTitle}>
-                Crate
-                <span className={styles.crateCount}>
-                  {visible.length} releases
+              {/* Transport Buttons */}
+              <div className={styles.transportRow}>
+                <div className={styles.transportBtnGroup}>
+                  <button
+                    type="button"
+                    onClick={() => go(-1)}
+                    className={styles.tactileBtn}
+                    aria-label="Previous release"
+                  >
+                    <SkipBack size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPlaying((v) => !v)}
+                    className={`${styles.tactileBtn} ${
+                      playing ? styles.tactileBtnSecondary : ''
+                    }`}
+                    aria-label={playing ? 'Pause' : 'Play'}
+                  >
+                    {playing ? (
+                      <Pause size={14} />
+                    ) : (
+                      <Play size={14} fill="currentColor" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => go(1)}
+                    className={styles.tactileBtn}
+                    aria-label="Next release"
+                  >
+                    <SkipForward size={13} />
+                  </button>
+                </div>
+                <span
+                  style={{
+                    fontFamily: 'var(--mono)',
+                    fontSize: '0.68rem',
+                    color: 'var(--muted)',
+                  }}
+                >
+                  {index + 1} OF {WORK_PROJECTS.length}
                 </span>
-              </h2>
-              <FilterRow
-                label="Filter by problem"
-                value={problem}
-                onChange={(next) => setProblem(next || 'All')}
-                options={[
-                  { value: 'All', label: 'All', count: WORK_PROJECTS.length },
-                  ...problems.map(([name, count]) => ({
-                    value: name,
-                    label: name,
-                    count,
-                  })),
-                ]}
-              />
+              </div>
+            </section>
+          </aside>
+
+          {/* Right Column: Release Crate Shelf */}
+          <section className={styles.shelfColumn} aria-label="Release crate">
+            <div className={styles.shelfHeader}>
+              <h2 className={styles.shelfTitle}>Release Shelf</h2>
+              <span className={styles.shelfCount}>
+                Showing {visible.length} of {WORK_PROJECTS.length}
+              </span>
             </div>
 
-            <div className={styles.sleeveGrid}>
-              {visible.map((item) => {
-                const i = WORK_PROJECTS.indexOf(item)
+            <div className={styles.shelfDeck}>
+              {visible.map((item, itemIdx) => {
+                const isSelected = item.id === project.id
                 return (
-                  <Sleeve
+                  <article
                     key={item.slug}
-                    project={item}
-                    index={i}
-                    active={item.id === selectedId}
-                    onPromote={() => select(item.id)}
-                  />
+                    onClick={() => select(item.id)}
+                    className={`${styles.deckCard} ${
+                      isSelected ? styles.deckCardActive : ''
+                    }`}
+                  >
+                    <div className={styles.cardTape} />
+
+                    <div className={styles.cardThumb}>
+                      {item.cover ? (
+                        <Image
+                          src={item.cover}
+                          alt={item.title}
+                          fill
+                          className="object-cover"
+                          sizes="(min-width: 640px) 140px, 100vw"
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            background: item.palette.a,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'var(--ink)',
+                            fontFamily: 'var(--mono)',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                          }}
+                        >
+                          AH-{trackLabel(itemIdx)}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={styles.cardBody}>
+                      <div className={styles.cardKicker}>
+                        <span>
+                          SIDE {trackLabel(itemIdx)[0]} · {trackLabel(itemIdx)}
+                        </span>
+                        <span>{item.year}</span>
+                      </div>
+
+                      <h3 className={styles.cardTitle}>{item.title}</h3>
+                      <p className={styles.cardDesc}>{item.description}</p>
+
+                      <div className={styles.consoleStack}>
+                        {item.stack.slice(0, 4).map((tech) => (
+                          <span key={tech} className={styles.stackTag}>
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className={styles.cardActions}>
+                        <Link
+                          href={`/projects/${item.slug}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className={styles.cardActionLink}
+                        >
+                          Case study
+                          <ArrowUpRight size={13} />
+                        </Link>
+                        <span style={{ color: 'var(--line)' }}>·</span>
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className={styles.cardActionLink}
+                        >
+                          Live app
+                          <ExternalLink size={12} />
+                        </a>
+                      </div>
+                    </div>
+                  </article>
                 )
               })}
             </div>
           </section>
-
-          <section>
-            <div className={styles.crateHead}>
-              <h2 className={styles.crateTitle}>
-                Contribution skyline
-                <span className={styles.crateCount}>live from GitHub</span>
-              </h2>
-              <a
-                href={`https://github.com/${GITHUB_USER}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.genre}
-                style={{ textDecoration: 'none' }}
-              >
-                <Github size={14} aria-hidden="true" />
-                github.com/{GITHUB_USER}
-              </a>
-            </div>
-
-            {/* Real counts when the fetch lands. With no data the component
-                draws its own seeded sample year, so a failed scrape degrades
-                to a labelled placeholder instead of an empty panel — hence the
-                caption swap rather than hiding the section. */}
-            <ContributionSkyline
-              data={contributions}
-              defaultView="3d"
-              palette="ember"
-              footer={
-                contributions.length
-                  ? 'Hover a day for its count · arrow keys to walk the year'
-                  : contributionsFailed
-                    ? 'Live counts unavailable — showing a generated sample year.'
-                    : 'Showing a generated sample year.'
-              }
-            />
-          </section>
-
-          <section>
-            <div className={styles.crateHead}>
-              <h2 className={styles.crateTitle}>
-                Recently played
-                <span className={styles.crateCount}>live from GitHub</span>
-              </h2>
-            </div>
-
-            {repos.length > 0 ? (
-              <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                  <caption className="sr-only">
-                    Recent repositories pushed to github.com/adityahimaone
-                  </caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Repo</th>
-                      <th scope="col" className={styles.colLang}>
-                        Language
-                      </th>
-                      <th
-                        scope="col"
-                        className={`${styles.colStars} ${styles.num}`}
-                      >
-                        ★
-                      </th>
-                      <th scope="col" className={styles.num}>
-                        Pushed
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {repos.slice(0, 8).map((repoItem) => (
-                      <tr key={repoItem.name}>
-                        <td>
-                          <a
-                            href={repoItem.html_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.repoName}
-                          >
-                            {repoItem.name}
-                          </a>
-                        </td>
-                        <td className={styles.cellLang}>
-                          {repoItem.language && (
-                            <span
-                              className={styles.langDot}
-                              aria-hidden="true"
-                            />
-                          )}
-                          {repoItem.language ?? '—'}
-                        </td>
-                        <td className={`${styles.cellStars} ${styles.num}`}>
-                          {repoItem.stargazers_count || '—'}
-                        </td>
-                        <td className={styles.num}>
-                          {formatRelative(repoItem.pushed_at)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className={styles.empty}>
-                {feedFailed
-                  ? 'Session log unavailable — the last fetch from GitHub failed. The releases above are cached.'
-                  : 'No recent pushes to report.'}
-              </p>
-            )}
-          </section>
         </div>
-      </main>
 
-      <LinerSheet
-        project={
-          linerId === null
-            ? null
-            : (WORK_PROJECTS.find((p) => p.id === linerId) ?? null)
-        }
-        index={
-          linerId === null
-            ? 0
-            : WORK_PROJECTS.findIndex((p) => p.id === linerId)
-        }
-        onClose={() => setLinerId(null)}
-      />
-    </>
+        {/* Bottom Engineering Telemetry Section */}
+        <section
+          className={styles.telemetrySection}
+          aria-label="Engineering activity"
+        >
+          <div className={styles.telemetryHead}>
+            <div>
+              <div
+                className={styles.headerMeta}
+                style={{ marginBottom: '0.4rem' }}
+              >
+                <span className={styles.pill}>
+                  <Sparkle className="size-2.5" />
+                  02 / TELEMETRY
+                </span>
+                <span>GitHub Production Signals</span>
+              </div>
+              <h2 className={styles.telemetryTitle}>
+                Engineering cadence & public repositories.
+              </h2>
+            </div>
+            <a
+              href="https://github.com/adityahimaone"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.tactileBtn}
+            >
+              <Github size={13} />
+              adityahimaone on GitHub
+              <ArrowUpRight size={13} />
+            </a>
+          </div>
+
+          {/* Skyline */}
+          <div className={styles.telemetryCard}>
+            <div
+              style={{
+                fontFamily: 'var(--mono)',
+                fontSize: '0.72rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                marginBottom: '1rem',
+                color: 'var(--muted)',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <span>ANNUAL COMMIT FREQUENCY</span>
+              <span>{contributions.length} DAYS RECORDED</span>
+            </div>
+            <ContributionSkyline data={contributions} />
+          </div>
+
+          {/* Repos Grid */}
+          {repos.length > 0 && (
+            <div>
+              <h3
+                style={{
+                  fontFamily: 'var(--display)',
+                  fontSize: '1.25rem',
+                  fontWeight: 750,
+                  marginBottom: '1rem',
+                  color: 'var(--ink)',
+                }}
+              >
+                Selected Open-Source Repositories
+              </h3>
+              <div className={styles.repoGrid}>
+                {repos.slice(0, 6).map((r) => (
+                  <a
+                    key={r.name}
+                    href={r.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.repoCard}
+                  >
+                    <div>
+                      <div className={styles.repoName}>{r.name}</div>
+                      <p className={styles.repoDesc}>
+                        {r.description || 'Open source engineering release.'}
+                      </p>
+                    </div>
+                    <div className={styles.repoMeta}>
+                      <span className={styles.repoLang}>
+                        <span className={styles.langDot} />
+                        {r.language || 'TypeScript'}
+                      </span>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.2rem',
+                        }}
+                      >
+                        <Star size={11} /> {r.stargazers_count}
+                      </span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Liner Notes Modal */}
+      {linerId !== null && (
+        <LinerSheet
+          project={
+            WORK_PROJECTS.find((p) => p.id === linerId) ?? WORK_PROJECTS[0]
+          }
+          index={WORK_PROJECTS.findIndex((p) => p.id === linerId)}
+          onClose={() => setLinerId(null)}
+        />
+      )}
+    </main>
   )
 }

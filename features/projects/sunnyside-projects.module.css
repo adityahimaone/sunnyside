@@ -1,0 +1,831 @@
+/* Sunnyside + Hallmark design system for /projects */
+
+.page {
+  --paper: #f3ecdf;
+  --paper-hi: #fffaf1;
+  --paper-lo: #e9dfcf;
+  --ink: #191a2e;
+  --muted: #5f5b6e;
+  --line: rgb(25 26 46 / 0.16);
+  --cobalt: #3d53d6;
+  --cobalt-ink: #2c3cae;
+  --cobalt-wash: #e8ebff;
+  --tangerine: #ff6a2b;
+  --butter: #ffd23f;
+  --pink: #ffb6e1;
+  --mint: #b7e4c7;
+  --sky: #a9c8ff;
+  --display: var(--font-syne), var(--font-space-grotesk), system-ui, sans-serif;
+  --ui: var(--font-geist), system-ui, sans-serif;
+  --mono: var(--font-geist-mono), ui-monospace, monospace;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-paper: 4px 4px 0 var(--ink);
+  --shadow-lift: 6px 8px 0 var(--ink);
+  --shadow-pressed: 1px 1px 0 var(--ink);
+
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--ui);
+  padding-top: clamp(2.5rem, 5vw, 4.5rem);
+  padding-bottom: clamp(6rem, 12vw, 10rem);
+  overflow-x: clip;
+}
+
+/* Paper stipple grain overlay */
+.page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stipple='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.shell {
+  width: 100%;
+  max-width: 82rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Header ─────────────────────────────────────────────────── */
+
+.header {
+  margin-bottom: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+.headerMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: var(--paper-hi);
+  border: 1.5px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pillDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--tangerine);
+  box-shadow: 0 0 6px var(--tangerine);
+}
+
+.headerTitleStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.headerScript {
+  color: var(--cobalt);
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  transform: rotate(-1.5deg);
+  display: inline-block;
+  margin-bottom: 0.25rem;
+}
+
+.headerTitle {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5.5vw, 4.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+.headerTitleTape {
+  display: inline-block;
+  background: var(--butter);
+  padding: 0 0.4em;
+  border: 1.5px solid var(--ink);
+  transform: rotate(0.8deg);
+  box-shadow: 3px 3px 0 var(--ink);
+  margin-left: 0.3em;
+}
+
+.headerIntro {
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  line-height: 1.6;
+  max-width: 48ch;
+  color: var(--muted);
+  margin-bottom: 1.75rem;
+}
+
+/* Problem filter chips */
+.filterRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.filterLabel {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-right: 0.5rem;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-hi);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+  transition: all 140ms var(--ease-out);
+}
+
+.filterChip:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.filterChip:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.filterChipActive {
+  background: var(--cobalt);
+  color: var(--paper-hi);
+  border-color: var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.filterChipCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding-inline: 0.25rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  background: var(--paper-lo);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.filterChipActive .filterChipCount {
+  background: var(--butter);
+  color: var(--ink);
+}
+
+/* ─── Main Asymmetric Grid (5 cols / 7 cols) ─────────────────── */
+
+.asymmetricGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  align-items: start;
+  margin-bottom: 4rem;
+}
+
+@media (min-width: 1024px) {
+  .asymmetricGrid {
+    grid-template-columns: minmax(360px, 5.2fr) minmax(0, 6.8fr);
+    gap: 3rem;
+  }
+}
+
+/* ─── Console Column (Left) ──────────────────────────────────── */
+
+.consoleSticky {
+  position: sticky;
+  top: 2rem;
+}
+
+.consoleBox {
+  position: relative;
+  background: var(--paper-hi);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lift);
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+/* Skeuomorphic corner screws */
+.screw {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1px solid var(--ink);
+  background: var(--paper-lo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screw::before {
+  content: '';
+  width: 5px;
+  height: 1px;
+  background: var(--ink);
+  transform: rotate(35deg);
+}
+
+.screwTL { top: 9px; left: 9px; }
+.screwTR { top: 9px; right: 9px; }
+.screwBL { bottom: 9px; left: 9px; }
+.screwBR { bottom: 9px; right: 9px; }
+
+.consoleTopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.9rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1.5px dashed var(--line);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.consoleLed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.ledDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--tangerine);
+  box-shadow: 0 0 8px var(--tangerine);
+  animation: pulseLed 2s infinite ease-in-out;
+}
+
+@keyframes pulseLed {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Vinyl & Sleeve turntable stage */
+.turntableStage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 250px;
+  margin-bottom: 1.5rem;
+  background: var(--paper-lo);
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.vinylDisc {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #242426 0%, #151517 70%, #0d0d0f 100%);
+  border: 3px solid #000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  right: 18px;
+  transition: transform 0.6s var(--ease-out);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vinylGrooves {
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 10px rgba(255, 255, 255, 0.03),
+              inset 0 0 0 25px rgba(255, 255, 255, 0.02);
+}
+
+.vinylCenter {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--butter);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+
+.vinylSpin {
+  animation: spinRecord 6s linear infinite;
+}
+
+@keyframes spinRecord {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.turntableSleeve {
+  position: absolute;
+  left: 20px;
+  width: 175px;
+  height: 175px;
+  border-radius: 8px;
+  border: 2px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  overflow: hidden;
+  background: var(--paper-hi);
+  z-index: 2;
+}
+
+/* Console Info Body */
+.consoleBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.consoleKicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.consoleTitle {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.85rem;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+
+.consoleDesc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.consoleStack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.stackTag {
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Scrubber / timeline ribbon */
+.scrubberRibbon {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+}
+
+.scrubberTrack {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--paper-lo);
+  border: 1px solid var(--ink);
+  overflow: hidden;
+  position: relative;
+}
+
+.scrubberFill {
+  height: 100%;
+  background: var(--tangerine);
+  transition: width 0.3s ease;
+}
+
+/* Transport Buttons */
+.transportRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  padding-top: 0.9rem;
+  border-top: 1.5px dashed var(--line);
+}
+
+.transportBtnGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tactileBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-hi);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+  transition: all 120ms var(--ease-out);
+}
+
+.tactileBtn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.tactileBtn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.tactileBtnPrimary {
+  background: var(--cobalt);
+  color: var(--paper-hi);
+  border-color: var(--ink);
+}
+
+.tactileBtnSecondary {
+  background: var(--butter);
+  color: var(--ink);
+}
+
+/* ─── Release Shelf Column (Right) ───────────────────────────── */
+
+.shelfHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--ink);
+}
+
+.shelfTitle {
+  font-family: var(--display);
+  font-weight: 750;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.shelfCount {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.shelfDeck {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Tactile Release Deck Card */
+.deckCard {
+  position: relative;
+  background: var(--paper-hi);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: var(--shadow-paper);
+  padding: 1.25rem;
+  transition: all 180ms var(--ease-out);
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .deckCard {
+    grid-template-columns: 140px minmax(0, 1fr);
+  }
+}
+
+.deckCard:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-lift);
+}
+
+.deckCardActive {
+  background: var(--cobalt-wash);
+  border-color: var(--cobalt);
+  box-shadow: 5px 6px 0 var(--cobalt-ink);
+}
+
+/* Washi tape on deck card */
+.cardTape {
+  position: absolute;
+  top: -8px;
+  right: 28px;
+  width: 52px;
+  height: 18px;
+  background: var(--butter);
+  border: 1px solid var(--ink);
+  transform: rotate(-3deg);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+.cardThumb {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  border-radius: 8px;
+  border: 1.5px solid var(--ink);
+  overflow: hidden;
+  background: var(--paper-lo);
+}
+
+@media (min-width: 640px) {
+  .cardThumb {
+    height: 100%;
+    min-height: 110px;
+  }
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.cardKicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.cardTitle {
+  font-family: var(--display);
+  font-weight: 750;
+  font-size: 1.25rem;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.cardDesc {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cardActionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--cobalt);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cardActionLink:hover {
+  color: var(--cobalt-ink);
+}
+
+/* ─── Engineering Telemetry Section ──────────────────────────── */
+
+.telemetrySection {
+  margin-top: 4rem;
+  padding-top: 2.5rem;
+  border-top: 2px dashed var(--line);
+}
+
+.telemetryHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.telemetryTitle {
+  font-family: var(--display);
+  font-weight: 750;
+  font-size: 1.5rem;
+  color: var(--ink);
+}
+
+.telemetryCard {
+  background: var(--paper-hi);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: var(--shadow-paper);
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.repoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.repoCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.1rem;
+  border-radius: 12px;
+  background: var(--paper-hi);
+  border: 1.5px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: all 140ms var(--ease-out);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.repoCard:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.repoName {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ink);
+  margin-bottom: 0.35rem;
+  word-break: break-all;
+}
+
+.repoDesc {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+.repoMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.repoLang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.langDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--cobalt);
+}
+
+/* ─── Liner Notes Modal ──────────────────────────────────────── */
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(25, 26, 46, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modalSheet {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--paper-hi);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 10px 14px 0 var(--ink);
+  padding: 2rem;
+}
+
+.modalTape {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1deg);
+  width: 90px;
+  height: 20px;
+  background: var(--butter);
+  border: 1px solid var(--ink);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.modalClose {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: all 120ms var(--ease-out);
+}
+
+.modalClose:hover {
+  background: var(--pink);
+  transform: translate(-1px, -1px);
+}

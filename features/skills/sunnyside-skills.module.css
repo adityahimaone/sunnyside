@@ -1,0 +1,542 @@
+/* Sunnyside + Hallmark design system for /skills */
+
+.page {
+  --paper: #f3ecdf;
+  --paper-hi: #fffaf1;
+  --paper-lo: #e9dfcf;
+  --ink: #191a2e;
+  --muted: #5f5b6e;
+  --line: rgb(25 26 46 / 0.16);
+  --cobalt: #3d53d6;
+  --cobalt-ink: #2c3cae;
+  --cobalt-wash: #e8ebff;
+  --tangerine: #ff6a2b;
+  --butter: #ffd23f;
+  --pink: #ffb6e1;
+  --mint: #b7e4c7;
+  --sky: #a9c8ff;
+  --display: var(--font-syne), var(--font-space-grotesk), system-ui, sans-serif;
+  --ui: var(--font-geist), system-ui, sans-serif;
+  --mono: var(--font-geist-mono), ui-monospace, monospace;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-paper: 4px 4px 0 var(--ink);
+  --shadow-lift: 6px 8px 0 var(--ink);
+  --shadow-pressed: 1px 1px 0 var(--ink);
+
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--ui);
+  padding-top: clamp(2.5rem, 5vw, 4.5rem);
+  padding-bottom: clamp(6rem, 12vw, 10rem);
+  overflow-x: clip;
+}
+
+.page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stipple='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.shell {
+  width: 100%;
+  max-width: 82rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Header ─────────────────────────────────────────────────── */
+
+.header {
+  margin-bottom: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+.headerMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: var(--paper-hi);
+  border: 1.5px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pillDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--pink);
+  box-shadow: 0 0 6px var(--pink);
+}
+
+.headerTitleStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.headerScript {
+  color: var(--cobalt);
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  transform: rotate(-1.5deg);
+  display: inline-block;
+  margin-bottom: 0.25rem;
+}
+
+.headerTitle {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5.5vw, 4.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+.headerTitleTape {
+  display: inline-block;
+  background: var(--butter);
+  color: var(--ink);
+  padding: 0 0.4em;
+  border: 1.5px solid var(--ink);
+  transform: rotate(0.8deg);
+  box-shadow: 3px 3px 0 var(--ink);
+  margin-left: 0.3em;
+}
+
+.headerIntro {
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  line-height: 1.6;
+  max-width: 50ch;
+  color: var(--muted);
+}
+
+/* ─── Asymmetric Layout (4 cols / 8 cols) ────────────────────── */
+
+.asymmetricGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .asymmetricGrid {
+    grid-template-columns: minmax(320px, 4.2fr) minmax(0, 7.8fr);
+    gap: 3rem;
+  }
+}
+
+/* ─── Sidebar Column (Left) ──────────────────────────────────── */
+
+.sidebarSticky {
+  position: sticky;
+  top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.sidebarCard {
+  position: relative;
+  background: var(--paper-hi);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: var(--shadow-paper);
+  padding: 1.35rem;
+}
+
+/* Corner screws */
+.screw {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid var(--ink);
+  background: var(--paper-lo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screw::before {
+  content: '';
+  width: 4px;
+  height: 1px;
+  background: var(--ink);
+  transform: rotate(45deg);
+}
+
+.screwTL { top: 8px; left: 8px; }
+.screwTR { top: 8px; right: 8px; }
+.screwBL { bottom: 8px; left: 8px; }
+.screwBR { bottom: 8px; right: 8px; }
+
+.sidebarHead {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Telemetry stat display */
+.telemetryReadout {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.telemetryBigNumber {
+  font-family: var(--display);
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.telemetryTotal {
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+
+.telemetryProgressTrack {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--paper-lo);
+  border: 1px solid var(--ink);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.telemetryProgressFill {
+  height: 100%;
+  background: var(--cobalt);
+  transition: width 0.3s ease;
+}
+
+/* Tag filter chips */
+.tagGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+  transition: all 120ms var(--ease-out);
+}
+
+.tagChip:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.tagChipActive {
+  background: var(--cobalt);
+  color: var(--paper-hi);
+  border-color: var(--ink);
+}
+
+.tagChipCount {
+  font-size: 0.65rem;
+  opacity: 0.75;
+}
+
+/* ─── Main Skills Column (Right) ─────────────────────────────── */
+
+.contentColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--paper-hi);
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--shadow-paper);
+  padding: 0.5rem 0.85rem;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--ui);
+  font-size: 0.95rem;
+  color: var(--ink);
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.searchClear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+}
+
+/* Skill Cartridge Cards */
+.skillDeck {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.skillCard {
+  position: relative;
+  background: var(--paper-hi);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: var(--shadow-paper);
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: all 140ms var(--ease-out);
+}
+
+.skillCard:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-lift);
+}
+
+.cardWashi {
+  position: absolute;
+  top: -8px;
+  right: 28px;
+  width: 48px;
+  height: 18px;
+  background: var(--butter);
+  border: 1px solid var(--ink);
+  transform: rotate(-2.5deg);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+.skillTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.skillStatusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--ink);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.statusInstalled {
+  background: var(--mint);
+  color: var(--ink);
+}
+
+.statusAvailable {
+  background: var(--paper-lo);
+  color: var(--muted);
+}
+
+.statusLed {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.statusInstalled .statusLed {
+  box-shadow: 0 0 6px var(--mint);
+}
+
+.skillTitle {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  line-height: 1.15;
+  color: var(--ink);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.skillTitle:hover {
+  color: var(--cobalt);
+}
+
+.skillRepo {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--cobalt);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.skillDesc {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* Terminal Install Bar */
+.installStrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: var(--ink);
+  color: var(--paper-hi);
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  margin-top: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+.installCode {
+  overflow-x: auto;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  background: var(--cobalt);
+  color: var(--paper-hi);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 120ms var(--ease-out);
+}
+
+.copyBtn:hover {
+  background: var(--butter);
+  color: var(--ink);
+}
+
+.skillFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.skillTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.tagPill {
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--ink);
+}
+
+.tactileBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-hi);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+  transition: all 120ms var(--ease-out);
+}
+
+.tactileBtn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.tactileBtn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
