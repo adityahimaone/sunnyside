@@ -1,13 +1,19 @@
-# Glass Booth — Projects · Bookmarks · Blog
+# Historical archive redesign — Booth
 
-A ground-up redesign of `/projects`, `/bookmarks`, `/blog` and `/blog/[slug]`, built
-from the language of the landing page's **rack 01**: near-black LCD ground,
-signal-orange silkscreen, hardware dock, music-player objects. Stack unchanged:
-Next.js 15, React 19, Tailwind v4, CSS Modules, `motion/react`.
-
-> This document supersedes `design.md` (SIGNAL, side two) for these three pages.
-> The earlier SIGNAL chrome is still in the repo and still serves the landing
-> page; the two systems coexist.
+> **Historical design proposal.** This document records an earlier archive/Booth
+> direction. It is not the current landing-page design reference and must not
+> override the live feature styles or the current [Sunnyside design
+> reference](../design.md). The landing page is now Sunnyside / Side A; the former
+> rack direction is retired.
+>
+> The proposal below describes a redesign of `/projects`, `/bookmarks`, `/blog`,
+> and `/blog/[slug]` using a dark LCD ground, signal-orange silkscreen, hardware
+> dock, and music-player objects. Those concepts are retained here as design
+> history, not instructions for new work. For the current archive shell, inspect
+> `features/archive/` and its owning feature styles.
+>
+> The original proposal targeted Next.js 15; current dependencies and deployment
+> details are documented in the root [README](../README.md).
 
 ---
 

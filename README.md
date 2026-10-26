@@ -173,6 +173,12 @@ The primary deployment target is Cloudflare Workers via OpenNext. Configure the 
 
 A standalone Next.js build is also available through `pnpm build:standalone`. The repository includes a separate VPS deployment script and rollback flow in [`deploy.sh`](./deploy.sh); its server-specific paths and secrets must be configured for that host.
 
+## Design and project guidance
+
+- [Current design reference](./design.md) — Sunnyside / Side A visual principles, palette, typography, accessibility, and implementation map.
+- [`AGENTS.md`](./AGENTS.md) — project-specific design and architecture guidance for coding agents.
+- [`docs/`](./docs/) contains dated audits, implementation records, and historical proposals. Treat them as snapshots unless current code links to them; they do not override the live implementation or `design.md`.
+
 ## Conventions
 
 - **Keep feature boundaries clear.** Cross-feature UI goes in `components/ui/`; feature-specific styling stays with the feature.

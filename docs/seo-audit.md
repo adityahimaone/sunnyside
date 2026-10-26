@@ -1,5 +1,10 @@
 # SEO Audit — adityahimaone.space
 
+> **Dated audit snapshot.** Findings below describe the repository and deployment
+> as inspected on the audit date. Verify every route, environment value, and
+> recommendation against current source and production before acting on it. This
+> is an SEO record, not current visual or design-system guidance.
+
 Audit date: 2026-10-01
 Scope: the full public surface of `next-portfolio-blog` (Next.js 16.3.7, App Router, self-hosted on VPS behind Nginx).
 Method: static read of the source tree, plus fence-aware probes for the counts a plain grep gets wrong (markdown headings vs. shell comments inside code fences; rendered title lengths vs. frontmatter lengths).

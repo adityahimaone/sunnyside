@@ -67,7 +67,7 @@ Observed:
 ```text
 ## main...origin/main
 ?? .codegraph/
-?? docs/e2e-contact-navigation-codex.md
+?? (duplicate contact-navigation snapshot, later removed)
 ?? docs/e2e-contact-navigation-hermes.md
 ?? docs/e2e-contact-navigation.md
 c500a46 fix(mobile): hero rail collision, footer spacing, navbar pinned bottom
