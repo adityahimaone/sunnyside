@@ -73,6 +73,10 @@ export function BookmarkAdminModal({
     return parseBulkBookmarks(bulkInput, bulkCategory)
   }, [bulkInput, bulkCategory])
 
+  /* The dialog's fields mirror the record it was opened for. That is a sync
+     with a prop on open, not a render-time derivation, so the setState-in-
+     effect rule is disabled for this one block with that reason. */
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (editingBookmark) {
       setTab('single')
@@ -96,6 +100,7 @@ export function BookmarkAdminModal({
     setLoginError('')
     setBulkMessage(null)
   }, [editingBookmark, isOpen])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Dismiss bottom dock while modal is open
   useEffect(() => {
@@ -215,16 +220,11 @@ export function BookmarkAdminModal({
         aria-modal="true"
         aria-labelledby="bookmark-modal-title"
       >
-        <span className={`${styles.chassisScrew} ${styles.chassisScrewTL}`} aria-hidden="true" />
-        <span className={`${styles.chassisScrew} ${styles.chassisScrewTR}`} aria-hidden="true" />
-        <span className={`${styles.chassisScrew} ${styles.chassisScrewBL}`} aria-hidden="true" />
-        <span className={`${styles.chassisScrew} ${styles.chassisScrewBR}`} aria-hidden="true" />
-
         <div className={styles.modalHeader}>
           <div>
             <div className={styles.modalMeta}>
               <span className={styles.tabPip} aria-hidden="true" />
-              SYS.BUS // RACK 02 · MODULE INGEST
+              Bookmarks admin
             </div>
             <h2 className={styles.modalTitle} id="bookmark-modal-title">
               {isAdmin ? (
@@ -236,7 +236,7 @@ export function BookmarkAdminModal({
                 ? 'Admin sign-in required'
                 : editingBookmark
                   ? `Edit bookmark`
-                  : 'Bookmark Management'}
+                  : 'Bookmark admin'}
             </h2>
           </div>
           <button
@@ -252,7 +252,7 @@ export function BookmarkAdminModal({
         {!isAdmin ? (
           <form onSubmit={handleLoginSubmit}>
             <p className={styles.modalHint}>
-              Enter administrator credentials to unlock bookmark controls.
+              Sign in to add, edit or remove bookmarks.
             </p>
 
             {loginError && (
@@ -263,11 +263,8 @@ export function BookmarkAdminModal({
             )}
 
             <div className={styles.field}>
-              <label
-                className={styles.fieldLabel}
-                htmlFor="bm-user"
-              >
-                // Username
+              <label className={styles.fieldLabel} htmlFor="bm-user">
+                Username
               </label>
               <input
                 id="bm-user"
@@ -282,11 +279,8 @@ export function BookmarkAdminModal({
             </div>
 
             <div className={styles.field}>
-              <label
-                className={styles.fieldLabel}
-                htmlFor="bm-pass"
-              >
-                // Password
+              <label className={styles.fieldLabel} htmlFor="bm-pass">
+                Password
               </label>
               <input
                 id="bm-pass"
@@ -300,13 +294,16 @@ export function BookmarkAdminModal({
               />
             </div>
 
-            <div className={styles.modalActions} style={{ marginTop: '1.25rem' }}>
+            <div
+              className={styles.modalActions}
+              style={{ marginTop: '1.25rem' }}
+            >
               <button
                 type="submit"
                 className={styles.submit}
                 disabled={isLoggingIn}
               >
-                {isLoggingIn ? 'Signing in…' : 'Unlock admin panel'}
+                {isLoggingIn ? 'Signing in…' : 'Sign in'}
               </button>
             </div>
           </form>
@@ -323,7 +320,9 @@ export function BookmarkAdminModal({
                     tab === 'single' ? styles.adminTabActive : ''
                   }`}
                 >
-                  {tab === 'single' && <span className={styles.tabPip} aria-hidden="true" />}
+                  {tab === 'single' && (
+                    <span className={styles.tabPip} aria-hidden="true" />
+                  )}
                   <FilePlus size={14} aria-hidden="true" />
                   Single Bookmark
                 </button>
@@ -336,9 +335,11 @@ export function BookmarkAdminModal({
                     tab === 'bulk' ? styles.adminTabActive : ''
                   }`}
                 >
-                  {tab === 'bulk' && <span className={styles.tabPip} aria-hidden="true" />}
+                  {tab === 'bulk' && (
+                    <span className={styles.tabPip} aria-hidden="true" />
+                  )}
                   <Layers size={14} aria-hidden="true" />
-                  Bulk Ingest
+                  Bulk Import
                 </button>
               </div>
             )}
@@ -374,11 +375,8 @@ export function BookmarkAdminModal({
 
                 <div className={styles.grid2}>
                   <div className={styles.field}>
-                    <label
-                      className={styles.fieldLabel}
-                      htmlFor="bm-title"
-                    >
-                      // Title
+                    <label className={styles.fieldLabel} htmlFor="bm-title">
+                      Title
                     </label>
                     <input
                       id="bm-title"
@@ -391,11 +389,8 @@ export function BookmarkAdminModal({
                     />
                   </div>
                   <div className={styles.field}>
-                    <label
-                      className={styles.fieldLabel}
-                      htmlFor="bm-url"
-                    >
-                      // URL
+                    <label className={styles.fieldLabel} htmlFor="bm-url">
+                      URL
                     </label>
                     <input
                       id="bm-url"
@@ -411,11 +406,8 @@ export function BookmarkAdminModal({
 
                 <div className={styles.grid2}>
                   <div className={styles.field}>
-                    <label
-                      className={styles.fieldLabel}
-                      htmlFor="bm-category"
-                    >
-                      // Channel
+                    <label className={styles.fieldLabel} htmlFor="bm-category">
+                      Category
                     </label>
                     <select
                       id="bm-category"
@@ -431,11 +423,8 @@ export function BookmarkAdminModal({
                     </select>
                   </div>
                   <div className={styles.field}>
-                    <label
-                      className={styles.fieldLabel}
-                      htmlFor="bm-tags"
-                    >
-                      // Tags
+                    <label className={styles.fieldLabel} htmlFor="bm-tags">
+                      Tags
                     </label>
                     <input
                       id="bm-tags"
@@ -449,11 +438,8 @@ export function BookmarkAdminModal({
                 </div>
 
                 <div className={styles.field}>
-                  <label
-                    className={styles.fieldLabel}
-                    htmlFor="bm-desc"
-                  >
-                    // Description
+                  <label className={styles.fieldLabel} htmlFor="bm-desc">
+                    Description
                   </label>
                   <textarea
                     id="bm-desc"
@@ -466,18 +452,17 @@ export function BookmarkAdminModal({
                 </div>
 
                 <div className={styles.field}>
-                  <label
-                    className={styles.fieldLabel}
-                    htmlFor="bm-favicon"
-                  >
-                    // Custom favicon URL
+                  <label className={styles.fieldLabel} htmlFor="bm-favicon">
+                    Custom favicon URL
                   </label>
                   <input
                     id="bm-favicon"
                     type="text"
                     placeholder="Leave empty to use host favicon"
                     value={customFaviconUrl}
-                    onChange={(event) => setCustomFaviconUrl(event.target.value)}
+                    onChange={(event) =>
+                      setCustomFaviconUrl(event.target.value)
+                    }
                     className={styles.input}
                   />
                 </div>
@@ -519,9 +504,13 @@ export function BookmarkAdminModal({
             ) : (
               <form onSubmit={handleBulkSubmit}>
                 <div className={styles.bulkHint}>
-                  <span style={{ color: 'var(--primary)', fontWeight: 600 }}>SYNTAX //</span>{' '}
+                  <span style={{ color: 'var(--primary)', fontWeight: 600 }}>
+                    Format
+                  </span>{' '}
                   Paste URLs one per line, pipe-separated (
-                  <span className={styles.codeExample}>url | title | channel</span>
+                  <span className={styles.codeExample}>
+                    url | title | channel
+                  </span>
                   ), or a JSON array of bookmarks.
                 </div>
 
@@ -534,7 +523,10 @@ export function BookmarkAdminModal({
                     }
                     style={
                       bulkMessage.type === 'success'
-                        ? { color: 'var(--primary)', borderColor: 'var(--primary)' }
+                        ? {
+                            color: 'var(--primary)',
+                            borderColor: 'var(--primary)',
+                          }
                         : undefined
                     }
                   >
@@ -548,11 +540,8 @@ export function BookmarkAdminModal({
                 )}
 
                 <div className={styles.field}>
-                  <label
-                    className={styles.fieldLabel}
-                    htmlFor="bulk-category"
-                  >
-                    // Default Channel for pasted items
+                  <label className={styles.fieldLabel} htmlFor="bulk-category">
+                    Default category for pasted items
                   </label>
                   <select
                     id="bulk-category"
@@ -574,7 +563,7 @@ export function BookmarkAdminModal({
                       className={styles.fieldLabel}
                       htmlFor="bulk-textarea"
                     >
-                      // Bulk Ingest Buffer
+                      Bulk import buffer
                     </label>
                     <span className={styles.badge}>
                       <Sparkles size={11} aria-hidden="true" />
@@ -591,8 +580,7 @@ https://motion.dev | Motion | Motion
 https://lucide.dev`}
                     value={bulkInput}
                     onChange={(event) => setBulkInput(event.target.value)}
-                    className={styles.input}
-                    style={{ fontFamily: 'monospace', fontSize: '0.8125rem' }}
+                    className={`${styles.input} ${styles.bulkInput}`}
                   />
                 </div>
 
@@ -602,7 +590,8 @@ https://lucide.dev`}
                       className={styles.fieldLabel}
                       style={{ marginBottom: '0.35rem', fontSize: '0.6875rem' }}
                     >
-                      // Ingest Preview (first {Math.min(parsedBulkItems.length, 5)})
+                      Import preview (first{' '}
+                      {Math.min(parsedBulkItems.length, 5)})
                     </div>
                     <div className={styles.bulkPreviewList}>
                       {parsedBulkItems.slice(0, 5).map((item, idx) => (
@@ -631,7 +620,10 @@ https://lucide.dev`}
                   </div>
                 )}
 
-                <div className={styles.modalActions} style={{ marginTop: '1.25rem' }}>
+                <div
+                  className={styles.modalActions}
+                  style={{ marginTop: '1.25rem' }}
+                >
                   <button
                     type="button"
                     onClick={onClose}
@@ -651,12 +643,10 @@ https://lucide.dev`}
                   <button
                     type="submit"
                     className={styles.submit}
-                    disabled={
-                      isBulkSubmitting || parsedBulkItems.length === 0
-                    }
+                    disabled={isBulkSubmitting || parsedBulkItems.length === 0}
                   >
                     {isBulkSubmitting
-                      ? 'Ingesting…'
+                      ? 'Importing…'
                       : `Import ${parsedBulkItems.length} Bookmarks`}
                   </button>
                 </div>

@@ -1,22 +1,21 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
+
 import { WORK_PROJECTS, getProject } from '@/data/projects'
 import { breadcrumbList, creativeWork, JsonLd } from '@/lib/structured-data'
 import { WEBSITE_URL } from '@/lib/constants'
+import layout from '@/features/archive/archive.module.css'
+import styles from '@/features/projects/case-study.module.css'
 
 /**
- * `/projects/[slug]` — the first URL on this domain that describes any of the
- * shipped work.
+ * `/projects/[slug]` — the case study that the shelf's "Case study" link opens.
  *
- * Every project in `data/projects.ts` carries an external `url` (a repo or a
- * live client site), and detail was previously reachable only through a modal.
- * So all six projects were indexable solely as outbound links from `/projects`:
- * the strongest material on the site was earning its authority for whichever
- * host it happened to sit on.
- *
- * The off-site `url` is kept, and linked from the page rather than replacing it
- * — the local page is the case study, the external link is the artefact.
+ * The content and the JSON-LD are unchanged from the plain Tailwind version;
+ * this is the same sheet as the index, with the facts moved into one cobalt
+ * block and the artwork framed like a sleeve rather than floated in the column.
  */
 export function generateStaticParams() {
   return WORK_PROJECTS.map((project) => ({ slug: project.slug }))
@@ -63,8 +62,7 @@ export default async function ProjectPage({
   const { slug } = await params
   const project = getProject(slug)
 
-  // An unknown slug renders the 404 rather than a thin page. Better no index
-  // entry than an empty one.
+  // An unknown slug renders the 404 rather than a thin page.
   if (!project) notFound()
 
   const url = `${WEBSITE_URL}/projects/${project.slug}`
@@ -73,8 +71,6 @@ export default async function ProjectPage({
     title: project.title,
     description: project.description,
     url,
-    // `cover` is empty on two of the six; the builder falls back to the site
-    // image rather than emitting an image-less CreativeWork.
     image: project.cover || undefined,
     genre: project.genre,
     year: project.year,
@@ -87,8 +83,6 @@ export default async function ProjectPage({
     { name: project.title, path: `/projects/${project.slug}` },
   ])
 
-  // Previous/next in the curated ORDER, so every detail page is reachable from
-  // its neighbours and the set is a chain rather than six isolated pages.
   const index = WORK_PROJECTS.findIndex((p) => p.slug === project.slug)
   const previous = WORK_PROJECTS[index - 1]
   const next = WORK_PROJECTS[index + 1]
@@ -98,108 +92,143 @@ export default async function ProjectPage({
       <JsonLd data={work} />
       <JsonLd data={breadcrumbs} />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
-        <nav aria-label="Breadcrumb" className="mb-8 text-sm">
-          <Link
-            href="/projects"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            ← All projects
-          </Link>
-        </nav>
+      <main className={`${layout.page} ${styles.page}`} id="main-content">
+        <div className={layout.container}>
+          <nav className={styles.crumbs} aria-label="Breadcrumb">
+            <Link href="/projects" className={styles.back}>
+              <ArrowLeft size={14} aria-hidden />
+              All projects
+            </Link>
+          </nav>
 
-        <header className="mb-10">
-          <p className="text-muted-foreground mb-3 font-mono text-xs tracking-[0.14em] uppercase">
-            {project.genre} · {project.year}
-          </p>
-          <h1 className="mb-4 text-4xl font-semibold tracking-tight sm:text-5xl">
-            {project.title}
-          </h1>
-          <p className="text-muted-foreground text-lg">{project.description}</p>
-        </header>
-
-        <dl className="mb-10 grid gap-6 sm:grid-cols-2">
-          <div>
-            <dt className="text-muted-foreground mb-1 font-mono text-xs tracking-[0.14em] uppercase">
-              Role
-            </dt>
-            <dd>{project.role}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground mb-1 font-mono text-xs tracking-[0.14em] uppercase">
-              Year
-            </dt>
-            <dd>{project.year}</dd>
-          </div>
-          <div className="sm:col-span-2">
-            <dt className="text-muted-foreground mb-2 font-mono text-xs tracking-[0.14em] uppercase">
-              Stack
-            </dt>
-            <dd className="flex flex-wrap gap-2">
-              {project.stack.map((tech) => (
-                <span
-                  key={tech}
-                  className="border-border bg-muted rounded-full border px-3 py-1 text-sm"
+          <header className={styles.head}>
+            <div className={styles.headCopy}>
+              <p className={styles.kicker}>
+                <span>{project.genre}</span>
+                <span className={layout.num}>{project.year}</span>
+              </p>
+              <h1 className={layout.title}>{project.title}</h1>
+              <p className={layout.intro}>{project.description}</p>
+              <div className={layout.actions}>
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={layout.primary}
                 >
-                  {tech}
-                </span>
-              ))}
-            </dd>
+                  Visit the live app
+                  <ArrowUpRight className="size-4" aria-hidden />
+                </a>
+              </div>
+            </div>
+
+            <dl className={styles.facts}>
+              <div className={styles.fact}>
+                <dt className={styles.factLabel}>Role</dt>
+                <dd className={styles.factValue}>{project.role}</dd>
+              </div>
+              <div className={styles.fact}>
+                <dt className={styles.factLabel}>Year</dt>
+                <dd className={`${styles.factValue} ${layout.num}`}>
+                  {project.year}
+                </dd>
+              </div>
+              <div className={styles.fact}>
+                <dt className={styles.factLabel}>Stack</dt>
+                <dd>
+                  <ul className={styles.chips}>
+                    {project.stack.map((tech) => (
+                      <li key={tech} className={styles.chip}>
+                        {tech}
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            </dl>
+          </header>
+
+          {project.cover ? (
+            <figure className={styles.cover}>
+              <span className={styles.tape} aria-hidden />
+              <div className={styles.coverArt}>
+                <Image
+                  src={project.cover}
+                  alt={`${project.title} interface`}
+                  fill
+                  sizes="(min-width: 1200px) 1120px, 92vw"
+                  className="object-cover"
+                  priority
+                />
+              </div>
+              <figcaption className={styles.coverCaption}>
+                {project.title}, {project.year}
+              </figcaption>
+            </figure>
+          ) : null}
+
+          <div className={styles.body}>
+            <section aria-labelledby="highlights-title">
+              <h2 id="highlights-title" className={styles.sectionTitle}>
+                What it does
+              </h2>
+              <ol className={styles.highlightList}>
+                {project.highlights.map((highlight) => (
+                  <li key={highlight} className={styles.highlight}>
+                    {highlight}
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            <aside className={styles.aside} aria-label="The artefact">
+              <p className={styles.asideNote}>
+                {project.role} on a {project.year} release, built with{' '}
+                {project.stack.join(', ')}.
+              </p>
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={layout.textLink}
+              >
+                Open {project.title}
+                <ArrowUpRight className="size-3.5" aria-hidden />
+              </a>
+            </aside>
           </div>
-        </dl>
 
-        <section className="mb-12">
-          <h2 className="mb-4 text-xl font-semibold tracking-tight">
-            What it does
-          </h2>
-          <ul className="space-y-2">
-            {project.highlights.map((highlight) => (
-              <li key={highlight} className="flex gap-3">
-                <span aria-hidden="true" className="text-muted-foreground">
-                  →
+          <nav className={styles.pager} aria-label="Other projects">
+            {previous ? (
+              <Link
+                href={`/projects/${previous.slug}`}
+                className={styles.pagerLink}
+              >
+                <ArrowLeft size={15} aria-hidden />
+                <span>
+                  <span className={styles.pagerLabel}>Previous</span>
+                  {previous.title}
                 </span>
-                <span>{highlight}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* The external link is a visit, not an exit: `nofollow` is not applied
-            because the page is the case study and this is the artefact, but it
-            opens in a new tab so the reader keeps their place in the set. */}
-        <p className="mb-16">
-          <a
-            href={project.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary font-medium underline underline-offset-4"
-          >
-            Visit {project.title} ↗
-          </a>
-        </p>
-
-        <nav
-          aria-label="Other projects"
-          className="border-border flex flex-wrap justify-between gap-4 border-t pt-6"
-        >
-          {previous ? (
-            <Link
-              href={`/projects/${previous.slug}`}
-              className="hover:underline"
-            >
-              ← {previous.title}
-            </Link>
-          ) : (
-            <span />
-          )}
-          {next ? (
-            <Link href={`/projects/${next.slug}`} className="hover:underline">
-              {next.title} →
-            </Link>
-          ) : (
-            <span />
-          )}
-        </nav>
+              </Link>
+            ) : (
+              <span />
+            )}
+            {next ? (
+              <Link
+                href={`/projects/${next.slug}`}
+                className={`${styles.pagerLink} ${styles.pagerNext}`}
+              >
+                <span>
+                  <span className={styles.pagerLabel}>Next</span>
+                  {next.title}
+                </span>
+                <ArrowRight size={15} aria-hidden />
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        </div>
       </main>
     </>
   )

@@ -14,7 +14,7 @@ import {
   SkipForward,
   Star,
 } from 'lucide-react'
-import { useRoomChannel } from '@/features/booth'
+
 import {
   PROJECT_PREVIEW_DURATION,
   WORK_PROJECTS,
@@ -26,6 +26,8 @@ import { LinerSheet } from '../components/liner-sheet'
 import ContributionSkyline from '@/components/ui/contribution-skyline'
 import { ScriptWord } from '@/features/landing-page/studio/script-word'
 import { Sparkle } from '@/features/landing-page/studio/doodles'
+import { Reveal } from '@/features/landing-page/studio/reveal'
+import layout from '@/features/archive/archive.module.css'
 import styles from '../sunnyside-projects.module.css'
 
 const ELAPSED = new Map<number, number>()
@@ -41,7 +43,6 @@ export function ProjectsPage({
   contributionsFailed?: boolean
   feedFailed?: boolean
 }) {
-  const setHue = useRoomChannel()
   const [activeId, setActiveId] = useState(WORK_PROJECTS[0].id)
   const [playing, setPlaying] = useState(true)
   const [problem, setProblem] = useState('All')
@@ -76,10 +77,6 @@ export function ProjectsPage({
   const repo = repos.find((r) => r.name === featuredProjects[index]?.githubSlug)
 
   useEffect(() => {
-    setHue(project.palette.a)
-  }, [project, setHue])
-
-  useEffect(() => {
     if (!playing) return
     const id = window.setInterval(() => {
       setElapsed((prev) => {
@@ -111,433 +108,431 @@ export function ProjectsPage({
   )
 
   return (
-    <main className={styles.page} id="main-content">
-      <div className={styles.shell}>
-        {/* Header */}
-        <header className={styles.header}>
-          <div className={styles.headerMeta}>
-            <span className={styles.pill}>
-              <span className={styles.pillDot} />
-              01 / ARCHIVE
-            </span>
-            <span>Selected Work · 2022–2026</span>
-            <span>·</span>
-            <span>{WORK_PROJECTS.length} Shipped Releases</span>
-          </div>
-
-          <div className={styles.headerTitleStack}>
-            <ScriptWord
-              text="the discography"
-              className={styles.headerScript}
-            />
-            <h1 className={styles.headerTitle}>
-              Proof in the product.
-              <span className={styles.headerTitleTape}>SIDE A</span>
-            </h1>
-          </div>
-
-          <p className={styles.headerIntro}>
-            Six production frontend systems, interfaces and experiments built
-            with Next.js, React and TypeScript. Pick a release on the shelf to
-            cue it into the console, inspect its architectural breakdown, and
-            read the field notes.
-          </p>
-
-          {/* Problem filter chips */}
-          <div className={styles.filterRow}>
-            <span className={styles.filterLabel}>Problem Shape:</span>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${
-                problem === 'All' ? styles.filterChipActive : ''
-              }`}
-              onClick={() => setProblem('All')}
-            >
-              <span>All Releases</span>
-              <span className={styles.filterChipCount}>
-                {WORK_PROJECTS.length}
+    <main className={`${layout.page} ${styles.page}`} id="main-content">
+      <div className={layout.container}>
+        <header className={styles.hero}>
+          <div className={styles.heroCopy}>
+            <div className={`${layout.kicker} ${layout.rise}`}>
+              <span className={layout.kickerTag}>
+                <Sparkle className="size-2.5" />
+                01 / The shelf
               </span>
-            </button>
-            {problems.map(([pName, count]) => (
-              <button
-                key={pName}
-                type="button"
-                className={`${styles.filterChip} ${
-                  problem === pName ? styles.filterChipActive : ''
-                }`}
-                onClick={() => setProblem(pName)}
+              <span className={layout.kickerText}>
+                Selected work, 2022 to 2026
+              </span>
+              <span className={layout.kickerText}>
+                <span className={layout.num}>{WORK_PROJECTS.length}</span>{' '}
+                shipped releases
+              </span>
+            </div>
+
+            <ScriptWord
+              text="the shelf"
+              className={`${layout.hand} ${layout.rise}`}
+              delay={0.05}
+            />
+
+            <h1 className={`${layout.title} ${layout.rise}`}>
+              Proof in the product.
+            </h1>
+
+            <p
+              className={`${layout.intro} ${layout.rise}`}
+              style={{ '--rise-delay': '120ms' } as React.CSSProperties}
+            >
+              Six production systems. Pick one on the shelf to cue it.
+            </p>
+
+            <div
+              className={`${layout.actions} ${layout.rise}`}
+              style={{ '--rise-delay': '180ms' } as React.CSSProperties}
+            >
+              <a href="#shelf" className={layout.primary}>
+                Browse the shelf
+                <ArrowUpRight className="size-4" aria-hidden />
+              </a>
+              <a
+                href="https://github.com/adityahimaone"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={layout.ghost}
               >
-                <span>{pName}</span>
-                <span className={styles.filterChipCount}>{count}</span>
-              </button>
-            ))}
+                <Github className="size-4" aria-hidden />
+                GitHub
+              </a>
+            </div>
+          </div>
+
+          <div
+            className={`${styles.heroArt} ${layout.rise}`}
+            style={{ '--rise-delay': '140ms' } as React.CSSProperties}
+            aria-hidden
+          >
+            <div className={styles.sleeve}>
+              <span className={`${layout.tape} ${styles.sleeveTape}`} />
+              <div className={styles.sleeveArt}>
+                {project.cover ? (
+                  <Image
+                    src={project.cover}
+                    alt=""
+                    fill
+                    sizes="(min-width: 960px) 34vw, 90vw"
+                    className="object-cover"
+                    priority
+                  />
+                ) : (
+                  <span
+                    className={styles.sleeveGenerated}
+                    style={
+                      {
+                        '--sleeve-a': project.palette.a,
+                        '--sleeve-b': project.palette.b,
+                      } as React.CSSProperties
+                    }
+                  >
+                    <span>{project.title}</span>
+                    <span className={styles.sleeveCode}>
+                      AH {trackLabel(index)}
+                    </span>
+                  </span>
+                )}
+              </div>
+              <div className={styles.sleeveFoot}>
+                <span className={styles.sleeveLabel}>Now cueing</span>
+                <span className={layout.num}>
+                  {trackLabel(index)} / {project.year}
+                </span>
+              </div>
+            </div>
           </div>
         </header>
 
-        {/* Asymmetric 5-column / 7-column layout */}
-        <div className={styles.asymmetricGrid}>
-          {/* Left Column: Master Console (Sticky) */}
-          <aside className={styles.consoleSticky}>
-            <section
-              className={styles.consoleBox}
-              aria-label="Mastering console"
-            >
-              <div className={`${styles.screw} ${styles.screwTL}`} />
-              <div className={`${styles.screw} ${styles.screwTR}`} />
-              <div className={`${styles.screw} ${styles.screwBL}`} />
-              <div className={`${styles.screw} ${styles.screwBR}`} />
-
-              <div className={styles.consoleTopBar}>
-                <div className={styles.consoleLed}>
-                  <span className={styles.ledDot} />
-                  <span>NOW CUED · TRACK {trackLabel(index)}</span>
-                </div>
-                <span>REV {project.year}</span>
-              </div>
-
-              {/* Turntable / Disc Preview */}
-              <div className={styles.turntableStage}>
-                <div
-                  className={`${styles.vinylDisc} ${
-                    playing ? styles.vinylSpin : ''
-                  }`}
-                >
-                  <div className={styles.vinylGrooves} />
-                  <div className={styles.vinylCenter}>
-                    <span>AH-{trackLabel(index)}</span>
-                    <span style={{ fontSize: '0.45rem', opacity: 0.8 }}>
-                      33 RPM
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.turntableSleeve}>
-                  {project.cover ? (
-                    <Image
-                      src={project.cover}
-                      alt={project.title}
-                      fill
-                      className="object-cover"
-                      sizes="180px"
-                      priority
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        background: project.palette.a,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--ink)',
-                        fontFamily: 'var(--display)',
-                        fontWeight: 800,
-                        fontSize: '1.2rem',
-                        padding: '1rem',
-                        textAlign: 'center',
-                      }}
-                    >
-                      {project.title}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Scrubber Tape Ribbon */}
-              <div className={styles.scrubberRibbon}>
-                <span>{formatProjectTime(elapsed)}</span>
-                <div className={styles.scrubberTrack}>
-                  <div
-                    className={styles.scrubberFill}
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-                <span>{formatProjectTime(PROJECT_PREVIEW_DURATION)}</span>
-              </div>
-
-              {/* Console Info Body */}
-              <div className={styles.consoleBody} style={{ marginTop: '1rem' }}>
-                <div className={styles.consoleKicker}>
-                  <span>
-                    {project.problem} · {project.genre}
-                  </span>
-                  {repo && repo.stargazers_count > 0 && (
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                      }}
-                    >
-                      <Star size={11} fill="currentColor" />
-                      {repo.stargazers_count}
-                    </span>
-                  )}
-                </div>
-
-                <h2 className={styles.consoleTitle}>{project.title}</h2>
-                <p className={styles.consoleDesc}>{project.description}</p>
-
-                <div className={styles.consoleStack}>
-                  {project.stack.map((t) => (
-                    <span key={t} className={styles.stackTag}>
-                      {t}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Direct Action Buttons */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '0.5rem',
-                    marginTop: '0.75rem',
-                  }}
-                >
-                  <Link
-                    href={`/projects/${project.slug}`}
-                    className={`${styles.tactileBtn} ${styles.tactileBtnPrimary}`}
-                  >
-                    Read case study
-                    <ArrowUpRight size={14} />
-                  </Link>
-
-                  <a
-                    href={project.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${styles.tactileBtn} ${styles.tactileBtnSecondary}`}
-                  >
-                    Open live app
-                    <ExternalLink size={13} />
-                  </a>
-
-                  <button
-                    type="button"
-                    onClick={() => setLinerId(project.id)}
-                    className={styles.tactileBtn}
-                  >
-                    <Info size={13} />
-                    Liner notes
-                  </button>
-                </div>
-              </div>
-
-              {/* Transport Buttons */}
-              <div className={styles.transportRow}>
-                <div className={styles.transportBtnGroup}>
-                  <button
-                    type="button"
-                    onClick={() => go(-1)}
-                    className={styles.tactileBtn}
-                    aria-label="Previous release"
-                  >
-                    <SkipBack size={13} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPlaying((v) => !v)}
-                    className={`${styles.tactileBtn} ${
-                      playing ? styles.tactileBtnSecondary : ''
-                    }`}
-                    aria-label={playing ? 'Pause' : 'Play'}
-                  >
-                    {playing ? (
-                      <Pause size={14} />
-                    ) : (
-                      <Play size={14} fill="currentColor" />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => go(1)}
-                    className={styles.tactileBtn}
-                    aria-label="Next release"
-                  >
-                    <SkipForward size={13} />
-                  </button>
-                </div>
+        <section className={styles.deck} aria-label="Cued release">
+          <div className={styles.deckMain}>
+            <div className={styles.deckCover}>
+              {project.cover ? (
+                <Image
+                  src={project.cover}
+                  alt=""
+                  fill
+                  sizes="132px"
+                  className="object-cover"
+                />
+              ) : (
                 <span
-                  style={{
-                    fontFamily: 'var(--mono)',
-                    fontSize: '0.68rem',
-                    color: 'var(--muted)',
-                  }}
-                >
-                  {index + 1} OF {WORK_PROJECTS.length}
-                </span>
-              </div>
-            </section>
-          </aside>
+                  className={styles.deckGenerated}
+                  style={
+                    {
+                      '--sleeve-a': project.palette.a,
+                      '--sleeve-b': project.palette.b,
+                    } as React.CSSProperties
+                  }
+                  aria-hidden
+                />
+              )}
+            </div>
 
-          {/* Right Column: Release Crate Shelf */}
-          <section className={styles.shelfColumn} aria-label="Release crate">
-            <div className={styles.shelfHeader}>
-              <h2 className={styles.shelfTitle}>Release Shelf</h2>
-              <span className={styles.shelfCount}>
-                Showing {visible.length} of {WORK_PROJECTS.length}
+            <div className={styles.deckBody}>
+              <p className={styles.deckKicker}>
+                <span className={styles.deckLive}>
+                  <span className={styles.led} data-on={playing} aria-hidden />
+                  {playing ? 'Playing' : 'Paused'}
+                </span>
+                <span>{project.problem}</span>
+                <span>{project.genre}</span>
+                <span className={layout.num}>{project.year}</span>
+              </p>
+
+              <h2 className={styles.deckTitle} aria-live="polite">
+                {project.title}
+              </h2>
+              <p className={styles.deckDesc}>{project.description}</p>
+
+              <ul className={styles.stack} aria-label="Stack">
+                {project.stack.map((tech) => (
+                  <li key={tech} className={styles.stackTag}>
+                    {tech}
+                  </li>
+                ))}
+              </ul>
+
+              <div className={styles.deckActions}>
+                <Link
+                  href={`/projects/${project.slug}`}
+                  className={`${layout.primary} ${layout.onLoud}`}
+                >
+                  Read the case study
+                  <ArrowUpRight className="size-4" aria-hidden />
+                </Link>
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.deckGhost}
+                >
+                  Open the live app
+                  <ExternalLink className="size-3.5" aria-hidden />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setLinerId(project.id)}
+                  className={styles.deckButton}
+                >
+                  <Info className="size-3.5" aria-hidden />
+                  Liner notes
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.transport}>
+            <div className={styles.transportButtons}>
+              <button
+                type="button"
+                onClick={() => go(-1)}
+                className={styles.transportButton}
+                aria-label="Previous release"
+              >
+                <SkipBack className="size-4" aria-hidden />
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlaying((v) => !v)}
+                className={styles.transportPlay}
+                aria-label={playing ? 'Pause the preview' : 'Play the preview'}
+              >
+                {playing ? (
+                  <Pause className="size-4" aria-hidden />
+                ) : (
+                  <Play className="size-4" fill="currentColor" aria-hidden />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => go(1)}
+                className={styles.transportButton}
+                aria-label="Next release"
+              >
+                <SkipForward className="size-4" aria-hidden />
+              </button>
+            </div>
+
+            <div className={styles.transportTime}>
+              <span className={layout.num}>{formatProjectTime(elapsed)}</span>
+              <span className={styles.transportTrack}>
+                <span
+                  className={styles.transportFill}
+                  style={{ width: `${progressPercent}%` }}
+                  role="progressbar"
+                  aria-label="Release preview progress"
+                  aria-valuemin={0}
+                  aria-valuemax={PROJECT_PREVIEW_DURATION}
+                  aria-valuenow={elapsed}
+                />
+              </span>
+              <span className={layout.num}>
+                {formatProjectTime(PROJECT_PREVIEW_DURATION)}
               </span>
             </div>
 
-            <div className={styles.shelfDeck}>
-              {visible.map((item, itemIdx) => {
-                const isSelected = item.id === project.id
-                return (
-                  <article
-                    key={item.slug}
-                    onClick={() => select(item.id)}
-                    className={`${styles.deckCard} ${
-                      isSelected ? styles.deckCardActive : ''
-                    }`}
-                  >
-                    <div className={styles.cardTape} />
+            <p className={styles.transportMeta}>
+              <span className={layout.num}>
+                {index + 1} of {WORK_PROJECTS.length}
+              </span>
+              {repo && repo.stargazers_count > 0 ? (
+                <span className={styles.stars}>
+                  <Star className="size-3" fill="currentColor" aria-hidden />
+                  <span className={layout.num}>{repo.stargazers_count}</span>
+                  <span className="sr-only"> stars on GitHub</span>
+                </span>
+              ) : null}
+            </p>
+          </div>
+        </section>
 
-                    <div className={styles.cardThumb}>
+        <section
+          id="shelf"
+          className={styles.shelf}
+          aria-labelledby="shelf-title"
+        >
+          <div className={layout.sectionHead}>
+            <h2 id="shelf-title" className={layout.sectionTitle}>
+              The release shelf
+            </h2>
+            <p className={layout.sectionNote}>
+              Showing <span className={layout.num}>{visible.length}</span> of{' '}
+              <span className={layout.num}>{WORK_PROJECTS.length}</span>
+            </p>
+          </div>
+
+          <div
+            className={styles.filters}
+            role="group"
+            aria-label="Filter releases by the problem they solved"
+          >
+            <span className={styles.filterLabel}>Problem shape</span>
+            <button
+              type="button"
+              className={styles.filterChip}
+              data-active={problem === 'All'}
+              onClick={() => setProblem('All')}
+            >
+              All releases
+              <span className={styles.filterCount}>{WORK_PROJECTS.length}</span>
+            </button>
+            {problems.map(([name, count]) => (
+              <button
+                key={name}
+                type="button"
+                className={styles.filterChip}
+                data-active={problem === name}
+                onClick={() => setProblem(name)}
+              >
+                {name}
+                <span className={styles.filterCount}>{count}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.shelfGrid}>
+            {visible.map((item) => {
+              const catalogue = WORK_PROJECTS.indexOf(item)
+              const isSelected = item.id === project.id
+              return (
+                <Reveal
+                  key={item.slug}
+                  className={styles.shelfCell}
+                  delay={0.04}
+                  y={22}
+                >
+                  <article
+                    className={styles.card}
+                    data-active={isSelected}
+                    onClick={() => select(item.id)}
+                  >
+                    <div className={styles.cardArt}>
+                      <span className={`${layout.tape} ${styles.cardTape}`} />
                       {item.cover ? (
                         <Image
                           src={item.cover}
-                          alt={item.title}
+                          alt={`${item.title} interface`}
                           fill
+                          sizes="(min-width: 900px) 40vw, 92vw"
                           className="object-cover"
-                          sizes="(min-width: 640px) 140px, 100vw"
                         />
                       ) : (
-                        <div
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            background: item.palette.a,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'var(--ink)',
-                            fontFamily: 'var(--mono)',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                          }}
+                        <span
+                          className={styles.cardGenerated}
+                          style={
+                            {
+                              '--sleeve-a': item.palette.a,
+                              '--sleeve-b': item.palette.b,
+                            } as React.CSSProperties
+                          }
+                          aria-hidden
                         >
-                          AH-{trackLabel(itemIdx)}
-                        </div>
+                          <span>{item.title}</span>
+                          <span className={styles.sleeveCode}>
+                            AH {trackLabel(catalogue)}
+                          </span>
+                        </span>
                       )}
+                      <span className={styles.cardNumber}>
+                        {trackLabel(catalogue)}
+                      </span>
                     </div>
 
                     <div className={styles.cardBody}>
-                      <div className={styles.cardKicker}>
-                        <span>
-                          SIDE {trackLabel(itemIdx)[0]} · {trackLabel(itemIdx)}
-                        </span>
-                        <span>{item.year}</span>
-                      </div>
-
+                      <p className={styles.cardMeta}>
+                        <span className={layout.num}>{item.year}</span>
+                        <span>{item.problem}</span>
+                        <span>{item.genre}</span>
+                      </p>
                       <h3 className={styles.cardTitle}>{item.title}</h3>
                       <p className={styles.cardDesc}>{item.description}</p>
 
-                      <div className={styles.consoleStack}>
+                      <ul className={styles.stack} aria-label="Stack">
                         {item.stack.slice(0, 4).map((tech) => (
-                          <span key={tech} className={styles.stackTag}>
+                          <li key={tech} className={styles.stackTag}>
                             {tech}
-                          </span>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
 
-                      <div className={styles.cardActions}>
-                        <Link
-                          href={`/projects/${item.slug}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className={styles.cardActionLink}
+                      <div className={styles.cardFoot}>
+                        <div className={styles.cardLinks}>
+                          <Link
+                            href={`/projects/${item.slug}`}
+                            className={styles.cardLink}
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            Case study
+                          </Link>
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.cardLink}
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            Live app
+                          </a>
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.cue}
+                          aria-pressed={isSelected}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            select(item.id)
+                          }}
                         >
-                          Case study
-                          <ArrowUpRight size={13} />
-                        </Link>
-                        <span style={{ color: 'var(--line)' }}>·</span>
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className={styles.cardActionLink}
-                        >
-                          Live app
-                          <ExternalLink size={12} />
-                        </a>
+                          {isSelected ? 'Cued' : 'Cue'}
+                        </button>
                       </div>
                     </div>
                   </article>
-                )
-              })}
-            </div>
-          </section>
-        </div>
+                </Reveal>
+              )
+            })}
+          </div>
+        </section>
 
-        {/* Bottom Engineering Telemetry Section */}
-        <section
-          className={styles.telemetrySection}
-          aria-label="Engineering activity"
-        >
+        <section className={styles.telemetry} aria-labelledby="telemetry-title">
           <div className={styles.telemetryHead}>
             <div>
-              <div
-                className={styles.headerMeta}
-                style={{ marginBottom: '0.4rem' }}
-              >
-                <span className={styles.pill}>
-                  <Sparkle className="size-2.5" />
-                  02 / TELEMETRY
-                </span>
-                <span>GitHub Production Signals</span>
-              </div>
-              <h2 className={styles.telemetryTitle}>
-                Engineering cadence & public repositories.
+              <p className={`${layout.kicker} ${styles.telemetryKicker}`}>
+                <span className={layout.kickerTag}>Outside the shelf</span>
+                <span className={layout.kickerText}>GitHub, the last year</span>
+              </p>
+              <h2 id="telemetry-title" className={styles.telemetryTitle}>
+                Engineering cadence and public repositories.
               </h2>
             </div>
             <a
               href="https://github.com/adityahimaone"
               target="_blank"
               rel="noopener noreferrer"
-              className={styles.tactileBtn}
+              className={layout.ghost}
             >
-              <Github size={13} />
-              adityahimaone on GitHub
-              <ArrowUpRight size={13} />
+              <Github className="size-4" aria-hidden />
+              adityahimaone
             </a>
           </div>
 
-          {/* Skyline */}
-          <div className={styles.telemetryCard}>
-            <div
-              style={{
-                fontFamily: 'var(--mono)',
-                fontSize: '0.72rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.12em',
-                marginBottom: '1rem',
-                color: 'var(--muted)',
-                display: 'flex',
-                justifyContent: 'space-between',
-              }}
-            >
-              <span>ANNUAL COMMIT FREQUENCY</span>
-              <span>{contributions.length} DAYS RECORDED</span>
+          <div className={styles.skyline}>
+            <div className={styles.skylineHead}>
+              <span>Contribution calendar</span>
+              <span className={layout.num}>
+                {contributions.length} days recorded
+              </span>
             </div>
             <ContributionSkyline data={contributions} />
           </div>
 
-          {/* Repos Grid */}
-          {repos.length > 0 && (
-            <div>
-              <h3
-                style={{
-                  fontFamily: 'var(--display)',
-                  fontSize: '1.25rem',
-                  fontWeight: 750,
-                  marginBottom: '1rem',
-                  color: 'var(--ink)',
-                }}
-              >
-                Selected Open-Source Repositories
-              </h3>
+          {repos.length > 0 ? (
+            <div className={styles.repos}>
+              <h3 className={styles.reposTitle}>Public repositories</h3>
               <div className={styles.repoGrid}>
                 {repos.slice(0, 6).map((r) => (
                   <a
@@ -548,36 +543,31 @@ export function ProjectsPage({
                     className={styles.repoCard}
                   >
                     <div>
-                      <div className={styles.repoName}>{r.name}</div>
+                      <span className={styles.repoName}>{r.name}</span>
                       <p className={styles.repoDesc}>
                         {r.description || 'Open source engineering release.'}
                       </p>
                     </div>
-                    <div className={styles.repoMeta}>
+                    <span className={styles.repoMeta}>
                       <span className={styles.repoLang}>
-                        <span className={styles.langDot} />
+                        <span className={styles.langDot} aria-hidden />
                         {r.language || 'TypeScript'}
                       </span>
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.2rem',
-                        }}
-                      >
-                        <Star size={11} /> {r.stargazers_count}
+                      <span className={styles.repoStars}>
+                        <Star className="size-3" aria-hidden />{' '}
+                        <span className={layout.num}>{r.stargazers_count}</span>
+                        <span className="sr-only"> stars</span>
                       </span>
-                    </div>
+                    </span>
                   </a>
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
         </section>
       </div>
 
-      {/* Liner Notes Modal */}
-      {linerId !== null && (
+      {linerId !== null ? (
         <LinerSheet
           project={
             WORK_PROJECTS.find((p) => p.id === linerId) ?? WORK_PROJECTS[0]
@@ -585,7 +575,7 @@ export function ProjectsPage({
           index={WORK_PROJECTS.findIndex((p) => p.id === linerId)}
           onClose={() => setLinerId(null)}
         />
-      )}
+      ) : null}
     </main>
   )
 }

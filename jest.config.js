@@ -3,10 +3,11 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-    // ts-jest only transforms .ts/.tsx, so a component importing a CSS module
-    // cannot be loaded in a jsdom suite without this. See tests/style-mock.js.
+    // The CSS mock must be tried before the alias. Module names are matched in
+    // order, and `^@/(.*)$` also matches an aliased `.module.css` path, which
+    // sent the real stylesheet to ts-jest. See tests/style-mock.js.
     '\\.css$': '<rootDir>/tests/style-mock.js',
+    '^@/(.*)$': '<rootDir>/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testMatch: [

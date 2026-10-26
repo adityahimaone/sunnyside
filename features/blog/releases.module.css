@@ -1,636 +1,50 @@
-/* Releases + Reader — /blog and /blog/[slug] (docs/DESIGN_BOOTH.md §6). */
+/* Hallmark · v2.0.0 · redesign: full · genre: editorial · theme: Sunnyside (by request) · surface: absolute · posture: committed · nav: sticky paper bar, four rooms and one Say hi · footer: compact cobalt sign-off · hero: Stage (split copy and one object) */
+/* The reader: /blog/[slug] and /guides/*.
+ *
+ * One sheet, one measure, one sticky chapter rail. The reader is paper on
+ * paper: no glass, no coloured room, no gradient cover. The only marks are the
+ * cobalt progress trace, the stamp that says what kind of page this is, and the
+ * butter state on the chapter you are in.
+ */
 
 .page {
-  width: 100%;
-  max-width: 1280px;
-  margin-inline: auto;
-  /* Clears the fixed dock. The magnetic magnify grows a 36px icon to ~50px,
-     so the capsule is ~62px tall before the 1.25rem offset. */
-  padding: 4rem 1.5rem 10rem;
-  background: var(--room-base);
+  background: var(--ss-paper);
+  padding-block: clamp(1.5rem, 3vw, 2.5rem) clamp(3rem, 6vw, 5rem);
 }
 
-@media (min-width: 768px) {
-  .page {
-    padding: 5rem 2.5rem 10rem;
-  }
-}
+/* ── Crumbs ─────────────────────────────────────────────────────────────── */
 
-/* This file never had a small-screen reservation, so a phone kept the desktop
-   10rem *and* the footer's 8rem — the deepest empty floor of the three booth
-   routes. The dock wraps to two rows below 720px, so the capsule is shorter
-   here anyway; the footer gives up its own half, so these sum to one. */
-@media (max-width: 767px) {
-  .page {
-    /* Same top-gutter trim as the other two booth routes: 4rem on a phone only
-       pushed the eyebrow below the fold, since the header brings its own
-       leading. The bottom is what clears the dock and stays. */
-    padding: 2.5rem 1rem 5.5rem;
-  }
-}
-
-.releases {
-  /* Capped at the container. As an implicit single column it was sized by its
-     widest child, and the lead panel's own two-column grid contributed to that,
-     so the section measured wider than the page on a phone. */
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  padding-top: 3rem;
-}
-
-.lead {
-  display: grid;
-  /* Same cap as .releases: the artwork and the copy are two grid items, and an
-     uncapped 1fr column resolves to their max-content rather than to the
-     panel's own width. */
-  grid-template-columns: minmax(0, 1fr);
-  gap: 1.75rem;
-  /* The side heading below owns the gap to the tracklist, so the lead keeps no
-     margin of its own and cannot double it. */
-  margin-bottom: 0;
-  padding: 1.5rem;
-  border-radius: var(--booth-r-panel);
-  color: var(--booth-ink);
-}
-
-@media (min-width: 820px) {
-  .lead {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    padding: 1.75rem;
-  }
-}
-
-/* Compact on phones. Stacked, the lead was 475px tall: a 130px cover on its own
-   row, then the copy, with 24px of panel padding and a 28px row gap around
-   both. The cover only needs to be a landmark, so it shrinks and the copy keeps
-   the rest of the width; the padding tightens to match the page's own 1rem
-   gutter instead of adding another 24px inside it.
-
-   The rules themselves live further down, after the base `.leadArt` they
-   override — see the note there. */
-
-.leadArt {
-  position: relative;
-  width: clamp(130px, 18vw, 190px);
-  border-radius: var(--booth-r-cover);
-  box-shadow:
-    0 18px 44px -18px rgba(0, 0, 0, 0.7),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
-}
-
-/* The phone override for the two rules above has to come *after* them. Placed
-   up beside the `.lead` fork it was silently lost to the base `.leadArt` width
-   on source order, which left a 260px cover overlapping the copy. */
-@media (max-width: 819px) {
-  .lead {
-    grid-template-columns: 92px minmax(0, 1fr);
-    align-items: start;
-    gap: 1rem;
-    padding: 1rem;
-  }
-
-  .leadArt {
-    width: 92px;
-  }
-
-  .leadTitle {
-    margin-top: 0.35rem;
-    font-size: clamp(1.125rem, 4.9vw, 1.4rem);
-  }
-
-  .leadDesc {
-    margin-top: 0.45rem;
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
-
-  .leadMeta {
-    margin-top: 0.7rem;
-  }
-}
-
-.leadKicker {
-  color: var(--booth-ink-muted);
-  font: var(--silkscreen);
-}
-
-.leadTitle {
-  margin: 0.5rem 0 0;
-  /* A grid item defaults to min-width:auto, so a long word is measured at its
-     full width and refuses to shrink — which pushed the grid wider than the
-     card and clipped the title against the panel edge. */
-  min-width: 0;
-  color: var(--booth-ink);
-  font:
-    750 clamp(1.5rem, 3.2vw, 2.25rem) / 1.05 var(--font-syne),
-    sans-serif;
-  letter-spacing: -0.045em;
-  /* Wrap rather than clip: the lead is the one place a full sentence of a
-     title is expected, and two lines read better than an ellipsis. */
-  overflow-wrap: break-word;
-  text-wrap: balance;
-}
-
-.leadTitle a {
-  color: inherit;
-  text-decoration: none;
-  /* The lead is the largest object on the page and its title was the only
-     link in the feature that snapped on hover, while the smaller list titles
-     crossfaded. The bigger element should not be the less polished one. */
-  transition: color var(--dur-fast) var(--ease-out);
-}
-
-.leadTitle a:hover {
-  color: var(--primary);
-}
-
-.leadDesc {
-  max-width: 58ch;
-  margin: 0.6rem 0 0;
-  color: var(--booth-ink-muted);
-  font-size: 0.9375rem;
-  line-height: 1.6;
-}
-
-.leadMeta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.9rem;
-  margin-top: 0.9rem;
-  color: var(--booth-ink-dim);
-  font: var(--silkscreen);
-  font-size: 0.6875rem;
-}
-
-/* ─── Filter dock ────────────────────────────────────────────── */
-
-.dock {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding: 0.5rem 0.6rem;
-  border-radius: var(--booth-r-panel);
-  color: var(--booth-ink);
-}
-
-.searchWrap {
-  position: relative;
-  display: flex;
-  flex: 1;
-  min-width: 12rem;
-  align-items: center;
-}
-
-.searchIcon {
-  position: absolute;
-  left: 0.8rem;
-  color: var(--booth-ink-muted);
-  pointer-events: none;
-}
-
-.search {
-  width: 100%;
-  height: 44px;
-  padding: 0 2.4rem;
-  border: 1px solid var(--hairline);
-  border-radius: var(--booth-r-control);
-  background: var(--flat-fill);
-  color: var(--booth-ink);
-  font-size: 0.9375rem;
-}
-
-.search::placeholder {
-  color: var(--booth-ink-dim);
-}
-
-.search:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-.searchClear {
-  position: absolute;
-  right: 0.5rem;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--booth-ink-muted);
-  cursor: pointer;
-}
-
-/* .tagRow / .tag moved to the shared FilterRow in
-   components/booth/filter-row.module.css, which /projects and /bookmarks
-   share too. Three hand-written rows had drifted to three different radii. */
-
-.sortBtn {
-  display: inline-flex;
-  min-height: 40px;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0 0.8rem;
-  border-radius: var(--booth-r-control);
-  color: var(--booth-ink);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* ─── Tracklist ──────────────────────────────────────────────── */
-
-/* Guide paths, surfaced on the blog index instead of behind a /guides route.
-   Ordered paths through the same posts, so they sit above the list as an
-   entry point rather than below it as an afterthought. */
-.guides {
-  margin: 2.4rem 0 0;
-  padding: 1.4rem 1.5rem 1.5rem;
-  border: 1px solid var(--hairline);
-  border-radius: 14px;
-}
-.guidesHead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 0.9rem;
-}
-.guidesTitle {
-  color: var(--booth-ink);
-  font-family: var(--font-space-grotesk), sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-}
-.guidesNote {
-  color: var(--booth-ink-dim);
-  font-size: 0.82rem;
-}
-.guidesList {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
-  gap: 0.7rem;
-  margin: 1.1rem 0 0;
-  list-style: none;
-}
-.guide {
-  display: grid;
-  gap: 0.22rem;
-  height: 100%;
-  padding: 0.85rem 0.95rem;
-  border: 1px solid var(--hairline);
-  border-radius: 10px;
-  color: inherit;
-  text-decoration: none;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease;
-}
-.guide:hover {
-  border-color: color-mix(in srgb, var(--foreground) 26%, transparent);
-  background-color: color-mix(in srgb, var(--foreground) 4%, transparent);
-}
-.guideMeta {
-  color: var(--booth-ink-dim);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.66rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-.guide b {
-  color: var(--booth-ink);
-  font-size: 0.92rem;
-  font-weight: 600;
-  line-height: 1.3;
-}
-.guideDesc {
-  color: var(--booth-ink-dim);
-  font-size: 0.8rem;
-  line-height: 1.45;
-}
-
-/* The questions these notes keep getting asked. Native details/summary, so the
-   answer text is in the DOM whether or not JS has hydrated. */
-.faq {
-  margin: 3rem 0 0;
-  padding-top: 2rem;
-  border-top: 1px solid var(--hairline);
-}
-.faqTitle {
-  color: var(--booth-ink);
-  font-family: var(--font-space-grotesk), sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-}
-.faqList {
-  display: grid;
-  gap: 0.15rem;
-  margin: 1rem 0 0;
-}
-.faqItem {
-  border-bottom: 1px solid var(--hairline);
-}
-.faqItem:last-child {
-  border-bottom: 0;
-}
-.faqDetails {
-  padding: 0.15rem 0;
-}
-.faqSummary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.8rem 0;
-  color: var(--booth-ink);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  list-style: none;
-}
-.faqSummary::-webkit-details-marker {
-  display: none;
-}
-.faqSummary::after {
-  flex-shrink: 0;
-  color: var(--booth-ink-dim);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.9rem;
-  content: '+';
-}
-.faqDetails[open] .faqSummary::after {
-  content: '−';
-}
-.faqSummary:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--foreground) 45%, transparent);
-  outline-offset: 3px;
-}
-.faqAnswer {
-  max-width: 68ch;
-  margin: 0;
-  padding: 0 2rem 1rem 0;
-  color: var(--booth-ink-dim);
-  font-size: 0.86rem;
-  line-height: 1.6;
-}
-
-.sideHead {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  margin: 2rem 0 0.6rem;
-}
-
-.sideTitle {
-  color: var(--booth-ink);
-  font-family: var(--font-space-grotesk), sans-serif;
-  font-size: 1rem;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-}
-
-.sideCount {
-  color: var(--booth-ink-dim);
-  font: var(--silkscreen);
-  font-size: 0.625rem;
-}
-
-.trackList {
-  margin: 0 0 1rem;
-  padding: 0;
-  list-style: none;
-}
-
-.track {
-  display: grid;
-  grid-template-columns: 34px 44px minmax(0, 1fr) clamp(70px, 12vw, 130px) 58px;
-  gap: 0.9rem;
-  align-items: center;
-  min-height: 56px;
-  padding: 0.3rem 0.6rem;
-  border-radius: 12px;
-  color: inherit;
-  text-decoration: none;
-  transition: background-color var(--dur-fast) var(--ease-out);
-}
-
-.track:hover {
-  background: var(--flat-fill-hover);
-}
-
-.track:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-.trackIndex {
-  color: var(--primary);
-  font: var(--silkscreen);
-  font-size: 0.75rem;
-}
-
-.trackArt {
-  position: relative;
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.trackArt img {
-  object-fit: cover;
-}
-
-.trackBody {
-  /* min-width:0 only bites on a grid or flex item, and this span is one. The
-     child title's ellipsis needs the parent to be a block with a definite
-     width, or the text is measured at its full length and clips instead. */
-  display: block;
-  min-width: 0;
-}
-
-.trackTitle {
-  /* `display: block` is what actually makes the ellipsis work here, and it
-     was missing. This is a <span>, so it computed to `display: inline` — and
-     overflow/text-overflow have no effect on an inline box, so the title was
-     measured at its full 752px and pushed the row out past the viewport. The
-     min-width: 0 alongside it is a no-op on a non-flex/grid item, which is why
-     adding it earlier did not fix the overflow.
-
-     display: block matches .trackBody, which the markup already relies on for
-     the same reason. */
-  display: block;
-  min-width: 0;
-  color: var(--booth-ink);
-  font:
-    650 0.9375rem / 1.3 var(--font-syne),
-    sans-serif;
-  /* One line, then an ellipsis. A second line would break the fixed 56px row
-     rhythm; the full title stays reachable as the row's title attribute. */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: color var(--dur-fast) var(--ease-out);
-}
-
-.track:hover .trackTitle {
-  color: var(--primary);
-}
-
-.trackMeta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.15rem;
-  color: var(--booth-ink-dim);
-  font-size: 0.75rem;
-}
-
-.wave {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  height: 26px;
-}
-
-.wave span {
-  display: block;
-  flex: 1;
-  min-height: 2px;
-  border-radius: 1px;
-  background: var(--primary);
-  opacity: 0.7;
-}
-
-.runtime {
-  color: var(--booth-ink-dim);
-  font: var(--silkscreen);
-  font-size: 0.625rem;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.empty {
-  padding: 3.5rem 1.5rem;
-  border: 1px dashed var(--hairline);
-  border-radius: var(--booth-r-panel);
-  text-align: center;
-}
-
-.emptyTitle {
-  margin: 0.7rem 0 0;
-  color: var(--booth-ink);
-  font-size: 1.0625rem;
-  font-weight: 650;
-}
-
-.emptyText {
-  max-width: 34rem;
-  margin: 0.4rem auto 0;
-  color: var(--booth-ink-muted);
-  font-size: 0.9375rem;
-}
-
-.resetBtn {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.85rem;
-  padding: 0 0.95rem;
-  border-radius: var(--booth-r-control);
-  color: var(--booth-ink);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* ─── Reader ─────────────────────────────────────────────────── */
-
-.reader {
-  display: grid;
-  gap: 2.5rem;
-  padding-top: 2rem;
-}
-
-@media (min-width: 1280px) {
-  .reader {
-    grid-template-columns: minmax(0, 1fr) 16rem;
-  }
-}
-
-.article {
-  min-width: 0;
-  max-width: 68ch;
-  margin-inline: auto;
-  /* The reader column sits on solid ground so the wash never competes. */
-  background: var(--room-base);
-  transition: filter var(--booth-dur-med) ease;
-}
-
-.headlineMeta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
-  color: var(--booth-ink-muted);
-  font: var(--silkscreen);
-  font-size: 0.6875rem;
-}
-
-/* ─── Breadcrumb ─────────────────────────────────────────────── */
-
-/* Sits above the article rather than in the dock: the dock's prev/next are
-   chevrons that are easy to miss on a long read, and a reader who lands
-   straight on a post has no other way back to the archive.
-
-   A child of .reader it would inherit the article's 68ch column and sit beside
-   the cue sheet, so it is a sibling of .reader and spans the full page. It
-   keeps the article's own measure so "back" still lands on the text's edge. */
 .crumbs {
   display: flex;
-  min-height: 44px;
+  width: 100%;
+  max-width: var(--ss-shell);
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  max-width: 68ch;
+  gap: 0.4rem 0.6rem;
   margin-inline: auto;
-  color: var(--booth-ink-muted);
-  font: var(--silkscreen);
-  font-size: 0.6875rem;
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+  padding-inline: clamp(1rem, 4vw, 3.5rem);
+  color: var(--ss-muted);
+  font-size: 0.8125rem;
 }
 
 .crumbBack {
   display: inline-flex;
-  min-height: 44px;
+  min-height: 32px;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0 0.6rem 0 0.45rem;
-  border-radius: var(--booth-r-control);
-  color: var(--booth-ink-muted);
+  gap: 0.3rem;
+  border-bottom: 1px solid var(--ss-line-strong);
+  color: var(--ss-ink);
   text-decoration: none;
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
 }
 
 .crumbBack:hover {
-  background: var(--flat-fill-hover);
-  color: var(--primary);
-}
-
-.crumbBack:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  border-color: var(--ss-tangerine);
+  color: var(--ss-tangerine);
 }
 
 .crumbSep {
-  color: var(--booth-ink-dim);
+  color: var(--ss-line-strong);
 }
 
 .crumbHere {
@@ -640,331 +54,606 @@
   white-space: nowrap;
 }
 
+/* ── Reader frame ───────────────────────────────────────────────────────── */
+
+.reader {
+  display: grid;
+  width: 100%;
+  max-width: var(--ss-shell);
+  gap: 2rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 3.5rem);
+}
+
+@media (min-width: 1100px) {
+  .reader {
+    grid-template-columns: minmax(0, 700px) 220px;
+    align-items: start;
+    justify-content: center;
+    gap: 3.5rem;
+  }
+}
+
+.article {
+  min-width: 0;
+  padding-bottom: 1rem;
+}
+
+/* Paper mode is a sheet of slightly whiter stock, not a new theme. */
+.paper {
+  border: 1.5px solid var(--ss-ink);
+  border-radius: var(--ss-r-lg);
+  padding: clamp(1rem, 3vw, 2.25rem);
+  background: var(--ss-paper-hi);
+  box-shadow: var(--ss-shadow-paper);
+}
+
+/* ── Headline ───────────────────────────────────────────────────────────── */
+
 .headlineCover {
-  position: relative;
-  width: 84px;
-  margin-bottom: 1.25rem;
-  border-radius: var(--booth-r-cover);
-  overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  display: flex;
+  margin-bottom: 0.9rem;
+}
+
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  transform: rotate(-1.2deg);
+  border: 1.5px solid var(--ss-ink);
+  border-radius: var(--ss-r-sm);
+  background: var(--ss-paper-hi);
+  box-shadow: 2px 2px 0 var(--ss-ink);
+}
+
+.stampLabel {
+  color: var(--ss-ink);
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.stampWave {
+  display: flex;
+  height: 18px;
+  align-items: flex-end;
+  gap: 1.5px;
+}
+
+.stampWave span {
+  width: 3px;
+  border-radius: 1px;
+  background: var(--ss-cobalt);
+}
+
+.stampMeta {
+  color: var(--ss-muted);
+  font-family: var(--ss-mono);
+  font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.headlineMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0;
+  margin: 0 0 0.75rem;
+  color: var(--ss-muted);
+  font-size: 0.8125rem;
+}
+
+.headlineMeta > * {
+  padding-inline: 0 0.6rem;
+}
+
+.headlineMeta > * + * {
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--ss-line);
+}
+
+.headlineMeta a {
+  border-bottom: 1px solid var(--ss-line-strong);
+  color: var(--ss-ink);
+  text-decoration: none;
+}
+
+.headlineMeta a:hover {
+  border-color: var(--ss-tangerine);
+  color: var(--ss-tangerine);
 }
 
 .headlineTitle {
-  margin: 0.75rem 0 0;
-  color: var(--booth-ink);
-  font:
-    750 clamp(2rem, 4.4vw, 2.9rem) / 1.05 var(--font-syne),
-    sans-serif;
-  letter-spacing: -0.045em;
-  /* Syne at -0.045em tracking leaves an unbalanced last line at narrow
-     measures, where a long title wraps to three lines and strands a word. */
+  max-width: 20ch;
+  margin: 0;
+  font-family: var(--ss-display);
+  font-size: clamp(2rem, 5vw, 3.35rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.96;
+  overflow-wrap: break-word;
   text-wrap: balance;
 }
 
 .headlineDesc {
-  margin: 0.9rem 0 0;
-  color: var(--booth-ink-muted);
-  font-size: 1.0625rem;
-  line-height: 1.65;
+  max-width: 62ch;
+  margin: 0.85rem 0 0;
+  color: var(--ss-muted);
+  font-size: clamp(1rem, 1.6vw, 1.125rem);
+  line-height: 1.6;
 }
 
+/* ── Prose ──────────────────────────────────────────────────────────────── */
+
 .body {
-  margin-top: 2.5rem;
-  color: color-mix(in srgb, var(--booth-ink) 92%, var(--booth-ink-muted));
+  max-width: 640px;
+  margin-top: clamp(1.75rem, 4vw, 2.5rem);
+  color: var(--ss-ink);
   font-size: 1.0625rem;
-  line-height: 1.7;
+  line-height: 1.75;
+}
+
+.body > :first-child {
+  margin-top: 0;
 }
 
 .body p {
-  margin: 0 0 1.4rem;
-  /* Keeps a single orphan word off the end of a paragraph. The reader is
-     narrower here than the measure asks for, so it matters more than usual. */
+  margin: 0 0 1.15em;
   text-wrap: pretty;
 }
 
-.body h2,
-.body h3,
-.body h4 {
-  scroll-margin-top: 6rem;
-  color: var(--booth-ink);
-  font-family: var(--font-syne), sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-}
-
 .body h2 {
-  margin: 2.75rem 0 1rem;
-  font-size: 1.6rem;
+  margin: 2.4em 0 0.65em;
+  border-top: 1.5px solid var(--ss-ink);
+  padding-top: 0.55em;
+  font-family: var(--ss-display);
+  font-size: clamp(1.4rem, 2.6vw, 1.75rem);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .body h3 {
-  margin: 2.1rem 0 0.8rem;
-  font-size: 1.25rem;
+  margin: 1.9em 0 0.4em;
+  font-family: var(--ss-ui);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.body h4 {
+  margin: 1.6em 0 0.35em;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .body ul,
 .body ol {
-  margin: 0 0 1.4rem;
-  padding-left: 1.35rem;
-}
-
-.body ul {
-  list-style: disc;
-}
-
-.body ol {
-  list-style: decimal;
+  margin: 0 0 1.15em;
+  padding-left: 1.3em;
 }
 
 .body li {
-  margin-bottom: 0.5rem;
+  margin: 0.25em 0;
 }
 
 .body li::marker {
-  color: var(--primary);
+  color: var(--ss-muted);
 }
 
 .body a {
-  color: var(--primary);
-  font-weight: 600;
+  color: var(--ss-cobalt);
   text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--primary) 35%, transparent);
+  text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 
 .body a:hover {
-  text-decoration-color: var(--primary);
-  text-underline-offset: 5px;
+  color: var(--ss-cobalt-ink);
+  text-decoration-thickness: 2px;
+}
+
+.body strong {
+  font-weight: 600;
 }
 
 .body blockquote {
-  margin: 1.9rem 0;
-  padding: 0.2rem 0 0.2rem 1.1rem;
-  border-left: 2px solid var(--primary);
-  color: var(--booth-ink-muted);
-  font-style: italic;
+  margin: 1.6em 0;
+  border-top: 1.5px solid var(--ss-tangerine);
+  border-bottom: 1.5px solid var(--ss-line);
+  padding: 0.6rem 0;
+  color: var(--ss-muted);
+  font-size: 1.0625rem;
+}
+
+.body blockquote p:last-child {
+  margin-bottom: 0;
 }
 
 .body hr {
-  margin: 2.5rem 0;
+  margin: 2.5em 0;
   border: 0;
-  border-top: 1px solid var(--hairline);
+  border-top: 1.5px solid var(--ss-ink);
 }
 
-.body code:not(pre code) {
-  padding: 0.1rem 0.3rem;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--primary) 14%, transparent);
-  color: var(--primary);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.9em;
-}
-
-/* GFM gives us tables and images, and neither had a rule here — they were
-   written once in blog.module.css, which nothing imports. An unstyled image
-   rendered at its intrinsic width and pushed the 68ch measure out of the
-   article; an unstyled table did the same, with no container to scroll. */
 .body img {
   max-width: 100%;
   height: auto;
-  border-radius: var(--booth-r-panel);
+  border: 1.5px solid var(--ss-ink);
+  border-radius: var(--ss-r-sm);
+}
+
+.body :not(pre) > code {
+  padding: 0.1em 0.35em;
+  border: 1px solid var(--ss-line);
+  border-radius: var(--ss-r-xs);
+  background: var(--ss-paper-lo);
+  font-family: var(--ss-mono);
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
+}
+
+.body pre {
+  overflow-x: auto;
+  margin: 1.7em 0;
+  border: 2px solid var(--ss-ink);
+  border-radius: var(--ss-r-md);
+  background: var(--ss-ink);
+  color: var(--ss-paper-hi);
+  font-family: var(--ss-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+
+.body pre code {
+  display: block;
+  padding: 1rem;
+  background: transparent;
 }
 
 .body table {
   width: 100%;
-  margin: 1.6rem 0;
+  margin: 1.7em 0;
   border-collapse: collapse;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .body th,
 .body td {
-  padding: 0.55rem 0.7rem;
-  border-bottom: 1px solid var(--hairline);
+  border: 1px solid var(--ss-line-strong);
+  padding: 0.5rem 0.6rem;
   text-align: left;
+  vertical-align: top;
 }
 
 .body th {
-  color: var(--booth-ink);
-  font: var(--silkscreen);
+  background: var(--ss-paper-lo);
+  font-weight: 600;
 }
 
-/* A table is the one block wider than the measure on a phone, so it becomes
-   its own scroll container rather than stretching the article. display:block
-   is what lets a table scroll at all; the cells keep their intrinsic widths
-   and the wrapper clips to the measure. */
-@media (max-width: 720px) {
-  .body table {
-    display: block;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .body th,
-  .body td {
-    padding: 0.5rem 0.6rem;
-    white-space: nowrap;
-  }
+.body table caption {
+  caption-side: bottom;
+  padding-top: 0.5rem;
+  color: var(--ss-muted);
+  font-size: 0.75rem;
 }
 
-/* ─── Code: the LCD family ───────────────────────────────────── */
+/* ── Code shell (markdown renderer) ─────────────────────────────────────── */
 
 .codeShell {
-  margin: 1.8rem 0;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
-  border-radius: var(--booth-r-panel);
-  background: var(--lcd-bg);
+  margin: 1.7em 0;
+  border: 2px solid var(--ss-ink);
+  border-radius: var(--ss-r-md);
+  background: var(--ss-ink);
 }
 
 .codeHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.4rem 0.5rem 0.4rem 0.9rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--lcd-text) 22%, transparent);
-  background: color-mix(in srgb, var(--lcd-text) 6%, transparent);
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.75rem;
+  border-bottom: 1px solid var(--ss-line);
+  background: color-mix(in srgb, var(--ss-ink) 88%, var(--ss-paper-hi));
 }
 
 .codeLang {
-  color: var(--lcd-text);
-  font: var(--silkscreen);
-  opacity: 0.8;
+  color: var(--ss-butter);
+  font-family: var(--ss-mono);
+  font-size: 0.625rem;
 }
 
 .codeCopy {
   display: grid;
+  width: 30px;
+  height: 30px;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid color-mix(in srgb, var(--lcd-text) 25%, transparent);
-  border-radius: 8px;
+  border: 1px solid var(--ss-paper-line);
+  border-radius: var(--ss-r-xs);
   background: transparent;
-  color: var(--lcd-text);
+  color: var(--ss-paper-hi);
   cursor: pointer;
 }
 
 .codeCopy:hover {
-  background: color-mix(in srgb, var(--lcd-text) 14%, transparent);
+  background: color-mix(in srgb, var(--ss-paper-hi) 14%, transparent);
 }
 
 .codeBody {
   overflow-x: auto;
-  /* Without this, a horizontal drag inside the code block is read as the
-     browser's back-swipe: the gesture belongs to the page's vertical scroll
-     and the block's horizontal one competes with it. */
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  padding: 1.1rem 1.15rem;
-  color: #e6e6e6;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.875rem;
-  line-height: 1.65;
-  tab-size: 2;
+  padding: 0.9rem 1rem;
+  color: var(--ss-paper-hi);
+  font-family: var(--ss-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
 }
 
-/* ─── Chapter popover (second glass surface) ─────────────────── */
+.codeBody pre {
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
 
-.chapters {
+/* ── Meta, related, tracks ──────────────────────────────────────────────── */
+
+.leadMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  color: var(--ss-muted);
+  font-size: 0.8125rem;
+}
+
+.tag {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  padding: 0.05rem 0.5rem;
+  border: 1.5px solid var(--ss-line-strong);
+  border-radius: var(--ss-r-pill);
+  background: transparent;
+  color: var(--ss-ink);
+  font-family: var(--ss-ui);
+  font-size: 0.75rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--ss-fast) var(--ss-ease),
+    border-color var(--ss-fast) var(--ss-ease);
+}
+
+.tag:hover {
+  border-color: var(--ss-ink);
+  background: var(--ss-butter);
+}
+
+.related {
+  margin-top: clamp(2rem, 4vw, 3rem);
+  border-top: 1.5px solid var(--ss-ink);
+  padding-top: 1rem;
+}
+
+.sideTitle {
+  margin: 0;
+  font-family: var(--ss-display);
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.trackList {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trackList > li {
+  min-width: 0;
+}
+
+.track {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  gap: 0.7rem;
+  align-items: center;
+  border-bottom: 1px solid var(--ss-line);
+  padding: 0.6rem 0.25rem;
+  color: var(--ss-ink);
+  text-decoration: none;
+  transition: background-color var(--ss-fast) var(--ss-ease);
+}
+
+.track:hover {
+  background: color-mix(in srgb, var(--ss-butter) 22%, transparent);
+}
+
+.trackIndex {
+  flex: none;
+  width: 1.5rem;
+  color: var(--ss-muted);
+  font-family: var(--ss-mono);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.trackArt {
   display: none;
 }
 
-@media (min-width: 1280px) {
-  .chapters {
-    display: block;
-    position: sticky;
-    top: 2rem;
-    align-self: start;
-    max-height: calc(100vh - 4rem);
-    overflow-y: auto;
-    padding: 0.9rem;
-    border-radius: var(--booth-r-panel);
-    scrollbar-width: none;
+.trackBody {
+  min-width: 0;
+  flex: 1;
+}
+
+/* The guide's steps are links inside `.body`, whose link rule is more specific
+   than `.track`. A step row is a row, not an underlined paragraph. */
+.body a.track {
+  color: var(--ss-ink);
+  text-decoration: none;
+}
+
+.body a.track:hover .trackTitle {
+  color: var(--ss-cobalt);
+}
+
+.trackTitle {
+  display: block;
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trackMeta {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--ss-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.track:hover .trackTitle {
+  color: var(--ss-cobalt);
+}
+
+.wave {
+  display: flex;
+  width: 54px;
+  height: 26px;
+  flex: none;
+  align-items: flex-end;
+  gap: 1.5px;
+}
+
+.wave span {
+  width: 2px;
+  border-radius: 1px;
+  background: var(--ss-cobalt);
+}
+
+.runtime {
+  flex: none;
+  color: var(--ss-muted);
+  font-size: 0.6875rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .wave,
+  .runtime {
+    display: none;
   }
 }
 
+/* ── Chapters ───────────────────────────────────────────────────────────── */
+
+.chapters {
+  position: sticky;
+  top: 5.5rem;
+  max-height: calc(100svh - 7rem);
+  overflow-y: auto;
+  border: 1.5px solid var(--ss-ink);
+  border-radius: var(--ss-r-md);
+  padding: 0.75rem;
+  background: var(--ss-paper-hi);
+  box-shadow: var(--ss-shadow-card);
+}
+
 .chapterTitle {
-  color: var(--booth-ink-muted);
-  font: var(--silkscreen);
+  margin: 0 0 0.4rem;
+  border-bottom: 1.5px solid var(--ss-ink);
+  padding-bottom: 0.35rem;
+  color: var(--ss-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .chapterList {
-  margin: 0.6rem 0 0;
+  display: grid;
+  gap: 1px;
+  margin: 0;
   padding: 0;
   list-style: none;
-  border-left: 1px solid var(--hairline);
 }
 
 .chapter {
-  position: relative;
   display: block;
   width: 100%;
-  padding: 0.3rem 0.5rem;
+  min-height: 30px;
+  padding: 0.2rem 0.35rem;
   border: 0;
+  border-radius: var(--ss-r-xs);
   background: transparent;
-  color: var(--booth-ink-muted);
-  font-size: 0.8125rem;
+  color: var(--ss-muted);
+  font-family: var(--ss-ui);
+  font-size: 0.75rem;
   line-height: 1.35;
   text-align: left;
-  overflow-wrap: anywhere;
   cursor: pointer;
-  transition: color var(--dur-fast) var(--ease-out);
+  transition:
+    background-color var(--ss-fast) var(--ss-ease),
+    color var(--ss-fast) var(--ss-ease);
 }
 
 .chapter:hover {
-  color: var(--booth-ink);
+  background: color-mix(in srgb, var(--ss-ink) 6%, transparent);
+  color: var(--ss-ink);
+}
+
+.chapter[aria-current='true'] {
+  background: var(--ss-butter);
+  color: var(--ss-ink);
+  font-weight: 600;
 }
 
 .chapterSub {
   padding-left: 1rem;
-}
-
-.chapter[aria-current='true'] {
-  color: var(--primary);
-  font-weight: 600;
-}
-
-.chapter[aria-current='true']::before {
-  content: '';
-  position: absolute;
-  top: 0.35rem;
-  bottom: 0.35rem;
-  left: -1px;
-  width: 2px;
-  background: var(--primary);
+  font-size: 0.6875rem;
 }
 
 .chapterFoot {
-  margin: 0.7rem 0 0;
-  color: var(--booth-ink-dim);
-  font: var(--silkscreen);
+  margin: 0.4rem 0 0;
+  color: var(--ss-muted);
+  font-family: var(--ss-mono);
   font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .chapterFab {
   position: fixed;
+  z-index: 60;
   right: 1rem;
-  bottom: 6.5rem;
-  z-index: 50;
+  bottom: 1rem;
   display: inline-flex;
   min-height: 44px;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0 0.85rem;
-  border: 1px solid var(--hairline);
-  border-radius: var(--booth-r-control);
-  background: var(--card);
-  color: var(--booth-ink);
-  font: var(--silkscreen);
-  font-size: 0.6875rem;
+  gap: 0.3rem;
+  padding: 0 0.8rem;
+  border: 1.5px solid var(--ss-ink);
+  border-radius: var(--ss-r-pill);
+  background: var(--ss-cobalt);
+  box-shadow: var(--ss-shadow-card);
+  color: var(--ss-paper-hi);
+  font-family: var(--ss-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
   cursor: pointer;
-  box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.6);
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1100px) {
   .chapterFab {
     display: none;
   }
@@ -972,240 +661,63 @@
 
 .chapterDrawer {
   position: fixed;
-  z-index: 72;
+  z-index: 80;
   right: 0;
   bottom: 0;
   left: 0;
-  max-height: 70vh;
+  max-height: 76svh;
   overflow-y: auto;
-  padding: 1rem 1.1rem 6rem;
-  border-radius: var(--booth-r-panel) var(--booth-r-panel) 0 0;
+  border-top: 2px solid var(--ss-ink);
+  border-radius: var(--ss-r-lg) var(--ss-r-lg) 0 0;
+  padding: 0.9rem clamp(1rem, 4vw, 2rem) 1.5rem;
+  background: var(--ss-paper-hi);
+  color: var(--ss-ink);
 }
 
 .chapterDrawerHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.6rem;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .drawerClose {
   display: grid;
-  place-items: center;
   width: 40px;
   height: 40px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--booth-ink-muted);
-  cursor: pointer;
-}
-
-/* ─── Scrubber (renders into the dock) ───────────────────────── */
-
-.scrubber {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--booth-ink);
-}
-
-.scrubWave {
-  position: relative;
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 2px;
-  min-width: 0;
-  height: 26px;
-}
-
-.scrubWave > span {
-  display: block;
-  flex: 1;
-  min-height: 2px;
-  height: var(--h, 30%);
-  border-radius: 1px;
-  background: color-mix(in srgb, var(--booth-ink) 24%, transparent);
-}
-
-.scrubFill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  overflow: hidden;
-}
-
-.scrubFill > span {
-  background: var(--primary);
-}
-
-.scrubHead {
-  position: absolute;
-  top: -3px;
-  bottom: -3px;
-  left: var(--progress, 0%);
-  width: 2px;
-  background: var(--primary);
-}
-
-.scrubTick {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  padding: 0;
-  border: 0;
-  background: color-mix(in srgb, var(--booth-ink) 45%, transparent);
-  cursor: pointer;
-}
-
-/* A readout, not a floating string. Grown into a chip that matches the dock's
-   control surface so it fills the slot instead of leaving a gap beside the
-   buttons. The text is dynamic (a chapter title on the reader, counts on the
-   list), so it has a hard ceiling and ellipsises rather than pushing the
-   scrubber out of the capsule. */
-.scrubMeta {
-  display: inline-flex;
-  min-width: 0;
-  max-width: 16rem;
-  height: 38px;
-  flex: 0 1 auto;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0 0.7rem;
-  overflow: hidden;
-  border: 1px solid var(--glass-edge);
-  border-radius: 12px;
-  background: var(--flat-fill);
-  color: var(--booth-ink-muted);
-  font: var(--silkscreen);
-  font-size: 0.6875rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.scrubMeta:hover {
-  background: var(--flat-fill-hover);
-  color: var(--booth-ink);
-}
-
-.scrubBtn {
-  display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  /* Matches the dock's chip radius, so the reading scrubber reads as part of
-     the control layer rather than a loose set of circles. */
-  border: 1px solid transparent;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--booth-ink-muted);
+  border: 1.5px solid var(--ss-ink);
+  border-radius: var(--ss-r-pill);
+  background: var(--ss-paper);
+  color: var(--ss-ink);
   cursor: pointer;
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
 }
 
-.scrubBtn:hover {
-  color: var(--booth-ink);
-  background: var(--flat-fill-hover);
-  border-color: var(--glass-edge);
+.drawerScrim {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  background: color-mix(in srgb, var(--ss-ink) 68%, transparent);
 }
 
-.scrubBtn:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+/* ── Tables inside guide bodies ─────────────────────────────────────────── */
+
+.body table th[scope='row'] {
+  background: var(--ss-paper-lo);
+  font-weight: 600;
 }
 
-@media (max-width: 720px) {
-  .scrubMeta {
-    /* Same call as the projects transport, for the same reason: the scrubber
-       is a chapter readout beside the previous/play/next controls, and on a
-       phone the text is the part that cannot be acted on. Hidden rather than
-       capped, so the capsule gives up a whole row instead of rendering an
-       ellipsis into space the nav icons need. */
+@media (max-width: 1099px) {
+  .chapters {
     display: none;
   }
 }
 
-/* ─── Related + paper mode ───────────────────────────────────── */
-
-.related {
-  margin-top: 3.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--hairline);
-}
-
-.paper {
-  background: #f4f1ea;
-}
-
-.paper .body {
-  filter: grayscale(1) sepia(0.18) contrast(1.06);
-}
-
-.dark .paper {
-  background: #1a1a1a;
-}
-
-/* The five-column row carries 34px + 44px + 58px of fixed tracks, a
-   clamp(70px, 12vw, 130px) waveform and four 0.9rem gaps — 263px of chrome
-   before the title. Collapsed to four columns here, and the waveform goes
-   with it: it is aria-hidden decoration, and the reading time it visualises is
-   still in the row's own runtime column at this width. */
-@media (max-width: 900px) {
-  .track {
-    grid-template-columns: 30px 40px minmax(0, 1fr) 52px;
-    gap: 0.6rem;
-  }
-
-  .wave {
-    display: none;
-  }
-}
-
-/* Four columns still cost 30 + 40 + 52 = 122px of fixed tracks plus 29px of
-   gaps, which is 151px before the title on a 360px screen. The reading time
-   is already in the lead panel and in the row's own title attribute, and it
-   is the only column that is pure metadata — so below 768 the row is three
-   columns and the title runs to the edge. */
-@media (max-width: 767px) {
-  .track {
-    grid-template-columns: 26px 38px minmax(0, 1fr);
-  }
-
-  .runtime {
-    display: none;
-  }
-
-  /* The search field's 12rem floor is 192px, so on a 360px screen the filter
-     row cannot hold it beside the sort control and wraps — pushing the tags
-     onto a third line. Dropping the floor lets the field take the full measure
-     instead, and the placeholder stops being clipped mid-word. */
-  .searchWrap {
-    min-width: 0;
-    flex-basis: 100%;
-  }
-}
-
-/*
-  Like the projects sheet, the live blog sheet had no reduced-motion guard
-  while the superseded blog.module.css did. Every transition in this file is a
-  hover response or a short crossfade, which is the class of motion that should
-  become an instant state change rather than a tween.
-*/
 @media (prefers-reduced-motion: reduce) {
+  .tag,
   .track,
-  .trackTitle,
-  .leadTitle a,
-  .crumbBack,
-  .body a,
-  .codeCopy,
-  .chapter,
-  .scrubMeta,
-  .scrubBtn {
-    transition-duration: 0.01ms;
+  .chapter {
+    transition: none;
   }
 }

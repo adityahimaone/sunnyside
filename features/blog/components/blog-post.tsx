@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
 import { ArrowLeft, List, X } from 'lucide-react'
 import type { BlogMeta } from '../lib/blog'
-import { Cover, useRoomChannel } from '@/features/booth'
 import { formatDate } from '@/lib/date'
 import { ViewCounter } from './view-counter'
+import { waveformFromReadingTime } from '@/lib/waveform-data'
 import { Markdown } from './markdown'
 import styles from '../releases.module.css'
 
@@ -16,15 +16,6 @@ interface Chapter {
   title: string
   top: number
 }
-
-const COVER_HUES = [
-  '#ff5a1f',
-  '#5cd6a3',
-  '#c9a574',
-  '#9b6cff',
-  '#d9895b',
-  '#2e3f5c',
-]
 
 export function BlogPost({
   meta,
@@ -37,16 +28,11 @@ export function BlogPost({
   prevPost?: BlogMeta
   nextPost?: BlogMeta
 }) {
-  const setHue = useRoomChannel()
   const articleRef = useRef<HTMLElement>(null)
   const [paper, setPaper] = useState(false)
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [progress, setProgress] = useState(0)
   const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    setHue(COVER_HUES[(meta.tags.length || 1) % COVER_HUES.length])
-  }, [meta.tags.length, setHue])
 
   const { scrollYProgress } = useScroll()
   const smooth = useSpring(scrollYProgress, {
@@ -152,12 +138,16 @@ export function BlogPost({
             className={`${styles.article} ${paper ? styles.paper : ''}`}
           >
             <div className={styles.headlineCover}>
-              <Cover
-                seed={meta.slug}
-                title={meta.title}
-                sizes="84px"
-                priority
-              />
+              <span className={styles.stamp} aria-hidden="true">
+                <span className={styles.stampLabel}>Field note</span>
+                <span className={styles.stampWave}>
+                  {waveformFromReadingTime(meta.readingTime)
+                    .slice(0, 7)
+                    .map((h, i) => (
+                      <span key={i} style={{ height: `${h}%` }} />
+                    ))}
+                </span>
+              </span>
             </div>
 
             <p className={styles.headlineMeta}>
@@ -172,11 +162,8 @@ export function BlogPost({
               <Link href="/#contact" className={styles.tag}>
                 Aditya Himawan
               </Link>
-              <span>·</span>
               {formatDate(meta.date, 'long')}
-              <span>·</span>
               <span>{meta.readingTime}</span>
-              <span>·</span>
               <ViewCounter slug={meta.slug} />
             </p>
 
@@ -215,26 +202,21 @@ export function BlogPost({
                   className={styles.trackList}
                   style={{ marginTop: '0.75rem' }}
                 >
-                  {relatedPosts.map((post) => (
+                  {relatedPosts.map((post, i) => (
                     <li key={post.slug}>
                       <Link
                         href={`/blog/${post.slug}`}
                         className={styles.track}
                       >
-                        <span className={styles.trackIndex}>→</span>
-                        <span className={styles.trackArt}>
-                          <Cover
-                            seed={post.slug}
-                            title={post.title}
-                            sizes="44px"
-                          />
+                        <span className={styles.trackIndex}>
+                          {String(i + 1).padStart(2, '0')}
                         </span>
                         <span className={styles.trackBody}>
                           <span className={styles.trackTitle}>
                             {post.title}
                           </span>
                           <span className={styles.trackMeta}>
-                            {formatDate(post.date)} · {post.readingTime}
+                            {formatDate(post.date)}, {post.readingTime}
                           </span>
                         </span>
                       </Link>
@@ -246,7 +228,7 @@ export function BlogPost({
           </article>
 
           {chapters.length > 0 && (
-            <nav className={`${styles.chapters} glass`} aria-label="Chapters">
+            <nav className={styles.chapters} aria-label="Chapters">
               <p className={styles.chapterTitle}>Chapters</p>
               <ul className={styles.chapterList}>
                 {chapters.map((chapter) => (
@@ -288,12 +270,7 @@ export function BlogPost({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                zIndex: 70,
-                background: 'rgba(0,0,0,0.55)',
-              }}
+              className={styles.drawerScrim}
             />
             <motion.div
               role="dialog"
@@ -303,7 +280,7 @@ export function BlogPost({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 300 }}
-              className={`${styles.chapterDrawer} glass`}
+              className={styles.chapterDrawer}
             >
               <div className={styles.chapterDrawerHead}>
                 <p className={styles.chapterTitle}>Chapters</p>

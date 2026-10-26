@@ -74,6 +74,9 @@ next-env.d.ts
 # local agent tooling state
 .commandcode/
 
+# Hallmark run artifacts: before record, screenshots, build/dev logs
+/.hallmark/
+
 # generated repo snapshots
 artifacts/
 

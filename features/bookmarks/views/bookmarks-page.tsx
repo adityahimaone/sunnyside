@@ -25,22 +25,19 @@ import {
 } from 'lucide-react'
 import type { Bookmark, BookmarkFormData } from '../types'
 import type { BookmarkPage } from '../lib/bookmarks'
-import { channelColor } from '../constants/categories'
-import { useRoomChannel } from '@/features/booth'
 import { FaviconCell } from '../components/favicon-cell'
 import { BookmarkAdminModal } from '../components/bookmark-admin-modal'
 import { useListKeys, useGlobalShortcuts } from '../hooks/use-list-keys'
 import { ScriptWord } from '@/features/landing-page/studio/script-word'
+import layout from '@/features/archive/archive.module.css'
 import styles from '../sunnyside-bookmarks.module.css'
 
-const DEFAULT_HUE = '#3d53d6'
 const SEARCH_DEBOUNCE_MS = 250
 
 export function BookmarksPage({ page }: { page: BookmarkPage }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const setHue = useRoomChannel()
   const [isPending, startTransition] = useTransition()
 
   const [isAdmin, setIsAdmin] = useState(false)
@@ -145,10 +142,6 @@ export function BookmarksPage({ page }: { page: BookmarkPage }) {
     for (const facet of page.facets) map.set(facet.name, facet.count)
     return map
   }, [page.facets])
-
-  useEffect(() => {
-    setHue(channel === 'All' ? DEFAULT_HUE : channelColor(channel))
-  }, [channel, setHue])
 
   const { active } = useListKeys(
     tracks.length,
@@ -331,221 +324,50 @@ export function BookmarksPage({ page }: { page: BookmarkPage }) {
   }
 
   return (
-    <main className={styles.page} id="main-content">
-      <div className={styles.shell}>
-        {/* Header */}
-        <header className={styles.header}>
-          <div className={styles.headerMeta}>
-            <span className={styles.pill}>
-              <span className={styles.pillDot} />
-              03 / LIBRARY
-            </span>
-            <span>Curated Reading Shelf & Directory</span>
-            <span>·</span>
-            <span>{page.totalAll} Reference Artifacts</span>
+    <main className={`${layout.page} ${styles.page}`} id="main-content">
+      <div className={layout.container}>
+        <header className={styles.hero}>
+          <div className={styles.heroCopy}>
+            <p className={styles.kicker}>
+              <span className={styles.kickerTag}>
+                <span className={styles.kickerMark} aria-hidden />
+                03 / The crate
+              </span>
+              <span className={styles.kickerText}>
+                <span className={layout.num}>{page.totalAll}</span> links,{' '}
+                <span className={layout.num}>{channels.length - 1}</span>{' '}
+                categories
+              </span>
+            </p>
+
+            <ScriptWord text="good finds" className={layout.hand} />
+
+            <h1 className={layout.title}>The reading rack.</h1>
+            <p className={layout.intro}>
+              Engineering write-ups, tools and interface references, kept in one
+              crate.
+            </p>
           </div>
 
-          <div className={styles.headerTitleStack}>
-            <ScriptWord text="good finds" className={styles.headerScript} />
-            <h1 className={styles.headerTitle}>
-              The reading rack.
-              <span className={styles.headerTitleTape}>ARCHIVE</span>
-            </h1>
-          </div>
-
-          <p className={styles.headerIntro}>
-            Engineering write-ups, architecture case studies, developer tooling,
-            and interface references bookmarked across the web. Click any entry
-            to read the original source.
-          </p>
-        </header>
-
-        {/* Asymmetric 4-column / 8-column layout */}
-        <div className={styles.asymmetricGrid}>
-          {/* Left Column: Channels & Controls */}
-          <aside className={styles.sidebarSticky}>
-            {/* Channel patchbay */}
-            <div className={styles.sidebarCard}>
-              <div className={styles.sidebarHead}>
-                <span>CHANNELS</span>
-                <span>{channels.length} SECTIONS</span>
-              </div>
-              <div className={styles.channelList}>
-                {channels.map((chName) => {
-                  const isActive = channel === chName
-                  const count =
-                    chName === 'All' ? page.totalAll : (counts.get(chName) ?? 0)
-
-                  return (
-                    <button
-                      key={chName}
-                      type="button"
-                      className={`${styles.channelBtn} ${
-                        isActive ? styles.channelBtnActive : ''
-                      }`}
-                      onClick={() => updateParams({ category: chName })}
-                    >
-                      <div className={styles.channelLeft}>
-                        <span className={styles.channelLed} />
-                        <span>{chName}</span>
-                      </div>
-                      <span className={styles.channelCount}>{count}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Quick Actions & Telemetry */}
-            <div className={styles.sidebarCard}>
-              <div className={styles.sidebarHead}>
-                <span>ACTIONS & SHORTCUTS</span>
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem',
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={shuffle}
-                  className={styles.tactileBtn}
-                  style={{ width: '100%', justifyContent: 'flex-start' }}
-                >
-                  <Shuffle size={14} />
-                  Shuffle Pick (R)
-                </button>
-
-                {isAdmin ? (
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.5rem',
-                      padding: '0.75rem',
-                      background: 'var(--butter)',
-                      border: '1.5px solid var(--ink)',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        fontFamily: 'var(--mono)',
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                      }}
-                    >
-                      <span>ADMIN UNLOCKED</span>
-                      <button
-                        type="button"
-                        onClick={handleLockAdmin}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          display: 'flex',
-                        }}
-                      >
-                        <Lock size={12} />
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditing(null)
-                        setModalTab('single')
-                        setIsAdminOpen(true)
-                      }}
-                      className={styles.tactileBtn}
-                      style={{ fontSize: '0.68rem', padding: '0.4rem 0.6rem' }}
-                    >
-                      <Plus size={12} /> Add bookmark
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditing(null)
-                        setModalTab('bulk')
-                        setIsAdminOpen(true)
-                      }}
-                      className={styles.tactileBtn}
-                      style={{ fontSize: '0.68rem', padding: '0.4rem 0.6rem' }}
-                    >
-                      <Layers size={12} /> Bulk import
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditing(null)
-                      setIsAdminOpen(true)
-                    }}
-                    className={styles.tactileBtn}
-                    style={{
-                      width: '100%',
-                      justifyContent: 'flex-start',
-                      opacity: 0.8,
-                    }}
-                  >
-                    <Unlock size={14} />
-                    Admin controls (E)
-                  </button>
-                )}
-
-                {/* Keyboard ledger */}
-                <div
-                  style={{
-                    padding: '0.8rem',
-                    background: 'var(--paper)',
-                    border: '1px solid var(--line)',
-                    borderRadius: '8px',
-                    fontFamily: 'var(--mono)',
-                    fontSize: '0.68rem',
-                    lineHeight: 1.6,
-                    color: 'var(--muted)',
-                  }}
-                >
-                  <div>
-                    <b style={{ color: 'var(--ink)' }}>J / K</b>: Move cursor
-                  </div>
-                  <div>
-                    <b style={{ color: 'var(--ink)' }}>O / Enter</b>: Open link
-                  </div>
-                  <div>
-                    <b style={{ color: 'var(--ink)' }}>/</b>: Focus search
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          {/* Right Column: Search & Bookmark Deck */}
-          <section
-            className={styles.contentColumn}
-            aria-label="Bookmarks collection"
-          >
-            {/* Search Toolbar */}
+          <div className={styles.heroTools}>
+            <label htmlFor="crate-search" className={styles.searchLabel}>
+              Search the crate
+            </label>
             <div className={styles.searchBar}>
-              <Search size={16} style={{ color: 'var(--muted)' }} />
+              <Search size={17} className={styles.searchIcon} aria-hidden />
               <input
                 ref={searchRef}
+                id="crate-search"
                 type="search"
                 value={queryInput}
                 onChange={(e) =>
                   setDraft({ base: urlQuery, value: e.target.value })
                 }
-                placeholder="Search bookmarks by domain, title, or tags..."
+                placeholder="Title, domain, tag"
                 className={styles.searchInput}
                 aria-label="Search bookmarks"
               />
-              {queryInput && (
+              {queryInput ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -555,227 +377,271 @@ export function BookmarksPage({ page }: { page: BookmarkPage }) {
                   className={styles.searchClear}
                   aria-label="Clear search"
                 >
-                  <X size={15} />
+                  <X size={15} aria-hidden />
+                </button>
+              ) : null}
+            </div>
+
+            <div className={styles.heroActions}>
+              <button
+                type="button"
+                onClick={shuffle}
+                className={styles.shuffleButton}
+              >
+                <Shuffle size={15} aria-hidden />
+                Shuffle a pick
+                <kbd className={styles.kbd}>R</kbd>
+              </button>
+              <span className={styles.heroHint}>
+                <kbd className={styles.kbd}>/</kbd> to search
+              </span>
+            </div>
+          </div>
+        </header>
+
+        <div className={styles.layout}>
+          <aside className={styles.index} aria-label="Crate filters">
+            <div className={styles.indexCard}>
+              <p className={styles.indexTitle}>Categories</p>
+              <div className={styles.channelList}>
+                {channels.map((chName) => {
+                  const isActive = channel === chName
+                  const count =
+                    chName === 'All' ? page.totalAll : (counts.get(chName) ?? 0)
+                  return (
+                    <button
+                      key={chName}
+                      type="button"
+                      className={styles.channel}
+                      data-active={isActive}
+                      onClick={() => updateParams({ category: chName })}
+                    >
+                      <span>{chName}</span>
+                      <span className={styles.channelCount}>{count}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className={styles.indexCard}>
+              <p className={styles.indexTitle}>Admin</p>
+              {isAdmin ? (
+                <div className={styles.adminBox}>
+                  <p className={styles.adminHead}>
+                    <span>Admin is on</span>
+                    <button
+                      type="button"
+                      onClick={handleLockAdmin}
+                      className={styles.lockButton}
+                      aria-label="Lock admin controls"
+                    >
+                      <Lock size={13} aria-hidden />
+                    </button>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditing(null)
+                      setModalTab('single')
+                      setIsAdminOpen(true)
+                    }}
+                    className={styles.adminAction}
+                  >
+                    <Plus size={13} aria-hidden />
+                    Add a bookmark
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditing(null)
+                      setModalTab('bulk')
+                      setIsAdminOpen(true)
+                    }}
+                    className={styles.adminAction}
+                  >
+                    <Layers size={13} aria-hidden />
+                    Bulk import
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditing(null)
+                    setIsAdminOpen(true)
+                  }}
+                  className={styles.adminOpen}
+                >
+                  <Unlock size={14} aria-hidden />
+                  Admin controls
+                  <kbd className={styles.kbd}>E</kbd>
                 </button>
               )}
             </div>
 
-            {/* Bookmarks Items Deck */}
-            <div className={styles.bookmarkDeck}>
+            <div className={styles.shortcuts}>
+              <p className={styles.indexTitle}>Keys</p>
+              <ul className={styles.shortcutList}>
+                <li>
+                  <kbd className={styles.kbd}>J</kbd>
+                  <kbd className={styles.kbd}>K</kbd>
+                  <span>move</span>
+                </li>
+                <li>
+                  <kbd className={styles.kbd}>O</kbd>
+                  <span>open</span>
+                </li>
+                <li>
+                  <kbd className={styles.kbd}>/</kbd>
+                  <span>search</span>
+                </li>
+              </ul>
+            </div>
+          </aside>
+
+          <section className={styles.list} aria-label="Bookmarks">
+            <div className={styles.listHead}>
+              <h2 className={styles.listTitle}>The crate</h2>
+              <p className={styles.listCount}>
+                <span className={layout.num}>{tracks.length}</span> of{' '}
+                <span className={layout.num}>{page.total}</span> shown
+              </p>
+            </div>
+
+            <div className={styles.deck}>
               {tracks.map((b, idx) => {
                 const isSelected = active === idx
                 return (
                   <article
                     key={b.id}
-                    className={styles.bookmarkCard}
-                    style={
-                      isSelected
-                        ? {
-                            borderColor: 'var(--cobalt)',
-                            background: 'var(--cobalt-wash)',
-                            boxShadow: '4px 6px 0 var(--cobalt-ink)',
-                          }
-                        : undefined
-                    }
+                    className={styles.row}
+                    data-active={isSelected}
                   >
-                    <div className={styles.bookmarkTop}>
-                      <div className={styles.bookmarkDomain}>
-                        <FaviconCell
-                          url={b.url}
-                          faviconUrl={b.faviconUrl}
-                          alt={b.title}
-                          className={styles.faviconBox}
-                        />
-                        <span>
-                          {new URL(b.url).hostname.replace('www.', '')}
-                        </span>
-                      </div>
+                    <div className={styles.rowMain}>
+                      <FaviconCell
+                        url={b.url}
+                        faviconUrl={b.faviconUrl}
+                        alt={b.title}
+                        className={styles.faviconBox}
+                      />
 
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                        }}
-                      >
-                        <span className={styles.categoryStamp}>
-                          {b.category}
-                        </span>
-                        {isAdmin && (
-                          <div
-                            style={{ display: 'inline-flex', gap: '0.25rem' }}
+                      <div className={styles.rowBody}>
+                        <div className={styles.rowTop}>
+                          <a
+                            href={b.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.rowTitle}
                           >
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setEditing(b)
-                                setIsAdminOpen(true)
-                              }}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: '2px',
-                              }}
-                              aria-label="Edit bookmark"
-                            >
-                              <Edit2 size={13} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setDeleteTarget(b)
-                              }}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: '2px',
-                                color: 'var(--tangerine)',
-                              }}
-                              aria-label="Delete bookmark"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        )}
+                            {b.title}
+                            <ArrowUpRight size={14} aria-hidden />
+                          </a>
+                          <span className={styles.rowDomain}>
+                            {new URL(b.url).hostname.replace('www.', '')}
+                          </span>
+                        </div>
+
+                        {b.description ? (
+                          <p className={styles.rowDesc}>{b.description}</p>
+                        ) : null}
+
+                        {b.tags.length > 0 ? (
+                          <p className={styles.rowTags}>
+                            {[...new Set(b.tags)].map((t) => (
+                              <span key={t} className={styles.tag}>
+                                {t}
+                              </span>
+                            ))}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
 
-                    <a
-                      href={b.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.bookmarkTitle}
-                    >
-                      <span>{b.title}</span>
-                      <ArrowUpRight size={14} style={{ opacity: 0.6 }} />
-                    </a>
-
-                    {b.description && (
-                      <p className={styles.bookmarkDesc}>{b.description}</p>
-                    )}
-
-                    <div className={styles.bookmarkFooter}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          gap: '0.35rem',
-                          flexWrap: 'wrap',
-                        }}
-                      >
-                        {b.tags.map((t) => (
-                          <span
-                            key={t}
-                            style={{
-                              padding: '0.1rem 0.4rem',
-                              borderRadius: '4px',
-                              background: 'var(--paper)',
-                              border: '1px solid var(--line)',
-                              fontSize: '0.65rem',
-                            }}
-                          >
-                            #{t}
-                          </span>
-                        ))}
-                      </div>
+                    <div className={styles.rowSide}>
+                      <span className={styles.category}>{b.category}</span>
 
                       <a
                         href={b.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.25rem',
-                          color: 'var(--cobalt)',
-                          fontWeight: 700,
-                          textDecoration: 'none',
-                        }}
+                        className={styles.visit}
                       >
-                        Visit <ExternalLink size={11} />
+                        Visit
+                        <ExternalLink size={11} aria-hidden />
                       </a>
+
+                      {isAdmin ? (
+                        <span className={styles.rowAdmin}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditing(b)
+                              setIsAdminOpen(true)
+                            }}
+                            className={styles.iconButton}
+                            aria-label={`Edit ${b.title}`}
+                          >
+                            <Edit2 size={13} aria-hidden />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(b)}
+                            className={`${styles.iconButton} ${styles.iconDanger}`}
+                            aria-label={`Delete ${b.title}`}
+                          >
+                            <Trash2 size={13} aria-hidden />
+                          </button>
+                        </span>
+                      ) : null}
                     </div>
                   </article>
                 )
               })}
 
-              {tracks.length === 0 && (
-                <div
-                  style={{
-                    padding: '3rem 2rem',
-                    textAlign: 'center',
-                    background: 'var(--paper-hi)',
-                    border: '2px dashed var(--ink)',
-                    borderRadius: '14px',
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontFamily: 'var(--display)',
-                      fontSize: '1.3rem',
-                      fontWeight: 800,
-                      marginBottom: '0.5rem',
-                    }}
-                  >
-                    No bookmarks found for &quot;{queryInput || channel}&quot;
+              {tracks.length === 0 ? (
+                <div className={styles.empty}>
+                  <h3 className={styles.emptyTitle}>
+                    No bookmarks for “{queryInput || channel}”
                   </h3>
-                  <p
-                    style={{
-                      fontSize: '0.9rem',
-                      color: 'var(--muted)',
-                      marginBottom: '1.25rem',
-                    }}
-                  >
-                    Try searching for another term or pick another channel.
+                  <p className={styles.emptyNote}>
+                    Try another word, or go back to every category.
                   </p>
                   <button
                     type="button"
                     onClick={() => updateParams({ q: '', category: 'All' })}
-                    className={styles.tactileBtn}
+                    className={layout.ghost}
                   >
-                    <RefreshCw size={13} />
-                    Reset to All
+                    <RefreshCw size={13} aria-hidden />
+                    Reset the filters
                   </button>
                 </div>
-              )}
+              ) : null}
             </div>
 
-            {/* Load More Sentinel & Button */}
-            {hasMore && (
-              <div style={{ textAlign: 'center', paddingBlock: '1.5rem' }}>
-                <div ref={sentinelRef} style={{ height: '10px' }} />
+            {hasMore ? (
+              <div className={styles.loadMoreWrap}>
+                <div ref={sentinelRef} className={styles.sentinel} />
                 <button
                   type="button"
                   onClick={loadMore}
                   disabled={isPending}
-                  className={styles.tactileBtn}
-                  style={{ padding: '0.6rem 1.4rem' }}
+                  className={styles.loadMore}
                 >
-                  {isPending ? 'Loading dispatches...' : 'Load more bookmarks'}
+                  {isPending ? 'Loading the next drawer…' : 'Load more links'}
                 </button>
               </div>
-            )}
-            {status && (
-              <p
-                style={{
-                  textAlign: 'center',
-                  fontFamily: 'var(--mono)',
-                  fontSize: '0.75rem',
-                  color: 'var(--muted)',
-                }}
-              >
+            ) : null}
+            {status ? (
+              <p className={styles.status} role="status">
                 {status}
               </p>
-            )}
+            ) : null}
           </section>
         </div>
       </div>
 
-      {/* Admin management modal */}
-      {isAdminOpen && (
+      {isAdminOpen ? (
         <BookmarkAdminModal
           isOpen={isAdminOpen}
           onClose={() => setIsAdminOpen(false)}
@@ -805,82 +671,42 @@ export function BookmarksPage({ page }: { page: BookmarkPage }) {
             }
           }}
         />
-      )}
+      ) : null}
 
-      {/* Delete Confirmation Modal */}
-      {deleteTarget && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 100,
-            background: 'rgba(25, 26, 46, 0.6)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
-        >
+      {deleteTarget ? (
+        <div className={styles.modalBackdrop} role="presentation">
           <div
-            style={{
-              background: 'var(--paper-hi)',
-              border: '2px solid var(--ink)',
-              borderRadius: '14px',
-              padding: '1.5rem',
-              maxWidth: '420px',
-              boxShadow: '8px 10px 0 var(--ink)',
-            }}
+            className={styles.modalCard}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-bookmark-title"
           >
-            <h3
-              style={{
-                fontFamily: 'var(--display)',
-                fontWeight: 800,
-                fontSize: '1.2rem',
-                marginBottom: '0.5rem',
-              }}
-            >
+            <h3 id="delete-bookmark-title" className={styles.modalTitle}>
               Delete bookmark?
             </h3>
-            <p
-              style={{
-                fontSize: '0.9rem',
-                color: 'var(--muted)',
-                marginBottom: '1.25rem',
-              }}
-            >
-              Are you sure you want to delete &quot;{deleteTarget.title}&quot;?
-              This cannot be undone.
+            <p className={styles.modalNote}>
+              “{deleteTarget.title}” will leave the crate. This cannot be
+              undone.
             </p>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '0.5rem',
-              }}
-            >
+            <div className={styles.modalActions}>
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className={styles.tactileBtn}
+                className={layout.ghost}
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={confirmDelete}
-                className={styles.tactileBtn}
-                style={{
-                  background: 'var(--tangerine)',
-                  color: 'var(--paper-hi)',
-                }}
+                className={styles.dangerButton}
               >
                 Delete
               </button>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </main>
   )
 }

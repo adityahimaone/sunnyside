@@ -3,18 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
-import {
-  AnimatePresence,
-  motion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from 'motion/react'
+import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
 import { ArrowLeft, List, X } from 'lucide-react'
-import { Cover } from '@/features/booth'
 import { ViewCounter } from '@/features/blog/components/view-counter'
 import { formatDate } from '@/lib/date'
-import { getWaveformBars } from '@/lib/waveform-data'
+import { getWaveformBars, waveformFromReadingTime } from '@/lib/waveform-data'
 import {
   guideChoices,
   guideFaq,
@@ -91,18 +84,12 @@ export function GuidePage({ meta }: { meta: GuideMeta }) {
   // Unused locally, but the seeded trace is what makes the section count and
   // the page feel like one of the archive's own objects rather than a
   // different kind of page that happens to share a stylesheet.
-  const bars = useMemo(
-    () => getWaveformBars(meta.slug, 40, { minHeight: 0.25, maxHeight: 1 }),
-    [meta.slug],
-  )
-
   const { scrollYProgress } = useScroll()
   const smooth = useSpring(scrollYProgress, {
     stiffness: 120,
     damping: 30,
     restDelta: 0.001,
   })
-  const percent = useTransform(smooth, (value) => `${value * 100}%`)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -178,30 +165,6 @@ export function GuidePage({ meta }: { meta: GuideMeta }) {
 
   return (
     <>
-      <motion.div
-        className={styles.scrubWave}
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 2,
-          zIndex: 60,
-          margin: 0,
-        }}
-      >
-        {bars.map((h, i) => (
-          <span key={i} style={{ ['--h' as string]: `${h * 100}%` }} />
-        ))}
-        <motion.div className={styles.scrubFill} style={{ width: percent }}>
-          {bars.map((h, i) => (
-            <span key={i} style={{ ['--h' as string]: `${h * 100}%` }} />
-          ))}
-        </motion.div>
-        <motion.span className={styles.scrubHead} style={{ left: percent }} />
-      </motion.div>
-
       <main className={styles.page} id="main-content">
         <nav className={styles.crumbs} aria-label="Breadcrumb">
           <Link href="/blog" className={styles.crumbBack}>
@@ -219,13 +182,16 @@ export function GuidePage({ meta }: { meta: GuideMeta }) {
         <div className={styles.reader}>
           <article ref={articleRef} className={styles.article}>
             <div className={styles.headlineCover}>
-              <Cover
-                seed={meta.slug}
-                title={meta.title}
-                catalog={meta.eyebrow}
-                sizes="84px"
-                priority
-              />
+              <span className={styles.stamp} aria-hidden="true">
+                <span className={styles.stampLabel}>Guide</span>
+                <span className={styles.stampWave}>
+                  {waveformFromReadingTime(readingTime)
+                    .slice(0, 7)
+                    .map((h, i) => (
+                      <span key={i} style={{ height: `${h}%` }} />
+                    ))}
+                </span>
+              </span>
             </div>
 
             <p className={styles.headlineMeta}>
@@ -240,11 +206,8 @@ export function GuidePage({ meta }: { meta: GuideMeta }) {
               <Link href="/#contact" className={styles.tag}>
                 Aditya Himawan
               </Link>
-              <span>·</span>
               {formatDate(meta.updated, 'long')}
-              <span>·</span>
               <span>{readingTime}</span>
-              <span>·</span>
               <ViewCounter slug={meta.slug} />
             </p>
 
@@ -274,13 +237,6 @@ export function GuidePage({ meta }: { meta: GuideMeta }) {
                           >
                             <span className={styles.trackIndex}>
                               {String(index + 1).padStart(2, '0')}
-                            </span>
-                            <span className={styles.trackArt}>
-                              <Cover
-                                seed={step.slug}
-                                title={step.title}
-                                sizes="44px"
-                              />
                             </span>
                             <span className={styles.trackBody}>
                               <span
@@ -420,7 +376,7 @@ export function GuidePage({ meta }: { meta: GuideMeta }) {
           </article>
 
           {chapters.length > 0 && (
-            <nav className={`${styles.chapters} glass`} aria-label="Chapters">
+            <nav className={styles.chapters} aria-label="Chapters">
               <p className={styles.chapterTitle}>Chapters</p>
               <ul className={styles.chapterList}>
                 {chapters.map((chapter) => (
@@ -467,12 +423,7 @@ export function GuidePage({ meta }: { meta: GuideMeta }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                zIndex: 70,
-                background: 'rgba(0,0,0,0.55)',
-              }}
+              className={styles.drawerScrim}
             />
             <motion.div
               role="dialog"
@@ -482,7 +433,7 @@ export function GuidePage({ meta }: { meta: GuideMeta }) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 300 }}
-              className={`${styles.chapterDrawer} glass`}
+              className={styles.chapterDrawer}
             >
               <div className={styles.chapterDrawerHead}>
                 <p className={styles.chapterTitle}>Chapters</p>

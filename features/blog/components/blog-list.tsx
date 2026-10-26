@@ -17,6 +17,7 @@ import { waveformFromReadingTime } from '@/lib/waveform-data'
 import { formatDate } from '@/lib/date'
 import { ViewCounter } from './view-counter'
 import { ScriptWord } from '@/features/landing-page/studio/script-word'
+import layout from '@/features/archive/archive.module.css'
 import styles from '../sunnyside-blog.module.css'
 
 type Sort = 'desc' | 'asc'
@@ -119,339 +120,287 @@ export function BlogList({ posts }: { posts: BlogMeta[] }) {
     : filtered.filter((post) => post.slug !== leadPost?.slug)
 
   return (
-    <main className={styles.page} id="main-content">
-      <div className={styles.shell}>
-        {/* Header */}
-        <header className={styles.header}>
-          <div className={styles.headerMeta}>
-            <span className={styles.pill}>
-              <span className={styles.pillDot} />
-              02 / DISPATCHES
-            </span>
-            <span>Field Notes & Engineering Log</span>
-            <span>·</span>
-            <span>{posts.length} Documented Essays</span>
+    <main className={`${layout.page} ${styles.page}`} id="main-content">
+      <div className={layout.container}>
+        <header className={styles.hero}>
+          <div className={styles.heroCopy}>
+            <p className={styles.kicker}>
+              <span className={styles.kickerTag}>
+                <span className={styles.kickerMark} aria-hidden />
+                02 / Field notes
+              </span>
+              <span className={styles.kickerText}>
+                <span className={layout.num}>{posts.length}</span> documented
+                essays
+              </span>
+            </p>
+
+            <ScriptWord text="field notes" className={layout.hand} />
+
+            <h1 className={layout.title}>Notes from the build.</h1>
+            <p className={layout.intro}>
+              Postmortems, deployment notes and the things that broke in
+              production.
+            </p>
+
+            <div className={layout.actions}>
+              <a href="#dispatches" className={layout.primary}>
+                Read the dispatches
+                <ArrowUpRight className="size-4" aria-hidden />
+              </a>
+              <a href="#guides" className={layout.ghost}>
+                Field guides
+                <ChevronRight className="size-4" aria-hidden />
+              </a>
+            </div>
           </div>
 
-          <div className={styles.headerTitleStack}>
-            <ScriptWord text="field notes" className={styles.headerScript} />
-            <h1 className={styles.headerTitle}>
-              Notes from the build.
-              <span className={styles.headerTitleTape}>DEV & OPS</span>
-            </h1>
-          </div>
-
-          <p className={styles.headerIntro}>
-            Frontend architecture, production incident postmortems, and
-            deployment infrastructure. Every post here is something that
-            actually failed, broke, or required a clean solution in production.
-          </p>
+          {leadPost ? (
+            <article className={styles.lead}>
+              <span className={styles.leadTape} aria-hidden />
+              <p className={styles.leadStamp}>
+                <Sparkles size={12} aria-hidden />
+                Featured dispatch
+              </p>
+              <Link
+                href={`/blog/${leadPost.slug}`}
+                className={styles.leadTitle}
+              >
+                {leadPost.title}
+              </Link>
+              <p className={styles.leadDesc}>{leadPost.description}</p>
+              <span className={styles.waveform} aria-hidden data-tone="butter">
+                {waveformFromReadingTime(leadPost.readingTime).map((h, i) => (
+                  <span
+                    key={i}
+                    className={styles.waveBar}
+                    style={{ height: `${h}%` }}
+                  />
+                ))}
+              </span>
+              <div className={styles.leadMeta}>
+                <span>{formatDate(leadPost.date)}</span>
+                <span>{leadPost.readingTime}</span>
+                <ViewCounter slug={leadPost.slug} />
+              </div>
+              <Link href={`/blog/${leadPost.slug}`} className={styles.leadLink}>
+                Read the dispatch
+                <ArrowUpRight size={13} aria-hidden />
+              </Link>
+            </article>
+          ) : (
+            <aside className={styles.filteredCard}>
+              <p className={styles.filteredLabel}>Filtered view</p>
+              <p className={styles.filteredValue}>
+                {query ? `“${query}”` : null}
+                {query && tag ? ' in ' : null}
+                {tag ? tag : null}
+              </p>
+              <button
+                type="button"
+                onClick={() => router.replace(pathname, { scroll: false })}
+                className={layout.ghost}
+              >
+                <RefreshCw size={13} aria-hidden />
+                Clear the filters
+              </button>
+            </aside>
+          )}
         </header>
 
-        {/* Asymmetric 4-column / 8-column grid */}
-        <div className={styles.asymmetricGrid}>
-          {/* Left Column: Guides & Topic Filters */}
-          <aside className={styles.sidebarSticky}>
-            {/* Curated Guides */}
-            <div className={styles.sidebarCard}>
-              <div className={styles.sidebarHead}>
-                <span>FIELD GUIDES</span>
-                <span>STEP-BY-STEP</span>
-              </div>
-              <p
-                style={{
-                  fontSize: '0.8rem',
-                  lineHeight: 1.5,
-                  color: 'var(--muted)',
-                  marginBottom: '1rem',
-                }}
-              >
-                Structured walk-throughs for production deployment and ops:
-              </p>
-              <div className={styles.guideList}>
-                {GUIDES.map((guide) => (
-                  <Link
-                    key={guide.href}
-                    href={guide.href}
-                    className={styles.guideCard}
-                  >
-                    <span className={styles.guideMeta}>
-                      {guide.steps} steps
-                    </span>
-                    <h3 className={styles.guideTitle}>{guide.title}</h3>
-                    <p className={styles.guideDesc}>{guide.description}</p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Topic Filter Matrix */}
-            <div className={styles.sidebarCard}>
-              <div className={styles.sidebarHead}>
-                <span>TOPIC INDEX</span>
-                <span>{tagCounts.length} TAGS</span>
-              </div>
-              <div className={styles.tagGrid}>
-                <button
-                  type="button"
-                  className={`${styles.tagChip} ${
-                    !tag ? styles.tagChipActive : ''
-                  }`}
-                  onClick={() => updateParam('tag', null)}
-                >
-                  <span>All Dispatches</span>
-                  <span className={styles.tagChipCount}>({posts.length})</span>
-                </button>
-                {tagCounts.map(([tagName, count]) => (
-                  <button
-                    key={tagName}
-                    type="button"
-                    className={`${styles.tagChip} ${
-                      tag === tagName ? styles.tagChipActive : ''
-                    }`}
-                    onClick={() =>
-                      updateParam('tag', tag === tagName ? null : tagName)
-                    }
-                  >
-                    <span>{tagName}</span>
-                    <span className={styles.tagChipCount}>({count})</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Editorial Rule Note */}
-            <div
-              style={{
-                padding: '1rem',
-                borderRadius: '12px',
-                border: '1.5px dashed var(--line)',
-                background: 'var(--paper-lo)',
-                fontFamily: 'var(--mono)',
-                fontSize: '0.7rem',
-                lineHeight: 1.5,
-                color: 'var(--muted)',
-              }}
-            >
-              <b style={{ color: 'var(--ink)' }}>EDITORIAL CONSTRAINT:</b>
-              <br />
-              If a post could sit on any generic engineering blog without
-              shipped codebase evidence, it gets cut.
-            </div>
-          </aside>
-
-          {/* Right Column: Search, Lead Story & Posts List */}
-          <section className={styles.contentColumn} aria-label="Essays feed">
-            {/* Search and Sort Toolbar */}
+        <section id="dispatches" className={styles.dispatches}>
+          <div className={styles.toolbar}>
             <div className={styles.searchBar}>
-              <Search size={16} style={{ color: 'var(--muted)' }} />
+              <Search size={16} className={styles.searchIcon} aria-hidden />
               <input
                 type="search"
                 value={query}
                 onChange={(e) => updateParam('q', e.target.value || null)}
-                placeholder="Search essays by title, keyword, or technology..."
+                placeholder="Search title, keyword or technology"
                 className={styles.searchInput}
                 aria-label="Search articles"
               />
-              {query && (
+              {query ? (
                 <button
                   type="button"
                   onClick={() => updateParam('q', null)}
-                  className={styles.searchBtn}
+                  className={styles.searchClear}
+                  aria-label="Clear search"
                 >
-                  <X size={12} />
-                  Clear
+                  <X size={14} aria-hidden />
                 </button>
-              )}
+              ) : null}
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                updateParam('sort', sort === 'desc' ? 'asc' : 'desc')
+              }
+              className={styles.sortButton}
+            >
+              <ArrowDownUp size={14} aria-hidden />
+              {sort === 'desc' ? 'Newest first' : 'Oldest first'}
+            </button>
+          </div>
+
+          <div
+            className={styles.tagRail}
+            role="group"
+            aria-label="Filter dispatches by topic"
+          >
+            <button
+              type="button"
+              className={styles.tagChip}
+              data-active={!tag}
+              onClick={() => updateParam('tag', null)}
+            >
+              <span>All dispatches</span>
+              <span className={styles.tagCount}>({posts.length})</span>
+            </button>
+            {tagCounts.map(([tagName, count]) => (
+              <button
+                key={tagName}
+                type="button"
+                className={styles.tagChip}
+                data-active={tag === tagName}
+                onClick={() =>
+                  updateParam('tag', tag === tagName ? null : tagName)
+                }
+              >
+                <span>{tagName}</span>
+                <span className={styles.tagCount}>({count})</span>
+              </button>
+            ))}
+          </div>
+
+          <p className={styles.editorNote}>
+            If a post could sit on any generic engineering blog without shipped
+            codebase evidence, it gets cut.
+          </p>
+
+          <div className={styles.listHead}>
+            <h2 className={styles.listTitle}>The dispatches</h2>
+            <p className={styles.listCount}>
+              <span className={layout.num}>{filtered.length}</span> shown
+              {isFiltered ? ' after filters' : ''}
+            </p>
+          </div>
+
+          <div className={styles.postList}>
+            {remainingPosts.map((post, idx) => (
+              <Link
+                key={post.slug}
+                href={`/blog/${post.slug}`}
+                className={styles.postRow}
+              >
+                <span className={styles.postIndex}>
+                  {String(idx + 1).padStart(2, '0')}
+                </span>
+
+                <span className={styles.postBody}>
+                  <span className={styles.postTopics}>
+                    {post.tags.slice(0, 2).map((t) => (
+                      <span key={t} className={styles.postTopic}>
+                        {t}
+                      </span>
+                    ))}
+                  </span>
+
+                  <span className={styles.postTitle}>{post.title}</span>
+                  <span className={styles.postDesc}>{post.description}</span>
+
+                  <span className={styles.postMeta}>
+                    <span>{formatDate(post.date)}</span>
+                    <span>{post.readingTime}</span>
+                    <ViewCounter slug={post.slug} />
+                  </span>
+                </span>
+
+                <span className={styles.postWave} aria-hidden>
+                  {waveformFromReadingTime(post.readingTime).map((h, i) => (
+                    <span
+                      key={i}
+                      className={styles.waveBar}
+                      style={{ height: `${h}%` }}
+                    />
+                  ))}
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className={styles.empty}>
+              <h3 className={styles.emptyTitle}>
+                No dispatches match “{query || tag}”
+              </h3>
+              <p className={styles.emptyNote}>
+                Try another topic, or clear the active query.
+              </p>
               <button
                 type="button"
-                onClick={() =>
-                  updateParam('sort', sort === 'desc' ? 'asc' : 'desc')
-                }
-                className={styles.searchBtn}
+                onClick={() => router.replace(pathname, { scroll: false })}
+                className={layout.ghost}
               >
-                <ArrowDownUp size={12} />
-                {sort === 'desc' ? 'Newest First' : 'Oldest First'}
+                <RefreshCw size={13} aria-hidden />
+                Reset the filters
               </button>
             </div>
+          ) : null}
+        </section>
 
-            {/* Lead Pinned Article (if not filtered and exists) */}
-            {leadPost && (
-              <article className={styles.leadCard}>
-                <div className={styles.leadTape} />
-                <div className={styles.leadStamp}>
-                  <Sparkles size={11} />
-                  FEATURED DISPATCH
-                </div>
+        <section
+          id="guides"
+          className={styles.guides}
+          aria-labelledby="guides-title"
+        >
+          <div className={layout.sectionHead}>
+            <h2 id="guides-title" className={layout.sectionTitle}>
+              Field guides
+            </h2>
+            <p className={layout.sectionNote}>Step-by-step walkthroughs</p>
+          </div>
 
-                <Link
-                  href={`/blog/${leadPost.slug}`}
-                  className={styles.leadTitle}
-                >
-                  {leadPost.title}
-                </Link>
+          <div className={styles.guideGrid}>
+            {GUIDES.map((guide) => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                className={styles.guideCard}
+              >
+                <span className={styles.guideMeta}>
+                  <span className={layout.num}>{guide.steps}</span> steps
+                </span>
+                <h3 className={styles.guideTitle}>{guide.title}</h3>
+                <p className={styles.guideDesc}>{guide.description}</p>
+                <span className={styles.guideLink}>
+                  Open the guide
+                  <ArrowUpRight size={13} aria-hidden />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-                <p className={styles.leadDesc}>{leadPost.description}</p>
-
-                <div className={styles.leadFooter}>
-                  <span>{formatDate(leadPost.date)}</span>
-                  <span className={styles.waveform} aria-hidden>
-                    {waveformFromReadingTime(leadPost.readingTime).map(
-                      (h, i) => (
-                        <span
-                          key={i}
-                          className={styles.waveBar}
-                          style={{ height: `${h}%` }}
-                        />
-                      ),
-                    )}
-                  </span>
-                  <span>{leadPost.readingTime}</span>
-                  <ViewCounter slug={leadPost.slug} />
-                  <Link
-                    href={`/blog/${leadPost.slug}`}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.2rem',
-                      color: 'var(--cobalt)',
-                      fontWeight: 700,
-                      textDecoration: 'none',
-                    }}
-                  >
-                    Read article <ArrowUpRight size={13} />
-                  </Link>
-                </div>
-              </article>
-            )}
-
-            {/* Chronological Posts Deck */}
-            <div className={styles.postDeck}>
-              {remainingPosts.map((post, idx) => (
-                <Link
-                  key={post.slug}
-                  href={`/blog/${post.slug}`}
-                  className={styles.postCard}
-                >
-                  <div className={styles.postCardTop}>
-                    <span>
-                      DISPATCH {String(idx + 1).padStart(2, '0')} ·{' '}
-                      {post.tags.slice(0, 2).join(' / ')}
-                    </span>
-                    <span>{formatDate(post.date)}</span>
-                  </div>
-
-                  <h3 className={styles.postTitle}>{post.title}</h3>
-                  <p className={styles.postDesc}>{post.description}</p>
-
-                  <div className={styles.postFooter}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                      }}
-                    >
-                      <span className={styles.waveform} aria-hidden>
-                        {waveformFromReadingTime(post.readingTime).map(
-                          (h, i) => (
-                            <span
-                              key={i}
-                              className={styles.waveBar}
-                              style={{ height: `${h}%` }}
-                            />
-                          ),
-                        )}
-                      </span>
-                      <span>{post.readingTime}</span>
-                    </div>
-
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                      }}
-                    >
-                      <ViewCounter slug={post.slug} />
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.2rem',
-                          color: 'var(--cobalt)',
-                          fontWeight: 700,
-                        }}
-                      >
-                        Read <ArrowUpRight size={12} />
-                      </span>
-                    </div>
-                  </div>
-                </Link>
+        {!isFiltered ? (
+          <section className={styles.faq} aria-labelledby="faq-head">
+            <h2 id="faq-head" className={styles.faqHead}>
+              Production decisions and FAQ
+            </h2>
+            <div className={styles.faqList}>
+              {BLOG_FAQ.map((faq) => (
+                <details key={faq.question} className={styles.faqItem}>
+                  <summary className={styles.faqSummary}>
+                    <span>{faq.question}</span>
+                    <ChevronRight size={16} aria-hidden />
+                  </summary>
+                  <p className={styles.faqAnswer}>{faq.answer}</p>
+                </details>
               ))}
-
-              {filtered.length === 0 && (
-                <div
-                  style={{
-                    padding: '3rem 2rem',
-                    textAlign: 'center',
-                    background: 'var(--paper-hi)',
-                    border: '2px dashed var(--ink)',
-                    borderRadius: '14px',
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontFamily: 'var(--display)',
-                      fontSize: '1.3rem',
-                      fontWeight: 800,
-                      marginBottom: '0.5rem',
-                    }}
-                  >
-                    No dispatches match &quot;{query || tag}&quot;
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: '0.9rem',
-                      color: 'var(--muted)',
-                      marginBottom: '1.25rem',
-                    }}
-                  >
-                    Try searching for another topic or clear the active query.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => router.replace(pathname, { scroll: false })}
-                    className={styles.searchBtn}
-                  >
-                    <RefreshCw size={13} />
-                    Reset filters
-                  </button>
-                </div>
-              )}
             </div>
-
-            {/* FAQ Dossier Section */}
-            {!isFiltered && (
-              <section className={styles.faqSection} aria-labelledby="faq-head">
-                <h2 id="faq-head" className={styles.faqHead}>
-                  Production Decisions & FAQ
-                </h2>
-                <div>
-                  {BLOG_FAQ.map((faq) => (
-                    <details key={faq.question} className={styles.faqItem}>
-                      <summary className={styles.faqSummary}>
-                        <span>{faq.question}</span>
-                        <ChevronRight size={16} />
-                      </summary>
-                      <p className={styles.faqAnswer}>{faq.answer}</p>
-                    </details>
-                  ))}
-                </div>
-              </section>
-            )}
           </section>
-        </div>
+        ) : null}
       </div>
     </main>
   )

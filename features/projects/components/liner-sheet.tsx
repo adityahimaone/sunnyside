@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect } from 'react'
-import Image from 'next/image'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowUpRight, Github, X } from 'lucide-react'
+import { ArrowUpRight, X } from 'lucide-react'
+
 import type { WorkProject } from '@/data/projects'
 import { trackLabel } from '@/data/projects'
+import layout from '@/features/archive/archive.module.css'
 import styles from '../sunnyside-projects.module.css'
 
 interface LinerSheetProps {
@@ -15,8 +16,9 @@ interface LinerSheetProps {
 }
 
 /**
- * The back of the album: tracklist of highlights, personnel, and links.
- * Styled in the Sunnyside archival liner sheet specification.
+ * The back of the sleeve: the tracklist, the personnel and the one link out.
+ * Same paper, same catalogue number and same hard edge as the card that opened
+ * it, so the modal reads as the sleeve turned over rather than a new surface.
  */
 export function LinerSheet({ project, index, onClose }: LinerSheetProps) {
   useEffect(() => {
@@ -35,7 +37,7 @@ export function LinerSheet({ project, index, onClose }: LinerSheetProps) {
 
   return (
     <AnimatePresence>
-      {project && (
+      {project ? (
         <motion.div
           className={styles.modalBackdrop}
           role="presentation"
@@ -50,12 +52,12 @@ export function LinerSheet({ project, index, onClose }: LinerSheetProps) {
             aria-modal="true"
             aria-labelledby="liner-title"
             onClick={(event) => event.stopPropagation()}
-            initial={{ scale: 0.95, y: 16, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            exit={{ scale: 0.96, opacity: 0 }}
+            initial={{ y: 16, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 10, opacity: 0 }}
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className={styles.modalTape} />
+            <span className={styles.modalTape} aria-hidden />
 
             <button
               type="button"
@@ -63,125 +65,50 @@ export function LinerSheet({ project, index, onClose }: LinerSheetProps) {
               className={styles.modalClose}
               aria-label="Close liner notes"
             >
-              <X size={16} />
+              <X size={16} aria-hidden />
             </button>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
-              <div>
-                <p
-                  style={{
-                    fontFamily: 'var(--mono)',
-                    fontSize: '0.72rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.12em',
-                    color: 'var(--muted)',
-                    marginBottom: '0.25rem',
-                  }}
-                >
-                  SIDE {trackLabel(index)[0]} · {trackLabel(index)} · {project.genre} · {project.year}
-                </p>
-                <h2
-                  id="liner-title"
-                  style={{
-                    fontFamily: 'var(--display)',
-                    fontWeight: 800,
-                    fontSize: '1.8rem',
-                    letterSpacing: '-0.03em',
-                    color: 'var(--ink)',
-                    marginBottom: '0.75rem',
-                  }}
-                >
-                  {project.title}
-                </h2>
-                <p
-                  style={{
-                    fontSize: '0.95rem',
-                    lineHeight: 1.6,
-                    color: 'var(--muted)',
-                    marginBottom: '1.5rem',
-                  }}
-                >
-                  {project.description}
-                </p>
+            <p className={styles.modalMeta}>
+              Side A, track {trackLabel(index)} / {project.genre} /{' '}
+              {project.year}
+            </p>
+            <h2 id="liner-title" className={styles.modalTitle}>
+              {project.title}
+            </h2>
+            <p className={styles.modalDesc}>{project.description}</p>
 
-                {/* Highlights / Tracklist */}
-                <h3
-                  style={{
-                    fontFamily: 'var(--mono)',
-                    fontSize: '0.75rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.14em',
-                    color: 'var(--ink)',
-                    borderBottom: '1.5px solid var(--ink)',
-                    paddingBottom: '0.35rem',
-                    marginBottom: '0.75rem',
-                  }}
-                >
-                  Key Architectural Decisions
-                </h3>
-                <ol
-                  style={{
-                    paddingLeft: '1.25rem',
-                    marginBottom: '1.5rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.5rem',
-                    fontSize: '0.9rem',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {project.highlights.map((h) => (
-                    <li key={h} style={{ color: 'var(--ink)' }}>
-                      {h}
-                    </li>
-                  ))}
-                </ol>
+            <h3 className={styles.modalSection}>What it does</h3>
+            <ol className={styles.modalList}>
+              {project.highlights.map((highlight) => (
+                <li key={highlight}>{highlight}</li>
+              ))}
+            </ol>
 
-                {/* Role & Personnel */}
-                <h3
-                  style={{
-                    fontFamily: 'var(--mono)',
-                    fontSize: '0.75rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.14em',
-                    color: 'var(--ink)',
-                    borderBottom: '1.5px solid var(--ink)',
-                    paddingBottom: '0.35rem',
-                    marginBottom: '0.5rem',
-                  }}
-                >
-                  Engineering Scope
-                </h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', marginBottom: '1rem' }}>
-                  {project.role}
-                </p>
+            <h3 className={styles.modalSection}>Role</h3>
+            <p className={styles.modalRole}>{project.role}</p>
 
-                {/* Tech stack */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '1.5rem' }}>
-                  {project.stack.map((t) => (
-                    <span key={t} className={styles.stackTag}>
-                      {t}
-                    </span>
-                  ))}
-                </div>
+            <div className={styles.modalChips} aria-label="Stack">
+              {project.stack.map((tech) => (
+                <span key={tech} className={styles.stackTag}>
+                  {tech}
+                </span>
+              ))}
+            </div>
 
-                {/* Action buttons */}
-                <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-                  <a
-                    href={project.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${styles.tactileBtn} ${styles.tactileBtnPrimary}`}
-                  >
-                    Open live application
-                    <ArrowUpRight size={13} />
-                  </a>
-                </div>
-              </div>
+            <div className={styles.modalActions}>
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={layout.primary}
+              >
+                Open the live app
+                <ArrowUpRight className="size-4" aria-hidden />
+              </a>
             </div>
           </motion.div>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   )
 }

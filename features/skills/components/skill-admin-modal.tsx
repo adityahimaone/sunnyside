@@ -73,6 +73,8 @@ export function SkillAdminModal({
     return parseBulkSkills(bulkInput, bulkTags)
   }, [bulkInput, bulkTags])
 
+  /* The dialog's fields mirror the record it was opened for. */
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (editingSkill) {
       setTab('single')
@@ -92,6 +94,7 @@ export function SkillAdminModal({
     setLoginError('')
     setBulkMessage(null)
   }, [editingSkill, isOpen])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Dismiss bottom dock while modal is open
   useEffect(() => {
@@ -188,7 +191,7 @@ export function SkillAdminModal({
     if (!onSaveBulkSkills) {
       setBulkMessage({
         type: 'error',
-        text: 'Bulk skill ingest is not supported',
+        text: 'Bulk skill import is not supported',
       })
       return
     }
@@ -201,7 +204,7 @@ export function SkillAdminModal({
       if (res.success) {
         setBulkMessage({
           type: 'success',
-          text: `Successfully ingested ${res.count} skill${res.count === 1 ? '' : 's'}`,
+          text: `Successfully imported ${res.count} skill${res.count === 1 ? '' : 's'}`,
         })
         setBulkInput('')
         setTimeout(() => {
@@ -210,7 +213,7 @@ export function SkillAdminModal({
       } else {
         setBulkMessage({
           type: 'error',
-          text: res.error || 'Failed to ingest bulk skills',
+          text: res.error || 'Failed to import bulk skills',
         })
       }
     } catch (err: unknown) {
@@ -235,41 +238,24 @@ export function SkillAdminModal({
         aria-modal="true"
         aria-labelledby="skill-modal-title"
       >
-        <span
-          className={`${styles.chassisScrew} ${styles.chassisScrewTL}`}
-          aria-hidden="true"
-        />
-        <span
-          className={`${styles.chassisScrew} ${styles.chassisScrewTR}`}
-          aria-hidden="true"
-        />
-        <span
-          className={`${styles.chassisScrew} ${styles.chassisScrewBL}`}
-          aria-hidden="true"
-        />
-        <span
-          className={`${styles.chassisScrew} ${styles.chassisScrewBR}`}
-          aria-hidden="true"
-        />
-
         <div className={styles.modalHeader}>
           <div>
             <div className={styles.modalMeta}>
-              <span>ADMIN BUS // SKILL CATALOGUE</span>
+              <span>Skills admin</span>
             </div>
             <h2 id="skill-modal-title" className={styles.modalTitle}>
               {isAdmin ? (
                 editingSkill ? (
-                  <>Edit Skill</>
+                  <>Edit skill</>
                 ) : tab === 'bulk' ? (
-                  <>Bulk Ingest Skills</>
+                  <>Bulk import skills</>
                 ) : (
-                  <>Add New Skill</>
+                  <>Add a skill</>
                 )
               ) : (
                 <>
                   <Lock size={16} aria-hidden="true" />
-                  Skill Management Login
+                  Admin sign in
                 </>
               )}
             </h2>
@@ -343,7 +329,7 @@ export function SkillAdminModal({
                 className={styles.submit}
                 disabled={isLoggingIn}
               >
-                {isLoggingIn ? 'Verifying...' : 'Unlock Panel'}
+                {isLoggingIn ? 'Verifying...' : 'Sign in'}
               </button>
             </div>
           </form>
@@ -353,7 +339,7 @@ export function SkillAdminModal({
               <div
                 className={styles.adminTabs}
                 role="tablist"
-                aria-label="Ingest mode"
+                aria-label="Import mode"
               >
                 <button
                   type="button"
@@ -363,7 +349,7 @@ export function SkillAdminModal({
                   className={`${styles.adminTab} ${tab === 'single' ? styles.adminTabActive : ''}`}
                 >
                   <FilePlus size={14} aria-hidden="true" />
-                  <span>Single Skill</span>
+                  <span>One skill</span>
                   {tab === 'single' && (
                     <span className={styles.tabPip} aria-hidden="true" />
                   )}
@@ -376,7 +362,7 @@ export function SkillAdminModal({
                   className={`${styles.adminTab} ${tab === 'bulk' ? styles.adminTabActive : ''}`}
                 >
                   <Layers size={14} aria-hidden="true" />
-                  <span>Bulk Ingest</span>
+                  <span>Bulk import</span>
                   {tab === 'bulk' && (
                     <span className={styles.tabPip} aria-hidden="true" />
                   )}
@@ -616,8 +602,8 @@ export function SkillAdminModal({
                     <Layers size={14} aria-hidden="true" />
                     <span>
                       {isBulkSubmitting
-                        ? 'Ingesting...'
-                        : `Ingest ${parsedBulkItems.length} Skills`}
+                        ? 'Importing...'
+                        : `Import ${parsedBulkItems.length} Skills`}
                     </span>
                   </button>
                 </div>

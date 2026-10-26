@@ -1,0 +1,71 @@
+/* The back room: the archive wing's half of the Sunnyside system.
+ *
+ * The landing page is Side A, a studio wall. These four routes are the shelves
+ * behind it, and they share one paper, one ink, one cobalt sign-off. Only the
+ * colour, type, shape, material and motion values live here; every rule that
+ * positions a box sits in a CSS module so adopting a token cannot move a page.
+ *
+ * These are the Sunnyside values from features/design-system/sunnyside-data.ts,
+ * lifted to :root with an `ss-` prefix. The prefix is load-bearing: the app's
+ * shadcn layer already owns `--muted`, `--primary` and `--border`, and the
+ * landing page's studio module owns unprefixed `--paper` inside its own root.
+ * A global `--paper` here would quietly re-colour every `bg-muted` on the site.
+ *
+ * Type aliases are deliberately NOT here. next/font sets `--font-*` on <body>,
+ * and a custom property's var() is substituted where the property is declared,
+ * so an alias at :root would resolve against <html>, find nothing, and drop
+ * every `font:` shorthand that read it. The archive shell declares those three
+ * aliases on itself, one level inside body. See features/archive/archive.module.css.
+ */
+
+:root {
+  /* Paper and ink */
+  --ss-paper: #f3ecdf;
+  --ss-paper-hi: #fffaf1;
+  --ss-paper-lo: #e9dfcf;
+  --ss-ink: #191a2e;
+  --ss-muted: #5f5b6e;
+  --ss-line: rgb(25 26 46 / 0.16);
+  --ss-line-strong: rgb(25 26 46 / 0.28);
+  --ss-paper-line: rgb(255 250 241 / 0.24);
+
+  /* One loud field and its states */
+  --ss-cobalt: #3d53d6;
+  --ss-cobalt-ink: #2c3cae;
+  --ss-cobalt-wash: #e8ebff;
+
+  /* Marks: annotation, tape, soft and healthy */
+  --ss-tangerine: #ff6a2b;
+  --ss-butter: #ffd23f;
+  --ss-pink: #ffb6e1;
+  --ss-mint: #b7e4c7;
+  --ss-sky: #a9c8ff;
+
+  /* Shape: five sizes, used by size not by component */
+  --ss-r-xs: 4px;
+  --ss-r-sm: 8px;
+  --ss-r-md: 14px;
+  --ss-r-lg: 20px;
+  --ss-r-xl: 28px;
+  --ss-r-pill: 999px;
+
+  /* Edges and lift. Hard, warm and directional; never a black blur. */
+  --ss-border: 1.5px solid var(--ss-ink);
+  --ss-shadow-ink: rgb(25 26 46 / 0.14);
+  --ss-shadow-paper: 5px 6px 0 var(--ss-shadow-ink);
+  --ss-shadow-lift: 9px 11px 0 var(--ss-shadow-ink);
+  --ss-shadow-card: 3px 3px 0 var(--ss-shadow-ink);
+  --ss-shadow-cobalt: 5px 6px 0 var(--ss-cobalt-ink);
+
+  /* Focus. Butter on paper, paper on cobalt; both are 3px and instant. */
+  --ss-focus: 0 0 0 3px var(--ss-butter);
+
+  /* Motion. Fast where a person is deciding; slow only for arrivals. */
+  --ss-fast: 160ms;
+  --ss-ui: 220ms;
+  --ss-enter: 700ms;
+  --ss-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Range */
+  --ss-shell: 80rem;
+}

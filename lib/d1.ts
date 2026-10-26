@@ -109,12 +109,21 @@ export async function readBookmarks(): Promise<Bookmark[]> {
   const db = await getDb()
   if (!db) return getLocalFileBookmarks()
 
-  const { results } = await db
-    .prepare('SELECT * FROM bookmarks')
-    .bind()
-    .all<BookmarkRow>()
+  // A local D1 that has never been migrated answers with "no such table:
+  // bookmarks" rather than an empty set. The read path already falls back to
+  // content/bookmarks.json when D1 is absent or empty, so a missing schema is
+  // the same situation: use the seed file instead of failing the whole route.
+  let rows: Bookmark[] = []
+  try {
+    const { results } = await db
+      .prepare('SELECT * FROM bookmarks')
+      .bind()
+      .all<BookmarkRow>()
+    rows = (results ?? []).map(rowToBookmark)
+  } catch {
+    rows = []
+  }
 
-  const rows = (results ?? []).map(rowToBookmark)
   if (rows.length > 0) return rows
 
   const local = await getLocalFileBookmarks()

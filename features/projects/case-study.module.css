@@ -1,0 +1,258 @@
+/* Hallmark · v2.0.0 · redesign: full · genre: editorial · theme: Sunnyside (by request) · surface: absolute · posture: committed · nav: sticky paper bar, four rooms and one Say hi · footer: compact cobalt sign-off · hero: Stage (split copy and one object) */
+/* /projects/[slug]: the case study, printed on the same sheet as the shelf. */
+
+.page {
+  background: var(--ss-paper);
+}
+
+.crumbs {
+  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.back {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--ss-muted);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--ss-ink);
+}
+
+.head {
+  display: grid;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .head {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+    gap: 3rem;
+  }
+}
+
+.headCopy {
+  min-width: 0;
+}
+
+.kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.8rem;
+  margin: 0 0 0.75rem;
+  color: var(--ss-muted);
+  font-size: 0.8125rem;
+}
+
+.kicker > span + span {
+  padding-left: 0.8rem;
+  border-left: 1px solid var(--ss-line);
+}
+
+.facts {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border: 2px solid var(--ss-ink);
+  border-radius: var(--ss-r-md);
+  background: var(--ss-cobalt);
+  box-shadow: var(--ss-shadow-lift);
+  color: var(--ss-paper-hi);
+}
+
+.fact {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+}
+
+.fact + .fact {
+  border-top: 1px solid var(--ss-paper-line);
+}
+
+.factLabel {
+  color: color-mix(in srgb, var(--ss-paper-hi) 88%, var(--ss-cobalt));
+  font-size: 0.75rem;
+}
+
+.factValue {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  padding: 0.12rem 0.4rem;
+  border: 1px solid var(--ss-paper-line);
+  border-radius: var(--ss-r-xs);
+  font-family: var(--ss-ui);
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.cover {
+  position: relative;
+  margin: clamp(2rem, 5vw, 3.5rem) 0 0;
+  padding: 12px;
+  border: 2px solid var(--ss-ink);
+  border-radius: var(--ss-r-lg);
+  background: var(--ss-paper-hi);
+  box-shadow: var(--ss-shadow-lift);
+}
+
+.coverArt {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: var(--ss-border);
+  border-radius: var(--ss-r-sm);
+  background: var(--ss-paper-lo);
+}
+
+.coverArt :global(img) {
+  object-fit: cover;
+}
+
+.tape {
+  position: absolute;
+  z-index: 2;
+  top: -11px;
+  left: clamp(1.5rem, 6vw, 4rem);
+  width: 92px;
+  height: 22px;
+  transform: rotate(-3deg);
+  background: var(--ss-butter);
+}
+
+.coverCaption {
+  padding: 0.55rem 0.15rem 0;
+  color: var(--ss-muted);
+  font-size: 0.75rem;
+}
+
+.body {
+  display: grid;
+  gap: 2rem;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+@media (min-width: 900px) {
+  .body {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+    gap: 3rem;
+  }
+}
+
+.sectionTitle {
+  margin: 0 0 0.9rem;
+  border-bottom: 1.5px solid var(--ss-ink);
+  padding-bottom: 0.5rem;
+  font-family: var(--ss-display);
+  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.highlightList {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: highlight;
+}
+
+.highlight {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: baseline;
+  border-bottom: 1px solid var(--ss-line);
+  padding-bottom: 0.55rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.highlight::before {
+  counter-increment: highlight;
+  content: counter(highlight, decimal-leading-zero);
+  color: var(--ss-muted);
+  font-family: var(--ss-ui);
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.aside {
+  align-self: start;
+  display: grid;
+  gap: 1rem;
+  border-top: 1.5px solid var(--ss-ink);
+  padding-top: 1rem;
+}
+
+.asideNote {
+  margin: 0;
+  color: var(--ss-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  border-top: 1.5px solid var(--ss-ink);
+  padding-top: 1rem;
+}
+
+.pagerLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ss-ink);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pagerLink:hover {
+  color: var(--ss-cobalt);
+}
+
+.pagerNext {
+  margin-left: auto;
+  text-align: right;
+}
+
+.pagerLabel {
+  display: block;
+  width: 100%;
+  color: var(--ss-muted);
+  font-size: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back,
+  .pagerLink {
+    transition: none;
+  }
+}

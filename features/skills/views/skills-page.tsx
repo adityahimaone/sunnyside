@@ -29,6 +29,8 @@ import {
 import { SkillAdminModal } from '../components/skill-admin-modal'
 import type { BulkSkillInput } from '../utils/bulk-parser'
 import { ScriptWord } from '@/features/landing-page/studio/script-word'
+import { Daisy } from '@/features/landing-page/studio/doodles'
+import layout from '@/features/archive/archive.module.css'
 import styles from '../sunnyside-skills.module.css'
 
 interface SkillsPageProps {
@@ -237,117 +239,115 @@ function SkillsPageContent({ initialCatalog }: SkillsPageProps) {
   )
 
   return (
-    <main className={styles.page} id="main-content">
-      <div className={styles.shell}>
-        {/* Header */}
-        <header className={styles.header}>
-          <div className={styles.headerMeta}>
-            <span className={styles.pill}>
-              <span className={styles.pillDot} />
-              04 / TOOLBOX
-            </span>
-            <span>Agent Skills & Extensions</span>
-            <span>·</span>
-            <span>{totalSkills} Evaluated Packages</span>
-          </div>
-
-          <div className={styles.headerTitleStack}>
-            <ScriptWord text="the bag" className={styles.headerScript} />
-            <h1 className={styles.headerTitle}>
-              Skills worth installing.
-              <span className={styles.headerTitleTape}>
-                {totalInstalled} / {totalSkills} IN USE
+    <main className={`${layout.page} ${styles.page}`} id="main-content">
+      <div className={layout.container}>
+        <header className={styles.hero}>
+          <div className={styles.heroCopy}>
+            <p className={styles.kicker}>
+              <span className={styles.kickerTag}>
+                <span className={styles.kickerMark} aria-hidden />
+                04 / The toolbox
               </span>
-            </h1>
+              <span className={styles.kickerText}>
+                <span className={layout.num}>{totalSkills}</span> evaluated
+                packages
+              </span>
+            </p>
+
+            <ScriptWord text="the bag" className={layout.hand} />
+
+            <h1 className={layout.title}>Skills worth installing.</h1>
+            <p className={layout.intro}>
+              <span className={layout.num}>{totalSkills}</span> agent skills
+              from ui-skills, tagged by what each one is for.
+            </p>
+
+            <div className={layout.actions}>
+              <a href="#tray" className={layout.primary}>
+                Browse the tray
+                <ArrowUpRight className="size-4" aria-hidden />
+              </a>
+              <a
+                href={SKILLS_SOURCE}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={layout.ghost}
+              >
+                ui-skills.com
+                <ArrowUpRight className="size-3.5" aria-hidden />
+              </a>
+            </div>
           </div>
 
-          <p className={styles.headerIntro}>
-            Extensible agent skills, coding hooks, and workflow plugins from the
-            ui-skills directory. Filter by capability, inspect the installation
-            command, or copy the npx script directly.
-          </p>
+          <aside className={styles.meter} aria-label="Skills in use">
+            <div className={styles.meterTop}>
+              <span>Installed</span>
+              <span className={styles.meterCount}>
+                {totalInstalled} of {totalSkills}
+              </span>
+            </div>
+            <p className={styles.meterBig}>
+              {totalInstalled}
+              <span>/{totalSkills}</span>
+            </p>
+            <div className={styles.meterTrack} aria-hidden>
+              {Array.from({ length: 12 }).map((_, index) => (
+                <span
+                  key={index}
+                  data-on={
+                    index < Math.round((progressPercent / 100) * 12)
+                      ? 'true'
+                      : 'false'
+                  }
+                />
+              ))}
+            </div>
+            <p className={styles.meterNote}>
+              Skills configured for Claude Code and Cursor agents across this
+              development workstation.
+            </p>
+            <Daisy className={styles.meterDaisy} title="Daisy sticker" />
+          </aside>
         </header>
 
-        {/* Asymmetric 4-column / 8-column layout */}
-        <div className={styles.asymmetricGrid}>
-          {/* Left Column: Gauge, Categories & Admin */}
-          <aside className={styles.sidebarSticky}>
-            {/* Agent Telemetry Card */}
-            <div className={styles.sidebarCard}>
-              <div className={`${styles.screw} ${styles.screwTL}`} />
-              <div className={`${styles.screw} ${styles.screwTR}`} />
-              <div className={`${styles.screw} ${styles.screwBL}`} />
-              <div className={`${styles.screw} ${styles.screwBR}`} />
-
-              <div className={styles.sidebarHead}>
-                <span>AGENT READINESS</span>
-                <span>{progressPercent}%</span>
-              </div>
-
-              <div className={styles.telemetryReadout}>
-                <span className={styles.telemetryBigNumber}>
-                  {totalInstalled}
-                </span>
-                <span className={styles.telemetryTotal}>
-                  / {totalSkills} installed
-                </span>
-              </div>
-
-              <div className={styles.telemetryProgressTrack}>
-                <div
-                  className={styles.telemetryProgressFill}
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-
-              <p
-                style={{
-                  fontSize: '0.8rem',
-                  lineHeight: 1.5,
-                  color: 'var(--muted)',
-                  marginBottom: '1rem',
-                }}
-              >
-                Skills configured for Claude Code and Cursor agents across this
-                development workstation.
-              </p>
-
-              {isAdmin ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.5rem',
-                    padding: '0.75rem',
-                    background: 'var(--butter)',
-                    border: '1.5px solid var(--ink)',
-                    borderRadius: '8px',
-                  }}
+        <section id="tray" className={styles.tray} aria-labelledby="tray-title">
+          <div className={styles.toolbar}>
+            <div className={styles.searchBar}>
+              <Search size={16} className={styles.searchIcon} aria-hidden />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search name, repository or capability"
+                className={styles.searchInput}
+                aria-label="Search skills"
+              />
+              {query || activeTags.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className={styles.searchClear}
+                  aria-label="Clear search filters"
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      fontFamily: 'var(--mono)',
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                    }}
-                  >
-                    <span>ADMIN BUS UNLOCKED</span>
+                  <X size={15} aria-hidden />
+                </button>
+              ) : null}
+            </div>
+
+            <div className={styles.adminArea}>
+              {isAdmin ? (
+                <>
+                  <span className={styles.adminTag}>
+                    Admin
                     <button
                       type="button"
                       onClick={handleLockAdmin}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        display: 'flex',
-                      }}
+                      className={styles.lockButton}
+                      aria-label="Lock admin controls"
                     >
-                      <Lock size={12} />
+                      <Lock size={12} aria-hidden />
                     </button>
-                  </div>
+                  </span>
                   <button
                     type="button"
                     onClick={() => {
@@ -355,10 +355,10 @@ function SkillsPageContent({ initialCatalog }: SkillsPageProps) {
                       setModalTab('single')
                       setIsModalOpen(true)
                     }}
-                    className={styles.tactileBtn}
-                    style={{ fontSize: '0.68rem', padding: '0.4rem 0.6rem' }}
+                    className={styles.adminButton}
                   >
-                    <Plus size={12} /> Add new skill
+                    <Plus size={13} aria-hidden />
+                    Add
                   </button>
                   <button
                     type="button"
@@ -367,12 +367,12 @@ function SkillsPageContent({ initialCatalog }: SkillsPageProps) {
                       setModalTab('bulk')
                       setIsModalOpen(true)
                     }}
-                    className={styles.tactileBtn}
-                    style={{ fontSize: '0.68rem', padding: '0.4rem 0.6rem' }}
+                    className={styles.adminButton}
                   >
-                    <Layers size={12} /> Bulk ingest
+                    <Layers size={13} aria-hidden />
+                    Bulk
                   </button>
-                </div>
+                </>
               ) : (
                 <button
                   type="button"
@@ -380,346 +380,215 @@ function SkillsPageContent({ initialCatalog }: SkillsPageProps) {
                     setEditingSkill(null)
                     setIsModalOpen(true)
                   }}
-                  className={styles.tactileBtn}
-                  style={{
-                    width: '100%',
-                    justifyContent: 'flex-start',
-                    opacity: 0.8,
-                  }}
+                  className={styles.adminOpen}
                 >
-                  <Unlock size={14} />
-                  Admin unlock
+                  <Unlock size={14} aria-hidden />
+                  Admin controls
                 </button>
               )}
             </div>
+          </div>
 
-            {/* Tag Filter Bench */}
-            <div className={styles.sidebarCard}>
-              <div className={styles.sidebarHead}>
-                <span>CAPABILITY TAGS</span>
-                <span>{catalog.tags.length} TAGS</span>
-              </div>
-
-              <div className={styles.tagGrid}>
-                <button
-                  type="button"
-                  className={`${styles.tagChip} ${
-                    activeTags.length === 0 ? styles.tagChipActive : ''
-                  }`}
-                  onClick={clearFilters}
-                >
-                  <span>All Skills</span>
-                  <span className={styles.tagChipCount}>({totalSkills})</span>
-                </button>
-                {catalog.tags.map((tag) => {
-                  const isActive = activeTags.includes(tag.slug)
-                  const count = tagCounts.get(tag.slug) ?? 0
-                  return (
-                    <button
-                      key={tag.slug}
-                      type="button"
-                      className={`${styles.tagChip} ${
-                        isActive ? styles.tagChipActive : ''
-                      }`}
-                      onClick={() => toggleTag(tag.slug)}
-                    >
-                      <span>{tag.label}</span>
-                      <span className={styles.tagChipCount}>({count})</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Source card */}
-            <div
-              style={{
-                padding: '1rem',
-                borderRadius: '12px',
-                border: '1.5px dashed var(--line)',
-                background: 'var(--paper-lo)',
-                fontFamily: 'var(--mono)',
-                fontSize: '0.7rem',
-                lineHeight: 1.5,
-                color: 'var(--muted)',
-              }}
-            >
-              <b style={{ color: 'var(--ink)' }}>INDEXED REPOSITORY:</b>
-              <br />
-              Catalog synced against{' '}
-              <a
-                href={SKILLS_SOURCE}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: 'var(--cobalt)',
-                  fontWeight: 700,
-                  textDecoration: 'underline',
-                }}
-              >
-                ui-skills.com{' '}
-                <ArrowUpRight size={11} style={{ display: 'inline' }} />
-              </a>
-            </div>
-          </aside>
-
-          {/* Right Column: Search & Cartridges Deck */}
-          <section
-            className={styles.contentColumn}
-            aria-label="Skills collection"
+          <div
+            className={styles.tagRail}
+            role="group"
+            aria-label="Filter skills by capability"
           >
-            {/* Search Toolbar */}
-            <div className={styles.searchBar}>
-              <Search size={16} style={{ color: 'var(--muted)' }} />
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search skills by name, repository, or capability..."
-                className={styles.searchInput}
-                aria-label="Search skills"
-              />
-              {(query || activeTags.length > 0) && (
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className={styles.searchClear}
-                  aria-label="Clear search filters"
-                >
-                  <X size={15} />
-                </button>
-              )}
-            </div>
-
-            {/* Status ribbon */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontFamily: 'var(--mono)',
-                fontSize: '0.72rem',
-                color: 'var(--muted)',
-                textTransform: 'uppercase',
-                paddingInline: '0.25rem',
-              }}
+            <button
+              type="button"
+              className={styles.tagChip}
+              data-active={activeTags.length === 0}
+              onClick={clearFilters}
             >
-              <span>
-                Showing <b>{visibleSkills.length}</b> of {totalSkills} skills
-              </span>
-              {activeTags.length > 0 && (
-                <span>Filtering by {activeTags.length} tags</span>
-              )}
-            </div>
+              <span>All skills</span>
+              <span className={styles.tagCount}>({totalSkills})</span>
+            </button>
+            {catalog.tags.map((tag) => (
+              <button
+                key={tag.slug}
+                type="button"
+                className={styles.tagChip}
+                data-active={activeTags.includes(tag.slug)}
+                onClick={() => toggleTag(tag.slug)}
+              >
+                <span>{tag.label}</span>
+                <span className={styles.tagCount}>
+                  ({tagCounts.get(tag.slug) ?? 0})
+                </span>
+              </button>
+            ))}
+          </div>
 
-            {/* Skills Deck */}
-            <div className={styles.skillDeck}>
-              {visibleSkills.map((skill, idx) => {
-                const cmd = installCommand(skill)
-                const isCopied = copiedSkill === skill.name
+          <div className={styles.resultRow}>
+            <h2 id="tray-title" className={styles.resultTitle}>
+              The tray
+            </h2>
+            <p className={styles.resultCount}>
+              Showing <span className={layout.num}>{visibleSkills.length}</span>{' '}
+              of <span className={layout.num}>{totalSkills}</span>
+              {activeTags.length > 0 ? `, ${activeTags.length} filters on` : ''}
+            </p>
+          </div>
 
-                return (
-                  <article
-                    key={`${skill.repo}/${skill.name}`}
-                    className={styles.skillCard}
-                  >
-                    <div className={styles.cardWashi} />
+          <div className={styles.grid}>
+            {visibleSkills.map((skill, idx) => {
+              const cmd = installCommand(skill)
+              const isCopied = copiedSkill === skill.name
+              return (
+                <article
+                  key={`${skill.repo}/${skill.name}`}
+                  className={styles.card}
+                  data-installed={skill.installed ? 'true' : 'false'}
+                >
+                  <div className={styles.cardTop}>
+                    <span className={styles.cardIndex}>
+                      <span className={layout.num}>
+                        {String(idx + 1).padStart(3, '0')}
+                      </span>{' '}
+                      {skill.repo}
+                    </span>
 
-                    <div className={styles.skillTop}>
-                      <span>
-                        MOD {String(idx + 1).padStart(2, '0')} · {skill.repo}
+                    <span className={styles.cardBits}>
+                      <span className={styles.status}>
+                        {skill.installed ? 'In use' : 'Available'}
                       </span>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                        }}
-                      >
-                        <span
-                          className={`${styles.skillStatusPill} ${
-                            skill.installed
-                              ? styles.statusInstalled
-                              : styles.statusAvailable
-                          }`}
-                        >
-                          <span className={styles.statusLed} />
-                          {skill.installed ? 'In use' : 'Available'}
-                        </span>
 
-                        {isAdmin && (
-                          <div
-                            style={{ display: 'inline-flex', gap: '0.2rem' }}
+                      {isAdmin ? (
+                        <span className={styles.cardAdmin}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingSkill(skill)
+                              setIsModalOpen(true)
+                            }}
+                            className={styles.iconButton}
+                            aria-label="Edit skill"
                           >
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setEditingSkill(skill)
-                                setIsModalOpen(true)
-                              }}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: '2px',
-                              }}
-                              aria-label="Edit skill"
-                            >
-                              <Edit2 size={13} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setDeleteTarget(skill)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: '2px',
-                                color: 'var(--tangerine)',
-                              }}
-                              aria-label="Delete skill"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                            <Edit2 size={13} aria-hidden />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(skill)}
+                            className={`${styles.iconButton} ${styles.iconDanger}`}
+                            aria-label="Delete skill"
+                          >
+                            <Trash2 size={13} aria-hidden />
+                          </button>
+                        </span>
+                      ) : null}
+                    </span>
+                  </div>
+
+                  <a
+                    href={skillUrl(skill)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.skillTitle}
+                    title={cmd}
+                  >
+                    <span>{skill.name}</span>
+                    <ArrowUpRight size={14} aria-hidden />
+                  </a>
+
+                  <p className={styles.skillDesc}>{skill.description}</p>
+
+                  <div className={styles.installStrip}>
+                    <Terminal size={13} aria-hidden />
+                    <code className={styles.installCode}>{cmd}</code>
+                    <button
+                      type="button"
+                      onClick={() => copyCommand(cmd, skill.name)}
+                      className={styles.copyButton}
+                      aria-label="Copy install command"
+                    >
+                      {isCopied ? (
+                        <>
+                          <Check size={11} aria-hidden />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={11} aria-hidden />
+                          Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className={styles.cardFoot}>
+                    <div className={styles.skillTags}>
+                      {skill.tags.map((tagSlug) => {
+                        const tag = tagsBySlug.get(tagSlug)
+                        return (
+                          <span key={tagSlug} className={styles.tag}>
+                            {tag ? tag.label : tagSlug}
+                          </span>
+                        )
+                      })}
                     </div>
 
                     <a
-                      href={skillUrl(skill)}
+                      href={
+                        skill.repo.startsWith('http')
+                          ? skill.repo
+                          : `https://github.com/${skill.repo}`
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={styles.skillTitle}
-                      title={cmd}
+                      className={styles.sourceLink}
                     >
-                      <span>{skill.name}</span>
-                      <ArrowUpRight size={14} style={{ opacity: 0.5 }} />
+                      Source
+                      <ExternalLink size={11} aria-hidden />
                     </a>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
 
-                    <p className={styles.skillDesc}>{skill.description}</p>
-
-                    {/* Terminal install command snippet */}
-                    <div className={styles.installStrip}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                          minWidth: 0,
-                        }}
-                      >
-                        <Terminal
-                          size={13}
-                          style={{ opacity: 0.7, flexShrink: 0 }}
-                        />
-                        <code className={styles.installCode}>{cmd}</code>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => copyCommand(cmd, skill.name)}
-                        className={styles.copyBtn}
-                        aria-label="Copy install command"
-                      >
-                        {isCopied ? (
-                          <>
-                            <Check size={11} />
-                            Copied!
-                          </>
-                        ) : (
-                          <>
-                            <Copy size={11} />
-                            Copy
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <div className={styles.skillFooter}>
-                      <div className={styles.skillTags}>
-                        {skill.tags.map((tagSlug) => {
-                          const tag = tagsBySlug.get(tagSlug)
-                          return (
-                            <span key={tagSlug} className={styles.tagPill}>
-                              {tag ? tag.label : tagSlug}
-                            </span>
-                          )
-                        })}
-                      </div>
-
-                      <a
-                        href={
-                          skill.repo.startsWith('http')
-                            ? skill.repo
-                            : `https://github.com/${skill.repo}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.2rem',
-                          fontFamily: 'var(--mono)',
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          color: 'var(--cobalt)',
-                          textDecoration: 'none',
-                        }}
-                      >
-                        Source repo <ExternalLink size={11} />
-                      </a>
-                    </div>
-                  </article>
-                )
-              })}
-
-              {visibleSkills.length === 0 && (
-                <div
-                  style={{
-                    padding: '3rem 2rem',
-                    textAlign: 'center',
-                    background: 'var(--paper-hi)',
-                    border: '2px dashed var(--ink)',
-                    borderRadius: '14px',
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontFamily: 'var(--display)',
-                      fontSize: '1.3rem',
-                      fontWeight: 800,
-                      marginBottom: '0.5rem',
-                    }}
-                  >
-                    No skills match the active filter
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: '0.9rem',
-                      color: 'var(--muted)',
-                      marginBottom: '1.25rem',
-                    }}
-                  >
-                    Try searching for another keyword or clear the selected
-                    tags.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={clearFilters}
-                    className={styles.tactileBtn}
-                  >
-                    <RefreshCw size={13} />
-                    Reset all filters
-                  </button>
-                </div>
-              )}
+          {visibleSkills.length === 0 ? (
+            <div className={styles.empty}>
+              <h3 className={styles.emptyTitle}>
+                No skills match the active filter
+              </h3>
+              <p className={styles.emptyNote}>
+                Try another keyword, or clear the selected tags.
+              </p>
+              <button
+                type="button"
+                onClick={clearFilters}
+                className={layout.ghost}
+              >
+                <RefreshCw size={13} aria-hidden />
+                Reset the filters
+              </button>
             </div>
-          </section>
-        </div>
+          ) : null}
+        </section>
+
+        <section className={styles.sourceBand} aria-labelledby="source-title">
+          <div>
+            <h2 id="source-title" className={styles.sourceTitle}>
+              Where the tray comes from
+            </h2>
+            <p className={styles.sourceNote}>
+              The list is synced against ui-skills.com. Each card carries the
+              exact install command the directory publishes.
+            </p>
+          </div>
+          <a
+            href={SKILLS_SOURCE}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={layout.textLink}
+          >
+            ui-skills.com
+            <ArrowUpRight className="size-3.5" aria-hidden />
+          </a>
+        </section>
       </div>
 
-      {/* Admin Management Modal */}
-      {isModalOpen && (
+      {isModalOpen ? (
         <SkillAdminModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -731,64 +600,27 @@ function SkillsPageContent({ initialCatalog }: SkillsPageProps) {
           onSaveBulkSkills={handleSaveBulkSkills}
           initialTab={modalTab}
         />
-      )}
+      ) : null}
 
-      {/* Delete Confirmation Modal */}
-      {deleteTarget && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 100,
-            background: 'rgba(25, 26, 46, 0.6)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
-        >
+      {deleteTarget ? (
+        <div className={styles.modalBackdrop} role="presentation">
           <div
-            style={{
-              background: 'var(--paper-hi)',
-              border: '2px solid var(--ink)',
-              borderRadius: '14px',
-              padding: '1.5rem',
-              maxWidth: '420px',
-              boxShadow: '8px 10px 0 var(--ink)',
-            }}
+            className={styles.modalCard}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-skill-title"
           >
-            <h3
-              style={{
-                fontFamily: 'var(--display)',
-                fontWeight: 800,
-                fontSize: '1.2rem',
-                marginBottom: '0.5rem',
-              }}
-            >
-              Delete skill?
+            <h3 id="delete-skill-title" className={styles.modalTitle}>
+              Remove this skill?
             </h3>
-            <p
-              style={{
-                fontSize: '0.9rem',
-                color: 'var(--muted)',
-                marginBottom: '1.25rem',
-              }}
-            >
-              Are you sure you want to remove &quot;{deleteTarget.name}&quot;
-              from the catalogue?
+            <p className={styles.modalNote}>
+              “{deleteTarget.name}” will leave the tray. This cannot be undone.
             </p>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '0.5rem',
-              }}
-            >
+            <div className={styles.modalActions}>
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className={styles.tactileBtn}
+                className={layout.ghost}
                 disabled={isDeleting}
               >
                 Cancel
@@ -796,19 +628,15 @@ function SkillsPageContent({ initialCatalog }: SkillsPageProps) {
               <button
                 type="button"
                 onClick={handleDeleteSkill}
-                className={styles.tactileBtn}
-                style={{
-                  background: 'var(--tangerine)',
-                  color: 'var(--paper-hi)',
-                }}
+                className={styles.dangerButton}
                 disabled={isDeleting}
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? 'Removing…' : 'Remove'}
               </button>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </main>
   )
 }

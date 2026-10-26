@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './deck-theme.css';
+@import '../features/archive/archive-tokens.css';
 @plugin '@tailwindcss/typography';
 @custom-variant dark (&:is(.dark *));
 
