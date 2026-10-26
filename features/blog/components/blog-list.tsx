@@ -13,7 +13,6 @@ import {
   X,
 } from 'lucide-react'
 import type { BlogMeta } from '../lib/blog'
-import { useDockSlot } from '@/features/booth/dock-slot'
 import { waveformFromReadingTime } from '@/lib/waveform-data'
 import { formatDate } from '@/lib/date'
 import { ViewCounter } from './view-counter'
@@ -118,27 +117,6 @@ export function BlogList({ posts }: { posts: BlogMeta[] }) {
   const remainingPosts = isFiltered
     ? filtered
     : filtered.filter((post) => post.slug !== leadPost?.slug)
-
-  useDockSlot(
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.4rem',
-        padding: '0.35rem 0.75rem',
-        background: 'var(--paper-hi)',
-        border: '1.5px solid var(--ink)',
-        borderRadius: '999px',
-        boxShadow: '2px 2px 0 var(--ink)',
-        fontFamily: 'var(--mono)',
-        fontSize: '0.7rem',
-        color: 'var(--ink)',
-      }}
-    >
-      {posts.length} articles · {tagCounts.length} topics
-    </span>,
-    [posts.length, tagCounts.length],
-  )
 
   return (
     <main className={styles.page} id="main-content">

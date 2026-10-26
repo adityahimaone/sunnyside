@@ -1,8 +1,6 @@
 export { BoothShell, GlassFilters, useRoomChannel } from './booth-shell'
 export { Room } from './room'
-export { Dock } from './dock'
 export { Footer } from './footer'
-export { DockSlotProvider, useDockSlot, useDockSlotValue } from './dock-slot'
 export { Cover } from './cover'
 export { Record } from './record'
 export { PageHeader } from './page-header'

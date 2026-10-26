@@ -30,7 +30,7 @@
   color: var(--ink);
   font-family: var(--ui);
   padding-top: clamp(2.5rem, 5vw, 4.5rem);
-  padding-bottom: clamp(6rem, 12vw, 10rem);
+  padding-bottom: clamp(3rem, 5vw, 5rem);
   overflow-x: clip;
 }
 

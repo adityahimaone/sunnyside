@@ -5,7 +5,6 @@ import { AudioEngineProvider } from '../audio/engine'
 import { SmoothScroll } from '../scroll/smooth-scroll'
 import { GlassDock } from './dock/glass-dock'
 import { MusicPlayer } from '@/features/landing-page/spotify/music-player'
-import { MagneticDock } from '@/features/layout/components/magnetic-dock'
 
 /**
  * Which chrome a route gets.
@@ -35,7 +34,6 @@ export function WorldChrome({ children }: { children: React.ReactNode }) {
       <>
         <div className="relative flex-1">{children}</div>
         <MusicPlayer />
-        <MagneticDock />
       </>
     )
   }

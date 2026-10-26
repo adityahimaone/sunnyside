@@ -69,19 +69,7 @@ test('theme toggle flips the document class', async ({ page }) => {
   await expect(html).not.toHaveClass(before)
 })
 
-test('dock renders its navigation items on a booth route', async ({ page }) => {
-  await page.goto('/projects')
-  const dock = page
-    .getByLabel('Primary')
-    .or(page.getByLabel('Quick navigation'))
-    .first()
-  await expect(dock, 'no dock rendered').toBeVisible()
-
-  // The dock exists to reach the other routes; if it is empty there is
-  // nothing to navigate to.
-  const links = dock.getByRole('link')
-  expect(await links.count(), 'dock rendered no links').toBeGreaterThan(0)
-})
+// Dock navigation has been removed in favor of Sunnyside header & footer navigation.
 
 test('bookmarks j/k moves the active row', async ({ page }) => {
   await page.goto('/bookmarks')

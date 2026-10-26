@@ -12,7 +12,6 @@ import { useRef } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { useHeroDockVisibility } from '../components/arrangement/use-hero-dock-visibility'
 import { Bolt, Burst, Daisy, Smiley, Sun } from './doodles'
 import { Reveal } from './reveal'
 import { HERO_FACTS, CHAPTERS, scrollToSection } from './studio-data'
@@ -24,7 +23,6 @@ export function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
   const artRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion() ?? false
-  useHeroDockVisibility({ sectionRef })
 
   const mx = useMotionValue(0)
   const my = useMotionValue(0)

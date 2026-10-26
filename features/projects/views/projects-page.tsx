@@ -15,7 +15,6 @@ import {
   Star,
 } from 'lucide-react'
 import { useRoomChannel } from '@/features/booth'
-import { useDockSlot } from '@/features/booth/dock-slot'
 import {
   PROJECT_PREVIEW_DURATION,
   WORK_PROJECTS,
@@ -105,57 +104,6 @@ export function ProjectsPage({
     const next = (index + delta + WORK_PROJECTS.length) % WORK_PROJECTS.length
     select(WORK_PROJECTS[next].id)
   }
-
-  // Mount transport indicator into bottom dock slot
-  useDockSlot(
-    <div
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.4rem',
-        padding: '0.35rem 0.75rem',
-        background: 'var(--paper-hi)',
-        border: '1.5px solid var(--ink)',
-        borderRadius: '999px',
-        boxShadow: '2px 2px 0 var(--ink)',
-        fontFamily: 'var(--mono)',
-        fontSize: '0.7rem',
-        color: 'var(--ink)',
-      }}
-      role="group"
-      aria-label="Crate transport"
-    >
-      <button
-        type="button"
-        onClick={() => go(-1)}
-        style={{ cursor: 'pointer', background: 'none', border: 'none' }}
-        aria-label="Previous release"
-      >
-        <SkipBack size={12} />
-      </button>
-      <button
-        type="button"
-        onClick={() => setPlaying((v) => !v)}
-        style={{ cursor: 'pointer', background: 'none', border: 'none' }}
-        aria-label={playing ? 'Pause' : 'Play'}
-      >
-        {playing ? <Pause size={12} /> : <Play size={12} fill="currentColor" />}
-      </button>
-      <span>
-        {project.title} · {formatProjectTime(elapsed)} /{' '}
-        {formatProjectTime(PROJECT_PREVIEW_DURATION)}
-      </span>
-      <button
-        type="button"
-        onClick={() => go(1)}
-        style={{ cursor: 'pointer', background: 'none', border: 'none' }}
-        aria-label="Next release"
-      >
-        <SkipForward size={12} />
-      </button>
-    </div>,
-    [project.id, elapsed, playing],
-  )
 
   const progressPercent = Math.min(
     100,

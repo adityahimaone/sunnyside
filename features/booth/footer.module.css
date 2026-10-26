@@ -9,13 +9,12 @@
   width: 100%;
   max-width: 1280px;
   margin-inline: auto;
-  /* Clears the fixed dock, same as .page in booth.module.css. */
-  padding: 1rem 1.5rem 8rem;
+  padding: 1rem 1.5rem 3rem;
 }
 
 @media (min-width: 768px) {
   .footer {
-    padding: 2rem 2.5rem 7.5rem;
+    padding: 2rem 2.5rem 3.5rem;
   }
 }
 

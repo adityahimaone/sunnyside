@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { getFaviconUrl } from '../utils/favicon'
 import { useFaviconState } from '../hooks/use-favicon-state'
 
-import styles from '../library.module.css'
+import styles from '../sunnyside-bookmarks.module.css'
 
 type FaviconCellProps = {
   url: string

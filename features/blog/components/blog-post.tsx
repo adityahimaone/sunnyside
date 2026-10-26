@@ -2,21 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import {
-  AnimatePresence,
-  motion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from 'motion/react'
-import { ArrowLeft, ChevronLeft, ChevronRight, List, X } from 'lucide-react'
+import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
+import { ArrowLeft, List, X } from 'lucide-react'
 import type { BlogMeta } from '../lib/blog'
-import { Cover, useDockSlot, useRoomChannel } from '@/features/booth'
-import {
-  formatRuntime,
-  getWaveformBars,
-  minutesFromReadingTime,
-} from '@/lib/waveform-data'
+import { Cover, useRoomChannel } from '@/features/booth'
 import { formatDate } from '@/lib/date'
 import { ViewCounter } from './view-counter'
 import { Markdown } from './markdown'
@@ -41,8 +30,6 @@ export function BlogPost({
   meta,
   content,
   relatedPosts = [],
-  prevPost,
-  nextPost,
 }: {
   meta: BlogMeta
   content: string
@@ -57,12 +44,6 @@ export function BlogPost({
   const [progress, setProgress] = useState(0)
   const [open, setOpen] = useState(false)
 
-  const minutes = minutesFromReadingTime(meta.readingTime)
-  const bars = useMemo(
-    () => getWaveformBars(meta.slug, 40, { minHeight: 0.25, maxHeight: 1 }),
-    [meta.slug],
-  )
-
   useEffect(() => {
     setHue(COVER_HUES[(meta.tags.length || 1) % COVER_HUES.length])
   }, [meta.tags.length, setHue])
@@ -73,7 +54,6 @@ export function BlogPost({
     damping: 30,
     restDelta: 0.001,
   })
-  const percent = useTransform(smooth, (value) => `${value * 100}%`)
 
   // Chapter ticks are measured once the headings exist and ids are assigned.
   useEffect(() => {
@@ -142,87 +122,13 @@ export function BlogPost({
   }, [])
 
   const current = useMemo(() => {
+    void progress
     let found: Chapter | null = null
     for (const chapter of chapters) {
       if (chapter.top - 120 <= window.scrollY + 200) found = chapter
     }
     return found
   }, [chapters, progress])
-
-  useDockSlot(
-    <div className={styles.scrubber} role="group" aria-label="Reading progress">
-      {prevPost && (
-        <Link
-          href={`/blog/${prevPost.slug}`}
-          className={styles.scrubBtn}
-          aria-label="Previous note"
-        >
-          <ChevronLeft size={16} />
-        </Link>
-      )}
-
-      <div className={styles.scrubWave} aria-hidden="true">
-        {bars.map((h, i) => (
-          <span key={i} style={{ ['--h' as string]: `${h * 100}%` }} />
-        ))}
-        <motion.div className={styles.scrubFill} style={{ width: percent }}>
-          {bars.map((h, i) => (
-            <span key={i} style={{ ['--h' as string]: `${h * 100}%` }} />
-          ))}
-        </motion.div>
-        <motion.span className={styles.scrubHead} style={{ left: percent }} />
-        {chapters.map((chapter) => (
-          <button
-            key={chapter.id}
-            type="button"
-            className={styles.scrubTick}
-            style={{
-              left: `${(chapter.top / Math.max(1, document.body.scrollHeight)) * 100}%`,
-            }}
-            onClick={() => jumpTo(chapter.top)}
-            tabIndex={-1}
-            aria-label={`Jump to ${chapter.title}`}
-          />
-        ))}
-      </div>
-
-      <span className={styles.scrubMeta}>
-        {current?.title ?? 'Intro'} · {formatRuntime(progress * minutes)} /{' '}
-        {formatRuntime(minutes)}
-      </span>
-
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={styles.scrubBtn}
-        aria-label="Chapters"
-        aria-expanded={open}
-      >
-        <List size={16} />
-      </button>
-
-      {nextPost && (
-        <Link
-          href={`/blog/${nextPost.slug}`}
-          className={styles.scrubBtn}
-          aria-label="Next note"
-        >
-          <ChevronRight size={16} />
-        </Link>
-      )}
-    </div>,
-    [
-      bars,
-      chapters,
-      current,
-      meta.slug,
-      minutes,
-      nextPost,
-      open,
-      prevPost,
-      progress,
-    ],
-  )
 
   return (
     <>

@@ -30,7 +30,7 @@
   color: var(--ink);
   font-family: var(--ui);
   padding-top: clamp(2.5rem, 5vw, 4.5rem);
-  padding-bottom: clamp(6rem, 12vw, 10rem);
+  padding-bottom: clamp(3rem, 5vw, 5rem);
   overflow-x: clip;
 }
 
@@ -431,3 +431,37 @@
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0 var(--ink);
 }
+
+.faviconCell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.faviconImg {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.faviconImg[data-state='loading'],
+.faviconImg[data-state='error'] {
+  opacity: 0;
+}
+
+.faviconFallback {
+  width: 14px;
+  height: 14px;
+  opacity: 0.5;
+}
+
+.faviconLoader {
+  width: 14px;
+  height: 14px;
+}
+

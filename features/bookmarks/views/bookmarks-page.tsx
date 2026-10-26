@@ -27,7 +27,6 @@ import type { Bookmark, BookmarkFormData } from '../types'
 import type { BookmarkPage } from '../lib/bookmarks'
 import { channelColor } from '../constants/categories'
 import { useRoomChannel } from '@/features/booth'
-import { useDockSlot } from '@/features/booth/dock-slot'
 import { FaviconCell } from '../components/favicon-cell'
 import { BookmarkAdminModal } from '../components/bookmark-admin-modal'
 import { useListKeys, useGlobalShortcuts } from '../hooks/use-list-keys'
@@ -222,32 +221,6 @@ export function BookmarksPage({ page }: { page: BookmarkPage }) {
     const pick = tracks[Math.floor(Math.random() * tracks.length)]
     window.open(pick.url, '_blank', 'noopener,noreferrer')
   }, [tracks])
-
-  useDockSlot(
-    <button
-      type="button"
-      onClick={shuffle}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.4rem',
-        padding: '0.35rem 0.75rem',
-        background: 'var(--paper-hi)',
-        border: '1.5px solid var(--ink)',
-        borderRadius: '999px',
-        boxShadow: '2px 2px 0 var(--ink)',
-        fontFamily: 'var(--mono)',
-        fontSize: '0.7rem',
-        color: 'var(--ink)',
-        cursor: 'pointer',
-      }}
-    >
-      <Shuffle size={12} />
-      Shuffle Pick
-      <span style={{ opacity: 0.7 }}>({tracks.length})</span>
-    </button>,
-    [tracks.length, shuffle],
-  )
 
   useGlobalShortcuts(
     useMemo(
