@@ -1,60 +1,100 @@
-# Huginn Studio — brand brief
+# Huginn — brand brief
 
-## Job
-Give a small software studio a printed identity that carries its ideas out, then brings them home intact.
+## The one line
+
+A studio for slow software.
+
+## What this is
+
+A brand kit and design system for **Huginn**, a two-city software studio
+(Oslo · Reykjavík). It covers the mark, the wordmark, the field, the type
+voices, the parts, the motion, the voice, and the tokens that carry all of it.
+It ships as a specimen sheet you can read top to bottom, plus the generators
+and the checks that prove it.
 
 ## Audience
-Independent design engineers, artists and product teams who prefer deliberate, legible software to attention-maximising interfaces.
+
+1. **The studio's own engineers**, who need to build a page without asking a
+   designer what colour a hover state is.
+2. **Prospective clients**, who read the sheet as evidence of craft before they
+   read a proposal.
+3. **Whoever inherits this**, who needs to know which decisions were measured
+   and which were taste.
 
 ## Promise
-Make thoughtful software feel vivid without making it loud everywhere.
+
+The identity depends on a drawing, not on a font. A painting becomes cells; a
+name becomes cells. There is no webfont to load, no font licence to buy, and no
+platform where the wordmark falls back to something else. That is the promise,
+and it is also the constraint that produced the look.
 
 ## Positioning
-A studio for slow software. Not a Viking game, Norse mythology publisher, retro arcade or generic creative-agency crest. The Wild Hunt is a reference to image-making and motion, not a literal mascot.
 
-## Direction
-**A thought crosses the threshold and returns in print.** The wordmark is a letterpress signal; ordered dither is the edge where the image gives way to the field.
+The default for a software studio is a grotesque, a soft gradient, and a
+rounded card. Huginn takes the opposite route: a nineteenth-century Norwegian
+painting, a blackletter cut into a 22-row cell grid, one loud field, and four
+corners that are cut rather than rounded. The reference is the printed
+broadside — a poster that had to work in one colour and no resolution — not a
+dashboard.
 
-## Domain
-- Concepts: a messenger's crossing, print registration, halftone, the picture plane, the return path.
-- Physical colours: iron ink, bone paper, vermilion pigment, warm cream, brass registration marks.
-- Signature: a broken, ordered-dither boundary between a source image and the red field.
-- Defaults to reject: raven silhouette, rune circle, generic agency monogram.
+The system is deliberately narrow. One field colour, one drawing, three voices,
+six parts. Narrowness is the strategy: it is what makes a two-person studio look
+like it has a point of view.
 
-## Constraints
-- Stack: Next.js App Router, React, TypeScript, Tailwind CSS 4, feature-scoped CSS.
-- Sizes: compact mark 16px; full mark 32/64/512; case at 1440 and 390px.
-- Accessibility: visible keyboard focus, semantic controls, 4.5:1 body contrast, reduced motion keeps a finished image.
-- Must not change: Sunnyside, Vitrine, archive shell and portfolio footer.
-- Maintainer: Aditya Himawan; source assets and tokens live in the repository.
+## Stack
 
-## References
-1. Peter Nicolai Arbo, *Åsgårdsreien* (1872) — take the sense of a whole sky moving through a frame, not a literal mythology illustration.
-2. Letterpress and risograph registration — take the hard ink edge, visible paper and slight misregistration.
-3. Ordered Bayer dither — take an image boundary that is made from a repeatable rule, not a gradient.
+| Layer | Choice | Why |
+| --- | --- | --- |
+| Specimen | one `design-system.html`, no build step | opens over `file://`, survives a decade |
+| Tokens | `scripts/build-tokens.mjs` → CSS + JSON | one source; neither file is edited by hand |
+| Marks | `scripts/build-brand.mjs` → SVG | glyphs are data, so the drawing is reproducible |
+| Type | system serif + system mono, blackletter drawn | no webfont, no licence, no fallback |
+| Component | React client component + generated CSS | the footer ships without the specimen |
+| Checks | contrast, motion, focus, screenshot scripts | claims point at files |
+
+## Three references
+
+1. **Peter Nicolai Arbo, *Åsgårdsreien* (The Wild Hunt of Odin), 1872.**
+   Nasjonalmuseet, Oslo. Public domain. The riders, the sky, and the idea that a
+   myth arrives as weather.
+2. **The letterpress broadside.** Blackletter for the name, a rule for the
+   hierarchy, a colophon for the honesty. Type set by hand, so nothing is
+   decorative that could be structural.
+3. **Ordered dithering**, as used in newsprint and the risograph. A picture
+   reduced to a grid of decisions — which is the same operation as cutting a
+   letter into cells.
 
 ## Deliverables
-- [x] Brief and one-sentence direction
-- [x] Six mark directions and a kept mark
-- [x] Mark family, wordmark and favicon variants
-- [x] Source-rendered brand board and guide
-- [x] Namespaced tokens, generated CSS and JSON
-- [x] `/design-system/huginn` component and form proof
-- [x] Markdown twin and honest audit
 
-## Non-goals
-- Replacing the portfolio footer or changing Sunnyside's current identity.
-- A public component package.
-- A second signature effect, 3D treatment, or animated background loop.
-- Decorative Norse lettering or an unlicensed cutout.
-
-## Success
-A reviewer can identify the print-boundary idea at 16px, see why the dither belongs in this system, use the example form by keyboard, and find the tokens and footer API from the case page.
-
-## Voice
-**Considered, vivid, exact.** “Thought flies out at dawn. The print remembers its way home.”
+```
+design-system.html                  the specimen, 11 sections, light + dark
+brand/mark.svg                      65 × 50   primary mark
+brand/mark-compact.svg              30 × 30   one-glyph stamp
+brand/wordmark.svg                  950 × 200 outlined, 760 cells
+brand/lockup.svg                    329 × 50  mark + name
+brand/favicons/favicon{-16,-32,-180}.svg
+brand/assets/asgardsreien-*.{jpg,webp}
+tokens/huginn.tokens.{css,json}     16 primitives · 16 roles · 10 space · 7 type
+components/ui/huginn-footer.tsx     the Wild Hunt footer, as a client component
+components/ui/huginn-footer.css     generated from the specimen
+lib/wild-hunt.js                    the drawing's geometry + controller
+docs/huginn-design-system-audit.md  what is proved, and what is not
+docs/shots/                         1440, 390, dark — the layout evidence
+```
 
 ## Assumptions
-- `ASSUMPTION` Huginn Studio is a fictional studio identity for this case.
-- `ASSUMPTION` The supplied footer is a feature specimen, not the portfolio footer.
-- `ASSUMPTION` The Wikimedia public-domain painting may be used as an attributed remote source if a suitable local asset cannot be verified.
+
+Marked because a brief that hides its guesses is fiction.
+
+- **ASSUMPTION** — The studio is fictional. "Huginn" is one of Odin's two
+  ravens, thought; the framing "thought, sent out at dawn and back by supper" is
+  built from that, not from a real client story.
+- **ASSUMPTION** — Two cities, Oslo and Reykjavík, chosen to justify the
+  painting's Nordic source and the bilingual `æ/ø/å` in the type specimen.
+- **ASSUMPTION** — The audience values craft over velocity. If it does not, the
+  system is over-built: a grotesque and a gradient would ship faster.
+- **ASSUMPTION** — Nobody needs a webfont. If a future campaign needs one, the
+  reading face is the only slot that should change; the wordmark never can,
+  because it is a drawing.
+- **NOT DECIDED** — Pricing, services copy, and the actual work index. The
+  footer's column labels are placeholders shaped like real navigation.

@@ -1,59 +1,59 @@
-# Huginn Studio — identity and system guide
+# Huginn — brand assets
 
-> A thought crosses the threshold and returns in print.
+> A picture becomes cells. A name becomes cells.
 
-Huginn is Case 03 of the design-system library. Its identity pairs bone paper and iron ink with one vermilion field. Ordered dither is the signature: a repeatable print boundary, not a texture placed over every surface.
+Case 03 of the design-system library. A print-first identity: Arbo's
+*Åsgårdsreien* dissolved into one vermilion field by an ordered dither, and a
+blackletter wordmark cut from a 22-row cell grid.
 
 - Live case: `/design-system/huginn`
 - Case library: `/design-system`
-- Brief: `design/brand/huginn/brief.md`
-- Board source: `design/brand/huginn/brandkit.html`
+- Specimen (self-contained): `/design-system/huginn/index.html`
 - Board: `/brand/huginn/huginn-brandkit.png`
+- Audit: `/design-system/huginn/audit.md`
+- Decisions: `/design-system/huginn/DESIGN.md`
 - Agent twin: `/design-system/huginn/llms.txt`
 
-## Idea and mark
+## Files
 
-The mark is **Threshold / Print**: a solid H-like frame interrupted by a small field of ordered dots. It means an image crossing a plane and leaving a trace. The compact form removes the dot field and keeps the H silhouette for 16px. It is not a raven, rune or shield.
+| File | Use |
+| --- | --- |
+| `mark.svg` | primary mark, 65 × 50. The H is missing a cell — the stray cell is part of the mark |
+| `mark-compact.svg` | 30 × 30 single glyph. Below 16 px the flying cell becomes noise, so it is dropped |
+| `wordmark.svg` | 950 × 200, 95 columns, 760 cells, one path. Outlined — never live text |
+| `lockup.svg` | mark + name, 329 × 50 |
+| `favicon.svg`, `favicon-{16,32,180}.svg` | the stamp at four sizes |
+| `icon-{180,192,512}.png`, `apple-icon-180.png` | raster app icons, rendered from `favicon-180.svg` |
+| `huginn-brandkit.png` | the board: 1500 × 1125 |
+| `huginn-tokens.{css,json}` | the token layer, exported for consumers |
+| `asgardsreien-1872.jpg` | the painting. Public domain |
+| `asgardsreien-riders.webp` | the riders with alpha, for the footer cutout |
 
-Six directions are compared in the board: Threshold / Print (kept), raven profile, rune ring, crossed wings, eye aperture and feather ladder. The five rejected studies are included to record the category defaults this system avoids.
+## The mark
 
-- Grid: 64 × 64 units.
-- Compact: one solid silhouette, minimum 16px.
-- Full mark: minimum 32px.
-- Clear space: half the full mark height on each side.
-- Horizontal lockup minimum width: 130px.
-- Wordmark artwork is SVG paths, never live text in a logo.
+The H is missing a cell. It sits one half-cell to the right of the stem, in the
+air, still flying. That omission is the whole logo: it is why the mark reads at
+16 px, and why it is never redrawn, outlined or "cleaned up".
 
-## Palette and type
+Clear space is one cell on every side, measured from the stray cell, which counts
+as part of the mark.
 
-The CSS and JSON exports are generated from `features/huginn/tokens.json`.
+## Colour
 
-| Role | Token | Value |
-| --- | --- | --- |
-| Ground | `--hg-bone` | `#F2E8D8` |
-| Structure | `--hg-ink` | `#171210` |
-| One loud field | `--hg-vermilion` | `#B82117` |
-| Reverse lettering | `--hg-cream` | `#F4EFE5` |
-| Registration / focus | `--hg-brass` | `#E6B84B` |
+| Role | Value |
+| --- | --- |
+| Sheet | `#EBE5D8` |
+| Chalk | `#F4EFE5` |
+| Ink | `#100F0E` |
+| Field | `#E2281B` — display and fills only |
+| Accent | `#A31810` — links, buttons, small type |
+| Focus | `#1B2DB0` — the ring, and nothing else |
 
-Display uses a system serif, reading uses a system sans and coordinates use a system mono. No downloaded font is required. Body text sits on solid paper/ink surfaces; the red field is reserved for display and primary actions.
+Paper white on the field measures 4.54:1. That is the ceiling, not a target:
+on the field, hierarchy comes from size and tracking, never from opacity.
 
-## Material and motion
+## Licence
 
-The ordered-dither dissolve is the only signature effect. A painting can fade into a solid red plane through a Bayer threshold while a separately supplied subject matte stays crisp above it. Grain is restrained print finish, not a second effect. The bitmap word resolves to single cells; a brief swash and the data captions follow.
-
-Motion is entrance-only and pointer response is optional. Under reduced motion the picture and lettering render in their completed state; all copy and controls remain understandable without animation. The photo is decorative in the footer demo; its attribution appears in adjacent case copy.
-
-## Components and forms
-
-The case documents the configurable Wild Hunt Footer and a compact native form kit: text, email, select, textarea, checkbox, radio, switch and submit. Each has a visible label, focus, invalid, disabled and success treatment where relevant. The route is a specimen, not a published component library.
-
-## Do / don't
-
-**Do** use the red as a single field, keep body text on opaque surfaces, attribute the painting, test at 16px, and preserve the no-cutout mode.
-
-**Don't** add a raven mascot, distribute runes as decoration, place small copy on the painting, use colour as the only state cue, or attach this footer to the portfolio's global shell.
-
-## Gaps
-
-The mark studies are a compact design record rather than a separate vector exploration application. Browser coverage outside the locally executed Chromium/Playwright pass is not claimed. No generated imagery or font asset is part of this identity.
+The painting is public domain (Peter Nicolai Arbo, *Åsgårdsreien*, 1872,
+Nasjonalmuseet, Oslo, via Wikimedia Commons). The blackletter is drawn — no
+typeface is embedded, referenced or required.

@@ -350,24 +350,28 @@ export const CASE = {
 export const HUGINN_CASE = {
   number: 'Case 03',
   title: 'Huginn Studio',
-  subtitle: 'A thought crosses the threshold and returns in print.',
+  subtitle: 'A picture becomes cells. A name becomes cells.',
   status: 'Shipped · 2026',
-  role: 'Identity · design system · forms · component proof',
+  role: 'Identity · design system · marks · component proof',
   href: '/design-system/huginn',
   library: '/design-system',
   cover: '/brand/huginn/huginn-brandkit.png',
   coverAlt:
-    'Huginn Studio brand board: Threshold Print mark, six mark studies, bone paper, ink, vermilion and ordered dither.',
+    'The Huginn brand board: the missing-cell mark, the drawn blackletter wordmark, the vermilion field and the painting dissolving into it through an ordered dither.',
   brief:
-    'Give a software studio a printed identity: bone paper, iron ink, one vermilion field and an ordered-dither boundary that carries an image into print. The case proves the visual language with a native form and a configurable footer component.',
+    'Give a two-city software studio an identity that depends on a drawing rather than a font: one bone sheet, one vermilion field, a blackletter wordmark cut into a 22-row cell grid, and a painting dissolved into that field by an ordered dither. The case proves the language with a native form kit and a configurable footer, then measures what it shipped.',
   decisions: [
     {
-      title: 'The threshold is the effect.',
-      line: 'Dither describes the boundary between image and field. It is not a page-wide texture or a second layer behind body copy.',
+      title: 'The missing cell is the logo.',
+      line: 'The H sits one half-cell to the right of its stem, still in the air. The omission is why the mark reads at 16px, and why it is never redrawn or cleaned up.',
     },
     {
-      title: 'Thought, not a bird.',
-      line: 'The name references Huginn, but the mark is a threshold and trace rather than a raven, rune ring or mythology crest.',
+      title: 'The wordmark is a drawing, not a face.',
+      line: '760 cells on a 22-row grid resolve to a single path. No webfont to load, no licence to buy, and no platform where the name falls back to something else.',
+    },
+    {
+      title: 'The dither is a mask, not a filter.',
+      line: 'A canvas is punched with transparent holes and laid over the painting, so no image pixel is ever read. The effect survives file://, a CDN and a canvas-taint policy unchanged.',
     },
     {
       title: 'The footer is a specimen.',
@@ -375,10 +379,11 @@ export const HUGINN_CASE = {
     },
   ],
   outcomes: [
-    'A distinct identity with a compact mark, wordmark, lockup and favicon-ready SVG.',
-    'A `--hg-*` token source with generated CSS/JSON and measured contrast pairs.',
-    'A native form kit and configurable ordered-dither footer component proof.',
-    'A full case page, Markdown twin and named verification gaps.',
+    'A mark that survives 16px, a drawn wordmark, a lockup and favicon-ready SVG at six sizes.',
+    'Three token layers — primitive, semantic, component — as DTCG JSON with CSS and JSON exports.',
+    'A native form kit and a configurable ordered-dither footer, both proved in the specimen.',
+    'A measured audit: 43 contrast targets across two themes, 53 focusables, and reduced motion verified by frame comparison.',
+    'A full case page, a Markdown twin, and the two findings the first build got wrong named alongside the ones it got right.',
   ],
 }
 

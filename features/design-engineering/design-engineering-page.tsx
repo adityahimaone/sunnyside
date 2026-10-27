@@ -640,8 +640,9 @@ export function DesignEngineeringPage() {
                   sizes="(max-width: 900px) 100vw, 760px"
                 />
                 <figcaption>
-                  Huginn Studio — the Threshold Print mark, wordmark and
-                  material palette.
+                  Huginn Studio — the missing-cell mark, the drawn blackletter
+                  wordmark, the vermilion field and the painting dissolving
+                  into it.
                 </figcaption>
               </figure>
               <DocsHeading id="case-huginn-brief" level={3} kicker="Brief">

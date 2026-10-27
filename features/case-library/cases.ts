@@ -55,16 +55,16 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     number: '03',
     name: 'Huginn Studio',
     href: '/design-system/huginn',
-    tagline: 'A thought crosses the threshold and returns in print.',
+    tagline: 'A picture becomes cells. A name becomes cells.',
     description:
-      'Bone paper, iron ink, one vermilion field and an ordered-dither boundary. A bitmap wordmark, native form states and a configurable footer component make the print system tangible.',
+      'Arbo’s Åsgårdsreien dissolved into one vermilion field by an ordered dither, and a blackletter wordmark cut from a 22-row cell grid. No webfont, no rounded corners, and an audit that names what it could not verify.',
     status: 'Shipped · 2026',
-    role: 'Identity · design system · forms · component proof',
+    role: 'Identity · design system · marks · component proof',
     material: 'Paper + ink + vermilion',
     cover: '/brand/huginn/huginn-brandkit.png',
     coverAlt:
-      'The Huginn Studio brand board: Threshold Print mark, six mark studies, bone paper, ink, vermilion and ordered-dither field.',
-    tags: ['Print', 'Dither', 'Vermilion', 'Forms'],
+      'The Huginn brand board: the missing-cell mark, the drawn blackletter wordmark, the vermilion field, and the painting dissolving into it through an ordered dither.',
+    tags: ['Print', 'Dither', 'Blackletter', 'Forms'],
     tone: 'huginn',
   },
   {
