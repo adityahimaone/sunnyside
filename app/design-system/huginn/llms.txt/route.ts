@@ -91,7 +91,7 @@ The field is a display surface, not a background for a page of text. Its measure
 
 ## Assets
 
-- Specimen: \`public/design-system/huginn/index.html\` (self-contained; zero network requests)
+- Specimen: \`public/design-system/huginn/specimen.html\` (self-contained; zero network requests)
 - Marks: \`public/brand/huginn/{mark,mark-compact,wordmark,lockup}.svg\`
 - Tokens: \`public/brand/huginn/huginn-tokens.{css,json}\`
 - Board: \`public/brand/huginn/huginn-brandkit.png\`

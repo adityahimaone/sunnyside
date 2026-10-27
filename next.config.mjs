@@ -171,7 +171,14 @@ const nextConfig = {
         // than joining it. SAMEORIGIN still blocks every third-party frame; only
         // this origin may frame this one file. The framing page itself stays
         // DENY, so the embed cannot be nested inside another copy of itself.
-        source: '/design-system/huginn/index.html',
+        //
+        // The file is `specimen.html` and must never be renamed back to
+        // `index.html`. Cloudflare serves static assets before the worker, and
+        // `auto-trailing-slash` maps `/design-system/huginn` to
+        // `huginn/index.html` -- so an index.html there silently replaced the
+        // route and the case page became unreachable in production while still
+        // working in `next dev`. Any name other than index.html keeps the route.
+        source: '/design-system/huginn/specimen.html',
         headers: [
           {
             key: 'X-Frame-Options',

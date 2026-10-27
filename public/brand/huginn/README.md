@@ -8,7 +8,7 @@ blackletter wordmark cut from a 22-row cell grid.
 
 - Live case: `/design-system/huginn`
 - Case library: `/design-system`
-- Specimen (self-contained): `/design-system/huginn/index.html`
+- Specimen (self-contained): `/design-system/huginn/specimen.html`
 - Board: `/brand/huginn/huginn-brandkit.png`
 - Audit: `/design-system/huginn/audit.md`
 - Decisions: `/design-system/huginn/DESIGN.md`

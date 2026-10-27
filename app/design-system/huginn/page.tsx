@@ -36,13 +36,21 @@ export const metadata: Metadata = {
 /**
  * The specimen is a complete document — its own styles, its own theme script,
  * its own sticky contents — so it is served as one rather than re-implemented
- * in React. It lives at public/design-system/huginn/index.html, copied straight
- * from the standalone build, so there is only ever one copy of the specimen and
- * the case page cannot drift from it.
+ * in React. It lives at public/design-system/huginn/specimen.html, copied
+ * straight from the standalone build, so there is only ever one copy of the
+ * specimen and the case page cannot drift from it.
  *
- * That copy is the one path exempted from the site-wide `X-Frame-Options: DENY`
- * in next.config.mjs. Remove the exemption and this iframe goes blank with
- * ERR_BLOCKED_BY_RESPONSE; remove the iframe and the exemption is dead weight.
+ * The filename is load-bearing. Cloudflare serves static assets ahead of the
+ * worker, so an `index.html` in this same directory resolves
+ * `/design-system/huginn` to the document and this page never runs — which is
+ * exactly what happened on the first deploy: correct under `next dev`, dead in
+ * production. `specimen.html` leaves the route alone.
+ *
+ * That copy is also the one path exempted from the site-wide
+ * `X-Frame-Options: DENY` in next.config.mjs. Remove the exemption and the
+ * iframe goes blank with ERR_BLOCKED_BY_RESPONSE under any host that applies
+ * Next's headers to static files; remove the iframe and the exemption is dead
+ * weight.
  */
 export default function HuginnCasePage() {
   return (
@@ -52,12 +60,12 @@ export default function HuginnCasePage() {
         <span>
           Huginn <b>·</b> Case 03
         </span>
-        <a href="/design-system/huginn/index.html" target="_blank" rel="noreferrer">
+        <a href="/design-system/huginn/specimen.html" target="_blank" rel="noreferrer">
           Open standalone ↗
         </a>
       </div>
       <iframe
-        src="/design-system/huginn/index.html"
+        src="/design-system/huginn/specimen.html"
         title="Huginn design system specimen"
         className={styles.frame}
       />

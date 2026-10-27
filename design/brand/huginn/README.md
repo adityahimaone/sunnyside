@@ -8,7 +8,7 @@ vermilion field, and a single operation — the cell grid — carried at three
 scales: the painting, the dissolve between painting and field, and the wordmark.
 
 - Live case: `/design-system/huginn` (the specimen, embedded full-bleed)
-- Standalone specimen: `/design-system/huginn/index.html`
+- Standalone specimen: `/design-system/huginn/specimen.html`
 - Case library: `/design-system`
 - Brief: [`brief.md`](./brief.md)
 - Board source: [`brandkit.html`](./brandkit.html) → renders `huginn-brandkit@2x.png`
