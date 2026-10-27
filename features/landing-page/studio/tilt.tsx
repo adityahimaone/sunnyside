@@ -28,12 +28,14 @@ export function Tilt({
   max = 5,
   perspective = 900,
   lift = 3,
+  'data-journey': journey,
 }: {
   children: ReactNode
   className?: string
   max?: number
   perspective?: number
   lift?: number
+  'data-journey'?: string
 }) {
   const reduced = useReducedMotion() ?? false
   const ref = useRef<HTMLDivElement>(null)
@@ -78,6 +80,7 @@ export function Tilt({
     <div
       ref={ref}
       className={cn(styles.tiltHit, className)}
+      data-journey={journey}
       onPointerEnter={onPointerEnter}
       onPointerMove={onPointerMove}
       onPointerLeave={reset}

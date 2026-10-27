@@ -75,7 +75,7 @@ export function About() {
             <Reveal delay={0.06} y={32}>
               <div data-about-photo>
                 <Tilt className={styles.photoTilt} max={3.5} lift={4}>
-                  <div className={styles.photoCard}>
+                  <div className={styles.photoCard} data-journey="photo">
                     <span
                       className={cn(
                         styles.tape,

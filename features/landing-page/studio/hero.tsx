@@ -168,6 +168,7 @@ export function Hero() {
           >
             <Tilt
               className={styles.artStage}
+              data-journey="hero-art"
               max={3.5}
               perspective={1000}
               lift={2}
@@ -213,6 +214,7 @@ export function Hero() {
               </div>
 
               <motion.div
+                data-journey-from="smiley"
                 style={{ x: smileX, y: smileY }}
                 className={cn(styles.heroSticker, styles.heroStickerSmiley)}
               >
@@ -222,6 +224,7 @@ export function Hero() {
               </motion.div>
 
               <motion.div
+                data-journey-from="burst"
                 style={{ x: burstX, y: burstY }}
                 className={cn(styles.heroSticker, styles.heroStickerBurst)}
               >
@@ -231,6 +234,7 @@ export function Hero() {
               </motion.div>
 
               <motion.div
+                data-journey-from="daisy"
                 style={{ x: daisyX, y: daisyY }}
                 className={cn(styles.heroSticker, styles.heroStickerDaisy)}
               >
@@ -239,7 +243,10 @@ export function Hero() {
                 </span>
               </motion.div>
 
-              <div className={cn(styles.heroSticker, styles.heroStickerBolt)}>
+              <div
+                data-journey-from="bolt"
+                className={cn(styles.heroSticker, styles.heroStickerBolt)}
+              >
                 <span className={styles.heroFloat}>
                   <Bolt className="w-full" title="Lightning bolt sticker" />
                 </span>

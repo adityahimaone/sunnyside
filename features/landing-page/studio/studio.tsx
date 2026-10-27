@@ -12,6 +12,7 @@ import { Showcase } from './showcase'
 import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
 import { Skills } from './skills'
+import { StickerJourney } from './journey/sticker-journey'
 import { useLandingMotion } from './use-landing-motion'
 import { usePagePosition } from './use-page-position'
 import styles from './studio.module.css'
@@ -27,7 +28,7 @@ const MARQUEE_WORDS = [
 
 function Marquee() {
   return (
-    <div className={styles.marqueeWrap} aria-hidden>
+    <div className={styles.marqueeWrap} data-journey="marquee" aria-hidden>
       <div className={styles.marquee}>
         {[0, 1].map((group) => (
           <div className={styles.marqueeGroup} key={group}>
@@ -83,6 +84,7 @@ export default function Studio() {
       </main>
 
       <SiteFooter />
+      <StickerJourney />
     </div>
   )
 }

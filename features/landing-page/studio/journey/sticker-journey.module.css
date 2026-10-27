@@ -1,0 +1,91 @@
+/* Registered so the shockwave radius can be animated from the Web Animations
+   API. Browsers without @property skip the interpolation and simply show no
+   ring; nothing else depends on it. */
+@property --journey-r {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* A zero-size anchor at the page root's top-left. Flyers are positioned in
+   document px from here, so a resting sticker scrolls with its section. It sits
+   under the header (50) and above every section. */
+.layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 45;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.flyer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  margin: -50px 0 0 -50px;
+  visibility: hidden;
+  will-change: transform;
+  filter: drop-shadow(3px 5px 0 rgb(25 26 46 / 0.14));
+}
+
+.inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 70%;
+  animation: journey-bob 6s ease-in-out infinite alternate;
+}
+.inner svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes journey-bob {
+  from {
+    translate: 0 -3px;
+    rotate: -2.5deg;
+  }
+  to {
+    translate: 0 4px;
+    rotate: 2.5deg;
+  }
+}
+
+.spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border: 1.5px solid var(--ink, #191a2e);
+  border-radius: 2px;
+  opacity: 0;
+}
+
+/* The tinted shockwave the sun throws on landing. Fixed to the viewport; the
+   centre and colour are set per landing from the runtime. */
+.ring {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  opacity: 0;
+  background: radial-gradient(
+    circle at var(--cx, 50%) var(--cy, 50%),
+    transparent calc(var(--journey-r) - 26px),
+    var(--ring, #ffd23f) calc(var(--journey-r) - 26px),
+    var(--ring, #ffd23f) var(--journey-r),
+    transparent calc(var(--journey-r) + 1px)
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer {
+    display: none;
+  }
+}
