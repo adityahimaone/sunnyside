@@ -10,8 +10,121 @@ export const contentType = 'image/png'
 /**
  * Sunnyside / Side A social card:
  * Warm paper ground (#f3ecdf), tactile studio card with dark ink border and drop shadow,
- * cobalt "AH" monogram badge, tangerine "DESIGN ENGINEER" tag, and display title.
+ * cobalt sun badge, tangerine "DESIGN ENGINEER" tag, and display title.
  */
+
+const RAY_ANGLES = Array.from({ length: 12 }, (_, index) => index * 30)
+
+/**
+ * The Sunnyside mark, rebuilt in Satori's box model: a cobalt tile with the sun
+ * clipped by the rounded edge. The vector original is public/brand/sunnyside-mark.svg;
+ * this is only here because ImageResponse cannot import an SVG component.
+ */
+function SunBadge() {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        display: 'flex',
+        width: '64px',
+        height: '64px',
+        borderRadius: '16px',
+        backgroundColor: '#3d53d6',
+        border: '2.5px solid #191a2e',
+        boxShadow: '3px 4px 0px #191a2e',
+        overflow: 'hidden',
+      }}
+    >
+      {RAY_ANGLES.map((angle) => (
+        <div
+          key={angle}
+          style={{
+            position: 'absolute',
+            left: '29.7px',
+            top: '25px',
+            width: '2.6px',
+            height: '9px',
+            borderRadius: '2px',
+            backgroundColor: '#191a2e',
+            transform: `rotate(${angle}deg) translateY(-24px)`,
+          }}
+        />
+      ))}
+      <div
+        style={{
+          position: 'absolute',
+          left: '13.4px',
+          top: '11.9px',
+          width: '35.2px',
+          height: '35.2px',
+          borderRadius: '50%',
+          backgroundColor: '#ffd23f',
+          border: '2.6px solid #191a2e',
+          display: 'flex',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: '8px',
+            top: '10px',
+            width: '2.6px',
+            height: '6.4px',
+            borderRadius: '2px',
+            backgroundColor: '#191a2e',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            left: '19px',
+            top: '10px',
+            width: '2.6px',
+            height: '6.4px',
+            borderRadius: '2px',
+            backgroundColor: '#191a2e',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            left: '8px',
+            top: '17.5px',
+            width: '14.8px',
+            height: '7.4px',
+            borderBottom: '2.6px solid #191a2e',
+            borderRadius: '0 0 14px 14px',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            left: '3.2px',
+            top: '17px',
+            width: '6.4px',
+            height: '4.2px',
+            borderRadius: '50%',
+            backgroundColor: '#ff6a2b',
+            opacity: 0.55,
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            left: '23px',
+            top: '17px',
+            width: '6.4px',
+            height: '4.2px',
+            borderRadius: '50%',
+            backgroundColor: '#ff6a2b',
+            opacity: 0.55,
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function Image() {
   return new ImageResponse(
     (
@@ -43,7 +156,7 @@ export default function Image() {
             padding: '52px 64px',
           }}
         >
-          {/* Top Bar: Monogram, Tag, Telemetry */}
+          {/* Top Bar: Mark, Tag, Telemetry */}
           <div
             style={{
               display: 'flex',
@@ -53,24 +166,7 @@ export default function Image() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div
-                style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '14px',
-                  background: '#3d53d6',
-                  border: '2px solid #191a2e',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#fffaf1',
-                  fontSize: '22px',
-                  fontWeight: 900,
-                  boxShadow: '3px 3px 0px #191a2e',
-                }}
-              >
-                AH
-              </div>
+              <SunBadge />
               <div
                 style={{
                   display: 'flex',
@@ -110,7 +206,9 @@ export default function Image() {
           </div>
 
           {/* Main Title & Lede */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+          >
             <h1
               style={{
                 fontSize: '64px',
@@ -133,8 +231,9 @@ export default function Image() {
                 fontWeight: 500,
               }}
             >
-              Aditya Himawan — building product interfaces in React, Next.js, and TypeScript.
-              Tactile design systems, honest motion, and thoughtful digital details.
+              Aditya Himawan — building product interfaces in React, Next.js,
+              and TypeScript. Tactile design systems, honest motion, and
+              thoughtful digital details.
             </p>
           </div>
 

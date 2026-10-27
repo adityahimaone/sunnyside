@@ -10,8 +10,12 @@ import { ArrowUpRight, Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
-import { cn } from '@/lib/utils'
+import {
+  SunnysideMark,
+  SunnysideWordmark,
+} from '@/components/ui/sunnyside-logo'
 import archive from '@/features/archive/archive.module.css'
+import { cn } from '@/lib/utils'
 
 import { CHAPTERS, SOCIALS, scrollToSection } from './studio-data'
 import styles from './studio.module.css'
@@ -115,18 +119,16 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
             <a
               href="#home"
               className={archive.brand}
-              aria-label="Aditya Himawan, back to the top"
+              aria-label="Sunnyside — Aditya Himawan, back to the top"
               onClick={(event) => {
                 event.preventDefault()
                 go('home')
               }}
             >
-              <span className={archive.mark} aria-hidden>
-                AH
-              </span>
+              <SunnysideMark className={archive.mark} />
               <span className={archive.brandText}>
-                <span className={archive.brandName}>Aditya Himawan</span>
-                <span className={archive.brandRole}>design engineer</span>
+                <SunnysideWordmark className={archive.brandWord} />
+                <span className={archive.brandRole}>Aditya Himawan</span>
               </span>
             </a>
 

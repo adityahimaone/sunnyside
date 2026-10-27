@@ -1,0 +1,535 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Sunnyside — brand kit</title>
+<style>
+  @font-face { font-family: Syne; src: url(./assets/syne.woff2) format("woff2"); font-weight: 400 800; }
+  @font-face { font-family: "Geist Mono"; src: url(./assets/geist-mono.woff2) format("woff2"); font-weight: 100 900; }
+
+  :root {
+    --paper: #f3ecdf;
+    --hi: #fffaf1;
+    --lo: #e9dfcf;
+    --ink: #191a2e;
+    --muted: #5f5b6e;
+    --cobalt: #3d53d6;
+    --cobalt-ink: #2c3cae;
+    --butter: #ffd23f;
+    --tangerine: #ff6a2b;
+    --canvas: #121321;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--canvas); }
+  body { font-family: "Geist Mono", ui-monospace, monospace; color: var(--ink); }
+
+  .board {
+    position: relative;
+    width: 2400px;
+    height: 1800px;
+    padding: 54px 54px 78px;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(61, 83, 214, 0.16), transparent 45%),
+      var(--canvas);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.06fr 1fr 1fr;
+    grid-template-rows: 1.14fr 1fr 1fr;
+    gap: 14px;
+    height: 100%;
+  }
+
+  .panel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    padding: 36px 38px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: radial-gradient(circle, #191a2e 0.7px, transparent 0.8px);
+    background-size: 5px 5px;
+  }
+
+  .kicker {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    position: relative;
+    z-index: 2;
+  }
+
+  .kicker b { font-weight: 500; opacity: 0.8; }
+
+  .paper { background: var(--paper); }
+  .hi { background: var(--hi); }
+  .ink { background: var(--ink); color: var(--paper); }
+  .cobalt { background: var(--cobalt); color: var(--hi); }
+  .butter { background: var(--butter); }
+
+  .ink .kicker, .cobalt .kicker { opacity: 0.55; }
+
+  /* 01 — cover */
+  .cover { grid-column: span 2; justify-content: space-between; padding: 44px 48px; }
+  .cover .lockup { display: block; width: 582px; height: 150px; margin-top: 4px; }
+  .cover .line {
+    font-family: Syne, sans-serif;
+    font-size: 60px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1.0;
+    max-width: 980px;
+    margin: 26px 0 0;
+  }
+  .cover .line em { font-style: normal; color: var(--cobalt); }
+  .cover .foot-note {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .cover .foot-note b {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  /* 02 — index */
+  .index { justify-content: space-between; }
+  .index .side {
+    font-family: Syne, sans-serif;
+    font-size: 178px;
+    font-weight: 800;
+    letter-spacing: -0.075em;
+    line-height: 0.8;
+    color: var(--butter);
+    margin-top: 6px;
+  }
+  .index .side small {
+    display: block;
+    margin-bottom: 16px;
+    font-family: "Geist Mono", monospace;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    color: var(--paper);
+    opacity: 0.55;
+  }
+  .index .index-line {
+    font-family: Syne, sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    color: var(--paper);
+    margin: 26px 0 0;
+  }
+  .index .index-body {
+    font-size: 16px;
+    line-height: 1.55;
+    color: rgba(243, 236, 223, 0.66);
+    margin: 12px 0 0;
+  }
+  .index .stamp {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(243, 236, 223, 0.55);
+  }
+  .index .stamp img { width: 46px; height: 46px; }
+
+  /* 03 — construction */
+  .construction .stage { flex: 1; display: grid; place-items: center; }
+  .construction .mark-wrap { position: relative; width: 294px; height: 294px; margin: 4px 0 2px; }
+  .construction .mark-wrap > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .construction .guides { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .construction .caption { font-size: 14px; line-height: 1.55; color: var(--muted); margin: 0; max-width: 370px; }
+  .construction .specs { display: flex; flex-wrap: wrap; gap: 7px 14px; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-top: 14px; }
+  .construction .specs b { color: var(--ink); font-weight: 500; }
+
+  /* 04 — navbar */
+  .navbar .browser {
+    margin-top: 20px;
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    background: var(--hi);
+    overflow: hidden;
+    box-shadow: 6px 7px 0 rgba(25, 26, 46, 0.13);
+  }
+  .navbar .chrome {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 13px;
+    border-bottom: 1.5px solid rgba(25, 26, 46, 0.13);
+    background: var(--paper);
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+  }
+  .navbar .dots { display: flex; gap: 5px; }
+  .navbar .dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(25, 26, 46, 0.22); }
+  .navbar .url { flex: 1; text-align: center; }
+  .navbar .realnav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 15px 18px;
+  }
+  .navbar .realbrand { display: flex; align-items: center; gap: 9px; }
+  .navbar .realbrand img.mark { width: 34px; height: 34px; display: block; }
+  .navbar .realbrand .words { display: flex; flex-direction: column; gap: 3px; }
+  .navbar .realbrand .words img { width: 87.7px; height: 25px; display: block; }
+  .navbar .realbrand .words span { font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .navbar .reallinks { display: flex; gap: 13px; margin-left: auto; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .navbar .realcta {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 11px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--cobalt);
+    color: var(--hi);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .navbar .measure {
+    margin-top: 17px;
+    padding-top: 13px;
+    border-top: 1px solid rgba(25, 26, 46, 0.16);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .navbar .caption { font-size: 15px; line-height: 1.5; color: var(--muted); margin: 10px 0 0; }
+
+
+  .navbar .responsive { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: auto; padding-top: 18px; }
+  .navbar .mini > span { display: block; margin-top: 8px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .navbar .minibar {
+    display: flex;
+    min-height: 52px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid rgba(25, 26, 46, 0.16);
+    border-radius: 8px;
+    background: var(--paper);
+  }
+  .navbar .minibrand { display: flex; align-items: center; gap: 6px; }
+  .navbar .minibrand img.mark { display: block; width: 28px; height: 28px; }
+  .navbar .minibrand img.word { display: block; width: 68px; height: 19.4px; }
+  .navbar .stackwords { display: flex; flex-direction: column; gap: 2px; }
+  .navbar .mininame { font-size: 5.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .navbar .minimenu { font-size: 13px; line-height: 1; color: var(--ink); }
+
+  /* 05 — colour */
+  .colour .swatches { margin-top: 18px; display: flex; flex-direction: column; }
+  .colour .row {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 15px;
+    padding: 13px 0;
+    border-bottom: 1px solid rgba(25, 26, 46, 0.12);
+  }
+  .colour .row:last-child { border-bottom: 0; }
+  .colour .chip { width: 44px; height: 44px; border-radius: 9px; border: 1.5px solid var(--ink); }
+  .colour .name { font-family: Syne, sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+  .colour .name small { display: block; margin-top: 6px; font-family: "Geist Mono", monospace; font-size: 10px; font-weight: 400; letter-spacing: 0.06em; color: var(--muted); text-transform: none; }
+  .colour .role { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-align: right; }
+  .colour .note { margin: auto 0 0; padding-top: 16px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .colour .note b { color: var(--ink); font-weight: 500; }
+
+  /* 06 — type */
+  .type .specimen { font-family: Syne, sans-serif; font-size: 104px; font-weight: 800; letter-spacing: -0.06em; line-height: 0.9; margin: 34px 0 0; }
+  .type .specimen em { font-style: normal; color: var(--cobalt); }
+  .type .rows { margin-top: auto; border-top: 1px solid rgba(25, 26, 46, 0.16); }
+  .type .row { display: grid; grid-template-columns: 68px 1fr auto; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid rgba(25, 26, 46, 0.12); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .type .row b { font-family: Syne, sans-serif; font-size: 15px; letter-spacing: -0.01em; text-transform: none; color: var(--ink); }
+  .type .row .hello { width: 74px; height: 26px; color: var(--tangerine); }
+  .type .row span:last-child { font-size: 10px; }
+
+  /* 07 — icon */
+  .icon { justify-content: flex-start; }
+  .icon-body { flex: 1; display: flex; align-items: center; gap: 26px; margin-top: 26px; }
+  .icon-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 24px; min-width: 0; }
+  .icon .tab {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 14px 9px 10px;
+    border: 1px solid rgba(25, 26, 46, 0.16);
+    border-radius: 10px 10px 0 0;
+    background: var(--hi);
+    font-size: 11px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .icon .tab img { width: 16px; height: 16px; }
+  .icon .tab i { font-style: normal; font-size: 12px; color: var(--muted); margin-left: 10px; }
+  .icon .sizes { display: flex; align-items: flex-end; gap: 24px; }
+  .icon .size { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; letter-spacing: 0.12em; color: var(--ink); opacity: 0.75; }
+  .icon .size img.mark { display: block; }
+  .icon .caption { font-size: 14px; line-height: 1.5; color: var(--ink); opacity: 0.7; margin: 0; max-width: 250px; }
+  .icon .sticker-chip {
+    display: grid;
+    place-items: center;
+    width: 188px;
+    height: 188px;
+    flex: none;
+    margin-left: auto;
+    border: 1.5px solid var(--ink);
+    border-radius: 18px;
+    background: var(--hi);
+    transform: rotate(-5deg);
+    box-shadow: 6px 7px 0 rgba(25, 26, 46, 0.16);
+  }
+  .icon .sticker-chip img.glyph { width: 138px; height: 138px; }
+
+  /* 08 — atmosphere */
+  .atmosphere { position: relative; }
+  .atmosphere::after {
+    opacity: 0.13;
+    background-image: radial-gradient(circle, #191a2e 1.1px, transparent 1.2px);
+    background-size: 9px 9px;
+  }
+  .atmosphere .atmo-line {
+    position: relative;
+    z-index: 2;
+    margin-top: 34px;
+    font-family: Syne, sans-serif;
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -0.055em;
+    line-height: 0.95;
+    color: var(--hi);
+  }
+  .atmosphere .atmo-sun {
+    position: absolute;
+    right: -110px;
+    bottom: -180px;
+    width: 520px;
+    height: 520px;
+    transform: rotate(-10deg);
+    opacity: 0.98;
+  }
+  .atmosphere .atmo-foot {
+    position: relative;
+    z-index: 2;
+    margin-top: auto;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 250, 241, 0.62);
+  }
+
+  /* 09 — essence */
+  .essence { justify-content: space-between; }
+  .essence .essence-line {
+    font-family: Syne, sans-serif;
+    font-size: 64px;
+    font-weight: 800;
+    letter-spacing: -0.055em;
+    line-height: 0.94;
+    margin-top: 36px;
+  }
+  .essence .essence-line em { font-style: normal; color: var(--cobalt); }
+  .essence .word { width: 176px; height: 50px; display: block; }
+  .essence .essence-foot { display: flex; justify-content: space-between; align-items: center; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .essence .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--tangerine); }
+
+  .board-foot {
+    position: absolute;
+    left: 54px;
+    right: 54px;
+    bottom: 26px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(243, 236, 223, 0.5);
+  }
+</style>
+</head>
+<body>
+<div class="board">
+  <div class="grid">
+
+    <section class="panel hi cover">
+      <div class="kicker"><span>Sunnyside — brand kit</span><span><b>01</b> / 08</span></div>
+      <div>
+        <img class="lockup" src="../../public/brand/sunnyside-lockup.svg" alt="Sunnyside lockup" />
+        <p class="line">Paper, cobalt,<br />and a little <em>noise.</em></p>
+      </div>
+      <div class="foot-note">
+        <div><b>A design system by Aditya Himawan</b>Jakarta · GMT+7 · 2026</div>
+        <div style="text-align:right"><b>Version</b>1.0 / Side A</div>
+      </div>
+    </section>
+
+    <section class="panel ink index">
+      <div class="kicker"><span>The studio</span><span><b>02</b> / 08</span></div>
+      <div>
+        <div class="side"><small>The sunny side of</small>A</div>
+        <p class="index-line">A system with a face.</p>
+        <p class="index-body">Warm paper, one cobalt room, and a drawer of stickers. Built so the next page starts with a point of view.</p>
+      </div>
+      <div class="stamp"><img src="../../public/brand/sunnyside-mark.svg" alt="" /><span>Est. 2026 · Jakarta</span></div>
+    </section>
+
+    <section class="panel paper construction">
+      <div class="kicker"><span>Construction</span><span><b>03</b> / 08</span></div>
+      <div class="stage">
+        <div class="mark-wrap">
+          <img src="../../public/brand/sunnyside-mark.svg" alt="Sunnyside mark" />
+          <svg class="guides" viewBox="-9 -9 82 82" fill="none">
+            <rect x="0" y="0" width="64" height="64" stroke="#191a2e" stroke-opacity=".34" stroke-dasharray="1.6 1.6" stroke-width=".55" />
+            <line x1="31" y1="-4" x2="31" y2="68" stroke="#191a2e" stroke-opacity=".22" stroke-width=".4" stroke-dasharray="1 1.4" />
+            <line x1="-4" y1="29.5" x2="68" y2="29.5" stroke="#191a2e" stroke-opacity=".22" stroke-width=".4" stroke-dasharray="1 1.4" />
+            <circle cx="31" cy="29.5" r="16.5" stroke="#3d53d6" stroke-opacity=".55" stroke-width=".45" />
+            <circle cx="31" cy="29.5" r="32" stroke="#ff6a2b" stroke-opacity=".45" stroke-width=".4" stroke-dasharray="1 1.4" />
+            <g stroke="#191a2e" stroke-opacity=".3" stroke-width=".4">
+              <line x1="31" y1="29.5" x2="59.5" y2="29.5" />
+              <line x1="31" y1="29.5" x2="47.5" y2="13" />
+              <line x1="31" y1="29.5" x2="31" y2="1.5" />
+              <line x1="31" y1="29.5" x2="14.5" y2="13" />
+              <line x1="31" y1="29.5" x2="2.5" y2="29.5" />
+              <line x1="31" y1="29.5" x2="14.5" y2="46" />
+              <line x1="31" y1="29.5" x2="31" y2="57.5" />
+              <line x1="31" y1="29.5" x2="47.5" y2="46" />
+            </g>
+            <circle cx="31" cy="29.5" r="1.4" fill="#ff6a2b" />
+          </svg>
+        </div>
+      </div>
+      <p class="caption">One sticker, cut on a 64 grid: cobalt field, ink edge, butter sun, and twelve rays that run into the paper.</p>
+      <div class="specs"><span><b>64</b> grid</span><span><b>16</b> radius</span><span><b>12</b> rays</span><span><b>2.5</b> hard offset</span></div>
+    </section>
+
+    <section class="panel hi navbar">
+      <div class="kicker"><span>Application — navbar</span><span><b>04</b> / 08</span></div>
+      <div class="browser">
+        <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url">adityahimaone.space</span><span>↗</span></div>
+        <div class="realnav">
+          <div class="realbrand">
+            <img class="mark" src="../../public/brand/sunnyside-mark.svg" alt="" />
+            <div class="words">
+              <img src="../../public/brand/sunnyside-wordmark.svg" alt="" />
+              <span>Aditya Himawan</span>
+            </div>
+          </div>
+          <div class="reallinks"><span>About</span><span>Work</span><span>Contact</span></div>
+          <div class="realcta">Say hi ↗</div>
+        </div>
+      </div>
+      <div class="measure">34 mark &nbsp;·&nbsp; 10 gap &nbsp;·&nbsp; 88 wordmark &nbsp;·&nbsp; 25 high &nbsp;·&nbsp; 8.5 name</div>
+      <p class="caption">The mark carries the brand at every width; the name arrives at 360, the role at 480.</p>
+      <div class="responsive">
+        <div class="mini">
+          <div class="minibar">
+            <div class="minibrand stack"><img class="mark" src="../../public/brand/sunnyside-mark.svg" alt="" /><div class="stackwords"><img class="word" src="../../public/brand/sunnyside-wordmark.svg" alt="" /><span class="mininame">Aditya Himawan</span></div></div>
+            <span class="minimenu">≡</span>
+          </div>
+          <span>≥ 480 / name</span>
+        </div>
+        <div class="mini">
+          <div class="minibar">
+            <div class="minibrand"><img class="mark" src="../../public/brand/sunnyside-mark.svg" alt="" /><img class="word" src="../../public/brand/sunnyside-wordmark.svg" alt="" /></div>
+            <span class="minimenu">≡</span>
+          </div>
+          <span>360–479 / wordmark</span>
+        </div>
+        <div class="mini">
+          <div class="minibar">
+            <div class="minibrand"><img class="mark" src="../../public/brand/sunnyside-mark.svg" alt="" /></div>
+            <span class="minimenu">≡</span>
+          </div>
+          <span>&lt; 360 / mark alone</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel paper colour">
+      <div class="kicker"><span>Colour</span><span><b>05</b> / 08</span></div>
+      <div class="swatches">
+        <div class="row"><span class="chip" style="background:var(--paper)"></span><span class="name">Paper<small>#f3ecdf</small></span><span class="role">The room</span></div>
+        <div class="row"><span class="chip" style="background:var(--ink)"></span><span class="name">Ink<small>#191a2e</small></span><span class="role">Type + edges</span></div>
+        <div class="row"><span class="chip" style="background:var(--cobalt)"></span><span class="name">Cobalt<small>#3d53d6</small></span><span class="role">One loud field</span></div>
+        <div class="row"><span class="chip" style="background:var(--butter)"></span><span class="name">Butter<small>#ffd23f</small></span><span class="role">Sun + focus</span></div>
+        <div class="row"><span class="chip" style="background:var(--tangerine)"></span><span class="name">Tangerine<small>#ff6a2b</small></span><span class="role">Annotation</span></div>
+      </div>
+      <p class="note"><b>One loud field at a time.</b> Ink on paper is 14.55:1; cream on cobalt is 5.93:1.</p>
+    </section>
+
+    <section class="panel hi type">
+      <div class="kicker"><span>Type</span><span><b>06</b> / 08</span></div>
+      <p class="specimen">sunny<br /><em>side</em></p>
+      <div class="rows">
+        <div class="row"><span>Display</span><b>Syne 800</b><span>−0.05em</span></div>
+        <div class="row"><span>Label</span><b>Geist Mono 500</b><span>0.14em</span></div>
+        <div class="row"><span>Hand</span><img class="hello" src="./assets/hello.svg" alt="hello!" /><span>marker</span></div>
+      </div>
+    </section>
+
+    <section class="panel butter icon">
+      <div class="kicker"><span>Application — icon</span><span><b>07</b> / 08</span></div>
+      <div class="icon-body">
+        <div class="icon-copy">
+          <div class="tab"><img src="../../public/brand/sunnyside-mark-compact.svg" alt="" /><span>Sunnyside — Design System</span><i>×</i></div>
+          <div class="sizes">
+            <div class="size"><img class="mark" src="../../public/brand/sunnyside-mark.svg" width="66" height="66" alt="" /><span>180 APP</span></div>
+            <div class="size"><img class="mark" src="../../public/brand/sunnyside-mark.svg" width="42" height="42" alt="" /><span>32</span></div>
+            <div class="size"><img class="mark" src="../../public/brand/sunnyside-mark-compact.svg" width="22" height="22" alt="" /><span>16</span></div>
+          </div>
+          <p class="caption">Compact mark for 16–24px: no shadow, eight rays, the face still readable.</p>
+        </div>
+        <div class="sticker-chip"><img class="glyph" src="../../public/brand/sunnyside-glyph.svg" alt="" /></div>
+      </div>
+    </section>
+
+    <section class="panel cobalt atmosphere">
+      <div class="kicker"><span>Image direction</span><span><b>08</b> / 08</span></div>
+      <p class="atmo-line">Stay on the<br />sunny side.</p>
+      <img class="atmo-sun" src="../../public/brand/sunnyside-glyph.svg" alt="" />
+      <div class="atmo-foot">adityahimaone.space</div>
+    </section>
+
+
+  </div>
+  <div class="board-foot"><span>Sunnyside — identity system</span><span>Aditya Himawan / 2026</span></div>
+</div>
+</body>
+</html>

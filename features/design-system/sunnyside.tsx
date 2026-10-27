@@ -6,6 +6,10 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { setInterfaceVisibility } from '@/hooks/use-hide-interface'
 import {
+  SunnysideMark,
+  SunnysideWordmark,
+} from '@/components/ui/sunnyside-logo'
+import {
   ArrowUpRight,
   Bolt,
   Burst,
@@ -1262,7 +1266,7 @@ function Applications() {
           >
             <div className={styles.appHero}>
               <div className={styles.appNav}>
-                <span>AH</span>
+                <SunnysideMark className={styles.appNavMark} />
                 <span>About · Work · Skills</span>
                 <span>Say hi ↗</span>
               </div>
@@ -1576,11 +1580,9 @@ export function Sunnyside() {
             className={styles.brand}
             aria-label={`${SYSTEM.name}, top`}
           >
-            <span className={styles.brandSun}>
-              <Sun className="size-full" />
-            </span>
+            <SunnysideMark className={styles.brandMark} />
             <span className={styles.brandWords}>
-              <b>{SYSTEM.name}</b>
+              <SunnysideWordmark className={styles.brandWord} />
               <span>design system · {SYSTEM.version}</span>
             </span>
           </a>

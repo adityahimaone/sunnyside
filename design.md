@@ -8,6 +8,7 @@ The live `/sunnyside` page is the interactive design-system specimen. It documen
 
 - [Side A landing page screenshot](public/readme/landing-page.png)
 - [Sunnyside specimen screenshot](public/readme/design-system.png)
+- [Sunnyside brand kit](design/brand/sunnyside-brandkit.png)
 - [README overview and live links](README.md)
 
 ## Design principles
@@ -20,6 +21,21 @@ The live `/sunnyside` page is the interactive design-system specimen. It documen
 6. **Edges feel printed, not floating.** Prefer ink outlines, paper layers, and hard directional shadows. Don’t default to glass blur or generic soft card shadows.
 7. **Motion earns its place.** Animate to explain a change, keep orientation, or provide feedback. Respect `prefers-reduced-motion` and keep content understandable without motion.
 8. **Specificity beats flourish.** Write useful, human copy. A clever label never replaces a clear action or an accessible name.
+
+## Logo
+
+The identity is a **die-cut sun sticker** and the **marker wordmark**. The mark is a
+cobalt tile with an ink edge, a butter sun with a face, twelve rays clipped by the
+rounded paper, and the same hard offset every other Sunnyside surface uses. The
+wordmark is the site's single-stroke marker alphabet frozen as outlines, so it never
+depends on a font loading. "A system with a face." is the one-line essence.
+
+- Header: 34px mark, 25px wordmark, 10px gap, 8.5px name at 0.14em. Below 480px the
+  name drops, below 360px the wordmark drops and the mark carries the brand.
+- Favicon: the compact mark (no shadow, eight rays, larger sun) at 16/32/48 and SVG;
+  the apple icon is the full mark on paper at 180.
+- Full files, clear space, minimum sizes, and do/don't rules:
+  [`design/brand/README.md`](./design/brand/README.md).
 
 ## Palette
 
@@ -67,6 +83,7 @@ Glass, audio, and hardware motifs may exist in other feature-specific experiment
 
 | Concern                                                | Current source                                                    |
 | ------------------------------------------------------ | ----------------------------------------------------------------- |
+| Logo mark, wordmark, lockups, favicon                  | `components/ui/sunnyside-logo.tsx`, `public/brand/`, `design/brand/README.md` |
 | Landing chapters and composition                       | `features/landing-page/studio/studio.tsx`                         |
 | Landing palette, chapters, and principles              | `features/landing-page/studio/studio-data.ts`                     |
 | Landing layout and scoped tokens                       | `features/landing-page/studio/studio.module.css`                  |

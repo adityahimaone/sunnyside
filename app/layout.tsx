@@ -35,20 +35,6 @@ export const metadata: Metadata = {
   },
   description:
     'Design engineer building product interfaces in React, Next.js, and TypeScript. Crafting tactile systems, honest motion, and thoughtful digital details.',
-  icons: {
-    icon: [
-      {
-        media: '(prefers-color-scheme: light)',
-        url: '/memoji-1.png',
-        href: '/memoji-1.png',
-      },
-      {
-        media: '(prefers-color-scheme: dark)',
-        url: '/memoji-1.png',
-        href: '/memoji-1.png',
-      },
-    ],
-  },
   alternates: {
     canonical: '/',
   },

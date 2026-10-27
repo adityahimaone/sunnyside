@@ -175,26 +175,17 @@
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.6rem;
   border-radius: var(--ss-r-sm);
   color: var(--ss-ink);
   text-decoration: none;
 }
 
 .mark {
-  display: grid;
+  display: block;
+  flex: none;
   width: 34px;
   height: 34px;
-  place-items: center;
-  border: 2px solid var(--ss-ink);
-  border-radius: var(--ss-r-sm);
-  background: var(--ss-butter);
-  box-shadow: 2px 2px 0 var(--ss-ink);
-  color: var(--ss-ink);
-  font-family: var(--ss-display);
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
   transition: transform var(--ss-ui) var(--ss-ease);
 }
 
@@ -208,22 +199,41 @@
 
 .brandText {
   display: none;
-  font-size: 0.75rem;
-  line-height: 1.25;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.brandName {
+/* The wordmark and the name are the same width (88px / 90px) so the two lines
+   lock together instead of looking like a label under a logo. */
+.brandWord {
   display: block;
-  font-weight: 600;
+  width: 87.7px;
+  height: 25px;
+  color: var(--ss-ink);
 }
 
 .brandRole {
-  display: block;
+  display: none;
   color: var(--ss-muted);
+  font-family: var(--ss-mono);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* The mark alone under 360px; the name joins it as soon as there is room, and
+   the role joins both at 480. */
+@media (min-width: 360px) {
+  .brandText {
+    display: flex;
+  }
 }
 
 @media (min-width: 480px) {
-  .brandText {
+  .brandRole {
     display: block;
   }
 }

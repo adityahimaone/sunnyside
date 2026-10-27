@@ -6,6 +6,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
+import {
+  SunnysideMark,
+  SunnysideWordmark,
+} from '@/components/ui/sunnyside-logo'
 import { cn } from '@/lib/utils'
 
 import styles from './archive.module.css'
@@ -115,14 +119,12 @@ export function ArchiveHeader() {
             <Link
               href="/"
               className={styles.brand}
-              aria-label="Aditya Himawan, Side A"
+              aria-label="Sunnyside — Aditya Himawan, back to Side A"
             >
-              <span className={styles.mark} aria-hidden>
-                AH
-              </span>
+              <SunnysideMark className={styles.mark} />
               <span className={styles.brandText}>
-                <span className={styles.brandName}>Aditya Himawan</span>
-                <span className={styles.brandRole}>design engineer</span>
+                <SunnysideWordmark className={styles.brandWord} />
+                <span className={styles.brandRole}>Aditya Himawan</span>
               </span>
             </Link>
 

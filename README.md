@@ -46,6 +46,8 @@ Sunnyside is the visual language behind the studio landing page and archive surf
 | **Motion**        | Movement should explain a change, orient the reader, or return feedback. Reduced-motion preferences are respected.                        |
 | **Accessibility** | Contrast pairs and focus treatments are documented; decorative accent colours are not used as small body text.                            |
 
+The identity is a die-cut sun sticker and the marker wordmark. The [brand kit](./design/brand/README.md) holds the board, clear space, sizes, and do/don't rules; the SVG and favicon files are in [`public/brand/`](./public/brand/), and the header uses [`components/ui/sunnyside-logo.tsx`](./components/ui/sunnyside-logo.tsx).
+
 The archive uses namespaced `--ss-*` tokens to avoid collisions with Tailwind/shadcn and page-local styles. The landing page and other areas still have their own scoped styling; the specimen is the clearest design reference, not a single runtime source consumed identically by every route.
 
 ## Routes
