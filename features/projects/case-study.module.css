@@ -125,7 +125,7 @@
 
 .coverArt :global(img) {
   object-fit: cover;
-  object-position: top center;
+  object-position: top left;
 }
 
 .tape {

@@ -157,9 +157,9 @@ if enc_val[:3] == b'v10':
   return '30efbf8b90f63df4fdac3be5f3ec1a90e1d676c7b453d2ea06e39056422f8515';
 }
 
-// 3. Switchyard Capture (Light Mode, Sidebar open, Blocked/Review/Done)
+// 3. Switchyard Capture (Light Mode, Sidebar open, Blocked → Review → Done, exactly like Image 2)
 async function captureSwitchyard() {
-  console.log('→ Capturing Switchyard (Light Mode, Sidebar open, Blocked → Review → Done)...');
+  console.log('→ Capturing Switchyard (Light Mode, Sidebar open, natural 1:1 scale matching Image 2)...');
   const browser = await launchBrave();
   const cookie = getSwitchyardCookie();
 
@@ -173,9 +173,10 @@ async function captureSwitchyard() {
     httpOnly: true
   });
 
+  // Exactly matching Image 2 framing (1024 x 528 at 2x scale = 2048 x 1056)
   await browser.send('Emulation.setDeviceMetricsOverride', {
-    width: 1440,
-    height: 900,
+    width: 1024,
+    height: 528,
     deviceScaleFactor: 2,
     mobile: false
   });
@@ -191,37 +192,21 @@ async function captureSwitchyard() {
       document.documentElement.classList.remove('dark');
       document.documentElement.dataset.theme = 'light';
 
-      // 2. Ensure sidebar is visible and open
+      // 2. Ensure sidebar is visible and open (natural state)
       const aside = document.querySelector('aside') || document.querySelector('nav');
       if (aside) aside.style.display = '';
 
-      // 3. Keep exactly Blocked, Review, Done visible
-      const keepTitles = ['Blocked', 'Review', 'Done'];
+      // 3. Natural scroll so Blocked is right after sidebar
       const allH2 = Array.from(document.querySelectorAll('h2'));
-      allH2.forEach(h => {
-        let col = h;
+      const blocked = allH2.find(el => el.innerText.trim() === 'Blocked');
+      if (blocked) {
+        let col = blocked;
         while (col && col.parentElement && !col.parentElement.className.includes('overflow-x')) {
           col = col.parentElement;
         }
-        if (!keepTitles.includes(h.innerText.trim())) {
-          if (col) col.style.display = 'none';
-        } else {
-          if (col) col.style.display = 'flex';
-        }
-      });
-
-      // 4. Ensure board container has scrollLeft = 0 and clean spacing
-      const main = document.querySelector('main');
-      const container = document.querySelector('.overflow-x-auto') || main;
-      if (container) {
-        container.scrollLeft = 0;
-        container.style.paddingLeft = '20px';
-        container.style.paddingRight = '48px';
-        container.style.gap = '16px';
+        const scrollContainer = col.parentElement;
+        scrollContainer.scrollLeft = col.offsetLeft - 12;
       }
-
-      // 5. Slight zoom out (0.90) so everything has generous breathing room
-      document.body.style.zoom = '0.90';
     })()`
   });
 
@@ -236,8 +221,7 @@ async function captureSwitchyard() {
   execSync(`python3 -c "
 from PIL import Image
 im = Image.open('${tmpPng}')
-im_resized = im.resize((1440, 900), Image.Resampling.LANCZOS)
-im_resized.save('${targetPath}', 'WEBP', quality=88, method=6)
+im.save('${targetPath}', 'WEBP', quality=92, method=6)
 "`);
   console.log(`✓ Switchyard updated: ${targetPath}`);
 }
