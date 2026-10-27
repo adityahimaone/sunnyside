@@ -390,35 +390,36 @@ export const HUGINN_CASE = {
 export const RISO_CASE = {
   number: 'Case 04',
   title: 'Riso Co.',
-  subtitle: 'A torn poster pinned to studio cork.',
+  subtitle: 'Two passes, one sheet.',
   status: 'Shipped · 2026',
-  role: 'Identity · design system · forms · tear physics',
+  role: 'Identity · design system · form kit · print proof',
   href: '/design-system/riso',
   library: '/design-system',
   cover: '/brand/riso/riso-brandkit.png',
   coverAlt:
-    'Riso Co. brand board: The Pin & Deckle mark, 64-unit grid, vermilion and cobalt sheets, pushpin physics and typography.',
+    'The Riso Co. brand board: a fluorescent orange sheet pulled 2.2mm off its federal blue pass, the deckle-edged mark on a 64-unit grid, five ink chips, the outlined wordmark at three favicon sizes, and the torn sheet edge.',
   brief:
-    'Translate tactile risograph printmaking and mechanical hardware to web interfaces: 270gsm raw vellum, electric vermilion and cobalt ink sheets, and Mulberry32 PRNG algorithmic deckle-edge tear physics.',
+    'A risograph prints one drum at a time, so the second impression never lands exactly on the first. Most digital riso pastiche hides that; Riso Co. makes it the rule. Every element is printed twice — fluorescent orange and federal blue — and the 2.5px misregistration is the identity rather than a defect to be corrected.',
   decisions: [
     {
-      title: 'The field is vermilion.',
-      line: 'One loud surface per view. The remainder is unbleached vellum and carbon soot.',
+      title: 'The second pass is never corrected.',
+      line: 'One CSS variable, `--rs-reg`, offsets every display element. A slider in the specimen runs 0–6px so the reader can pull the sheet back into register and watch the idea disappear.',
     },
     {
-      title: 'Hardware anchors the sheet.',
-      line: 'The mechanical pushpin is an interactive focal point: pulling it lifts the needle, re-seeds the generator, and stabs a fresh tear.',
+      title: 'The mark is the sheet, not a letter.',
+      line: 'A drawn two-pass rectangle on a 64-unit grid, its bottom edge carrying seven ridge points and two deep bites. One path with two strokes, so it still reads at 16px where a monogram would turn to mud.',
     },
     {
-      title: 'Pure math over raster files.',
-      line: 'The tear ridge, exposed cellulose fiber rim, and curled flaps are SVG and canvas math from numbers without external dependencies.',
+      title: 'The overprint is measured, not blended.',
+      line: 'No `mix-blend-mode`. Where the passes coincide the third colour is a third clipped path, so the identity survives a favicon, a PDF and a client with blending disabled.',
     },
   ],
   outcomes: [
-    'A geometric Pin & Deckle mark, outlined wordmark and 16px favicon.',
-    'A `--rs-*` token source with synchronized CSS/JSON and WCAG AAA/AA ratings.',
-    'An accessible native form kit with full state coverage (default, focus, invalid, disabled, success).',
-    'Interactive PushpinTearFooter component specimen and agent-readable Markdown twin.',
+    'A mark family at 64/32/16px plus a registration target, an outlined wordmark and a lockup — all SVG, no live text, no webfont dependency.',
+    'Three token layers with 16 contrast pairs computed in the build rather than typed, including the one pair that fails: orange as body type at 2.88:1, documented as fills-only.',
+    'A native form kit with default, focus, invalid, disabled and success states, and an error summary that moves focus to the first bad field.',
+    'The pushpin tear footer rebuilt as a print specimen, with a seed control that re-tears the sheet on demand.',
+    'A printed 1500×1125 brand board, a full case page and a Markdown twin — with the 2.88:1 failure named in the audit instead of rounded up.',
   ],
 }
 

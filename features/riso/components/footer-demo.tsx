@@ -1,123 +1,95 @@
 'use client'
 
 import * as React from 'react'
+
 import PushpinTearFooter from '@/components/ui/pushpin-tear-footer'
 
+import styles from '../riso.module.css'
+import { RisoMark } from './brand'
+
+const EMAIL = 'orders@risoco.berlin'
+
+/**
+ * The specimen, not a mock of it: the real component, fed the real tokens.
+ *
+ * The one prop that matters is `sheetInk`. The component defaults to white on
+ * the sheet, which is 3.36:1 on this orange and fails AA for the sizes it is
+ * set at. Carbon on the same orange is 5.30:1, so the demo prints black — which
+ * is also what a risograph does when the second drum is black.
+ */
 export function FooterDemo() {
-  const [edition, setEdition] = React.useState<'vermilion' | 'cobalt'>('vermilion')
+  const [drum, setDrum] = React.useState<'a' | 'b'>('a')
   const [seed, setSeed] = React.useState(23)
 
-  const isVermilion = edition === 'vermilion'
+  const sheet = drum === 'a' ? '#ff4a1c' : '#1a7ff0'
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* Specimen control bar */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          padding: '1rem 1.5rem',
-          backgroundColor: 'var(--rs-surface-card)',
-          borderBottom: '1px solid var(--rs-border)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--rs-text-subtle)' }}>
-            Drum Edition:
-          </span>
-          <button
-            type="button"
-            onClick={() => setEdition('vermilion')}
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              padding: '0.35rem 0.75rem',
-              borderRadius: '99px',
-              border: isVermilion ? '1.5px solid #ff4a1c' : '1px solid var(--rs-border)',
-              backgroundColor: isVermilion ? '#fff0ec' : 'transparent',
-              color: isVermilion ? '#ff4a1c' : 'var(--rs-text)',
-              cursor: 'pointer',
-            }}
-          >
-            Vermilion Run (#ff4a1c)
-          </button>
-          <button
-            type="button"
-            onClick={() => setEdition('cobalt')}
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              padding: '0.35rem 0.75rem',
-              borderRadius: '99px',
-              border: !isVermilion ? '1.5px solid #1a7ff0' : '1px solid var(--rs-border)',
-              backgroundColor: !isVermilion ? '#edf5fe' : 'transparent',
-              color: !isVermilion ? '#1a7ff0' : 'var(--rs-text)',
-              cursor: 'pointer',
-            }}
-          >
-            Electric Cobalt (#1a7ff0)
+    <div className={styles.specimen}>
+      <div className={styles.specimenBar}>
+        <div className={styles.specimenGroup}>
+          <span className={styles.label}>Drum</span>
+          <div className={styles.segmented} role="group" aria-label="Drum">
+            <button
+              type="button"
+              aria-pressed={drum === 'a'}
+              onClick={() => setDrum('a')}
+              data-ink="a"
+            >
+              Orange
+            </button>
+            <button
+              type="button"
+              aria-pressed={drum === 'b'}
+              onClick={() => setDrum('b')}
+              data-ink="b"
+            >
+              Blue
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.specimenGroup}>
+          <span className={styles.label}>Seed</span>
+          <span className={styles.seed}>{seed}</span>
+          <button type="button" className={styles.ghostButton} onClick={() => setSeed((s) => s + 1)}>
+            Re-tear ↻
           </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '0.8125rem', color: 'var(--rs-text-subtle)' }}>
-            Mulberry32 Seed: <strong>{seed}</strong>
-          </span>
-          <button
-            type="button"
-            onClick={() => setSeed((s) => s + 1)}
-            style={{
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              padding: '0.35rem 0.75rem',
-              borderRadius: '4px',
-              border: '1px solid var(--rs-border)',
-              backgroundColor: 'var(--rs-surface)',
-              color: 'var(--rs-text)',
-              cursor: 'pointer',
-            }}
-          >
-            Re-rip New Edge ⟳
-          </button>
-        </div>
+        <p className={styles.specimenNote}>
+          Scroll it into view. The chrome assembles, the pin drops, and the sheet rips from the
+          pin outward.
+        </p>
       </div>
 
-      {/* The Pushpin Tear Footer Specimen */}
-      <div style={{ width: '100%', minHeight: '640px' }}>
+      <div className={styles.specimenStage}>
         <PushpinTearFooter
           brand="ink."
           name="riso co."
-          logoHref="#"
-          logo={
-            <span style={{ fontSize: '1.5em', fontWeight: 700, letterSpacing: '-0.04em' }}>
-              ink.
-            </span>
-          }
-          sheet={isVermilion ? '#ff4a1c' : '#1a7ff0'}
+          logoHref="#specimen"
+          logo={<RisoMark size={52} />}
+          sheet={sheet}
           paper="#f1ede4"
           paperInk="#1b1712"
+          sheetInk="#1b1712"
           seed={seed}
-          email="orders@risoco.berlin"
+          email={EMAIL}
           newsletter={{ label: 'new prints, every other friday', placeholder: 'your@email' }}
           status={{ label: 'taking print orders' }}
           mark="run 0412"
           timeZone="Europe/Berlin"
           timeLabel="BER"
           socials={[
-            { icon: 'ig', label: 'Instagram', href: 'https://instagram.com' },
-            { icon: 'x', label: 'X', href: 'https://x.com' },
-            { icon: 'github', label: 'GitHub', href: 'https://github.com' },
+            { icon: 'ig', label: 'Instagram', href: '#' },
+            { icon: 'x', label: 'X', href: '#' },
           ]}
           columns={[
             {
               title: 'shop',
               links: [
-                { label: 'Broadside Posters', href: '#' },
-                { label: 'Risograph Zines', href: '#' },
-                { label: 'Uncut Paper Stock', href: '#' },
+                { label: 'Broadside posters', href: '#' },
+                { label: 'Risograph zines', href: '#' },
+                { label: 'Uncut paper stock', href: '#' },
               ],
               cta: { label: 'shop.', href: '#' },
             },
@@ -125,10 +97,10 @@ export function FooterDemo() {
               title: 'studio',
               links: [
                 { label: 'Stockists', href: '#' },
-                { label: 'Wholesale Runs', href: '#' },
-                { label: 'Workshop Visit', href: '#' },
+                { label: 'Wholesale runs', href: '#' },
+                { label: 'Workshop visit', href: '#' },
               ],
-              cta: { label: 'order.', href: 'mailto:orders@risoco.berlin' },
+              cta: { label: 'order.', href: `mailto:${EMAIL}` },
             },
           ]}
           sideLinks={[
@@ -139,7 +111,8 @@ export function FooterDemo() {
           copyright="© 2026 ink. riso co."
           credit="printed by hand in berlin"
           handle={{ label: '@ink.riso', href: '#' }}
-          onRepin={(newSeed) => setSeed(newSeed)}
+          fontSans="var(--font-geist), system-ui, sans-serif"
+          onRepin={(next) => setSeed(next)}
         />
       </div>
     </div>

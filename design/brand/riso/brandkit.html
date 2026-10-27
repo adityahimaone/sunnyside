@@ -2,7 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Riso Co. — Brand Kit & Identity Board</title>
+    <title>Riso Co. / Atelier Ink — brand board</title>
+    <!--
+      The board is the 4:3 thumbnail on /design-system, so it is authored at
+      1500 × 1125 and rendered at 2× before being downscaled. Fonts are local
+      files: nothing here is fetched.
+
+        node scripts/render-riso-board.mjs
+    -->
     <style>
       @font-face {
         font-family: 'Space Grotesk';
@@ -23,525 +30,409 @@
         font-display: block;
       }
 
-      * {
-        box-sizing: border-box;
-      }
-      html, body {
-        margin: 0;
-        padding: 0;
-        background: #0f0d0b;
+      :root {
+        --paper: #f1ede4;
+        --deep: #e8e1d3;
+        --carbon: #1b1712;
+        --orange: #ff4a1c;
+        --blue: #1a7ff0;
+        --over: #46212a;
+        --muted: #6b6155;
+        --rule: #c9c0af;
       }
 
-      #board {
-        width: 2400px;
-        height: 1800px;
-        padding: 54px;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(3, 1fr);
-        gap: 16px;
-        background: #0f0d0b;
-        color: #f1ede4;
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body {
+        width: 1500px;
+        height: 1125px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      .board {
+        position: relative;
+        width: 1500px;
+        height: 1125px;
+        padding: 44px 48px 40px;
+        background: var(--paper);
+        color: var(--carbon);
         font-family: 'Geist', sans-serif;
         -webkit-font-smoothing: antialiased;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 22px;
       }
 
-      .panel {
-        position: relative;
-        overflow: hidden;
-        border-radius: 18px;
-        background: #171310;
-        border: 1px solid #28211b;
-        padding: 36px;
-        display: flex;
-        flex-direction: column;
+      /* a printed dot screen over the whole sheet, not a texture image */
+      .board::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at center, rgba(27, 23, 18, 0.5) 0.6px, transparent 0.7px);
+        background-size: 4px 4px;
+        opacity: 0.1;
+        pointer-events: none;
       }
 
       .mono {
         font-family: 'Geist Mono', monospace;
-        font-size: 13px;
-        font-weight: 500;
-        letter-spacing: 0.14em;
+        font-size: 11px;
+        letter-spacing: 0.16em;
         text-transform: uppercase;
+        color: var(--muted);
       }
 
-      .label {
-        font-family: 'Geist Mono', monospace;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: #ff4a1c;
+      /* crop marks: four corners, drawn as rules that stop short of the trim */
+      .crop { position: absolute; width: 22px; height: 22px; opacity: 0.85; }
+      .crop::before, .crop::after { content: ''; position: absolute; background: var(--carbon); }
+      .crop::before { width: 100%; height: 1px; }
+      .crop::after { width: 1px; height: 100%; }
+      .crop.tl { top: 16px; left: 16px; }
+      .crop.tr { top: 16px; right: 16px; }
+      .crop.tr::before { right: 0; } .crop.tr::after { right: 0; }
+      .crop.bl { bottom: 16px; left: 16px; }
+      .crop.bl::before { bottom: 0; } .crop.bl::after { bottom: 0; }
+      .crop.br { bottom: 16px; right: 16px; }
+      .crop.br::before { bottom: 0; right: 0; } .crop.br::after { bottom: 0; right: 0; }
+
+      /* ---------- header ---------- */
+      header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--carbon);
+        padding-bottom: 12px;
+        position: relative;
+        z-index: 1;
+      }
+      header img { display: block; height: 40px; }
+      .head-meta { display: flex; gap: 28px; }
+
+      /* ---------- main ---------- */
+      main {
+        display: grid;
+        grid-template-columns: 1fr 452px;
+        gap: 22px;
+        min-height: 0;
+        position: relative;
+        z-index: 1;
       }
 
+      .poster {
+        position: relative;
+        background: var(--orange);
+        color: var(--carbon);
+        padding: 40px 44px 30px;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        overflow: hidden;
+      }
+      .poster::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at center, rgba(27, 23, 18, 0.55) 0.7px, transparent 0.8px);
+        background-size: 5px 5px;
+        opacity: 0.14;
+        pointer-events: none;
+      }
+      .poster-top { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; }
+      .poster-top .mono { color: rgba(27, 23, 18, 0.72); }
+      .poster-mark { width: 140px; height: 140px; }
+
+      .poster-mid { align-self: center; position: relative; z-index: 1; }
       .display {
         font-family: 'Space Grotesk', sans-serif;
         font-weight: 700;
-        letter-spacing: -0.04em;
-        line-height: 0.98;
+        font-size: 118px;
+        line-height: 0.88;
+        letter-spacing: -0.055em;
+        position: relative;
       }
-
-      /* Panel 1: Cover / Header */
-      .cover {
-        grid-column: span 2;
-        padding: 44px 48px;
-        background: radial-gradient(circle at 10% 10%, rgba(255, 74, 28, 0.15), transparent 60%), #171310;
+      /* the second impression: the same words, 2.5px up and right, in blue */
+      .display .ghost {
+        position: absolute;
+        inset: 0;
+        color: var(--blue);
+        transform: translate(4px, -4px);
+        opacity: 0.9;
+        z-index: 1;
       }
-
-      .cover-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-      }
-
-      .cover-meta {
-        text-align: right;
-        line-height: 1.8;
-        color: #9d8f82;
-      }
-
-      .cover-headline {
-        margin-top: auto;
-        font-size: 68px;
-        width: 880px;
-        color: #f1ede4;
-      }
-
-      .cover-headline em {
-        font-style: normal;
-        color: #ff4a1c;
-      }
-
-      .cover-foot {
+      .display .top { position: relative; z-index: 2; }
+      .poster-foot {
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
-        margin-top: 24px;
+        border-top: 1px solid rgba(27, 23, 18, 0.45);
+        padding-top: 12px;
+        position: relative;
+        z-index: 1;
       }
-
-      .cover-sub {
-        max-width: 520px;
-        font-size: 18px;
-        line-height: 1.5;
-        color: #b3a497;
-      }
-
-      /* Panel 2: Index / 04 */
-      .index-num {
-        font-size: 154px;
-        line-height: 0.8;
-        color: #ff4a1c;
-        margin: 16px 0 6px;
-        font-weight: 800;
-      }
-
-      .index-body {
-        margin-top: auto;
-        font-size: 19px;
-        line-height: 1.45;
-        color: #c9bdb2;
-      }
-
-      .index-list {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px 16px;
-        margin-top: 20px;
-        color: #9d8f82;
-        font-size: 12px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+      .poster-foot .mono { color: rgba(27, 23, 18, 0.78); }
+      .run {
         font-family: 'Geist Mono', monospace;
+        font-size: 13px;
+        letter-spacing: 0.1em;
       }
 
-      /* Panel 3: Construction & Grid */
-      .construction svg {
-        width: 100%;
-        height: auto;
-        margin-top: 12px;
-      }
+      .side { display: grid; grid-template-rows: 1fr auto; gap: 22px; min-height: 0; }
 
-      .specs {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px 20px;
-        margin-top: auto;
-        color: #9d8f82;
-        font-family: 'Geist Mono', monospace;
-        font-size: 12px;
-      }
-
-      .specs b {
-        color: #f1ede4;
-      }
-
-      /* Panel 4: Physical Swatches */
-      .swatches-grid {
+      .panel {
+        border: 1px solid var(--carbon);
+        padding: 20px 22px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        margin-top: 20px;
+        background: var(--paper);
       }
+      .panel-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
 
-      .swatch-row {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        background: #1f1a16;
-        border: 1px solid #322a22;
-        border-radius: 10px;
-        padding: 10px 14px;
-      }
-
-      .swatch-box {
-        width: 44px;
-        height: 44px;
-        border-radius: 6px;
-        flex-shrink: 0;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-      }
-
-      .swatch-info {
+      .mark-stage {
         flex: 1;
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-      }
-
-      .swatch-name {
-        font-size: 15px;
-        font-weight: 600;
-        color: #f1ede4;
-      }
-
-      .swatch-hex {
-        font-family: 'Geist Mono', monospace;
-        font-size: 12px;
-        color: #ff4a1c;
-      }
-
-      /* Panel 5: PRNG & Tear Physics */
-      .tear-preview {
-        margin-top: 20px;
-        height: 140px;
+        display: grid;
+        place-items: center;
         position: relative;
-        background: #ff4a1c;
-        border-radius: 10px;
-        overflow: hidden;
+        background-image:
+          linear-gradient(to right, rgba(27, 23, 18, 0.1) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(27, 23, 18, 0.1) 1px, transparent 1px);
+        background-size: 22px 22px;
+        margin: 0 -6px;
       }
+      .mark-stage img { width: 186px; height: 186px; display: block; }
+      .mark-notes { display: flex; justify-content: space-between; margin-top: 10px; }
 
-      .tear-math {
-        margin-top: auto;
-        background: #110e0c;
-        border: 1px solid #28211b;
-        border-radius: 8px;
-        padding: 14px 18px;
-        font-family: 'Geist Mono', monospace;
-        font-size: 12px;
-        color: #b3a497;
-        line-height: 1.6;
-      }
-
-      /* Panel 6: Favicon Scale Gate */
-      .scale-row {
-        display: flex;
-        align-items: flex-end;
-        gap: 28px;
-        margin: 24px 0 auto;
-        padding-bottom: 24px;
-      }
-
-      .scale-item {
-        display: flex;
-        flex-direction: column;
+      .inks { display: grid; gap: 0; }
+      .ink {
+        display: grid;
+        grid-template-columns: 30px 1fr auto;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
+        padding: 9px 0;
+        border-top: 1px solid var(--rule);
       }
+      .ink:last-child { border-bottom: 1px solid var(--rule); }
+      .chip { width: 30px; height: 30px; }
+      .ink-name { font-size: 13px; font-weight: 500; letter-spacing: -0.01em; }
+      .ink-hex { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
 
-      .scale-item span {
-        font-family: 'Geist Mono', monospace;
-        font-size: 11px;
-        color: #9d8f82;
-      }
-
-      /* Panel 7: Typography Scale */
-      .type-stack {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-        margin-top: 18px;
-      }
-
-      .type-spec {
-        border-bottom: 1px solid #28211b;
-        padding-bottom: 10px;
-      }
-
-      .type-spec h4 {
-        margin: 0 0 4px;
-        color: #f1ede4;
-        letter-spacing: -0.02em;
-      }
-
-      .type-spec p {
-        margin: 0;
-        font-family: 'Geist Mono', monospace;
-        font-size: 11px;
-        color: #9d8f82;
-      }
-
-      /* Panel 8: Component Specimen */
-      .specimen-card {
-        margin-top: 18px;
-        background: #f1ede4;
-        color: #1b1712;
-        border-radius: 12px;
-        padding: 24px;
+      /* ---------- bottom strip ---------- */
+      .strip {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr 0.95fr;
+        gap: 22px;
+        height: 246px;
         position: relative;
-        box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.4);
+        z-index: 1;
       }
 
-      .specimen-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1.5px solid #1b1712;
-        padding-bottom: 8px;
-        margin-bottom: 14px;
-      }
-
-      .specimen-title {
-        font-weight: 800;
-        font-size: 24px;
-        letter-spacing: -0.03em;
-      }
-
-      .specimen-pill {
-        background: #ff4a1c;
-        color: #fff;
-        padding: 4px 10px;
-        border-radius: 99px;
-        font-size: 11px;
+      .specimen { font-family: 'Space Grotesk', sans-serif; }
+      .specimen .aa {
+        font-size: 84px;
         font-weight: 700;
+        letter-spacing: -0.05em;
+        line-height: 0.9;
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+      }
+      .specimen .aa small {
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        color: var(--muted);
+        font-weight: 400;
+        line-height: 1.9;
+        padding-left: 6px;
+      }
+      .specimen .body {
+        font-family: 'Geist', sans-serif;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-top: 12px;
+        max-width: 36ch;
+        color: #332d26;
+      }
+
+      .wordmark-panel { display: flex; flex-direction: column; justify-content: space-between; }
+      .wordmark-panel img { width: 100%; display: block; }
+
+      .sizes { display: flex; align-items: flex-end; gap: 16px; }
+      .sizes img { display: block; }
+
+      .reg { width: 84px; height: 84px; flex: none; }
+
+      footer {
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid var(--carbon);
+        padding-top: 10px;
+        position: relative;
+        z-index: 1;
       }
     </style>
   </head>
   <body>
-    <div id="board">
-      <!-- 01: COVER (spans 2 columns) -->
-      <div class="panel cover">
-        <div class="cover-top">
-          <div style="display: flex; align-items: center; gap: 14px;">
-            <svg width="44" height="44" viewBox="0 0 64 64" fill="none">
-              <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="#ff4a1c"/>
-              <ellipse cx="28" cy="46" rx="6" ry="2" fill="#1b1712" opacity="0.3"/>
-              <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="#a3a9b2"/>
-              <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="#f1ede4"/>
-              <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="#f1ede4"/>
-              <ellipse cx="32" cy="27" rx="5" ry="1.8" fill="#f1ede4"/>
-            </svg>
-            <span class="display" style="font-size: 32px; font-weight: 800;">ink. riso co.</span>
-          </div>
-          <div class="cover-meta mono">
-            <div>CASE 04 / BRAND &amp; INTERFACE SYSTEM</div>
-            <div>BERLIN WORKSHOP · RUN 0412</div>
-          </div>
+    <div class="board">
+      <span class="crop tl"></span><span class="crop tr"></span>
+      <span class="crop bl"></span><span class="crop br"></span>
+
+      <header>
+        <img src="../../../public/brand/riso/lockup.svg" alt="Riso Co." />
+        <div class="head-meta">
+          <span class="mono">Case 04 / Brand kit</span>
+          <span class="mono">2 drums / 1 sheet</span>
+          <span class="mono">Berlin · 2026</span>
         </div>
+      </header>
 
-        <h1 class="cover-headline display">
-          A torn poster pinned to <em>studio cork.</em>
-        </h1>
+      <main>
+        <section class="poster">
+          <div class="poster-top">
+            <img class="poster-mark" src="../../../public/brand/riso/mark.svg" alt="" />
+            <div style="text-align: right">
+              <div class="mono">Run 0412</div>
+              <div class="mono" style="margin-top: 4px">270gsm vellum</div>
+            </div>
+          </div>
 
-        <div class="cover-foot">
-          <p class="cover-sub">
-            Electric vermilion and federal cobalt meet raw 270gsm vellum. Mathematical deckle-edge physics from Mulberry32 PRNG and a mechanical pushpin anchor tactile print engineering.
+          <div class="poster-mid">
+            <div class="display">
+              <span class="top">two passes,</span><br />
+              <span class="top">one sheet.</span>
+              <span class="ghost" aria-hidden="true">two passes,<br />one sheet.</span>
+            </div>
+          </div>
+
+          <div class="poster-foot">
+            <div>
+              <div class="mono">Fluorescent orange / federal blue</div>
+              <div class="run" style="margin-top: 6px">A · B — registration 2.2mm</div>
+            </div>
+            <div class="mono">1 / 250</div>
+          </div>
+        </section>
+
+        <div class="side">
+          <section class="panel">
+            <div class="panel-head">
+              <span class="mono">01 / The mark</span>
+              <span class="mono">64 grid</span>
+            </div>
+            <div class="mark-stage">
+              <img src="../../../public/brand/riso/mark.svg" alt="The Riso Co. mark" />
+            </div>
+            <div class="mark-notes">
+              <span class="mono">Sheet, torn</span>
+              <span class="mono">Keyline +2.2 / −2.2</span>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <span class="mono">02 / Inks</span>
+              <span class="mono">5 + 2</span>
+            </div>
+            <div class="inks">
+              <div class="ink">
+                <span class="chip" style="background: #ff4a1c"></span>
+                <span class="ink-name">Fluorescent orange</span>
+                <span class="ink-hex">#FF4A1C</span>
+              </div>
+              <div class="ink">
+                <span class="chip" style="background: #1a7ff0"></span>
+                <span class="ink-name">Federal blue</span>
+                <span class="ink-hex">#1A7FF0</span>
+              </div>
+              <div class="ink">
+                <span class="chip" style="background: #46212a"></span>
+                <span class="ink-name">Overprint</span>
+                <span class="ink-hex">#46212A</span>
+              </div>
+              <div class="ink">
+                <span class="chip" style="background: #1b1712"></span>
+                <span class="ink-name">Carbon black</span>
+                <span class="ink-hex">#1B1712</span>
+              </div>
+              <div class="ink">
+                <span class="chip" style="background: #f1ede4; border: 1px solid #c9c0af"></span>
+                <span class="ink-name">Vellum</span>
+                <span class="ink-hex">#F1EDE4</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <div class="strip">
+        <section class="panel specimen">
+          <div class="panel-head">
+            <span class="mono">03 / Type</span>
+            <span class="mono">Space Grotesk · Geist</span>
+          </div>
+          <div class="aa">
+            Aa
+            <small>Display 112 / 0.88<br />Body 17 / 1.55<br />Label 11 / 0.16em</small>
+          </div>
+          <p class="body">
+            The orange drum fills; the blue drum keylines. Where both land on the same
+            fibre, the sheet prints a third colour.
           </p>
-          <div class="mono" style="color: #9d8f82; text-align: right;">
-            <div>SPECIFICATION 1.0</div>
-            <div>WCAG AAA / AA PASS</div>
+        </section>
+
+        <section class="panel wordmark-panel">
+          <div class="panel-head">
+            <span class="mono">04 / Wordmark</span>
+            <span class="mono">Outlined</span>
           </div>
-        </div>
-      </div>
-
-      <!-- 02: INDEX / IDENTITY -->
-      <div class="panel">
-        <div class="label">01 / IDENTITY</div>
-        <div class="index-num display">04</div>
-        <div class="index-body">
-          <strong style="color: #f1ede4; font-size: 22px; display: block; margin-bottom: 6px;">Riso Co.</strong>
-          A print workshop and publication lab. Soy ink layers, unbleached vellum stock, and mechanical pushpins.
-        </div>
-        <div class="index-list">
-          <div>· 270gsm Vellum</div>
-          <div>· 84 Ridge Units</div>
-          <div>· Soy-based Ink</div>
-          <div>· 6 Curled Flaps</div>
-          <div>· Steel Pushpin</div>
-          <div>· Zero Bloat</div>
-        </div>
-      </div>
-
-      <!-- 03: CONSTRUCTION & GRID -->
-      <div class="panel construction">
-        <div class="label">02 / MARK GEOMETRY</div>
-        <svg viewBox="0 0 240 160" fill="none">
-          <!-- 64-unit construction grid -->
-          <line x1="20" y1="20" x2="220" y2="20" stroke="#28211b" stroke-width="1"/>
-          <line x1="20" y1="80" x2="220" y2="80" stroke="#28211b" stroke-width="1"/>
-          <line x1="20" y1="140" x2="220" y2="140" stroke="#28211b" stroke-width="1"/>
-          <line x1="60" y1="10" x2="60" y2="150" stroke="#28211b" stroke-width="1"/>
-          <line x1="120" y1="10" x2="120" y2="150" stroke="#28211b" stroke-width="1"/>
-          <line x1="180" y1="10" x2="180" y2="150" stroke="#28211b" stroke-width="1"/>
-
-          <!-- Dimension markings -->
-          <circle cx="120" cy="80" r="54" stroke="#ff4a1c" stroke-dasharray="3 3" opacity="0.4"/>
-          
-          <!-- Mark drawing -->
-          <g transform="translate(70, 20) scale(1.6)">
-            <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="#ff4a1c"/>
-            <ellipse cx="28" cy="46" rx="6" ry="2" fill="#000000" opacity="0.4"/>
-            <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="#a3a9b2"/>
-            <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="#f1ede4"/>
-            <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="#f1ede4"/>
-            <ellipse cx="30.5" cy="13" rx="2.5" ry="1" fill="#ffffff" opacity="0.6"/>
-            <ellipse cx="32" cy="27" rx="5" ry="1.8" fill="#f1ede4"/>
-          </g>
-        </svg>
-        <div class="specs">
-          <div>Grid: <b>64×64 units</b></div>
-          <div>Clearance: <b>0.5H</b></div>
-          <div>Tear jag: <b>Mulberry32</b></div>
-          <div>Silhouette: <b>16px Pass</b></div>
-        </div>
-      </div>
-
-      <!-- 04: PALETTE & DYES -->
-      <div class="panel">
-        <div class="label">03 / PALETTE &amp; DYES</div>
-        <div class="swatches-grid">
-          <div class="swatch-row">
-            <div class="swatch-box" style="background: #ff4a1c;"></div>
-            <div class="swatch-info">
-              <span class="swatch-name">Vermilion Drum</span>
-              <span class="swatch-hex">#ff4a1c · 4.8:1</span>
+          <img src="../../../public/brand/riso/wordmark.svg" alt="riso co." />
+          <div>
+            <div class="sizes">
+              <img src="../../../public/brand/riso/favicons/favicon-16.svg" width="16" height="16" alt="" />
+              <img src="../../../public/brand/riso/favicons/favicon-32.svg" width="32" height="32" alt="" />
+              <img src="../../../public/brand/riso/favicons/favicon-180.svg" width="64" height="64" alt="" />
             </div>
+            <div class="mono" style="margin-top: 10px">Favicon 16 · 32 · 64 — drawn, not scaled</div>
           </div>
-          <div class="swatch-row">
-            <div class="swatch-box" style="background: #1a7ff0;"></div>
-            <div class="swatch-info">
-              <span class="swatch-name">Federal Cobalt</span>
-              <span class="swatch-hex">#1a7ff0 · 4.5:1</span>
-            </div>
-          </div>
-          <div class="swatch-row">
-            <div class="swatch-box" style="background: #f1ede4;"></div>
-            <div class="swatch-info">
-              <span class="swatch-name">Raw Rag Vellum</span>
-              <span class="swatch-hex">#f1ede4 · Base</span>
-            </div>
-          </div>
-          <div class="swatch-row">
-            <div class="swatch-box" style="background: #1b1712;"></div>
-            <div class="swatch-info">
-              <span class="swatch-name">Carbon Soot Ink</span>
-              <span class="swatch-hex">#1b1712 · 14.2:1</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        </section>
 
-      <!-- 05: TEAR PHYSICS & MATH -->
-      <div class="panel">
-        <div class="label">04 / TEAR PHYSICS</div>
-        <div class="tear-preview">
-          <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 140">
-            <path d="M0 0H400V90L360 80L320 100L270 85L220 105L170 85L120 105L70 90L0 100Z" fill="#ff4a1c"/>
-            <path d="M0 100L70 90L120 105L170 85L220 105L270 85L320 100L360 80L400 90" stroke="#ffffff" stroke-width="3" fill="none"/>
-            <path d="M0 102L70 92L120 107L170 87L220 107L270 87L320 102L360 82L400 92L400 140L0 140Z" fill="#f1ede4"/>
+        <section class="panel" style="justify-content: space-between">
+          <div class="panel-head">
+            <span class="mono">05 / Tear</span>
+            <span class="mono">Seed 23</span>
+          </div>
+          <svg viewBox="0 0 300 116" style="width: 100%; display: block" aria-label="The deckle tear">
+            <rect x="0" y="0" width="300" height="116" fill="#f1ede4" />
+            <path
+              d="M0 0H300V35.7L293.3 36.6L286.7 35.8L280.0 37.5L273.3 36.5L266.7 37.7L260.0 47.8L253.3 61.4L246.7 50.9L240.0 39.1L233.3 39.8L226.7 41.0L220.0 41.1L213.3 39.8L206.7 38.9L200.0 41.0L193.3 42.7L186.7 40.9L180.0 48.3L173.3 62.5L166.7 51.5L160.0 45.0L153.3 45.0L146.7 42.9L140.0 43.4L133.3 45.6L126.7 43.9L120.0 41.3L113.3 49.7L106.7 65.8L100.0 53.3L93.3 42.2L86.7 44.4L80.0 43.4L73.3 43.4L66.7 42.7L60.0 42.4L53.3 41.1L46.7 48.8L40.0 63.7L33.3 52.1L26.7 41.6L20.0 41.4L13.3 41.9L6.7 43.6L0.0 43.4Z"
+              fill="#ff4a1c"
+            />
+            <path
+              d="M0 0H300V35.7L293.3 36.6L286.7 35.8L280.0 37.5L273.3 36.5L266.7 37.7L260.0 47.8L253.3 61.4L246.7 50.9L240.0 39.1L233.3 39.8L226.7 41.0L220.0 41.1L213.3 39.8L206.7 38.9L200.0 41.0L193.3 42.7L186.7 40.9L180.0 48.3L173.3 62.5L166.7 51.5L160.0 45.0L153.3 45.0L146.7 42.9L140.0 43.4L133.3 45.6L126.7 43.9L120.0 41.3L113.3 49.7L106.7 65.8L100.0 53.3L93.3 42.2L86.7 44.4L80.0 43.4L73.3 43.4L66.7 42.7L60.0 42.4L53.3 41.1L46.7 48.8L40.0 63.7L33.3 52.1L26.7 41.6L20.0 41.4L13.3 41.9L6.7 43.6L0.0 43.4Z"
+              fill="none"
+              stroke="#46212a"
+              stroke-width="2.4"
+              transform="translate(1.6 -1.6)"
+              opacity="0.9"
+            />
+            <path
+              d="M0 0H300V35.7L293.3 36.6L286.7 35.8L280.0 37.5L273.3 36.5L266.7 37.7L260.0 47.8L253.3 61.4L246.7 50.9L240.0 39.1L233.3 39.8L226.7 41.0L220.0 41.1L213.3 39.8L206.7 38.9L200.0 41.0L193.3 42.7L186.7 40.9L180.0 48.3L173.3 62.5L166.7 51.5L160.0 45.0L153.3 45.0L146.7 42.9L140.0 43.4L133.3 45.6L126.7 43.9L120.0 41.3L113.3 49.7L106.7 65.8L100.0 53.3L93.3 42.2L86.7 44.4L80.0 43.4L73.3 43.4L66.7 42.7L60.0 42.4L53.3 41.1L46.7 48.8L40.0 63.7L33.3 52.1L26.7 41.6L20.0 41.4L13.3 41.9L6.7 43.6L0.0 43.4Z"
+              fill="none"
+              stroke="#1a7ff0"
+              stroke-width="1.6"
+              transform="translate(3.2 -2.6)"
+              opacity="0.85"
+            />
+            <text x="0" y="88" font-family="Geist Mono, monospace" font-size="9" letter-spacing="1.2" fill="#6b6155">46 POINTS · 4 DEEP BITES · RIM 1.2–4.8PX</text>
+            <text x="0" y="104" font-family="Geist Mono, monospace" font-size="9" letter-spacing="1.4" fill="#6b6155">DETERMINISTIC · NO IMAGE FILES</text>
           </svg>
-        </div>
-        <div class="tear-math">
-          mulberry32(seed): 84 ridge coordinates<br/>
-          lag: d*0.4 + 0.04 + 0.03*sin(x*23)<br/>
-          rim: 1.2px exposed cellulose fiber
-        </div>
+        </section>
       </div>
 
-      <!-- 06: FAVICON & SCALE GATE -->
-      <div class="panel">
-        <div class="label">05 / SCALE &amp; FAVICON GATE</div>
-        <div class="scale-row">
-          <div class="scale-item">
-            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-              <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="#ff4a1c"/>
-              <ellipse cx="28" cy="46" rx="6" ry="2" fill="#1b1712" opacity="0.3"/>
-              <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="#a3a9b2"/>
-              <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="#f1ede4"/>
-              <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="#f1ede4"/>
-            </svg>
-            <span>64px</span>
-          </div>
-          <div class="scale-item">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <path d="M6 8H26V18L22 16L18 20L14 17L10 21L6 18Z" fill="#ff4a1c"/>
-              <path d="M12.5 8H19.5V10C19.5 12 17.5 13 17.5 15H14.5C14.5 13 12.5 12 12.5 10Z" fill="#f1ede4"/>
-              <ellipse cx="16" cy="8" rx="4" ry="2" fill="#f1ede4"/>
-            </svg>
-            <span>32px</span>
-          </div>
-          <div class="scale-item">
-            <svg width="16" height="16" viewBox="0 0 32 32" fill="none">
-              <path d="M6 8H26V18L22 16L18 20L14 17L10 21L6 18Z" fill="#ff4a1c"/>
-              <path d="M12.5 8H19.5V10C19.5 12 17.5 13 17.5 15H14.5C14.5 13 12.5 12 12.5 10Z" fill="#f1ede4"/>
-              <ellipse cx="16" cy="8" rx="4" ry="2" fill="#f1ede4"/>
-            </svg>
-            <span>16px</span>
-          </div>
-        </div>
-        <div class="specs">
-          <div>Silhouette: <b>High Contrast</b></div>
-          <div>Favicon: <b>16px Clear</b></div>
-        </div>
-      </div>
-
-      <!-- 07: TYPOGRAPHY HIERARCHY -->
-      <div class="panel">
-        <div class="label">06 / TYPOGRAPHY GATE</div>
-        <div class="type-stack">
-          <div class="type-spec">
-            <h4 class="display" style="font-size: 26px;">Display Headline 68px</h4>
-            <p>Space Grotesk · 700 · -0.04em · LH 1.05</p>
-          </div>
-          <div class="type-spec">
-            <h4 style="font-size: 18px; font-weight: 600;">Editorial Body 18px / 1.55</h4>
-            <p>Geist Sans · 400 · Natural Rag · Balanced</p>
-          </div>
-          <div class="type-spec">
-            <h4 class="mono" style="font-size: 14px; color: #ff4a1c;">CODE &amp; LABELS 13PX</h4>
-            <p>Geist Mono · 500 · 0.14em tracking</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 08: COMPONENT SPECIMEN -->
-      <div class="panel">
-        <div class="label">07 / COMPONENT PROOF</div>
-        <div class="specimen-card">
-          <div class="specimen-top">
-            <span class="specimen-title">ink. riso co.</span>
-            <span class="specimen-pill">Pushpin Tear</span>
-          </div>
-          <p style="font-size: 13px; margin: 0 0 12px; color: #786c5e;">
-            Deterministic Mulbery32 PRNG seed = 23.<br/>
-            Pull the mechanical pin to re-tear.
-          </p>
-          <div style="display: flex; gap: 8px;">
-            <span style="font-size: 11px; font-weight: 600; padding: 4px 8px; background: #e0dbcf; border-radius: 4px;">Posters</span>
-            <span style="font-size: 11px; font-weight: 600; padding: 4px 8px; background: #e0dbcf; border-radius: 4px;">Zines</span>
-            <span style="font-size: 11px; font-weight: 600; padding: 4px 8px; background: #e0dbcf; border-radius: 4px;">Vellum</span>
-          </div>
-        </div>
-      </div>
+      <footer>
+        <span class="mono">Riso Co. / Atelier Ink — brand kit v3</span>
+        <span class="mono">2 inks · 1 stock · 1 tear</span>
+        <span class="mono">adityahimaone.space / design-system / riso</span>
+      </footer>
     </div>
   </body>
 </html>

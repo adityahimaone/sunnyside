@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" fill="#f1ede4"/>
+  <g transform="scale(1) translate(-0.75 0.95)">
+    <defs><clipPath id="f32"><path d="M6 7H26V22L16.45 20.03L6 24.6Z"/></clipPath></defs>
+    <path d="M6 7H26V22L16.45 20.03L6 24.6Z" fill="#ff4a1c"/>
+    <path d="M6 7H26V22L16.45 20.03L6 24.6Z" transform="translate(1.5 -1.5)" fill="none" stroke="#1a7ff0" stroke-width="2.6" stroke-linejoin="round"/>
+    <g clip-path="url(#f32)"><path d="M6 7H26V22L16.45 20.03L6 24.6Z" transform="translate(1.5 -1.5)" fill="none" stroke="#46212a" stroke-width="2.6" stroke-linejoin="round"/></g>
+  </g>
+</svg>

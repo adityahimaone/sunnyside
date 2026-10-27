@@ -1,48 +1,151 @@
 import Link from 'next/link'
 
-export function RisoMark({ size = 32 }: { size?: number }) {
+import {
+  COMPACT_OFFSET,
+  COMPACT_STROKE,
+  MARK_OFFSET,
+  MARK_STROKE,
+  SHEET,
+  SHEET_COMPACT,
+  WORDMARK_D,
+  WORDMARK_GHOST,
+  WORDMARK_RATIO,
+  WORDMARK_VIEWBOX,
+} from '../brand-paths'
+
+/**
+ * The mark: one sheet, two passes.
+ *
+ * The orange drum fills the sheet. The blue drum is the same drawing keylined
+ * 2.2 units up and right — the plate that never quite registered. Where the
+ * keyline lands on the sheet both drums hit the same fibre, so that stretch is
+ * the overprint colour. Three clipped paths, no blend modes, no images.
+ */
+export function RisoMark({
+  size = 32,
+  compact = false,
+  title,
+  className,
+}: {
+  size?: number
+  compact?: boolean
+  title?: string
+  className?: string
+}) {
+  const d = compact ? SHEET_COMPACT : SHEET
+  const offset = compact ? COMPACT_OFFSET : MARK_OFFSET
+  const stroke = compact ? COMPACT_STROKE : MARK_STROKE
+  const box = compact ? 32 : 64
+  const clip = `riso-sheet-${compact ? 'c' : 'f'}-${size}`
+  const t = `translate(${offset} ${-offset})`
+
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
-      <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="var(--rs-sheet-vermilion)" />
-      <ellipse cx="28" cy="46" rx="6" ry="2" fill="var(--rs-ink-carbon)" opacity="0.25" />
-      <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="var(--rs-steel-needle)" />
-      <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="var(--rs-ink-carbon)" />
-      <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="var(--rs-ink-carbon)" />
-      <ellipse cx="30.5" cy="13" rx="2.5" ry="1" fill="#ffffff" opacity="0.6" />
-      <ellipse cx="32" cy="27" rx="5" ry="1.8" fill="var(--rs-ink-carbon)" />
+    <svg
+      viewBox={`0 0 ${box} ${box}`}
+      width={size}
+      height={size}
+      className={className}
+      role={title ? 'img' : undefined}
+      aria-label={title}
+      aria-hidden={title ? undefined : true}
+      focusable="false"
+    >
+      <defs>
+        <clipPath id={clip}>
+          <path d={d} />
+        </clipPath>
+      </defs>
+      <path d={d} fill="var(--rs-display-a)" />
+      <path
+        d={d}
+        transform={t}
+        fill="none"
+        stroke="var(--rs-display-b)"
+        strokeWidth={stroke}
+        strokeLinejoin="round"
+      />
+      <g clipPath={`url(#${clip})`}>
+        <path
+          d={d}
+          transform={t}
+          fill="none"
+          stroke="var(--rs-overprint)"
+          strokeWidth={stroke}
+          strokeLinejoin="round"
+        />
+      </g>
     </svg>
   )
 }
 
-export function RisoLockup({ size = 28 }: { size?: number }) {
+/** The name, outlined once from Space Grotesk 700. Never live text. */
+export function RisoWordmark({
+  height = 28,
+  ghost = true,
+  ghostScale = 1,
+  className,
+}: {
+  height?: number
+  ghost?: boolean
+  /** The second impression is 1.8% of the height; on a drum it needs more. */
+  ghostScale?: number
+  className?: string
+}) {
   return (
-    <Link
-      href="/design-system/riso"
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.625rem',
-        textDecoration: 'none',
-        color: 'inherit',
-      }}
-      aria-label="Riso Co. — Design System Home"
+    <svg
+      viewBox={WORDMARK_VIEWBOX}
+      height={height}
+      width={Math.round(height * WORDMARK_RATIO)}
+      className={className}
+      role="img"
+      aria-label="riso co."
+      focusable="false"
     >
+      {ghost && (
+        <path
+          d={WORDMARK_D}
+          fill="var(--rs-ghost)"
+          transform={`translate(${WORDMARK_GHOST * ghostScale} ${-WORDMARK_GHOST * ghostScale})`}
+          opacity={0.9}
+        />
+      )}
+      <path d={WORDMARK_D} fill="currentColor" />
+    </svg>
+  )
+}
+
+export function RisoLockup({ size = 30 }: { size?: number }) {
+  return (
+    <Link href="/design-system/riso" className="riso-lockup" aria-label="Riso Co. — design system">
       <RisoMark size={size} />
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem' }}>
-        <span style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.04em' }}>
-          ink.
-        </span>
-        <span
-          style={{
-            fontSize: '0.875rem',
-            fontWeight: 700,
-            color: 'var(--rs-sheet-vermilion)',
-            letterSpacing: '-0.01em',
-          }}
-        >
-          riso co.
-        </span>
-      </div>
+      <span className="riso-lockup-word">
+        <RisoWordmark height={Math.round(size * 0.66)} />
+        <span className="riso-lockup-sub">Atelier ink / Berlin</span>
+      </span>
     </Link>
+  )
+}
+
+/**
+ * A registration target: two circles, the blue one 2.2 units off. Used as a
+ * section marker, and as the only decorative thing on the page that is allowed
+ * to be off-centre.
+ */
+export function RegistrationTarget({ size = 40, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      width={size}
+      height={size}
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="50" cy="50" r="18" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M50 2V28M50 72v26M2 50h26M72 50h26" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="52.2" cy="47.8" r="30" fill="none" stroke="var(--rs-display-b)" strokeWidth="1.6" />
+      <circle cx="52.2" cy="47.8" r="2.6" fill="var(--rs-overprint)" />
+    </svg>
   )
 }

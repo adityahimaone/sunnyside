@@ -1,46 +1,135 @@
 # Brand Brief — Riso Co. / Atelier Ink
 
-> Case 04 — Risograph print edition workshop, paper laboratory, and tactile poster studio.
+> Case 04 — Risograph print edition workshop and paper laboratory.
+> Version 3.0.0. Supersedes the "torn poster pinned to cork" direction.
 
-## 1. Domain Before Defaults
+## 1. The idea
 
-### 5 Domain Concepts
-1. **Drum & Master Roll**: Soy-based ink pressed through micro-perforated emulsion onto raw paper.
-2. **Deckle & Fibre Rim**: Uncut paper edges where fibrous pulp creates soft, jagged white rims when torn.
-3. **Mechanical Pushpin**: Glossy domed cap, waisted neck, circular flange, and a tempered steel needle that stabs into studio cork.
-4. **Registration Marks & Stamp**: Calibration marks, crop guidelines, and numbered edition runs (`run 0412`).
-5. **270gsm Heavy Stock**: Tactile warm vellum that holds ink without buckling.
+**Two passes, one sheet.**
 
-### 5 Physical Colours
-1. **Electric Vermilion (`#ff4a1c`)**: Fluorescent orange-red Riso drum ink.
-2. **Warm Paper Pulp (`#f1ede4`)**: Unbleached raw archival rag vellum.
-3. **Iron Ink Carbon (`#1b1712`)**: Dense soy-oil carbon black.
-4. **Electric Cobalt (`#1a7ff0`)**: Ultra-marine Federal Blue Riso drum ink.
-5. **Needle Steel (`#a3a9b2`)**: Polished needle steel with ambient highlights.
+A risograph is not a printer with four inks at once. It is one drum, then another drum, and the paper moves between them. The second impression never lands exactly on the first. That error is the most recognisable thing a riso does, and it is the only thing this identity is built on.
 
-### One Signature
-- **The Pushpin Puncture & Jagged Deckle Tear**: An electric dyed poster sheet pinned to a raw wall, ripped away from a pushpin downwards in an algorithmic jagged ridge with curled flaps casting drop shadows.
+Everything else — paper, orange, blue, the torn edge, the pushpin — is material, not idea. Material can be swapped. The rule cannot.
 
-### 3 Category Defaults Rejected
-1. *No generic CMYK registration rosettes or vector ink-splatters.*
-2. *No clinical SaaS sterile white cards with blurry drop shadows.*
-3. *No static dead footers; the tear is interactive, seeded, and recalculates its deckle flaps in real-time.*
+**Acceptance test.** Cover the wordmark and the copy. If the remaining page could belong to any warm-paper studio identity, the page has failed. If the orange and blue visibly miss each other on every display element, and pulling them into register makes the design look like a generic editorial site, it has passed.
 
 ---
 
-## 2. Positioning & Audience
-- **Category**: High-craft risograph studio, zine publisher, and bespoke print lab.
-- **Promise**: Tactile, material print engineering brought to digital interfaces with zero external graphic bloat.
-- **Audience**: Independent publishers, printmakers, typography directors, and design engineers.
-- **Voice**: Tactile, editorial, exact, physical, unhurried.
+## 2. Domain before defaults
+
+### Five things the machine actually does
+
+1. **Drum, not cartridge.** One colour is loaded at a time. Changing colour means changing drum.
+2. **Master wrap.** The image is burned onto a master sheet wrapped around the drum; long runs drift, short runs don't.
+3. **Misregistration.** Paper feed tolerance means pass two sits 1–3mm off pass one. Operators call it "out of register"; it is unavoidable, not a mistake.
+4. **Overprint.** Where two translucent inks land on the same fibre, a third colour appears subtractively. Orange over blue is not orange-plus-blue; it is a dark plum.
+5. **Deckle.** Torn stock leaves a fibrous, irregular edge — soft white fibres where the pulp separates.
+
+### Five physical colours
+
+| Primitive | Value | Where it comes from |
+| --- | --- | --- |
+| `stock-paper` | `#f1ede4` | 270gsm unbleached vellum, the only ground |
+| `stock-deep` | `#e8e1d3` | The same stock, one shade under |
+| `ink-carbon` | `#1b1712` | Soy carbon black, the reading ink |
+| `ink-orange` | `#ff4a1c` | Fluorescent orange drum — fill only |
+| `ink-blue` | `#1a7ff0` | Federal blue drum, the second pass |
+| `ink-overprint` | `#46212a` | Where both drums land on the same fibre |
+| `steel` | `#a3a9b2` | The pushpin needle, and nothing else |
+| `safelight` | `#141110` | Darkroom ground, the second surface |
+
+### The one signature
+
+**The offset.** Not a texture, not a grain overlay, not a torn-paper mask — a 2.5px screen / 2.2mm paper displacement between two complete impressions of the same element, never corrected.
+
+### Three category defaults rejected
+
+1. **No CMYK rosettes, no ink splatter.** Those are print *decoration*. Misregistration is print *behaviour*.
+2. **No `mix-blend-mode`.** A blend mode is a lie about the medium: it needs a compositing context, dies in a favicon, and disappears in a PDF. The overprint here is a third clipped path.
+3. **No live-text wordmark.** Outlined, always. A print identity that depends on a webfont loading is not an identity.
 
 ---
 
-## 3. Direction & Acceptance Test
-- **Mark**: The Pin & Deckle (a 64-unit silhouette uniting the pushpin domed silhouette and a serrated paper deckle edge).
-- **Deliverables**:
-  - Outlined mark family (`mark.svg`, `mark-compact.svg`, `wordmark.svg`, `lockup.svg`, `cover.svg`).
-  - Strict 3-tier token architecture (primitives, semantic light/dark, component tokens).
-  - High-fidelity interactive proof page (`/design-system/riso`).
-  - Native accessible form kit with full state coverage (default, focus, invalid, disabled, success).
-  - Configurable `PushpinTearFooter` component demonstration.
+## 3. Positioning
+
+- **Category**: Risograph edition workshop, zine publisher, bespoke print lab.
+- **Promise**: A digital interface that behaves like the machine it comes from — two impressions, visible tolerance, no correction.
+- **Audience**: Independent publishers, printmakers, typography directors, design engineers.
+- **Voice**: Press-room exact. Run numbers, sheet counts, ink names, no adjectives about "craft".
+
+---
+
+## 4. The mark
+
+The mark is **the sheet**, not a letter.
+
+A rectangle on a 64-unit grid whose bottom edge carries seven ridge points with two deep bites — width jitter plus a slow drift, seeded at 412, generated by `mulberry32`. Three points read as a bookmark; seven read as paper. Not nine small teeth (that reads as a saw), not a monogram (that reads as a logo for a software company).
+
+Drawn as **one path with two strokes**:
+
+1. the orange fill;
+2. a blue stroke of the same path, offset 2.2 units up and right;
+3. a blue stroke of the offset path, clipped to the original — so the overprint only exists where the two passes actually cross.
+
+No filled offset path anywhere: an offset fill inside the shape produces a solid dark block, not an overprint.
+
+Optically centred on its **drawn bounds**, not its box, because the deckle changes the silhouette's mass.
+
+**Family**: 64 grid at 64/32px, a hand-tuned 26-unit compact variant at 16px with a heavier 2.6 stroke, and a registration target. Each instance carries a unique `clipPath` id so multiple marks can share a page.
+
+## 5. The wordmark
+
+"Riso Co." outlined from Space Grotesk 700 via `fontTools` (`instantiateVariableFont` → `SVGPathPen` → `TransformPen`), emitted as a single path in `wordmark-path.json`. ViewBox 3514 × 728, ratio 4.83.
+
+The blue ghost is the same path, second copy, at 1.8% of cap height (13.1 units) up and right. In the lockup the ghost is computed in glyph units, not screen units — dividing by the wrong scale produces a ghost the size of the wordmark.
+
+---
+
+## 6. Token architecture
+
+Three layers, one direction:
+
+```
+primitives  →  semantic (light | dark)  →  component
+```
+
+- **22 semantic roles** per theme, including `ghost`, `rule`, `rule-strong`, `accent`, `accent-alt`, `overprint`, `field`, `field-border`, `focus`, and the four `button-*` roles.
+- **16 contrast pairs** declared in `tokens.json` and *computed* by `scripts/build-riso-brand.mjs` into `tokens.contrast`. No ratio is typed by hand, and none is rounded up.
+
+### Measured, not asserted
+
+| Pair | Ratio | Level |
+| --- | --- | --- |
+| Carbon on vellum | 15.26:1 | AAA |
+| Carbon on the orange drum | 5.30:1 | AA |
+| Carbon on the blue drum | 4.53:1 | AA |
+| Second-impression orange `#c22e08` | 4.87:1 | AA |
+| Federal blue as type `#0e3f8f` | 8.45:1 | AAA |
+| Press note on vellum | 5.19:1 | AA |
+| Field perimeter | 3.23:1 | — |
+| **Fluorescent orange as type** | **2.88:1** | **Fail** |
+| Vellum on safelight | 16.09:1 | AAA |
+| Press note under safelight | 9.09:1 | AAA |
+| Orange type, dark stock | 7.29:1 | AAA |
+| Blue type, dark stock | 8.21:1 | AAA |
+
+**The failure is a rule, not a bug.** `#ff4a1c` cannot carry type on paper stock at 2.88:1, and darkening it until it passes would stop it being fluorescent orange. So the orange drum is a **fill-only ink**; orange *type* uses `accent` `#c22e08`. This is documented in the specimen, the tokens, and the audit — not silently swapped.
+
+The same discipline applies to the footer: `PushpinTearFooter`'s default white on orange is 3.36:1 and fails, so the Riso specimen passes `sheetInk="#1b1712"` (5.30:1) instead.
+
+---
+
+## 7. Deliverables
+
+- Outlined mark family: `mark.svg`, `mark-compact.svg`, `wordmark.svg`, `lockup.svg`, `favicon.svg`, `favicons/favicon-{16,32,180}.svg`.
+- Token source `features/riso/tokens.json` → `riso-tokens.css` (scoped `--rs-*`) and `public/brand/riso/riso-tokens.{css,json}`.
+- Generated TypeScript geometry: `features/riso/brand-paths.ts`.
+- Printed brand board: `design/brand/riso/brandkit.html` → `public/brand/riso/riso-brandkit.png` at 1500×1125.
+- Proof page: `app/design-system/riso` — nine sections, light and safelight.
+- Native form kit with default / focus / invalid / disabled / success, error summary and focus management.
+- `PushpinTearFooter` specimen with drum switch, seed control and re-tear.
+- Agent twin: `app/design-system/riso/llms.txt`.
+
+## 8. Not verified
+
+Print output. The overprint `#46212a` is a screen approximation of a subtractive result. Actual drum registration, ink absorption on 270gsm vellum, and the real second-pass colour have not been proofed.

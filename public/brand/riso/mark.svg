@@ -1,15 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <!-- Torn sheet corner in background -->
-  <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="#ff4a1c"/>
-  <!-- Pushpin drop shadow -->
-  <ellipse cx="28" cy="46" rx="6" ry="2" fill="#1b1712" opacity="0.3"/>
-  <!-- Steel needle -->
-  <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="#a3a9b2"/>
-  <!-- Pushpin body -->
-  <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="#1b1712"/>
-  <!-- Pushpin domed head -->
-  <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="#1b1712"/>
-  <ellipse cx="30.5" cy="13" rx="2.5" ry="1" fill="#ffffff" opacity="0.6"/>
-  <!-- Base flange -->
-  <ellipse cx="32" cy="27" rx="5" ry="1.8" fill="#1b1712"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Riso Co.">
+  <defs><clipPath id="clip"><path d="M11 13H53V42L47.27 38.23L40.92 38.61L35.98 44.68L28.58 40.87L23.84 40.28L17.91 46.11L11 39.2Z"/></clipPath></defs>
+  <g transform="translate(-1.1 3.55)"><path d="M11 13H53V42L47.27 38.23L40.92 38.61L35.98 44.68L28.58 40.87L23.84 40.28L17.91 46.11L11 39.2Z" fill="var(--riso-a, #ff4a1c)"/>
+    <path d="M11 13H53V42L47.27 38.23L40.92 38.61L35.98 44.68L28.58 40.87L23.84 40.28L17.91 46.11L11 39.2Z" transform="translate(2.2 -2.2)" fill="none" stroke="var(--riso-b, #1a7ff0)" stroke-width="1.9" stroke-linejoin="round"/>
+    <g clip-path="url(#clip)"><path d="M11 13H53V42L47.27 38.23L40.92 38.61L35.98 44.68L28.58 40.87L23.84 40.28L17.91 46.11L11 39.2Z" transform="translate(2.2 -2.2)" fill="none" stroke="var(--riso-overprint, #46212a)" stroke-width="1.9" stroke-linejoin="round"/></g></g>
 </svg>

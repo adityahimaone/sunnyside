@@ -71,16 +71,16 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     number: '04',
     name: 'Riso Co.',
     href: '/design-system/riso',
-    tagline: 'A torn poster pinned to studio cork.',
+    tagline: 'Two passes, one sheet.',
     description:
-      'Electric vermilion and cobalt sheets meet 270gsm vellum. Mathematical deckle-edge physics from Mulberry32 PRNG and a mechanical pushpin anchor tactile print engineering.',
+      'Fluorescent orange and federal blue, printed one drum at a time. The 2.5px misregistration is the rule, the overprint is a third clipped path instead of a blend mode, and sixteen contrast pairs are measured in the build — including the one that fails.',
     status: 'Shipped · 2026',
-    role: 'Identity · design system · forms · tear physics',
-    material: 'Vellum + soy ink + steel',
+    role: 'Identity · design system · form kit · print proof',
+    material: 'Paper + orange + blue',
     cover: '/brand/riso/riso-brandkit.png',
     coverAlt:
-      'The Riso Co. brand board: Pin & Deckle mark, vermilion sheet, pushpin, warm vellum, and typography.',
-    tags: ['Risograph', 'Pushpin', 'Deckle Tear', 'Vellum'],
+      'The Riso Co. brand board: an orange sheet pulled 2.2mm off its blue pass, the deckle-edged mark, five ink chips, the outlined wordmark at three favicon sizes and a torn sheet edge.',
+    tags: ['Risograph', 'Misregistration', 'Overprint', 'Deckle Tear'],
     tone: 'riso',
   },
 ]

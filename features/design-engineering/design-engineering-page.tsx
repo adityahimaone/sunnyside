@@ -717,7 +717,7 @@ export function DesignEngineeringPage() {
                 </div>
                 <div>
                   <dt>System</dt>
-                  <dd>Vellum, vermilion, pushpin and deckle tear</dd>
+                  <dd>Two drums, misregistration, measured overprint</dd>
                 </div>
               </dl>
               <figure className={styles.figure}>
@@ -729,8 +729,9 @@ export function DesignEngineeringPage() {
                   sizes="(max-width: 900px) 100vw, 760px"
                 />
                 <figcaption>
-                  Riso Co. — The Pin &amp; Deckle mark, Mulberry32 PRNG tear
-                  ridge and tactile print palette.
+                  Riso Co. — the orange sheet pulled 2.2mm off its blue pass, the
+                  deckled mark, five ink chips and the outlined wordmark at three
+                  favicon sizes.
                 </figcaption>
               </figure>
               <DocsHeading id="case-riso-brief" level={3} kicker="Brief">
