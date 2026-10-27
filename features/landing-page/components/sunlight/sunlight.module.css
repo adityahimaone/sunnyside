@@ -1,0 +1,52 @@
+/* The fixed light layer. It sits above every section and below the music
+   player (40) and the top bar, never takes a pointer event, and is the only
+   thing in this feature that is allowed to cover content. */
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.layer[data-ready='true'] {
+  opacity: 1;
+}
+
+/* A diagonal pane of light that crosses the frame whenever the page passes a
+   section boundary. Driven by the Web Animations API from sunlight.tsx; this
+   rule only draws it and parks it off-screen. */
+.beam {
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 0;
+  width: 46vw;
+  opacity: 0;
+  transform: translate3d(-70%, 0, 0) skewX(-18deg);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(var(--sun-rgb, 255 190 110) / 0.1) 30%,
+    rgb(var(--sun-rgb, 255 190 110) / 0.34) 50%,
+    rgb(var(--sun-rgb, 255 190 110) / 0.1) 70%,
+    transparent 100%
+  );
+  will-change: transform, opacity;
+}
+.beamThin {
+  width: 9vw;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 244 220 / 0.5),
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer {
+    display: none;
+  }
+}

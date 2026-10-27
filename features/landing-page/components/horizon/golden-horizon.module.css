@@ -1,0 +1,287 @@
+/* Golden hour. Resting state = the finished sunrise (reduced motion, no JS);
+   the scrubbed timeline animates *from* the night state *to* this one. */
+.horizon {
+  --gh-night-top: #0e1114;
+  --gh-night-bottom: #1b2230;
+  --gh-day-top: #ffd9a8;
+  --gh-day-mid: #ffb878;
+  --gh-day-bottom: #ffe6c2;
+  --gh-hill-back: #e9a066;
+  --gh-hill-mid: #c9b083;
+  --gh-ink: #1d1e1c;
+
+  position: relative;
+  z-index: 3;
+  height: 230svh;
+  background: var(--deck-ground, #14171a);
+  color: var(--gh-ink);
+}
+:global(.dark) .horizon {
+  --gh-day-top: #ffb070;
+  --gh-day-mid: #e97a3d;
+  --gh-day-bottom: #f2c79a;
+  --gh-hill-back: #b8683a;
+  --gh-hill-mid: #8d7a58;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.sky,
+.skyDay {
+  position: absolute;
+  inset: 0;
+}
+.sky {
+  background: linear-gradient(
+    180deg,
+    var(--gh-night-top),
+    var(--gh-night-bottom) 100%
+  );
+}
+.skyDay {
+  background: linear-gradient(
+    180deg,
+    var(--gh-day-top) 0%,
+    var(--gh-day-mid) 52%,
+    var(--gh-day-bottom) 100%
+  );
+}
+
+.stars {
+  position: absolute;
+  inset: 0;
+}
+.stars i {
+  position: absolute;
+  border-radius: 50%;
+  background: #f1eee5;
+  opacity: 0.7;
+  animation: gh-twinkle 3.2s ease-in-out infinite;
+}
+@keyframes gh-twinkle {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.sunWrap {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  width: min(62vmin, 560px);
+  aspect-ratio: 1;
+  margin-left: calc(min(62vmin, 560px) / -2);
+  will-change: transform;
+}
+.glow {
+  position: absolute;
+  inset: -45%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(255 236 190 / 0.95) 0%,
+    rgb(255 190 110 / 0.5) 28%,
+    rgb(255 140 70 / 0.16) 52%,
+    transparent 70%
+  );
+  will-change: transform, opacity;
+}
+.rays,
+.rings {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  will-change: transform;
+}
+.rays line {
+  stroke: rgb(255 244 214 / 0.7);
+  stroke-linecap: round;
+}
+.rings circle {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.45);
+  stroke-width: 1.5;
+}
+.disc {
+  position: absolute;
+  inset: 25%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 38% 34%,
+    #fffbe8 0%,
+    #ffe39a 38%,
+    #ffb347 74%,
+    #ff7a2f 100%
+  );
+  box-shadow: 0 0 80px 20px rgb(255 190 100 / 0.55);
+}
+
+.cloud {
+  position: absolute;
+  height: 5.5vmin;
+  border-radius: 999px;
+  background: rgb(255 250 240 / 0.78);
+  filter: blur(0.4px);
+  will-change: transform;
+}
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  bottom: 40%;
+  border-radius: 50%;
+  background: inherit;
+}
+.cloud::before {
+  left: 16%;
+  width: 36%;
+  aspect-ratio: 1;
+}
+.cloud::after {
+  left: 42%;
+  width: 28%;
+  aspect-ratio: 1;
+  bottom: 52%;
+}
+.cloudA {
+  top: 20%;
+  left: 12%;
+  width: 22vmin;
+}
+.cloudB {
+  top: 34%;
+  left: 58%;
+  width: 28vmin;
+  opacity: 0.7;
+}
+.cloudC {
+  top: 12%;
+  left: 74%;
+  width: 16vmin;
+  opacity: 0.55;
+}
+
+.hill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  will-change: transform;
+}
+.hillBack {
+  height: 52%;
+}
+.hillBack path {
+  fill: var(--gh-hill-back);
+}
+.hillMid {
+  height: 42%;
+}
+.hillMid path {
+  fill: var(--gh-hill-mid);
+}
+/* The front hill is the Contact chassis, so the last frame has no seam. */
+.hillFront {
+  height: 30%;
+}
+.hillFront path {
+  fill: var(--chassis, #e7e2d8);
+}
+
+.copy {
+  position: absolute;
+  inset: auto 0 clamp(36px, 9svh, 96px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(12px, 2.4svh, 22px);
+  padding: 0 clamp(20px, 5vw, 78px);
+  text-align: center;
+}
+.label {
+  margin: 0;
+  font: 650 0.6875rem/1 var(--deck-font-mono, ui-monospace, monospace);
+  letter-spacing: 0.14em;
+  color: #5e625c;
+}
+.title {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 0.28em;
+  margin: 0;
+  font: 750 clamp(2.4rem, 7.4vw, 6.4rem) / 0.98
+    var(--deck-font-display, system-ui);
+  letter-spacing: -0.05em;
+  color: #101211;
+  perspective: 800px;
+}
+.word {
+  display: inline-flex;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+.letter {
+  display: inline-block;
+  will-change: transform;
+  transform-origin: 50% 100%;
+}
+.cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 22px;
+  border: 1px solid rgb(16 18 17 / 0.5);
+  border-radius: var(--deck-r-chip, 3px);
+  background: #101211;
+  color: #f4f0e8;
+  font: 650 0.75rem/1 var(--deck-font-mono, ui-monospace, monospace);
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    transform 0.3s cubic-bezier(0.22, 0.7, 0.2, 1),
+    background 0.3s ease;
+}
+.cta:hover,
+.cta:focus-visible {
+  background: var(--signal-orange, #ff5a1f);
+  transform: translateY(-2px);
+}
+.cta:focus-visible {
+  outline: 3px solid var(--signal-orange, #ff5a1f);
+  outline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+  .horizon {
+    height: 190svh;
+  }
+  .sunWrap {
+    top: 16%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .horizon {
+    height: auto;
+  }
+  .stage {
+    position: relative;
+    height: 100svh;
+  }
+  .stars {
+    opacity: 0;
+  }
+  .stars i {
+    animation: none;
+  }
+}
