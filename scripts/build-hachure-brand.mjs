@@ -130,29 +130,33 @@ writeFileSync(join(ROOT, 'features/hachure/hachure-tokens.css'), CSS)
 writeFileSync(join(PUBLIC, 'hachure-tokens.css'), CSS)
 writeFileSync(join(PUBLIC, 'hachure-tokens.json'), JSON.stringify(tokens, null, 2) + '\n')
 
-/* ---------- the mark: a profile that prints into paper ------------------ */
+/* ---------- the mark: the H, printed into its own paper ---------------- */
 
 const round = (n) => Number(n.toFixed(2))
 
 /**
- * The ridge profile, on the 64 grid. Deliberately not a triangle: the apex sits
- * left of centre and the right shoulder is twice the length of the left face,
- * which is what terrain looks like and what an icon does not.
+ * The mark is the initial, not the mountain.
+ *
+ * The first pass kept an asymmetric ridge; at 16px it collapsed into the same
+ * peak every terrain app already uses. The second pass keeps the letter and the
+ * system's own move: the stem tops are cut on a shallow ridge line, and the feet
+ * break into the same 4-unit cells the range is printed from. It reads as an H
+ * at 16px and as a printed H at 96px — two jobs, one drawing.
+ *
+ * 64 grid. Stems 12 wide, a 20-unit counter, a 6-unit crossbar. The base is cut
+ * at 46 and two rows of thresholded cells finish it.
  */
-const PROFILE = [
-  [10, 50],
-  [26, 13],
-  [38, 34],
-  [54, 50],
-]
-/**
- * Everything above this row is solid; below it the mark thins out over two
- * rows of cells. Two rows, not three: a third row under a 42-row base reads as
- * gravel, and two read as the ink running out. The base sits at 42 rather than
- * 34 so the knee at (38,34) is part of the drawing — clipping above the knee
- * turns an asymmetric ridge back into a triangle.
- */
-const BODY_BOTTOM = 42
+const H = {
+  left: 10,
+  innerLeft: 22,
+  innerRight: 42,
+  right: 54,
+  topLeft: 16,
+  topRight: 12,
+  barTop: 31,
+  barBottom: 37,
+  base: 46,
+}
 const CELL = 4
 const COVER = [0.82, 0.44]
 
@@ -163,38 +167,22 @@ const BAYER = [
   61, 29, 53, 21,
 ].map((v) => (v + 0.5) / 64)
 
-const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]
-
-/** Where a segment crosses y = BODY_BOTTOM. */
-const crossAt = (p, q) => {
-  const t = (BODY_BOTTOM - p[1]) / (q[1] - p[1])
-  return lerp(p, q, t)
-}
-
-/** Left and right edge x at a given y, walking the profile. */
-const edgesAt = (y) => {
-  let left = null
-  let right = null
-  for (let i = 0; i < PROFILE.length - 1; i++) {
-    const [p, q] = [PROFILE[i], PROFILE[i + 1]]
-    const lo = Math.min(p[1], q[1])
-    const hi = Math.max(p[1], q[1])
-    if (y < lo || y > hi) continue
-    const x = lerp(p, q, (y - p[1]) / (q[1] - p[1]))[0]
-    if (left === null || x < left) left = x
-    if (right === null || x > right) right = x
-  }
-  return [left, right]
-}
-
 function markGeometry({ scale = 1, foot = true, cell = CELL, cover = COVER } = {}) {
-  const p = (pt) => [round(pt[0] * scale), round(pt[1] * scale)]
-  const top = crossAt(PROFILE[0], PROFILE[1])
-  const bottom = crossAt(PROFILE[2], PROFILE[3])
-
-  const body = foot
-    ? [p(top), p(PROFILE[1]), p(PROFILE[2]), p(bottom)]
-    : PROFILE.map(p)
+  const p = (x, y) => [round(x * scale), round(y * scale)]
+  const body = [
+    [H.left, H.topLeft],
+    [H.innerLeft, H.topRight],
+    [H.innerLeft, H.barTop],
+    [H.innerRight, H.barTop],
+    [H.innerRight, H.topRight],
+    [H.right, H.topLeft],
+    [H.right, H.base],
+    [H.innerRight, H.base],
+    [H.innerRight, H.barBottom],
+    [H.innerLeft, H.barBottom],
+    [H.innerLeft, H.base],
+    [H.left, H.base],
+  ].map(([x, y]) => p(x, y))
 
   let d = `M${body[0][0]} ${body[0][1]}` + body.slice(1).map((q) => `L${q[0]} ${q[1]}`).join('') + 'Z'
   const cells = []
@@ -202,19 +190,16 @@ function markGeometry({ scale = 1, foot = true, cell = CELL, cover = COVER } = {
 
   if (foot) {
     const size = cell * scale
-    for (let row = 0; row < cover.length; row++) {
-      const y = BODY_BOTTOM + row * cell
-      const [left, right] = edgesAt(y + cell / 2)
-      if (left === null) continue
-      const from = Math.floor(left / cell) * cell
-      for (let x = from; x < right; x += cell) {
-        const cx = x + cell / 2
-        if (cx < left || cx > right) continue
-        const col = Math.round(x / cell)
-        if (cover[row] <= BAYER[(row * 8 + col) % 64]) continue
-        const [qx, qy] = [round(x * scale), round(y * scale)]
-        cells.push(`M${qx} ${qy}h${round(size)}v${round(size)}h${-round(size)}Z`)
-        points.push([qx, qy], [round(qx + size), round(qy + size)])
+    for (const stem of [H.left, H.innerRight]) {
+      for (let row = 0; row < cover.length; row++) {
+        const y = H.base + row * cell
+        for (let col = 0; col < 3; col++) {
+          if (cover[row] <= BAYER[(row * 8 + col) % 64]) continue
+          const x = stem + col * cell
+          const [qx, qy] = [round(x * scale), round(y * scale)]
+          cells.push(`M${qx} ${qy}h${round(size)}v${round(size)}h${-round(size)}Z`)
+          points.push([qx, qy], [round(qx + size), round(qy + size)])
+        }
       }
     }
   }
@@ -239,8 +224,8 @@ function centre(shape, size) {
 }
 
 const mark = markGeometry({ scale: 1, foot: true })
-/* At 16px the 4-unit cells are sub-pixel, so the compact redraws the foot on a
-   2-unit grid and keeps only the first two rows. */
+/* At 16px a 4-unit cell is sub-pixel, so the compact redraws the foot on a
+   2-unit grid and keeps only the row that survives. */
 const compact = markGeometry({ scale: 0.5, foot: true, cell: 2, cover: [0.55, 0.22] })
 
 const markSVG = (shape, size) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="Hachure">
@@ -333,7 +318,7 @@ export const LOCKUP_H = ${LOCK_H}
 )
 
 console.log(`tokens   ${tokens.semantic.light.length} light / ${tokens.semantic.dark.length} dark / ${tokens.contrast.length} measured pairs`)
-console.log(`mark     64 grid, ${mark.cells} foot cells, profile ${mark.body.length} points`)
+console.log(`mark     64 grid, H ${mark.bounds.x1 - mark.bounds.x0} × ${mark.bounds.y1 - mark.bounds.y0}, ${mark.cells} foot cells`)
 console.log(`wordmark ${WM_W} × ${WM_H} from ${word.text}`)
 console.log(`lockup   ${LOCK_W} × ${LOCK_H}`)
 const fails = tokens.contrast.filter((c) => c.level === 'Fail')

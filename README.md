@@ -49,7 +49,7 @@ Sunnyside is the visual language behind the studio landing page and archive surf
 
 Vitrine is the second case, deliberately not a Sunnyside variant: a glass container, a halftone information layer, a V mark made of two panes, and ten native form controls. Its source lives in `features/vitrine/`, `design/brand/vitrine/` and `public/brand/vitrine/`; the audit is in `docs/vitrine-design-system-audit.md`. Do not import its `--vt-*` tokens into Sunnyside.
 
-Hachure (Case 05) is the opposite test: no blur, no shadow, no rounded corner. It takes the supplied ridgeline dither footer as a **tone engine** and builds a cartographic system around density — survey stock, hachure, a benchmark mark, three elevation bands and a footer you can read an altitude off. Source: `features/hachure/`, `design/brand/hachure/`, `public/brand/hachure/`; audit: `docs/hachure-design-system-audit.md`.
+Hachure (Case 05) is the opposite test: no blur, no shadow, no rounded corner. It takes the supplied ridgeline dither footer as a **tone engine** and builds a cartographic system around density — survey stock, hachure, an H printed into paper, three elevation bands and a footer you can read an altitude off. Source: `features/hachure/`, `design/brand/hachure/`, `public/brand/hachure/`; audit: `docs/hachure-design-system-audit.md`.
 
 The `/design-engineering` docs hub is the practice-facing companion: the loop, the four standards, the Sunnyside case, the capability atlas, the installable brand-system skill and the field notes. It is built for reading and for agents: a sticky contents column, stable heading anchors, real tables, and raw Markdown twins at `/design-engineering/llms.txt` and `/design-engineering/learning/llms.txt`.
 

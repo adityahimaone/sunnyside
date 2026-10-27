@@ -2,13 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Hachure — brand board</title>
+    <title>Hachure — brand kit</title>
     <!--
-      The board is the 4:3 thumbnail on /design-system, so it is authored at
-      1500 × 1125 and captured at 2× before being downscaled. Fonts are local,
-      colours come from the generated token stylesheet, and the plate is drawn
-      by the browser with a copy of the ridge maths kept in step with
-      features/hachure/dither-field.ts.
+      A 3 × 3 identity deck on a night table: nine panels, one idea each.
+
+      Authored at 1500 × 1125 and captured at 2× before downscaling. Colours come
+      from the generated token stylesheet; the mark and wordmark are used as
+      masks so they can print in ink, paper or lichen without a second asset.
+      The two plates are drawn by the browser with a copy of the ridge maths kept
+      in step with features/hachure/dither-field.ts.
 
         node scripts/render-hachure-board.mjs
     -->
@@ -38,8 +40,8 @@
         width: 1500px;
         height: 1125px;
         overflow: hidden;
-        background: var(--hx-stock);
-        color: var(--hx-ink);
+        background: var(--hx-night);
+        color: var(--hx-stock);
         -webkit-font-smoothing: antialiased;
       }
 
@@ -47,765 +49,945 @@
         font-family: 'Geist', system-ui, sans-serif;
       }
 
+      /* ---------------------------------------------------------- the table */
       .board {
         position: relative;
         width: 1500px;
         height: 1125px;
-        padding: 34px 44px 24px;
+        padding: 24px 26px 18px;
         display: grid;
-        grid-template-rows: auto auto 1fr auto auto;
-        gap: 16px;
+        grid-template-rows: 22px 1fr 16px;
+        gap: 10px;
       }
 
-      /* survey dot screen over the whole sheet — print texture, not an image */
       .board::before {
         content: '';
         position: absolute;
-        inset: 0;
-        background-image: radial-gradient(circle at center, rgba(22, 33, 27, 0.55) 0.5px, transparent 0.6px);
-        background-size: 5px 5px;
-        opacity: 0.07;
+        inset: 13px;
+        border: 1px solid rgba(242, 244, 238, 0.14);
         pointer-events: none;
       }
 
-      .mono {
-        font-family: 'Geist Mono', monospace;
+      .board::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at center, rgba(242, 244, 238, 0.5) 0.5px, transparent 0.6px);
+        background-size: 6px 6px;
+        opacity: 0.05;
+        pointer-events: none;
       }
 
-      .label {
-        font-family: 'Geist Mono', monospace;
-        font-size: 9.5px;
-        font-weight: 500;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--hx-ink-muted);
-      }
-
-      .rule {
-        height: 1px;
-        background: var(--hx-rule);
-      }
-
-      /* ------------------------------------------------------------ header */
-      .head {
+      .top,
+      .foot {
+        position: relative;
+        z-index: 2;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding-bottom: 16px;
-        border-bottom: 1px solid var(--hx-ink);
-        position: relative;
-        z-index: 1;
-      }
-
-      .head img {
-        display: block;
-        height: 40px;
-      }
-
-      .head-right {
-        display: flex;
-        gap: 26px;
-        align-items: baseline;
-      }
-
-      /* -------------------------------------------------------------- hero */
-      .hero {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 566px;
-        gap: 34px;
-        position: relative;
-        z-index: 1;
-      }
-
-      .hero-copy {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .eyebrow {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        gap: 20px;
         font-family: 'Geist Mono', monospace;
-        font-size: 9.5px;
+        font-size: 8px;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        color: var(--hx-ink-muted);
+        color: rgba(242, 244, 238, 0.62);
       }
 
-      .eyebrow::before {
-        content: '';
-        width: 26px;
-        height: 1px;
-        background: var(--hx-ink);
+      .top-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--hx-stock);
       }
 
-      h1 {
-        margin-top: 18px;
+      .wm,
+      .mk {
+        display: block;
+        object-fit: contain;
+        object-position: left center;
+      }
+
+      .mk {
+        object-position: center;
+      }
+
+      .invert {
+        filter: brightness(0) invert(1);
+      }
+
+      .top .wm {
+        width: 74px;
+        height: 13px;
+      }
+
+      /* --------------------------------------------------------- the grid */
+      .grid {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-rows: repeat(3, minmax(0, 1fr));
+        gap: 11px;
+      }
+
+      .panel {
+        position: relative;
+        overflow: hidden;
+        padding: 15px 16px 14px;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+      }
+
+      .paper {
+        background: var(--hx-stock);
+        color: var(--hx-ink);
+        border: 1px solid rgba(22, 33, 27, 0.14);
+      }
+
+      .pine {
+        background: var(--hx-pine);
+        color: var(--hx-stock);
+        border: 1px solid rgba(242, 244, 238, 0.16);
+      }
+
+      .night {
+        background: var(--hx-night);
+        color: var(--hx-stock);
+        border: 1px solid rgba(242, 244, 238, 0.16);
+      }
+
+      .lichen {
+        background: var(--hx-lichen);
+        color: var(--hx-ink);
+        border: 1px solid rgba(22, 33, 27, 0.18);
+      }
+
+      .plabel {
         font-family: 'Geist Mono', monospace;
-        font-size: 56px;
-        line-height: 0.96;
+        font-size: 7.5px;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.62;
+        flex: none;
+      }
+
+      .pnum {
+        position: absolute;
+        right: 14px;
+        bottom: 11px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 7px;
+        letter-spacing: 0.14em;
+        opacity: 0.45;
+      }
+
+      .caption {
+        font-family: 'Geist Mono', monospace;
+        font-size: 7.5px;
+        line-height: 1.5;
+        letter-spacing: 0.05em;
+        opacity: 0.68;
+      }
+
+      /* ------------------------------------------------------------- 01 */
+      .cover .mk {
+        position: absolute;
+        top: 30px;
+        left: 50%;
+        width: 212px;
+        height: 212px;
+        margin-left: -106px;
+      }
+
+      .cover .wm {
+        position: absolute;
+        left: 16px;
+        bottom: 25px;
+        width: 198px;
+        height: 35px;
+      }
+
+      .cover-tag {
+        position: absolute;
+        right: 16px;
+        bottom: 24px;
+        width: 196px;
+        text-align: right;
+        font-family: 'Geist Mono', monospace;
+        font-size: 8.5px;
+        line-height: 1.55;
+        letter-spacing: 0.02em;
+        opacity: 0.7;
+      }
+
+      /* ------------------------------------------------------------- 02 */
+      .construct {
+        gap: 10px;
+      }
+
+      .construct-body {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        min-height: 0;
+      }
+
+      .cgrid {
+        position: relative;
+        width: 190px;
+        height: 190px;
+        flex: none;
+        background-image:
+          linear-gradient(to right, rgba(22, 33, 27, 0.16) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(22, 33, 27, 0.16) 1px, transparent 1px);
+        background-size: 11.875px 11.875px;
+        border: 1px solid rgba(22, 33, 27, 0.3);
+        display: grid;
+        place-items: center;
+      }
+
+      .cgrid .mk {
+        width: 160px;
+        height: 160px;
+      }
+
+      .cgrid::before,
+      .cgrid::after {
+        content: '';
+        position: absolute;
+        background: var(--hx-lichen);
+        opacity: 0.9;
+      }
+
+      .cgrid::before {
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 1px;
+      }
+
+      .cgrid::after {
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+      }
+
+      .cnotes {
+        display: grid;
+        gap: 7px;
+        align-content: center;
+      }
+
+      .cnote {
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr);
+        gap: 7px;
+        align-items: baseline;
+        border-top: 1px solid rgba(22, 33, 27, 0.16);
+        padding-top: 6px;
+      }
+
+      .cnote b {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+      }
+
+      .cnote span {
+        font-family: 'Geist Mono', monospace;
+        font-size: 7.5px;
+        line-height: 1.4;
+        opacity: 0.66;
+      }
+
+      .construct-foot {
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid rgba(22, 33, 27, 0.22);
+        padding-top: 7px;
+      }
+
+      /* ------------------------------------------------------------- 03 */
+      .browser {
+        flex: 1;
+        display: grid;
+        grid-template-rows: 26px 1fr;
+        border: 1px solid rgba(242, 244, 238, 0.22);
+        background: #0d1811;
+        margin-top: 12px;
+        min-height: 0;
+      }
+
+      .bbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 9px;
+        border-bottom: 1px solid rgba(242, 244, 238, 0.16);
+        font-family: 'Geist Mono', monospace;
+        font-size: 7px;
+        letter-spacing: 0.08em;
+        color: rgba(242, 244, 238, 0.72);
+      }
+
+      .bbar .url {
+        flex: 1;
+        padding: 3px 7px;
+        border: 1px solid rgba(242, 244, 238, 0.16);
+      }
+
+      .bbar .live {
+        color: var(--hx-lichen);
+      }
+
+      .screen {
+        position: relative;
+        overflow: hidden;
+        min-height: 0;
+      }
+
+      .screen canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+      }
+
+      .screen-nav {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 10px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--hx-ink);
+      }
+
+      .alt {
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 6px;
+        background: var(--hx-stock);
+        color: var(--hx-ink);
+        font-family: 'Geist Mono', monospace;
+        font-size: 7px;
+        letter-spacing: 0.08em;
+        border: 1px solid rgba(22, 33, 27, 0.35);
+      }
+
+      .alt i {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--hx-ink);
+        display: block;
+      }
+
+      /* ------------------------------------------------------------- 04 */
+      .essence {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-bottom: 8px;
+      }
+
+      .essence h2 {
+        font-family: 'Geist Mono', monospace;
+        font-size: 42px;
+        line-height: 0.98;
         letter-spacing: -0.035em;
         font-weight: 700;
+        text-wrap: balance;
       }
 
-      h1 em {
-        font-style: normal;
-        color: var(--hx-moss);
-      }
-
-      .hero-lead {
-        margin-top: 20px;
-        max-width: 46ch;
-        font-size: 14px;
-        line-height: 1.6;
-        color: var(--hx-ink-muted);
-      }
-
-      .hero-lead b {
-        color: var(--hx-ink);
-        font-weight: 500;
-      }
-
-      .specs {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        margin-top: 22px;
-        border-top: 1px solid var(--hx-ink);
-        border-bottom: 1px solid var(--hx-rule);
-      }
-
-      .specs div {
-        padding: 8px 10px 9px 0;
-        border-right: 1px solid var(--hx-rule);
-        display: grid;
-        gap: 4px;
-      }
-
-      .specs div:last-child {
-        border-right: 0;
-        padding-right: 0;
-      }
-
-      .specs span {
+      .essence-foot {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        border-top: 1px solid rgba(22, 33, 27, 0.3);
+        padding-top: 7px;
         font-family: 'Geist Mono', monospace;
         font-size: 8px;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: var(--hx-ink-muted);
       }
 
-      .specs b {
-        font-family: 'Geist Mono', monospace;
-        font-size: 10px;
-        font-weight: 500;
-        letter-spacing: -0.01em;
-      }
-
-      .mark-line {
-        margin-top: auto;
-        display: flex;
-        align-items: flex-end;
-        gap: 20px;
-        padding-top: 20px;
-        border-top: 1px solid var(--hx-rule);
-      }
-
-      .mark-line img {
-        width: 96px;
-        height: 96px;
-        display: block;
-      }
-
-      .mark-line .mark-copy {
-        display: grid;
-        gap: 5px;
-        padding-bottom: 4px;
-      }
-
-      .mark-line .mark-copy b {
-        font-family: 'Geist Mono', monospace;
-        font-size: 14px;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-      }
-
-      .mark-line .mark-copy span {
-        font-size: 11.5px;
-        line-height: 1.45;
-        color: var(--hx-ink-muted);
-        max-width: 30ch;
-      }
-
-      /* ------------------------------------------------------------- plate */
-      .plate-wrap {
-        display: flex;
-        flex-direction: column;
-        gap: 9px;
-      }
-
-      .plate {
-        border: 1px solid var(--hx-ink);
-        background: var(--hx-stock);
-      }
-
-      .plate-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 11px;
-        font-family: 'Geist Mono', monospace;
-        font-size: 9px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--hx-ink-muted);
-        border-bottom: 1px solid var(--hx-rule);
-      }
-
-      .plate-bar span:first-child::before {
-        content: '';
-        display: inline-block;
-        width: 12px;
-        height: 1px;
-        margin-right: 7px;
-        vertical-align: middle;
-        background: var(--hx-ink);
-      }
-
-      canvas {
-        display: block;
-        width: 564px;
-        height: 390px;
-        image-rendering: pixelated;
-      }
-
-      .plate-foot {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 11px;
-        border-top: 1px solid var(--hx-rule);
-        font-family: 'Geist Mono', monospace;
-        font-size: 9px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--hx-ink-muted);
-      }
-
-      .scale {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .scale i {
-        width: 54px;
-        height: 5px;
-        border: 1px solid currentColor;
-        border-top: 0;
-        position: relative;
-        display: inline-block;
-      }
-
-      .scale i::after {
-        content: '';
-        position: absolute;
-        inset: 0 50% 0 0;
-        background: currentColor;
-      }
-
-      .plate-caption {
-        font-size: 10.5px;
-        line-height: 1.5;
-        color: var(--hx-ink-muted);
-        max-width: 56ch;
-      }
-
-      /* ----------------------------------------------------------- palette */
-      .mid {
-        display: grid;
-        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-        gap: 34px;
-        position: relative;
-        z-index: 1;
-        padding-top: 18px;
-        border-top: 1px solid var(--hx-ink);
-      }
-
+      /* ------------------------------------------------------------- 05 */
       .swatches {
+        flex: 1;
         display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 0;
-        border: 1px solid var(--hx-rule);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        gap: 5px;
+        margin-top: 11px;
+        min-height: 0;
       }
 
       .swatch {
         display: grid;
-        grid-template-rows: 64px auto;
-        border-right: 1px solid var(--hx-rule);
-      }
-
-      .swatch:last-child {
-        border-right: 0;
+        grid-template-rows: 1fr auto;
+        border: 1px solid rgba(22, 33, 27, 0.2);
+        min-height: 0;
       }
 
       .swatch i {
         display: block;
-        border-bottom: 1px solid var(--hx-rule);
       }
 
       .swatch div {
-        padding: 7px 8px 8px;
-        display: grid;
-        gap: 2px;
+        display: flex;
+        justify-content: space-between;
+        gap: 4px;
+        padding: 3px 4px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.04em;
+        border-top: 1px solid rgba(22, 33, 27, 0.14);
       }
 
-      .swatch b {
-        font-family: 'Geist Mono', monospace;
-        font-size: 9.5px;
-        font-weight: 500;
-      }
-
-      .swatch code {
-        font-family: 'Geist Mono', monospace;
-        font-size: 8px;
-        color: var(--hx-ink-muted);
+      .swatch div span:last-child {
+        opacity: 0.55;
       }
 
       .ramp {
-        margin-top: 12px;
         display: grid;
         grid-template-columns: repeat(7, minmax(0, 1fr));
-        border: 1px solid var(--hx-rule);
-      }
-
-      .ramp div {
-        display: grid;
-        gap: 4px;
-        padding: 0 5px 5px;
-        border-right: 1px solid var(--hx-rule);
-      }
-
-      .ramp div:last-child {
-        border-right: 0;
+        height: 34px;
+        border: 1px solid rgba(22, 33, 27, 0.24);
+        margin-top: 7px;
       }
 
       .ramp i {
         display: block;
-        height: 32px;
-        margin: 0 -5px 2px;
+        border-right: 1px solid rgba(22, 33, 27, 0.12);
       }
 
-      .ramp b {
-        font-family: 'Geist Mono', monospace;
-        font-size: 8px;
-        font-weight: 500;
-        letter-spacing: 0.06em;
-      }
-
-      .ramp code {
-        font-family: 'Geist Mono', monospace;
-        font-size: 7px;
-        color: var(--hx-ink-muted);
+      .ramp i:last-child {
+        border-right: 0;
       }
 
       .palette-note {
-        margin-top: 10px;
-        font-size: 11px;
-        line-height: 1.5;
-        color: var(--hx-ink-muted);
-        max-width: 68ch;
-      }
-
-      .palette-note b {
-        color: var(--hx-ink);
-        font-weight: 500;
-      }
-
-      /* -------------------------------------------------------------- type */
-      .type-panel {
         display: flex;
-        flex-direction: column;
+        justify-content: space-between;
         gap: 10px;
-        padding-left: 26px;
-        border-left: 1px solid var(--hx-rule);
+        margin-top: 6px;
       }
 
-      .type-row {
+      /* ------------------------------------------------------------- 06 */
+      .type-top {
+        flex: 1;
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         gap: 16px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid var(--hx-rule);
+        min-height: 0;
       }
 
       .aa {
         font-family: 'Geist Mono', monospace;
-        font-size: 54px;
-        line-height: 0.8;
+        font-size: 82px;
+        line-height: 0.78;
         font-weight: 700;
-        letter-spacing: -0.04em;
+        letter-spacing: -0.05em;
       }
 
       .type-meta {
         display: grid;
-        gap: 3px;
-        padding-bottom: 4px;
+        gap: 5px;
+        align-content: center;
       }
 
       .type-meta b {
         font-family: 'Geist Mono', monospace;
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 500;
+        letter-spacing: 0.04em;
       }
 
       .type-meta span {
-        font-size: 10.5px;
-        line-height: 1.4;
-        color: var(--hx-ink-muted);
+        font-size: 8.5px;
+        line-height: 1.45;
+        opacity: 0.68;
       }
 
-      .wordmark-img {
+      .type-wm {
+        color: var(--hx-ink);
         width: 100%;
-        max-width: 268px;
-        display: block;
+        height: 38px;
+        margin-top: 4px;
+      }
+
+      .type-foot {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        border-top: 1px solid rgba(22, 33, 27, 0.22);
+        padding-top: 7px;
         margin-top: 2px;
       }
 
-      /* ------------------------------------------------------------ bottom */
-      .bottom {
-        display: grid;
-        grid-template-columns: 1.15fr 0.85fr 1.2fr;
-        gap: 30px;
-        padding-top: 18px;
-        border-top: 1px solid var(--hx-ink);
+      /* ------------------------------------------------------------- 07 */
+      .print {
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sheet {
         position: relative;
-        z-index: 1;
-      }
-
-      .cell {
-        display: grid;
-        align-content: start;
-        gap: 9px;
-      }
-
-      .family {
+        width: 286px;
+        height: 214px;
+        padding: 18px 18px 14px;
+        background: var(--hx-stock);
+        color: var(--hx-ink);
+        border: 1px solid var(--hx-ink);
         display: flex;
-        align-items: flex-end;
-        gap: 22px;
+        flex-direction: column;
       }
 
-      .family figure {
+      .sheet .kicker {
+        font-family: 'Geist Mono', monospace;
+        font-size: 7px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .sheet-lock {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .sheet .sheet-mark {
+        width: 34px;
+        height: 34px;
+        display: block;
+        flex: none;
+      }
+
+      .sheet .wm {
+        width: 150px;
+        height: 26px;
+      }
+
+      .sheet .sheet-ramp {
         display: grid;
-        justify-items: center;
+        grid-template-columns: repeat(7, 1fr);
+        height: 9px;
+        margin-top: 18px;
+        border: 1px solid rgba(22, 33, 27, 0.25);
+      }
+
+      .sheet .sheet-ramp i {
+        display: block;
+        border-right: 1px solid rgba(22, 33, 27, 0.12);
+      }
+
+      .sheet .sheet-ramp i:last-child {
+        border-right: 0;
+      }
+
+      .sheet .rule {
+        margin-top: auto;
+        border-top: 1px solid rgba(22, 33, 27, 0.4);
+        padding-top: 7px;
+        display: flex;
+        justify-content: space-between;
+        font-family: 'Geist Mono', monospace;
+        font-size: 7px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .sheet .ticks {
+        position: absolute;
+        inset: -4px;
+        pointer-events: none;
+      }
+
+      .sheet .ticks i {
+        position: absolute;
+        width: 9px;
+        height: 9px;
+        border-color: rgba(242, 244, 238, 0.8);
+        border-style: solid;
+        border-width: 0;
+      }
+
+      .sheet .ticks i:nth-child(1) {
+        left: 0;
+        top: 0;
+        border-left-width: 1px;
+        border-top-width: 1px;
+      }
+
+      .sheet .ticks i:nth-child(2) {
+        right: 0;
+        top: 0;
+        border-right-width: 1px;
+        border-top-width: 1px;
+      }
+
+      .sheet .ticks i:nth-child(3) {
+        left: 0;
+        bottom: 0;
+        border-left-width: 1px;
+        border-bottom-width: 1px;
+      }
+
+      .sheet .ticks i:nth-child(4) {
+        right: 0;
+        bottom: 0;
+        border-right-width: 1px;
+        border-bottom-width: 1px;
+      }
+
+      .print .caption {
+        margin-top: 10px;
+        color: var(--hx-stock);
+        opacity: 0.6;
+        text-align: center;
+      }
+
+      /* ------------------------------------------------------------- 08 */
+      .range {
+        padding: 0;
+        border: 1px solid rgba(242, 244, 238, 0.16);
+      }
+
+      .range canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+      }
+
+      .range .plabel {
+        position: absolute;
+        top: 13px;
+        left: 14px;
+        color: var(--hx-ink);
+        opacity: 0.72;
+        z-index: 2;
+      }
+
+      .range .pnum {
+        top: 13px;
+        right: 14px;
+        bottom: auto;
+        color: var(--hx-ink);
+        z-index: 2;
+      }
+
+      .range-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 7px 10px;
+        background: var(--hx-stock);
+        color: var(--hx-ink);
+        font-family: 'Geist Mono', monospace;
+        font-size: 6.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      /* ------------------------------------------------------------- 09 */
+      .system {
+        gap: 10px;
+      }
+
+      .sys-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
         gap: 5px;
       }
 
-      .family img {
-        display: block;
-      }
-
-      .family figcaption {
-        font-family: 'Geist Mono', monospace;
-        font-size: 8px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--hx-ink-muted);
-      }
-
-      .cell p {
-        font-size: 10.5px;
-        line-height: 1.5;
-        color: var(--hx-ink-muted);
-      }
-
-      .cell p b {
-        color: var(--hx-ink);
-        font-weight: 500;
-      }
-
-      .rules-list {
-        display: grid;
-        gap: 6px;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-
-      .rules-list li {
-        display: grid;
-        grid-template-columns: 16px minmax(0, 1fr);
-        gap: 8px;
-        font-size: 11px;
-        line-height: 1.45;
-        color: var(--hx-ink-muted);
-      }
-
-      .rules-list li span {
-        font-family: 'Geist Mono', monospace;
-        font-size: 8.5px;
-        color: var(--hx-ink-muted);
-        padding-top: 2px;
-      }
-
-      .rules-list li b {
-        color: var(--hx-ink);
-        font-weight: 500;
-      }
-
-      /* ------------------------------------------------------------ footer */
-      .foot {
-        display: flex;
-        justify-content: space-between;
+      .tag {
+        display: inline-flex;
         align-items: center;
-        gap: 24px;
-        padding-top: 10px;
-        border-top: 1px solid var(--hx-rule);
+        padding: 4px 5px 3px;
+        border: 1px solid var(--hx-ink);
         font-family: 'Geist Mono', monospace;
-        font-size: 8.5px;
+        font-size: 6.5px;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: var(--hx-ink-muted);
-        position: relative;
-        z-index: 1;
       }
 
-      /* crop marks */
-      .crop {
-        position: absolute;
-        width: 16px;
-        height: 16px;
+      .tag.fill {
+        background: var(--hx-lichen);
+      }
+
+      .tag.solid {
+        background: var(--hx-ink);
+        color: var(--hx-stock);
+      }
+
+      .sys-field {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid var(--hx-ink);
+        outline: 1.5px solid var(--hx-ink);
+        outline-offset: 2px;
+        padding: 6px 7px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 7px;
+        letter-spacing: 0.04em;
+      }
+
+      .sys-field span:last-child {
         opacity: 0.5;
       }
 
-      .crop[data-at='tl'] {
-        top: 16px;
-        left: 16px;
-        border-left: 1px solid var(--hx-ink);
-        border-top: 1px solid var(--hx-ink);
+      .sys-bottom {
+        margin-top: auto;
+        display: flex;
+        align-items: flex-end;
+        gap: 16px;
+        border-top: 1px solid rgba(22, 33, 27, 0.22);
+        padding-top: 9px;
       }
 
-      .crop[data-at='tr'] {
-        top: 16px;
-        right: 16px;
-        border-right: 1px solid var(--hx-ink);
-        border-top: 1px solid var(--hx-ink);
+      .bayer {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        width: 62px;
+        height: 62px;
+        border: 1px solid var(--hx-ink);
+        flex: none;
       }
 
-      .crop[data-at='bl'] {
-        bottom: 16px;
-        left: 16px;
-        border-left: 1px solid var(--hx-ink);
-        border-bottom: 1px solid var(--hx-ink);
+      .bayer i {
+        background: var(--hx-ink);
+        display: block;
       }
 
-      .crop[data-at='br'] {
-        bottom: 16px;
-        right: 16px;
-        border-right: 1px solid var(--hx-ink);
-        border-bottom: 1px solid var(--hx-ink);
+      .favicons {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+      }
+
+      .favicons img {
+        display: block;
+        image-rendering: pixelated;
+      }
+
+      .sys-note {
+        margin-left: auto;
+        display: grid;
+        gap: 3px;
+        text-align: right;
       }
     </style>
   </head>
   <body>
     <main class="board">
-      <span class="crop" data-at="tl"></span>
-      <span class="crop" data-at="tr"></span>
-      <span class="crop" data-at="bl"></span>
-      <span class="crop" data-at="br"></span>
-
-      <header class="head">
-        <img src="../../../public/brand/hachure/lockup.svg" alt="Hachure" />
-        <div class="head-right">
-          <span class="label">Case 05 / brand board</span>
-          <span class="label">v1.0.0 · 2026</span>
+      <header class="top">
+        <div class="top-left">
+          <img class="wm invert" src="../../../public/brand/hachure/wordmark.svg" alt="" />
+          <span>Case 05 — identity system</span>
         </div>
+        <span>Terrain / weather / field data</span>
+        <span>v1.1 · 2026</span>
       </header>
 
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Terrain / weather / field data</p>
-          <h1>
-            Relief drawn<br />
-            by density,<br />
-            <em>never by shadow.</em>
-          </h1>
-          <p class="hero-lead">
-            A cartographic interface system built from the supplied ridgeline dither footer. Six
-            ridges from one seed, seven tones from one paper, and a mark that prints into the page.
-            <b>Depth is how many of the seven steps a surface is allowed to use.</b>
-          </p>
+      <div class="grid">
+        <!-- 01 · cover -->
+        <section class="panel paper cover">
+          <span class="plabel">01 / Mark</span>
+          <img class="mk" src="../../../public/brand/hachure/mark.svg" alt="" />
+          <img class="wm" src="../../../public/brand/hachure/wordmark.svg" alt="" />
+          <p class="cover-tag">Relief drawn by density,<br />never by shadow.</p>
+          <span class="pnum">01</span>
+        </section>
 
-          <div class="specs">
-            <div><span>Grid</span><b>64 units</b></div>
-            <div><span>Tones</span><b>7 / tone 1 = paper</b></div>
-            <div><span>Bands</span><b>3 / range reserved</b></div>
-            <div><span>Component</span><b>Ridgeline footer</b></div>
-          </div>
-
-          <div class="mark-line">
-            <img src="../../../public/brand/hachure/mark.svg" alt="The Hachure mark" />
-            <div class="mark-copy">
-              <b>The mark prints into paper</b>
-              <span>
-                64 grid · one path · apex (26, 13), knee (38, 34), feet (10, 50) and (54, 50).
-                Solid above row 42; the base breaks into 14 cells at 82% and 44% coverage.
-              </span>
+        <!-- 02 · construction -->
+        <section class="panel paper construct">
+          <span class="plabel">02 / Construction</span>
+          <div class="construct-body">
+            <div class="cgrid">
+              <img class="mk" src="../../../public/brand/hachure/mark.svg" alt="" />
+            </div>
+            <div class="cnotes">
+              <div class="cnote"><b>64</b><span>Grid. One path, no mask.</span></div>
+              <div class="cnote"><b>12</b><span>Stem width; 20-unit counter.</span></div>
+              <div class="cnote"><b>6</b><span>Crossbar; the H sits on its centre.</span></div>
+              <div class="cnote"><b>4</b><span>Cell. The feet print into paper.</span></div>
             </div>
           </div>
-        </div>
+          <div class="construct-foot">
+            <span class="caption">44 × 42 / 8 cells / 1 path</span>
+            <span class="caption">16 / 32 / 64 / 180</span>
+          </div>
+          <span class="pnum">02</span>
+        </section>
 
-        <div class="plate-wrap">
-          <div class="plate">
-            <div class="plate-bar">
-              <span>Sheet 05</span>
-              <span>1:25 000</span>
+        <!-- 03 · digital application -->
+        <section class="panel night">
+          <span class="plabel">03 / Application</span>
+          <div class="browser">
+            <div class="bbar">
+              <span class="url">hachure.survey/plate/05</span>
+              <span class="live">live</span>
             </div>
-            <canvas id="plate" width="282" height="195" aria-hidden="true"></canvas>
-            <div class="plate-foot">
-              <span class="scale"><span>0</span><i></i><span>1 km</span></span>
-              <span>47°12′N 8°41′E</span>
+            <div class="screen">
+              <canvas id="plate-digital" aria-hidden="true"></canvas>
+              <div class="screen-nav"><span>Plate 05</span><span>Seed 41 / Field log</span></div>
+              <span class="alt"><i></i>2,480 m</span>
             </div>
           </div>
-          <p class="plate-caption">
-            One plate, drawn by the browser at 2 CSS px per cell: six ridges, seven tones, seed 7.
-            Tone 1 is the stock, which is why the range can dissolve upward instead of fading.
-          </p>
-        </div>
-      </section>
+          <span class="pnum">03</span>
+        </section>
 
-      <section class="mid">
-        <div>
-          <p class="label" style="margin-bottom: 9px">01 / Materials</p>
-          <div class="swatches">
-            <div class="swatch">
-              <i style="background: var(--hx-stock)"></i>
-              <div><b>stock</b><code>#F2F4EE</code></div>
-            </div>
-            <div class="swatch">
-              <i style="background: var(--hx-stock-deep)"></i>
-              <div><b>stock-deep</b><code>#E5E9DF</code></div>
-            </div>
-            <div class="swatch">
-              <i style="background: var(--hx-pine)"></i>
-              <div><b>pine</b><code>#1E3B2C</code></div>
-            </div>
-            <div class="swatch">
-              <i style="background: var(--hx-ink)"></i>
-              <div><b>ink</b><code>#16211B</code></div>
-            </div>
-            <div class="swatch">
-              <i style="background: var(--hx-lichen)"></i>
-              <div><b>lichen</b><code>#C9D94E</code></div>
-            </div>
-            <div class="swatch">
-              <i style="background: var(--hx-moss)"></i>
-              <div><b>moss</b><code>#4A6B33</code></div>
-            </div>
+        <!-- 04 · essence -->
+        <section class="panel lichen">
+          <span class="plabel">04 / Essence</span>
+          <div class="essence">
+            <h2>Relief drawn<br />by density.</h2>
           </div>
+          <div class="essence-foot">
+            <span>Never by shadow</span>
+            <span>400–3,000 m</span>
+          </div>
+          <span class="pnum">04</span>
+        </section>
 
+        <!-- 05 · colour -->
+        <section class="panel paper">
+          <span class="plabel">05 / Colour</span>
+          <div class="swatches" id="swatches"></div>
           <div class="ramp" id="ramp"></div>
-          <p class="palette-note">
-            <b>Lichen is a fill, never a letter</b> — 1.40:1 on stock. The type-safe green is moss at
-            5.51:1, and the dither's tone 5 follows it. Survey red #A82A1C is functional only.
-          </p>
-        </div>
+          <div class="palette-note">
+            <span class="caption">One loud field. Lichen is a fill, never a letter.</span>
+            <span class="caption">tone 1 = paper</span>
+          </div>
+          <span class="pnum">05</span>
+        </section>
 
-        <div class="type-panel">
-          <p class="label">02 / Type</p>
-          <div class="type-row">
+        <!-- 06 · type -->
+        <section class="panel paper">
+          <span class="plabel">06 / Type</span>
+          <div class="type-top">
             <span class="aa">Aa</span>
             <div class="type-meta">
               <b>Geist Mono 700</b>
               <span>Display, labels, coordinates,<br />altitudes, the wordmark</span>
+              <span>Geist 400 — reading copy, 17 / 1.6</span>
             </div>
           </div>
-          <div class="type-row" style="align-items: flex-start; border-bottom: 0">
-            <div class="type-meta">
-              <b>Geist 400</b>
-              <span>Body copy at 17px, 1.6 leading,<br />held to about 68 characters</span>
-            </div>
+          <img class="wm type-wm" src="../../../public/brand/hachure/wordmark.svg" alt="" />
+          <div class="type-foot">
+            <span class="caption">0.92 / −0.03em</span>
+            <span class="caption">two families</span>
           </div>
-          <img
-            class="wordmark-img"
-            src="../../../public/brand/hachure/wordmark.svg"
-            alt="The Hachure wordmark, outlined from Geist Mono 700"
-          />
-        </div>
-      </section>
+          <span class="pnum">06</span>
+        </section>
 
-      <section class="bottom">
-        <div class="cell">
-          <p class="label">03 / Mark family</p>
-          <div class="family">
-            <figure>
-              <img src="../../../public/brand/hachure/mark.svg" width="56" height="56" alt="" />
-              <figcaption>64</figcaption>
-            </figure>
-            <figure>
-              <img src="../../../public/brand/hachure/mark.svg" width="32" height="32" alt="" />
-              <figcaption>32</figcaption>
-            </figure>
-            <figure>
+        <!-- 07 · print -->
+        <section class="panel pine print">
+          <span class="plabel" style="align-self: flex-start">07 / Print</span>
+          <div class="sheet">
+            <span class="ticks" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <div class="kicker">
+              <span>Quadrangle 05</span>
+              <span>1:25 000</span>
+            </div>
+            <div class="sheet-lock">
+              <img class="sheet-mark" src="../../../public/brand/hachure/mark.svg" alt="" />
+              <img class="wm" src="../../../public/brand/hachure/wordmark.svg" alt="" />
+            </div>
+            <div class="sheet-ramp" id="sheet-ramp" aria-hidden="true"></div>
+            <div class="rule">
+              <span>Terrain / field data</span>
+              <span>47°12′N</span>
+            </div>
+          </div>
+          <p class="caption">A field sheet, printed one tone at a time.</p>
+          <span class="pnum">07</span>
+        </section>
+
+        <!-- 08 · atmosphere -->
+        <section class="panel range">
+          <span class="plabel">08 / Range</span>
+          <canvas id="plate-atmosphere" aria-hidden="true"></canvas>
+          <div class="range-bar">
+            <span>One plate / seed 7 / 7 tones</span>
+            <span>47°12′N 8°41′E</span>
+          </div>
+          <span class="pnum">08</span>
+        </section>
+
+        <!-- 09 · system -->
+        <section class="panel paper system">
+          <span class="plabel">09 / System</span>
+          <div class="sys-row">
+            <span class="tag fill">Spot height</span>
+            <span class="tag solid">Ridge</span>
+            <span class="tag">Provisional</span>
+            <span class="tag" style="border-style: dashed; opacity: 0.6">Datum locked</span>
+          </div>
+          <div class="sys-field"><span>piz.badile / south ridge</span><span>2,108 m</span></div>
+          <div class="sys-row">
+            <span class="tag solid" style="padding: 5px 8px 4px">File a report</span>
+            <span class="tag" style="padding: 5px 8px 4px">Save draft</span>
+          </div>
+          <p class="caption" style="margin-top: 9px">
+            Native controls. Focus is always visible; errors name their own recovery.
+          </p>
+          <div class="sys-bottom">
+            <div class="bayer" id="bayer" aria-hidden="true"></div>
+            <div class="favicons">
               <img src="../../../public/brand/hachure/favicons/favicon-16.svg" width="16" height="16" alt="" />
-              <figcaption>16</figcaption>
-            </figure>
-            <figure>
-              <img src="../../../public/brand/hachure/favicons/favicon-180.svg" width="40" height="40" alt="" />
-              <figcaption>180 / apple</figcaption>
-            </figure>
+              <img src="../../../public/brand/hachure/favicons/favicon-32.svg" width="32" height="32" alt="" />
+              <img src="../../../public/brand/hachure/mark.svg" width="44" height="44" alt="" />
+            </div>
+            <div class="sys-note">
+              <span class="caption">8 × 8 Bayer / 2px cell</span>
+              <span class="caption">16 / 32 / 44</span>
+            </div>
           </div>
-          <p>
-            <b>One silhouette, one operation.</b> The compact drawing redraws the base on a 2-unit
-            grid so it survives 16px.
-          </p>
-        </div>
-
-        <div class="cell">
-          <p class="label">04 / Elevation</p>
-          <ul class="rules-list">
-            <li><span>03</span><div><b>Range 400–3,000 m</b> — the footer, and only the footer.</div></li>
-            <li><span>02</span><div><b>Bench 40 m</b> — panels, fields, table headers.</div></li>
-            <li><span>01</span><div><b>Ground 0 m</b> — the page. Nothing sits below it.</div></li>
-          </ul>
-          <p>
-            No shadow, no gradient sky, no peak logo. A hairline and a bench tone carry every
-            elevation below the range.
-          </p>
-        </div>
-
-        <div class="cell">
-          <p class="label">05 / The rule</p>
-          <p>
-            <b>One loud field per view.</b> Lichen is the field; the range is the only place it may
-            be dithered. Ten form controls, three elevation bands, and one contrast pair that fails
-            on purpose — kept visible so the rule can be checked.
-          </p>
-          <p>
-            Tokens: stock, pine, ink, lichen, moss, mist, night, alert. Two families. Three bands.
-            One reserved surface.
-          </p>
-        </div>
-      </section>
+          <span class="pnum">09</span>
+        </section>
+      </div>
 
       <footer class="foot">
         <span>hachure / a drawn specimen, not a company</span>
-        <span>Tokens: features/hachure/tokens.json → hachure-tokens.css</span>
-        <span>Board 1500 × 1125 @2× · 2026</span>
+        <span>Tokens: features/hachure/tokens.json</span>
+        <span>1500 × 1125 @2× — sheet 05</span>
       </footer>
     </main>
 
     <script>
-      /* The plate. This is a standalone artefact with no bundler, so the ridge
-         maths is mirrored here from features/hachure/dither-field.ts. Same Bayer
-         matrix, same tone formula, same 2px cell; the page remains the source. */
+      /* Two plates, one engine. Mirrored from features/hachure/dither-field.ts
+         because this board is a standalone artefact; the page remains the source. */
       ;(() => {
-        const canvas = document.getElementById('plate')
-        const ctx = canvas.getContext('2d')
-        const cols = canvas.width
-        const rows = canvas.height
-        const px = 2
-
         const BAYER = [
           0, 32, 8, 40, 2, 34, 10, 42, 48, 16, 56, 24, 50, 18, 58, 26, 12, 44, 4, 36, 14, 46, 6, 38, 60, 28, 52, 20,
           62, 30, 54, 22, 3, 35, 11, 43, 1, 33, 9, 41, 51, 19, 59, 27, 49, 17, 57, 25, 15, 47, 7, 39, 13, 45, 5, 37,
@@ -813,12 +995,11 @@
         ].map((v) => (v + 0.5) / 64)
 
         const css = getComputedStyle(document.documentElement)
-        const tone = (i) => css.getPropertyValue('--hx-tone-' + i).trim()
+        const token = (name) => css.getPropertyValue(name).trim()
         const pack = (hex) => {
           const n = parseInt(hex.slice(1), 16)
           return ((255 << 24) | ((n & 255) << 16) | (((n >> 8) & 255) << 8) | ((n >> 16) & 255)) >>> 0
         }
-        const pal = [1, 2, 3, 4, 5, 6, 7].map((i) => pack(tone(i)))
 
         const hash = (x, y, s) => {
           let h = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s | 0, 1442695041)
@@ -856,92 +1037,143 @@
           const t = Math.max(0, Math.min(1, (x - a) / (b - a)))
           return t * t * (3 - 2 * t)
         }
-        const ridge = (i, layers, seed, margin) => {
-          const k = i / (layers - 1)
-          const n = cols + margin * 2
-          const out = new Float32Array(n)
-          const base = rows * (0.38 + 0.66 * Math.pow(k, 1.4))
-          const amp = rows * (0.2 + 0.24 * k)
-          const freq = 6 - 3.8 * k
-          const flankL = rows * 0.5 * k * k * k * (0.55 + 0.6 * hash(i, 11, seed))
-          const flankR = rows * 0.5 * k * k * k * (0.55 + 0.6 * hash(i, 13, seed))
-          const ceil = rows * 0.17
-          const tilt = (hash(i, 7, seed) - 0.5) * rows * 0.34 * (0.4 + k)
-          const s = seed * 13 + i * 101
-          for (let x = 0; x < n; x++) {
-            const u = (x - margin) / cols
-            const r1 = 1 - Math.abs(noise(u * freq + i * 3.7, 0.5, s) * 2 - 1)
-            const r2 = 1 - Math.abs(noise(u * freq * 2.3, 3.5, s + 1) * 2 - 1)
-            const f = fbm(u * freq * 4.1, 9.5, s + 2, 3)
-            const h = r1 * r1 * 0.62 + r2 * 0.24 + f * 0.14
-            const e = Math.min(1.2, Math.abs(u * 2 - 1))
-            const y =
-              base - h * amp + tilt * (u - 0.5) * 2 - (u < 0.5 ? flankL : flankR) * e * e * Math.sqrt(e)
-            out[x] = y < ceil ? ceil - (ceil - y) * 0.25 : y
+
+        function draw(canvas, { layers = 6, seed = 7, tones, mist = 0.8, fadeFrom = 0.45, cell = 2 }) {
+          const host = canvas.parentElement
+          const rect = host.getBoundingClientRect()
+          const cols = Math.max(8, Math.ceil(rect.width / cell))
+          const rows = Math.max(8, Math.ceil(rect.height / cell))
+          canvas.width = cols
+          canvas.height = rows
+          const ctx = canvas.getContext('2d')
+
+          const pal = tones.map((tone) => pack(tone))
+          const margin = Math.ceil(cols * 0.045) + 3
+          const ridge = (i) => {
+            const k = i / (layers - 1)
+            const n = cols + margin * 2
+            const out = new Float32Array(n)
+            const base = rows * (0.38 + 0.66 * Math.pow(k, 1.4))
+            const amp = rows * (0.2 + 0.24 * k)
+            const freq = 6 - 3.8 * k
+            const flankL = rows * 0.5 * k * k * k * (0.55 + 0.6 * hash(i, 11, seed))
+            const flankR = rows * 0.5 * k * k * k * (0.55 + 0.6 * hash(i, 13, seed))
+            const ceil = rows * 0.17
+            const tilt = (hash(i, 7, seed) - 0.5) * rows * 0.34 * (0.4 + k)
+            const s = seed * 13 + i * 101
+            for (let x = 0; x < n; x++) {
+              const u = (x - margin) / cols
+              const r1 = 1 - Math.abs(noise(u * freq + i * 3.7, 0.5, s) * 2 - 1)
+              const r2 = 1 - Math.abs(noise(u * freq * 2.3, 3.5, s + 1) * 2 - 1)
+              const f = fbm(u * freq * 4.1, 9.5, s + 2, 3)
+              const h = r1 * r1 * 0.62 + r2 * 0.24 + f * 0.14
+              const e = Math.min(1.2, Math.abs(u * 2 - 1))
+              const y =
+                base - h * amp + tilt * (u - 0.5) * 2 - (u < 0.5 ? flankL : flankR) * e * e * Math.sqrt(e)
+              out[x] = y < ceil ? ceil - (ceil - y) * 0.25 : y
+            }
+            return out
           }
-          return out
-        }
 
-        const layers = 6
-        const seed = 7
-        const margin = Math.ceil(cols * 0.045) + 3
-        const tops = []
-        for (let i = 0; i < layers; i++) tops.push(ridge(i, layers, seed, margin))
+          const tops = []
+          for (let i = 0; i < layers; i++) tops.push(ridge(i))
 
-        const fw = (cols >> 1) + 2
-        const fh = (rows >> 1) + 2
-        const fog = new Float32Array(fw * fh)
-        for (let gy = 0; gy < fh; gy++) {
-          for (let gx = 0; gx < fw; gx++) {
-            const v = fbm((gx * 9) / cols, (gy * 4.4) / rows, 31, 3)
-            fog[gy * fw + gx] = smooth(0.3, 0.74, v)
+          const fw = (cols >> 1) + 2
+          const fh = (rows >> 1) + 2
+          const fog = new Float32Array(fw * fh)
+          for (let gy = 0; gy < fh; gy++) {
+            for (let gx = 0; gx < fw; gx++) {
+              const v = fbm((gx * 9) / cols, (gy * 4.4) / rows, 31, 3)
+              fog[gy * fw + gx] = smooth(0.3, 0.74, v)
+            }
           }
-        }
 
-        const img = ctx.createImageData(cols, rows)
-        const buf = new Uint32Array(img.data.buffer)
-        const mist = 0.75
-        const fadeFrom = 0.45
-
-        for (let y = 0; y < rows; y++) {
-          const fade = smooth(0, rows * fadeFrom, y)
-          for (let x = 0; x < cols; x++) {
-            let L = -1
-            for (let i = layers - 1; i >= 0; i--) {
-              if (y >= tops[i][x + margin]) {
-                L = i
-                break
+          const img = ctx.createImageData(cols, rows)
+          const buf = new Uint32Array(img.data.buffer)
+          for (let y = 0; y < rows; y++) {
+            const fade = smooth(0, rows * fadeFrom, y)
+            for (let x = 0; x < cols; x++) {
+              let L = -1
+              for (let i = layers - 1; i >= 0; i--) {
+                if (y >= tops[i][x + margin]) {
+                  L = i
+                  break
+                }
               }
+              let t = 0
+              if (L >= 0) {
+                const k = L / (layers - 1)
+                const d = y - tops[L][x + margin]
+                const pool = rows * (0.08 + 0.42 * k)
+                const crest = 1 - smooth(0, pool, d) * (0.88 - 0.45 * k)
+                t = (0.16 + 0.76 * Math.pow(k, 1.6)) * crest
+                const sl = tops[L][Math.min(tops[L].length - 1, x + margin + 2)] - tops[L][x + margin - 2]
+                t += Math.max(-0.16, Math.min(0.16, sl * 0.055)) * (1 - smooth(0, pool * 0.5, d))
+              } else {
+                t = 0.05 * smooth(rows * 0.15, rows * 0.6, y)
+              }
+              let m = fog[(y >> 1) * fw + (x >> 1)] * mist * (L >= 0 ? 0.95 - 0.5 * (L / (layers - 1)) : 0.3)
+              if (m > 1) m = 1
+              t = (t * (1 - m) + 0.07 * m) * fade
+              const b = BAYER[(y & 7) * 8 + (x & 7)]
+              const v = Math.floor(t * (pal.length - 1) + b)
+              buf[y * cols + x] = pal[v > pal.length - 1 ? pal.length - 1 : v]
             }
-            let t = 0
-            if (L >= 0) {
-              const k = L / (layers - 1)
-              const d = y - tops[L][x + margin]
-              const pool = rows * (0.08 + 0.42 * k)
-              const crest = 1 - smooth(0, pool, d) * (0.88 - 0.45 * k)
-              t = (0.16 + 0.76 * Math.pow(k, 1.6)) * crest
-              const sl = tops[L][Math.min(tops[L].length - 1, x + margin + 2)] - tops[L][x + margin - 2]
-              t += Math.max(-0.16, Math.min(0.16, sl * 0.055)) * (1 - smooth(0, pool * 0.5, d))
-            } else {
-              t = 0.05 * smooth(rows * 0.15, rows * 0.6, y)
-            }
-            let m = fog[(y >> 1) * fw + (x >> 1)] * mist * (L >= 0 ? 0.95 - 0.5 * (L / (layers - 1)) : 0.3)
-            if (m > 1) m = 1
-            t = (t * (1 - m) + 0.07 * m) * fade
-            const b = BAYER[(y & 7) * 8 + (x & 7)]
-            const v = Math.floor(t * 6 + b)
-            buf[y * cols + x] = pal[v > 6 ? 6 : v]
+          }
+          ctx.putImageData(img, 0, 0)
+        }
+
+        const tones = [1, 2, 3, 4, 5, 6, 7].map((i) => token('--hx-tone-' + i))
+
+        draw(document.getElementById('plate-atmosphere'), {
+          tones,
+          seed: 7,
+          layers: 6,
+          mist: 0.86,
+          fadeFrom: 0.32,
+        })
+        draw(document.getElementById('plate-digital'), {
+          tones,
+          seed: 41,
+          layers: 5,
+          mist: 0.55,
+          fadeFrom: 0.4,
+        })
+
+        /* The swatches and the ramp are read from the same token layer. */
+        const materials = [
+          ['stock', '--hx-stock', '#F2F4EE'],
+          ['pine', '--hx-pine', '#1E3B2C'],
+          ['ink', '--hx-ink', '#16211B'],
+          ['lichen', '--hx-lichen', '#C9D94E'],
+          ['moss', '--hx-moss', '#4A6B33'],
+          ['mist', '--hx-mist', '#A9BBB0'],
+        ]
+        const swatches = document.getElementById('swatches')
+        for (const [name, varName, fallback] of materials) {
+          const value = token(varName) || fallback
+          const cell = document.createElement('div')
+          cell.className = 'swatch'
+          cell.innerHTML =
+            '<i style="background:' + value + '"></i><div><span>' + name + '</span><span>' + value + '</span></div>'
+          swatches.appendChild(cell)
+        }
+
+        for (let i = 1; i <= 7; i++) {
+          const value = token('--hx-tone-' + i)
+          for (const id of ['ramp', 'sheet-ramp']) {
+            const cell = document.createElement('i')
+            cell.style.background = value
+            document.getElementById(id).appendChild(cell)
           }
         }
-        ctx.putImageData(img, 0, 0)
 
-        // The tone ramp is generated from the same token stylesheet.
-        const ramp = document.getElementById('ramp')
-        for (let i = 1; i <= 7; i++) {
-          const cell = document.createElement('div')
-          cell.innerHTML =
-            '<i style="background:' + tone(i) + '"></i><b>' + String(i).padStart(2, '0') + '</b><code>' + tone(i) + '</code>'
-          ramp.appendChild(cell)
+        /* The Bayer matrix in the system panel: threshold, not opacity. */
+        const bayer = document.getElementById('bayer')
+        for (const value of BAYER) {
+          const cell = document.createElement('i')
+          cell.style.opacity = String(0.08 + value * 0.92)
+          bayer.appendChild(cell)
         }
       })()
     </script>

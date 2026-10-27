@@ -36,7 +36,7 @@ export const metadata: Metadata = {
         url: '/brand/hachure/hachure-brandkit.png',
         width: 1500,
         height: 1125,
-        alt: 'The Hachure brand board: the ridge mark printing into paper, the lattice wordmark, the seven-tone dither ramp and a quadrangle sheet.',
+        alt: 'The Hachure brand board: a 3 × 3 identity deck on a night table — the H mark printing into paper, the outlined mono wordmark, the dither plate, the seven-tone ramp and the form kit.',
       },
     ],
   },
@@ -148,12 +148,12 @@ const FUSIONS = [
 ]
 
 const EXPLORATIONS = [
-  { n: '01', name: 'Nested contours', note: 'a radio button at 16px' },
-  { n: '02', name: 'Benchmark triangle', note: 'the hazard glyph' },
-  { n: '03', name: 'Ridge printing into paper', note: 'kept' },
-  { n: '04', name: 'Quadrangle corner', note: 'reads as UI chrome' },
-  { n: '05', name: 'Hachure tile', note: 'a grey square below 48px' },
-  { n: '06', name: 'Spot height', note: 'a dot without its numeral' },
+  { n: '01', name: 'Ridge, first pass', note: 'a peak at 16px' },
+  { n: '02', name: 'Ridge + gullies', note: 'reads as a tent' },
+  { n: '03', name: 'Comb ridge', note: 'a barcode skyline' },
+  { n: '04', name: 'Range pair', note: 'dots read as sparks' },
+  { n: '05', name: 'H, solid', note: 'clean but plain' },
+  { n: '06', name: 'H, printed feet', note: 'kept' },
 ]
 
 const TIMELINE = [
@@ -566,15 +566,15 @@ export default function HachurePage() {
                 id="mark"
                 number="04"
                 label="The mark"
-                title="A profile, not a peak."
-                lead="The mark is the footer in miniature: an asymmetric ridge whose base breaks into the same 4-unit cells, thresholded by the same Bayer matrix. The apex is left of centre, there is a knee, and the base prints into the paper."
+                title="A letter, printed into paper."
+                lead="The first pass kept a ridge; at 16px it collapsed into the peak every terrain app already uses. The second pass kept the letter: an H whose stem tops are cut on a shallow ridge and whose feet break into the same 4-unit cells the range is printed from."
               />
 
               <div className={styles.markGrid}>
                 <div className={styles.markStage}>
                   <HachureMark size={240} title="The mark on a 64 grid" />
                   <span className={styles.markStageNote}>
-                    64 grid / 14 foot cells / one path
+                    64 grid / 8 foot cells / one path
                   </span>
                 </div>
 
@@ -603,18 +603,18 @@ export default function HachurePage() {
                   </div>
 
                   <p className={styles.familyNote}>
-                    At 16px the foot cells are sub-pixel, so the compact variant
-                    redraws the base on a 2-unit grid and keeps only the two
-                    rows that survive. Clear space is half the body height on
-                    every side. The benchmark is a section marker only — it is
-                    missing its centre on purpose, because a triangle with a dot
-                    already means
+                    At 16px a 4-unit cell is sub-pixel, so the compact variant
+                    redraws the feet on a 2-unit grid and keeps only the row
+                    that survives. Clear space is 10 units on every side. The
+                    benchmark is a section marker only — it is missing its
+                    centre on purpose, because a triangle with a dot already
+                    means
                     <em> warning</em> in every airport on earth.
                   </p>
 
                   <div>
                     <p className={styles.label} style={{ marginBottom: 10 }}>
-                      Six drawn, one kept
+                      Second pass / six drawn, one kept
                     </p>
                     <ul className={styles.explorations}>
                       {EXPLORATIONS.map((item) => (
@@ -632,13 +632,14 @@ export default function HachurePage() {
                       Construction
                     </p>
                     <p className={styles.familyNote}>
-                      Apex <span className={styles.mono}>(26, 13)</span>, knee{' '}
-                      <span className={styles.mono}>(38, 34)</span>, feet{' '}
-                      <span className={styles.mono}>(10, 50)</span> and{' '}
-                      <span className={styles.mono}>(54, 50)</span>. Solid above
-                      row 42; rows 42 and 46 break into cells at 82% and 44%
-                      coverage. The wordmark is Geist Mono 700, outlined once,
-                      never live text.
+                      Stems <span className={styles.mono}>12</span> wide with a{' '}
+                      <span className={styles.mono}>20</span>-unit counter; the
+                      crossbar is <span className={styles.mono}>6</span> and
+                      sits on the letter&apos;s centre. The base is cut at{' '}
+                      <span className={styles.mono}>46</span> and two rows of
+                      4-unit cells at 82% and 44% coverage finish it. The
+                      wordmark is Geist Mono 700, outlined once, never live
+                      text.
                     </p>
                   </div>
                 </div>
@@ -653,13 +654,19 @@ export default function HachurePage() {
                   <span>{`${Math.round(268.66)} × 56`}</span>
                 </div>
                 <div style={{ padding: '22px 18px' }}>
-                  <HachureMark size={44} />
-                  <div style={{ marginTop: 14 }}>
-                    <HachureWordmark height={34} />
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 16,
+                    }}
+                  >
+                    <HachureMark size={46} />
+                    <HachureWordmark height={26} />
                   </div>
                   <span
                     className={styles.markStageNote}
-                    style={{ display: 'block', marginTop: 12 }}
+                    style={{ display: 'block', marginTop: 14 }}
                   >
                     Mark and wordmark, 16-unit gap
                   </span>
@@ -1315,7 +1322,7 @@ export default function HachurePage() {
                       path. The page loads no images at runtime.
                     </li>
                     <li>
-                      The mark is one path with {`14`} foot cells; the 16px
+                      The mark is one path with {`8`} foot cells; the 16px
                       favicon is the compact drawing on a 32 grid, not the
                       primary scaled down.
                     </li>

@@ -10,7 +10,7 @@ the form, the draft and the case card.
 - Board: `public/brand/hachure/hachure-brandkit.png`
 - Tokens: `features/hachure/tokens.json`
 - Decisions: `design/brand/hachure/brief.md`, `design/brand/hachure/DESIGN.md`
-- Screenshots: `docs/screenshots/hachure-1440-{hero,study,specimen,dark}.png`, `hachure-390-hero.png`
+- Screenshots: `docs/screenshots/hachure-1440-{hero,mark,study,specimen,dark}.png`, `hachure-390-hero.png`, and the mark pass in `hachure-mark-pass.png`
 
 ## Scorecard
 
@@ -18,7 +18,7 @@ the form, the draft and the case card.
 | --- | --- | --- |
 | One-sentence brief | Pass | “Relief drawn by density, never by shadow.” in `brief.md` and `DESIGN.md` |
 | Six directions, one kept | Pass | `design/brand/hachure/explorations/directions.md`; the page's section 04 lists all six and why five lost |
-| Mark at 16 / 32 / 64 | Pass | `public/brand/hachure/mark.svg`, `mark-compact.svg`, `favicons/favicon-{16,32,180}.svg`; one path, 14 foot cells |
+| Mark at 16 / 32 / 64 | Pass | `public/brand/hachure/mark.svg`, `mark-compact.svg`, `favicons/favicon-{16,32,180}.svg`; one path, 8 foot cells, an H that reads at 16px |
 | Tokens, one source | Pass | `features/hachure/tokens.json` → `hachure-tokens.css`, public CSS/JSON and `brand-paths.ts` by `scripts/build-hachure-brand.mjs`; nothing downstream hand-edited |
 | Contrast measured, not typed | Pass | 18 pairs computed in the build from the semantic layer |
 | Typography gate | Pass | Two families (Geist Mono / Geist); body 17px at 1.6; labels 11px at 0.14em; measure ≤ 68ch; tabular numerals; `text-wrap: balance` on headings |
@@ -26,7 +26,7 @@ the form, the draft and the case card.
 | Responsive 1440 / 390 | Pass | `scrollWidth === clientWidth` at both; no clipped grids. Mobile page height ≈21.6k px |
 | Dark theme | Pass | `data-theme` on `data-hachure-root`; the footer follows via `MutationObserver` and gets its own night ramp, not an inversion |
 | Reduced motion | Pass | Footer resolves to the finished plate; `rdf-in` and opacity 1 under `reducedMotion: 'reduce'` |
-| Board | Pass | 1500 × 1125 PNG rendered at 2× and downscaled; the plate on it is drawn by the browser |
+| Board | Pass | 3 × 3 identity deck, 1500 × 1125 PNG rendered at 2× and downscaled; both plates on it are drawn by the browser |
 | Docs twin | Pass | `/design-system/hachure/llms.txt` → 200, 12,001 bytes, contains the sentence and the 4.82:1 accent ratio |
 | Case library | Pass | `/design-system` card 05 links to the route, cover `hachure-brandkit.png` |
 | E2E | **Skipped** | Explicitly out of scope; the manual pass in `scripts/verify-hachure.mjs` still ran |
@@ -41,7 +41,7 @@ the form, the draft and the case card.
 - **Tone ramp:** seven steps per theme. Night is a separate ramp
   (`#0A110D → #A6D2B0`) where near ridges get lighter; it is not the light ramp
   inverted.
-- **Mark:** 64 grid, 14 foot cells, one path; compact redrawn on a 2-unit grid.
+- **Mark:** 64 grid, 44 × 42, 8 foot cells, one path; compact redrawn on a 2-unit grid.
 - **Page weight:** no images at runtime on the route; the hero, study and range
   thumb are canvas drawn by the same engine, and every mark is SVG.
 - **Keyboard:** the skip link is the first tab stop; submitting the empty form
@@ -51,10 +51,11 @@ the form, the draft and the case card.
 
 ## Fixes made during this pass
 
-1. **The mark clipped its own knee.** `BODY_BOTTOM` was 34, which cut the
-   profile above the knee at `(38, 34)` and turned an asymmetric ridge back into
-   a triangle. Moved to 42 with two dissolve rows at 82% / 44% coverage — the
-   geometry the brief already described.
+1. **The first mark was a peak at 16px.** The ridge passed the 64px test and
+   failed the only test that matters. A second pass drew six more marks; the H
+   with printed feet replaced it. The first pass is kept as history in
+   `explorations/directions.md`; the page's mark section now shows the second
+   pass, including the control.
 2. **The plate's fade ran the wrong way.** `drawRange` faded from the middle
    *down*, leaving the top of every plate empty and only the bottom 42% printed.
    It now dissolves upward into the paper, as the component does.
@@ -84,8 +85,8 @@ the form, the draft and the case card.
 - **Performance.** No Lighthouse/INP run. Three canvases draw on this route (hero,
   study, range thumb) plus the footer; the hero and footer stop after their
   entrance, and the study redraws only on control change or resize.
-- **The board's plate** uses a mirrored copy of the ridge maths because the board
-  is a standalone HTML file. `features/hachure/dither-field.ts` and the component
+- **The board's two plates** use a mirrored copy of the ridge maths because the
+  board is a standalone HTML file. `features/hachure/dither-field.ts` and the component
   remain the source of truth; a change to the tone formula must be mirrored in
   `design/brand/hachure/brandkit.html`.
 - **E2E** was skipped as instructed (`npm run test:e2e` not run).

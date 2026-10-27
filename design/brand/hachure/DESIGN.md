@@ -119,17 +119,22 @@ It is never live text.
 
 ## 7. Mark
 
-One silhouette, one operation. On a 64 grid: apex `(26, 13)`, knee `(38, 34)`,
-feet `(10, 50)` and `(54, 50)`. Solid above row 42; rows 42 and 46 break into
-4-unit cells at 82% and 44% coverage, thresholded with the same Bayer matrix the
-footer samples. Fourteen cells, one path, no mask.
+The initial, not the mountain.
 
-At 16px the cells are sub-pixel, so the compact drawing redraws the base on a
-2-unit grid and keeps two rows. The primary mark is never scaled down for a
-favicon.
+The first pass kept an asymmetric ridge, and at 16px it became the peak glyph
+every terrain app already uses. The second pass kept the letter and the system's
+own move: an H on a 64 grid — stems 12 wide, a 20-unit counter, a 6-unit
+crossbar — whose stem tops are cut on a shallow ridge and whose feet break into
+the same 4-unit cells the range is printed from. Eight cells at 82% and 44%
+coverage, thresholded with the same Bayer matrix as the footer. One path, no
+mask. It reads as an H at 16px and as a printed H at 96px.
 
-Six marks were drawn; five lost. The rejection notes are in
-[`explorations/directions.md`](./explorations/directions.md).
+At 16px the cells are sub-pixel, so the compact drawing redraws the feet on a
+2-unit grid and keeps the row that survives. The primary mark is never scaled
+down for a favicon.
+
+Eleven marks were drawn across two passes; two were kept, one per pass. The
+rejection notes are in [`explorations/directions.md`](./explorations/directions.md).
 
 ## 8. Motion
 

@@ -85,3 +85,69 @@ the metaphor and lost the scale.
 
 Rejection notes are the guide: the mark section of the proof page states the
 construction rule, not the story.
+
+---
+
+# The second pass — the brandkit pass
+
+The first pass was judged at 16px and passed. It should not have. Printed small,
+the ridge is the peak glyph every terrain app uses; the asymmetry that reads at
+96px disappears in eleven pixels, and the foot cells become a speckle. A mark
+that only works large is a poster.
+
+So the brandkit pass drew again, on the same 64 grid, with one rule added: the
+mark must survive 16px *as a shape*, not as a texture. Six directions:
+
+## 07 · Ridge with gullies
+
+The kept ridge from the first pass, with three narrow slots cut into its face.
+At 96px the slots read as ravines; at 64px they close into a tent; at 32px the
+mark becomes a badge with a white triangle in it. **Lost.**
+
+## 08 · Comb ridge
+
+Five vertical bars whose tops trace the ridge profile, so the mark is literally
+hachure. At 96px it is a skyline; at 32px it is a barcode; at 16px it is a
+smudge. Hachure needs more strokes than a mark can afford. **Lost.**
+
+## 09 · Range pair
+
+A solid near ridge with a dotted far ridge behind it — depth by density, the
+system's actual sentence. At 96px the dots read as sparks above the peak. At
+32px they are gone, leaving the first pass's ridge. **Lost.**
+
+## 10 · H, solid
+
+The initial, with the stem tops cut on a shallow ridge. Clean at every size, and
+completely plain: a letter with no operation in it. **Lost.**
+
+## 11 · H, hachured stem
+
+The left stem split into three vertical bars, the right one solid: two densities
+in one letter. At 64px it reads as a printer's registration mark; at 32px it
+reads as a glitch. The idea is right and the balance is wrong. **Lost.**
+
+## 12 · H, printed feet — **kept**
+
+An H on the 64 grid — stems 12, counter 20, crossbar 6 — with the stem tops cut
+on a shallow ridge and the base cut at row 46. Eight 4-unit cells at 82% and 44%
+coverage finish the feet, thresholded with the same Bayer matrix the footer
+samples.
+
+**Why it works.**
+
+- At 16px it is an H. Not a peak, not a barcode — the initial, in eleven pixels.
+- At 96px the feet dissolve into cells, so the letter carries the system's own
+  operation: ink running out into paper.
+- It is not a mountain. The range is still the footer's subject; the mark no
+  longer has to repeat it.
+- One path, no mask, 8 cells. It favicons without a redraw at 32 and 180; the
+  16px compact only redraws the feet on a 2-unit grid.
+
+---
+
+## The decision, again
+
+12 replaces 03. The first pass's six remain the honest history of the idea — and
+the reason the second pass had something to reject. A mark is allowed a second
+pass; a system that hides its first one is a brochure.

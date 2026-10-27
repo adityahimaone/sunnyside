@@ -89,13 +89,13 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     href: '/design-system/hachure',
     tagline: 'Relief drawn by density, never by shadow.',
     description:
-      'A cartographic interface system built from the supplied ridgeline footer: six ridges from one seed, seven tones from one paper, a mark that prints into the page, and a footer you can read an altitude off. Every contrast pair is measured in the build.',
+      'A cartographic interface system built from the supplied ridgeline footer: six ridges from one seed, seven tones from one paper, an H that prints into its own paper, and a footer you can read an altitude off. Every contrast pair is measured in the build.',
     status: 'Shipped · 2026',
     role: 'Identity · design system · dither engine · form kit',
     material: 'Survey paper + lichen + ordered dither',
     cover: '/brand/hachure/hachure-brandkit.png',
     coverAlt:
-      'The Hachure brand board: the asymmetric ridge mark printing into paper, the outlined mono wordmark, the seven-tone dither ramp and a quadrangle sheet on survey stock.',
+      'The Hachure brand board: a 3 × 3 identity deck on a night table — the H mark printing into paper, the outlined mono wordmark, the dither plate, the seven-tone ramp, the field sheet and the form kit.',
     tags: ['Hachure', 'Bayer Dither', 'Survey', 'Altimeter'],
     tone: 'hachure',
   },
