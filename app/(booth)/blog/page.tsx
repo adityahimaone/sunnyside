@@ -70,17 +70,23 @@ export async function generateMetadata({
 
   const described = [q && `“${q}”`, tag].filter(Boolean).join(' · ')
 
+  const queryParts = [
+    tag && `tag=${encodeURIComponent(tag)}`,
+    q && `q=${encodeURIComponent(q)}`,
+    sort === 'asc' && 'sort=asc',
+  ].filter(Boolean)
+  const canonicalUrl = `/blog${queryParts.length > 0 ? `?${queryParts.join('&')}` : ''}`
+
   return {
     title: described ? `${described} | Blog` : `Blog (oldest first)`,
     description: described
       ? `${DESCRIPTION.replace(/\.$/, '')} filtered to ${described}.`
       : DESCRIPTION,
-    alternates: { canonical: '/blog' },
+    alternates: { canonical: canonicalUrl },
     // Combinatorially many, thin, and all reachable from post bodies, which
     // link to `/blog?tag=<tag>`. Linkable and crawlable, but each not worth an
-    // index slot. Collapsing the canonical onto the unfiltered page instead
-    // would be worse — it tells the index these are duplicates of /blog while
-    // they render different rows.
+    // index slot. A self-referencing canonical matches the noindex signal so Google
+    // does not flag canonical mismatches.
     robots: { index: false, follow: true },
   }
 }

@@ -60,30 +60,74 @@ const nextConfig = {
     // is content-hashed by query string, so a week is safe.
     minimumCacheTTL: 604800,
   },
-  // Legacy paths from before the App Router rewrite, plus the four routes whose
-  // content was folded back into the sections that already existed.
-  //
-  // `/about` and `/work` now live in the landing profile deck and in the
-  // projects filter; `/contact` is the landing page's contact section, whose id
-  // is `contact`; `/guides` is listed on the blog index. The routes themselves
-  // still exist so these have something to point at, but nothing in the app
-  // links to them any more.
-  //
-  // Every one of these is `permanent`, including the anchor destinations: the
-  // content is not coming back at these addresses, and an external link or a
-  // bookmark should land on the content rather than a 404.
+  // Canonical single-hop redirects for legacy routes, folded content, and missing endpoints.
+  // Direct destinations prevent 308 redirect chains (e.g. trailing slash normalization).
   async redirects() {
     return [
+      // Media & legacy versions
       { source: '/spotify', destination: '/music', permanent: true },
       { source: '/v2', destination: '/', permanent: true },
-      // One hop, not a chain: /contact used to answer on a trailing slash and
-      // Next would 308 that to the clean path.
-      { source: '/contact/', destination: '/contact', permanent: true },
-      // Folded content.
+      { source: '/classic', destination: '/', permanent: true },
+      { source: '/classic/', destination: '/', permanent: true },
+
+      // Folded content & anchor sections (one direct hop for clean and trailing slash)
       { source: '/about', destination: '/#about', permanent: true },
-      { source: '/work', destination: '/projects', permanent: true },
+      { source: '/about/', destination: '/#about', permanent: true },
       { source: '/contact', destination: '/#contact', permanent: true },
+      { source: '/contact/', destination: '/#contact', permanent: true },
+      { source: '/work', destination: '/projects', permanent: true },
+      { source: '/work/', destination: '/projects', permanent: true },
+      { source: '/experience', destination: '/#about', permanent: true },
+      { source: '/experience/', destination: '/#about', permanent: true },
       { source: '/guides', destination: '/blog', permanent: true },
+      { source: '/guides/', destination: '/blog', permanent: true },
+
+      // Legacy notes mappings to canonical blog posts
+      {
+        source: '/notes/9router',
+        destination: '/blog/9router-ai-gateway-60plus-providers',
+        permanent: true,
+      },
+      {
+        source: '/notes/frontend-2026',
+        destination: '/blog/frontend-development-2026',
+        permanent: true,
+      },
+      {
+        source: '/notes/vps-deploy-nextjs',
+        destination: '/blog/deploy-nextjs-vps-nginx-pm2-custom-domain',
+        permanent: true,
+      },
+      {
+        source: '/notes/obsidian-syncthing',
+        destination: '/blog/most-powerful-free-notes-obsidian-syncthing',
+        permanent: true,
+      },
+      {
+        source: '/notes/tailscale',
+        destination: '/blog/tailscale-access-any-device-anywhere',
+        permanent: true,
+      },
+      {
+        source: '/notes/vps-monitoring',
+        destination: '/blog/vps-monitoring-grafana-prometheus-blackbox',
+        permanent: true,
+      },
+      {
+        source: '/notes/thirty-dead-components',
+        destination: '/blog/why-i-rebuilt-my-portfolio',
+        permanent: true,
+      },
+      { source: '/notes', destination: '/blog', permanent: true },
+      { source: '/notes/', destination: '/blog', permanent: true },
+      { source: '/notes/:slug*', destination: '/blog', permanent: true },
+
+      // Common URL variants & feeds
+      { source: '/resume', destination: '/resume.pdf', permanent: true },
+      { source: '/cv', destination: '/resume.pdf', permanent: true },
+      { source: '/feed', destination: '/rss.xml', permanent: true },
+      { source: '/rss', destination: '/rss.xml', permanent: true },
+      { source: '/sitemap', destination: '/sitemap.xml', permanent: true },
     ]
   },
   headers: async () => {

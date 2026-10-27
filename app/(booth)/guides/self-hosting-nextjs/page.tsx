@@ -43,7 +43,7 @@ export default async function SelfHostingGuide() {
 
   const breadcrumbs = breadcrumbList([
     { name: 'Home', path: '/' },
-    { name: 'Guides', path: '/guides' },
+    { name: 'Blog', path: '/blog' },
     { name: meta.title, path: `/guides/${meta.slug}` },
   ])
 

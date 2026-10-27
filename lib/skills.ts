@@ -17,7 +17,7 @@ async function getLocalCatalog(): Promise<SkillsCatalog | null> {
   try {
     const fs = await import('node:fs')
     const path = await import('node:path')
-    const filePath = path.join(process.cwd(), ...STORE_PATH)
+    const filePath = path.join(process.cwd(), 'content', 'skills.json')
     if (fs.existsSync(filePath)) {
       const parsed = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
       if (parsed && Array.isArray(parsed.skills) && parsed.skills.length > 0) {
@@ -34,7 +34,7 @@ async function saveLocalCatalog(catalog: SkillsCatalog): Promise<boolean> {
   try {
     const fs = await import('node:fs')
     const path = await import('node:path')
-    const filePath = path.join(process.cwd(), ...STORE_PATH)
+    const filePath = path.join(process.cwd(), 'content', 'skills.json')
     fs.writeFileSync(filePath, JSON.stringify(catalog, null, 2), 'utf-8')
     return true
   } catch {

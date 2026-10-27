@@ -2,19 +2,24 @@ import { getAllPosts } from '@/features/blog'
 import { WORK_PROJECTS } from '@/data/projects'
 import { WEBSITE_URL } from '@/lib/constants'
 
+function toW3CDate(dateStr?: string): string | undefined {
+  if (!dateStr) return undefined
+  try {
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return dateStr.slice(0, 10)
+    return d.toISOString().split('T')[0]
+  } catch {
+    return dateStr.slice(0, 10)
+  }
+}
+
 export async function GET() {
   const posts = await getAllPosts()
 
   // The date the newest post was written. Used as the `lastmod` for the
   // section indexes that are not otherwise datable.
-  //
-  // These pages previously fell back to `new Date().toISOString()`, which
-  // reported "changed just now" on every single request — so /projects looked
-  // permanently fresh to a crawler even though its content is a hand-edited
-  // list that has not moved in weeks. A lastmod that always says "now" is
-  // worse than no lastmod at all: it trains crawlers to ignore the field.
-  const lastPostDate = posts[0]?.date
-  const fallbackLastmod = lastPostDate ?? undefined
+  const lastPostDate = posts[0]?.dateModified ?? posts[0]?.date
+  const fallbackLastmod = lastPostDate ? toW3CDate(lastPostDate) : undefined
 
   const pages = [
     { url: '/', changefreq: 'daily', priority: 1.0 },
@@ -33,18 +38,12 @@ export async function GET() {
     { url: '/music', changefreq: 'monthly', priority: 0.8 },
     // The visual system behind the landing page. Linked from the footer note.
     { url: '/sunnyside', changefreq: 'monthly', priority: 0.6 },
-    // /contact, /about, /work and /guides are absent on purpose. Their content
-    // was folded into the landing profile deck, the landing contact section,
-    // the projects filter and the blog index, and those routes now redirect.
-    // Listing them would submit a sitemap of permanent redirects.
   ].map((page) => ({ ...page, lastmod: fallbackLastmod }))
 
   const blogEntries = posts.map(
     (post: { slug: string; date: string; dateModified?: string }) => ({
       url: `/blog/${post.slug}`,
-      // The post's own last change, falling back to its publish date. Echoing
-      // `date` unconditionally was indistinguishable from omitting the field.
-      lastmod: post.dateModified ?? post.date,
+      lastmod: toW3CDate(post.dateModified ?? post.date),
       changefreq: 'monthly',
       priority: 0.7,
     }),
