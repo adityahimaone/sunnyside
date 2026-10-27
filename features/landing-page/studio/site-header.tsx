@@ -31,8 +31,9 @@ const NAV = CHAPTERS.filter((chapter) => chapter.id !== 'home')
 /**
  * The menu's destinations.
  *
- * These are places, not chapters: the design system and the archive's four
- * rooms. The chapter list still exists, one step below, because a phone reader
+ * These are places, not chapters: the design system, the archive rooms and the
+ * practice manual. The chapter list still exists, one step below, because a
+ * phone reader
  * loses every section jump if the only menu becomes a route index.
  */
 const DESTINATIONS = [
@@ -46,6 +47,12 @@ const DESTINATIONS = [
   { href: '/bookmarks', label: 'Bookmarks', note: 'the crate', number: '02' },
   { href: '/skills', label: 'Skills', note: 'the toolbox', number: '03' },
   { href: '/blog', label: 'Blog', note: 'field notes', number: '04' },
+  {
+    href: '/design-engineering',
+    label: 'Practice',
+    note: 'the field manual',
+    number: '05',
+  },
 ] as const
 
 export function SiteHeader({ active, scrolled, footerVisible }: Props) {

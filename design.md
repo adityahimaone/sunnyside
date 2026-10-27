@@ -79,6 +79,13 @@ Treat this as the current landing-page direction. The former rack, DAW, device-w
 
 Projects, bookmarks, skills, and blog pages share a responsive archive shell that carries the Sunnyside paper, ink, cobalt, and typography into a denser browsing context. The archive’s `--ss-*` tokens are namespaced to avoid collisions with global theme and component variables. Each feature still owns its composition and CSS; importing the palette does not mean forcing every page into one layout.
 
+The `/design-engineering` route is a documentation surface built in the same
+archive shell and tokens: a sticky contents column, a 760px article, real tables
+and figures, stable heading anchors, and a raw Markdown twin for agents. The
+Learning wing uses visible sections rather than tabs. It is a composition of this
+system, not a second visual language; the docs notes live in
+`docs/design-engineering.md`.
+
 Glass, audio, and hardware motifs may exist in other feature-specific experiments, but they are not the default Sunnyside surface language and should not be applied to archive content or the studio without a clear, information-bearing reason.
 
 ## Implementation map
@@ -86,6 +93,8 @@ Glass, audio, and hardware motifs may exist in other feature-specific experiment
 | Concern                                                | Current source                                                    |
 | ------------------------------------------------------ | ----------------------------------------------------------------- |
 | Logo mark, wordmark, lockups, favicon                  | `components/ui/sunnyside-logo.tsx`, `public/brand/`, `design/brand/README.md` |
+| Design-engineering docs, Markdown twins and notes      | `features/design-engineering/`, `app/(booth)/design-engineering/llms.txt/route.ts`, `docs/design-engineering.md` |
+| Brand-system skill                                     | `skills/sunnyside-brand-system/`                                  |
 | Landing chapters and composition                       | `features/landing-page/studio/studio.tsx`                         |
 | Landing palette, chapters, and principles              | `features/landing-page/studio/studio-data.ts`                     |
 | Landing layout and scoped tokens                       | `features/landing-page/studio/studio.module.css`                  |
@@ -93,5 +102,10 @@ Glass, audio, and hardware motifs may exist in other feature-specific experiment
 | Interactive design-system specimen                     | `features/design-system/sunnyside.tsx` and `sunnyside.module.css` |
 | Archive tokens and shell                               | `features/archive/archive-tokens.css` and `archive.module.css`    |
 | Cross-feature primitives                               | `components/ui/`                                                  |
+
+The brand-kit board is authored as HTML/CSS and rendered with Playwright, then
+downscaled with Lanczos; the mark is SVG and the favicon/app icons are assembled
+with Pillow. The installable `sunnyside-brand-system` skill documents that
+pipeline exactly, alongside the AI-image rules for atmosphere and photography.
 
 When prose and implementation disagree, inspect the current route and owning feature styles. Update this reference when the system changes; do not revive old concepts by treating a detailed historical proposal as current code.

@@ -19,6 +19,7 @@ const ROUTES = [
   { href: '/bookmarks', label: 'Bookmarks', number: '02' },
   { href: '/skills', label: 'Skills', number: '03' },
   { href: '/blog', label: 'Blog', number: '04' },
+  { href: '/design-engineering', label: 'Practice', number: '05' },
 ] as const
 
 const ELSEWHERE = [
@@ -42,8 +43,9 @@ function isHere(href: string, pathname: string) {
  * The archive's topbar.
  *
  * Side A's header is a chapter selector for one long scroll. Here the reader is
- * moving between four rooms, so the bar names the rooms instead: the wordmark
- * returns to the studio, the four shelves sit in the middle, and the one action
+ * moving between the archive rooms, so the bar names them instead: the wordmark
+ * returns to the studio, the shelves and the practice manual sit in the middle,
+ * and the one action
  * is the same "Say hi" the landing page offers. The cobalt phone panel is the
  * landing menu's pattern, not a second navigation idea.
  */

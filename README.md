@@ -46,6 +46,8 @@ Sunnyside is the visual language behind the studio landing page and archive surf
 | **Motion**        | Movement should explain a change, orient the reader, or return feedback. Reduced-motion preferences are respected.                        |
 | **Accessibility** | Contrast pairs and focus treatments are documented; decorative accent colours are not used as small body text.                            |
 
+The `/design-engineering` docs hub is the practice-facing companion: the loop, the four standards, the Sunnyside case, the capability atlas, the installable brand-system skill and the field notes. It is built for reading and for agents: a sticky contents column, stable heading anchors, real tables, and raw Markdown twins at `/design-engineering/llms.txt` and `/design-engineering/learning/llms.txt`.
+
 The archive uses namespaced `--ss-*` tokens to avoid collisions with Tailwind/shadcn and page-local styles. The landing page and other areas still have their own scoped styling; the specimen is the clearest design reference, not a single runtime source consumed identically by every route.
 
 ## Logo and brand kit
@@ -75,6 +77,10 @@ The identity is a **die-cut sun sticker** and the site's **marker wordmark**. Th
 | -------------------------------- | ---------------------------------- |
 | `/`                              | Studio landing page                |
 | `/sunnyside`                     | Design-system specimen             |
+| `/design-engineering`            | Design-engineering docs hub         |
+| `/design-engineering/learning`   | Field notes: Pen.dev, Figma, Craft  |
+| `/design-engineering/llms.txt`   | Markdown twin of the docs hub       |
+| `/design-engineering/learning/llms.txt` | Markdown twin of the field notes |
 | `/projects` · `/projects/[slug]` | Project catalogue and case studies |
 | `/blog` · `/blog/[slug]`         | Blog index and articles            |
 | `/bookmarks`                     | Searchable bookmark catalogue      |
@@ -82,6 +88,16 @@ The identity is a **die-cut sun sticker** and the site's **marker wordmark**. Th
 | `/music`                         | Audio playground                   |
 | `/notes` · `/notes/[slug]`       | Notes                              |
 | `/rss.xml`                       | Blog feed                          |
+
+## Agent skill — sunnyside-brand-system
+
+The brand-kit and design-system method is packaged as an installable skill. It covers the brief, the logo family, the 3 × 3 board, favicon/app icons, tokens, docs, and the images that document the system — including the exact HTML → Playwright → PNG pipeline used for the Sunnyside board and the SVG/Pillow icon workflow.
+
+```bash
+npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth
+```
+
+The package lives in [`skills/sunnyside-brand-system/`](./skills/sunnyside-brand-system/); start with [`SKILL.md`](./skills/sunnyside-brand-system/SKILL.md). The public companion page is [`/design-engineering`](https://adityahimaone.space/design-engineering).
 
 ## Stack
 
@@ -197,6 +213,7 @@ A standalone Next.js build is also available through `pnpm build:standalone`. Th
 ## Design and project guidance
 
 - [Current design reference](./design.md) — Sunnyside / Side A visual principles, palette, typography, accessibility, and implementation map.
+- [Design-engineering docs notes](./docs/design-engineering.md) — the docs shell, domain model, skill package, gaps and open questions.
 - [`AGENTS.md`](./AGENTS.md) — project-specific design and architecture guidance for coding agents.
 - [`docs/`](./docs/) contains dated audits, implementation records, and historical proposals. Treat them as snapshots unless current code links to them; they do not override the live implementation or `design.md`.
 

@@ -11,6 +11,7 @@ const BROWSE = [
   { href: '/projects', label: 'Projects' },
   { href: '/bookmarks', label: 'Bookmarks' },
   { href: '/skills', label: 'Skills' },
+  { href: '/design-engineering', label: 'Practice' },
   { href: '/blog', label: 'Blog' },
   { href: '/music', label: 'Mixtape' },
 ] as const
