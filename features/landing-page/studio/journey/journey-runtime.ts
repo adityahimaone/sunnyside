@@ -30,6 +30,7 @@ type Item = {
   wasFlying: boolean
   dock: number
   seeded: boolean
+  spawned: boolean
 }
 
 const animate = (
@@ -84,6 +85,7 @@ export function runJourney(layer: HTMLElement): () => void {
         wasFlying: false,
         dock: -1,
         seeded: false,
+        spawned: false,
       },
     ]
   })
@@ -311,6 +313,10 @@ export function runJourney(layer: HTMLElement): () => void {
         const appear = clamp01((scrollY - (first.y - vh * 0.95)) / (vh * 0.22))
         if (appear <= 0) visible = false
         scale *= easeOutBack(appear)
+        if (appear > 0.35 && !item.spawned) {
+          item.spawned = true
+          onLand(item, p, scrollY)
+        }
       }
 
       item.el.style.visibility = visible ? 'visible' : 'hidden'

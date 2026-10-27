@@ -29,7 +29,12 @@
   margin: -50px 0 0 -50px;
   visibility: hidden;
   will-change: transform;
-  filter: drop-shadow(3px 5px 0 rgb(25 26 46 / 0.14));
+  /* The same low sun lights every sticker: a warm rim on the upper-left, a
+     hard ink shadow on the lower-right. The rim is an offset, not a blur, so
+     it stays in the print language instead of becoming a glow. */
+  filter:
+    drop-shadow(3px 5px 0 rgb(25 26 46 / 0.16))
+    drop-shadow(-1.5px -1.5px 0 rgb(255 210 63 / 0.34));
 }
 
 .inner {

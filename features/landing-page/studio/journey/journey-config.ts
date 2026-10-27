@@ -3,8 +3,8 @@ import type { FlightParams } from './journey-math'
 /**
  * Who flies where.
  *
- * Every dock lives in the empty padding band at the top (or bottom) edge of a
- * section, never in the middle of one, so a resting sticker can never sit on
+ * A dock lives in the empty padding band at the top (or bottom) edge of a
+ * section, or on an explicit side marker beside a photo, never in the middle of
  * copy. `x` is a share of the section's width, `oy` is px in from the chosen
  * edge, and `tint` is the colour of the shockwave the sun throws when it lands.
  */
@@ -17,7 +17,7 @@ export type StickerKind =
   | 'heart'
 
 export type DockSpec = {
-  /** CSS selector of the section the dock sits in. */
+  /** CSS selector of the section, or a marker element inside it. */
   at: string
   x: number
   edge?: 'top' | 'bottom'
@@ -51,6 +51,7 @@ export const TINT = {
   work: '#a9c8ff',
   skills: '#b7e4c7',
   contact: '#ff6a2b',
+  sun: '#ffd23f',
 } as const
 
 export const SPARK_COLOURS = [
@@ -69,13 +70,7 @@ export const FLYERS: readonly FlyerSpec[] = [
     from: 'smiley',
     mobile: true,
     params: { lane: -0.1, arc: 0.1, hop: 0.12, spin: 1, wobble: 7, delay: 0 },
-    docks: [
-      { at: '#about', x: 0.92, oy: 46, rot: 10, size: 70 },
-      { at: '#showcase', x: 0.08, oy: 46, rot: -10, size: 72 },
-      { at: '#work', x: 0.9, oy: 46, rot: 8, size: 70 },
-      { at: '#skills', x: 0.1, oy: 46, rot: -6, size: 72 },
-      { at: '#contact', x: 0.9, oy: 46, rot: 6, size: 78 },
-    ],
+    docks: [{ at: '#about', x: 0.92, oy: 44, rot: 10, size: 70 }],
   },
   {
     id: 'burst',
@@ -91,18 +86,13 @@ export const FLYERS: readonly FlyerSpec[] = [
       wobble: 5,
       delay: 0.1,
     },
-    docks: [
-      { at: '#about', x: 0.07, oy: 46, rot: -12, size: 74 },
-      { at: '#showcase', x: 0.93, oy: 46, rot: 12, size: 74 },
-      { at: '#skills', x: 0.5, oy: 46, rot: -8, size: 74 },
-      { at: '#contact', x: 0.1, edge: 'bottom', oy: 46, rot: 10, size: 80 },
-    ],
+    docks: [{ at: '#about', x: 0.06, oy: 56, rot: -12, size: 74 }],
   },
   {
     id: 'daisy',
     kind: 'daisy',
     from: 'daisy',
-    mobile: false,
+    mobile: true,
     params: {
       lane: -0.16,
       arc: 0.14,
@@ -112,10 +102,13 @@ export const FLYERS: readonly FlyerSpec[] = [
       delay: 0.18,
     },
     docks: [
-      { at: '#about', x: 0.9, edge: 'bottom', oy: 46, rot: 8, size: 72 },
-      { at: '#work', x: 0.5, oy: 46, rot: -10, size: 72 },
-      { at: '#skills', x: 0.08, edge: 'bottom', oy: 46, rot: 12, size: 76 },
-      { at: '#contact', x: 0.06, oy: 46, rot: -8, size: 76 },
+      {
+        at: '[data-journey-dock="about-flower"]',
+        x: 0.5,
+        oy: 0,
+        rot: 8,
+        size: 72,
+      },
     ],
   },
   {
@@ -131,12 +124,7 @@ export const FLYERS: readonly FlyerSpec[] = [
       wobble: 16,
       delay: 0.26,
     },
-    docks: [
-      { at: '#about', x: 0.14, edge: 'bottom', oy: 46, rot: -14, size: 60 },
-      { at: '#showcase', x: 0.7, oy: 46, rot: 10, size: 60 },
-      { at: '#work', x: 0.07, oy: 46, rot: -10, size: 62 },
-      { at: '#skills', x: 0.92, oy: 46, rot: 14, size: 62 },
-    ],
+    docks: [{ at: '#about', x: 0.28, oy: 58, rot: -14, size: 60 }],
   },
   {
     id: 'sun',
@@ -152,11 +140,8 @@ export const FLYERS: readonly FlyerSpec[] = [
         oy: 46,
         rot: 0,
         size: 84,
-        tint: TINT.showcase,
+        tint: TINT.sun,
       },
-      { at: '#work', x: 0.22, oy: 46, rot: 0, size: 84, tint: TINT.work },
-      { at: '#skills', x: 0.78, oy: 46, rot: 0, size: 84, tint: TINT.skills },
-      { at: '#contact', x: 0.5, oy: 46, rot: 0, size: 92, tint: TINT.contact },
     ],
   },
   {
