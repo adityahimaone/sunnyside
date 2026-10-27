@@ -519,6 +519,10 @@ export const GAPS = [
     label: 'Motion',
     line: 'The pieces are good; the published motion spec is missing.',
   },
+  {
+    label: 'Skill listing',
+    line: 'The brand-system skill installs from the repo; it is not yet listed in the skills.sh registry.',
+  },
 ]
 
 export const AGENT_SKILLS: AgentSkill[] = [
