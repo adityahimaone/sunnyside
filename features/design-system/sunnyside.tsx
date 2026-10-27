@@ -1614,6 +1614,10 @@ function Endcap() {
                 Say hello
                 <ArrowUpRight className="size-4" />
               </a>
+              <Link href="/design-system" className={styles.ghostButton}>
+                Case library
+                <ArrowUpRight className="size-4" />
+              </Link>
             </div>
           </div>
           <div className={styles.endcapArt} aria-hidden>

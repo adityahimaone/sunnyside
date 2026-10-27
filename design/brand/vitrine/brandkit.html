@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vitrine — brand board</title>
+    <style>
+      @font-face {
+        font-family: 'Space Grotesk';
+        src: url('./assets/SpaceGrotesk.ttf') format('truetype');
+        font-weight: 300 700;
+        font-display: block;
+      }
+      @font-face {
+        font-family: 'Geist';
+        src: url('./assets/Geist.ttf') format('truetype');
+        font-weight: 100 900;
+        font-display: block;
+      }
+      @font-face {
+        font-family: 'Geist Mono';
+        src: url('./assets/GeistMono.ttf') format('truetype');
+        font-weight: 100 900;
+        font-display: block;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0b0d10;
+      }
+      #board {
+        width: 2400px;
+        height: 1800px;
+        padding: 54px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 14px;
+        background: #0b0d10;
+        color: #f2f6f8;
+        font-family: 'Geist', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .panel {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        background: #11161a;
+        border: 1px solid #202a30;
+        padding: 34px;
+      }
+      .cover {
+        grid-column: span 2;
+        padding: 40px 44px;
+        display: flex;
+        flex-direction: column;
+      }
+      .mono {
+        font-family: 'Geist Mono', monospace;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .dim {
+        color: #93a3ac;
+      }
+      .display {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.05em;
+        line-height: 0.94;
+      }
+      .label {
+        font-family: 'Geist Mono', monospace;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #93a3ac;
+      }
+      .rule {
+        height: 1px;
+        background: #2a343b;
+      }
+
+      /* Cover */
+      .cover-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+      .cover-lockup {
+        width: 356px;
+        height: auto;
+        display: block;
+      }
+      .cover-meta {
+        text-align: right;
+        line-height: 1.9;
+      }
+      .cover-headline {
+        margin-top: auto;
+        font-size: 64px;
+        width: 840px;
+        color: #f2f6f8;
+      }
+      .cover-headline em {
+        font-style: normal;
+        color: #d9ff43;
+      }
+      .cover-foot {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-top: 28px;
+        gap: 32px;
+      }
+      .cover-sub {
+        max-width: 460px;
+        font-size: 17px;
+        line-height: 1.55;
+        color: #a9b7be;
+      }
+      .cover-strip {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 280px;
+        height: 100%;
+        background-image: radial-gradient(circle, #d9ff43 1px, transparent 1.15px);
+        background-size: 5px 5px;
+        opacity: 0.2;
+        -webkit-mask-image: linear-gradient(105deg, transparent 0%, #000 72%);
+        mask-image: linear-gradient(105deg, transparent 0%, #000 72%);
+        pointer-events: none;
+      }
+      /* Index */
+      .index {
+        display: flex;
+        flex-direction: column;
+      }
+      .index-big {
+        font-size: 148px;
+        line-height: 0.8;
+        color: #f2f6f8;
+        margin: 18px 0 8px;
+      }
+      .index-mark {
+        width: 158px;
+        height: 158px;
+        margin-top: 4px;
+        opacity: 0.95;
+      }
+      .index-body {
+        margin-top: auto;
+        font-size: 19px;
+        line-height: 1.45;
+        color: #c8d3d8;
+        max-width: 560px;
+      }
+      .index-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 18px;
+        margin-top: 22px;
+        color: #8b9aa3;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-family: 'Geist Mono', monospace;
+      }
+      .index-num {
+        position: absolute;
+        right: 26px;
+        top: 8px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 168px;
+        line-height: 1;
+        color: #f2f6f8;
+        opacity: 0.06;
+        letter-spacing: -0.08em;
+      }
+
+      /* Construction */
+      .construction {
+        padding: 30px 28px;
+        display: flex;
+        flex-direction: column;
+      }
+      .construction svg {
+        width: 100%;
+        height: auto;
+        margin-top: 4px;
+      }
+      .specs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px 22px;
+        margin-top: auto;
+        color: #93a3ac;
+        font-family: 'Geist Mono', monospace;
+        font-size: 11.5px;
+        letter-spacing: 0.03em;
+      }
+      .specs b {
+        color: #f2f6f8;
+        font-weight: 500;
+      }
+
+      /* Digital */
+      .digital {
+        background: #f2f6f8;
+        color: #0b0d10;
+        border-color: #d4dde2;
+        padding: 26px;
+        display: flex;
+        flex-direction: column;
+      }
+      .digital .label {
+        color: #5e6d76;
+      }
+      .browser {
+        margin-top: 16px;
+        flex: 1;
+        border-radius: 14px;
+        border: 1px solid #c9d4da;
+        background: #fff;
+        overflow: hidden;
+        box-shadow: 0 18px 40px -32px rgba(11, 13, 16, 0.55);
+      }
+      .browser-bar {
+        height: 34px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 12px;
+        border-bottom: 1px solid #e3eaee;
+        background: #f8fbfc;
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #cbd6dc;
+      }
+      .url {
+        margin-left: 8px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 9.5px;
+        color: #61727c;
+        letter-spacing: 0.04em;
+      }
+      .mini {
+        padding: 13px 16px 16px;
+        height: calc(100% - 34px);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .mini-nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .mini-nav img {
+        width: 22px;
+        height: 22px;
+      }
+      .mini-word {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: -0.04em;
+      }
+      .mini-links {
+        margin-left: auto;
+        display: flex;
+        gap: 12px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #6b7c85;
+      }
+      .mini-stage {
+        position: relative;
+        flex: 1;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #0b0d10;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .mini-dither {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle, #d9ff43 1.1px, transparent 1.25px);
+        background-size: 5px 5px;
+        opacity: 0.5;
+        -webkit-mask-image: radial-gradient(circle at 78% 18%, #000 0%, transparent 62%);
+        mask-image: radial-gradient(circle at 78% 18%, #000 0%, transparent 62%);
+      }
+      .mini-card {
+        position: relative;
+        width: 76%;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.38);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.07));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.4),
+          0 14px 30px -22px rgba(0, 0, 0, 0.8);
+        padding: 14px;
+        color: #f2f6f8;
+        backdrop-filter: blur(8px);
+      }
+      .mini-card h4 {
+        margin: 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 17px;
+        letter-spacing: -0.03em;
+      }
+      .mini-card p {
+        margin: 4px 0 10px;
+        font-size: 8.5px;
+        line-height: 1.45;
+        color: #b9c6cc;
+      }
+      .mini-field {
+        height: 23px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(11, 13, 16, 0.35);
+        display: flex;
+        align-items: center;
+        padding: 0 7px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 7.5px;
+        color: #9fb0b8;
+        margin-bottom: 6px;
+      }
+      .mini-field.focus {
+        border-color: #d9ff43;
+        box-shadow: 0 0 0 2px rgba(217, 255, 67, 0.2);
+        color: #f2f6f8;
+      }
+      .mini-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 7px;
+        color: #a9b7be;
+        margin: 6px 0 9px;
+      }
+      .mini-check {
+        width: 9px;
+        height: 9px;
+        border-radius: 2px;
+        background: #d9ff43;
+        display: inline-grid;
+        place-items: center;
+        color: #0b0d10;
+        font-size: 7px;
+        font-weight: 700;
+      }
+      .mini-btn {
+        height: 24px;
+        border-radius: 6px;
+        background: #d9ff43;
+        color: #0b0d10;
+        display: grid;
+        place-items: center;
+        font-family: 'Geist Mono', monospace;
+        font-size: 7.5px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .digital-foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        color: #5e6d76;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      /* Colour */
+      .colour {
+        display: flex;
+        flex-direction: column;
+      }
+      .swatches {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin-top: 16px;
+      }
+      .swatch {
+        border-radius: 10px;
+        padding: 12px;
+        min-height: 97px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .swatch-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 15px;
+        letter-spacing: -0.02em;
+      }
+      .swatch-meta {
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.04em;
+        opacity: 0.78;
+        margin-top: 2px;
+      }
+      .colour-note {
+        margin-top: auto;
+        font-size: 13px;
+        line-height: 1.45;
+        color: #a9b7be;
+        max-width: 560px;
+      }
+
+      /* Type */
+      .type {
+        background: #f2f6f8;
+        color: #0b0d10;
+        border-color: #d4dde2;
+        display: flex;
+        flex-direction: column;
+      }
+      .type .label {
+        color: #5e6d76;
+      }
+      .specimen {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 176px;
+        letter-spacing: -0.07em;
+        line-height: 0.8;
+        margin: 16px 0 4px -8px;
+      }
+      .type-rows {
+        margin-top: auto;
+      }
+      .type-row {
+        display: grid;
+        grid-template-columns: 74px 1fr auto;
+        gap: 10px;
+        align-items: baseline;
+        padding: 9px 0;
+        border-top: 1px solid #d4dde2;
+        font-size: 13px;
+      }
+      .type-row .voice {
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #5e6d76;
+      }
+      .type-row .face {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 19px;
+        letter-spacing: -0.02em;
+      }
+      .type-row .face.read {
+        font-family: 'Geist', sans-serif;
+        font-weight: 400;
+      }
+      .type-row .face.mono {
+        font-family: 'Geist Mono', monospace;
+        font-weight: 500;
+        font-size: 13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .type-row .size {
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        color: #5e6d76;
+      }
+
+      /* Icons */
+      .icons {
+        display: flex;
+        flex-direction: column;
+      }
+      .tab {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 290px;
+        padding: 11px 13px;
+        border-radius: 9px 9px 0 0;
+        background: #f2f6f8;
+        color: #0b0d10;
+        margin-top: 18px;
+        font-size: 12px;
+      }
+      .tab img {
+        width: 16px;
+        height: 16px;
+      }
+      .tab.dark-tab {
+        background: #020304;
+        color: #f2f6f8;
+        border: 1px solid #2a343b;
+        margin-top: 8px;
+        border-radius: 9px;
+      }
+      .icon-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 22px;
+        margin-top: 22px;
+      }
+      .icon-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+      }
+      .icon-cell img {
+        image-rendering: pixelated;
+        border-radius: 5px;
+      }
+      .icon-cell span {
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        color: #93a3ac;
+        letter-spacing: 0.05em;
+      }
+      .icon-note {
+        margin-top: auto;
+        font-size: 13px;
+        line-height: 1.45;
+        color: #a9b7be;
+      }
+      .app-icon {
+        width: 76px;
+        height: 76px;
+        border-radius: 18px;
+        border: 1px solid #2a343b;
+        margin-left: auto;
+      }
+
+      /* Atmosphere */
+      .atmosphere {
+        background: #d9ff43;
+        color: #0b0d10;
+        border-color: #d9ff43;
+        padding: 34px;
+        display: flex;
+        flex-direction: column;
+      }
+      .atmosphere .label {
+        color: #3f4b12;
+      }
+      .atm-mark {
+        width: 132px;
+        height: 132px;
+        margin-top: 12px;
+      }
+      .atm-head {
+        margin-top: auto;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 62px;
+        letter-spacing: -0.06em;
+        line-height: 0.92;
+        color: #0b0d10;
+      }
+      .atm-sub {
+        font-size: 15px;
+        line-height: 1.4;
+        color: #38420f;
+        margin-top: 12px;
+        max-width: 420px;
+      }
+      .atm-foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 18px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #38420f;
+      }
+      .atm-dither {
+        position: absolute;
+        right: -20px;
+        top: -20px;
+        width: 300px;
+        height: 300px;
+        background-image: radial-gradient(circle, #0b0d10 1.2px, transparent 1.4px);
+        background-size: 5px 5px;
+        -webkit-mask-image: radial-gradient(circle at 60% 40%, #000 0%, transparent 66%);
+        mask-image: radial-gradient(circle at 60% 40%, #000 0%, transparent 66%);
+        opacity: 0.55;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="board">
+      <!-- 01 COVER -->
+      <section class="panel cover">
+        <div class="cover-strip"></div>
+        <div class="cover-top">
+          <img class="cover-lockup" src="../../../public/brand/vitrine/lockup-reverse.svg" alt="Vitrine" />
+          <div class="mono cover-meta dim">
+            CASE 02<br />
+            V1.0 — 2026<br />
+            DESIGN SYSTEM
+          </div>
+        </div>
+        <h1 class="display cover-headline">
+          A glass case for a<br /><em>low-resolution</em> light.
+        </h1>
+        <div class="cover-foot">
+          <p class="cover-sub">
+            Glass is the container. Dither is the label. The form is the proof.
+            Built for interfaces that need depth without fog.
+          </p>
+          <div class="mono" style="text-align: right; line-height: 1.8; color: #f2f6f8; position: relative; z-index: 2">
+            adityahimaone.space<br />/design-system/vitrine
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 INDEX -->
+      <section class="panel index">
+        <span class="index-num">01</span>
+        <span class="label">01 / Index</span>
+        <img class="index-mark" src="../../../public/brand/vitrine/mark-reverse.svg" alt="" />
+        <div class="index-body">
+          Two panes meet at a point. One is solid glass; one is printed grain.
+          The case holds one object, and the clearance is the design.
+        </div>
+        <div class="index-list">
+          <span>01 Identity</span>
+          <span>02 Material</span>
+          <span>03 Forms</span>
+          <span>04 Case</span>
+        </div>
+      </section>
+
+      <!-- 03 CONSTRUCTION -->
+      <section class="panel construction">
+        <span class="label">02 / Construction</span>
+        <svg viewBox="0 0 420 372" role="img" aria-label="Vitrine mark construction on a 64-unit grid">
+          <defs>
+            <pattern id="grid64" width="52.5" height="52.5" patternUnits="userSpaceOnUse">
+              <path d="M52.5 0H0V52.5" fill="none" stroke="#f2f6f8" stroke-width="0.6" opacity="0.12" />
+            </pattern>
+            <pattern id="ditherBoard" width="16" height="16" patternUnits="userSpaceOnUse">
+              <rect width="8" height="8" fill="#f2f6f8" />
+              <rect x="8" y="8" width="8" height="8" fill="#f2f6f8" />
+            </pattern>
+          </defs>
+          <rect x="0.5" y="0.5" width="419" height="419" fill="url(#grid64)" />
+          <line x1="0" y1="210" x2="420" y2="210" stroke="#f2f6f8" stroke-width="0.8" opacity="0.25" stroke-dasharray="4 5" />
+          <line x1="210" y1="0" x2="210" y2="420" stroke="#f2f6f8" stroke-width="0.8" opacity="0.25" stroke-dasharray="4 5" />
+          <g transform="translate(74 16) scale(4.25)">
+            <path d="M16 14 32 49" stroke="#f2f6f8" stroke-width="13" stroke-linecap="square" />
+            <path d="M32 49 48 14" stroke="url(#ditherBoard)" stroke-width="13" stroke-linecap="square" />
+            <circle cx="32" cy="49" r="3.2" fill="#d9ff43" />
+          </g>
+          <line x1="74" y1="352" x2="306" y2="352" stroke="#d9ff43" stroke-width="1" />
+          <line x1="74" y1="346" x2="74" y2="358" stroke="#d9ff43" stroke-width="1" />
+          <line x1="306" y1="346" x2="306" y2="358" stroke="#d9ff43" stroke-width="1" />
+          <text x="190" y="368" fill="#d9ff43" font-family="Geist Mono" font-size="10" letter-spacing="1.5" text-anchor="middle">64 UNITS</text>
+        </svg>
+        <div class="specs">
+          <span>GRID <b>64 × 64</b></span>
+          <span>STROKE <b>13 / 64</b></span>
+          <span>APEX <b>32, 49</b></span>
+          <span>DITHER <b>4 CELL</b></span>
+          <span>DOT <b>r 3.2</b></span>
+          <span>MIN <b>32 / 16</b></span>
+        </div>
+      </section>
+
+      <!-- 04 DIGITAL APPLICATION -->
+      <section class="panel digital">
+        <span class="label">03 / Digital application</span>
+        <div class="browser">
+          <div class="browser-bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="url">adityahimaone.space/design-system/vitrine</span>
+          </div>
+          <div class="mini">
+            <div class="mini-nav">
+              <img src="../../../public/brand/vitrine/mark.svg" alt="" />
+              <span class="mini-word">vitrine</span>
+              <span class="mini-links"><span>Material</span><span>Forms</span><span>Case</span></span>
+            </div>
+            <div class="mini-stage">
+              <div class="mini-dither"></div>
+              <div class="mini-card">
+                <h4>Request access</h4>
+                <p>A lit case for the work. One object, one clear action.</p>
+                <div class="mini-field focus">you@studio.com</div>
+                <div class="mini-field">Role — Design engineer</div>
+                <div class="mini-row"><span class="mini-check">✓</span> Send me the field notes</div>
+                <div class="mini-btn">Request a key</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="digital-foot">
+          <span>Glass panel / dithered field</span>
+          <span>Light mode</span>
+        </div>
+      </section>
+
+      <!-- 05 COLOUR -->
+      <section class="panel colour">
+        <span class="label">04 / Colour</span>
+        <div class="swatches">
+          <div class="swatch" style="background: #0b0d10; color: #f2f6f8">
+            <span class="swatch-name">Case</span>
+            <span class="swatch-meta">#0B0D10 · 17.9:1</span>
+          </div>
+          <div class="swatch" style="background: #f2f6f8; color: #0b0d10">
+            <span class="swatch-name">Frost</span>
+            <span class="swatch-meta">#F2F6F8 · 17.9:1</span>
+          </div>
+          <div class="swatch" style="background: #45525b; color: #f2f6f8">
+            <span class="swatch-name">Graphite</span>
+            <span class="swatch-meta">#45525B · 7.4:1</span>
+          </div>
+          <div class="swatch" style="background: #d9ff43; color: #0b0d10">
+            <span class="swatch-name">Signal</span>
+            <span class="swatch-meta">#D9FF43 · 17.0:1</span>
+          </div>
+          <div class="swatch" style="background: #5b4be8; color: #f2f6f8">
+            <span class="swatch-name">Iris</span>
+            <span class="swatch-meta">#5B4BE8 · 5.3:1</span>
+          </div>
+          <div class="swatch" style="background: #b23a1d; color: #f2f6f8">
+            <span class="swatch-name">Clay</span>
+            <span class="swatch-meta">#B23A1D · 5.5:1</span>
+          </div>
+        </div>
+        <p class="colour-note">
+          One loud field: Signal. Everything else is a surface, a text role or a
+          status accent. Glass never adds a colour of its own.
+        </p>
+      </section>
+
+      <!-- 06 TYPE -->
+      <section class="panel type">
+        <span class="label">05 / Type</span>
+        <div class="specimen">vitrine</div>
+        <div class="type-rows">
+          <div class="type-row">
+            <span class="voice">Display</span>
+            <span class="face">Space Grotesk 700</span>
+            <span class="size">64–190 / -0.07em</span>
+          </div>
+          <div class="type-row">
+            <span class="voice">Reading</span>
+            <span class="face read">Depth without fog.</span>
+            <span class="size">Geist 400 / 16–18</span>
+          </div>
+          <div class="type-row">
+            <span class="voice">Label</span>
+            <span class="face mono">Material / 04</span>
+            <span class="size">Geist Mono 500 / 0.14em</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 ICONS -->
+      <section class="panel icons">
+        <span class="label">06 / Icons</span>
+        <div class="tab"><img src="../../../public/brand/vitrine/favicon-16.png" alt="" /> Vitrine — Design System</div>
+        <div class="tab dark-tab"><img src="../../../public/brand/vitrine/favicon-16.png" alt="" /> Vitrine — Design System</div>
+        <div class="icon-row">
+          <div class="icon-cell"><img src="../../../public/brand/vitrine/favicon-16.png" width="16" height="16" alt="" /><span>16</span></div>
+          <div class="icon-cell"><img src="../../../public/brand/vitrine/favicon-32.png" width="32" height="32" alt="" /><span>32</span></div>
+          <div class="icon-cell"><img src="../../../public/brand/vitrine/favicon-48.png" width="48" height="48" alt="" /><span>48</span></div>
+          <div class="icon-cell"><img src="../../../public/brand/vitrine/favicon-48.png" width="64" height="64" alt="" /><span>ICO + SVG</span></div>
+          <div class="icon-cell"><img class="app-icon" src="../../../public/brand/vitrine/icon-192.png" alt="" /><span>192 / 512</span></div>
+        </div>
+        <p class="icon-note">
+          The favicon is the loud field: Signal tile, Case mark, readable on
+          light and dark chrome. The app icon returns to the Case field.
+        </p>
+      </section>
+
+      <!-- 08 ATMOSPHERE -->
+      <section class="panel atmosphere">
+        <div class="atm-dither"></div>
+        <span class="label">07 / Atmosphere</span>
+        <svg class="atm-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M13 13 30 47" stroke="#0b0d10" stroke-width="15" stroke-linecap="square" />
+          <path d="M34 47 51 13" stroke="#0b0d10" stroke-width="15" stroke-linecap="square" />
+          <circle cx="32" cy="48" r="3.6" fill="#f2f6f8" />
+        </svg>
+        <div class="atm-head">One case.<br />One object.</div>
+        <p class="atm-sub">The rest is clearance. Signal is the only field that gets to shout.</p>
+        <div class="atm-foot">
+          <span>Signal / #D9FF43</span>
+          <span>Clearance 1/2 mark</span>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

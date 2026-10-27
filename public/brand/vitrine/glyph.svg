@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Vitrine glyph">
+  <defs>
+    <pattern id="vt-glyph-dither" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="2" height="2" fill="#0B0D10" />
+      <rect x="2" y="2" width="2" height="2" fill="#0B0D10" />
+    </pattern>
+  </defs>
+  <path d="M16 14 32 49" stroke="#0B0D10" stroke-width="13" stroke-linecap="square" />
+  <path d="M32 49 48 14" stroke="url(#vt-glyph-dither)" stroke-width="13" stroke-linecap="square" />
+</svg>

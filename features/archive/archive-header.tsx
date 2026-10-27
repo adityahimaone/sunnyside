@@ -36,6 +36,9 @@ const SOCIALS = [
 
 function isHere(href: string, pathname: string) {
   if (href === '/blog' && pathname.startsWith('/guides')) return true
+  // The design-system case library is part of the practice wing.
+  if (href === '/design-engineering' && pathname.startsWith('/design-system'))
+    return true
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 

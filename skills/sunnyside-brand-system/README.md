@@ -1,89 +1,113 @@
 # sunnyside-brand-system
 
-An installable agent skill for designing a brand kit **and** a design-system
-guideline set from a written brief: logo family, 3 × 3 board, favicon/app icons,
-tokens, documentation, and the images that document it.
+An installable agent skill for shipping **brand kits**, **design systems** and
+**single-page mockups** from a brief:
 
-It is built from the [Sunnyside](https://adityahimaone.space/design-engineering)
-case: a paper-and-ink portfolio identity with a sun mark, a marker wordmark, a
-compact favicon, a board rendered from HTML, and docs that are readable by
-humans and agents.
+- one idea, one mark family, one 3×3 board;
+- favicon and app icons;
+- primitive → semantic → component tokens, CSS + JSON;
+- single-page HTML or TSX proof;
+- shadcn/Radix component and form kit;
+- typography gate;
+- lean audit and browser QA;
+- pen.dev design-source integration.
+
+Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
 
 ## Install
 
-From the repository:
-
 ```bash
 npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth
+npx skills add adityahimaone/sunnyside --skill pen-dev --full-depth
 ```
 
-Or point an agent that supports local skills at this folder:
+Optional typography companion — the upstream skill by Jakub Krehel:
+
+```bash
+npx skills add jakubkrehel/skills --skill better-typography
+```
+
+Or point an agent that supports local skill folders at this folder:
 
 ```bash
 npx skills add ./skills/sunnyside-brand-system
 ```
 
-The skill follows the standard `SKILL.md` format. It works with any agent that
-can read local skill folders; the install command is the `skills.sh` convention.
+## The method in one screen
+
+1. **Pick the smallest mode**: brand kit, design system, mockup, audit or pen.
+2. Write `brief.md` and the one sentence the work can be rejected against.
+3. Draw six marks; keep one; write down why the other five lost.
+4. Build the mark + compact + outlined wordmark, or start with tokens.
+5. Use one token source → CSS + JSON. Never hand-edit generated output.
+6. Build one proof page: HTML for a static board/mockup, TSX for an interactive
+   system. Use shadcn/Radix for accessible primitives; native for the rest.
+7. Run the typography gate before the first screenshot.
+8. Render the board from HTML at 2×; downscale.
+9. Run the static audit and one browser QA pass. Fix the root cause, not the
+   screenshot. Name the gaps.
+
+## Fast commands
+
+Run these from the skill folder, or copy `scripts/` and `templates/` into the project.
+
+```bash
+# Static audit: required files, SVG text, ICO sizes, PNG dimensions, contrast
+node scripts/audit.mjs --manifest audit.json
+
+# Browser QA: 1440 + 390, light + dark, reduced motion, console, overflow
+node scripts/qa.mjs \
+  --url http://localhost:3000/design-system/vitrine \
+  --out docs/screenshots --name vitrine
+
+# Board render and web copy
+node scripts/render-board.mjs \
+  --html design/brand/<slug>/brandkit.html \
+  --out design/brand/<slug>/<slug>-brandkit@2x.png \
+  --width 2400 --height 1800 --scale 2
+
+# pen.dev: delegated agent or MCP-in-the-loop (see skills/pen-dev/SKILL.md)
+pen status
+pen --out design/brand/<slug>/<slug>-board.pen --prompt "…" --agent claude
+pen interactive --out design/brand/<slug>/<slug>-board.pen --enable-preview
+```
+
+Prerequisites: Playwright for the renderer/QA, Pillow + fontTools + HarfBuzz for
+the icon and wordmark scripts. The static audit has no dependencies.
 
 ## What is inside
 
 ```
 sunnyside-brand-system/
-  SKILL.md                     the method, workflow and output contract
+  SKILL.md                     modes, fast path, rules, contract
   references/
-    brief.md                   the one-page brief and review gates
+    brief.md                   one-page brief and review gates
     logo-system.md             concepts, grid, family, favicon, tests
-    board-and-images.md        the 3 × 3 board and the render pipeline
+    board-and-images.md        the 3×3 board and render pipeline
     image-direction.md         prompts, provenance and QA for generated images
     tokens-and-docs.md         token layers and agent-readable docs
-    verification.md            the ship checklist
+    design-systems.md          shadcn/Radix, primitives, forms, case page
+    typography.md              the typography gate + better-typography source
+    verification.md            the ship checklist and audit format
+    lessons.md                 Case 02 failures and the rules they produced
   scripts/
     render-board.mjs           HTML board → PNG (Playwright)
     render-icons.mjs           SVG → exact-size transparent PNGs
-    favicons.py                PNG → favicon ICO, apple and app icons (Pillow)
+    favicons.py                PNG → ICO, apple and app icons (Pillow)
     downscale.py               Lanczos downscale for the web copy
     extract-wordmark.py        shaped text → SVG outlines (fontTools + HarfBuzz)
+    audit.mjs                  static artifact/contrast audit (no deps)
+    qa.mjs                     one browser QA pass (Playwright)
   templates/
-    brandkit.html              a 3 × 3 board starter
-    guidelines.md              a brand-guide starter
+    brandkit.html              3×3 board starter
+    single-page.html           static brand/design-system mockup
+    case-page.tsx              Next/React case-page scaffold
+    audit.json                 audit manifest template
+    guidelines.md              brand-guide starter
   examples/
-    sunnyside.md               the case, in numbers, with links
+    sunnyside.md               the paper/cobalt case
+    vitrine.md                 the glass/dither case + audit
 ```
-
-## Quick start
-
-```bash
-# render the starter board at 2×
-node scripts/render-board.mjs \
-  --html templates/brandkit.html \
-  --out brandkit.png \
-  --width 2400 --height 1800 --scale 2
-
-# make a web copy
-python scripts/downscale.py brandkit.png brandkit-web.png 3000 2250
-```
-
-Prerequisites:
-
-```bash
-npm i -D playwright && npx playwright install chromium
-pip install pillow fonttools brotli uharfbuzz
-```
-
-## The method in one screen
-
-1. Write the brief and the one-sentence direction.
-2. Explore six marks; keep one; write down why the others lost.
-3. Build the mark on a 64 grid, plus a separate compact mark for 16px.
-4. Set the wordmark in outlines, then build the family and the responsive lockup.
-5. Build the 3 × 3 board in HTML/CSS; render it at 2×; downscale.
-6. Generate only the atmosphere/photography that needs to be an image; keep
-   provenance; never generate the logo, type or board.
-7. Build the favicon/app icon set and test at 1×.
-8. Ship tokens and docs that are readable without JavaScript, with a raw
-   Markdown twin.
-9. Verify every size, contrast pair and link; name what is missing.
 
 ## What this skill refuses
 
@@ -91,17 +115,14 @@ pip install pillow fonttools brotli uharfbuzz
 - Live text as the wordmark.
 - A mark that only reads at poster size.
 - Boards with no exportable assets.
-- Guidelines that live only in a PDF or a Figma file.
-- Invented metrics or fake case studies.
-
-## Publish to skills.sh
-
-The skill is a normal GitHub-backed skill. Once the repository is public and the
-folder is on the default branch, it can be listed and installed with the command
-above. If you maintain a fork, replace the owner in the command.
+- Guidelines that live only in a PDF or Figma file.
+- A component museum with no form kit.
+- “Looks good” audits with no computed values or file paths.
+- Ten exploratory pen prompts for a board that needed one.
 
 ## Credits
 
-The method, the Sunnyside case and the templates are by
-[Aditya Himawan](https://adityahimaone.space). The craft references that inform
-the review pass are from [Craft](https://craft.gustavofior.com).
+The method, the Sunnyside and Vitrine cases, and the templates are by
+[Aditya Himawan](https://adityahimaone.space). The typography distillation
+follows [better-typography](https://www.ui-skills.com/skills/jakubkrehel/better-typography)
+by Jakub Krehel. The pen.dev workflow follows the official CLI and MCP tools.

@@ -3,6 +3,42 @@
 Run this before calling the kit finished. A kit is not done when the board looks
 good; it is done when the smallest file works.
 
+## Lean path
+
+Do not read every file. Run the static audit, one browser pass, and look at the
+screens the scripts cannot judge.
+
+```bash
+node scripts/audit.mjs --manifest audit.json
+node scripts/qa.mjs --url http://localhost:3000/design-system/<slug> \
+  --out docs/screenshots --name <slug>
+```
+
+Then inspect:
+
+1. the mark at 16px and the header size, light and dark;
+2. the lockup at 130/240 and the 390px header;
+3. the board at 100% and 50%;
+4. form focus, error, disabled and success;
+5. one dark and one light section with the effect behind text;
+6. no horizontal scroll at 390 and no console/shader errors.
+
+Write **Not verified** for anything you could not inspect. Never approve
+coverage you did not see.
+
+## Audit format
+
+One table, one row per root cause, every location:
+
+| Status | Item | Evidence | Note |
+| --- | --- | --- | --- |
+| pass | Mark at 16/32/64/512 | `public/brand/...` | compact is a separate drawing |
+| fail | Contrast on Signal button | `features/...:line` | 1.2:1, must be 4.5:1 |
+| gap | No visual regression CI | — | named, not hidden |
+
+Finish with `PASS` only when every row is pass and the gaps are named. A case
+with no gap probably did not look.
+
 ## Mark
 
 - [ ] Silhouette reads at 32px.
@@ -45,10 +81,14 @@ good; it is done when the smallest file works.
 
 - [ ] Display, reading and label faces named.
 - [ ] Wordmark is outlined, not live text.
-- [ ] Type scale has real sizes and tracking.
-- [ ] Labels at 8–11px with 0.14–0.2em tracking.
-- [ ] No paragraph set in the display face.
+- [ ] Type scale has real sizes, unitless line-height and `em` tracking.
+- [ ] Body 16–18px; labels 8–11px with 0.14–0.2em; no 100–300 weight under 18px.
+- [ ] Measure capped at 60–75 characters; no paragraph set in the display face.
+- [ ] `text-wrap: balance` on headings, `pretty` on paragraphs only.
+- [ ] `tabular-nums` on counters, prices and numeric columns.
+- [ ] Inputs at 16px on mobile, or the documented alternative.
 - [ ] The board's labels are readable at 50%.
+- [ ] `references/typography.md` gate complete.
 
 ## Board
 
@@ -90,6 +130,9 @@ good; it is done when the smallest file works.
 - [ ] The guide's links resolve.
 - [ ] The page is in the sitemap and has a canonical URL.
 - [ ] The OG/social card uses the mark.
+- [ ] The case route and the case-library index both resolve; icons are segment-local.
+- [ ] A moved route updated canonical, OG, sitemap, llms, links and tests.
+- [ ] The page has a Markdown twin at `<case>/llms.txt`.
 - [ ] The installation command for the skill works.
 - [ ] The gaps are named.
 
@@ -103,6 +146,7 @@ good; it is done when the smallest file works.
 - contrast fails on body text;
 - the guide hides a known gap;
 - the board is an AI image with the logo in it;
-- the page's only copy is behind a tab or a script.
+- the page's only copy is behind a tab or a script;
+- a stale generated route type or `.next` artifact is being treated as source.
 
 Otherwise `Approve` and leave the remaining polish as work to do.

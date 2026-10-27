@@ -28,6 +28,7 @@
 
 - **Studio landing page** — six chapters: Intro, About, Show & tell, Work, Skills, and Contact.
 - **Sunnyside** — a browsable design-system guide with palette, type, components, motion, voice, applications, and copyable/downloadable tokens.
+- **Vitrine** — Case 02: a separate glass-and-dither brand kit, form specimen, token set and audit at `/design-system/vitrine`, listed with Sunnyside in the `/design-system` case library.
 - **Projects archive** — project releases, case studies, and GitHub activity.
 - **Blog and guides** — Markdown writing about frontend work, self-hosting, and infrastructure, with filters, reading aids, RSS, and generated social images.
 - **Bookmarks** — a searchable, paginated catalogue backed by Cloudflare D1, with an admin editor.
@@ -45,6 +46,8 @@ Sunnyside is the visual language behind the studio landing page and archive surf
 | **Composition**   | Paper-first layouts, considered offsets, one loud field at a time; stickers punctuate content, never carry its structure.                 |
 | **Motion**        | Movement should explain a change, orient the reader, or return feedback. Reduced-motion preferences are respected.                        |
 | **Accessibility** | Contrast pairs and focus treatments are documented; decorative accent colours are not used as small body text.                            |
+
+Vitrine is the second case, deliberately not a Sunnyside variant: a glass container, a halftone information layer, a V mark made of two panes, and ten native form controls. Its source lives in `features/vitrine/`, `design/brand/vitrine/` and `public/brand/vitrine/`; the audit is in `docs/vitrine-design-system-audit.md`. Do not import its `--vt-*` tokens into Sunnyside.
 
 The `/design-engineering` docs hub is the practice-facing companion: the loop, the four standards, the Sunnyside case, the capability atlas, the installable brand-system skill and the field notes. It is built for reading and for agents: a sticky contents column, stable heading anchors, real tables, and raw Markdown twins at `/design-engineering/llms.txt` and `/design-engineering/learning/llms.txt`.
 
@@ -77,6 +80,8 @@ The identity is a **die-cut sun sticker** and the site's **marker wordmark**. Th
 | -------------------------------- | ---------------------------------- |
 | `/`                              | Studio landing page                |
 | `/sunnyside`                     | Design-system specimen             |
+| `/design-system`                 | Design-system case library         |
+| `/design-system/vitrine`         | Vitrine — glass-and-dither case    |
 | `/design-engineering`            | Design-engineering docs hub         |
 | `/design-engineering/learning`   | Field notes: Pen.dev, Figma, Craft  |
 | `/design-engineering/llms.txt`   | Markdown twin of the docs hub       |
@@ -91,13 +96,14 @@ The identity is a **die-cut sun sticker** and the site's **marker wordmark**. Th
 
 ## Agent skill — sunnyside-brand-system
 
-The brand-kit and design-system method is packaged as an installable skill. It covers the brief, the logo family, the 3 × 3 board, favicon/app icons, tokens, docs, and the images that document the system — including the exact HTML → Playwright → PNG pipeline used for the Sunnyside board and the SVG/Pillow icon workflow.
+The brand-kit, design-system and mockup method is packaged as an installable skill. It covers the brief, the logo family, the 3 × 3 board, favicon/app icons, tokens, single-page HTML/TSX proofs, shadcn/Radix components, forms, a typography gate, lean QA, and the pen.dev design-source workflow.
 
 ```bash
 npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth
+npx skills add adityahimaone/sunnyside --skill pen-dev --full-depth
 ```
 
-The package lives in [`skills/sunnyside-brand-system/`](./skills/sunnyside-brand-system/); start with [`SKILL.md`](./skills/sunnyside-brand-system/SKILL.md). The public companion page is [`/design-engineering`](https://adityahimaone.space/design-engineering).
+The package lives in [`skills/sunnyside-brand-system/`](./skills/sunnyside-brand-system/); start with [`SKILL.md`](./skills/sunnyside-brand-system/SKILL.md). The pen.dev companion is [`skills/pen-dev/`](./skills/pen-dev/). Typography is a first-class gate; the optional upstream companion is [better-typography](https://www.ui-skills.com/skills/jakubkrehel/better-typography). The public companion page is [`/design-engineering`](https://adityahimaone.space/design-engineering).
 
 ## Stack
 

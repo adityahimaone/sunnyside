@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vitrine mark explorations</title>
+    <style>
+      :root {
+        --case: #0b0d10;
+        --frost: #f2f6f8;
+        --signal: #d9ff43;
+        --iris: #5b4be8;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 40px;
+        font: 12px/1.4 ui-monospace, monospace;
+        background: #f2f6f8;
+        color: #0b0d10;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        max-width: 1100px;
+      }
+      .card {
+        border: 1px solid #c7d2d9;
+        border-radius: 16px;
+        padding: 20px;
+        background: #fff;
+      }
+      .card h2 { font: 600 13px/1.3 ui-monospace, monospace; margin: 0 0 4px; }
+      .card p { margin: 0 0 16px; color: #45525b; font-size: 11px; }
+      .row { display: flex; align-items: flex-end; gap: 18px; }
+      .s64 { width: 64px; height: 64px; }
+      .s32 { width: 32px; height: 32px; }
+      .s16 { width: 16px; height: 16px; }
+      .dark { background: #0b0d10; border-color: #2a333a; color: #f2f6f8; }
+      .dark p { color: #9aa9b3; }
+      .dark .card { background: #12171b; border-color: #2a333a; }
+      .dark .row { background: #0b0d10; }
+      .dark svg .solid { fill: #f2f6f8; }
+      .dark svg .check { fill: #f2f6f8; }
+      .dark svg .arc { stroke: #0b0d10; }
+    </style>
+  </head>
+  <body>
+    <div class="grid" id="grid">
+      <div class="card">
+        <h2>01 — Split V</h2>
+        <p>Two panes meeting at a point; one solid, one dithered.</p>
+        <div class="row">
+          <svg class="s64" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <pattern id="c1" width="4" height="4" patternUnits="userSpaceOnUse">
+                <rect class="check" width="2" height="2" fill="#0B0D10" />
+                <rect class="check" x="2" y="2" width="2" height="2" fill="#0B0D10" />
+              </pattern>
+            </defs>
+            <path d="M16 15 L32 48" stroke="#0B0D10" stroke-width="13" stroke-linecap="square" class="solid" />
+            <path d="M32 48 L48 15" stroke="url(#c1)" stroke-width="13" stroke-linecap="square" />
+            <circle cx="32" cy="48" r="3.2" fill="#D9FF43" />
+          </svg>
+          <svg class="s32" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M16 15 L32 48" stroke="#0B0D10" stroke-width="13" stroke-linecap="square" class="solid" />
+            <path d="M32 48 L48 15" stroke="#0B0D10" stroke-width="13" stroke-linecap="square" opacity="0.45" class="check" />
+            <circle cx="32" cy="48" r="3.2" fill="#D9FF43" />
+          </svg>
+          <svg class="s16" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M16 15 L32 48" stroke="#0B0D10" stroke-width="15" stroke-linecap="square" class="solid" />
+            <path d="M32 48 L48 15" stroke="#0B0D10" stroke-width="15" stroke-linecap="square" opacity="0.45" class="check" />
+            <circle cx="32" cy="48" r="4" fill="#D9FF43" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>02 — Aperture</h2>
+        <p>A lens split between solid glass and a halftone field.</p>
+        <div class="row">
+          <svg class="s64" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <pattern id="c2" width="4" height="4" patternUnits="userSpaceOnUse">
+                <rect class="check" width="2" height="2" fill="#0B0D10" />
+                <rect class="check" x="2" y="2" width="2" height="2" fill="#0B0D10" />
+              </pattern>
+              <clipPath id="lens2"><circle cx="32" cy="32" r="28" /></clipPath>
+            </defs>
+            <g clip-path="url(#lens2)">
+              <rect width="32" height="64" class="solid" fill="#0B0D10" />
+              <rect x="32" width="32" height="64" fill="url(#c2)" />
+            </g>
+            <path d="M14 27 A21 21 0 0 1 28 13" fill="none" stroke="#F2F6F8" stroke-width="3.4" stroke-linecap="round" class="arc" />
+            <circle cx="32" cy="32" r="3.2" fill="#D9FF43" />
+          </svg>
+          <svg class="s32" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="28" fill="#0B0D10" class="solid" />
+            <path d="M32 4 A28 28 0 0 1 32 60 Z" fill="#0B0D10" opacity="0.45" class="check" />
+            <path d="M14 27 A21 21 0 0 1 28 13" fill="none" stroke="#F2F6F8" stroke-width="3.4" stroke-linecap="round" class="arc" />
+            <circle cx="32" cy="32" r="3.2" fill="#D9FF43" />
+          </svg>
+          <svg class="s16" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="29" fill="#0B0D10" class="solid" />
+            <path d="M32 3 A29 29 0 0 1 32 61 Z" fill="#0B0D10" opacity="0.45" class="check" />
+            <circle cx="32" cy="32" r="4" fill="#D9FF43" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>03 — Case</h2>
+        <p>A vitrine tile with a V cut and a dithered base.</p>
+        <div class="row">
+          <svg class="s64" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <pattern id="c3" width="4" height="4" patternUnits="userSpaceOnUse">
+                <rect class="check" width="2" height="2" fill="#0B0D10" />
+                <rect class="check" x="2" y="2" width="2" height="2" fill="#0B0D10" />
+              </pattern>
+            </defs>
+            <rect x="5" y="5" width="54" height="54" rx="14" fill="#0B0D10" class="solid" />
+            <path d="M17 18 L32 40 L47 18" fill="none" stroke="#F2F6F8" stroke-width="9" stroke-linejoin="miter" />
+            <rect x="14" y="50" width="36" height="4" fill="url(#c3)" />
+            <circle cx="32" cy="40" r="3" fill="#D9FF43" />
+          </svg>
+          <svg class="s32" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="5" y="5" width="54" height="54" rx="14" fill="#0B0D10" class="solid" />
+            <path d="M17 18 L32 40 L47 18" fill="none" stroke="#F2F6F8" stroke-width="9" stroke-linejoin="miter" />
+            <rect x="14" y="50" width="36" height="4" fill="#F2F6F8" opacity="0.4" class="check" />
+            <circle cx="32" cy="40" r="3" fill="#D9FF43" />
+          </svg>
+          <svg class="s16" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="4" y="4" width="56" height="56" rx="15" fill="#0B0D10" class="solid" />
+            <path d="M16 18 L32 41 L48 18" fill="none" stroke="#F2F6F8" stroke-width="10" stroke-linejoin="miter" />
+            <circle cx="32" cy="41" r="4" fill="#D9FF43" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>04 — Stacked panes</h2>
+        <p>Three translucent panes in perspective.</p>
+        <div class="row">
+          <svg class="s64" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="10" y="24" width="44" height="9" rx="2" fill="#0B0D10" opacity="0.25" class="solid" />
+            <rect x="14" y="34" width="36" height="9" rx="2" fill="#0B0D10" opacity="0.5" class="solid" />
+            <rect x="18" y="44" width="28" height="9" rx="2" fill="#0B0D10" class="solid" />
+            <rect x="28" y="10" width="8" height="8" fill="#D9FF43" />
+          </svg>
+          <svg class="s32" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="9" y="20" width="46" height="10" rx="2" fill="#0B0D10" opacity="0.25" class="solid" />
+            <rect x="14" y="33" width="36" height="10" rx="2" fill="#0B0D10" opacity="0.5" class="solid" />
+            <rect x="19" y="46" width="26" height="10" rx="2" fill="#0B0D10" class="solid" />
+          </svg>
+          <svg class="s16" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="8" y="16" width="48" height="12" rx="3" fill="#0B0D10" opacity="0.3" class="solid" />
+            <rect x="14" y="32" width="36" height="12" rx="3" fill="#0B0D10" opacity="0.6" class="solid" />
+            <rect x="20" y="48" width="24" height="12" rx="3" fill="#0B0D10" class="solid" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>05 — Halftone V</h2>
+        <p>A V drawn only in dots; no solid silhouette.</p>
+        <div class="row">
+          <svg class="s64" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <pattern id="c5" width="8" height="8" patternUnits="userSpaceOnUse">
+                <circle cx="4" cy="4" r="2.5" fill="#0B0D10" />
+              </pattern>
+            </defs>
+            <path d="M16 15 L32 48 L48 15" fill="none" stroke="url(#c5)" stroke-width="14" stroke-linecap="butt" />
+            <circle cx="32" cy="48" r="3" fill="#D9FF43" />
+          </svg>
+          <svg class="s32" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <pattern id="c5b" width="8" height="8" patternUnits="userSpaceOnUse">
+                <circle cx="4" cy="4" r="3" fill="#0B0D10" />
+              </pattern>
+            </defs>
+            <path d="M16 15 L32 48 L48 15" fill="none" stroke="url(#c5b)" stroke-width="16" />
+            <circle cx="32" cy="48" r="4" fill="#D9FF43" />
+          </svg>
+          <svg class="s16" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M16 15 L32 48 L48 15" fill="none" stroke="#0B0D10" stroke-width="16" class="solid" />
+            <circle cx="32" cy="48" r="4" fill="#D9FF43" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>06 — Lens bar</h2>
+        <p>A horizontal glass bar with a V notch and a dithered end.</p>
+        <div class="row">
+          <svg class="s64" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <pattern id="c6" width="4" height="4" patternUnits="userSpaceOnUse">
+                <rect class="check" width="2" height="2" fill="#0B0D10" />
+                <rect class="check" x="2" y="2" width="2" height="2" fill="#0B0D10" />
+              </pattern>
+            </defs>
+            <rect x="6" y="22" width="52" height="22" rx="6" fill="#0B0D10" class="solid" />
+            <path d="M24 22 L32 36 L40 22" fill="none" stroke="#0B0D10" stroke-width="3" />
+            <rect x="40" y="22" width="18" height="22" fill="url(#c6)" />
+            <rect x="6" y="22" width="34" height="3" fill="#F2F6F8" opacity="0.5" />
+          </svg>
+          <svg class="s32" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="6" y="20" width="52" height="24" rx="7" fill="#0B0D10" class="solid" />
+            <rect x="40" y="20" width="18" height="24" fill="#0B0D10" opacity="0.45" class="check" />
+            <rect x="6" y="20" width="34" height="4" fill="#F2F6F8" opacity="0.5" />
+          </svg>
+          <svg class="s16" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="4" y="18" width="56" height="28" rx="8" fill="#0B0D10" class="solid" />
+            <rect x="36" y="18" width="24" height="28" fill="#0B0D10" opacity="0.45" class="check" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 32px"></div>
+    <div class="grid dark" id="dark-grid">
+      <div class="card">
+        <h2>01 — Split V</h2>
+        <p>On the case ground.</p>
+        <div class="row">
+          <svg class="s64" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <pattern id="d1" width="4" height="4" patternUnits="userSpaceOnUse">
+                <rect width="2" height="2" fill="#F2F6F8" />
+                <rect x="2" y="2" width="2" height="2" fill="#F2F6F8" />
+              </pattern>
+            </defs>
+            <path d="M16 15 L32 48" stroke="#F2F6F8" stroke-width="13" stroke-linecap="square" class="solid" />
+            <path d="M32 48 L48 15" stroke="url(#d1)" stroke-width="13" stroke-linecap="square" />
+            <circle cx="32" cy="48" r="3.2" fill="#D9FF43" />
+          </svg>
+          <svg class="s16" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M16 15 L32 48" stroke="#F2F6F8" stroke-width="15" stroke-linecap="square" class="solid" />
+            <path d="M32 48 L48 15" stroke="#F2F6F8" stroke-width="15" stroke-linecap="square" opacity="0.45" />
+            <circle cx="32" cy="48" r="4" fill="#D9FF43" />
+          </svg>
+        </div>
+      </div>
+      <div class="card"><h2>02 — Aperture</h2><p>On the case ground.</p><div class="row"><svg class="s64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#F2F6F8" /><path d="M32 4 A28 28 0 0 1 32 60 Z" fill="#0B0D10" opacity="0.55" /><path d="M14 27 A21 21 0 0 1 28 13" fill="none" stroke="#0B0D10" stroke-width="3.4" stroke-linecap="round" /><circle cx="32" cy="32" r="3.2" fill="#D9FF43" /></svg><svg class="s16" viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="#F2F6F8" /><path d="M32 3 A29 29 0 0 1 32 61 Z" fill="#0B0D10" opacity="0.55" /><circle cx="32" cy="32" r="4" fill="#D9FF43" /></svg></div></div>
+      <div class="card"><h2>03 — Case</h2><p>On the case ground.</p><div class="row"><svg class="s64" viewBox="0 0 64 64"><rect x="5" y="5" width="54" height="54" rx="14" fill="#F2F6F8" /><path d="M17 18 L32 40 L47 18" fill="none" stroke="#0B0D10" stroke-width="9" /><circle cx="32" cy="40" r="3" fill="#D9FF43" /></svg><svg class="s16" viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="15" fill="#F2F6F8" /><path d="M16 18 L32 41 L48 18" fill="none" stroke="#0B0D10" stroke-width="10" stroke-linejoin="miter" /></svg></div></div>
+      <div class="card"><h2>04 — Stacked panes</h2><p>On the case ground.</p><div class="row"><svg class="s64" viewBox="0 0 64 64"><rect x="10" y="24" width="44" height="9" rx="2" fill="#F2F6F8" opacity="0.25" /><rect x="14" y="34" width="36" height="9" rx="2" fill="#F2F6F8" opacity="0.5" /><rect x="18" y="44" width="28" height="9" rx="2" fill="#F2F6F8" /><rect x="28" y="10" width="8" height="8" fill="#D9FF43" /></svg><svg class="s16" viewBox="0 0 64 64"><rect x="8" y="16" width="48" height="12" rx="3" fill="#F2F6F8" opacity="0.3" /><rect x="14" y="32" width="36" height="12" rx="3" fill="#F2F6F8" opacity="0.6" /><rect x="20" y="48" width="24" height="12" rx="3" fill="#F2F6F8" /></svg></div></div>
+      <div class="card"><h2>05 — Halftone V</h2><p>On the case ground.</p><div class="row"><svg class="s64" viewBox="0 0 64 64"><path d="M16 15 L32 48 L48 15" fill="none" stroke="#F2F6F8" stroke-width="14" /><circle cx="32" cy="48" r="3" fill="#D9FF43" /></svg><svg class="s16" viewBox="0 0 64 64"><path d="M16 15 L32 48 L48 15" fill="none" stroke="#F2F6F8" stroke-width="16" /><circle cx="32" cy="48" r="4" fill="#D9FF43" /></svg></div></div>
+      <div class="card"><h2>06 — Lens bar</h2><p>On the case ground.</p><div class="row"><svg class="s64" viewBox="0 0 64 64"><rect x="6" y="22" width="52" height="22" rx="6" fill="#F2F6F8" /><rect x="40" y="22" width="18" height="22" fill="#0B0D10" opacity="0.55" /><rect x="6" y="22" width="34" height="3" fill="#0B0D10" opacity="0.2" /></svg><svg class="s16" viewBox="0 0 64 64"><rect x="4" y="18" width="56" height="28" rx="8" fill="#F2F6F8" /><rect x="36" y="18" width="24" height="28" fill="#0B0D10" opacity="0.55" /></svg></div></div>
+    </div>
+  </body>
+</html>

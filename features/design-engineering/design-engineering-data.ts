@@ -57,7 +57,7 @@ export const PRACTICE = {
   title: ['Design', 'engineering'],
   standfirst: 'The work between the drawing and the browser.',
   intro:
-    'I design the system and build the interface: the name, the mark, the type, the tokens, then the page that proves them. Sunnyside is the worked example — one paper world, six releases, a brand kit, and the docs that keep it honest.',
+    'I design the system and build the interface: the name, the mark, the type, the tokens, then the page that proves them. Sunnyside is the first worked example — one paper world, a brand kit and the docs that keep it honest. Vitrine is the second: a glass case, a dithered label and a form kit that has to survive the material.',
   body: 'Most handoffs lose the reason. A file says what, a ticket says when, and the browser finds out whether it was true. The practice is the loop that keeps the reason attached: one direction, one system, one proof, one written decision.',
   actions: [
     { href: '#case', label: 'Read the Sunnyside case', kind: 'primary' },
@@ -347,22 +347,97 @@ export const CASE = {
   ],
 }
 
+export const VITRINE_CASE = {
+  number: 'Case 02',
+  title: 'Vitrine',
+  subtitle: 'A glass case for a low-resolution light.',
+  status: 'Shipped · 2026',
+  role: 'Identity · design system · form kit · dither',
+  href: '/design-system/vitrine',
+  library: '/design-system',
+  cover: '/brand/vitrine/vitrine-brandkit.png',
+  coverAlt:
+    'The Vitrine brand board: the Split V mark, the Case and Frost palette, the Signal field, type specimens, favicon sizes and the form specimen.',
+  brief:
+    'Give the second system a different material without losing the method: a glass container, a halftone information layer, a form kit and an audit that names its own gaps. Vitrine had to prove that glass and dither can be legible together, not just photogenic.',
+  constraints: [
+    'A separate brand from Sunnyside: no sun, paper or cobalt.',
+    'Glass is a container; body copy sits on solid ground.',
+    'One live DitherShader; reduced motion keeps a finished frame.',
+    'Ten native controls with labels, errors, focus and a disabled state.',
+    'One token source generates CSS and JSON; the case is readable without JavaScript.',
+  ],
+  decisions: [
+    {
+      title: 'The case and the grain.',
+      line: 'Glass holds the object; the dither is the printed label inside it. The glass never becomes the content, and the dither never sits under the words that explain it.',
+    },
+    {
+      title: 'Split V, one solid and one dithered.',
+      line: 'Two panes meet at a point. The full mark keeps the checkerboard; the compact 16px mark drops it so the silhouette survives a favicon.',
+    },
+    {
+      title: 'Audit the method, not just the output.',
+      line: 'The page records 16/16 skill resources present, 10 used as shipped, 4 substitutions and 6 named gaps. A case without its gaps is a brochure.',
+    },
+  ],
+  outcomes: [
+    'A new brand kit, outlined wordmark, favicon set, 3 × 3 board and 125-declaration token system.',
+    'A ten-control form specimen with a focused error summary, password toggle, switch, range and file input.',
+    'One custom lens dither on the dithercn engine, static under reduced motion, with no example component installed.',
+    'An honest case page and Markdown twin: 12/12 output-contract items shipped, six gaps named.',
+  ],
+  evidence: [
+    {
+      label: 'Read the full case',
+      href: '/design-system/vitrine',
+      note: 'The brand, forms, tokens and audit on one page.',
+    },
+    {
+      label: 'The case library',
+      href: '/design-system',
+      note: 'Sunnyside and Vitrine, side by side.',
+    },
+    {
+      label: 'The brand kit',
+      href: '/brand/vitrine/vitrine-brandkit.png',
+      note: '3000 × 2250, rendered from HTML.',
+    },
+    {
+      label: 'The tokens',
+      href: '/brand/vitrine/vitrine-tokens.json',
+      note: 'Primitive → semantic → component, one source.',
+    },
+    {
+      label: 'The audit',
+      href: '/design-system/vitrine#audit',
+      note: 'Resources, substitutions and gaps.',
+    },
+    {
+      label: 'The Markdown twin',
+      href: '/design-system/vitrine/llms.txt',
+      note: 'The same case for agents and readers without JS.',
+    },
+  ],
+}
+
 /** The method, packaged as an installable agent skill. */
 export const BRAND_SKILL = {
   name: 'sunnyside-brand-system',
   description:
-    'A complete skill for designing a brand kit and a design-system guideline set from a written brief: the logo family, a 3×3 board, favicon and app icons, tokens, docs, and the images that document them.',
+    'A fast, evidence-led skill for brand kits, design systems and single-page HTML/TSX mockups: strategy, logo family, board, favicons, tokens, forms, a typography gate, lean QA and pen.dev integration.',
   install:
     'npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth',
   folder: 'skills/sunnyside-brand-system',
   repo: 'https://github.com/adityahimaone/sunnyside/tree/main/skills/sunnyside-brand-system',
   file: 'https://github.com/adityahimaone/sunnyside/blob/main/skills/sunnyside-brand-system/SKILL.md',
   includes: [
-    'SKILL.md — the method, workflow and output contract',
-    '6 references — brief, logo, board, image direction, tokens, verification',
-    '5 scripts — board, icons, favicon, downscale, wordmark outlines',
-    '2 templates — a 3 × 3 brand board and a brand guide',
-    'The Sunnyside case, in numbers, with links',
+    'SKILL.md — modes, fast path, token budget, rules and output contract',
+    '9 references — brief, logo, board, image direction, tokens, design systems, typography, verification, lessons',
+    '7 scripts — board, icons, favicon, downscale, wordmark, static audit, browser QA',
+    '5 templates — brand board, single-page mockup, TSX case page, audit manifest, guide',
+    '2 examples — Sunnyside and Vitrine, with the Case 02 audit',
+    'Companion pen-dev skill — delegated agent and MCP-in-the-loop',
   ],
 }
 
@@ -409,7 +484,7 @@ export const CAPABILITIES: Capability[] = [
       'Accessibility',
     ],
     evidence:
-      'The `/sunnyside` specimen, the namespaced `--ss-*` tokens, the CSS/JSON exports and the one-shell archive.',
+      'The `/sunnyside` specimen, the namespaced `--ss-*` tokens, the CSS/JSON exports, the one-shell archive and the Vitrine case with its own `--vt-*` tokens and form kit.',
     next: 'Component-level docs for the UI primitives, and visual regression in CI.',
   },
   {
@@ -540,6 +615,16 @@ export const AGENT_SKILLS: AgentSkill[] = [
     name: 'design-taste-frontend',
     use: 'A brief-led direction that rejects templated defaults.',
     note: 'Running in this workspace',
+  },
+  {
+    name: 'pen-dev',
+    use: 'Pen.dev .pen boards, exports and the MCP-in-the-loop workflow.',
+    note: 'Running in this workspace',
+  },
+  {
+    name: 'better-typography',
+    use: 'Type scale, wrapping, font features and punctuation checks.',
+    note: 'ui-skills.com / optional',
   },
   {
     name: 'craft-design-engineering',

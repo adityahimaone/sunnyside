@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vitrine logo QA</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 32px; font: 12px/1.4 ui-monospace, monospace; background: #f2f6f8; color: #0b0d10; }
+      h2 { font-size: 12px; margin: 0 0 14px; letter-spacing: .08em; text-transform: uppercase; }
+      .panel { border: 1px solid #c7d2d9; border-radius: 16px; padding: 20px; background: #fff; margin-bottom: 20px; }
+      .dark { background: #0b0d10; border-color: #2a333a; color: #f2f6f8; }
+      .row { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; }
+      .item { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+      .label { color: #6b7c86; font-size: 10px; }
+      .dark .label { color: #9aa9b3; }
+      img { display: block; }
+      .s16 { width: 16px; height: 16px; }
+      .s24 { width: 24px; height: 24px; }
+      .s32 { width: 32px; height: 32px; }
+      .s64 { width: 64px; height: 64px; }
+      .mark-wrap { display: grid; place-items: center; width: 88px; height: 88px; border-radius: 12px; }
+      .light .mark-wrap { background: #fff; }
+      .dark .mark-wrap { background: #12171b; }
+      .wordmark { height: auto; }
+      .chrome { display: flex; align-items: center; gap: 9px; border-radius: 10px; padding: 10px 14px; width: 250px; }
+      .chrome.light { background: #f2f6f8; color: #0b0d10; border: 1px solid #c7d2d9; }
+      .chrome.dark { background: #0b0d10; color: #f2f6f8; border: 1px solid #2a333a; }
+      .chrome img { width: 16px; height: 16px; image-rendering: pixelated; }
+      .chrome span { font: 500 10px/1.2 ui-monospace, monospace; letter-spacing: .04em; }
+      .zoom { image-rendering: pixelated; width: 128px; height: 128px; border-radius: 8px; }
+      .clear-box { position: relative; display: grid; place-items: center; width: 128px; height: 128px; border: 1px dashed #8fa0aa; border-radius: 8px; background-image: linear-gradient(#5b4be8 1px, transparent 1px), linear-gradient(90deg, #5b4be8 1px, transparent 1px); background-size: 32px 32px; background-position: center; }
+      .clear-mark { width: 64px; height: 64px; }
+      .note { margin-top: 10px; color: #5e6d76; font-size: 11px; max-width: 640px; line-height: 1.5; }
+      .dark .note { color: #9aa9b3; }
+    </style>
+  </head>
+  <body>
+    <div class="panel light" style="background: #f2f6f8">
+      <h2>01 / Mark and lockups — light</h2>
+      <div class="row">
+        <div class="item"><div class="mark-wrap"><img class="s16" src="../../../../public/brand/vitrine/mark.svg" alt="" /></div><span class="label">mark 16</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s24" src="../../../../public/brand/vitrine/mark.svg" alt="" /></div><span class="label">mark 24</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s32" src="../../../../public/brand/vitrine/mark.svg" alt="" /></div><span class="label">mark 32</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s64" src="../../../../public/brand/vitrine/mark.svg" alt="" /></div><span class="label">mark 64</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s16" src="../../../../public/brand/vitrine/mark-compact.svg" alt="" /></div><span class="label">compact 16</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s24" src="../../../../public/brand/vitrine/mark-compact.svg" alt="" /></div><span class="label">compact 24</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s32" src="../../../../public/brand/vitrine/mark-compact.svg" alt="" /></div><span class="label">compact 32</span></div>
+        <div class="item"><img style="width: 138.76px; height: 34px" src="../../../../public/brand/vitrine/lockup.svg" alt="" /><span class="label">lockup 34</span></div>
+        <div class="item"><img style="width: 240px; height: 58.8px" src="../../../../public/brand/vitrine/lockup.svg" alt="" /><span class="label">lockup 240</span></div>
+        <div class="item"><img style="width: 106.15px; height: 88px" src="../../../../public/brand/vitrine/lockup-stacked.svg" alt="" /><span class="label">stacked</span></div>
+      </div>
+    </div>
+
+    <div class="panel dark">
+      <h2>02 / Mark and lockups — reverse</h2>
+      <div class="row">
+        <div class="item"><div class="mark-wrap"><img class="s16" src="../../../../public/brand/vitrine/mark-reverse.svg" alt="" /></div><span class="label">mark 16</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s24" src="../../../../public/brand/vitrine/mark-reverse.svg" alt="" /></div><span class="label">mark 24</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s32" src="../../../../public/brand/vitrine/mark-reverse.svg" alt="" /></div><span class="label">mark 32</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s64" src="../../../../public/brand/vitrine/mark-reverse.svg" alt="" /></div><span class="label">mark 64</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s16" src="../../../../public/brand/vitrine/mark-compact-reverse.svg" alt="" /></div><span class="label">compact 16</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s24" src="../../../../public/brand/vitrine/mark-compact-reverse.svg" alt="" /></div><span class="label">compact 24</span></div>
+        <div class="item"><div class="mark-wrap"><img class="s32" src="../../../../public/brand/vitrine/mark-compact-reverse.svg" alt="" /></div><span class="label">compact 32</span></div>
+        <div class="item"><img style="width: 138.76px; height: 34px" src="../../../../public/brand/vitrine/lockup-reverse.svg" alt="" /><span class="label">lockup 34</span></div>
+        <div class="item"><img style="width: 240px; height: 58.8px" src="../../../../public/brand/vitrine/lockup-reverse.svg" alt="" /><span class="label">lockup 240</span></div>
+        <div class="item"><img style="width: 106.15px; height: 88px" src="../../../../public/brand/vitrine/lockup-stacked-reverse.svg" alt="" /><span class="label">stacked</span></div>
+      </div>
+    </div>
+
+    <div class="panel light" style="background: #fff">
+      <h2>03 / Wordmark — widths</h2>
+      <div class="row">
+        <div class="item"><img class="wordmark" style="width: 72px" src="../../../../public/brand/vitrine/wordmark.svg" alt="" /><span class="label">72</span></div>
+        <div class="item"><img class="wordmark" style="width: 100px" src="../../../../public/brand/vitrine/wordmark.svg" alt="" /><span class="label">100</span></div>
+        <div class="item"><img class="wordmark" style="width: 160px" src="../../../../public/brand/vitrine/wordmark.svg" alt="" /><span class="label">160</span></div>
+        <div class="item"><img class="wordmark" style="width: 240px" src="../../../../public/brand/vitrine/wordmark.svg" alt="" /><span class="label">240</span></div>
+        <div class="item"><img class="wordmark" style="width: 512px" src="../../../../public/brand/vitrine/wordmark.svg" alt="" /><span class="label">512</span></div>
+      </div>
+      <p class="note">The wordmark is Space Grotesk 700 outlines at −0.04em. At 72px wide it still reads; below that, use the compact mark.</p>
+    </div>
+
+    <div class="panel light" style="background: #fff">
+      <h2>04 / Favicon, clear space and app icon</h2>
+      <div class="row">
+        <div class="item">
+          <div class="chrome light"><img src="../../../../public/brand/vitrine/favicon-16.png" alt="" /><span>Vitrine — Design System</span></div>
+          <span class="label">light chrome, 16</span>
+        </div>
+        <div class="item">
+          <div class="chrome dark"><img src="../../../../public/brand/vitrine/favicon-16.png" alt="" /><span>Vitrine — Design System</span></div>
+          <span class="label">dark chrome, 16</span>
+        </div>
+        <div class="item"><img class="zoom" src="../../../../public/brand/vitrine/favicon-16.png" alt="" /><span class="label">16 at 8×, light</span></div>
+        <div class="item" style="background: #0b0d10; padding: 8px; border-radius: 8px"><img class="zoom" src="../../../../public/brand/vitrine/favicon-16.png" alt="" /><span class="label">16 at 8×, dark</span></div>
+        <div class="item"><img style="width: 48px; height: 48px; image-rendering: pixelated" src="../../../../public/brand/vitrine/favicon-48.png" alt="" /><span class="label">48</span></div>
+        <div class="item"><img style="width: 76px; height: 76px; border-radius: 18px" src="../../../../public/brand/vitrine/icon-192.png" alt="" /><span class="label">app 192</span></div>
+        <div class="item"><div class="clear-box"><img class="clear-mark" src="../../../../public/brand/vitrine/mark.svg" alt="" /></div><span class="label">64 mark in 128 box</span></div>
+      </div>
+      <p class="note">The favicon is the Signal field so it survives both chrome colours. The clear-space box is half the mark height on every side (16px at a 32px mark).</p>
+    </div>
+  </body>
+</html>

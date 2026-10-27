@@ -88,6 +88,38 @@ system, not a second visual language; the docs notes live in
 
 Glass, audio, and hardware motifs may exist in other feature-specific experiments, but they are not the default Sunnyside surface language and should not be applied to archive content or the studio without a clear, information-bearing reason.
 
+
+## Vitrine — Case 02
+
+`/design-system/vitrine` is a **separate** glass-and-dither system, not a Sunnyside
+variant. It exists to test the same method against a different material: a glass
+container, a halftone information layer, and a form kit. The mark is a V of two
+panes (one solid, one dithered), the palette is Case/Frost/Signal/Iris, and the
+display face is Space Grotesk rather than Syne. Do not import its `--vt-*`
+tokens into Sunnyside, and do not reuse Sunnyside's sun, paper or cobalt there.
+
+The case owns its tokens (`features/vitrine/tokens.json`), a scoped route
+(`app/design-system/vitrine/`), a brand kit under `design/brand/vitrine/`, and a raw
+Markdown twin at `/design-system/vitrine/llms.txt`. `/design-system` is the case
+library that lists Sunnyside and Vitrine. Its dither is a custom field on the
+dithercn engine (`lib/dither`), not an example component. The brand-system skill
+audit is in `docs/vitrine-design-system-audit.md`; the known gaps are listed
+there and on the page, rather than hidden.
+
+### Vitrine implementation map
+
+| Concern | Source |
+| --- | --- |
+| Case library | `app/design-system/page.tsx`, `features/case-library/` |
+| Route and token scope | `app/design-system/vitrine/page.tsx` (imports the token CSS; `.vt-scope` on the page root) |
+| Tokens | `features/vitrine/tokens.json` → `vitrine-tokens.css` + public JSON |
+| Form controls | `features/vitrine/components/form-demo.tsx` |
+| Signature dither | `features/vitrine/components/dither-lens.tsx` |
+| Brand kit | `design/brand/vitrine/` |
+| Logo and icons | `public/brand/vitrine/` |
+| Design-engineering case | `features/design-engineering/` (`#case-vitrine`) |
+| Audit | `docs/vitrine-design-system-audit.md` |
+
 ## Implementation map
 
 | Concern                                                | Current source                                                    |

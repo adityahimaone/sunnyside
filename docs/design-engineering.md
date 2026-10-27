@@ -134,16 +134,25 @@ the `skills` CLI:
 npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth
 ```
 
-It contains the method, six references, five scripts, two templates and the
-Sunnyside case:
+It contains the method, nine references, seven scripts, five templates and two
+cases:
 
-- `SKILL.md` — workflow, output contract, rules, verification.
+- `SKILL.md` — modes, fast path, token budget, rules, output contract and verification.
 - `references/brief.md`, `logo-system.md`, `board-and-images.md`,
-  `image-direction.md`, `tokens-and-docs.md`, `verification.md`.
+  `image-direction.md`, `tokens-and-docs.md`, `design-systems.md`,
+  `typography.md`, `verification.md`, `lessons.md`.
 - `scripts/render-board.mjs`, `render-icons.mjs`, `favicons.py`,
-  `downscale.py`, `extract-wordmark.py`.
-- `templates/brandkit.html`, `guidelines.md`.
-- `examples/sunnyside.md`.
+  `downscale.py`, `extract-wordmark.py`, `audit.mjs`, `qa.mjs`.
+- `templates/brandkit.html`, `single-page.html`, `case-page.tsx`,
+  `audit.json`, `guidelines.md`.
+- `examples/sunnyside.md`, `examples/vitrine.md`.
+
+The companion `skills/pen-dev/` skill documents the delegated pen agent and the
+MCP-in-the-loop workflow:
+
+```bash
+npx skills add adityahimaone/sunnyside --skill pen-dev --full-depth
+```
 
 The guideline images are **not** AI-generated. The board is HTML/CSS rendered
 with Playwright at 2× and downscaled with Lanczos; the mark is SVG; the favicon
@@ -157,7 +166,7 @@ part most brand kits get wrong.
 2. No visual-regression or accessibility check in CI.
 3. No generated-imagery pipeline or provenance; the identity is drawn, not
    generated.
-4. Pen.dev is a versioned source folder, not yet an agent-in-the-loop.
+4. Pen.dev is now a companion skill, not yet a CI-gated agent step.
 5. No component-level docs for the UI primitives.
 6. Motion has strong pieces but no published motion spec.
 7. The skill is installable from the repo, not yet listed on skills.sh.

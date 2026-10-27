@@ -26,6 +26,7 @@ import {
   RESOURCES,
   STANDARDS,
   SYSTEM,
+  VITRINE_CASE,
 } from './design-engineering-data'
 import { LEARNING_TRACKS } from './learning-data'
 import styles from './design-engineering.module.css'
@@ -46,6 +47,12 @@ const NAV: DocsNavItem[] = [
   },
   { href: '#system', label: 'The system', number: '03', sectionId: 'system' },
   { href: '#case', label: 'The case', number: '04', sectionId: 'case' },
+  {
+    href: '#case-vitrine',
+    label: 'Vitrine case',
+    number: '04b',
+    sectionId: 'case-vitrine',
+  },
   { href: '#skills', label: 'Capabilities', number: '05', sectionId: 'skills' },
   { href: '#skill', label: 'The skill', number: '06', sectionId: 'skill' },
   {
@@ -352,6 +359,20 @@ export function DesignEngineeringPage() {
               </DocsHeading>
               <p className={styles.caseLede}>{CASE.subtitle}</p>
 
+              <div className={styles.caseSwitch}>
+                <a href="#case" className={styles.caseSwitchActive}>
+                  01 / Sunnyside
+                </a>
+                <a href="#case-vitrine">02 / Vitrine</a>
+                <Link
+                  href={VITRINE_CASE.library}
+                  className={styles.caseSwitchLibrary}
+                >
+                  Case library
+                  <ArrowUpRight className="size-3.5" aria-hidden />
+                </Link>
+              </div>
+
               <dl className={styles.caseMeta}>
                 <div>
                   <dt>Role</dt>
@@ -433,6 +454,126 @@ export function DesignEngineeringPage() {
               </DocsHeading>
               <ul className={styles.evidence}>
                 {CASE.evidence.map((item) => (
+                  <li key={item.label}>
+                    <SmartLink href={item.href} className={styles.evidenceLink}>
+                      {item.label}
+                    </SmartLink>
+                    <span>{item.note}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section className={styles.docSection}>
+              <DocsHeading id="case-vitrine" kicker="04 / Case 02">
+                {VITRINE_CASE.title}
+              </DocsHeading>
+              <p className={styles.caseLede}>{VITRINE_CASE.subtitle}</p>
+
+              <div className={styles.caseCtaRow}>
+                <Link href={VITRINE_CASE.href} className={styles.caseCta}>
+                  Read the full case
+                  <ArrowRight className="size-4" aria-hidden />
+                </Link>
+                <Link href={VITRINE_CASE.library} className={styles.textLink}>
+                  Case library
+                  <ArrowUpRight className="size-3.5" aria-hidden />
+                </Link>
+              </div>
+
+              <dl className={styles.caseMeta}>
+                <div>
+                  <dt>Role</dt>
+                  <dd>{VITRINE_CASE.role}</dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>{VITRINE_CASE.status}</dd>
+                </div>
+                <div>
+                  <dt>Stack</dt>
+                  <dd>Next.js · TypeScript · CSS Modules · dithercn</dd>
+                </div>
+                <div>
+                  <dt>System</dt>
+                  <dd>Glass, dither, tokens and a form kit</dd>
+                </div>
+              </dl>
+
+              <figure className={styles.figure}>
+                <Image
+                  src={VITRINE_CASE.cover}
+                  alt={VITRINE_CASE.coverAlt}
+                  width={1500}
+                  height={1125}
+                  sizes="(max-width: 900px) 100vw, 760px"
+                />
+                <figcaption>
+                  The Vitrine brand kit — Split V, Case and Frost, one Signal
+                  field, the form specimen and the audit.
+                </figcaption>
+              </figure>
+
+              <DocsHeading id="case-vitrine-brief" level={3} kicker="Brief">
+                What it had to do
+              </DocsHeading>
+              <p className={styles.prose}>{VITRINE_CASE.brief}</p>
+
+              <DocsHeading
+                id="case-vitrine-constraints"
+                level={3}
+                kicker="Constraints"
+              >
+                The edges
+              </DocsHeading>
+              <ul className={styles.list}>
+                {VITRINE_CASE.constraints.map((constraint) => (
+                  <li key={constraint}>{constraint}</li>
+                ))}
+              </ul>
+
+              <DocsHeading
+                id="case-vitrine-decisions"
+                level={3}
+                kicker="Decisions"
+              >
+                What I chose
+              </DocsHeading>
+              <ol className={styles.decisions}>
+                {VITRINE_CASE.decisions.map((decision, index) => (
+                  <li key={decision.title}>
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <div>
+                      <b>{decision.title}</b>
+                      <p>
+                        <CodeText>{decision.line}</CodeText>
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+
+              <DocsHeading id="case-vitrine-outcome" level={3} kicker="Outcome">
+                What shipped
+              </DocsHeading>
+              <ul className={styles.list}>
+                {VITRINE_CASE.outcomes.map((outcome) => (
+                  <li key={outcome} className={styles.checkLine}>
+                    <Check className={styles.checkIcon} aria-hidden />
+                    {outcome}
+                  </li>
+                ))}
+              </ul>
+
+              <DocsHeading
+                id="case-vitrine-evidence"
+                level={3}
+                kicker="Evidence"
+              >
+                Open the files
+              </DocsHeading>
+              <ul className={styles.evidence}>
+                {VITRINE_CASE.evidence.map((item) => (
                   <li key={item.label}>
                     <SmartLink href={item.href} className={styles.evidenceLink}>
                       {item.label}

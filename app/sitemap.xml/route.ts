@@ -44,6 +44,9 @@ export async function GET() {
     { url: '/music', changefreq: 'monthly', priority: 0.8 },
     // The visual system behind the landing page. Linked from the footer note.
     { url: '/sunnyside', changefreq: 'monthly', priority: 0.6 },
+    // The design-system case library, and Case 02's full page.
+    { url: '/design-system', changefreq: 'monthly', priority: 0.7 },
+    { url: '/design-system/vitrine', changefreq: 'monthly', priority: 0.7 },
   ].map((page) => ({ ...page, lastmod: fallbackLastmod }))
 
   const blogEntries = posts.map(

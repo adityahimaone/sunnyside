@@ -82,6 +82,17 @@ body[data-modal-open='true'] .dock {
     --glass-rim-hi: rgba(255, 255, 255, 0.55);
     --glass-rim-lo: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    --dither-ink: var(--primary);
+    --dither-paper: var(--background);
+    --dither-cell: 3px;
+    --dither-color-blue: oklch(0.56 0.18 248);
+    --dither-color-purple: oklch(0.53 0.22 302);
+    --dither-color-green: oklch(0.58 0.15 152);
+    --dither-color-pink: oklch(0.58 0.21 355);
+    --dither-color-orange: oklch(0.64 0.17 52);
+    --dither-color-red: oklch(0.55 0.21 27);
+    --dither-color-grey: oklch(0.55 0 0);
+    --dither-bloom: 0.6;
   }
 
   body {
@@ -116,6 +127,19 @@ body[data-modal-open='true'] .dock {
   /* Add focus styles for accessibility */
   :focus-visible {
     @apply outline-primary outline-2 outline-offset-2;
+  }
+  .dark {
+    --dither-ink: var(--primary);
+    --dither-paper: var(--background);
+    --dither-cell: 3px;
+    --dither-color-blue: oklch(0.72 0.14 240);
+    --dither-color-purple: oklch(0.7 0.18 304);
+    --dither-color-green: oklch(0.78 0.17 152);
+    --dither-color-pink: oklch(0.74 0.17 354);
+    --dither-color-orange: oklch(0.79 0.15 62);
+    --dither-color-red: oklch(0.68 0.2 25);
+    --dither-color-grey: oklch(0.66 0 0);
+    --dither-bloom: 1;
   }
 }
 
@@ -809,6 +833,24 @@ body[data-modal-open='true'] .dock {
   );
 
   --animate-led-pulse: led-pulse 2s ease-in-out infinite;
+
+  --color-dither-ink: var(--dither-ink);
+
+  --color-dither-paper: var(--dither-paper);
+
+  --color-dither-blue: var(--dither-color-blue);
+
+  --color-dither-purple: var(--dither-color-purple);
+
+  --color-dither-green: var(--dither-color-green);
+
+  --color-dither-pink: var(--dither-color-pink);
+
+  --color-dither-orange: var(--dither-color-orange);
+
+  --color-dither-red: var(--dither-color-red);
+
+  --color-dither-grey: var(--dither-color-grey);
 }
 @layer base {
   * {
@@ -1485,5 +1527,11 @@ html[data-interface='hidden'] [data-dock] {
 }
 
 html[data-interface='hidden'] [data-music-player] {
+  display: none !important;
+}
+/* Vitrine case: the route has its own header and footer, so the floating music
+   widget stands down. The attribute is set by features/vitrine/components/
+   case-chrome.tsx and removed on unmount. */
+body[data-vt-case='true'] [data-music-player] {
   display: none !important;
 }
