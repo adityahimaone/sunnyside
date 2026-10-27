@@ -8,14 +8,9 @@ export const size = {
 export const contentType = 'image/png'
 
 /**
- * The homepage had no generated OG image. Its metadata pointed `openGraph.images`
- * and `twitter.images` at a ucarecdn hotlink — a third-party CDN holding the
- * most-shared asset on the site, outside version control and replaceable by
- * anyone with the URL. That is a single point of failure for every link to `/`.
- *
- * /projects and /blog/[slug] already generate their own, so this brings the root
- * in line: same 1200x630, same visual language, and it is served from
- * `/opengraph-image` alongside the rest.
+ * Sunnyside / Side A social card:
+ * Warm paper ground (#f3ecdf), tactile studio card with dark ink border and drop shadow,
+ * cobalt "AH" monogram badge, tangerine "DESIGN ENGINEER" tag, and display title.
  */
 export default function Image() {
   return new ImageResponse(
@@ -25,86 +20,172 @@ export default function Image() {
           height: '100%',
           width: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#09090b',
+          backgroundColor: '#f3ecdf',
           backgroundImage:
-            'radial-gradient(circle at 25px 25px, #27272a 2px, transparent 0), radial-gradient(circle at 75px 75px, #27272a 2px, transparent 0)',
-          backgroundSize: '100px 100px',
-          padding: '80px',
+            'radial-gradient(circle at 20px 20px, rgba(25, 26, 46, 0.08) 1.5px, transparent 0)',
+          backgroundSize: '28px 28px',
+          padding: '48px',
         }}
       >
         <div
           style={{
+            width: '100%',
+            height: '100%',
             display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            marginBottom: '24px',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            backgroundColor: '#fffaf1',
+            borderRadius: '28px',
+            border: '3px solid #191a2e',
+            boxShadow: '14px 16px 0px #191a2e',
+            padding: '52px 64px',
           }}
         >
+          {/* Top Bar: Monogram, Tag, Telemetry */}
           <div
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              background: '#273281',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontSize: '18px',
-              fontWeight: 'bold',
+              justifyContent: 'space-between',
+              width: '100%',
             }}
           >
-            A
-          </div>
-          <span style={{ fontSize: '20px', color: '#a1a1aa', fontWeight: 500 }}>
-            adityahimaone.space
-          </span>
-        </div>
-        <h1
-          style={{
-            fontSize: '68px',
-            fontWeight: 'bold',
-            color: '#ffffff',
-            lineHeight: 1.1,
-            letterSpacing: '-0.02em',
-            maxWidth: '900px',
-            marginBottom: '20px',
-          }}
-        >
-          Aditya Himawan
-        </h1>
-        <p
-          style={{
-            fontSize: '28px',
-            color: '#a1a1aa',
-            maxWidth: '820px',
-            marginBottom: '28px',
-          }}
-        >
-          Frontend Engineer — React, Next.js and TypeScript for products used by
-          15K+ people.
-        </p>
-        <div
-          style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' as const }}
-        >
-          {['React', 'Next.js', 'TypeScript', 'Tailwind CSS'].map((tech) => (
-            <span
-              key={tech}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div
+                style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '14px',
+                  background: '#3d53d6',
+                  border: '2px solid #191a2e',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fffaf1',
+                  fontSize: '22px',
+                  fontWeight: 900,
+                  boxShadow: '3px 3px 0px #191a2e',
+                }}
+              >
+                AH
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#ff6a2b',
+                  color: '#191a2e',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  border: '2px solid #191a2e',
+                  boxShadow: '3px 3px 0px #191a2e',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  letterSpacing: '0.14em',
+                }}
+              >
+                <span>✳</span>
+                <span>DESIGN ENGINEER</span>
+              </div>
+            </div>
+
+            <div
               style={{
-                fontSize: '18px',
-                color: '#a1a1aa',
-                background: '#18181b',
-                padding: '8px 16px',
-                borderRadius: '9999px',
-                border: '1px solid #27272a',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                color: '#5f5b6e',
+                fontSize: '14px',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
               }}
             >
-              {tech}
+              <span>JAKARTA, GMT+7</span>
+              <span>·</span>
+              <span>SIDE A / 2026</span>
+            </div>
+          </div>
+
+          {/* Main Title & Lede */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h1
+              style={{
+                fontSize: '64px',
+                fontWeight: 900,
+                color: '#191a2e',
+                lineHeight: 1.05,
+                letterSpacing: '-0.04em',
+                margin: 0,
+              }}
+            >
+              Interfaces with a pulse.
+            </h1>
+            <p
+              style={{
+                fontSize: '24px',
+                color: '#5f5b6e',
+                lineHeight: 1.4,
+                margin: 0,
+                maxWidth: '920px',
+                fontWeight: 500,
+              }}
+            >
+              Aditya Himawan — building product interfaces in React, Next.js, and TypeScript.
+              Tactile design systems, honest motion, and thoughtful digital details.
+            </p>
+          </div>
+
+          {/* Bottom Bar: Stack pills and domain */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+              paddingTop: '20px',
+              borderTop: '2px dashed rgba(25, 26, 46, 0.18)',
+            }}
+          >
+            <div style={{ display: 'flex', gap: '10px' }}>
+              {[
+                'React',
+                'Next.js',
+                'TypeScript',
+                'Design Systems',
+                'Motion',
+              ].map((tech) => (
+                <span
+                  key={tech}
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    letterSpacing: '0.06em',
+                    color: '#191a2e',
+                    background: '#e8ebff',
+                    padding: '6px 14px',
+                    borderRadius: '999px',
+                    border: '1.5px solid rgba(25, 26, 46, 0.25)',
+                  }}
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+
+            <span
+              style={{
+                fontSize: '16px',
+                fontWeight: 700,
+                color: '#3d53d6',
+                letterSpacing: '0.04em',
+              }}
+            >
+              adityahimaone.space
             </span>
-          ))}
+          </div>
         </div>
       </div>
     ),

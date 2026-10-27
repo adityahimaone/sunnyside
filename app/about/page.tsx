@@ -6,12 +6,12 @@ import { WEBSITE_URL } from '@/lib/constants'
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'Aditya Himawan is a frontend engineer in Jakarta building React, Next.js and TypeScript products — including platforms used by 15K+ people.',
+    'Aditya Himawan is a design engineer in Jakarta building React, Next.js and TypeScript products — crafting tactile systems, honest motion and thoughtful digital details.',
   alternates: { canonical: '/about' },
   openGraph: {
     title: 'About — Aditya Himawan',
     description:
-      'Frontend engineer in Jakarta. React, Next.js and TypeScript, and the infrastructure underneath.',
+      'Design engineer in Jakarta. React, Next.js and TypeScript, and the tactile systems underneath.',
     url: `${WEBSITE_URL}/about`,
     type: 'profile',
   },

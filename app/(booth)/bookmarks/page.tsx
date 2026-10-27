@@ -32,9 +32,9 @@ export async function generateMetadata({
 
   if (unfiltered && page === 1) {
     return {
-      title: 'Curated Bookmarks | Web Resources & Tools',
+      title: 'Curated Bookmarks | Design & Engineering Resources',
       description:
-        'A curated list of developer tools, design resources, audio synthesis frameworks, and articles collected by Aditya.',
+        'A curated library of design engineering tools, interface patterns, web typography, and technical articles collected by Aditya Himawan.',
       alternates: { canonical: '/bookmarks' },
     }
   }

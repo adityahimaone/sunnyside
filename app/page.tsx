@@ -4,7 +4,15 @@ import { JsonLd, person, webSite } from '@/lib/structured-data'
 
 export default async function Home() {
   const jsonLd = person({
+    description:
+      'Design engineer building product interfaces in React, Next.js, and TypeScript. Crafting tactile systems, honest motion, and thoughtful digital details.',
     knowsAbout: [
+      'Design Engineering',
+      'Design Systems',
+      'UI/UX Engineering',
+      'Motion Design',
+      'Frontend Architecture',
+      'Creative Development',
       'React',
       'Next.js',
       'TypeScript',

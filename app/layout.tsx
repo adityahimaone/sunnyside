@@ -30,11 +30,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(WEBSITE_URL),
   title: {
-    default: 'Aditya Himawan — Frontend Engineer',
+    default: 'Aditya Himawan — Design Engineer',
     template: '%s | Aditya Himawan',
   },
   description:
-    'Frontend Engineer with 4+ years building production web apps with React, Next.js, and TypeScript — leading platforms serving 15K+ users. Music-themed interactive portfolio.',
+    'Design engineer building product interfaces in React, Next.js, and TypeScript. Crafting tactile systems, honest motion, and thoughtful digital details.',
   icons: {
     icon: [
       {
@@ -60,18 +60,18 @@ export const metadata: Metadata = {
       }
     : {}),
   openGraph: {
-    title: 'Aditya Himawan — Frontend Engineer',
+    title: 'Aditya Himawan — Design Engineer',
     type: 'website',
     images: ['/opengraph-image'],
     description:
-      'Frontend Engineer with 4+ years building production web apps with React, Next.js, and TypeScript — leading platforms serving 15K+ users.',
+      'Design engineer building product interfaces in React, Next.js, and TypeScript. Crafting tactile systems, honest motion, and thoughtful digital details.',
   },
   twitter: {
     card: 'summary_large_image',
     site: '@adityahimaone',
-    title: 'Aditya Himawan — Frontend Engineer',
+    title: 'Aditya Himawan — Design Engineer',
     description:
-      'Frontend Engineer with 4+ years building production web apps with React, Next.js, and TypeScript.',
+      'Design engineer building product interfaces in React, Next.js, and TypeScript. Crafting tactile systems, honest motion, and thoughtful digital details.',
     images: ['/opengraph-image'],
   },
 }

@@ -9,12 +9,12 @@ import { WEBSITE_URL } from '@/lib/constants'
 export const metadata: Metadata = {
   title: 'Shipped Work',
   description:
-    'Production frontend systems, interfaces and experiments built with Next.js, React and TypeScript — including the code behind this portfolio.',
+    'Production design engineering systems, tactile interfaces and experiments built with Next.js, React and TypeScript — including the code behind this portfolio.',
   alternates: { canonical: '/projects' },
   openGraph: {
     title: 'Shipped Work — Aditya Himawan',
     description:
-      'Production frontend systems, interfaces and experiments built from architecture through interaction.',
+      'Production design systems, tactile interfaces and experiments built from architecture through interaction.',
     url: `${WEBSITE_URL}/projects`,
     type: 'website',
     // No explicit image. Next replaces the root openGraph block rather than

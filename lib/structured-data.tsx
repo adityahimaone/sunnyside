@@ -282,7 +282,7 @@ export function person({
     // Without an `image` a Person entity has nothing for a knowledge panel to
     // show, and the site already has a public avatar to point at.
     image: `${WEBSITE_URL}/memoji-1.png`,
-    jobTitle: 'Frontend Engineer',
+    jobTitle: 'Design Engineer',
     email,
     ...(description ? { description } : {}),
     address: {
