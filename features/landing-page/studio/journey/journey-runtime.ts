@@ -259,8 +259,9 @@ export function runJourney(layer: HTMLElement): () => void {
     if (photo) {
       const rect = photo.getBoundingClientRect()
       const q = clamp01((vh - rect.top) / (vh + rect.height))
-      photo.style.translate = `0 ${(0.5 - q) * 56}px`
-      photo.style.rotate = `${(q - 0.5) * 12}deg`
+      // Small drift only: the thunder sticker is docked to the photo's edge,
+      // so a large rotation would visibly peel it off the frame.
+      photo.style.translate = `0 ${(0.5 - q) * 20}px`
     }
     if (marquee) {
       const target = Math.max(-2.4, Math.min(2.4, velocity / 700))

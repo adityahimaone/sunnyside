@@ -115,7 +115,7 @@ export const FLYERS: readonly FlyerSpec[] = [
     id: 'bolt',
     kind: 'bolt',
     from: 'bolt',
-    mobile: false,
+    mobile: true,
     params: {
       lane: 0.06,
       arc: 0.2,
@@ -124,7 +124,15 @@ export const FLYERS: readonly FlyerSpec[] = [
       wobble: 16,
       delay: 0.26,
     },
-    docks: [{ at: '#about', x: 0.28, oy: 58, rot: -14, size: 60 }],
+    docks: [
+      {
+        at: '[data-journey-dock="about-bolt"]',
+        x: 0.5,
+        oy: 0,
+        rot: -14,
+        size: 60,
+      },
+    ],
   },
   {
     id: 'sun',

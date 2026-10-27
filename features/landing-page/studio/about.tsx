@@ -4,7 +4,7 @@ import Image from 'next/image'
 
 import { cn } from '@/lib/utils'
 
-import { Squiggle, Sun } from './doodles'
+import { Squiggle } from './doodles'
 import { Reveal } from './reveal'
 import { Tilt } from './tilt'
 import { SectionHead, SectionNext } from './section-head'
@@ -79,9 +79,11 @@ export function About() {
             />
             <Reveal delay={0.06} y={32}>
               <div className={styles.photoStage} data-about-photo>
-                <span className={styles.photoLight} aria-hidden>
-                  <Sun className="w-full" />
-                </span>
+                <span
+                  className={styles.photoBoltDock}
+                  data-journey-dock="about-bolt"
+                  aria-hidden
+                />
                 <Tilt className={styles.photoTilt} max={3.5} lift={4}>
                   <div className={styles.photoCard} data-journey="photo">
                     <span
