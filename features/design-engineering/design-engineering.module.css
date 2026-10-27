@@ -579,6 +579,17 @@
   vertical-align: middle;
 }
 
+.tokenCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.tokenCell code {
+  color: var(--ss-muted);
+  font-size: 0.72em;
+}
+
 .typeSample {
   display: block;
   max-width: 28ch;

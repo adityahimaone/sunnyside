@@ -82,8 +82,13 @@ ${SYSTEM.lede}
 ### Colour
 
 ${table(
-  ['Name', 'Hex', 'Role'],
-  SYSTEM.swatches.map((swatch) => [swatch.name, swatch.hex, swatch.role]),
+  ['Name', 'Token', 'Hex', 'Role'],
+  SYSTEM.swatches.map((swatch) => [
+    swatch.name,
+    swatch.token,
+    swatch.hex,
+    swatch.role,
+  ]),
 )}
 
 ### Type

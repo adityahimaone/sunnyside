@@ -285,7 +285,7 @@ export function DesignEngineeringPage() {
               </DocsHeading>
               <Table
                 caption="Sunnyside colour tokens"
-                head={['Swatch', 'Name', 'Hex', 'Role']}
+                head={['Swatch', 'Token', 'Hex', 'Role']}
                 rows={SYSTEM.swatches.map((swatch) => [
                   <span
                     key={swatch.name}
@@ -293,7 +293,13 @@ export function DesignEngineeringPage() {
                     style={{ background: swatch.hex }}
                     aria-hidden
                   />,
-                  <b key={`${swatch.name}-name`}>{swatch.name}</b>,
+                  <span
+                    key={`${swatch.name}-token`}
+                    className={styles.tokenCell}
+                  >
+                    <b>{swatch.name}</b>
+                    <code>{swatch.token}</code>
+                  </span>,
                   <code key={`${swatch.name}-hex`}>{swatch.hex}</code>,
                   swatch.role,
                 ])}

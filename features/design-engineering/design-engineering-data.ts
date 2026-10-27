@@ -210,11 +210,26 @@ export const SYSTEM = {
   title: 'One paper. One loud field. One drawer of marks.',
   lede: 'Sunnyside is not a component library with a landing page attached. It is a visual language with a specimen, a brand kit, and the archive that uses them. The page you are reading is built in it.',
   swatches: [
-    { name: 'Paper', hex: '#f3ecdf', role: 'The room' },
-    { name: 'Ink', hex: '#191a2e', role: 'Type + edges' },
-    { name: 'Cobalt', hex: '#3d53d6', role: 'One loud field' },
-    { name: 'Butter', hex: '#ffd23f', role: 'Sun + focus' },
-    { name: 'Tangerine', hex: '#ff6a2b', role: 'Annotation' },
+    { name: 'Paper', token: '--ss-paper', hex: '#f3ecdf', role: 'The room' },
+    { name: 'Ink', token: '--ss-ink', hex: '#191a2e', role: 'Type + edges' },
+    {
+      name: 'Cobalt',
+      token: '--ss-cobalt',
+      hex: '#3d53d6',
+      role: 'One loud field',
+    },
+    {
+      name: 'Butter',
+      token: '--ss-butter',
+      hex: '#ffd23f',
+      role: 'Sun + focus',
+    },
+    {
+      name: 'Tangerine',
+      token: '--ss-tangerine',
+      hex: '#ff6a2b',
+      role: 'Annotation',
+    },
   ],
   voices: [
     { name: 'Syne 800', role: 'Display', sample: 'Interfaces with a pulse.' },
