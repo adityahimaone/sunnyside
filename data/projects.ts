@@ -66,7 +66,7 @@ const SEEDS: Seed[] = [
     description:
       'A control plane for coding agents. Boards and tasks live in one place, a dispatcher claims each one, and results wait in review until someone approves the diff.',
     cover: '/work/switchyard-cover.webp',
-    url: 'https://github.com/adityahimaone/switchyard',
+    url: 'https://kanban.adityahimaone.space/board/default',
     genre: 'Developer tools',
     problem: 'Internal tools',
     year: 2024,
@@ -87,7 +87,7 @@ const SEEDS: Seed[] = [
     description:
       'A manufacturing group running several plants on one site. Content, catalogue and enquiry flows rebuilt so the sales team stopped maintaining duplicate pages.',
     cover: '/work/primarindo-asia-cover.webp',
-    url: 'https://primarindo.niqcode.com/',
+    url: 'https://www.primarindo.co.id/',
     genre: 'Corporate',
     problem: 'Marketing sites',
     year: 2024,
@@ -108,7 +108,7 @@ const SEEDS: Seed[] = [
     description:
       'A habit tracker built around streaks and weekly review rather than daily guilt. Local-first, so the data never leaves the device.',
     cover: '/work/habit-tracker-cover.webp',
-    url: 'https://habit.adityahimaone.space/',
+    url: 'https://habit.adityahimaone.space/today/',
     genre: 'Utility',
     problem: 'Offline-capable products',
     year: 2026,

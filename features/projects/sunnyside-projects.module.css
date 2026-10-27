@@ -94,6 +94,7 @@
 
 .sleeveArt :global(img) {
   object-fit: cover;
+  object-position: top center;
 }
 
 .sleeveGenerated,
@@ -219,6 +220,7 @@
 
 .deckCover :global(img) {
   object-fit: cover;
+  object-position: top center;
 }
 
 .deckGenerated {
@@ -616,6 +618,7 @@
 
 .cardArt :global(img) {
   object-fit: cover;
+  object-position: top center;
   transition: transform 500ms var(--ss-ease);
 }
 
