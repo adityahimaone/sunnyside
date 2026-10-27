@@ -1,15 +1,21 @@
 #!/usr/bin/env node
 /**
- * Project Cover & Thumbnail Generator for Sunnyside Portfolio
+ * Universal Project Cover & Thumbnail Generator for Sunnyside Portfolio
  *
- * Captures live project screenshots via Brave Browser headless CDP
+ * Captures live web applications or ANY URL using Brave Browser headless CDP
  * and formats them into high-DPI 16:10 WebP cards matching the Sunnyside design system.
  *
  * Usage:
- *   pnpm generate-covers              # Captures and updates all project covers
- *   pnpm generate-covers switchyard   # Captures only Switchyard
- *   pnpm generate-covers habit        # Captures only Habit Tracker
- *   pnpm generate-covers primarindo   # Captures only Primarindo
+ *   # 1. Capture ANY arbitrary website or app:
+ *   pnpm generate-covers https://stripe.com
+ *   pnpm generate-covers https://my-app.com --out public/work/my-app.webp --mode mobile-mockup
+ *   pnpm generate-covers --url https://github.com --width 1440 --height 900
+ *
+ *   # 2. Portfolio presets:
+ *   pnpm generate-covers              # Captures and updates all portfolio project presets
+ *   pnpm generate-covers switchyard   # Captures Switchyard (Light Mode, sidebar open, Blocked->Done)
+ *   pnpm generate-covers habit        # Captures Habit Tracker (Mobile device mockup)
+ *   pnpm generate-covers primarindo   # Captures Primarindo (16:10 Desktop)
  */
 
 import { spawn, execSync } from 'node:child_process';
@@ -22,7 +28,7 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 const OUTPUT_DIR = path.join(ROOT, 'public/work');
 
-// 1. Helper to launch headless Brave with CDP
+// 1. Launch Brave Headless with CDP
 async function launchBrave(options = {}) {
   const port = options.port || (9500 + Math.floor(Math.random() * 400));
   const tmpDir = `/tmp/brave_cdp_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
@@ -109,7 +115,7 @@ async function launchBrave(options = {}) {
   };
 }
 
-// 2. Helper to get Switchyard session cookie from local Brave profile or fallback
+// 2. Cookie extraction from local Brave profile
 function getSwitchyardCookie() {
   try {
     const pyScript = `
@@ -146,110 +152,17 @@ if enc_val[:3] == b'v10':
     val = dec.update(enc_val[3:]) + dec.finalize()
     pad = val[-1]
     raw = val[:-pad].decode('utf-8', errors='ignore')
-    # strip hash prefix
     print(raw[32:])
 `;
     const res = execSync(`python3 -c "${pyScript}"`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
     const cookie = res.trim();
     if (cookie && cookie.length > 20) return cookie;
   } catch {}
-  // Default fallback known session
   return '30efbf8b90f63df4fdac3be5f3ec1a90e1d676c7b453d2ea06e39056422f8515';
 }
 
-// 3. Switchyard Capture (Light Mode, Sidebar open, Blocked → Review → Done, exactly like Image 2)
-async function captureSwitchyard() {
-  console.log('→ Capturing Switchyard (Light Mode, Sidebar open, natural 1:1 scale matching Image 2)...');
-  const browser = await launchBrave();
-  const cookie = getSwitchyardCookie();
-
-  await browser.send('Network.enable');
-  await browser.send('Network.setCookie', {
-    name: 'kanban_session',
-    value: cookie,
-    domain: 'kanban.adityahimaone.space',
-    path: '/',
-    secure: true,
-    httpOnly: true
-  });
-
-  // Exactly matching Image 2 framing (1024 x 528 at 2x scale = 2048 x 1056)
-  await browser.send('Emulation.setDeviceMetricsOverride', {
-    width: 1024,
-    height: 528,
-    deviceScaleFactor: 2,
-    mobile: false
-  });
-
-  await browser.send('Page.enable');
-  await browser.send('Page.navigate', { url: 'https://kanban.adityahimaone.space/board/default' });
-  await new Promise((r) => setTimeout(r, 4500));
-
-  await browser.send('Runtime.evaluate', {
-    expression: `(() => {
-      // 1. Force Light Mode
-      localStorage.setItem('kb-theme', 'light');
-      document.documentElement.classList.remove('dark');
-      document.documentElement.dataset.theme = 'light';
-
-      // 2. Ensure sidebar is visible and open (natural state)
-      const aside = document.querySelector('aside') || document.querySelector('nav');
-      if (aside) aside.style.display = '';
-
-      // 3. Natural scroll so Blocked is right after sidebar
-      const allH2 = Array.from(document.querySelectorAll('h2'));
-      const blocked = allH2.find(el => el.innerText.trim() === 'Blocked');
-      if (blocked) {
-        let col = blocked;
-        while (col && col.parentElement && !col.parentElement.className.includes('overflow-x')) {
-          col = col.parentElement;
-        }
-        const scrollContainer = col.parentElement;
-        scrollContainer.scrollLeft = col.offsetLeft - 12;
-      }
-    })()`
-  });
-
-  await new Promise((r) => setTimeout(r, 1000));
-  const shot = await browser.send('Page.captureScreenshot', { format: 'png' });
-  await browser.close();
-
-  const tmpPng = '/tmp/switchyard_raw.png';
-  fs.writeFileSync(tmpPng, Buffer.from(shot.data, 'base64'));
-
-  const targetPath = path.join(OUTPUT_DIR, 'switchyard-cover.webp');
-  execSync(`python3 -c "
-from PIL import Image
-im = Image.open('${tmpPng}')
-im.save('${targetPath}', 'WEBP', quality=92, method=6)
-"`);
-  console.log(`✓ Switchyard updated: ${targetPath}`);
-}
-
-// 4. Habit Tracker Capture (Native Retina Mobile in Floating Device Canvas)
-async function captureHabitTracker() {
-  console.log('→ Capturing Habit Tracker (Native Retina Mobile Device Canvas)...');
-  const browser = await launchBrave();
-  await browser.send('Page.enable');
-
-  // Native iPhone resolution
-  await browser.send('Emulation.setDeviceMetricsOverride', {
-    width: 412,
-    height: 892,
-    deviceScaleFactor: 2,
-    mobile: true
-  });
-
-  await browser.send('Page.navigate', { url: 'https://habit.adityahimaone.space/today/' });
-  await new Promise((r) => setTimeout(r, 4000));
-
-  const shot = await browser.send('Page.captureScreenshot', { format: 'png' });
-  await browser.close();
-
-  const tmpMobile = '/tmp/habit_native_mobile.png';
-  fs.writeFileSync(tmpMobile, Buffer.from(shot.data, 'base64'));
-
-  const targetPath = path.join(OUTPUT_DIR, 'habit-tracker-cover.webp');
+// 3. Composite Mobile Screenshot into Floating Device Mockup Canvas (16:10)
+function compositeMobileMockup(srcMobilePng, dstWebpPath) {
   const pyMockup = `
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -266,7 +179,7 @@ for r in range(450, 0, -10):
 glow = glow.filter(ImageFilter.GaussianBlur(70))
 bg = Image.blend(bg, glow, 0.6)
 
-screen = Image.open('${tmpMobile}').convert('RGBA')
+screen = Image.open('${srcMobilePng}').convert('RGBA')
 sw, sh = screen.size
 
 dev_h = 770
@@ -300,51 +213,162 @@ bezel_draw = ImageDraw.Draw(bezel)
 bezel_draw.rounded_rectangle([0, 0, dev_w - 1, dev_h - 1], radius=dev_r, outline=(255, 255, 255, 38), width=2)
 bg.paste(bezel, (pos_x, pos_y), bezel)
 
-bg.save('${targetPath}', 'WEBP', quality=88, method=6)
+bg.save('${dstWebpPath}', 'WEBP', quality=88, method=6)
 `;
   execSync(`python3 -c "${pyMockup}"`);
-  console.log(`✓ Habit Tracker updated: ${targetPath}`);
 }
 
-// 5. Primarindo Capture (16:10 Desktop with full hero)
-async function capturePrimarindo() {
-  console.log('→ Capturing Primarindo (16:10 Desktop)...');
+// 4. General-purpose Capture Function for ANY URL
+export async function captureUrl(options) {
+  const url = options.url;
+  const outputPath = options.out || path.join(OUTPUT_DIR, `${new URL(url).hostname.replace(/[^a-z0-9]/gi, '_')}.webp`);
+  const mode = options.mode || 'desktop'; // 'desktop' | 'mobile' | 'mobile-mockup'
+  const width = options.width || (mode.startsWith('mobile') ? 412 : 1440);
+  const height = options.height || (mode.startsWith('mobile') ? 892 : 900);
+  const scale = options.scale || 2;
+  const waitMs = options.wait || 4000;
+  const zoom = options.zoom || null;
+  const theme = options.theme || null; // 'light' | 'dark'
+
+  console.log(`→ Capturing URL: ${url}`);
+  console.log(`  Mode: ${mode} (${width}x${height} @ ${scale}x) -> ${outputPath}`);
+
   const browser = await launchBrave();
   await browser.send('Page.enable');
+
+  if (options.cookie) {
+    await browser.send('Network.enable');
+    const [cName, cVal] = options.cookie.split('=');
+    await browser.send('Network.setCookie', {
+      name: cName,
+      value: cVal,
+      domain: new URL(url).hostname,
+      path: '/',
+      secure: true
+    });
+  }
+
   await browser.send('Emulation.setDeviceMetricsOverride', {
-    width: 1440,
-    height: 900,
-    deviceScaleFactor: 2,
-    mobile: false
+    width,
+    height,
+    deviceScaleFactor: scale,
+    mobile: mode.startsWith('mobile')
   });
 
-  await browser.send('Page.navigate', { url: 'https://www.primarindo.co.id/' });
-  await new Promise((r) => setTimeout(r, 4000));
+  await browser.send('Page.navigate', { url });
+  await new Promise((r) => setTimeout(r, waitMs));
 
-  await browser.send('Runtime.evaluate', {
-    expression: `(() => {
-      document.body.style.zoom = '0.85';
-    })()`
-  });
+  if (theme || zoom || options.js) {
+    await browser.send('Runtime.evaluate', {
+      expression: `(() => {
+        ${theme ? `
+          if ('${theme}' === 'light') {
+            localStorage.setItem('kb-theme', 'light');
+            document.documentElement.classList.remove('dark');
+            document.documentElement.dataset.theme = 'light';
+          } else if ('${theme}' === 'dark') {
+            localStorage.setItem('kb-theme', 'dark');
+            document.documentElement.classList.add('dark');
+            document.documentElement.dataset.theme = 'dark';
+          }
+        ` : ''}
+        ${zoom ? `document.body.style.zoom = '${zoom}';` : ''}
+        ${options.js ? options.js : ''}
+      })()`
+    });
+    await new Promise((r) => setTimeout(r, 600));
+  }
 
-  await new Promise((r) => setTimeout(r, 800));
   const shot = await browser.send('Page.captureScreenshot', { format: 'png' });
   await browser.close();
 
-  const tmpPng = '/tmp/primarindo_raw.png';
+  const tmpPng = `/tmp/capture_${Date.now()}.png`;
   fs.writeFileSync(tmpPng, Buffer.from(shot.data, 'base64'));
 
-  const targetPath = path.join(OUTPUT_DIR, 'primarindo-asia-cover.webp');
-  execSync(`python3 -c "
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+
+  if (mode === 'mobile-mockup') {
+    compositeMobileMockup(tmpPng, outputPath);
+  } else {
+    // 16:10 high-DPI output
+    const targetW = options.targetWidth || 1440;
+    const targetH = Math.round(targetW * (height / width));
+    execSync(`python3 -c "
 from PIL import Image
 im = Image.open('${tmpPng}')
-im_resized = im.resize((1440, 900), Image.Resampling.LANCZOS)
-im_resized.save('${targetPath}', 'WEBP', quality=88, method=6)
+im_resized = im.resize((${targetW}, ${targetH}), Image.Resampling.LANCZOS)
+im_resized.save('${outputPath}', 'WEBP', quality=88, method=6)
 "`);
-  console.log(`✓ Primarindo updated: ${targetPath}`);
+  }
+
+  try { fs.unlinkSync(tmpPng); } catch {}
+  console.log(`✓ Saved: ${outputPath}`);
+  return outputPath;
 }
 
-// 6. Update manifest.json with actual file sizes
+// 5. Preset: Switchyard (Light Mode, sidebar open, Blocked->Done, natural framing)
+async function captureSwitchyard() {
+  const cookie = getSwitchyardCookie();
+  const outputPath = path.join(OUTPUT_DIR, 'switchyard-cover.webp');
+
+  await captureUrl({
+    url: 'https://kanban.adityahimaone.space/board/default',
+    out: outputPath,
+    mode: 'desktop',
+    width: 1180,
+    height: 738, // 16:10, slightly zoomed out from 1024x528 to fit naturally without clipping
+    scale: 2,
+    cookie: `kanban_session=${cookie}`,
+    theme: 'light',
+    js: `
+      const aside = document.querySelector('aside') || document.querySelector('nav');
+      if (aside) aside.style.display = '';
+
+      const allH2 = Array.from(document.querySelectorAll('h2'));
+      const blocked = allH2.find(el => el.innerText.trim() === 'Blocked');
+      if (blocked) {
+        let col = blocked;
+        while (col && col.parentElement && !col.parentElement.className.includes('overflow-x')) {
+          col = col.parentElement;
+        }
+        const scrollContainer = col.parentElement;
+        scrollContainer.scrollLeft = col.offsetLeft - 12;
+      }
+    `,
+    targetWidth: 1440
+  });
+}
+
+// 6. Preset: Habit Tracker (Native Retina Mobile in Floating Device Canvas)
+async function captureHabitTracker() {
+  const outputPath = path.join(OUTPUT_DIR, 'habit-tracker-cover.webp');
+  await captureUrl({
+    url: 'https://habit.adityahimaone.space/today/',
+    out: outputPath,
+    mode: 'mobile-mockup',
+    width: 412,
+    height: 892,
+    scale: 2,
+    wait: 4000
+  });
+}
+
+// 7. Preset: Primarindo (16:10 Desktop)
+async function capturePrimarindo() {
+  const outputPath = path.join(OUTPUT_DIR, 'primarindo-asia-cover.webp');
+  await captureUrl({
+    url: 'https://www.primarindo.co.id/',
+    out: outputPath,
+    mode: 'desktop',
+    width: 1440,
+    height: 900,
+    scale: 2,
+    zoom: '0.85',
+    targetWidth: 1440
+  });
+}
+
+// 8. Update manifest.json with actual file sizes
 function updateManifest() {
   const manifestPath = path.join(OUTPUT_DIR, 'manifest.json');
   const getKb = (name) => {
@@ -383,28 +407,74 @@ function updateManifest() {
   console.log(`✓ Manifest updated: ${manifestPath}`);
 }
 
-async function main() {
-  const target = (process.argv[2] || '').toLowerCase();
-  console.log('=== Sunnyside Project Cover Generator ===');
+// Parse CLI arguments
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const options = {};
 
-  if (target === 'switchyard') {
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--url' && args[i + 1]) {
+      options.url = args[++i];
+    } else if (arg === '--out' && args[i + 1]) {
+      options.out = args[++i];
+    } else if (arg === '--mode' && args[i + 1]) {
+      options.mode = args[++i];
+    } else if (arg === '--width' && args[i + 1]) {
+      options.width = parseInt(args[++i], 10);
+    } else if (arg === '--height' && args[i + 1]) {
+      options.height = parseInt(args[++i], 10);
+    } else if (arg === '--scale' && args[i + 1]) {
+      options.scale = parseFloat(args[++i]);
+    } else if (arg === '--zoom' && args[i + 1]) {
+      options.zoom = args[++i];
+    } else if (arg === '--theme' && args[i + 1]) {
+      options.theme = args[++i];
+    } else if (arg === '--cookie' && args[i + 1]) {
+      options.cookie = args[++i];
+    } else if (arg.startsWith('http://') || arg.startsWith('https://')) {
+      options.url = arg;
+    } else if (!options.preset && !arg.startsWith('-')) {
+      options.preset = arg.toLowerCase();
+    }
+  }
+
+  return options;
+}
+
+async function main() {
+  const opts = parseArgs();
+  console.log('=== Sunnyside Universal Thumbnail Generator ===');
+
+  // If a URL was given directly, capture that arbitrary URL
+  if (opts.url) {
+    await captureUrl(opts);
+    return;
+  }
+
+  // Preset dispatching
+  const preset = opts.preset || 'all';
+  if (preset === 'switchyard') {
     await captureSwitchyard();
-  } else if (target === 'habit' || target === 'habit-tracker') {
+  } else if (preset === 'habit' || preset === 'habit-tracker') {
     await captureHabitTracker();
-  } else if (target === 'primarindo' || target === 'primarindo-asia') {
+  } else if (preset === 'primarindo' || preset === 'primarindo-asia') {
+    await capturePrimarindo();
+  } else if (preset === 'all') {
+    await captureSwitchyard();
+    await captureHabitTracker();
     await capturePrimarindo();
   } else {
-    // Capture all
-    await captureSwitchyard();
-    await captureHabitTracker();
-    await capturePrimarindo();
+    console.error(`Unknown preset or command: "${preset}".`);
+    console.log('Provide a valid URL (e.g. "pnpm generate-covers https://example.com") or preset name.');
+    process.exit(1);
   }
 
   updateManifest();
-  console.log('=== All requested covers generated successfully! ===');
+  console.log('=== Done! ===');
 }
 
 main().catch((err) => {
-  console.error('Fatal error during cover generation:', err);
+  console.error('Fatal error during thumbnail generation:', err);
   process.exit(1);
 });

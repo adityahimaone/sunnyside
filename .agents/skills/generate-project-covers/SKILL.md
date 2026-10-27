@@ -5,31 +5,54 @@ description: Automatically captures and generates high-DPI 16:10 project thumbna
 
 # generate-project-covers
 
-Automates capturing, framing, and generating high-DPI 16:10 project thumbnail covers (`.webp`) for the Sunnyside portfolio projects:
-- **Switchyard**: Light Mode, sidebar open, board cleanly started from `Blocked` with `Review` and `Done`, balanced gutters.
-- **Habit Tracker**: Native Retina mobile capture in an elevated device mockup canvas with ambient dark emerald wash.
-- **Primarindo Asia**: 16:10 desktop hero framing showing navbar, corporate identity, and manufacturing facilities.
+Universal thumbnail generator that captures live screenshots for **ANY URL, web app, or link**, as well as the predefined Sunnyside portfolio projects. Outputs high-DPI 16:10 `.webp` cards optimized for the Sunnyside design system.
 
-## Execution
+## Usage
 
-Run the CLI generator script directly from the repository root:
+### 1. Capture ANY Arbitrary URL / Link / App
+
+You can pass any URL directly:
 
 ```bash
-# Capture and update all project covers:
+# Capture any URL in 16:10 desktop mode:
+pnpm generate-covers https://stripe.com --out public/work/stripe-cover.webp
+
+# Capture any mobile app in floating device mockup mode:
+pnpm generate-covers https://my-mobile-app.com --out public/work/app-cover.webp --mode mobile-mockup
+
+# Capture with custom dimensions, scale, or theme:
+pnpm generate-covers https://github.com --width 1440 --height 900 --theme light
+```
+
+**Options:**
+- `--url <url>`: Target URL to screenshot (also accepts raw URL as first argument).
+- `--out <path>`: Output `.webp` destination path.
+- `--mode <desktop|mobile|mobile-mockup>`:
+  - `desktop` *(default)*: Crisp 16:10 desktop viewport (`1440×900` @ 2x).
+  - `mobile`: Native phone viewport (`412×892` @ 2x).
+  - `mobile-mockup`: Native mobile screen floating inside a refined device bezel on an ambient dark glow background.
+- `--theme <light|dark>`: Injects theme preferences (`localStorage` and class updates).
+- `--zoom <number>`: Applies CSS zoom level if needed.
+- `--wait <ms>`: Delay in milliseconds for client apps (default `4000ms`).
+- `--cookie <name=val>`: Injects session cookies for authenticated apps.
+
+---
+
+### 2. Portfolio Project Presets
+
+Run preset shortcuts for existing portfolio items:
+
+```bash
+# Capture all portfolio projects:
 pnpm generate-covers
 
-# Capture only a specific project:
+# Capture only a specific project preset:
 pnpm generate-covers switchyard
 pnpm generate-covers habit
 pnpm generate-covers primarindo
 ```
 
-## How It Works
-
-1. **Browser Engine**: Launches local Brave Browser in headless mode (`--headless=new`) and connects via Chrome DevTools Protocol (CDP).
-2. **Session Decryption**: Extracts authenticated cookies (such as `kanban_session` for Switchyard) from the local Brave profile if present.
-3. **Framing & Viewports**:
-   - `switchyard`: Sets Light Mode (`localStorage.setItem('kb-theme', 'light')`), keeps sidebar open, positions `Blocked`, `Review`, and `Done` with 20px margins, and applies 0.90 zoom out to prevent edge clipping.
-   - `habit-tracker`: Captures at native 412×892 @ 2x scale, then uses Pillow/PIL to composite into a floating rounded device bezel with soft elevation shadow on an emerald glow background.
-   - `primarindo-asia`: Renders at 1440×900 with 0.85 scale to fit corporate hero branding and factory imagery.
-4. **Optimization**: Encodes directly to WebP (quality 88) at 1440×900 (16:10), saving output to `public/work/<slug>-cover.webp` and updating `public/work/manifest.json`.
+**Preset Configurations:**
+- **Switchyard**: Light Mode, sidebar open, starting cleanly at `Blocked` with `Review`, `Done`, and `Archived`, natural framing without clipping.
+- **Habit Tracker**: Native Retina iPhone capture inside an elevated mobile device mockup canvas with ambient dark emerald wash.
+- **Primarindo Asia**: 16:10 desktop hero framing showing corporate navbar, logo, headline, and manufacturing facility.
