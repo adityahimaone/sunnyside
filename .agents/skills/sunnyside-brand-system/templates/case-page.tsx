@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 
 /**
- * Single-page design-system / brand case scaffold.
+ * Single-page brand case scaffold. For a design-system specimen, use templates/design-system.html.
  *
  * Copy this into app/design-system/<slug>/page.tsx, replace SLUG and the token
  * block, and adapt the sections to the brief. It is a server component; for an

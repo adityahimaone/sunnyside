@@ -72,13 +72,17 @@ palette is a different brand.
 
 | Target | Use when | Rules |
 | --- | --- | --- |
-| **Single HTML** | Board, static case, mockup | One file + token block; native form; no build; render at 2× |
-| **TSX** | Design system, forms, interactive case | Server page + small client islands; shadcn/Radix; metadata API |
-| **Both** | Board + product page | One token source; HTML is the review artefact, TSX is the product |
+| **System specimen (HTML)** | Single-page design system, styleguide, docs | `design-system.html`; topbar + contents + hero + sections; one material |
+| **Product route (TSX)** | Design system inside an existing app | Host route or settings page; server page + small client islands; shadcn/Radix |
+| **Storybook/Ladle** | Component library with no page route | Stories + docs; the story is the proof; no metadata/sitemap |
+| **Simple mockup** | Board, static case, one-page proof | `single-page.html`; one file; no build; render at 2× |
 | **Pen** | A `.pen` source already exists | Use `pen-dev`; the code tokens and page are still the product |
 
-Use the brand skill's `templates/single-page.html` and
-`templates/case-page.tsx` as scaffolds. Copy them; do not rebuild a page shell.
+Use `templates/design-system.html` for a specimen, `templates/single-page.html`
+for a mockup, and `templates/case-page.tsx` for a case route. Copy them; do not
+rebuild a page shell. If the host has no route, do not create one. For a TSX
+specimen, keep the page server-rendered and move theme/nav/copy controls into
+small client islands.
 
 ## Implementation sequence
 
@@ -116,14 +120,20 @@ do not create `brand-blue` and `primary` in parallel.
 
 ### 3. Sections
 
-One route is enough for a proof page:
+Choose the page order from the surface, not a template:
 
-1. **Hero** — the one idea, the one effect, one sentence, 2 CTAs, 3–4 facts.
-2. **Material** — show the effect and the rule that keeps content readable.
-3. **System** — one real form plus an anatomy/states aside.
-4. **Tokens** — three layers, a small table, contrast pairs, downloads.
-5. **Audit** — resources, contract, engine check, named gaps.
-6. **Footer** — brand, downloads, links.
+- **System specimen** (closest to `/sunnyside`): topbar → contents → hero →
+  foundation → material → marks → colour → type → parts → motion → voice →
+  applications → tokens → audit/endcap.
+- **Product page:** hero → material → components → forms → tokens → audit.
+- **Case page:** brief → idea → decisions → system → outcome → audit.
+- **No page:** Storybook story, single HTML file or `.pen`; use the same section
+  order only where it helps.
+
+Keep the hero to one idea, one effect, one sentence, 2 CTAs and 3–4 facts. The
+material section shows the effect and the rule that keeps content readable. The
+parts/forms section is the proof. The tokens section is the source. The audit
+names the gaps.
 
 Use the brief's real copy. No lorem. If you use numbers, they must be an actual
 sequence; otherwise remove the numbered markers. If you accent one word, it must
@@ -239,27 +249,34 @@ loading. Add selected/checked where relevant.
 
 ### 8. Metadata, routes and QA
 
-Metadata:
+Metadata — only if the host renders web pages:
 
 - Title, description, canonical and `og:url` agree; OG/Twitter images are
   absolute; icons and `theme-color` are intentional; JSON-LD only when it maps to
   real content.
 - One metadata owner per page; no duplicates.
 
-Routes:
+Routes — only if the host has a router:
 
-- Case page, index card, manual section and `<case>/llms.txt` link to each other.
+- Use the host's route convention. Do not invent `/design-system`,
+  `/design-engineering` or a case library.
+- If a case index exists, link the case, index and any Markdown twin. If not,
+  skip it.
 - A moved route updates canonical, OG, icons, sitemap, llms, nav/footer, board
   URLs, audit evidence and tests. Run `next typegen` or restart the dev server;
   `.next` generated types are not source.
-- Case icons are segment-local.
+- If there is no route (standalone HTML, Storybook, pen), skip this block and
+  report **Not applicable**; do not create empty metadata or a sitemap.
+
+Read `sunnyside-brand-system/references/workspace-contexts.md` for the full
+context matrix.
 
 QA (run from the brand skill folder, or copy `scripts/` into the project):
 
 ```bash
 node <path-to-sunnyside-brand-system>/scripts/audit.mjs --manifest audit.json
 node <path-to-sunnyside-brand-system>/scripts/qa.mjs \
-  --url http://localhost:3000/design-system/<slug> \
+  --url <the surface URL or file:// path> \
   --out docs/screenshots --name <slug>
 ```
 
@@ -288,13 +305,14 @@ pass/gap table, not “looks good”.
 - use the brief's real content and labels;
 - reuse the project's primitives and conventions;
 - measure contrast and states;
-- ship the page, its metadata and its Markdown twin.
+- ship the surface; add metadata and a Markdown twin only if the host has them.
 
 **Do not**
 
 - redesign the mark, palette, type or effect;
 - introduce a second accent, a second effect or a new font;
 - build a component museum instead of the page;
+- invent a route, case library, sitemap or `llms.txt` the host does not have;
 - use live text as the wordmark;
 - hand-build a select/dialog/switch or focus trap;
 - use `transition: all`, gradient soup, glow as a primary affordance, or
@@ -315,24 +333,27 @@ pass/gap table, not “looks good”.
 ## Output contract
 
 ```
-app/design-system/page.tsx                 # case library (if multi-case)
-app/design-system/<slug>/page.tsx          # the proof
-app/design-system/<slug>/llms.txt/route.ts # Markdown twin
-features/<slug>/                            # tokens, module CSS, components
+design-system.html / <host-route>          # the proof surface
+features/<slug>/                            # tokens, CSS modules, components
 public/brand/<slug>/                        # real assets used by the page
 docs/<slug>-design-system-audit.md         # evidence + gaps
 ```
 
-Update sitemap, canonical, OG, icons, docs and the manual section in the same
-change. Keep generated output generated.
+Then, only if they exist: sitemap, canonical, OG, icons, llms twin and the manual
+section. For Storybook, add stories and docs; for pen, add `.pen` + exports; for
+print, add PDF/PNG + rules. Keep generated output generated.
 
 ## References
 
 - `sunnyside-brand-system/SKILL.md` — the brand decision and handoff.
 - `sunnyside-brand-system/references/ui-skills-fusion.md` — the audit and fused
   rules behind this skill.
+- `sunnyside-brand-system/references/visual-directions.md` — modern material systems.
+- `sunnyside-brand-system/references/workspace-contexts.md` — app, docs, portfolio,
+  standalone, Storybook, pen, print.
 - `sunnyside-brand-system/references/design-systems.md` — shadcn/Radix, forms.
 - `sunnyside-brand-system/references/typography.md` — type gate.
 - `sunnyside-brand-system/references/verification.md` — ship checklist.
 - `pen-dev/SKILL.md` — if the source is a `.pen`.
-- `sunnyside-brand-system/templates/` — page and board scaffolds.
+- `sunnyside-brand-system/templates/` — `design-system.html`, `single-page.html`,
+  `case-page.tsx`, `brandkit.html`.

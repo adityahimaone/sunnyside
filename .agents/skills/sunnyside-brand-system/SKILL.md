@@ -63,6 +63,19 @@ Before drawing, name four things:
 Remove the product name from the proposal. If it could belong to any product in
 the category, explore deeper before drawing.
 
+## Visual direction
+
+Choose a **material system**, not a trend label. One signature, then restraint.
+Read `references/visual-directions.md` before proposing.
+
+Current families worth knowing: liquid glass/glassmorphism, dither/halftone/1-bit,
+neo-brutalist/raw, editorial/Swiss, bento/modular, gradient mesh/aurora,
+grain/paper/risograph, 3D/WebGL, monochrome/pixel/ASCII.
+
+For each, the reference gives the use case, recipe, fallback and trap. The short
+version: one effect, content on a solid surface, measure the composite, respect
+reduced motion, and never use a trend as the only idea.
+
 ## Token budget
 
 - Read this file, then only the reference for the current mode.
@@ -77,13 +90,13 @@ the category, explore deeper before drawing.
 
 | Format | Best for | Rules |
 | --- | --- | --- |
-| **Single HTML** | Board, static case, mockup | One file + token block; real fonts/assets; no build; render at 2× |
-| **TSX** | Design system, forms, interactive case | Next/React + Tailwind v4; shadcn/Radix; one route; small client islands |
+| **System specimen** | Single-page design system, styleguide, docs | `design-system.html` (or TSX): topbar + contents + hero + foundations/material/marks/colour/type/parts/motion/voice/applications/tokens/audit |
+| **Board / mockup** | Brand board, static case, one-page proof | One file + token block; real fonts/assets; no build; render at 2× |
+| **TSX** | Product styleguide, forms, interactive case | Next/React + Tailwind v4; shadcn/Radix; host route or Storybook; small client islands |
 | **Both** | Board + product page | One token source; HTML is the review artefact, TSX is the product |
 | **pen.dev** | Visual source | `.pen` + 2× PNG; never the final wordmark/type/code |
 
-Start from `templates/single-page.html` or `templates/case-page.tsx`. Use the
-project’s existing fonts/tokens before adding a system.
+Start from `templates/design-system.html` for a specimen, `templates/single-page.html` for a simple mockup, or `templates/case-page.tsx` for a case route. Use the project’s existing fonts/tokens before adding a system.
 
 ## Stack defaults
 
@@ -145,7 +158,10 @@ Keep one; the rejection note becomes the guide.
 palette/type/tokens → board → icons → guide → audit.
 
 **Design system:** brief + one effect → token source → primitives → form kit →
-proof page → docs → audit.
+proof page → docs → audit. For a single-page specimen, follow the /sunnyside
+anatomy: topbar → contents → hero (name, version, promise, stats, sheet) →
+foundation → material → marks → colour → type → parts → motion → voice →
+applications → tokens → audit/endcap.
 
 **Mockup:** sentence + three refs → 10–20 tokens → one page (hero + 3–5 sections +
 one component group) → 1440/390 check → stop.
@@ -153,19 +169,25 @@ one component group) → 1440/390 check → stop.
 Recipes: `references/logo-system.md`, `references/board-and-images.md`,
 `references/tokens-and-docs.md`.
 
-## Case pages and routes
+## Surfaces, not assumptions
 
-- **Index** (`/design-system`) lists cases with cover, number, status, material,
-  link; use the project’s archive shell.
-- **Case** (`/design-system/<slug>`) is the full page; it owns its tokens/nav.
-- **Manual** (`/design-engineering`) gives each case a section with a switch and
-  a link to the full case.
-- **One Markdown twin per case** at `<case>/llms.txt`.
-- **Route move checklist:** canonical, OG, icons, sitemap, llms, nav/footer, board
-  URLs, audit evidence, tests; run `next typegen` or restart dev. Generated `.next`
-  types are not source.
-- Icons are segment-local; the index inherits the site icon.
+A brand kit can live in a product app, a marketing site, a docs site, a Storybook,
+a standalone HTML file, a pen/Figma workspace, or print. **Do not invent routes.**
+Read `references/workspace-contexts.md` and choose:
 
+| If the host has… | Build | Do not assume |
+| --- | --- | --- |
+| No UI / one deliverable | `design-system.html` or a board | A router, sitemap or llms twin |
+| Existing app shell | A host route, settings page or Storybook | `/design-system`, `/design-engineering` |
+| Docs site | Docs page + live specimens | A separate case library |
+| Portfolio/archive | Case index + case page only if the brief asks | That every system needs a case |
+| Component library | Storybook/Ladle stories + docs | A marketing page |
+| Pen/Figma workspace | `.pen`/Figma + 2× exports + `DESIGN.md` | A code route |
+
+If routes exist, use the host’s convention and update only what exists: canonical,
+OG, icons, sitemap, llms, nav/footer, tests. If no route exists, do not create
+empty metadata, a sitemap entry or a case card to satisfy a template. The
+specimen can be one file; the board can be the deliverable.
 ## Pen.dev
 
 Use the companion **`pen-dev`** skill for the full workflow. In short:
@@ -187,7 +209,7 @@ Run these from this skill folder, or copy `scripts/` into the project.
 
 ```bash
 node scripts/audit.mjs --manifest audit.json
-node scripts/qa.mjs --url http://localhost:3000/design-system/<slug> \
+node scripts/qa.mjs --url <the surface URL or file:// path> \
   --out docs/screenshots --name <slug>
 ```
 
@@ -203,7 +225,8 @@ screenshots. Full checklist: `references/verification.md`.
 - State selectors break easily under scripted edits; test off/on and both themes.
 - Dark inverse scopes drift; generate or sync them.
 - Route moves and boards overflow silently; use a checklist and inspect 100%/50%.
-- Fewer artifacts, more proof: index + one case + one manual section + one board.
+- Fewer artifacts, more proof: if the host has cases, index + one case + one
+  manual section + one board; otherwise one specimen + one board.
 
 Details: `references/lessons.md`; case: `examples/vitrine.md`.
 
@@ -226,9 +249,17 @@ without JS.
 brand/         brief.md, DESIGN.md, brandkit.html, <slug>-brandkit.png (3000×2250), assets/
 public/brand/<slug>/   mark*, wordmark, lockups, glyph, favicons, icons,
                        <slug>-brandkit.png, <slug>-tokens.css/json
-app/design-system/     page.tsx (library), <slug>/page.tsx, <slug>/llms.txt
-features/<slug>/       tokens.json, module.css, components/
 docs/                  <slug>-design-system-audit.md
+```
+
+Then the surface follows the host:
+
+```
+standalone      design-system.html
+app route       app/<host-route>/page.tsx + <host-route>/llms.txt (only if the host has one)
+storybook       <Component>.stories.tsx + docs
+pen             <slug>.pen + exports
+print           <slug>.pdf/png + rules
 ```
 
 For a design system add the component inventory and form states; for a mockup
@@ -245,7 +276,7 @@ pass. Hand off:
 - `public/brand/<slug>/` (mark, compact mark, wordmark, lockups, favicons, icons);
 - the board PNG and `brandkit.html`;
 - the component inventory, form states, motion rule and named gaps;
-- the audit and the target route/stack.
+- the audit and the target surface/stack (route, Storybook, standalone file, pen or print).
 
 Load **`implement-brand-system`** for the HTML/TSX build. It will not redesign
 the kit; it maps tokens, composes sections, uses shadcn/Radix or native controls,
@@ -258,26 +289,28 @@ and runs the QA gate.
 - `board-and-images.md` — board, render pipeline, image QA.
 - `image-direction.md` — prompts and provenance.
 - `tokens-and-docs.md` — token layers and agent-readable docs.
-- `design-systems.md` — shadcn/Radix, primitives, forms, case page.
+- `design-systems.md` — shadcn/Radix, primitives, forms, surfaces.
+- `visual-directions.md` — liquid glass, dither, brutalist, editorial, bento, 3D, grain and sources.
+- `workspace-contexts.md` — app, docs, portfolio, standalone, Storybook, pen, print.
 - `ui-skills-fusion.md` — the ui-skills audit and the fused operating rules.
 - `typography.md` — the typography gate.
 - `verification.md` — ship checklist and audit format.
 - `lessons.md` — Case 02 failures and rules.
-- `examples/sunnyside.md`, `examples/vitrine.md` — the two cases.
+- `examples/sunnyside.md`, `examples/vitrine.md` — the two cases (evidence, not defaults).
 
 ## Scripts and templates
 
 `render-board.mjs`, `render-icons.mjs`, `favicons.py`, `downscale.py`,
 `extract-wordmark.py`, `audit.mjs`, `qa.mjs`.
 
-`templates/`: `brandkit.html`, `single-page.html`, `case-page.tsx`, `audit.json`,
-`guidelines.md`.
+`templates/`: `design-system.html`, `brandkit.html`, `single-page.html`,
+`case-page.tsx`, `audit.json`, `guidelines.md`.
 
 ## How to use this skill well
 
 1. Brief first; write the one-sentence direction.
 2. Six, keep one, write down why.
-3. Choose HTML or TSX before building.
+3. Choose the surface and HTML/TSX before building.
 4. shadcn/Radix where accessible primitives matter; native for the rest.
 5. Typography gate before the first screenshot.
 6. Scripts for audit/QA; one look; fix the root cause; stop.

@@ -92,8 +92,10 @@ sunnyside-brand-system/
     board-and-images.md        the 3×3 board and render pipeline
     image-direction.md         prompts, provenance and QA for generated images
     tokens-and-docs.md         token layers and agent-readable docs
-    design-systems.md          shadcn/Radix, primitives, forms, case page
+    design-systems.md          shadcn/Radix, primitives, forms, surfaces
     ui-skills-fusion.md        audit of the ui-skills registry + fused rules
+    visual-directions.md       liquid glass, dither, brutalist, editorial, bento, 3D
+    workspace-contexts.md      app, docs, portfolio, standalone, Storybook, pen, print
     typography.md              the typography gate + better-typography source
     verification.md            the ship checklist and audit format
     lessons.md                 Case 02 failures and the rules they produced
@@ -107,7 +109,8 @@ sunnyside-brand-system/
     qa.mjs                     one browser QA pass (Playwright)
   templates/
     brandkit.html              3×3 board starter
-    single-page.html           static brand/design-system mockup
+    design-system.html         /sunnyside-style single-page system specimen
+    single-page.html           static brand mockup
     case-page.tsx              Next/React case-page scaffold
     audit.json                 audit manifest template
     guidelines.md              brand-guide starter
@@ -123,9 +126,17 @@ sunnyside-brand-system/
 - [`pen-dev`](../pen-dev/SKILL.md) — `.pen` design source, delegated agent and
   MCP-in-the-loop.
 
+## Surfaces, not routes
+
+The skill does not assume a portfolio. A system can ship as a single HTML
+specimen, an app route, a Storybook, a pen/Figma file or print. Read
+`references/workspace-contexts.md` before choosing a surface; never invent a
+case library or a route the host does not have.
+
 ## What this skill refuses
 
 - AI-generated logos, wordmarks, type specimens or whole boards.
+- Inventing a case library, `/design-system` route or sitemap entry.
 - Live text as the wordmark.
 - A mark that only reads at poster size.
 - Boards with no exportable assets.

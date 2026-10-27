@@ -134,23 +134,27 @@ the `skills` CLI:
 npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth
 ```
 
-It contains the method, ten references, seven scripts, five templates and two
+It contains the method, twelve references, seven scripts, six templates and two
 cases:
 
 - `SKILL.md` — modes, fast path, token budget, rules, output contract and verification.
 - `references/brief.md`, `logo-system.md`, `board-and-images.md`,
   `image-direction.md`, `tokens-and-docs.md`, `design-systems.md`,
-  `typography.md`, `verification.md`, `lessons.md`, `ui-skills-fusion.md`.
+  `typography.md`, `verification.md`, `lessons.md`, `ui-skills-fusion.md`,
+  `visual-directions.md`, `workspace-contexts.md`.
 - `scripts/render-board.mjs`, `render-icons.mjs`, `favicons.py`,
   `downscale.py`, `extract-wordmark.py`, `audit.mjs`, `qa.mjs`.
-- `templates/brandkit.html`, `single-page.html`, `case-page.tsx`,
-  `audit.json`, `guidelines.md`.
+- `templates/design-system.html`, `brandkit.html`, `single-page.html`,
+  `case-page.tsx`, `audit.json`, `guidelines.md`.
 - `examples/sunnyside.md`, `examples/vitrine.md`.
 
 v2.0 was rebuilt after an audit of [ui-skills.com](https://www.ui-skills.com/).
 The registry lists 439 skills across 27 categories; 22 relevant ones were
 inspected and fused into a brand pass and an implementation pass. The audit and
-the fusion rules live in `references/ui-skills-fusion.md`.
+the fusion rules live in `references/ui-skills-fusion.md`. The skill does not
+assume a portfolio: it ships to a standalone page, an app route, Storybook, pen
+or print via `references/workspace-contexts.md`; `references/visual-directions.md`
+covers liquid glass, dither, brutalist, editorial, bento, 3D and grain.
 
 The companion `skills/implement-brand-system/` skill turns an approved kit into
 the HTML/TSX proof without redesigning it, and `skills/pen-dev/` documents the

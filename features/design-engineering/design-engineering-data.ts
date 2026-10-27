@@ -495,7 +495,7 @@ export const VITRINE_CASE = {
 export const BRAND_SKILL = {
   name: 'sunnyside-brand-system',
   description:
-    'A fast, evidence-led skill for brand kits, design systems and single-page HTML/TSX mockups: strategy, logo family, board, favicons, tokens, forms, a typography gate and lean QA. It hands the approved kit to implement-brand-system.',
+    'A fast, evidence-led skill for brand kits, design systems and single-page HTML/TSX mockups: strategy, logo family, board, favicons, tokens, forms, modern visual directions, universal surfaces and lean QA. It hands the approved kit to implement-brand-system.',
   install:
     'npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth',
   folder: 'skills/sunnyside-brand-system',
@@ -503,10 +503,10 @@ export const BRAND_SKILL = {
   file: 'https://github.com/adityahimaone/sunnyside/blob/main/skills/sunnyside-brand-system/SKILL.md',
   includes: [
     'SKILL.md — modes, fast path, token budget, rules and output contract',
-    '10 references — brief, logo, board, image direction, tokens, design systems, typography, verification, lessons, ui-skills fusion',
+    '12 references — brief, logo, board, image direction, tokens, design systems, typography, verification, lessons, ui-skills fusion, visual directions, workspace contexts',
     'UI Skills audit — 22 relevant skills inspected; fused into the brand and implementation passes',
     '7 scripts — board, icons, favicon, downscale, wordmark, static audit, browser QA',
-    '5 templates — brand board, single-page mockup, TSX case page, audit manifest, guide',
+    '6 templates — system specimen, brand board, single-page mockup, TSX case page, audit manifest, guide',
     '2 examples — Sunnyside and Vitrine, with the Case 02 audit',
     'Companion implement-brand-system skill — HTML/TSX implementation, shadcn/Radix, forms, metadata, QA',
     'Companion pen-dev skill — delegated agent and MCP-in-the-loop',

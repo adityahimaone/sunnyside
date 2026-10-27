@@ -96,7 +96,7 @@ The identity is a **die-cut sun sticker** and the site's **marker wordmark**. Th
 
 ## Agent skills — brand system and implementation
 
-The brand-kit, design-system and mockup method is packaged as three installable skills. `sunnyside-brand-system` owns the brief, logo family, board, favicons, tokens, typography, audit and handoff. `implement-brand-system` turns the approved kit into a single-page HTML/TSX proof with shadcn/Radix, forms, metadata and lean QA. `pen-dev` covers the `.pen` design-source workflow.
+The brand-kit, design-system and mockup method is packaged as three installable skills. `sunnyside-brand-system` owns the brief, logo family, board, favicons, tokens, typography, modern visual directions, universal surfaces, audit and handoff. `implement-brand-system` turns the approved kit into a single-page HTML/TSX proof with shadcn/Radix, forms, metadata and lean QA. `pen-dev` covers the `.pen` design-source workflow.
 
 ```bash
 npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth

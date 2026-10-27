@@ -768,9 +768,7 @@ export function DesignEngineeringPage() {
                 ))}
               </ul>
               <p className={styles.backTop}>
-                <Link href={RISO_CASE.href}>
-                  Open Riso Co. / Case 04
-                </Link>
+                <Link href={RISO_CASE.href}>Open Riso Co. / Case 04</Link>
               </p>
             </section>
 

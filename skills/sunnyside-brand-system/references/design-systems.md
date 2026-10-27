@@ -90,19 +90,24 @@ only focus indicator. Do not use colour as the only error signal.
 
 ## 4. Page anatomy
 
-One route is enough for a proof page:
+Choose the surface before the route. A proof does not require a router.
 
-1. **Nav** — brand lockup, 3–5 in-page links, theme toggle (if the system has
-   dark mode).
-2. **Hero** — the one effect, one headline, one sentence, 2 CTAs, 3–4 facts.
-3. **Material** — show the signature effect and the rule that keeps it readable.
-4. **Components/forms** — one form panel + one anatomy/state aside.
-5. **Tokens** — three layers, a small table, contrast pairs, downloads.
-6. **Audit** — resources, contract, dither/engine check, named gaps.
-7. **Footer** — brand, downloads, links, what the case is not.
+**System specimen (closest to `/sunnyside`)** — use
+`templates/design-system.html`:
+
+topbar → contents → hero (name, version, promise, stats, sheet) → foundation →
+material → marks → colour → type → parts → motion → voice → applications →
+tokens → audit/endcap.
+
+**Product or case page:** nav → hero → material → components/forms → tokens →
+audit → footer. Use only the sections the brief needs.
+
+**No page:** Storybook story, standalone HTML or `.pen`; skip the topbar/contents
+if there is no page.
 
 Keep the page readable without JavaScript. The prose, tables and downloads are
-server-rendered; only the interactive islands need JS.
+server-rendered; only the interactive islands need JS. A theme toggle is optional;
+if the system has no dark theme, do not add one.
 
 ## 5. HTML or TSX?
 
@@ -118,20 +123,25 @@ For TSX, keep the route a server component. Put state in small `"use client"`
 islands. Do not turn the whole page into a client component for a theme toggle or
 a password eye.
 
-## 6. Case library pattern
+## 6. Surfaces and routes (if any)
 
-When there is more than one system:
+Choose the surface from the host, not from a template. Read
+`workspace-contexts.md` for the full matrix.
 
-- `/design-system` — the index. Cards with cover, number, status, material, role,
-  tags, link. Use the project's archive shell.
-- `/design-system/<slug>` — the full case.
-- `/design-engineering` — the method page. A case section per system, with a
-  switch and a link to the full case.
-- `<case>/llms.txt` — the Markdown twin.
+- **No UI / one deliverable:** `design-system.html` or a board; no router, sitemap
+  or llms twin.
+- **Product app:** a host route, settings page or Storybook; use the existing
+  shell. Do not invent `/design-system`.
+- **Docs site:** docs page + live specimens.
+- **Portfolio/archive:** case index + case page **only if the brief asks**.
+- **Component library:** Storybook/Ladle stories; no page route.
+- **Pen/Figma/print:** canvas/exports; no code route.
 
-Route moves: update canonical, OG, icons, sitemap, llms, nav/footer, board URLs,
-audit evidence and tests in the same commit. Run `next typegen` or restart the
-dev server; stale generated types are not source.
+If a route exists, use the host's convention and update only what exists:
+canonical, OG, icons, sitemap, llms, nav/footer, tests. Route moves are a
+checklist; run `next typegen` or restart the dev server. Stale generated types are
+not source. If no route exists, skip the metadata/route checklist and say
+**Not applicable**.
 
 ## 7. Acceptance
 
@@ -141,5 +151,5 @@ dev server; stale generated types are not source.
 - [ ] Light/dark both intentional; text contrast measured.
 - [ ] 1440 and 390; no horizontal scroll.
 - [ ] Reduced motion keeps a finished state.
-- [ ] Page readable without JS; Markdown twin exists.
+- [ ] Page readable without JS; Markdown twin exists if the host publishes docs.
 - [ ] Audit names what is missing.

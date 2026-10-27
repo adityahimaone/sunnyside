@@ -25,7 +25,8 @@ npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-dep
 
 - audits the kit before writing code and names gaps;
 - maps primitive → semantic → component tokens without inventing values;
-- chooses single HTML, TSX or a pen source;
+- chooses a system specimen, app route, Storybook, standalone HTML, pen or print;
+- uses the `/sunnyside`-style specimen anatomy when a full page is wanted;
 - builds the shell, sections, one effect, components and one real form;
 - uses shadcn/Radix for accessible primitives, native controls for the rest;
 - applies the fused UI Skills rules: type, colour, craft, motion, a11y, metadata;
@@ -43,5 +44,7 @@ npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-dep
 - `SKILL.md` — inputs, handoff, sequence, recipes, QA gate, fidelity contract.
 - `../sunnyside-brand-system/references/ui-skills-fusion.md` — the audit of the
   ui-skills registry and the fused rules.
-- `../sunnyside-brand-system/templates/` — HTML and TSX scaffolds.
+- `../sunnyside-brand-system/templates/` — `design-system.html`, HTML/TSX scaffolds.
+- `../sunnyside-brand-system/references/visual-directions.md` — modern material systems.
+- `../sunnyside-brand-system/references/workspace-contexts.md` — surface selection.
 - `../sunnyside-brand-system/scripts/` — `audit.mjs` and `qa.mjs`.

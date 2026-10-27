@@ -151,14 +151,14 @@ with no gap probably did not look.
 - [ ] Every claim points to a shipped file or route.
 - [ ] File paths are real.
 - [ ] One h1; headings in order; section IDs.
-- [ ] Raw Markdown twin exists and is linked.
+- [ ] Raw Markdown twin exists and is linked, if the host publishes docs.
 - [ ] Last updated and version shown.
 - [ ] No invented metrics or fake screenshots.
 
 ## Accessibility and interaction
 
 - [ ] Keyboard path through every control.
-- [ ] Visible focus on paper, ink and cobalt.
+- [ ] Visible focus on every surface/theme.
 - [ ] 44px targets with 8px between.
 - [ ] Reduced motion path; no motion-only state.
 - [ ] Hover only under `@media (hover: hover)`.
@@ -171,11 +171,11 @@ with no gap probably did not look.
 
 - [ ] SVG, PNG, ICO and token files exist at the stated paths.
 - [ ] The guide's links resolve.
-- [ ] The page is in the sitemap and has a canonical URL.
-- [ ] The OG/social card uses the mark.
-- [ ] The case route and the case-library index both resolve; icons are segment-local.
-- [ ] A moved route updated canonical, OG, sitemap, llms, links and tests.
-- [ ] The page has a Markdown twin at `<case>/llms.txt`.
+- [ ] If a web route exists: sitemap, canonical, OG and icons are correct; otherwise **Not applicable**.
+- [ ] If a case library exists: the case and index resolve; icons are segment-local; otherwise **Not applicable**.
+- [ ] If a route moved: canonical, OG, sitemap, llms, links and tests are updated.
+- [ ] If the host publishes one: the Markdown twin exists; otherwise **Not applicable**.
+- [ ] For Storybook/standalone/pen/print: the surface's own checks pass (stories, console, exports, crops).
 - [ ] The installation command for the skill works.
 - [ ] The gaps are named.
 
