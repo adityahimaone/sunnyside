@@ -73,7 +73,6 @@ export function Hero() {
 
           <Reveal delay={0.06}>
             <div className={cn(styles.heroEyebrow, 'mt-5')}>
-              <span className="dot" aria-hidden />
               <span>Design engineer</span>
               <span aria-hidden>·</span>
               <span>Jakarta, GMT+7</span>

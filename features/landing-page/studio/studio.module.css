@@ -488,19 +488,13 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.6rem;
   font-family: var(--font-geist-mono), monospace;
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--muted);
-}
-
-.heroEyebrow .dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--tangerine);
 }
 
 .heroTitle {
@@ -1616,8 +1610,11 @@
 
 /* dialog */
 .dialog {
-  width: min(68rem, 92vw);
-  max-width: none;
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(68rem, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
   max-height: 90svh;
   padding: 0;
   border: 0;
@@ -1787,8 +1784,14 @@
 
 .workGrid {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(1.2rem, 2.4vw, 2rem);
   margin-top: clamp(2.8rem, 6vw, 4.4rem);
+}
+
+.workGrid > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 @media (min-width: 1024px) {
@@ -1874,6 +1877,10 @@
 
 .projectCard {
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 0.75rem;
   border: 2px solid var(--ink);
   border-radius: 20px;
@@ -1893,6 +1900,8 @@
 
 .projectMedia {
   position: relative;
+  width: 100%;
+  max-width: 100%;
   aspect-ratio: 16 / 10;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -3099,17 +3108,22 @@
 .cardTilt {
   display: flex;
   width: 100%;
+  max-width: 100%;
   height: 100%;
   min-width: 0;
 }
 
 .cardTilt .tiltInner {
   display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .cardTilt .projectCard {
   width: 100%;
-  height: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
