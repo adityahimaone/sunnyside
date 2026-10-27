@@ -29,11 +29,13 @@ The kit is 4:3, drawn on a 2400 × 1800 grid and exported at 3000 × 2250. Sourc
 | Favicon PNGs                      | `public/brand/favicon-16/32/48.png`          | 1:1       | Sources for the `.ico`                                     |
 | App/PWA icons                     | `public/brand/icon-192.png`, `icon-512.png`  | 1:1       | Installed app / platform use                               |
 | Mark raster                       | `public/brand/sunnyside-mark-1024.png`       | 1:1       | Avatars and decks where SVG is not accepted                |
+| Brand kit board                   | `public/brand/sunnyside-brandkit.png`        | 4:3       | Download from the specimen / share as a deck               |
 | Favicon, Next.js                  | `app/favicon.ico`, `app/icon.svg`            | 16/32/48 + any | Served by file convention                             |
 | Apple touch icon                  | `app/apple-icon.png`                         | 180 × 180 | iOS home screen                                            |
 
 The SVGs have transparent corners. The raster app icons sit on paper so they behave
-on any surface.
+on any surface. The live `/sunnyside` specimen repeats the rules in its **Marks**
+section and links the lockup and board downloads from the same files.
 
 ## Construction
 

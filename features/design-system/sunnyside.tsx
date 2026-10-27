@@ -585,10 +585,98 @@ function Marks() {
           intro="The marks are drawn, not fetched. They share one white cut line and one flat fill, so a heart and a bolt feel like siblings."
         />
 
+        <div className={styles.logoCard}>
+          <div className={styles.cardRail}>
+            <span>The logo / 01</span>
+            <span>mark + wordmark</span>
+          </div>
+          <div className={styles.logoBody}>
+            <div className={styles.logoStage}>
+              <div className={styles.logoClear}>
+                <div className={styles.logoLockup}>
+                  <SunnysideMark className={styles.logoMark} />
+                  <span className={styles.logoText}>
+                    <SunnysideWordmark className={styles.logoWord} />
+                    <span className={styles.logoName}>Aditya Himawan</span>
+                  </span>
+                </div>
+              </div>
+              <span className={styles.logoStageNote}>
+                0.5× clear space / 34px mark
+              </span>
+            </div>
+
+            <div className={styles.logoSpecs}>
+              <p className={styles.logoNote}>
+                The mark is the sun from the drawer cut into a cobalt tile. The
+                wordmark is the marker hand, frozen as outlines — never retyped
+                in another face.
+              </p>
+              <dl className={styles.logoList}>
+                <div>
+                  <dt>Header</dt>
+                  <dd>34 mark · 25 wordmark · 8.5 name</dd>
+                </div>
+                <div>
+                  <dt>Minimum</dt>
+                  <dd>24 mark · 16 compact · 130 lockup</dd>
+                </div>
+                <div>
+                  <dt>Clear space</dt>
+                  <dd>Half the mark&apos;s height</dd>
+                </div>
+                <div>
+                  <dt>Favicon</dt>
+                  <dd>16 / 32 / 48 · 180 apple</dd>
+                </div>
+              </dl>
+              <div className={styles.logoIcons}>
+                <img
+                  src="/brand/sunnyside-mark.svg"
+                  alt=""
+                  width={48}
+                  height={48}
+                />
+                <img
+                  src="/brand/sunnyside-mark.svg"
+                  alt=""
+                  width={32}
+                  height={32}
+                />
+                <img
+                  src="/brand/sunnyside-mark-compact.svg"
+                  alt=""
+                  width={16}
+                  height={16}
+                />
+                <span>48 / 32 / 16</span>
+              </div>
+              <div className={styles.logoActions}>
+                <a href="/brand/sunnyside-lockup.svg" download>
+                  Lockup SVG <ArrowUpRight className={styles.logoArrow} />
+                </a>
+                <a href="/brand/sunnyside-brandkit.png" download>
+                  Brand kit <ArrowUpRight className={styles.logoArrow} />
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className={styles.logoRules}>
+            <p>
+              <b>Do</b> Keep cobalt, ink and butter fixed. Let the wordmark
+              inherit ink. Use the compact mark below 24px.
+            </p>
+            <p>
+              <b>Don&apos;t</b> Recolour the sun, stretch the lockup, soften the
+              offset, or rotate past the 4° hover.
+            </p>
+          </div>
+        </div>
+
         <div className={styles.marksGrid}>
           <div className={styles.wordmarkCard}>
             <div className={styles.cardRail}>
-              <span>Wordmark / 01</span>
+              <span>Wordmark / 02</span>
               <span>drawn, not typeset</span>
             </div>
             <div className={styles.wordmarkStage}>
@@ -621,7 +709,7 @@ function Marks() {
 
           <div className={styles.sunCard}>
             <div className={styles.cardRail}>
-              <span>The sun / 02</span>
+              <span>The sun / 03</span>
               <span>always has a face</span>
             </div>
             <Sun className={styles.sunCardMark} title="The Sunnyside sun" />

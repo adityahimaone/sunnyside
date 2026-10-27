@@ -46,9 +46,28 @@ Sunnyside is the visual language behind the studio landing page and archive surf
 | **Motion**        | Movement should explain a change, orient the reader, or return feedback. Reduced-motion preferences are respected.                        |
 | **Accessibility** | Contrast pairs and focus treatments are documented; decorative accent colours are not used as small body text.                            |
 
-The identity is a die-cut sun sticker and the marker wordmark. The [brand kit](./design/brand/README.md) holds the board, clear space, sizes, and do/don't rules; the SVG and favicon files are in [`public/brand/`](./public/brand/), and the header uses [`components/ui/sunnyside-logo.tsx`](./components/ui/sunnyside-logo.tsx).
-
 The archive uses namespaced `--ss-*` tokens to avoid collisions with Tailwind/shadcn and page-local styles. The landing page and other areas still have their own scoped styling; the specimen is the clearest design reference, not a single runtime source consumed identically by every route.
+
+## Logo and brand kit
+
+The identity is a **die-cut sun sticker** and the site's **marker wordmark**. The mark is a cobalt tile with an ink edge, a butter sun with a face, twelve rays clipped by the rounded paper, and the same hard directional offset as every other Sunnyside surface. The wordmark is the marker hand frozen as outlines, so it never depends on a font loading. The one-line essence is **“A system with a face.”**
+
+| Piece             | Rule                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Header lockup** | 34px mark · 10px gap · 87.7 × 25px wordmark · 8.5px name at 0.14em. Name drops below 480px, wordmark below 360. |
+| **Clear space**   | Half the mark's height on every side — 17px at the 34px header size.                                          |
+| **Minimums**      | 24px full mark, 16px compact mark, 72px wide wordmark, 130px wide lockup.                                     |
+| **Favicon**       | Compact mark (no shadow, 8 rays) at 16/32/48 in the ICO, plus SVG and a 180px apple icon.                     |
+| **Colour**        | Keep cobalt, ink, butter and tangerine fixed. The wordmark inherits ink. One loud field at a time.            |
+| **Type**          | Syne 800 for display, Geist Mono 500 for labels at 0.14–0.2em, the marker hand for annotations.               |
+
+**Do** use the supplied SVGs or the `SunnysideMark` / `SunnysideWordmark` components, keep the hard offset hard, and switch to the compact mark below 24px. **Don't** recolour the sun, swap the tile for another shape, add gradients or soft shadows, stretch or re-space the lockup, rotate beyond the 4° hover, retype the wordmark, or use the glyph (the sun without its tile) as a favicon.
+
+- [Full guidelines](./design/brand/README.md) — construction, clear space, rules, implementation
+- [Brand kit board](./design/brand/sunnyside-brandkit.png) — the 3 × 3 identity deck
+- [Logo SVGs](./public/brand/) — lockups, marks, wordmark, favicon images
+- [Logo component](./components/ui/sunnyside-logo.tsx) — `SunnysideMark`, `SunnysideWordmark`
+- [Live specimen — Marks](https://adityahimaone.space/sunnyside#marks) — the same rules, with downloads
 
 ## Routes
 

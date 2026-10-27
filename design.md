@@ -34,6 +34,8 @@ depends on a font loading. "A system with a face." is the one-line essence.
   name drops, below 360px the wordmark drops and the mark carries the brand.
 - Favicon: the compact mark (no shadow, eight rays, larger sun) at 16/32/48 and SVG;
   the apple icon is the full mark on paper at 180.
+- The `/sunnyside` **Marks** section documents the lockup, clear space, minimum
+  sizes, favicon sizes and downloads; keep it in sync with this file.
 - Full files, clear space, minimum sizes, and do/don't rules:
   [`design/brand/README.md`](./design/brand/README.md).
 

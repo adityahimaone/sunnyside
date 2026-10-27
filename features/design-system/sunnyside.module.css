@@ -159,7 +159,7 @@
 }
 
 .brand:hover .brandMark {
-  transform: rotate(12deg) scale(1.04);
+  transform: rotate(-4deg);
 }
 
 .brandWords {
@@ -1164,6 +1164,223 @@
   border-top: 1px solid rgb(25 26 46 / 0.2);
   font-size: 0.78rem;
   line-height: 1.55;
+}
+
+.logoCard {
+  position: relative;
+  margin-bottom: 1rem;
+  padding: clamp(1rem, 2vw, 1.3rem);
+  border: 1.5px solid var(--ink);
+  border-radius: 5px;
+  background: var(--paper-hi);
+  color: var(--ink);
+  box-shadow: 10px 11px 0 rgb(0 0 0 / 0.17);
+}
+
+.logoBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  gap: clamp(1rem, 2.4vw, 1.8rem);
+  padding-top: 1rem;
+}
+
+.logoStage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: clamp(0.8rem, 1.8vw, 1.1rem);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper-lo);
+}
+
+.logoClear {
+  display: flex;
+  width: fit-content;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.25rem, 3.4vw, 1.95rem);
+  border: 1px dashed rgb(25 26 46 / 0.34);
+  border-radius: 4px;
+}
+
+.logoLockup {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.logoMark {
+  display: block;
+  flex: none;
+  width: 3.9rem;
+  height: 3.9rem;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.logoWord {
+  display: block;
+  width: 9.875rem;
+  height: 2.8rem;
+  color: var(--ink);
+}
+
+.logoName {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.logoStageNote {
+  font-family: var(--mono);
+  font-size: 0.44rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.logoSpecs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.logoNote {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.logoList {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.logoList > div {
+  display: grid;
+  grid-template-columns: 5.3rem minmax(0, 1fr);
+  gap: 0.5rem;
+  padding-block: 0.3rem;
+  border-top: 1px solid var(--line);
+}
+
+.logoList dt {
+  font-family: var(--mono);
+  font-size: 0.44rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.logoList dd {
+  margin: 0;
+  font-size: 0.67rem;
+  line-height: 1.45;
+}
+
+.logoIcons {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.1rem;
+}
+
+.logoIcons img {
+  display: block;
+}
+
+.logoIcons span {
+  padding-bottom: 0.1rem;
+  font-family: var(--mono);
+  font-size: 0.44rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.logoActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.4rem;
+}
+
+.logoActions a {
+  display: inline-flex;
+  min-height: 2.1rem;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper-hi);
+  box-shadow: 2px 2px 0 var(--ink);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.47rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    transform var(--ui) var(--ease-out),
+    box-shadow var(--ui) var(--ease-out);
+}
+
+.logoActions a:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.logoActions a:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.logoArrow {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.logoRules {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--line);
+}
+
+.logoRules p {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.logoRules b {
+  display: inline-block;
+  margin-right: 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.44rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
 }
 
 .stickerDrawer {
@@ -3048,7 +3265,12 @@
   .motionGrid,
   .voiceGrid,
   .tokensGrid,
-  .endcapGrid {
+  .endcapGrid,
+  .logoBody {
+    grid-template-columns: 1fr;
+  }
+
+  .logoRules {
     grid-template-columns: 1fr;
   }
 
@@ -3119,6 +3341,24 @@
 }
 
 @media (max-width: 760px) {
+  .logoMark {
+    width: 3.1rem;
+    height: 3.1rem;
+  }
+
+  .logoWord {
+    width: 7.85rem;
+    height: 2.23rem;
+  }
+
+  .logoClear {
+    padding: 1.15rem;
+  }
+
+  .logoName {
+    font-size: 0.46rem;
+  }
+
   .contents {
     position: sticky;
   }
