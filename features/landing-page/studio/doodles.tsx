@@ -13,16 +13,19 @@ const svgProps = (title?: string) =>
     ? { role: 'img' as const, 'aria-label': title }
     : { 'aria-hidden': true as const, focusable: 'false' as const }
 
+const stableCoordinate = (value: number) =>
+  Math.round(value * 1_000_000) / 1_000_000
+
 export function Sun({ className, title }: DoodleProps) {
   return (
     <svg viewBox="0 0 200 200" className={className} {...svgProps(title)}>
       <g stroke="var(--ink, #191a2e)" strokeWidth="4" strokeLinecap="round">
         {Array.from({ length: 12 }, (_, i) => {
           const a = (i / 12) * Math.PI * 2
-          const x1 = 100 + Math.cos(a) * 74
-          const y1 = 100 + Math.sin(a) * 74
-          const x2 = 100 + Math.cos(a) * 93
-          const y2 = 100 + Math.sin(a) * 93
+          const x1 = stableCoordinate(100 + Math.cos(a) * 74)
+          const y1 = stableCoordinate(100 + Math.sin(a) * 74)
+          const x2 = stableCoordinate(100 + Math.cos(a) * 93)
+          const y2 = stableCoordinate(100 + Math.sin(a) * 93)
           return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} />
         })}
       </g>
@@ -144,7 +147,9 @@ export function Burst({
   for (let i = 0; i < points * 2; i++) {
     const a = (i / (points * 2)) * Math.PI * 2 - Math.PI / 2
     const r = i % 2 ? 39 : 54
-    pts.push(`${60 + Math.cos(a) * r} ${60 + Math.sin(a) * r}`)
+    pts.push(
+      `${stableCoordinate(60 + Math.cos(a) * r)} ${stableCoordinate(60 + Math.sin(a) * r)}`,
+    )
   }
   return (
     <svg viewBox="-4 -4 128 128" className={className} {...svgProps(title)}>
