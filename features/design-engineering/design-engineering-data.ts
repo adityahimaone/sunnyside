@@ -347,6 +347,76 @@ export const CASE = {
   ],
 }
 
+export const HUGINN_CASE = {
+  number: 'Case 03',
+  title: 'Huginn Studio',
+  subtitle: 'A thought crosses the threshold and returns in print.',
+  status: 'Shipped · 2026',
+  role: 'Identity · design system · forms · component proof',
+  href: '/design-system/huginn',
+  library: '/design-system',
+  cover: '/brand/huginn/huginn-brandkit.png',
+  coverAlt:
+    'Huginn Studio brand board: Threshold Print mark, six mark studies, bone paper, ink, vermilion and ordered dither.',
+  brief:
+    'Give a software studio a printed identity: bone paper, iron ink, one vermilion field and an ordered-dither boundary that carries an image into print. The case proves the visual language with a native form and a configurable footer component.',
+  decisions: [
+    {
+      title: 'The threshold is the effect.',
+      line: 'Dither describes the boundary between image and field. It is not a page-wide texture or a second layer behind body copy.',
+    },
+    {
+      title: 'Thought, not a bird.',
+      line: 'The name references Huginn, but the mark is a threshold and trace rather than a raven, rune ring or mythology crest.',
+    },
+    {
+      title: 'The footer is a specimen.',
+      line: 'The Wild Hunt Footer lives in the case proof and is not applied to Sunnyside or the portfolio shell.',
+    },
+  ],
+  outcomes: [
+    'A distinct identity with a compact mark, wordmark, lockup and favicon-ready SVG.',
+    'A `--hg-*` token source with generated CSS/JSON and measured contrast pairs.',
+    'A native form kit and configurable ordered-dither footer component proof.',
+    'A full case page, Markdown twin and named verification gaps.',
+  ],
+}
+
+export const RISO_CASE = {
+  number: 'Case 04',
+  title: 'Riso Co.',
+  subtitle: 'A torn poster pinned to studio cork.',
+  status: 'Shipped · 2026',
+  role: 'Identity · design system · forms · tear physics',
+  href: '/design-system/riso',
+  library: '/design-system',
+  cover: '/brand/riso/riso-brandkit.png',
+  coverAlt:
+    'Riso Co. brand board: The Pin & Deckle mark, 64-unit grid, vermilion and cobalt sheets, pushpin physics and typography.',
+  brief:
+    'Translate tactile risograph printmaking and mechanical hardware to web interfaces: 270gsm raw vellum, electric vermilion and cobalt ink sheets, and Mulberry32 PRNG algorithmic deckle-edge tear physics.',
+  decisions: [
+    {
+      title: 'The field is vermilion.',
+      line: 'One loud surface per view. The remainder is unbleached vellum and carbon soot.',
+    },
+    {
+      title: 'Hardware anchors the sheet.',
+      line: 'The mechanical pushpin is an interactive focal point: pulling it lifts the needle, re-seeds the generator, and stabs a fresh tear.',
+    },
+    {
+      title: 'Pure math over raster files.',
+      line: 'The tear ridge, exposed cellulose fiber rim, and curled flaps are SVG and canvas math from numbers without external dependencies.',
+    },
+  ],
+  outcomes: [
+    'A geometric Pin & Deckle mark, outlined wordmark and 16px favicon.',
+    'A `--rs-*` token source with synchronized CSS/JSON and WCAG AAA/AA ratings.',
+    'An accessible native form kit with full state coverage (default, focus, invalid, disabled, success).',
+    'Interactive PushpinTearFooter component specimen and agent-readable Markdown twin.',
+  ],
+}
+
 export const VITRINE_CASE = {
   number: 'Case 02',
   title: 'Vitrine',

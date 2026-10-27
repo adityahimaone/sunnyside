@@ -1,0 +1,55 @@
+/**
+ * Riso Co. / Atelier Ink — CSS Custom Properties
+ * Generated from features/riso/tokens.json
+ */
+
+:root,
+.rs-scope,
+[data-theme="light"][data-riso-root] {
+  --rs-sheet-vermilion: #ff4a1c;
+  --rs-sheet-cobalt: #1a7ff0;
+  --rs-paper-raw: #f1ede4;
+  --rs-paper-rim: #ffffff;
+  --rs-ink-carbon: #1b1712;
+  --rs-ink-subtle: #786c5e;
+  --rs-steel-needle: #a3a9b2;
+  --rs-steel-shadow: #0b1a33;
+  --rs-cork-tan: #e2dcce;
+
+  --rs-surface: #f1ede4;
+  --rs-surface-card: #ffffff;
+  --rs-sheet: #ff4a1c;
+  --rs-sheet-alt: #1a7ff0;
+  --rs-on-sheet: #ffffff;
+  --rs-on-paper: #1b1712;
+  --rs-text: #1b1712;
+  --rs-text-subtle: #786c5e;
+  --rs-border: #d5cebe;
+  --rs-border-focus: #ff4a1c;
+  --rs-button-bg: #ff4a1c;
+  --rs-button-fg: #ffffff;
+  --rs-button-quiet-bg: #e2dcce;
+  --rs-button-quiet-fg: #1b1712;
+  --rs-field-bg: #ffffff;
+  --rs-field-border: #1b1712;
+  --rs-radius: 4px;
+}
+
+[data-theme="dark"][data-riso-root] {
+  --rs-surface: #14110e;
+  --rs-surface-card: #1d1915;
+  --rs-sheet: #ff4a1c;
+  --rs-sheet-alt: #1a7ff0;
+  --rs-on-sheet: #ffffff;
+  --rs-on-paper: #f1ede4;
+  --rs-text: #f1ede4;
+  --rs-text-subtle: #a89f92;
+  --rs-border: #342e27;
+  --rs-border-focus: #ff4a1c;
+  --rs-button-bg: #ff4a1c;
+  --rs-button-fg: #ffffff;
+  --rs-button-quiet-bg: #26211c;
+  --rs-button-quiet-fg: #f1ede4;
+  --rs-field-bg: #1d1915;
+  --rs-field-border: #685e54;
+}

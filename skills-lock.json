@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "better-typography": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-typography/SKILL.md",
+      "computedHash": "6546baea71117ed05b74dd9fb4ebf25300b3a8c9fab1751fd9981701550bd1b7"
+    },
+    "implement-brand-system": {
+      "source": "adityahimaone/sunnyside",
+      "sourceType": "github",
+      "skillPath": "skills/implement-brand-system/SKILL.md",
+      "computedHash": "75fad44629c1211b75c9bfe95327763ba5a738086928ecf9fafceb2405dfa89c"
+    },
+    "pen-dev": {
+      "source": "adityahimaone/sunnyside",
+      "sourceType": "github",
+      "skillPath": "skills/pen-dev/SKILL.md",
+      "computedHash": "f44ec93e982d39e68b25ae2a6ae6c66ed1312cd2a62098f64eb91c7ef5ce457a"
+    },
+    "sunnyside-brand-system": {
+      "source": "adityahimaone/sunnyside",
+      "sourceType": "github",
+      "skillPath": "skills/sunnyside-brand-system/SKILL.md",
+      "computedHash": "dc9630da19e4a4138a5d8d7f72077b144e4131be59257836f3e31a82aa268968"
+    },
+    "ui-skills-root": {
+      "source": "ibelick/ui-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui-skills-root/SKILL.md",
+      "computedHash": "e3120361faa5a0ef5fba9b67d91e00c90002f3c9ca092c5325d2391dab8c619e"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "d63bd281a96b8dfa52a2656ec6e6af743bfcfde6f6bfb6c9edc203cbff377b16"
+    }
+  }
+}

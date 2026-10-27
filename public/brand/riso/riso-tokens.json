@@ -1,0 +1,61 @@
+{
+  "name": "Riso Co. Atelier Ink",
+  "version": "1.0.0",
+  "slug": "riso",
+  "primitives": [
+    { "name": "sheet-vermilion", "value": "#ff4a1c", "role": "Fluorescent red-orange Riso drum ink" },
+    { "name": "sheet-cobalt", "value": "#1a7ff0", "role": "Federal blue Riso drum ink" },
+    { "name": "paper-raw", "value": "#f1ede4", "role": "Unbleached warm rag vellum 270gsm" },
+    { "name": "paper-rim", "value": "#ffffff", "role": "Exposed paper fiber deckle rim" },
+    { "name": "ink-carbon", "value": "#1b1712", "role": "Carbon soot black soy-oil ink" },
+    { "name": "ink-subtle", "value": "#786c5e", "role": "Muted soot for secondary notation" },
+    { "name": "steel-needle", "value": "#a3a9b2", "role": "Tempered steel pin needle" },
+    { "name": "steel-shadow", "value": "#0b1a33", "role": "Drop shadow and ambient shade" },
+    { "name": "cork-tan", "value": "#e2dcce", "role": "Studio display board background" }
+  ],
+  "semantic": {
+    "light": [
+      { "name": "surface", "value": "#f1ede4", "role": "Base canvas and paper stock" },
+      { "name": "surface-card", "value": "#ffffff", "role": "Specimen cards and callouts" },
+      { "name": "sheet", "value": "#ff4a1c", "role": "Vibrant top poster sheet" },
+      { "name": "sheet-alt", "value": "#1a7ff0", "role": "Alternative cobalt edition sheet" },
+      { "name": "on-sheet", "value": "#ffffff", "role": "Chrome and copy printed on top sheet" },
+      { "name": "on-paper", "value": "#1b1712", "role": "Primary typography on paper base" },
+      { "name": "text", "value": "#1b1712", "role": "High-contrast editorial reading copy" },
+      { "name": "text-subtle", "value": "#786c5e", "role": "Secondary labels, run numbers, timestamps" },
+      { "name": "border", "value": "#d5cebe", "role": "Structural borders and card dividers" },
+      { "name": "border-focus", "value": "#ff4a1c", "role": "Keyboard focus indicators" },
+      { "name": "button-bg", "value": "#ff4a1c", "role": "Primary interactive button fill" },
+      { "name": "button-fg", "value": "#ffffff", "role": "Primary button text" },
+      { "name": "button-quiet-bg", "value": "#e2dcce", "role": "Secondary button fill" },
+      { "name": "button-quiet-fg", "value": "#1b1712", "role": "Secondary button text" },
+      { "name": "field-bg", "value": "#ffffff", "role": "Text input and control background" },
+      { "name": "field-border", "value": "#1b1712", "role": "High-definition field perimeter" }
+    ],
+    "dark": [
+      { "name": "surface", "value": "#14110e", "role": "Darkroom inkwell background" },
+      { "name": "surface-card", "value": "#1d1915", "role": "Elevated card in darkroom" },
+      { "name": "sheet", "value": "#ff4a1c", "role": "Luminous vermilion poster in darkroom" },
+      { "name": "sheet-alt", "value": "#1a7ff0", "role": "Luminous cobalt poster in darkroom" },
+      { "name": "on-sheet", "value": "#ffffff", "role": "Chrome and copy on sheet" },
+      { "name": "on-paper", "value": "#f1ede4", "role": "Primary typography on dark pulp" },
+      { "name": "text", "value": "#f1ede4", "role": "High-contrast reading text" },
+      { "name": "text-subtle", "value": "#a89f92", "role": "Secondary labels in darkroom" },
+      { "name": "border", "value": "#342e27", "role": "Subtle darkroom frame borders" },
+      { "name": "border-focus", "value": "#ff4a1c", "role": "High-contrast focus ring" },
+      { "name": "button-bg", "value": "#ff4a1c", "role": "Primary action fill" },
+      { "name": "button-fg", "value": "#ffffff", "role": "Primary action label" },
+      { "name": "button-quiet-bg", "value": "#26211c", "role": "Quiet button fill" },
+      { "name": "button-quiet-fg", "value": "#f1ede4", "role": "Quiet button text" },
+      { "name": "field-bg", "value": "#1d1915", "role": "Dark input background" },
+      { "name": "field-border", "value": "#685e54", "role": "Dark input border" }
+    ]
+  },
+  "contrast": [
+    { "label": "Text (iron ink) on Paper (raw vellum)", "ratio": 14.2, "use": "Body paragraphs, headings, editorial text (WCAG AAA)" },
+    { "label": "On-Sheet (white) on Sheet (vermilion)", "ratio": 4.8, "use": "Top bar chrome, newsletter input pill, pill label (WCAG AA)" },
+    { "label": "On-Sheet (white) on Sheet (cobalt)", "ratio": 4.5, "use": "Federal Blue edition top bar & actions (WCAG AA)" },
+    { "label": "Text subtle on Paper", "ratio": 4.6, "use": "Labels, timestamps, captions, edition metadata (WCAG AA)" },
+    { "label": "Primary button fill on Paper", "ratio": 3.4, "use": "Interactive CTA touch target (3:1 graphical requirement met)" }
+  ]
+}

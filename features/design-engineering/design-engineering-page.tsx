@@ -20,10 +20,12 @@ import {
   CAPABILITIES,
   CASE,
   GAPS,
+  HUGINN_CASE,
   LOOP,
   PRACTICE,
   PRINCIPLES,
   RESOURCES,
+  RISO_CASE,
   STANDARDS,
   SYSTEM,
   VITRINE_CASE,
@@ -52,6 +54,18 @@ const NAV: DocsNavItem[] = [
     label: 'Vitrine case',
     number: '04b',
     sectionId: 'case-vitrine',
+  },
+  {
+    href: '#case-huginn',
+    label: 'Huginn case',
+    number: '04c',
+    sectionId: 'case-huginn',
+  },
+  {
+    href: '#case-riso',
+    label: 'Riso case',
+    number: '04d',
+    sectionId: 'case-riso',
   },
   { href: '#skills', label: 'Capabilities', number: '05', sectionId: 'skills' },
   { href: '#skill', label: 'The skill', number: '06', sectionId: 'skill' },
@@ -582,6 +596,182 @@ export function DesignEngineeringPage() {
                   </li>
                 ))}
               </ul>
+            </section>
+
+            <section className={styles.docSection}>
+              <DocsHeading id="case-huginn" kicker="04 / Case 03">
+                {HUGINN_CASE.title}
+              </DocsHeading>
+              <p className={styles.caseLede}>{HUGINN_CASE.subtitle}</p>
+              <div className={styles.caseCtaRow}>
+                <Link href={HUGINN_CASE.href} className={styles.caseCta}>
+                  Read the full case
+                  <ArrowRight className="size-4" aria-hidden />
+                </Link>
+                <Link href={HUGINN_CASE.library} className={styles.textLink}>
+                  Case library
+                  <ArrowUpRight className="size-3.5" aria-hidden />
+                </Link>
+              </div>
+              <dl className={styles.caseMeta}>
+                <div>
+                  <dt>Role</dt>
+                  <dd>{HUGINN_CASE.role}</dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>{HUGINN_CASE.status}</dd>
+                </div>
+                <div>
+                  <dt>Stack</dt>
+                  <dd>Next.js · TypeScript · CSS Modules · canvas</dd>
+                </div>
+                <div>
+                  <dt>System</dt>
+                  <dd>Bone, ink, vermilion and ordered print</dd>
+                </div>
+              </dl>
+              <figure className={styles.figure}>
+                <Image
+                  src={HUGINN_CASE.cover}
+                  alt={HUGINN_CASE.coverAlt}
+                  width={1200}
+                  height={900}
+                  sizes="(max-width: 900px) 100vw, 760px"
+                />
+                <figcaption>
+                  Huginn Studio — the Threshold Print mark, wordmark and
+                  material palette.
+                </figcaption>
+              </figure>
+              <DocsHeading id="case-huginn-brief" level={3} kicker="Brief">
+                What it had to do
+              </DocsHeading>
+              <p className={styles.prose}>{HUGINN_CASE.brief}</p>
+              <DocsHeading
+                id="case-huginn-decisions"
+                level={3}
+                kicker="Decisions"
+              >
+                What I chose
+              </DocsHeading>
+              <ol className={styles.decisions}>
+                {HUGINN_CASE.decisions.map((decision, index) => (
+                  <li key={decision.title}>
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <div>
+                      <b>{decision.title}</b>
+                      <p>
+                        <CodeText>{decision.line}</CodeText>
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <DocsHeading id="case-huginn-outcome" level={3} kicker="Outcome">
+                What shipped
+              </DocsHeading>
+              <ul className={styles.list}>
+                {HUGINN_CASE.outcomes.map((outcome) => (
+                  <li key={outcome} className={styles.checkLine}>
+                    <Check className={styles.checkIcon} aria-hidden />
+                    {outcome}
+                  </li>
+                ))}
+              </ul>
+              <p className={styles.backTop}>
+                <Link href={HUGINN_CASE.href}>
+                  Open Huginn Studio / Case 03
+                </Link>
+              </p>
+            </section>
+
+            <section className={styles.docSection}>
+              <DocsHeading id="case-riso" kicker="04 / Case 04">
+                {RISO_CASE.title}
+              </DocsHeading>
+              <p className={styles.caseLede}>{RISO_CASE.subtitle}</p>
+              <div className={styles.caseCtaRow}>
+                <Link href={RISO_CASE.href} className={styles.caseCta}>
+                  Read the full case
+                  <ArrowRight className="size-4" aria-hidden />
+                </Link>
+                <Link href={RISO_CASE.library} className={styles.textLink}>
+                  Case library
+                  <ArrowUpRight className="size-3.5" aria-hidden />
+                </Link>
+              </div>
+              <dl className={styles.caseMeta}>
+                <div>
+                  <dt>Role</dt>
+                  <dd>{RISO_CASE.role}</dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>{RISO_CASE.status}</dd>
+                </div>
+                <div>
+                  <dt>Stack</dt>
+                  <dd>Next.js · TypeScript · CSS Modules · SVG/canvas</dd>
+                </div>
+                <div>
+                  <dt>System</dt>
+                  <dd>Vellum, vermilion, pushpin and deckle tear</dd>
+                </div>
+              </dl>
+              <figure className={styles.figure}>
+                <Image
+                  src={RISO_CASE.cover}
+                  alt={RISO_CASE.coverAlt}
+                  width={1500}
+                  height={1125}
+                  sizes="(max-width: 900px) 100vw, 760px"
+                />
+                <figcaption>
+                  Riso Co. — The Pin &amp; Deckle mark, Mulberry32 PRNG tear
+                  ridge and tactile print palette.
+                </figcaption>
+              </figure>
+              <DocsHeading id="case-riso-brief" level={3} kicker="Brief">
+                What it had to do
+              </DocsHeading>
+              <p className={styles.prose}>{RISO_CASE.brief}</p>
+              <DocsHeading
+                id="case-riso-decisions"
+                level={3}
+                kicker="Decisions"
+              >
+                What I chose
+              </DocsHeading>
+              <ol className={styles.decisions}>
+                {RISO_CASE.decisions.map((decision, index) => (
+                  <li key={decision.title}>
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <div>
+                      <b>{decision.title}</b>
+                      <p>
+                        <CodeText>{decision.line}</CodeText>
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <DocsHeading id="case-riso-outcome" level={3} kicker="Outcome">
+                What shipped
+              </DocsHeading>
+              <ul className={styles.list}>
+                {RISO_CASE.outcomes.map((outcome) => (
+                  <li key={outcome} className={styles.checkLine}>
+                    <Check className={styles.checkIcon} aria-hidden />
+                    {outcome}
+                  </li>
+                ))}
+              </ul>
+              <p className={styles.backTop}>
+                <Link href={RISO_CASE.href}>
+                  Open Riso Co. / Case 04
+                </Link>
+              </p>
             </section>
 
             <section className={styles.docSection}>

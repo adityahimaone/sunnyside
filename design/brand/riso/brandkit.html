@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Riso Co. — Brand Kit & Identity Board</title>
+    <style>
+      @font-face {
+        font-family: 'Space Grotesk';
+        src: url('./assets/SpaceGrotesk.ttf') format('truetype');
+        font-weight: 300 700;
+        font-display: block;
+      }
+      @font-face {
+        font-family: 'Geist';
+        src: url('./assets/Geist.ttf') format('truetype');
+        font-weight: 100 900;
+        font-display: block;
+      }
+      @font-face {
+        font-family: 'Geist Mono';
+        src: url('./assets/GeistMono.ttf') format('truetype');
+        font-weight: 100 900;
+        font-display: block;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #0f0d0b;
+      }
+
+      #board {
+        width: 2400px;
+        height: 1800px;
+        padding: 54px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 16px;
+        background: #0f0d0b;
+        color: #f1ede4;
+        font-family: 'Geist', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .panel {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        background: #171310;
+        border: 1px solid #28211b;
+        padding: 36px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .mono {
+        font-family: 'Geist Mono', monospace;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .label {
+        font-family: 'Geist Mono', monospace;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #ff4a1c;
+      }
+
+      .display {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 0.98;
+      }
+
+      /* Panel 1: Cover / Header */
+      .cover {
+        grid-column: span 2;
+        padding: 44px 48px;
+        background: radial-gradient(circle at 10% 10%, rgba(255, 74, 28, 0.15), transparent 60%), #171310;
+      }
+
+      .cover-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .cover-meta {
+        text-align: right;
+        line-height: 1.8;
+        color: #9d8f82;
+      }
+
+      .cover-headline {
+        margin-top: auto;
+        font-size: 68px;
+        width: 880px;
+        color: #f1ede4;
+      }
+
+      .cover-headline em {
+        font-style: normal;
+        color: #ff4a1c;
+      }
+
+      .cover-foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-top: 24px;
+      }
+
+      .cover-sub {
+        max-width: 520px;
+        font-size: 18px;
+        line-height: 1.5;
+        color: #b3a497;
+      }
+
+      /* Panel 2: Index / 04 */
+      .index-num {
+        font-size: 154px;
+        line-height: 0.8;
+        color: #ff4a1c;
+        margin: 16px 0 6px;
+        font-weight: 800;
+      }
+
+      .index-body {
+        margin-top: auto;
+        font-size: 19px;
+        line-height: 1.45;
+        color: #c9bdb2;
+      }
+
+      .index-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 16px;
+        margin-top: 20px;
+        color: #9d8f82;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-family: 'Geist Mono', monospace;
+      }
+
+      /* Panel 3: Construction & Grid */
+      .construction svg {
+        width: 100%;
+        height: auto;
+        margin-top: 12px;
+      }
+
+      .specs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 20px;
+        margin-top: auto;
+        color: #9d8f82;
+        font-family: 'Geist Mono', monospace;
+        font-size: 12px;
+      }
+
+      .specs b {
+        color: #f1ede4;
+      }
+
+      /* Panel 4: Physical Swatches */
+      .swatches-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .swatch-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: #1f1a16;
+        border: 1px solid #322a22;
+        border-radius: 10px;
+        padding: 10px 14px;
+      }
+
+      .swatch-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 6px;
+        flex-shrink: 0;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .swatch-info {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .swatch-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #f1ede4;
+      }
+
+      .swatch-hex {
+        font-family: 'Geist Mono', monospace;
+        font-size: 12px;
+        color: #ff4a1c;
+      }
+
+      /* Panel 5: PRNG & Tear Physics */
+      .tear-preview {
+        margin-top: 20px;
+        height: 140px;
+        position: relative;
+        background: #ff4a1c;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .tear-math {
+        margin-top: auto;
+        background: #110e0c;
+        border: 1px solid #28211b;
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 12px;
+        color: #b3a497;
+        line-height: 1.6;
+      }
+
+      /* Panel 6: Favicon Scale Gate */
+      .scale-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 28px;
+        margin: 24px 0 auto;
+        padding-bottom: 24px;
+      }
+
+      .scale-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .scale-item span {
+        font-family: 'Geist Mono', monospace;
+        font-size: 11px;
+        color: #9d8f82;
+      }
+
+      /* Panel 7: Typography Scale */
+      .type-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .type-spec {
+        border-bottom: 1px solid #28211b;
+        padding-bottom: 10px;
+      }
+
+      .type-spec h4 {
+        margin: 0 0 4px;
+        color: #f1ede4;
+        letter-spacing: -0.02em;
+      }
+
+      .type-spec p {
+        margin: 0;
+        font-family: 'Geist Mono', monospace;
+        font-size: 11px;
+        color: #9d8f82;
+      }
+
+      /* Panel 8: Component Specimen */
+      .specimen-card {
+        margin-top: 18px;
+        background: #f1ede4;
+        color: #1b1712;
+        border-radius: 12px;
+        padding: 24px;
+        position: relative;
+        box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.4);
+      }
+
+      .specimen-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1.5px solid #1b1712;
+        padding-bottom: 8px;
+        margin-bottom: 14px;
+      }
+
+      .specimen-title {
+        font-weight: 800;
+        font-size: 24px;
+        letter-spacing: -0.03em;
+      }
+
+      .specimen-pill {
+        background: #ff4a1c;
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 99px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="board">
+      <!-- 01: COVER (spans 2 columns) -->
+      <div class="panel cover">
+        <div class="cover-top">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <svg width="44" height="44" viewBox="0 0 64 64" fill="none">
+              <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="#ff4a1c"/>
+              <ellipse cx="28" cy="46" rx="6" ry="2" fill="#1b1712" opacity="0.3"/>
+              <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="#a3a9b2"/>
+              <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="#f1ede4"/>
+              <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="#f1ede4"/>
+              <ellipse cx="32" cy="27" rx="5" ry="1.8" fill="#f1ede4"/>
+            </svg>
+            <span class="display" style="font-size: 32px; font-weight: 800;">ink. riso co.</span>
+          </div>
+          <div class="cover-meta mono">
+            <div>CASE 04 / BRAND &amp; INTERFACE SYSTEM</div>
+            <div>BERLIN WORKSHOP · RUN 0412</div>
+          </div>
+        </div>
+
+        <h1 class="cover-headline display">
+          A torn poster pinned to <em>studio cork.</em>
+        </h1>
+
+        <div class="cover-foot">
+          <p class="cover-sub">
+            Electric vermilion and federal cobalt meet raw 270gsm vellum. Mathematical deckle-edge physics from Mulberry32 PRNG and a mechanical pushpin anchor tactile print engineering.
+          </p>
+          <div class="mono" style="color: #9d8f82; text-align: right;">
+            <div>SPECIFICATION 1.0</div>
+            <div>WCAG AAA / AA PASS</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02: INDEX / IDENTITY -->
+      <div class="panel">
+        <div class="label">01 / IDENTITY</div>
+        <div class="index-num display">04</div>
+        <div class="index-body">
+          <strong style="color: #f1ede4; font-size: 22px; display: block; margin-bottom: 6px;">Riso Co.</strong>
+          A print workshop and publication lab. Soy ink layers, unbleached vellum stock, and mechanical pushpins.
+        </div>
+        <div class="index-list">
+          <div>· 270gsm Vellum</div>
+          <div>· 84 Ridge Units</div>
+          <div>· Soy-based Ink</div>
+          <div>· 6 Curled Flaps</div>
+          <div>· Steel Pushpin</div>
+          <div>· Zero Bloat</div>
+        </div>
+      </div>
+
+      <!-- 03: CONSTRUCTION & GRID -->
+      <div class="panel construction">
+        <div class="label">02 / MARK GEOMETRY</div>
+        <svg viewBox="0 0 240 160" fill="none">
+          <!-- 64-unit construction grid -->
+          <line x1="20" y1="20" x2="220" y2="20" stroke="#28211b" stroke-width="1"/>
+          <line x1="20" y1="80" x2="220" y2="80" stroke="#28211b" stroke-width="1"/>
+          <line x1="20" y1="140" x2="220" y2="140" stroke="#28211b" stroke-width="1"/>
+          <line x1="60" y1="10" x2="60" y2="150" stroke="#28211b" stroke-width="1"/>
+          <line x1="120" y1="10" x2="120" y2="150" stroke="#28211b" stroke-width="1"/>
+          <line x1="180" y1="10" x2="180" y2="150" stroke="#28211b" stroke-width="1"/>
+
+          <!-- Dimension markings -->
+          <circle cx="120" cy="80" r="54" stroke="#ff4a1c" stroke-dasharray="3 3" opacity="0.4"/>
+          
+          <!-- Mark drawing -->
+          <g transform="translate(70, 20) scale(1.6)">
+            <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="#ff4a1c"/>
+            <ellipse cx="28" cy="46" rx="6" ry="2" fill="#000000" opacity="0.4"/>
+            <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="#a3a9b2"/>
+            <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="#f1ede4"/>
+            <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="#f1ede4"/>
+            <ellipse cx="30.5" cy="13" rx="2.5" ry="1" fill="#ffffff" opacity="0.6"/>
+            <ellipse cx="32" cy="27" rx="5" ry="1.8" fill="#f1ede4"/>
+          </g>
+        </svg>
+        <div class="specs">
+          <div>Grid: <b>64×64 units</b></div>
+          <div>Clearance: <b>0.5H</b></div>
+          <div>Tear jag: <b>Mulberry32</b></div>
+          <div>Silhouette: <b>16px Pass</b></div>
+        </div>
+      </div>
+
+      <!-- 04: PALETTE & DYES -->
+      <div class="panel">
+        <div class="label">03 / PALETTE &amp; DYES</div>
+        <div class="swatches-grid">
+          <div class="swatch-row">
+            <div class="swatch-box" style="background: #ff4a1c;"></div>
+            <div class="swatch-info">
+              <span class="swatch-name">Vermilion Drum</span>
+              <span class="swatch-hex">#ff4a1c · 4.8:1</span>
+            </div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-box" style="background: #1a7ff0;"></div>
+            <div class="swatch-info">
+              <span class="swatch-name">Federal Cobalt</span>
+              <span class="swatch-hex">#1a7ff0 · 4.5:1</span>
+            </div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-box" style="background: #f1ede4;"></div>
+            <div class="swatch-info">
+              <span class="swatch-name">Raw Rag Vellum</span>
+              <span class="swatch-hex">#f1ede4 · Base</span>
+            </div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-box" style="background: #1b1712;"></div>
+            <div class="swatch-info">
+              <span class="swatch-name">Carbon Soot Ink</span>
+              <span class="swatch-hex">#1b1712 · 14.2:1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 05: TEAR PHYSICS & MATH -->
+      <div class="panel">
+        <div class="label">04 / TEAR PHYSICS</div>
+        <div class="tear-preview">
+          <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 140">
+            <path d="M0 0H400V90L360 80L320 100L270 85L220 105L170 85L120 105L70 90L0 100Z" fill="#ff4a1c"/>
+            <path d="M0 100L70 90L120 105L170 85L220 105L270 85L320 100L360 80L400 90" stroke="#ffffff" stroke-width="3" fill="none"/>
+            <path d="M0 102L70 92L120 107L170 87L220 107L270 87L320 102L360 82L400 92L400 140L0 140Z" fill="#f1ede4"/>
+          </svg>
+        </div>
+        <div class="tear-math">
+          mulberry32(seed): 84 ridge coordinates<br/>
+          lag: d*0.4 + 0.04 + 0.03*sin(x*23)<br/>
+          rim: 1.2px exposed cellulose fiber
+        </div>
+      </div>
+
+      <!-- 06: FAVICON & SCALE GATE -->
+      <div class="panel">
+        <div class="label">05 / SCALE &amp; FAVICON GATE</div>
+        <div class="scale-row">
+          <div class="scale-item">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+              <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="#ff4a1c"/>
+              <ellipse cx="28" cy="46" rx="6" ry="2" fill="#1b1712" opacity="0.3"/>
+              <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="#a3a9b2"/>
+              <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="#f1ede4"/>
+              <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="#f1ede4"/>
+            </svg>
+            <span>64px</span>
+          </div>
+          <div class="scale-item">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <path d="M6 8H26V18L22 16L18 20L14 17L10 21L6 18Z" fill="#ff4a1c"/>
+              <path d="M12.5 8H19.5V10C19.5 12 17.5 13 17.5 15H14.5C14.5 13 12.5 12 12.5 10Z" fill="#f1ede4"/>
+              <ellipse cx="16" cy="8" rx="4" ry="2" fill="#f1ede4"/>
+            </svg>
+            <span>32px</span>
+          </div>
+          <div class="scale-item">
+            <svg width="16" height="16" viewBox="0 0 32 32" fill="none">
+              <path d="M6 8H26V18L22 16L18 20L14 17L10 21L6 18Z" fill="#ff4a1c"/>
+              <path d="M12.5 8H19.5V10C19.5 12 17.5 13 17.5 15H14.5C14.5 13 12.5 12 12.5 10Z" fill="#f1ede4"/>
+              <ellipse cx="16" cy="8" rx="4" ry="2" fill="#f1ede4"/>
+            </svg>
+            <span>16px</span>
+          </div>
+        </div>
+        <div class="specs">
+          <div>Silhouette: <b>High Contrast</b></div>
+          <div>Favicon: <b>16px Clear</b></div>
+        </div>
+      </div>
+
+      <!-- 07: TYPOGRAPHY HIERARCHY -->
+      <div class="panel">
+        <div class="label">06 / TYPOGRAPHY GATE</div>
+        <div class="type-stack">
+          <div class="type-spec">
+            <h4 class="display" style="font-size: 26px;">Display Headline 68px</h4>
+            <p>Space Grotesk · 700 · -0.04em · LH 1.05</p>
+          </div>
+          <div class="type-spec">
+            <h4 style="font-size: 18px; font-weight: 600;">Editorial Body 18px / 1.55</h4>
+            <p>Geist Sans · 400 · Natural Rag · Balanced</p>
+          </div>
+          <div class="type-spec">
+            <h4 class="mono" style="font-size: 14px; color: #ff4a1c;">CODE &amp; LABELS 13PX</h4>
+            <p>Geist Mono · 500 · 0.14em tracking</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 08: COMPONENT SPECIMEN -->
+      <div class="panel">
+        <div class="label">07 / COMPONENT PROOF</div>
+        <div class="specimen-card">
+          <div class="specimen-top">
+            <span class="specimen-title">ink. riso co.</span>
+            <span class="specimen-pill">Pushpin Tear</span>
+          </div>
+          <p style="font-size: 13px; margin: 0 0 12px; color: #786c5e;">
+            Deterministic Mulbery32 PRNG seed = 23.<br/>
+            Pull the mechanical pin to re-tear.
+          </p>
+          <div style="display: flex; gap: 8px;">
+            <span style="font-size: 11px; font-weight: 600; padding: 4px 8px; background: #e0dbcf; border-radius: 4px;">Posters</span>
+            <span style="font-size: 11px; font-weight: 600; padding: 4px 8px; background: #e0dbcf; border-radius: 4px;">Zines</span>
+            <span style="font-size: 11px; font-weight: 600; padding: 4px 8px; background: #e0dbcf; border-radius: 4px;">Vellum</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

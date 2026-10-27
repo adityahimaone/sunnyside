@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" fill="none">
+  <!-- Background raw warm paper -->
+  <rect width="1200" height="900" fill="#f1ede4"/>
+  
+  <!-- Subtle paper texture grid lines -->
+  <path d="M60 0V900M1140 0V900M0 60H1200M0 840H1200" stroke="#e0dbcf" stroke-width="1.5"/>
+
+  <!-- Top bar / Edition run header -->
+  <text x="70" y="50" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" letter-spacing="0.1em" fill="#786c5e">RISO CO. / EDITION 04</text>
+  <text x="1130" y="50" text-anchor="end" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" letter-spacing="0.1em" fill="#786c5e">BERLIN / 2026</text>
+
+  <!-- Electric Vermilion torn poster block -->
+  <g transform="translate(70, 90)">
+    <!-- Sheet shadow -->
+    <path d="M0 0H1060V320L980 290L880 340L760 300L620 350L480 310L320 340L160 300L0 330Z" fill="#000000" opacity="0.08" transform="translate(0, 10)"/>
+    <!-- Vermilion sheet -->
+    <path d="M0 0H1060V320L980 290L880 340L760 300L620 350L480 310L320 340L160 300L0 330Z" fill="#ff4a1c"/>
+    <!-- Torn white fibre deckle rim -->
+    <path d="M0 330L160 300L320 340L480 310L620 350L760 300L880 340L980 290L1060 320" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/>
+    
+    <!-- Title on sheet -->
+    <text x="60" y="110" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="600" letter-spacing="0.08em" fill="#ffffff" opacity="0.8">ATELIER INK &amp; RISO PRINT</text>
+    <text x="60" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="88" font-weight="800" letter-spacing="-0.04em" fill="#ffffff">ink. riso co.</text>
+    <text x="60" y="260" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" letter-spacing="0.02em" fill="#ffffff" opacity="0.9">A torn poster pinned to studio cork. Mechanical hardware and unbleached vellum.</text>
+    
+    <!-- Pushpin on the sheet -->
+    <g transform="translate(860, 40) scale(1.4)">
+      <ellipse cx="28" cy="88" rx="8" ry="3" fill="#000000" opacity="0.25"/>
+      <path d="M29 60L31 60L30.3 88L29.7 88Z" fill="#a3a9b2"/>
+      <path d="M24 24H36V30C36 34 32 38 32 44H28C28 38 24 34 24 30Z" fill="#1b1712"/>
+      <ellipse cx="30" cy="24" rx="8" ry="4" fill="#1b1712"/>
+      <ellipse cx="28" cy="22" rx="3" ry="1.2" fill="#ffffff" opacity="0.7"/>
+      <ellipse cx="30" cy="46" rx="6.5" ry="2.2" fill="#1b1712"/>
+    </g>
+  </g>
+
+  <!-- Bottom Section: Marks, Palette & System specs -->
+  <g transform="translate(70, 480)">
+    <!-- Column 1: Identity & Mark -->
+    <rect width="320" height="340" rx="4" fill="#ffffff" stroke="#e0dbcf" stroke-width="1.5"/>
+    <text x="24" y="44" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" letter-spacing="0.1em" fill="#786c5e">01 / MARK &amp; GEOMETRY</text>
+    
+    <g transform="translate(110, 80) scale(1.6)">
+      <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="#ff4a1c"/>
+      <ellipse cx="28" cy="46" rx="6" ry="2" fill="#1b1712" opacity="0.3"/>
+      <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="#a3a9b2"/>
+      <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="#1b1712"/>
+      <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="#1b1712"/>
+      <ellipse cx="30.5" cy="13" rx="2.5" ry="1" fill="#ffffff" opacity="0.6"/>
+      <ellipse cx="32" cy="27" rx="5" ry="1.8" fill="#1b1712"/>
+    </g>
+    <text x="24" y="220" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="#1b1712">The Pin &amp; Deckle</text>
+    <text x="24" y="248" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="400" fill="#786c5e">64-unit mathematical grid.</text>
+    <text x="24" y="270" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="400" fill="#786c5e">Tested at 16px silhouette.</text>
+    <text x="24" y="292" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="400" fill="#786c5e">Zero live-text dependency.</text>
+
+    <!-- Column 2: Material Palette -->
+    <g transform="translate(360, 0)">
+      <rect width="320" height="340" rx="4" fill="#ffffff" stroke="#e0dbcf" stroke-width="1.5"/>
+      <text x="24" y="44" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" letter-spacing="0.1em" fill="#786c5e">02 / MATERIAL PALETTE</text>
+
+      <!-- Swatch 1: Vermilion -->
+      <rect x="24" y="70" width="36" height="36" rx="3" fill="#ff4a1c"/>
+      <text x="72" y="86" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#1b1712">Vermilion Sheet</text>
+      <text x="72" y="102" font-family="monospace" font-size="11" fill="#786c5e">#ff4a1c · 4.8:1</text>
+
+      <!-- Swatch 2: Paper Pulp -->
+      <rect x="24" y="120" width="36" height="36" rx="3" fill="#f1ede4" stroke="#d5cebe" stroke-width="1"/>
+      <text x="72" y="136" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#1b1712">Paper Stock</text>
+      <text x="72" y="152" font-family="monospace" font-size="11" fill="#786c5e">#f1ede4 · Base Vellum</text>
+
+      <!-- Swatch 3: Carbon Ink -->
+      <rect x="24" y="170" width="36" height="36" rx="3" fill="#1b1712"/>
+      <text x="72" y="186" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#1b1712">Iron Carbon Ink</text>
+      <text x="72" y="202" font-family="monospace" font-size="11" fill="#786c5e">#1b1712 · 14.2:1</text>
+
+      <!-- Swatch 4: Cobalt Alt -->
+      <rect x="24" y="220" width="36" height="36" rx="3" fill="#1a7ff0"/>
+      <text x="72" y="236" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#1b1712">Electric Cobalt</text>
+      <text x="72" y="252" font-family="monospace" font-size="11" fill="#786c5e">#1a7ff0 · Federal Blue</text>
+
+      <!-- Swatch 5: Needle Steel -->
+      <rect x="24" y="270" width="36" height="36" rx="3" fill="#a3a9b2"/>
+      <text x="72" y="286" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#1b1712">Needle Steel</text>
+      <text x="72" y="302" font-family="monospace" font-size="11" fill="#786c5e">#a3a9b2 · Metalwork</text>
+    </g>
+
+    <!-- Column 3: Component Specifications -->
+    <g transform="translate(720, 0)">
+      <rect width="340" height="340" rx="4" fill="#ffffff" stroke="#e0dbcf" stroke-width="1.5"/>
+      <text x="24" y="44" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" letter-spacing="0.1em" fill="#786c5e">03 / PHYSICAL SPECS</text>
+
+      <g transform="translate(24, 76)">
+        <text x="0" y="0" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#1b1712">Mulberry32 Ridge PRNG</text>
+        <text x="0" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="400" fill="#786c5e">84 points, 6 curled flaps with drop shadow.</text>
+
+        <text x="0" y="60" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#1b1712">Mechanical Pushpin Action</text>
+        <text x="0" y="80" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="400" fill="#786c5e">Lift &amp; stab animation; re-pins a fresh seed.</text>
+
+        <text x="0" y="120" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#1b1712">Reduced Motion Safe</text>
+        <text x="0" y="140" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="400" fill="#786c5e">Instantly displays rested deckle without lag.</text>
+
+        <text x="0" y="180" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#1b1712">Zero-Dependency Render</text>
+        <text x="0" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="400" fill="#786c5e">100% SVG and canvas generated from math.</text>
+      </g>
+    </g>
+  </g>
+</svg>

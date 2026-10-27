@@ -1,0 +1,104 @@
+# [Brand] — brand guide
+
+> [One sentence: what this brand is and the one idea it carries.]
+> Version [1.0] · [Month Year] · Owner: [name]
+
+## The idea
+
+- **Audience:** [who, and the context they arrive in.]
+- **Promise:** [what the brand makes possible, in their words.]
+- **Positioning:** [what it is not. The nearest thing it must not look like.]
+- **Metaphor:** [one sentence. The mark should be explainable from this.]
+- **Direction:** “[The sentence work can be rejected against.]”
+
+## The mark
+
+[Image: mark on paper and on ink.]
+
+- **Construction:** [grid, tile, radius, core, details, offset.]
+- **Clear space:** [half the mark height. Show it.]
+- **Minimum size:** [full mark; compact mark.]
+- **Compact mark:** [what changes at 16–24px.]
+- **Do not:** [recolour, stretch, rotate, add effects, redraw.]
+
+## The wordmark
+
+[Image: wordmark at 3 sizes, on paper and reversed.]
+
+- **Source:** [type outlines / drawn alphabet.]
+- **Tracking / weight:** [values.]
+- **Lockups:** [horizontal, stacked.]
+- **Responsive:** [name drops at X; wordmark drops at Y.]
+- **Do not:** [retype, re-space, outline, add effects.]
+
+## Colour
+
+| Role | Token | Hex | Use |
+| --- | --- | --- | --- |
+| Paper | `--[brand]-paper` | #[hex] | [the room] |
+| Ink | `--[brand]-ink` | #[hex] | [type, edges] |
+| Loud field | `--[brand]-[accent]` | #[hex] | [one per page] |
+| Accent | `--[brand]-[accent]` | #[hex] | [marks only] |
+
+Contrast pairs: [ink on paper 0.0:1; cream on cobalt 0.0:1.]
+Rule: [one loud field at a time; accents are not body text.]
+
+## Type
+
+| Voice | Face | Use | Spec |
+| --- | --- | --- | --- |
+| Display | [face] | [one remembered thing] | [weight / tracking / leading] |
+| Reading | [face] | [body] | [size / line / measure] |
+| Label | [face] | [metadata] | [size / tracking] |
+
+[One large specimen. Two short working rows. No paragraphs in the display face.]
+
+## Icons and favicon
+
+- Favicon: [compact mark; 16/32/48 ICO; SVG; 180 apple.]
+- App: [192 / 512.]
+- Checked: [16px on light and dark chrome.]
+- Do not: [use the glyph without a tile; add a shadow at 16px.]
+
+## Applications
+
+[Images: navbar, card, sticker, social, board.]
+
+- Navbar: [mark size, wordmark, name, gap.]
+- Social: [which lockup, which crop.]
+- Print: [which file, which stock.]
+
+## Do / don't
+
+**Do**
+
+- [Use the supplied SVG; keep the hard offset.]
+- [Use the compact mark below 24px.]
+- [Keep the wordmark in ink on paper.]
+
+**Don't**
+
+- [Recolour the core / face.]
+- [Stretch or re-space the lockup.]
+- [Add gradients, glows, soft shadows.]
+- [Place the ink wordmark on cobalt.]
+
+## Implementation
+
+- Mark: `[path]`
+- Wordmark: `[path]`
+- Lockups: `[paths]`
+- Tokens: `[CSS / JSON paths]`
+- Component: `[component path]`
+- Docs page: `[route]`
+- Raw Markdown: `[route]/llms.txt`
+
+## Still open
+
+- [Gap 1]
+- [Gap 2]
+- [Gap 3]
+
+## Verification
+
+[Link to the checklist. Name the date and the reviewer.]

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 64" fill="none">
+  <!-- Mark on left -->
+  <g transform="translate(0, 0)">
+    <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="#ff4a1c"/>
+    <ellipse cx="28" cy="46" rx="6" ry="2" fill="#1b1712" opacity="0.3"/>
+    <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="#a3a9b2"/>
+    <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="#1b1712"/>
+    <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="#1b1712"/>
+    <ellipse cx="30.5" cy="13" rx="2.5" ry="1" fill="#ffffff" opacity="0.6"/>
+    <ellipse cx="32" cy="27" rx="5" ry="1.8" fill="#1b1712"/>
+  </g>
+  <!-- Wordmark on right -->
+  <text x="76" y="40" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="700" letter-spacing="-0.04em" fill="#1b1712">ink.</text>
+  <text x="146" y="40" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="600" letter-spacing="-0.02em" fill="#ff4a1c">riso co.</text>
+  <text x="248" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500" letter-spacing="0.08em" fill="#786c5e">RUN 0412</text>
+</svg>

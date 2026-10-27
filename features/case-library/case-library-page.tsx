@@ -37,7 +37,7 @@ export function CaseLibraryPage() {
               <Sparkle className="size-2.5" />
               Design engineering / Case library
             </span>
-            <span className={layout.kickerText}>Two systems, one method</span>
+            <span className={layout.kickerText}>Four systems, one method</span>
             <span className={layout.kickerText}>
               <span className={layout.num}>{DESIGN_CASES.length}</span> cases
             </span>
@@ -49,12 +49,13 @@ export function CaseLibraryPage() {
             label="Case files"
           />
 
-          <h1 className={layout.title}>Two systems, one paper trail.</h1>
+          <h1 className={layout.title}>Four systems, one paper trail.</h1>
           <p className={layout.intro}>
             A case is not a moodboard. It is a brief, a mark, a system, a proof
             and a written decision. Sunnyside is paper and cobalt; Vitrine is
-            glass and dither. Both are documented as pages, with the files and
-            the gaps left on the table.
+            glass and dither; Huginn is bone and ordered print; Riso Co. is torn
+            poster and pushpin physics. Each case is documented with its files
+            and gaps left on the table.
           </p>
 
           <div className={styles.heroActions}>
@@ -149,7 +150,7 @@ export function CaseLibraryPage() {
           <p className={styles.methodFoot}>
             The method is documented as a field manual, and packaged as the{' '}
             <Link href="/design-engineering#skill">sunnyside-brand-system</Link>{' '}
-            agent skill. Vitrine is the second proof that it travels.
+            agent skill. Vitrine, Huginn and Riso Co. prove it travels beyond one material.
           </p>
         </section>
       </div>

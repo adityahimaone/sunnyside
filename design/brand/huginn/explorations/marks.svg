@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" role="img" aria-labelledby="title desc">
+<title id="title">Six Huginn mark studies</title><desc id="desc">A six-cell grid compares Threshold Print, raven profile, rune ring, crossed wings, eye aperture and feather ladder. Threshold Print is selected.</desc>
+<rect width="960" height="400" fill="#F2E8D8"/>
+<g fill="none" stroke="#171210" stroke-width="2">
+<rect x="20" y="20" width="296" height="170"/><rect x="332" y="20" width="296" height="170"/><rect x="644" y="20" width="296" height="170"/>
+<rect x="20" y="210" width="296" height="170"/><rect x="332" y="210" width="296" height="170"/><rect x="644" y="210" width="296" height="170"/>
+</g>
+<g transform="translate(130 42)" fill="#B82117"><path d="M0 0h52v16H16v52H0zM36 36h16v32H36z"/><circle cx="44" cy="44" r="4" fill="#171210"/><circle cx="51" cy="51" r="2" fill="#171210"/></g>
+<g transform="translate(442 50)" fill="#171210"><path d="M0 42c16-22 42-32 69-22l-20 12 20 12-28 3-19 16-7-16z"/><circle cx="53" cy="34" r="2" fill="#F2E8D8"/></g>
+<g transform="translate(750 45)" fill="none" stroke="#171210" stroke-width="6"><circle cx="40" cy="40" r="33"/><path d="M17 28l46 24M17 52l46-24"/><circle cx="40" cy="40" r="5" fill="#B82117"/></g>
+<g transform="translate(132 235)" fill="none" stroke="#171210" stroke-width="9" stroke-linecap="square"><path d="M0 0l40 45 40-45M0 60l40-45 40 45"/></g>
+<g transform="translate(442 240)" fill="none" stroke="#171210" stroke-width="5"><path d="M0 35c20-35 60-35 80 0-20 35-60 35-80 0z"/><circle cx="40" cy="35" r="12" fill="#B82117"/><circle cx="40" cy="35" r="3" fill="#F2E8D8"/></g>
+<g transform="translate(750 230)" fill="#171210"><path d="M7 0h15v52L7 68zM28 7h15v45L28 68zM49 14h15v38L49 68z"/></g>
+<g fill="#171210" font-family="Arial,sans-serif" font-size="12" letter-spacing="2"><text x="32" y="176">01 / THRESHOLD · KEPT</text><text x="344" y="176">02 / RAVEN PROFILE</text><text x="656" y="176">03 / RUNE RING</text><text x="32" y="366">04 / CROSSED WINGS</text><text x="344" y="366">05 / EYE APERTURE</text><text x="656" y="366">06 / FEATHER LADDER</text></g>
+</svg>

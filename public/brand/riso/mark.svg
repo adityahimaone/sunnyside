@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Torn sheet corner in background -->
+  <path d="M12 18L52 18L52 38L44 34L36 42L28 36L20 44L12 36Z" fill="#ff4a1c"/>
+  <!-- Pushpin drop shadow -->
+  <ellipse cx="28" cy="46" rx="6" ry="2" fill="#1b1712" opacity="0.3"/>
+  <!-- Steel needle -->
+  <path d="M31 32L33 32L32.4 46L31.6 46Z" fill="#a3a9b2"/>
+  <!-- Pushpin body -->
+  <path d="M26 14H38V18C38 21 34 23 34 26H30C30 23 26 21 26 18Z" fill="#1b1712"/>
+  <!-- Pushpin domed head -->
+  <ellipse cx="32" cy="14" rx="7" ry="3.5" fill="#1b1712"/>
+  <ellipse cx="30.5" cy="13" rx="2.5" ry="1" fill="#ffffff" opacity="0.6"/>
+  <!-- Base flange -->
+  <ellipse cx="32" cy="27" rx="5" ry="1.8" fill="#1b1712"/>
+</svg>
