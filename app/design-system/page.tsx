@@ -8,12 +8,12 @@ import { breadcrumbList, itemList, JsonLd } from '@/lib/structured-data'
 export const metadata: Metadata = {
   title: 'Design Systems — Case Library',
   description:
-    'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and print), and Riso Co. (torn poster and pushpin physics). Briefs, marks, tokens, form kits and audits.',
+    'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and print), Riso Co. (torn poster and pushpin physics), and Hachure (survey paper and ordered dither). Briefs, marks, tokens, form kits and audits.',
   alternates: { canonical: '/design-system' },
   openGraph: {
     title: 'Design Systems — Case Library | Aditya Himawan',
     description:
-      'Sunnyside, Vitrine, Huginn Studio, and Riso Co.: distinct interface systems, one design-engineering method. Open the case files.',
+      'Sunnyside, Vitrine, Huginn Studio, Riso Co. and Hachure: distinct interface systems, one design-engineering method. Open the case files.',
     url: `${WEBSITE_URL}/design-system`,
     type: 'website',
     images: [
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Design Systems — Case Library | Aditya Himawan',
     description:
-      'Explore documented design systems: Sunnyside, Vitrine, Huginn Studio, and Riso Co.',
+      'Explore documented design systems: Sunnyside, Vitrine, Huginn Studio, Riso Co. and Hachure.',
     images: [
       {
         url: '/brand/vitrine/vitrine-brandkit.png',
@@ -50,7 +50,7 @@ export default function DesignSystemLibraryPage() {
   const list = itemList({
     name: 'Design systems — case library',
     description:
-      'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and ordered print), and Riso Co. (torn poster and pushpin physics).',
+      'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and ordered print), Riso Co. (torn poster and pushpin physics) and Hachure (survey paper and ordered dither).',
     items: DESIGN_CASES.map((item) => ({
       name: `${item.number} — ${item.name}`,
       url: `${WEBSITE_URL}${item.href}`,

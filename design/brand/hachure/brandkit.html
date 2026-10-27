@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Hachure — brand board</title>
+    <!--
+      The board is the 4:3 thumbnail on /design-system, so it is authored at
+      1500 × 1125 and captured at 2× before being downscaled. Fonts are local,
+      colours come from the generated token stylesheet, and the plate is drawn
+      by the browser with a copy of the ridge maths kept in step with
+      features/hachure/dither-field.ts.
+
+        node scripts/render-hachure-board.mjs
+    -->
+    <link rel="stylesheet" href="../../../public/brand/hachure/hachure-tokens.css" />
+    <style>
+      @font-face {
+        font-family: 'Geist';
+        src: url('./assets/Geist.ttf') format('truetype');
+        font-weight: 100 900;
+        font-display: block;
+      }
+      @font-face {
+        font-family: 'Geist Mono';
+        src: url('./assets/GeistMono.ttf') format('truetype');
+        font-weight: 100 900;
+        font-display: block;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 1500px;
+        height: 1125px;
+        overflow: hidden;
+        background: var(--hx-stock);
+        color: var(--hx-ink);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        font-family: 'Geist', system-ui, sans-serif;
+      }
+
+      .board {
+        position: relative;
+        width: 1500px;
+        height: 1125px;
+        padding: 34px 44px 24px;
+        display: grid;
+        grid-template-rows: auto auto 1fr auto auto;
+        gap: 16px;
+      }
+
+      /* survey dot screen over the whole sheet — print texture, not an image */
+      .board::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at center, rgba(22, 33, 27, 0.55) 0.5px, transparent 0.6px);
+        background-size: 5px 5px;
+        opacity: 0.07;
+        pointer-events: none;
+      }
+
+      .mono {
+        font-family: 'Geist Mono', monospace;
+      }
+
+      .label {
+        font-family: 'Geist Mono', monospace;
+        font-size: 9.5px;
+        font-weight: 500;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--hx-ink-muted);
+      }
+
+      .rule {
+        height: 1px;
+        background: var(--hx-rule);
+      }
+
+      /* ------------------------------------------------------------ header */
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--hx-ink);
+        position: relative;
+        z-index: 1;
+      }
+
+      .head img {
+        display: block;
+        height: 40px;
+      }
+
+      .head-right {
+        display: flex;
+        gap: 26px;
+        align-items: baseline;
+      }
+
+      /* -------------------------------------------------------------- hero */
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 566px;
+        gap: 34px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-copy {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 9.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--hx-ink-muted);
+      }
+
+      .eyebrow::before {
+        content: '';
+        width: 26px;
+        height: 1px;
+        background: var(--hx-ink);
+      }
+
+      h1 {
+        margin-top: 18px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 56px;
+        line-height: 0.96;
+        letter-spacing: -0.035em;
+        font-weight: 700;
+      }
+
+      h1 em {
+        font-style: normal;
+        color: var(--hx-moss);
+      }
+
+      .hero-lead {
+        margin-top: 20px;
+        max-width: 46ch;
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--hx-ink-muted);
+      }
+
+      .hero-lead b {
+        color: var(--hx-ink);
+        font-weight: 500;
+      }
+
+      .specs {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-top: 22px;
+        border-top: 1px solid var(--hx-ink);
+        border-bottom: 1px solid var(--hx-rule);
+      }
+
+      .specs div {
+        padding: 8px 10px 9px 0;
+        border-right: 1px solid var(--hx-rule);
+        display: grid;
+        gap: 4px;
+      }
+
+      .specs div:last-child {
+        border-right: 0;
+        padding-right: 0;
+      }
+
+      .specs span {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--hx-ink-muted);
+      }
+
+      .specs b {
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+      }
+
+      .mark-line {
+        margin-top: auto;
+        display: flex;
+        align-items: flex-end;
+        gap: 20px;
+        padding-top: 20px;
+        border-top: 1px solid var(--hx-rule);
+      }
+
+      .mark-line img {
+        width: 96px;
+        height: 96px;
+        display: block;
+      }
+
+      .mark-line .mark-copy {
+        display: grid;
+        gap: 5px;
+        padding-bottom: 4px;
+      }
+
+      .mark-line .mark-copy b {
+        font-family: 'Geist Mono', monospace;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .mark-line .mark-copy span {
+        font-size: 11.5px;
+        line-height: 1.45;
+        color: var(--hx-ink-muted);
+        max-width: 30ch;
+      }
+
+      /* ------------------------------------------------------------- plate */
+      .plate-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+
+      .plate {
+        border: 1px solid var(--hx-ink);
+        background: var(--hx-stock);
+      }
+
+      .plate-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 11px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--hx-ink-muted);
+        border-bottom: 1px solid var(--hx-rule);
+      }
+
+      .plate-bar span:first-child::before {
+        content: '';
+        display: inline-block;
+        width: 12px;
+        height: 1px;
+        margin-right: 7px;
+        vertical-align: middle;
+        background: var(--hx-ink);
+      }
+
+      canvas {
+        display: block;
+        width: 564px;
+        height: 390px;
+        image-rendering: pixelated;
+      }
+
+      .plate-foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 11px;
+        border-top: 1px solid var(--hx-rule);
+        font-family: 'Geist Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--hx-ink-muted);
+      }
+
+      .scale {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .scale i {
+        width: 54px;
+        height: 5px;
+        border: 1px solid currentColor;
+        border-top: 0;
+        position: relative;
+        display: inline-block;
+      }
+
+      .scale i::after {
+        content: '';
+        position: absolute;
+        inset: 0 50% 0 0;
+        background: currentColor;
+      }
+
+      .plate-caption {
+        font-size: 10.5px;
+        line-height: 1.5;
+        color: var(--hx-ink-muted);
+        max-width: 56ch;
+      }
+
+      /* ----------------------------------------------------------- palette */
+      .mid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        gap: 34px;
+        position: relative;
+        z-index: 1;
+        padding-top: 18px;
+        border-top: 1px solid var(--hx-ink);
+      }
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 0;
+        border: 1px solid var(--hx-rule);
+      }
+
+      .swatch {
+        display: grid;
+        grid-template-rows: 64px auto;
+        border-right: 1px solid var(--hx-rule);
+      }
+
+      .swatch:last-child {
+        border-right: 0;
+      }
+
+      .swatch i {
+        display: block;
+        border-bottom: 1px solid var(--hx-rule);
+      }
+
+      .swatch div {
+        padding: 7px 8px 8px;
+        display: grid;
+        gap: 2px;
+      }
+
+      .swatch b {
+        font-family: 'Geist Mono', monospace;
+        font-size: 9.5px;
+        font-weight: 500;
+      }
+
+      .swatch code {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        color: var(--hx-ink-muted);
+      }
+
+      .ramp {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        border: 1px solid var(--hx-rule);
+      }
+
+      .ramp div {
+        display: grid;
+        gap: 4px;
+        padding: 0 5px 5px;
+        border-right: 1px solid var(--hx-rule);
+      }
+
+      .ramp div:last-child {
+        border-right: 0;
+      }
+
+      .ramp i {
+        display: block;
+        height: 32px;
+        margin: 0 -5px 2px;
+      }
+
+      .ramp b {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+      }
+
+      .ramp code {
+        font-family: 'Geist Mono', monospace;
+        font-size: 7px;
+        color: var(--hx-ink-muted);
+      }
+
+      .palette-note {
+        margin-top: 10px;
+        font-size: 11px;
+        line-height: 1.5;
+        color: var(--hx-ink-muted);
+        max-width: 68ch;
+      }
+
+      .palette-note b {
+        color: var(--hx-ink);
+        font-weight: 500;
+      }
+
+      /* -------------------------------------------------------------- type */
+      .type-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-left: 26px;
+        border-left: 1px solid var(--hx-rule);
+      }
+
+      .type-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--hx-rule);
+      }
+
+      .aa {
+        font-family: 'Geist Mono', monospace;
+        font-size: 54px;
+        line-height: 0.8;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+      }
+
+      .type-meta {
+        display: grid;
+        gap: 3px;
+        padding-bottom: 4px;
+      }
+
+      .type-meta b {
+        font-family: 'Geist Mono', monospace;
+        font-size: 10px;
+        font-weight: 500;
+      }
+
+      .type-meta span {
+        font-size: 10.5px;
+        line-height: 1.4;
+        color: var(--hx-ink-muted);
+      }
+
+      .wordmark-img {
+        width: 100%;
+        max-width: 268px;
+        display: block;
+        margin-top: 2px;
+      }
+
+      /* ------------------------------------------------------------ bottom */
+      .bottom {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr 1.2fr;
+        gap: 30px;
+        padding-top: 18px;
+        border-top: 1px solid var(--hx-ink);
+        position: relative;
+        z-index: 1;
+      }
+
+      .cell {
+        display: grid;
+        align-content: start;
+        gap: 9px;
+      }
+
+      .family {
+        display: flex;
+        align-items: flex-end;
+        gap: 22px;
+      }
+
+      .family figure {
+        display: grid;
+        justify-items: center;
+        gap: 5px;
+      }
+
+      .family img {
+        display: block;
+      }
+
+      .family figcaption {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--hx-ink-muted);
+      }
+
+      .cell p {
+        font-size: 10.5px;
+        line-height: 1.5;
+        color: var(--hx-ink-muted);
+      }
+
+      .cell p b {
+        color: var(--hx-ink);
+        font-weight: 500;
+      }
+
+      .rules-list {
+        display: grid;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .rules-list li {
+        display: grid;
+        grid-template-columns: 16px minmax(0, 1fr);
+        gap: 8px;
+        font-size: 11px;
+        line-height: 1.45;
+        color: var(--hx-ink-muted);
+      }
+
+      .rules-list li span {
+        font-family: 'Geist Mono', monospace;
+        font-size: 8.5px;
+        color: var(--hx-ink-muted);
+        padding-top: 2px;
+      }
+
+      .rules-list li b {
+        color: var(--hx-ink);
+        font-weight: 500;
+      }
+
+      /* ------------------------------------------------------------ footer */
+      .foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        padding-top: 10px;
+        border-top: 1px solid var(--hx-rule);
+        font-family: 'Geist Mono', monospace;
+        font-size: 8.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--hx-ink-muted);
+        position: relative;
+        z-index: 1;
+      }
+
+      /* crop marks */
+      .crop {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        opacity: 0.5;
+      }
+
+      .crop[data-at='tl'] {
+        top: 16px;
+        left: 16px;
+        border-left: 1px solid var(--hx-ink);
+        border-top: 1px solid var(--hx-ink);
+      }
+
+      .crop[data-at='tr'] {
+        top: 16px;
+        right: 16px;
+        border-right: 1px solid var(--hx-ink);
+        border-top: 1px solid var(--hx-ink);
+      }
+
+      .crop[data-at='bl'] {
+        bottom: 16px;
+        left: 16px;
+        border-left: 1px solid var(--hx-ink);
+        border-bottom: 1px solid var(--hx-ink);
+      }
+
+      .crop[data-at='br'] {
+        bottom: 16px;
+        right: 16px;
+        border-right: 1px solid var(--hx-ink);
+        border-bottom: 1px solid var(--hx-ink);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="board">
+      <span class="crop" data-at="tl"></span>
+      <span class="crop" data-at="tr"></span>
+      <span class="crop" data-at="bl"></span>
+      <span class="crop" data-at="br"></span>
+
+      <header class="head">
+        <img src="../../../public/brand/hachure/lockup.svg" alt="Hachure" />
+        <div class="head-right">
+          <span class="label">Case 05 / brand board</span>
+          <span class="label">v1.0.0 · 2026</span>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Terrain / weather / field data</p>
+          <h1>
+            Relief drawn<br />
+            by density,<br />
+            <em>never by shadow.</em>
+          </h1>
+          <p class="hero-lead">
+            A cartographic interface system built from the supplied ridgeline dither footer. Six
+            ridges from one seed, seven tones from one paper, and a mark that prints into the page.
+            <b>Depth is how many of the seven steps a surface is allowed to use.</b>
+          </p>
+
+          <div class="specs">
+            <div><span>Grid</span><b>64 units</b></div>
+            <div><span>Tones</span><b>7 / tone 1 = paper</b></div>
+            <div><span>Bands</span><b>3 / range reserved</b></div>
+            <div><span>Component</span><b>Ridgeline footer</b></div>
+          </div>
+
+          <div class="mark-line">
+            <img src="../../../public/brand/hachure/mark.svg" alt="The Hachure mark" />
+            <div class="mark-copy">
+              <b>The mark prints into paper</b>
+              <span>
+                64 grid · one path · apex (26, 13), knee (38, 34), feet (10, 50) and (54, 50).
+                Solid above row 42; the base breaks into 14 cells at 82% and 44% coverage.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="plate-wrap">
+          <div class="plate">
+            <div class="plate-bar">
+              <span>Sheet 05</span>
+              <span>1:25 000</span>
+            </div>
+            <canvas id="plate" width="282" height="195" aria-hidden="true"></canvas>
+            <div class="plate-foot">
+              <span class="scale"><span>0</span><i></i><span>1 km</span></span>
+              <span>47°12′N 8°41′E</span>
+            </div>
+          </div>
+          <p class="plate-caption">
+            One plate, drawn by the browser at 2 CSS px per cell: six ridges, seven tones, seed 7.
+            Tone 1 is the stock, which is why the range can dissolve upward instead of fading.
+          </p>
+        </div>
+      </section>
+
+      <section class="mid">
+        <div>
+          <p class="label" style="margin-bottom: 9px">01 / Materials</p>
+          <div class="swatches">
+            <div class="swatch">
+              <i style="background: var(--hx-stock)"></i>
+              <div><b>stock</b><code>#F2F4EE</code></div>
+            </div>
+            <div class="swatch">
+              <i style="background: var(--hx-stock-deep)"></i>
+              <div><b>stock-deep</b><code>#E5E9DF</code></div>
+            </div>
+            <div class="swatch">
+              <i style="background: var(--hx-pine)"></i>
+              <div><b>pine</b><code>#1E3B2C</code></div>
+            </div>
+            <div class="swatch">
+              <i style="background: var(--hx-ink)"></i>
+              <div><b>ink</b><code>#16211B</code></div>
+            </div>
+            <div class="swatch">
+              <i style="background: var(--hx-lichen)"></i>
+              <div><b>lichen</b><code>#C9D94E</code></div>
+            </div>
+            <div class="swatch">
+              <i style="background: var(--hx-moss)"></i>
+              <div><b>moss</b><code>#4A6B33</code></div>
+            </div>
+          </div>
+
+          <div class="ramp" id="ramp"></div>
+          <p class="palette-note">
+            <b>Lichen is a fill, never a letter</b> — 1.40:1 on stock. The type-safe green is moss at
+            5.51:1, and the dither's tone 5 follows it. Survey red #A82A1C is functional only.
+          </p>
+        </div>
+
+        <div class="type-panel">
+          <p class="label">02 / Type</p>
+          <div class="type-row">
+            <span class="aa">Aa</span>
+            <div class="type-meta">
+              <b>Geist Mono 700</b>
+              <span>Display, labels, coordinates,<br />altitudes, the wordmark</span>
+            </div>
+          </div>
+          <div class="type-row" style="align-items: flex-start; border-bottom: 0">
+            <div class="type-meta">
+              <b>Geist 400</b>
+              <span>Body copy at 17px, 1.6 leading,<br />held to about 68 characters</span>
+            </div>
+          </div>
+          <img
+            class="wordmark-img"
+            src="../../../public/brand/hachure/wordmark.svg"
+            alt="The Hachure wordmark, outlined from Geist Mono 700"
+          />
+        </div>
+      </section>
+
+      <section class="bottom">
+        <div class="cell">
+          <p class="label">03 / Mark family</p>
+          <div class="family">
+            <figure>
+              <img src="../../../public/brand/hachure/mark.svg" width="56" height="56" alt="" />
+              <figcaption>64</figcaption>
+            </figure>
+            <figure>
+              <img src="../../../public/brand/hachure/mark.svg" width="32" height="32" alt="" />
+              <figcaption>32</figcaption>
+            </figure>
+            <figure>
+              <img src="../../../public/brand/hachure/favicons/favicon-16.svg" width="16" height="16" alt="" />
+              <figcaption>16</figcaption>
+            </figure>
+            <figure>
+              <img src="../../../public/brand/hachure/favicons/favicon-180.svg" width="40" height="40" alt="" />
+              <figcaption>180 / apple</figcaption>
+            </figure>
+          </div>
+          <p>
+            <b>One silhouette, one operation.</b> The compact drawing redraws the base on a 2-unit
+            grid so it survives 16px.
+          </p>
+        </div>
+
+        <div class="cell">
+          <p class="label">04 / Elevation</p>
+          <ul class="rules-list">
+            <li><span>03</span><div><b>Range 400–3,000 m</b> — the footer, and only the footer.</div></li>
+            <li><span>02</span><div><b>Bench 40 m</b> — panels, fields, table headers.</div></li>
+            <li><span>01</span><div><b>Ground 0 m</b> — the page. Nothing sits below it.</div></li>
+          </ul>
+          <p>
+            No shadow, no gradient sky, no peak logo. A hairline and a bench tone carry every
+            elevation below the range.
+          </p>
+        </div>
+
+        <div class="cell">
+          <p class="label">05 / The rule</p>
+          <p>
+            <b>One loud field per view.</b> Lichen is the field; the range is the only place it may
+            be dithered. Ten form controls, three elevation bands, and one contrast pair that fails
+            on purpose — kept visible so the rule can be checked.
+          </p>
+          <p>
+            Tokens: stock, pine, ink, lichen, moss, mist, night, alert. Two families. Three bands.
+            One reserved surface.
+          </p>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <span>hachure / a drawn specimen, not a company</span>
+        <span>Tokens: features/hachure/tokens.json → hachure-tokens.css</span>
+        <span>Board 1500 × 1125 @2× · 2026</span>
+      </footer>
+    </main>
+
+    <script>
+      /* The plate. This is a standalone artefact with no bundler, so the ridge
+         maths is mirrored here from features/hachure/dither-field.ts. Same Bayer
+         matrix, same tone formula, same 2px cell; the page remains the source. */
+      ;(() => {
+        const canvas = document.getElementById('plate')
+        const ctx = canvas.getContext('2d')
+        const cols = canvas.width
+        const rows = canvas.height
+        const px = 2
+
+        const BAYER = [
+          0, 32, 8, 40, 2, 34, 10, 42, 48, 16, 56, 24, 50, 18, 58, 26, 12, 44, 4, 36, 14, 46, 6, 38, 60, 28, 52, 20,
+          62, 30, 54, 22, 3, 35, 11, 43, 1, 33, 9, 41, 51, 19, 59, 27, 49, 17, 57, 25, 15, 47, 7, 39, 13, 45, 5, 37,
+          63, 31, 55, 23, 61, 29, 53, 21,
+        ].map((v) => (v + 0.5) / 64)
+
+        const css = getComputedStyle(document.documentElement)
+        const tone = (i) => css.getPropertyValue('--hx-tone-' + i).trim()
+        const pack = (hex) => {
+          const n = parseInt(hex.slice(1), 16)
+          return ((255 << 24) | ((n & 255) << 16) | (((n >> 8) & 255) << 8) | ((n >> 16) & 255)) >>> 0
+        }
+        const pal = [1, 2, 3, 4, 5, 6, 7].map((i) => pack(tone(i)))
+
+        const hash = (x, y, s) => {
+          let h = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s | 0, 1442695041)
+          h = Math.imul(h ^ (h >>> 13), 1274126177)
+          h ^= h >>> 16
+          return (h >>> 0) / 4294967296
+        }
+        const noise = (x, y, s) => {
+          const xi = Math.floor(x)
+          const yi = Math.floor(y)
+          const xf = x - xi
+          const yf = y - yi
+          const u = xf * xf * (3 - 2 * xf)
+          const v = yf * yf * (3 - 2 * yf)
+          const a = hash(xi, yi, s)
+          const b = hash(xi + 1, yi, s)
+          const c = hash(xi, yi + 1, s)
+          const d = hash(xi + 1, yi + 1, s)
+          return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v
+        }
+        const fbm = (x, y, s, o) => {
+          let sum = 0
+          let amp = 0.5
+          let norm = 0
+          for (let i = 0; i < o; i++) {
+            sum += noise(x, y, s + i * 31) * amp
+            norm += amp
+            x *= 2.03
+            y *= 2.03
+            amp *= 0.5
+          }
+          return sum / norm
+        }
+        const smooth = (a, b, x) => {
+          const t = Math.max(0, Math.min(1, (x - a) / (b - a)))
+          return t * t * (3 - 2 * t)
+        }
+        const ridge = (i, layers, seed, margin) => {
+          const k = i / (layers - 1)
+          const n = cols + margin * 2
+          const out = new Float32Array(n)
+          const base = rows * (0.38 + 0.66 * Math.pow(k, 1.4))
+          const amp = rows * (0.2 + 0.24 * k)
+          const freq = 6 - 3.8 * k
+          const flankL = rows * 0.5 * k * k * k * (0.55 + 0.6 * hash(i, 11, seed))
+          const flankR = rows * 0.5 * k * k * k * (0.55 + 0.6 * hash(i, 13, seed))
+          const ceil = rows * 0.17
+          const tilt = (hash(i, 7, seed) - 0.5) * rows * 0.34 * (0.4 + k)
+          const s = seed * 13 + i * 101
+          for (let x = 0; x < n; x++) {
+            const u = (x - margin) / cols
+            const r1 = 1 - Math.abs(noise(u * freq + i * 3.7, 0.5, s) * 2 - 1)
+            const r2 = 1 - Math.abs(noise(u * freq * 2.3, 3.5, s + 1) * 2 - 1)
+            const f = fbm(u * freq * 4.1, 9.5, s + 2, 3)
+            const h = r1 * r1 * 0.62 + r2 * 0.24 + f * 0.14
+            const e = Math.min(1.2, Math.abs(u * 2 - 1))
+            const y =
+              base - h * amp + tilt * (u - 0.5) * 2 - (u < 0.5 ? flankL : flankR) * e * e * Math.sqrt(e)
+            out[x] = y < ceil ? ceil - (ceil - y) * 0.25 : y
+          }
+          return out
+        }
+
+        const layers = 6
+        const seed = 7
+        const margin = Math.ceil(cols * 0.045) + 3
+        const tops = []
+        for (let i = 0; i < layers; i++) tops.push(ridge(i, layers, seed, margin))
+
+        const fw = (cols >> 1) + 2
+        const fh = (rows >> 1) + 2
+        const fog = new Float32Array(fw * fh)
+        for (let gy = 0; gy < fh; gy++) {
+          for (let gx = 0; gx < fw; gx++) {
+            const v = fbm((gx * 9) / cols, (gy * 4.4) / rows, 31, 3)
+            fog[gy * fw + gx] = smooth(0.3, 0.74, v)
+          }
+        }
+
+        const img = ctx.createImageData(cols, rows)
+        const buf = new Uint32Array(img.data.buffer)
+        const mist = 0.75
+        const fadeFrom = 0.45
+
+        for (let y = 0; y < rows; y++) {
+          const fade = smooth(0, rows * fadeFrom, y)
+          for (let x = 0; x < cols; x++) {
+            let L = -1
+            for (let i = layers - 1; i >= 0; i--) {
+              if (y >= tops[i][x + margin]) {
+                L = i
+                break
+              }
+            }
+            let t = 0
+            if (L >= 0) {
+              const k = L / (layers - 1)
+              const d = y - tops[L][x + margin]
+              const pool = rows * (0.08 + 0.42 * k)
+              const crest = 1 - smooth(0, pool, d) * (0.88 - 0.45 * k)
+              t = (0.16 + 0.76 * Math.pow(k, 1.6)) * crest
+              const sl = tops[L][Math.min(tops[L].length - 1, x + margin + 2)] - tops[L][x + margin - 2]
+              t += Math.max(-0.16, Math.min(0.16, sl * 0.055)) * (1 - smooth(0, pool * 0.5, d))
+            } else {
+              t = 0.05 * smooth(rows * 0.15, rows * 0.6, y)
+            }
+            let m = fog[(y >> 1) * fw + (x >> 1)] * mist * (L >= 0 ? 0.95 - 0.5 * (L / (layers - 1)) : 0.3)
+            if (m > 1) m = 1
+            t = (t * (1 - m) + 0.07 * m) * fade
+            const b = BAYER[(y & 7) * 8 + (x & 7)]
+            const v = Math.floor(t * 6 + b)
+            buf[y * cols + x] = pal[v > 6 ? 6 : v]
+          }
+        }
+        ctx.putImageData(img, 0, 0)
+
+        // The tone ramp is generated from the same token stylesheet.
+        const ramp = document.getElementById('ramp')
+        for (let i = 1; i <= 7; i++) {
+          const cell = document.createElement('div')
+          cell.innerHTML =
+            '<i style="background:' + tone(i) + '"></i><b>' + String(i).padStart(2, '0') + '</b><code>' + tone(i) + '</code>'
+          ramp.appendChild(cell)
+        }
+      })()
+    </script>
+  </body>
+</html>

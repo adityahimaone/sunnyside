@@ -114,6 +114,10 @@
   --case-accent: #ff4a1c;
 }
 
+.tone_hachure {
+  --case-accent: #4a6b33;
+}
+
 .cardTop {
   display: flex;
   align-items: center;
