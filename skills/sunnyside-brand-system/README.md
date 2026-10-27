@@ -1,7 +1,8 @@
 # sunnyside-brand-system
 
 An installable agent skill for shipping **brand kits**, **design systems** and
-**single-page mockups** from a brief:
+**single-page mockups** from a brief. It owns the brand decision and hands the
+approved kit to **`implement-brand-system`** for the build:
 
 - one idea, one mark family, one 3×3 board;
 - favicon and app icons;
@@ -14,10 +15,16 @@ An installable agent skill for shipping **brand kits**, **design systems** and
 
 Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
 
+**v2.0 provenance:** rebuilt after auditing
+[ui-skills.com](https://www.ui-skills.com/) — 439 skills across 27 categories;
+22 relevant skills inspected and fused in
+[`references/ui-skills-fusion.md`](references/ui-skills-fusion.md).
+
 ## Install
 
 ```bash
 npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth
+npx skills add adityahimaone/sunnyside --skill implement-brand-system --full-depth
 npx skills add adityahimaone/sunnyside --skill pen-dev --full-depth
 ```
 
@@ -40,12 +47,11 @@ npx skills add ./skills/sunnyside-brand-system
 3. Draw six marks; keep one; write down why the other five lost.
 4. Build the mark + compact + outlined wordmark, or start with tokens.
 5. Use one token source → CSS + JSON. Never hand-edit generated output.
-6. Build one proof page: HTML for a static board/mockup, TSX for an interactive
-   system. Use shadcn/Radix for accessible primitives; native for the rest.
-7. Run the typography gate before the first screenshot.
-8. Render the board from HTML at 2×; downscale.
-9. Run the static audit and one browser QA pass. Fix the root cause, not the
-   screenshot. Name the gaps.
+6. Write `DESIGN.md`: decisions, token roles, component rules, what not to do.
+7. Render the board from HTML at 2×; downscale.
+8. Run the static audit and one browser QA pass. Name the gaps.
+9. **Hand off** to `implement-brand-system` for the HTML/TSX proof page. Do not
+   redesign the kit in the implementation pass.
 
 ## Fast commands
 
@@ -87,6 +93,7 @@ sunnyside-brand-system/
     image-direction.md         prompts, provenance and QA for generated images
     tokens-and-docs.md         token layers and agent-readable docs
     design-systems.md          shadcn/Radix, primitives, forms, case page
+    ui-skills-fusion.md        audit of the ui-skills registry + fused rules
     typography.md              the typography gate + better-typography source
     verification.md            the ship checklist and audit format
     lessons.md                 Case 02 failures and the rules they produced
@@ -108,6 +115,13 @@ sunnyside-brand-system/
     sunnyside.md               the paper/cobalt case
     vitrine.md                 the glass/dither case + audit
 ```
+
+## Companion skills
+
+- [`implement-brand-system`](../implement-brand-system/SKILL.md) — turns the
+  approved kit into a single-page HTML/TSX proof; never redesigns the brand.
+- [`pen-dev`](../pen-dev/SKILL.md) — `.pen` design source, delegated agent and
+  MCP-in-the-loop.
 
 ## What this skill refuses
 

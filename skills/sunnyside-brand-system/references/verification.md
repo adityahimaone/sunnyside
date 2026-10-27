@@ -26,6 +26,49 @@ Then inspect:
 Write **Not verified** for anything you could not inspect. Never approve
 coverage you did not see.
 
+## Review order and escalation
+
+Review in this order so foundation failures are not hidden by polish:
+**accessibility → layout → writing → typography → colour → UI polish.** If an
+owning skill is unavailable, mark that domain **Not reviewed**; never claim it.
+
+These are `HIGH` on sight, whatever the style guide says:
+
+- an interactive control with no accessible name;
+- a keyboard-reachable control with no visible focus;
+- a pointer-only control or path;
+- motion or autoplay that ignores `prefers-reduced-motion`;
+- content clipped, overlapped or unreachable at 320px or 200% zoom;
+- body/control text whose rendered contrast pair fails;
+- state or meaning carried by colour alone;
+- a destructive action with no confirmation, undo or distinct treatment;
+- truncated content with no way to reach the full value;
+- content behind a scroll edge or disclosure with no visible cue;
+- an error that names no recovery;
+- a semantic colour used against its meaning;
+- a state change carried by motion alone.
+
+Prefer the cheaper fix, in this order: **delete → use the platform → reuse what
+the project has → correct the value → add.** One root cause is one row, with every
+location. Cap the report at 15 findings; a short report is valid. A finding needs
+`path:line` plus a rendered/runtime check; source alone cannot prove a visual
+finding, and a screenshot alone cannot prove a code finding.
+
+## Layout gate
+
+- Space groups first; separators last. The gap between groups is at least 2× the
+  gap within one.
+- Controls are visually distinct from content; one primary action per view.
+- Shared alignment edges; DOM order matches visual order.
+- Direction-dependent layout uses logical properties; test the RTL mirror.
+- Hidden or truncated content has a visible cue and a way to the full value.
+- Controls stay inside the margins and safe areas; content may bleed.
+- `minmax(0, 1fr)` / `min-width: 0` for long text and tables; `100dvh` not
+  `100vh`; `min-height` on text boxes; `scroll-padding-block-start` under sticky
+  chrome.
+- Test 320px, 200% zoom and the largest supported width; clip or overlap is
+  `HIGH`.
+
 ## Audit format
 
 One table, one row per root cause, every location:

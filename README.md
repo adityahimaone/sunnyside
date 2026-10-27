@@ -94,16 +94,17 @@ The identity is a **die-cut sun sticker** and the site's **marker wordmark**. Th
 | `/notes` · `/notes/[slug]`       | Notes                              |
 | `/rss.xml`                       | Blog feed                          |
 
-## Agent skill — sunnyside-brand-system
+## Agent skills — brand system and implementation
 
-The brand-kit, design-system and mockup method is packaged as an installable skill. It covers the brief, the logo family, the 3 × 3 board, favicon/app icons, tokens, single-page HTML/TSX proofs, shadcn/Radix components, forms, a typography gate, lean QA, and the pen.dev design-source workflow.
+The brand-kit, design-system and mockup method is packaged as three installable skills. `sunnyside-brand-system` owns the brief, logo family, board, favicons, tokens, typography, audit and handoff. `implement-brand-system` turns the approved kit into a single-page HTML/TSX proof with shadcn/Radix, forms, metadata and lean QA. `pen-dev` covers the `.pen` design-source workflow.
 
 ```bash
 npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth
+npx skills add adityahimaone/sunnyside --skill implement-brand-system --full-depth
 npx skills add adityahimaone/sunnyside --skill pen-dev --full-depth
 ```
 
-The package lives in [`skills/sunnyside-brand-system/`](./skills/sunnyside-brand-system/); start with [`SKILL.md`](./skills/sunnyside-brand-system/SKILL.md). The pen.dev companion is [`skills/pen-dev/`](./skills/pen-dev/). Typography is a first-class gate; the optional upstream companion is [better-typography](https://www.ui-skills.com/skills/jakubkrehel/better-typography). The public companion page is [`/design-engineering`](https://adityahimaone.space/design-engineering).
+The package lives in [`skills/sunnyside-brand-system/`](./skills/sunnyside-brand-system/); start with [`SKILL.md`](./skills/sunnyside-brand-system/SKILL.md). The implementation companion is [`skills/implement-brand-system/`](./skills/implement-brand-system/) and the pen.dev companion is [`skills/pen-dev/`](./skills/pen-dev/). Typography is a first-class gate; the optional upstream companion is [better-typography](https://www.ui-skills.com/skills/jakubkrehel/better-typography). The public companion page is [`/design-engineering`](https://adityahimaone.space/design-engineering).
 
 ## Stack
 

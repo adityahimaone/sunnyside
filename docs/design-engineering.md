@@ -125,7 +125,7 @@ substitute for the judgement that decides what to keep.
 - The skill is the agent-facing version of the method. The page stays the
   human-facing guide; both must be updated together.
 
-## The installable skill
+## The installable skills
 
 `skills/sunnyside-brand-system/` is a normal `SKILL.md` package, installable via
 the `skills` CLI:
@@ -134,23 +134,30 @@ the `skills` CLI:
 npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth
 ```
 
-It contains the method, nine references, seven scripts, five templates and two
+It contains the method, ten references, seven scripts, five templates and two
 cases:
 
 - `SKILL.md` — modes, fast path, token budget, rules, output contract and verification.
 - `references/brief.md`, `logo-system.md`, `board-and-images.md`,
   `image-direction.md`, `tokens-and-docs.md`, `design-systems.md`,
-  `typography.md`, `verification.md`, `lessons.md`.
+  `typography.md`, `verification.md`, `lessons.md`, `ui-skills-fusion.md`.
 - `scripts/render-board.mjs`, `render-icons.mjs`, `favicons.py`,
   `downscale.py`, `extract-wordmark.py`, `audit.mjs`, `qa.mjs`.
 - `templates/brandkit.html`, `single-page.html`, `case-page.tsx`,
   `audit.json`, `guidelines.md`.
 - `examples/sunnyside.md`, `examples/vitrine.md`.
 
-The companion `skills/pen-dev/` skill documents the delegated pen agent and the
-MCP-in-the-loop workflow:
+v2.0 was rebuilt after an audit of [ui-skills.com](https://www.ui-skills.com/).
+The registry lists 439 skills across 27 categories; 22 relevant ones were
+inspected and fused into a brand pass and an implementation pass. The audit and
+the fusion rules live in `references/ui-skills-fusion.md`.
+
+The companion `skills/implement-brand-system/` skill turns an approved kit into
+the HTML/TSX proof without redesigning it, and `skills/pen-dev/` documents the
+delegated pen agent and MCP-in-the-loop workflow:
 
 ```bash
+npx skills add adityahimaone/sunnyside --skill implement-brand-system --full-depth
 npx skills add adityahimaone/sunnyside --skill pen-dev --full-depth
 ```
 

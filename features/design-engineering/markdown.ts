@@ -202,6 +202,11 @@ ${table(
 
 ${BRAND_SKILL.description}
 
+v2.0 was rebuilt after an audit of [ui-skills.com](https://www.ui-skills.com/).
+The registry lists 439 skills across 27 categories; 22 relevant ones were
+inspected and fused into a brand pass and an implementation pass. The audit is
+in references/ui-skills-fusion.md.
+
 Install:
 
 \`\`\`bash

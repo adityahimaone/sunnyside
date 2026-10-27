@@ -425,7 +425,7 @@ export const VITRINE_CASE = {
 export const BRAND_SKILL = {
   name: 'sunnyside-brand-system',
   description:
-    'A fast, evidence-led skill for brand kits, design systems and single-page HTML/TSX mockups: strategy, logo family, board, favicons, tokens, forms, a typography gate, lean QA and pen.dev integration.',
+    'A fast, evidence-led skill for brand kits, design systems and single-page HTML/TSX mockups: strategy, logo family, board, favicons, tokens, forms, a typography gate and lean QA. It hands the approved kit to implement-brand-system.',
   install:
     'npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth',
   folder: 'skills/sunnyside-brand-system',
@@ -433,10 +433,12 @@ export const BRAND_SKILL = {
   file: 'https://github.com/adityahimaone/sunnyside/blob/main/skills/sunnyside-brand-system/SKILL.md',
   includes: [
     'SKILL.md — modes, fast path, token budget, rules and output contract',
-    '9 references — brief, logo, board, image direction, tokens, design systems, typography, verification, lessons',
+    '10 references — brief, logo, board, image direction, tokens, design systems, typography, verification, lessons, ui-skills fusion',
+    'UI Skills audit — 22 relevant skills inspected; fused into the brand and implementation passes',
     '7 scripts — board, icons, favicon, downscale, wordmark, static audit, browser QA',
     '5 templates — brand board, single-page mockup, TSX case page, audit manifest, guide',
     '2 examples — Sunnyside and Vitrine, with the Case 02 audit',
+    'Companion implement-brand-system skill — HTML/TSX implementation, shadcn/Radix, forms, metadata, QA',
     'Companion pen-dev skill — delegated agent and MCP-in-the-loop',
   ],
 }
@@ -584,7 +586,7 @@ export const GAPS = [
   },
   {
     label: 'Pen.dev',
-    line: 'The sources are versioned, but the agent-in-the-loop is still a manual workflow.',
+    line: 'The pen-dev skill documents the loop, but the CI-gated agent run is still manual.',
   },
   {
     label: 'Components',
@@ -614,6 +616,11 @@ export const AGENT_SKILLS: AgentSkill[] = [
   {
     name: 'design-taste-frontend',
     use: 'A brief-led direction that rejects templated defaults.',
+    note: 'Running in this workspace',
+  },
+  {
+    name: 'implement-brand-system',
+    use: 'Turns an approved kit into an HTML/TSX proof without redesigning it.',
     note: 'Running in this workspace',
   },
   {

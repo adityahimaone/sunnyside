@@ -15,6 +15,10 @@ A method for shipping a **brand kit** or **design system** quickly without losin
 the reasoning. The output is a page or a small set of files, not a folder of
 exports. Sunnyside and Vitrine are evidence, not templates.
 
+**v2.0 provenance:** rebuilt after an audit of [ui-skills.com](https://www.ui-skills.com/)
+(439 skills / 27 categories; 22 relevant skills inspected). The fusion is in
+`references/ui-skills-fusion.md`; the implementation half is `implement-brand-system`.
+
 ## Read this first
 
 Pick the smallest deliverable that answers the request.
@@ -26,6 +30,10 @@ Pick the smallest deliverable that answers the request.
 | **Mockup** | A visual direction needs to be seen | One HTML/TSX page, real copy, 3–5 sections, one component group | Reads at 1440 and 390; no asset set promised |
 | **Audit / QA** | Something exists and needs a verdict | Scorecard, evidence paths, fixes, gaps | Every claim has a file or a browser check |
 | **pen.dev** | A canvas/board source is wanted | `.pen` + 2× PNG, reconciled with code tokens | Code remains the source of truth |
+
+If the ask is to **build the page**, finish the kit and hand off to
+`implement-brand-system`. This skill owns the decision; that skill owns the
+execution.
 
 If no brief exists, ask for: name, category, audience, promise, positioning,
 stack/sizes/accessibility, three references, deliverables. Write `brief.md` before
@@ -42,6 +50,18 @@ drawing; mark unknowns `ASSUMPTION`. Template: `references/brief.md`.
 5. **One proof page** with real copy and states. HTML for a board/mockup, TSX for
    an interactive system.
 6. **Audit and stop**: static audit + one QA pass. Fix only what fails. Name gaps.
+
+## Domain before defaults
+
+Before drawing, name four things:
+
+- **5 domain concepts or metaphors** from the product's world, not its features;
+- **5 colours from the physical version** of that world (materials, light, objects);
+- **one signature** that could only belong to this product;
+- **3 obvious defaults** for this category, visual and structural.
+
+Remove the product name from the proposal. If it could belong to any product in
+the category, explore deeper before drawing.
 
 ## Token budget
 
@@ -203,7 +223,7 @@ claim points to a file or route; icons are tested at 16px; the page is readable
 without JS.
 
 ```
-brand/         brief.md, brandkit.html, <slug>-brandkit.png (3000×2250), assets/
+brand/         brief.md, DESIGN.md, brandkit.html, <slug>-brandkit.png (3000×2250), assets/
 public/brand/<slug>/   mark*, wordmark, lockups, glyph, favicons, icons,
                        <slug>-brandkit.png, <slug>-tokens.css/json
 app/design-system/     page.tsx (library), <slug>/page.tsx, <slug>/llms.txt
@@ -214,6 +234,23 @@ docs/                  <slug>-design-system-audit.md
 For a design system add the component inventory and form states; for a mockup
 promise only the page and its tokens.
 
+## Handoff to implementation
+
+Stop when the kit is approved. Do not build the product page inside the brand
+pass. Hand off:
+
+- `brief.md` and `DESIGN.md` (or the project's design guide/README: the decisions,
+  rules and what not to do);
+- `tokens.json` + `tokens.css`, with the contrast pairs;
+- `public/brand/<slug>/` (mark, compact mark, wordmark, lockups, favicons, icons);
+- the board PNG and `brandkit.html`;
+- the component inventory, form states, motion rule and named gaps;
+- the audit and the target route/stack.
+
+Load **`implement-brand-system`** for the HTML/TSX build. It will not redesign
+the kit; it maps tokens, composes sections, uses shadcn/Radix or native controls,
+and runs the QA gate.
+
 ## References
 
 - `brief.md` — brief and review gates.
@@ -222,6 +259,7 @@ promise only the page and its tokens.
 - `image-direction.md` — prompts and provenance.
 - `tokens-and-docs.md` — token layers and agent-readable docs.
 - `design-systems.md` — shadcn/Radix, primitives, forms, case page.
+- `ui-skills-fusion.md` — the ui-skills audit and the fused operating rules.
 - `typography.md` — the typography gate.
 - `verification.md` — ship checklist and audit format.
 - `lessons.md` — Case 02 failures and rules.
