@@ -26,6 +26,7 @@
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
+import { execFileSync } from 'node:child_process'
 
 const args = process.argv.slice(2)
 const flag = (name, fallback) => {
@@ -34,7 +35,9 @@ const flag = (name, fallback) => {
 }
 const has = (name) => args.includes(`--${name}`)
 
-const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet']
+const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet', 'dotmatrix', 'lines', 'overprint', 'nodes', 'monogram']
+// Six families for a bake-off (geometry, dots, lines, dots+geometry, lines+geometry, network)
+const BAKEOFF = ['aperture', 'dotmatrix', 'lines', 'overprint', 'hatch', 'nodes']
 
 const STARTER = {
   name: 'Sunnyside',
@@ -89,7 +92,62 @@ if (has('init')) {
     cfg.dna.radius = 6
   }
   if (concept === 'orbit') cfg.dna.tile = 'circle'
+  if (concept === 'monogram') cfg.params.letter = cfg.name[0]
   console.log(JSON.stringify(cfg, null, 2))
+  process.exit(0)
+}
+
+
+// ───────────────────────── bake-off ─────────────────────────
+// Six concepts from six different families, same palette and material (theme DNA),
+// so the only variable is the idea. Pick one; write down why five lost.
+if (has('bakeoff')) {
+  const cfgFile = resolve(process.cwd(), flag('bakeoff'))
+  const outRoot = resolve(process.cwd(), flag('out', 'bakeoff'))
+  const base0 = JSON.parse(await readFile(cfgFile, 'utf8'))
+  const families = {
+    aperture: 'pure geometry',
+    dotmatrix: 'dot matrix',
+    lines: 'line system',
+    overprint: 'dots + geometry (two inks)',
+    hatch: 'lines + geometry',
+    nodes: 'node network',
+  }
+  const picks = (base0.bakeoff ?? BAKEOFF).filter((c) => CONCEPTS.includes(c))
+  if (base0.params?.letter || base0.letter) picks.splice(picks.length > 5 ? 5 : picks.length, picks.length > 5 ? 1 : 0, 'monogram')
+  await mkdir(outRoot, { recursive: true })
+  for (const c of picks) {
+    const tmp = join(outRoot, `.${c}.json`)
+    await writeFile(tmp, JSON.stringify({ ...base0, concept: c }))
+    try {
+      execFileSync(process.execPath, [process.argv[1], '--config', tmp, '--out', join(outRoot, c)], { stdio: 'pipe' })
+    } catch (error) {
+      console.error(`bake-off: ${c} failed\n${error.stdout?.toString() ?? ''}`)
+    }
+  }
+  const sizes = [16, 32, 64, 128]
+  const card = (c, i) => {
+    const row = (bg, fg) =>
+      `<div style="background:${bg};color:${fg};padding:12px;display:flex;gap:14px;align-items:end;border-radius:8px">${sizes
+        .map((z) => `<img src="${c}/${z <= 32 ? 'mark-compact' : 'mark'}.svg" width="${z}" height="${z}" alt="">`)
+        .join('')}</div>`
+    return `<article style="background:#fff;border:1px solid #0002;border-radius:12px;padding:18px;display:grid;gap:12px">
+<header style="display:flex;justify-content:space-between;font:600 13px ui-monospace,monospace"><span>${String(i + 1).padStart(2, '0')} · ${c}</span><span style="opacity:.6">${families[c] ?? 'monogram'}</span></header>
+<img src="${c}/mark.svg" width="180" height="180" alt="${c} mark" style="justify-self:center">
+${row('#f6f1e7', '#111')}${row('#14141f', '#fff')}
+<p style="font:12px/1.4 system-ui;margin:0;color:#444">One sentence this mark argues (no shape names): <br><strong>________________</strong></p>
+<p style="font:12px/1.4 system-ui;margin:0;color:#444">Keep / lost because: <strong>________________</strong></p></article>`
+  }
+  await writeFile(
+    join(outRoot, 'bakeoff.html'),
+    `<!doctype html><meta charset="utf-8"><title>${base0.name ?? 'brand'} — bake-off</title>
+<body style="margin:0;padding:28px;background:#e9e4d8;font-family:system-ui"><h1 style="font:700 20px system-ui;margin:0 0 6px">${base0.name ?? 'brand'} — six ideas, one material</h1>
+<p style="margin:0 0 20px;max-width:70ch;color:#444;font-size:14px">Same palette and theme DNA; only the idea changes. Judge at 16px first. Keep one. Write why five lost: that note becomes the guide.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">${picks.map(card).join('')}</div></body>
+`,
+  )
+  console.log(`bake-off · ${picks.join(', ')} → ${outRoot}/bakeoff.html`)
+  console.log('Next: python scripts/score-mark.py --dir ' + outRoot + ' (objective checks), then choose and refine.')
   process.exit(0)
 }
 
@@ -110,7 +168,8 @@ const merged = {
   params: { ...STARTER.params, ...cfg.params },
   story: { ...STARTER.story, ...cfg.story },
 }
-const { name, slug, concept, palette: P, dna, params, story } = merged
+let { concept } = merged
+const { name, slug, palette: P, dna, params, story } = merged
 if (!CONCEPTS.includes(concept)) fail(`unknown concept "${concept}". Use: ${CONCEPTS.join(', ')}`)
 for (const [key, value] of Object.entries(P)) {
   if (!/^#[0-9a-f]{6}$/i.test(value)) fail(`palette.${key} must be #rrggbb, got ${value}`)
@@ -142,11 +201,30 @@ function tileShape(extra = '', inset = 0) {
   const x = T.x + inset
   const y = T.y + inset
   const s = T.s - inset * 2
+  if (dna.tile === 'none') return `<circle cx="32" cy="32" r="${r(28 - inset)}" ${extra}/>`
   if (dna.tile === 'circle') return `<circle cx="${r(x + s / 2)}" cy="${r(y + s / 2)}" r="${r(s / 2)}" ${extra}/>`
   const rx = dna.tile === 'square' ? Math.min(dna.radius, 4) : Math.max(dna.radius - inset, 2)
   return `<rect x="${r(x)}" y="${r(y)}" width="${r(s)}" height="${r(s)}" rx="${r(rx)}" ${extra}/>`
 }
 const clipId = `${slug}-tile`
+
+
+// Geometric monoline capitals on a 40 × 48 box (stroke is applied by the concept).
+const LETTERS = {
+  A: 'M2 48L20 2L38 48M9 31H31', B: 'M3 2V46M3 2H20A11 11 0 0 1 20 24H3M3 24H22A11 11 0 0 1 22 46H3',
+  C: 'M37.3 11.1A20 20 0 1 0 37.3 36.9', D: 'M3 2V46H16A22 22 0 0 0 16 2Z',
+  E: 'M37 2H3V46H37M3 24H29', F: 'M37 2H3V46M3 24H29',
+  G: 'M37.3 11.1A20 20 0 1 0 41 24H24', H: 'M3 2V46M37 2V46M3 24H37',
+  I: 'M10 2H30M20 2V46M10 46H30', J: 'M33 2V30A13 13 0 0 1 7 30',
+  K: 'M3 2V46M37 2L3 28M12 20L37 46', L: 'M3 2V46H37',
+  M: 'M3 46V2L20 30L37 2V46', N: 'M3 46V2L37 46V2',
+  O: 'M20 2A17 22 0 0 0 20 46A17 22 0 0 0 20 2Z', P: 'M3 46V2H20A12 12 0 0 1 20 26H3',
+  Q: 'M20 2A17 22 0 0 0 20 46A17 22 0 0 0 20 2ZM26 34L39 48', R: 'M3 46V2H20A12 12 0 0 1 20 26H3M19 26L37 46',
+  S: 'M35 9C28 0 5 0 5 12C5 25 35 21 35 36C35 49 10 48 3 39', T: 'M2 2H38M20 2V46',
+  U: 'M3 2V28A17 17 0 0 0 37 28V2', V: 'M2 2L20 46L38 2',
+  W: 'M0 2L10 46L20 14L30 46L40 2', X: 'M3 2L37 46M37 2L3 46',
+  Y: 'M2 2L20 24L38 2M20 24V46', Z: 'M3 2H37L3 46H37',
+}
 
 // ───────────────────────── concepts ─────────────────────────
 // Each returns inner SVG for the content sitting INSIDE the tile, in a palette
@@ -204,14 +282,21 @@ const concepts = {
     )
   },
   hatch(c, compact) {
-    const gap = compact ? 9 : 5.5
-    const w = compact ? 3.6 : 2
-    const lines = []
-    for (let x = -64; x < 128; x += gap) lines.push(`M${r(x)} 64L${r(x + 64)} 0`)
-    const orb = compact ? 13 : 15
+    // Hachure: short strokes on the shaded side only, steepest at the edge; the lit half stays empty.
+    const gap = compact ? 9 : 5
+    const w = compact ? 3.6 : 1.9
+    const segs = []
+    for (let k = 64 + gap * 1.5; k < 124; k += gap * 1.4142) {
+      const t = (k - 64) / 60
+      const inset = (1 - t) * 10 // lines start further in near the lit side: a falling-off shade
+      segs.push(`M${r(k - 64 + inset)} ${r(64 - inset)}L${r(64 - inset)} ${r(k - 64 + inset)}`)
+    }
+    const orb = compact ? 13 : 14
+    const ring = dna.tile === 'none' ? `<circle cx="32" cy="32" r="${compact ? 27 : 27.4}" fill="none" stroke="${c.lead}" stroke-width="${compact ? 3 : 1.8}"/>` : ''
     return (
-      `<g clip-path="url(#${clipId})"><path d="${lines.join('')}" fill="none" stroke="${c.ink}" stroke-width="${w}"/></g>` +
-      `<circle cx="32" cy="32" r="${orb}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.4}"/>`
+      `<g clip-path="url(#${clipId})"><path d="${segs.join('')}" fill="none" stroke="${c.lead}" stroke-width="${w}" stroke-linecap="butt"/></g>` +
+      ring +
+      `<circle cx="28.5" cy="28.5" r="${orb}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.4}"/>`
     )
   },
   stack(c, compact) {
@@ -226,6 +311,85 @@ const concepts = {
       out += `<rect x="${r(x)}" y="${r(y)}" width="${size}" height="${size}" rx="${compact ? 5 : 4}" fill="${fills[i]}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.2}"/>`
     }
     return out
+  },
+  dotmatrix(c, compact) {
+    // Concentric dots, empty centre, one wedge removed: tension without noise.
+    const rings = compact ? [[6, 10, 4.4], [12, 21, 3.4]] : [[6, 9, 3.4], [12, 18, 2.9], [18, 26.5, 2.4]]
+    const gapAt = -50 // degrees; the wedge opens to the upper right
+    const gapHalf = compact ? 30 : 24
+    let out = ''
+    for (const [n, ringR, dotR] of rings) {
+      for (let i = 0; i < n; i++) {
+        const a = (360 / n) * i - 90
+        const d = Math.abs((((a - gapAt) % 360) + 540) % 360 - 180)
+        if (d < gapHalf) continue
+        const [x, y] = pt(32, 32, ringR, a)
+        out += `<circle cx="${r(x)}" cy="${r(y)}" r="${dotR}" fill="${c.lead}"/>`
+      }
+    }
+    const [ax, ay] = pt(32, 32, compact ? 21 : 26, gapAt)
+    return out + `<circle cx="${r(ax)}" cy="${r(ay)}" r="${compact ? 5 : 4.4}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 2.4 : 1.8}"/>`
+  },
+  lines(c, compact) {
+    // A disc hatched with lines whose weight swells through the middle (a lit sphere, drawn).
+    const n = compact ? 5 : 9
+    const R = compact ? 23 : 22
+    const top = 32 - R
+    const step = (2 * R) / n
+    let out = `<defs><clipPath id="${slug}-disc"><circle cx="32" cy="32" r="${R}"/></clipPath></defs><g clip-path="url(#${slug}-disc)">`
+    for (let i = 0; i < n; i++) {
+      const t = (i + 0.5) / n
+      const w = (compact ? 2.2 : 1.1) + Math.sin(t * Math.PI) * (compact ? 3.4 : 3.1)
+      const y = top + (i + 0.5) * step
+      out += `<line x1="6" y1="${r(y)}" x2="58" y2="${r(y)}" stroke="${c.lead}" stroke-width="${r(w)}"/>`
+    }
+    out += '</g>'
+    const [sx, sy] = pt(32, 32, R + 1, -45)
+    return out + `<circle cx="${r(sx)}" cy="${r(sy)}" r="${compact ? 5.4 : 4.6}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 2.4 : 1.8}"/>`
+  },
+  overprint(c, compact) {
+    // Two inks, one lens. Flat fills only; the lens is clipped, not blended.
+    const rr = compact ? 15.5 : 16
+    const a = [compact ? 25 : 24.5, compact ? 35 : 36]
+    const b = [compact ? 39 : 39.5, compact ? 29 : 28]
+    const sw = compact ? 2.8 : 2
+    return (
+      `<defs><clipPath id="${slug}-lens"><circle cx="${a[0]}" cy="${a[1]}" r="${rr}"/></clipPath></defs>` +
+      `<circle cx="${a[0]}" cy="${a[1]}" r="${rr}" fill="${c.spark}"/>` +
+      `<circle cx="${b[0]}" cy="${b[1]}" r="${rr}" fill="${c.core}"/>` +
+      `<circle cx="${b[0]}" cy="${b[1]}" r="${rr}" fill="${params.lens && c.ink === P.ink ? params.lens : c.ink}" clip-path="url(#${slug}-lens)"/>` +
+      `<circle cx="${a[0]}" cy="${a[1]}" r="${rr}" fill="none" stroke="${c.ink}" stroke-width="${sw}"/>` +
+      `<circle cx="${b[0]}" cy="${b[1]}" r="${rr}" fill="none" stroke="${c.ink}" stroke-width="${sw}"/>`
+    )
+  },
+  nodes(c, compact) {
+    // Three nodes on a diagonal, thick edges, one satellite. Asymmetric on purpose.
+    const N = compact ? [[17, 44, 7], [45, 20, 8]] : [[16, 45, 6.4], [30, 28, 7.8], [48, 20, 5.4]]
+    const w = compact ? 3.8 : 3
+    let edges = ''
+    for (let i = 0; i < N.length - 1; i++) {
+      const [x1, y1] = N[i]
+      const [x2, y2] = N[i + 1]
+      const mx = (x1 + x2) / 2 + (i % 2 ? 6 : -6)
+      const my = (y1 + y2) / 2 + (i % 2 ? 6 : 6)
+      edges += `<path d="M${x1} ${y1}Q${r(mx)} ${r(my)} ${x2} ${y2}" fill="none" stroke="${c.lead}" stroke-width="${w}" stroke-linecap="round"/>`
+    }
+    const fills = [c.spark, c.core, c.lead]
+    const nodes = N.map(([x, y, rr], i) => `<circle cx="${x}" cy="${y}" r="${rr}" fill="${fills[i % 3]}" stroke="${c.ink}" stroke-width="${compact ? 2.6 : 2}"/>`).join('')
+    return edges + nodes
+  },
+  monogram(c, compact) {
+    const ch = String(params.letter || name[0] || 'A').toUpperCase()
+    const glyph = LETTERS[ch]
+    if (!glyph) return ''
+    const w = compact ? 7.4 : 6
+    const s = compact ? 0.82 : 0.8
+    const tx = 32 - 20 * s
+    const ty = 32 - 24 * s
+    const lay = (stroke, dx, dy) =>
+      `<g transform="translate(${r(tx + dx)} ${r(ty + dy)}) scale(${s})" fill="none" stroke="${stroke}" stroke-width="${r(w / s)}" stroke-linecap="round" stroke-linejoin="round"><path d="${glyph}"/></g>`
+    // printed offset sits behind the letter; compact drops it (it dies below 1.5px at 16px)
+    return (compact ? '' : lay(c.core, 2.2, 2.2)) + lay(c.lead, 0, 0)
   },
   facet(c, compact) {
     const rr = compact ? 19 : 17
@@ -255,7 +419,8 @@ function face(cx, cy, c) {
 const svgOpen = (w = 64, h = 64, title = name) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${title}">`
 
-function buildMark({ colors, compact = false, tile = true, shadow = true, field = colors.field }) {
+function buildMark({ colors, compact = false, tile = true, shadow = true, field = colors.field, forceTile = false }) {
+  if (dna.tile === 'none' && !forceTile) { tile = false; shadow = false }
   const off = compact || !shadow || dna.edge === 'none' ? 0 : dna.offset
   const stroke = compact ? 3.2 : dna.stroke
   const defs = `<defs><clipPath id="${clipId}">${tileShape('', 0)}</clipPath></defs>`
@@ -266,23 +431,23 @@ function buildMark({ colors, compact = false, tile = true, shadow = true, field 
   parts.push(concepts[concept](colors, compact))
   return `${svgOpen()}${parts.join('')}</svg>\n`
 }
-const base = { field: P.field, core: P.core, spark: P.spark, ink: P.ink, paper: P.paperHi }
+const base = { field: P.field, core: P.core, spark: P.spark, ink: P.ink, paper: P.paperHi, lead: dna.tile === 'none' ? P.ink : P.paperHi }
 const outputs = {}
 outputs['mark.svg'] = buildMark({ colors: base })
 outputs['mark-compact.svg'] = buildMark({ colors: base, compact: true })
 outputs['glyph.svg'] = buildMark({ colors: base, tile: false, shadow: false })
 // Reversed: tile in ink, drawing lines in paper so it holds on a dark ground.
 outputs['mark-reverse.svg'] = buildMark({
-  colors: { field: P.ink, core: P.core, spark: P.spark, ink: P.paperHi, paper: P.ink },
+  colors: { field: P.ink, core: P.core, spark: P.spark, ink: P.paperHi, paper: P.ink, lead: P.paperHi },
   shadow: false,
 })
 // One-colour stamp is DRAWN: all fills collapse to ink/paper with the same geometry.
 outputs['mark-mono.svg'] = buildMark({
-  colors: { field: P.paperHi, core: P.paperHi, spark: P.paperHi, ink: P.ink, paper: P.paperHi },
+  colors: { field: P.paperHi, core: P.paperHi, spark: P.paperHi, ink: P.ink, paper: P.paperHi, lead: P.ink },
   shadow: dna.edge === 'hard',
 })
 // Favicon field: the compact mark, with an opaque ground so it never vanishes on chrome.
-outputs['icon.svg'] = buildMark({ colors: base, compact: true })
+outputs['icon.svg'] = buildMark({ colors: base, compact: true, forceTile: true })
 
 // Lockups (need an outlined wordmark)
 const wordPath = flag('wordmark')

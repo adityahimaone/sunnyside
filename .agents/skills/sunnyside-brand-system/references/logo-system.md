@@ -135,9 +135,14 @@ with a complete, tested family instead of a blank file.
 | `hatch` | diagonal lines + a disc | drawing, shading, craft | line gap must grow in the compact |
 | `stack` | offset plates | layers, versions, depth | keep ≤ 3 plates, 2 in compact |
 | `facet` | circle cut by a diagonal | decision, split, light | thin cut disappears at 16px |
+| `dotmatrix` | aligned rings of dots, empty centre, one gap | data, signal, texture | dots under 4 units wide vanish at 16px; keep two rings in compact |
+| `lines` | disc hatched with weight-swelling lines | flow, shading, signal | reads as a striped planet unless the story is shading |
+| `overprint` | two flat discs, clipped lens | merge, agreement, two inks | lens colour must be a real third colour, not a blend mode |
+| `nodes` | asymmetric nodes + thick edges | agents, links, route | no orphan satellites; every dot attached |
+| `monogram` | geometric monoline letter + printed offset | initial | a letter alone is not an idea: add a cut, join or light |
 
-Process: `--init <concept>` for three or four concepts → compare each
-`sheet.html` at 16px → keep one → write why the rest lost → hand-refine points on
+Process: `--bakeoff brand.json` (six families, one material) → `score-mark.py` →
+compare at 16px → keep one → write why the rest lost → hand-refine points on
 the grid → re-run. Vary **theme DNA** before geometry; material is what makes the
 mark yours.
 

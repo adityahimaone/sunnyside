@@ -1,0 +1,14 @@
+{
+  "name": "Riso Co.",
+  "slug": "riso-co",
+  "concept": "overprint",
+  "palette": { "paper": "#f0e9d8", "paperHi": "#faf5e8", "ink": "#2a2540", "field": "#faf5e8", "core": "#0078bf", "spark": "#ff48b0", "muted": "#5c5870", "danger": "#b3261e", "success": "#1f7a4d" },
+  "dna": { "edge": "none", "offset": 0, "stroke": 0, "radius": 10, "tile": "none", "density": "cosy", "label": "mono-caps", "ring": "offset", "font": { "display": "Space Grotesk", "ui": "Inter", "mono": "Space Mono" } },
+  "params": { "lens": "#6b2f9e" },
+  "story": {
+    "belief": "Two honest colours beat ten fake ones.",
+    "enemy": "Print that hides its process.",
+    "promise": "Small-run print where the overlap is the point.",
+    "proof": "Every file ships as separated spot-colour layers."
+  }
+}

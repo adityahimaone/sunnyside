@@ -1,0 +1,14 @@
+{
+  "name": "Hachure",
+  "slug": "hachure",
+  "concept": "hatch",
+  "palette": { "paper": "#ece7d6", "paperHi": "#f6f2e4", "ink": "#16201a", "field": "#f6f2e4", "core": "#e8b84a", "spark": "#c4572b", "muted": "#4f5a50", "danger": "#a3261f", "success": "#2f6b3f" },
+  "dna": { "edge": "none", "offset": 0, "stroke": 2.2, "radius": 8, "tile": "none", "density": "compact", "label": "small-caps", "ring": "solid", "font": { "display": "Newsreader", "ui": "Inter", "mono": "IBM Plex Mono" } },
+  "params": {},
+  "story": {
+    "belief": "Slope is something you should be able to read at a glance.",
+    "enemy": "Maps that flatten terrain into colour.",
+    "promise": "Relief drawn the old way: short lines, steepest where it matters.",
+    "proof": "Every contour is traceable to a source survey."
+  }
+}

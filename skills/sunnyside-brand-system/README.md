@@ -16,6 +16,11 @@ approved kit to **`implement-brand-system`** for the build:
 
 Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
 
+**v2.2:** fuses [op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill)
+(six-family brainstorm, design rules, pattern families): `--bakeoff`, five new
+concepts, `score-mark.py`, `references/logo-brainstorm.md` and a worked redo in
+`examples/brainstorm-huginn-riso-hachure.md`.
+
 **v2.1:** a generated vector logo family (`scripts/brand-forge.mjs`: six
 construction concepts, tokens, theme-matched form kit, proof sheet, story
 scaffold), a storytelling layer, theme-matched forms and stronger audit checks.
@@ -70,6 +75,10 @@ node scripts/audit.mjs --manifest audit.json
 # Generate the whole family from one config (concepts: sunburst aperture orbit hatch stack facet)
 node scripts/brand-forge.mjs --init orbit > brand.json
 node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> --wordmark wordmark.svg
+
+# Six ideas from six families, one material; then objective checks
+node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff
+python3 scripts/score-mark.py --dir bakeoff   # pip install cairosvg pillow
 
 # Keep the .agents/skills mirror identical
 bash scripts/sync-skill.sh

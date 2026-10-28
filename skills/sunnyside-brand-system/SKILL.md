@@ -4,7 +4,7 @@ description: Design and ship a brand kit or design system from a brief — strat
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '2.1'
+  version: '2.2'
 ---
 
 # Sunnyside brand system
@@ -14,6 +14,12 @@ One idea → one mark → one system → one proof → one audit.
 A method for shipping a **brand kit** or **design system** quickly without losing
 the reasoning. The output is a page or a small set of files, not a folder of
 exports. Sunnyside and Vitrine are evidence, not templates.
+
+**v2.2:** fuses the discipline and pattern families of
+[op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill):
+a six-family brainstorm (`references/logo-brainstorm.md`), a bake-off command,
+five more concepts (dotmatrix, lines, overprint, nodes, monogram) and an
+objective mark scorer (`scripts/score-mark.py`).
 
 **v2.1:** adds a generated vector logo family (`scripts/brand-forge.mjs`), a
 storytelling layer (`references/storytelling.md`), theme-matched form fields
@@ -49,9 +55,10 @@ drawing; mark unknowns `ASSUMPTION`. Template: `references/brief.md`.
 1. **Brief and one sentence** the work can be rejected against.
 2. **One idea**: monogram + meaning, product action, metaphor fusion, negative
    space, or construction geometry. One metaphor, one loud field.
-3. **Draw six, keep one** on the same 64 grid. Write down why five lost. Fastest
-   route: `brand-forge.mjs --init <concept>` for each candidate concept, compare
-   `sheet.html`, keep one.
+3. **Brainstorm six, keep one** across six *families* (geometry, dots, lines,
+   shapes+geometry, lines+geometry, network), not six tweaks of a letter. Fastest
+   route: `brand-forge.mjs --bakeoff brand.json`, then `score-mark.py`, keep one,
+   write why five lost. Protocol: `references/logo-brainstorm.md`.
 4. **Generate the family** (`node scripts/brand-forge.mjs --config brand.json`):
    mark, compact, glyph, reverse, mono, icon, lockups, tokens, form kit, proof
    sheet. Then hand-refine the mark; the generator is a start, not a ceiling.
@@ -129,7 +136,9 @@ Details: `references/design-systems.md`.
 64 grid. It is the fast path for step 3–4; it does not replace judgement.
 
 ```bash
-node scripts/brand-forge.mjs --list                       # sunburst aperture orbit hatch stack facet
+node scripts/brand-forge.mjs --list                       # 11 concepts: sunburst aperture orbit hatch stack facet dotmatrix lines overprint nodes monogram
+node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff   # six families, one material
+python3 scripts/score-mark.py --dir bakeoff               # numbers before taste
 node scripts/brand-forge.mjs --init orbit > brand.json    # starter config, edit palette/dna/params
 node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> \
   --wordmark wordmark.svg                                 # from extract-wordmark.py
@@ -140,6 +149,11 @@ It writes `mark`, `mark-compact` (a separate, simpler drawing), `glyph`,
 tokens (CSS + JSON with contrast pairs), the form kit, `sheet.html` (16/32/64/128
 on light + dark) and `story.md`. Exit code 1 if any contrast pair or SVG check
 fails. Without `--wordmark` it skips lockups; it never fakes one with `<text>`.
+
+Avoid the three failure modes seen in the wild (`logo-brainstorm.md` §0): a bare
+initial or letter-in-a-box, an orphan accent that dies at 16px, and an effect
+(offset, misregistration) standing in for an idea. A letter earns its place only
+if something is cut, joined or lit.
 
 Make it better than the default:
 
@@ -272,6 +286,7 @@ Use the companion **`pen-dev`** skill for the full workflow. In short:
 Run these from this skill folder, or copy `scripts/` into the project.
 
 ```bash
+python3 scripts/score-mark.py --dir public/brand/<slug>   # 16px, silhouette, specks, negative space
 node scripts/audit.mjs --manifest audit.json   # files, SVG, ICO, PNG, tokens, family, forms, story
 node scripts/qa.mjs --url <the surface URL or file:// path> \
   --out docs/screenshots --name <slug>
@@ -352,6 +367,7 @@ and runs the QA gate.
 
 - `brief.md` — brief and review gates.
 - `logo-system.md` — concepts, grid, family, favicon.
+- `logo-brainstorm.md` — six-family brainstorm, design rules, scoring, why marks come out ugly.
 - `board-and-images.md` — board, render pipeline, image QA.
 - `image-direction.md` — prompts and provenance.
 - `tokens-and-docs.md` — token layers and agent-readable docs.
@@ -366,10 +382,11 @@ and runs the QA gate.
 - `form-theming.md` — theme DNA, material → field recipes, states, shadcn mapping.
 - `skill-audit.md` — audit of this skill, fixes, known gaps.
 - `examples/sunnyside.md`, `examples/vitrine.md` — the two cases (evidence, not defaults).
+- `examples/brainstorm-huginn-riso-hachure.md` + `examples/configs/` — a worked redo of three weak marks.
 
 ## Scripts and templates
 
-`brand-forge.mjs` (generate the family), `render-board.mjs`, `render-icons.mjs`,
+`brand-forge.mjs` (generate the family, `--bakeoff`), `score-mark.py` (objective mark checks), `render-board.mjs`, `render-icons.mjs`,
 `favicons.py`, `downscale.py`, `extract-wordmark.py`, `audit.mjs`, `qa.mjs`,
 `sync-skill.sh` (keep `.agents/skills` mirror identical).
 
@@ -383,6 +400,6 @@ and runs the QA gate.
 3. Choose the surface and HTML/TSX before building.
 4. shadcn/Radix where accessible primitives matter; native for the rest.
 5. Typography gate before the first screenshot.
-6. Generate with `brand-forge`, then refine by hand; write the story; match the fields.
+6. Bake off six families with `brand-forge`, score, then refine by hand; write the story; match the fields.
 7. Scripts for audit/QA; one look; fix the root cause; stop.
 8. Name what is missing. A guide that hides its gaps is a brochure.
