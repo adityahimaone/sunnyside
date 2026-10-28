@@ -96,6 +96,14 @@ async function shoot(page, name, fullPage = true) {
     () => document.documentElement.scrollWidth - window.innerWidth,
   )
   await shoot(page, 'vitrine-390-light.jpg')
+  await page.locator('#marks').scrollIntoViewIfNeeded()
+  await page.evaluate(() => window.scrollBy(0, -90))
+  await page.locator('#marks').screenshot({
+    path: `${out}/vitrine-390-section-marks.jpg`,
+    type: 'jpeg',
+    quality: 82,
+  })
+  await page.evaluate(() => window.scrollTo(0, 0))
   await page.getByRole('button', { name: 'Dark' }).click()
   await page.waitForTimeout(800)
   await shoot(page, 'vitrine-390-dark.jpg')

@@ -4,7 +4,7 @@
 
 .vt-scope {
   /* Theme DNA: the mark and the fields read this object */
-  --vt-dna-family: continuous-ribbon;
+  --vt-dna-family: architectural-monogram;
   --vt-dna-material: liquid-glass;
   --vt-dna-edge: hard;
   --vt-dna-offset: 1px;
@@ -15,9 +15,11 @@
   --vt-dna-density: cosy;
   --vt-dna-label: mono-caps;
   --vt-dna-field-recipe: liquid-glass;
-  --vt-dna-mark-fold: sharp;
-  --vt-dna-mark-gap: 9 units;
-  --vt-dna-mark-label: 10x8 units;
+  --vt-dna-mark-form: half-light V;
+  --vt-dna-mark-frame: 8 units;
+  --vt-dna-mark-vertex: 32/34;
+  --vt-dna-mark-plinth: 16x22 units;
+  --vt-dna-mark-arms: 16 units;
 
   /* Primitive */
   --vt-case: #0B0D10;

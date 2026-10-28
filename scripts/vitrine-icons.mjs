@@ -7,11 +7,11 @@
 import { chromium } from '@playwright/test'
 
 const compact = (color) => `
-  <path d="M12 6L32 42L52 6L61 12L42 58L22 58L3 12Z" fill="${color}"/>`
+  <path d="M6 6H22L32 32L42 6H58L42 58H22Z" fill="${color}"/>`
 
 const fullReverse = `
-  <path d="M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z" fill="#F2F6F8"/>
-  <rect x="27" y="46" width="10" height="8" fill="#D9FF43"/>`
+  <path d="M8 8H24L32 34V56H24Z" fill="#F2F6F8"/>
+  <path d="M32 34L40 8H56L40 56H32Z" fill="#D9FF43"/>`
 
 const icon = (id, size, body, bg) => `
   <div id="${id}" style="width:${size}px;height:${size}px;background:${bg};overflow:hidden">

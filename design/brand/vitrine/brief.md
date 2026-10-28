@@ -32,8 +32,8 @@ The product's world is a museum vitrine, not a dashboard.
 - **Five colours from the physical world:** case-black, frost glass, the
   chartreuse of a safety label, iris flare from a lens, and clay from a
   registration error.
-- **Signature:** one folded ribbon V with a flat plinth and a single Signal
-  label — the case and its tag are the same drawing.
+- **Signature:** one V split by its material — the ink arm is the glass, the
+  Signal arm is the light; the plinth is flat.
 - **Obvious defaults to avoid:** a frosted card with a gradient blob, a 1-bit
   retro toy, an app-store tile with an initial, and a circular orbit badge.
   Vitrine uses none of them.
@@ -60,22 +60,22 @@ The product's world is a museum vitrine, not a dashboard.
 3. Optical instruments — take: the aperture, the specular arc, the idea that a
    lens is a frame for looking, not a decoration.
 
-## v2.3 direction
+## v2.5 direction
 
-- **Family:** continuous ribbon. One thick beam folds into the V and a flat
-  plinth. The Signal label is an inlay in the plinth, not a detached dot.
-- **Gate:** zero circle, fill-only, two primitives in the primary, one in the
-  compact, one Signal accent.
-- **Bake-off:** architectural monogram, offset planes, louvers, ribbon and
-  horizon were generated on the same palette and theme DNA. Four lost for
-  silhouette collisions with Huginn, Riso and Hachure; the ribbon won.
+- **Family:** architectural monogram. One V, split vertically at x32; the left
+  arm is Case, the right arm is Signal. The flat plinth makes the letter a case
+  in section.
+- **Gate:** the constructed v2.3 gate — zero circle, fill-only, two primitives in
+  the primary, one in the compact, one Signal arm.
+- **Bake-off:** the five families were re-judged. The open case was retired
+  because it drew the container and withheld the light; the half-light V won.
 - **Theme DNA:** hard edge, square tile, solid ring, cosy density. The mark and
   the fields read the same object.
 
 ## Deliverables
 
 - [x] one-page brief (this file)
-- [x] five-family v2.3 bake-off, one kept, four rejected with reasons
+- [x] five-family constructed v2.3 bake-off, one kept, four rejected with reasons
 - [x] story spine, eight decision cards and a voice card
 - [x] mark, compact mark, glyph, mono mark
 - [x] wordmark as outlines
@@ -85,7 +85,7 @@ The product's world is a museum vitrine, not a dashboard.
 - [x] theme DNA + primitive → semantic → component tokens, CSS and JSON
 - [x] portable form kit CSS and HTML
 - [x] `/design-system/vitrine` case page with live components and forms
-- [x] v2.3 skill-resource audit and objective mark score
+- [x] v2.5 skill-resource audit and objective mark score
 
 ## Non-goals
 
@@ -97,8 +97,8 @@ The product's world is a museum vitrine, not a dashboard.
 
 ## Success
 
-After 30 seconds a reviewer can say: “The V is one folded beam with a Signal
-label in its plinth; the compact mark drops the label; the glass holds the
+After 30 seconds a reviewer can say: “The V is split by its material: one arm is
+glass, one is the light; the compact drops the Signal arm; the glass holds the
 content, and the form fields are actually usable.” They can find the tokens,
 the favicon, the story and the component code.
 
@@ -116,5 +116,6 @@ Example: “One case. One object. The rest is clearance.”
   the `/design-system` case library. `/sunnyside` remains the Side A specimen.
 - `ASSUMPTION` The signature dither is a hero lens-caustic field spilling through
   card edges, chosen by the owner in this session.
-- `ASSUMPTION` The v2.3 mark is a re-construction of the Split V idea, not a new
-  name. The V survives; the stroke, the circle and the dithered pane do not.
+- `ASSUMPTION` The v2.5 mark replaces the open case with the half-light V, not a
+  new name. The open case and the earlier folded V are retired; the split V, the
+  glass and the flat plinth carry the identity.

@@ -1,0 +1,1776 @@
+From b2ea9f9ef0bdfa8d3cdcc70f092ad6022ae1cdf3 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 28 Oct 2026 02:34:11 +0000
+Subject: [PATCH] feat(brand-system): fuse logo-generator-skill; six-family
+ bake-off and mark scorer
+
+Marks produced by v2.1 (Huginn, Riso Co., Hachure) were an initial or a blob
+plus an effect: no family diversity, name meaning ignored, orphan accent,
+offsets that die at 16px.
+
+- references/logo-brainstorm.md: diagnosis, concept bank, six families,
+  design rules paraphrased from op7418/logo-generator-skill, exit criteria.
+- brand-forge: five new concepts (dotmatrix, lines, overprint, nodes,
+  monogram), hatch rebuilt as real hachure, tile "none", --bakeoff mode.
+- scripts/score-mark.py: compact stroke/dot floors, silhouette, 16px contrast,
+  detached specks, negative space, symmetry note.
+- examples: worked redo of Huginn / Riso Co. / Hachure with runnable configs.
+- SKILL.md, README, logo-system, skill-audit updated; v2.2.
+---
+ .../skills/sunnyside-brand-system/README.md   |   9 +
+ .../skills/sunnyside-brand-system/SKILL.md    |  31 ++-
+ .../brainstorm-huginn-riso-hachure.md         |  50 +++++
+ .../examples/configs/hachure.json             |  14 ++
+ .../examples/configs/huginn.json              |  14 ++
+ .../examples/configs/riso-co.json             |  14 ++
+ .../references/logo-brainstorm.md             | 116 +++++++++++
+ .../references/logo-system.md                 |  11 +-
+ .../references/skill-audit.md                 |  15 +-
+ .../scripts/brand-forge.mjs                   | 193 ++++++++++++++++--
+ .../scripts/score-mark.py                     | 145 +++++++++++++
+ skills/sunnyside-brand-system/README.md       |   9 +
+ skills/sunnyside-brand-system/SKILL.md        |  31 ++-
+ .../brainstorm-huginn-riso-hachure.md         |  50 +++++
+ .../examples/configs/hachure.json             |  14 ++
+ .../examples/configs/huginn.json              |  14 ++
+ .../examples/configs/riso-co.json             |  14 ++
+ .../references/logo-brainstorm.md             | 116 +++++++++++
+ .../references/logo-system.md                 |  11 +-
+ .../references/skill-audit.md                 |  15 +-
+ .../scripts/brand-forge.mjs                   | 193 ++++++++++++++++--
+ .../scripts/score-mark.py                     | 145 +++++++++++++
+ 22 files changed, 1174 insertions(+), 50 deletions(-)
+ create mode 100644 .agents/skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md
+ create mode 100644 .agents/skills/sunnyside-brand-system/examples/configs/hachure.json
+ create mode 100644 .agents/skills/sunnyside-brand-system/examples/configs/huginn.json
+ create mode 100644 .agents/skills/sunnyside-brand-system/examples/configs/riso-co.json
+ create mode 100644 .agents/skills/sunnyside-brand-system/references/logo-brainstorm.md
+ create mode 100644 .agents/skills/sunnyside-brand-system/scripts/score-mark.py
+ create mode 100644 skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md
+ create mode 100644 skills/sunnyside-brand-system/examples/configs/hachure.json
+ create mode 100644 skills/sunnyside-brand-system/examples/configs/huginn.json
+ create mode 100644 skills/sunnyside-brand-system/examples/configs/riso-co.json
+ create mode 100644 skills/sunnyside-brand-system/references/logo-brainstorm.md
+ create mode 100644 skills/sunnyside-brand-system/scripts/score-mark.py
+
+diff --git a/.agents/skills/sunnyside-brand-system/README.md b/.agents/skills/sunnyside-brand-system/README.md
+index 8f162a7..6d4a7a1 100644
+--- a/.agents/skills/sunnyside-brand-system/README.md
++++ b/.agents/skills/sunnyside-brand-system/README.md
+@@ -16,6 +16,11 @@ approved kit to **`implement-brand-system`** for the build:
+ 
+ Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
+ 
++**v2.2:** fuses [op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill)
++(six-family brainstorm, design rules, pattern families): `--bakeoff`, five new
++concepts, `score-mark.py`, `references/logo-brainstorm.md` and a worked redo in
++`examples/brainstorm-huginn-riso-hachure.md`.
++
+ **v2.1:** a generated vector logo family (`scripts/brand-forge.mjs`: six
+ construction concepts, tokens, theme-matched form kit, proof sheet, story
+ scaffold), a storytelling layer, theme-matched forms and stronger audit checks.
+@@ -71,6 +76,10 @@ node scripts/audit.mjs --manifest audit.json
+ node scripts/brand-forge.mjs --init orbit > brand.json
+ node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> --wordmark wordmark.svg
+ 
++# Six ideas from six families, one material; then objective checks
++node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff
++python3 scripts/score-mark.py --dir bakeoff   # pip install cairosvg pillow
++
+ # Keep the .agents/skills mirror identical
+ bash scripts/sync-skill.sh
+ 
+diff --git a/.agents/skills/sunnyside-brand-system/SKILL.md b/.agents/skills/sunnyside-brand-system/SKILL.md
+index c5e1375..0878661 100644
+--- a/.agents/skills/sunnyside-brand-system/SKILL.md
++++ b/.agents/skills/sunnyside-brand-system/SKILL.md
+@@ -4,7 +4,7 @@ description: Design and ship a brand kit or design system from a brief — strat
+ metadata:
+   author: adityahimaone
+   source: https://github.com/adityahimaone/sunnyside
+-  version: '2.1'
++  version: '2.2'
+ ---
+ 
+ # Sunnyside brand system
+@@ -15,6 +15,12 @@ A method for shipping a **brand kit** or **design system** quickly without losin
+ the reasoning. The output is a page or a small set of files, not a folder of
+ exports. Sunnyside and Vitrine are evidence, not templates.
+ 
++**v2.2:** fuses the discipline and pattern families of
++[op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill):
++a six-family brainstorm (`references/logo-brainstorm.md`), a bake-off command,
++five more concepts (dotmatrix, lines, overprint, nodes, monogram) and an
++objective mark scorer (`scripts/score-mark.py`).
++
+ **v2.1:** adds a generated vector logo family (`scripts/brand-forge.mjs`), a
+ storytelling layer (`references/storytelling.md`), theme-matched form fields
+ (`references/form-theming.md`) and stronger audit checks. The audit of this
+@@ -49,9 +55,10 @@ drawing; mark unknowns `ASSUMPTION`. Template: `references/brief.md`.
+ 1. **Brief and one sentence** the work can be rejected against.
+ 2. **One idea**: monogram + meaning, product action, metaphor fusion, negative
+    space, or construction geometry. One metaphor, one loud field.
+-3. **Draw six, keep one** on the same 64 grid. Write down why five lost. Fastest
+-   route: `brand-forge.mjs --init <concept>` for each candidate concept, compare
+-   `sheet.html`, keep one.
++3. **Brainstorm six, keep one** across six *families* (geometry, dots, lines,
++   shapes+geometry, lines+geometry, network), not six tweaks of a letter. Fastest
++   route: `brand-forge.mjs --bakeoff brand.json`, then `score-mark.py`, keep one,
++   write why five lost. Protocol: `references/logo-brainstorm.md`.
+ 4. **Generate the family** (`node scripts/brand-forge.mjs --config brand.json`):
+    mark, compact, glyph, reverse, mono, icon, lockups, tokens, form kit, proof
+    sheet. Then hand-refine the mark; the generator is a start, not a ceiling.
+@@ -129,7 +136,9 @@ Details: `references/design-systems.md`.
+ 64 grid. It is the fast path for step 3–4; it does not replace judgement.
+ 
+ ```bash
+-node scripts/brand-forge.mjs --list                       # sunburst aperture orbit hatch stack facet
++node scripts/brand-forge.mjs --list                       # 11 concepts: sunburst aperture orbit hatch stack facet dotmatrix lines overprint nodes monogram
++node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff   # six families, one material
++python3 scripts/score-mark.py --dir bakeoff               # numbers before taste
+ node scripts/brand-forge.mjs --init orbit > brand.json    # starter config, edit palette/dna/params
+ node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> \
+   --wordmark wordmark.svg                                 # from extract-wordmark.py
+@@ -141,6 +150,11 @@ tokens (CSS + JSON with contrast pairs), the form kit, `sheet.html` (16/32/64/12
+ on light + dark) and `story.md`. Exit code 1 if any contrast pair or SVG check
+ fails. Without `--wordmark` it skips lockups; it never fakes one with `<text>`.
+ 
++Avoid the three failure modes seen in the wild (`logo-brainstorm.md` §0): a bare
++initial or letter-in-a-box, an orphan accent that dies at 16px, and an effect
++(offset, misregistration) standing in for an idea. A letter earns its place only
++if something is cut, joined or lit.
++
+ Make it better than the default:
+ 
+ - Vary the **theme DNA** (`edge`, `offset`, `stroke`, `tile`, `radius`) before
+@@ -272,6 +286,7 @@ Use the companion **`pen-dev`** skill for the full workflow. In short:
+ Run these from this skill folder, or copy `scripts/` into the project.
+ 
+ ```bash
++python3 scripts/score-mark.py --dir public/brand/<slug>   # 16px, silhouette, specks, negative space
+ node scripts/audit.mjs --manifest audit.json   # files, SVG, ICO, PNG, tokens, family, forms, story
+ node scripts/qa.mjs --url <the surface URL or file:// path> \
+   --out docs/screenshots --name <slug>
+@@ -352,6 +367,7 @@ and runs the QA gate.
+ 
+ - `brief.md` — brief and review gates.
+ - `logo-system.md` — concepts, grid, family, favicon.
++- `logo-brainstorm.md` — six-family brainstorm, design rules, scoring, why marks come out ugly.
+ - `board-and-images.md` — board, render pipeline, image QA.
+ - `image-direction.md` — prompts and provenance.
+ - `tokens-and-docs.md` — token layers and agent-readable docs.
+@@ -366,10 +382,11 @@ and runs the QA gate.
+ - `form-theming.md` — theme DNA, material → field recipes, states, shadcn mapping.
+ - `skill-audit.md` — audit of this skill, fixes, known gaps.
+ - `examples/sunnyside.md`, `examples/vitrine.md` — the two cases (evidence, not defaults).
++- `examples/brainstorm-huginn-riso-hachure.md` + `examples/configs/` — a worked redo of three weak marks.
+ 
+ ## Scripts and templates
+ 
+-`brand-forge.mjs` (generate the family), `render-board.mjs`, `render-icons.mjs`,
++`brand-forge.mjs` (generate the family, `--bakeoff`), `score-mark.py` (objective mark checks), `render-board.mjs`, `render-icons.mjs`,
+ `favicons.py`, `downscale.py`, `extract-wordmark.py`, `audit.mjs`, `qa.mjs`,
+ `sync-skill.sh` (keep `.agents/skills` mirror identical).
+ 
+@@ -383,6 +400,6 @@ and runs the QA gate.
+ 3. Choose the surface and HTML/TSX before building.
+ 4. shadcn/Radix where accessible primitives matter; native for the rest.
+ 5. Typography gate before the first screenshot.
+-6. Generate with `brand-forge`, then refine by hand; write the story; match the fields.
++6. Bake off six families with `brand-forge`, score, then refine by hand; write the story; match the fields.
+ 7. Scripts for audit/QA; one look; fix the root cause; stop.
+ 8. Name what is missing. A guide that hides its gaps is a brochure.
+diff --git a/.agents/skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md b/.agents/skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md
+new file mode 100644
+index 0000000..8e5d68d
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md
+@@ -0,0 +1,50 @@
++# Worked brainstorm: Huginn, Riso Co., Hachure
++
++The v2.0 sheet gave each brand a letter or a blob. This is the same brief run
++through `references/logo-brainstorm.md`. Configs are in `examples/configs/`.
++
++```bash
++node scripts/brand-forge.mjs --config examples/configs/huginn.json  --out out/huginn
++node scripts/brand-forge.mjs --config examples/configs/riso-co.json --out out/riso-co
++node scripts/brand-forge.mjs --config examples/configs/hachure.json --out out/hachure
++python3 scripts/score-mark.py --dir out
++```
++
++## Huginn
++
++- **Name says:** one of Odin's two ravens; Huginn is thought, Muninn is memory.
++- **Kept idea:** `overprint`. Two discs, thought (bone) and memory (ash); where
++  they overlap the field is cut away. *What two minds agree on is the answer.*
++- **Why not the H:** a letter says nothing about thinking, and the detached
++  square read as a typo.
++- **Lost:** `nodes` (right idea, reads as generic AI), `dotmatrix` (too
++  decorative for a calm product), `monogram H` (the original sheet).
++- **Next:** try a raven silhouette by hand on the same 64 grid; the overlap
++  lens could become the raven's eye.
++
++## Riso Co.
++
++- **Name says:** risograph; two spot inks printed in two passes.
++- **Kept idea:** `overprint`, in real riso inks (fluorescent pink, blue); the
++  lens is the colour the inks actually make where they overlap.
++- **Why not the pennant:** a shield has no relation to print, and the
++  misregistration offset was the *only* idea; at 16px it became a smudge.
++- **Lost:** `stack` (layers, but reads as a design tool), `lines` (halftone
++  reading is too fine at 16px).
++- **Next:** a second compact for single-colour stamps: the lens only.
++
++## Hachure
++
++- **Name says:** the short parallel lines that shade slopes on old maps.
++- **Kept idea:** `hatch`. A lit disc, a shaded side drawn in lines that fall
++  off toward the light. *Relief, drawn the old way.*
++- **Why not the notched H:** it never drew a line, so the name was missing.
++- **Lost:** `lines` (reads as a striped planet), `orbit` (wrong domain).
++- **Next:** make the line spacing follow the slope of a real contour.
++
++## What changed in the pipeline
++
++- Six different families, not six tweaks of one letter.
++- `score-mark.py` flags the orphan square pattern, thin compacts and blob
++  silhouettes before a human sees them.
++- Compact marks drop offsets and heavy detail by rule.
+diff --git a/.agents/skills/sunnyside-brand-system/examples/configs/hachure.json b/.agents/skills/sunnyside-brand-system/examples/configs/hachure.json
+new file mode 100644
+index 0000000..4081aaf
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/examples/configs/hachure.json
+@@ -0,0 +1,14 @@
++{
++  "name": "Hachure",
++  "slug": "hachure",
++  "concept": "hatch",
++  "palette": { "paper": "#ece7d6", "paperHi": "#f6f2e4", "ink": "#16201a", "field": "#f6f2e4", "core": "#e8b84a", "spark": "#c4572b", "muted": "#4f5a50", "danger": "#a3261f", "success": "#2f6b3f" },
++  "dna": { "edge": "none", "offset": 0, "stroke": 2.2, "radius": 8, "tile": "none", "density": "compact", "label": "small-caps", "ring": "solid", "font": { "display": "Newsreader", "ui": "Inter", "mono": "IBM Plex Mono" } },
++  "params": {},
++  "story": {
++    "belief": "Slope is something you should be able to read at a glance.",
++    "enemy": "Maps that flatten terrain into colour.",
++    "promise": "Relief drawn the old way: short lines, steepest where it matters.",
++    "proof": "Every contour is traceable to a source survey."
++  }
++}
+diff --git a/.agents/skills/sunnyside-brand-system/examples/configs/huginn.json b/.agents/skills/sunnyside-brand-system/examples/configs/huginn.json
+new file mode 100644
+index 0000000..7a1479d
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/examples/configs/huginn.json
+@@ -0,0 +1,14 @@
++{
++  "name": "Huginn",
++  "slug": "huginn",
++  "concept": "overprint",
++  "palette": { "paper": "#efe9db", "paperHi": "#f7f2e6", "ink": "#0d0d0f", "field": "#0d0d0f", "core": "#e9e2cf", "spark": "#7d8794", "muted": "#55524b", "danger": "#a3261f", "success": "#2a6b4a" },
++  "dna": { "edge": "none", "offset": 0, "stroke": 2.2, "radius": 14, "tile": "rounded", "density": "cosy", "label": "mono-caps", "ring": "solid", "font": { "display": "Fraunces", "ui": "Inter", "mono": "JetBrains Mono" } },
++  "params": { "lens": "#0d0d0f" },
++  "story": {
++    "belief": "An agent should think and remember in the open.",
++    "enemy": "Black-box assistants that forget what they decided.",
++    "promise": "Two ravens, thought and memory; what they agree on is the answer.",
++    "proof": "Every decision is logged with its reason and can be replayed."
++  }
++}
+diff --git a/.agents/skills/sunnyside-brand-system/examples/configs/riso-co.json b/.agents/skills/sunnyside-brand-system/examples/configs/riso-co.json
+new file mode 100644
+index 0000000..d54e062
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/examples/configs/riso-co.json
+@@ -0,0 +1,14 @@
++{
++  "name": "Riso Co.",
++  "slug": "riso-co",
++  "concept": "overprint",
++  "palette": { "paper": "#f0e9d8", "paperHi": "#faf5e8", "ink": "#2a2540", "field": "#faf5e8", "core": "#0078bf", "spark": "#ff48b0", "muted": "#5c5870", "danger": "#b3261e", "success": "#1f7a4d" },
++  "dna": { "edge": "none", "offset": 0, "stroke": 0, "radius": 10, "tile": "none", "density": "cosy", "label": "mono-caps", "ring": "offset", "font": { "display": "Space Grotesk", "ui": "Inter", "mono": "Space Mono" } },
++  "params": { "lens": "#6b2f9e" },
++  "story": {
++    "belief": "Two honest colours beat ten fake ones.",
++    "enemy": "Print that hides its process.",
++    "promise": "Small-run print where the overlap is the point.",
++    "proof": "Every file ships as separated spot-colour layers."
++  }
++}
+diff --git a/.agents/skills/sunnyside-brand-system/references/logo-brainstorm.md b/.agents/skills/sunnyside-brand-system/references/logo-brainstorm.md
+new file mode 100644
+index 0000000..d3c3cce
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/references/logo-brainstorm.md
+@@ -0,0 +1,116 @@
++# Logo brainstorm: from name to six honest ideas
++
++Fusion of this skill's six-keep-one method with the design discipline and
++pattern families of
++[op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill)
++(paraphrased, with credit; install it separately if you want its Gemini
++showcase step). The fused rule: **explore wide across families, judge with
++numbers, then draw by hand.**
++
++## 0. Why marks come out ugly
++
++Diagnosis from a real proof sheet (Huginn, Riso Co., Hachure, all v2.0 output):
++
++| Symptom | What it was | Rule that prevents it |
++| --- | --- | --- |
++| Initial in a box, or a bare initial | Every brand became "H" or a blob; nothing said what the product does | A letter alone is a typeface choice, not an idea. Use a letter only when something is cut, joined or lit (§3). |
++| Detached square next to a letter (Huginn) | An accent with no job; vanishes at 16px | Every part is attached or deleted. `score-mark.py` flags specks under 15% of the median part. |
++| Pennant/shield blob with a misregistration offset (Riso) | Offset effect with no shape idea; reads as a render bug small | Effects at < 1.5px at 16px are noise. Compact drops them. The *idea* must survive flat. |
++| Chamfered letter with notches (Hachure) | Name's meaning (hatching) never drawn | Draw the thing the name points at. Hachure = short lines on a slope. |
++| Same drawing move three times | One construction method (letter + decoration) | Draw from **six different families**, not six tweaks. |
++
++## 1. Gather (one round, five lines)
++
++Name · category · audience · core concept (one verb or image) · mood and
++palette limits. Etymology counts: what does the *name itself* depict?
++
++## 2. Concept bank (before any drawing)
++
++Fill four columns, three entries each, from the product's world:
++
++| Name says | Product does | Material it is made of | What it is *not* |
++| --- | --- | --- | --- |
++| e.g. Huginn = Odin's raven "thought" (pair with Muninn "memory") | remembers decisions | black ink, feather, bone | a chatbot bubble, a circuit brain |
++| e.g. Riso = risograph | overprints two spot inks | paper, fluorescent ink, drum | a printer icon |
++| e.g. Hachure = map shading lines | shows slope | line, paper, survey | a topo-map pin |
++
++Rank the entries by **how little explanation they need**. The top two or three
++become the briefs for the bake-off. Cut anything that works for any product in
++the category.
++
++## 3. Six families, six ideas
++
++Allocate across families (from the op7418 method), one idea each:
++
++| # | Family | `brand-forge` concept | Reads as |
++| --- | --- | --- | --- |
++| 1 | pure geometry | `aperture`, `orbit`, `facet`, `sunburst` | focus, cycle, decision, origin |
++| 2 | dot matrix | `dotmatrix` | data, signal, texture with a void |
++| 3 | line system | `lines` | flow, signal, shading |
++| 4 | dots/shapes + geometry | `overprint`, `stack` | merge, layers, two things that agree |
++| 5 | lines + geometry | `hatch` | drawing, relief, craft |
++| 6 | node network | `nodes` | agents, links, route |
++| + | letter with a cut | `monogram` | only if the letter carries an idea |
++
++Run it:
++
++```bash
++node scripts/brand-forge.mjs --init sunburst > brand.json      # edit palette + dna + story
++node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff
++python3 scripts/score-mark.py --dir bakeoff
++```
++
++`bakeoff.html` shows six cards on the same palette and material, each with the
++16/32/64/128 row on light and dark, and two lines to fill: *the sentence this
++mark argues* and *why it was kept or lost*. Same material on purpose: the only
++variable is the idea.
++
++## 4. Design rules (paraphrased from the op7418 reference)
++
++1. **One or two core ideas.** Six shapes is already a lot.
++2. **Generous negative space.** Roughly 40–50% of the mark should be empty
++   (the field counts). `score-mark.py` reports the share.
++3. **Stroke weight on a 100 grid: 2.5–4** (≈ 1.6–2.6 on our 64 grid). Thinner
++   looks fragile, heavier looks clumsy. Compact strokes go up, not down.
++4. **Intentional imbalance.** Perfect symmetry is inert; shift weight.
++5. **Restraint.** No gradient, shadow or extra colour that does not carry meaning.
++6. **One focal point.** The eye knows where to land.
++7. **Structural mass.** Two thin lines feel weak; use dense repetition or a
++   solid shape.
++8. **Round the cuts.** Negative-space cuts and stroke ends are rounded, not
++   sharp, unless the brand is deliberately hard-edged and says so.
++
++## 5. Judge with numbers, then with eyes
++
++`scripts/score-mark.py` fails or warns on: compact strokes under 2.4 units,
++dots under 4 units, a silhouette that covers < 10% or > 88% of the box, no
++contrast at 16px, detached specks, more than 24 elements, and negative space
++outside 25–80%. It notes full symmetry. It cannot judge taste; it only removes
++the failures not worth discussing.
++
++Then the six tests in `logo-system.md` §2. Keep one. Write why five lost
++into `story.md`.
++
++## 6. Refine by hand
++
++The generator is draft one. Open the SVG, move points on the 64 grid, keep one
++viewBox, re-run `score-mark.py` and `audit.mjs`. Ideas to push a kept mark:
++
++- Change **material** (edge, offset, stroke) before you change geometry.
++- Break one rule on purpose: a gap, an off-centre disc, a cut that stays.
++- Build the compact as a separate drawing with fewer parts and heavier strokes.
++
++## 7. Showcase images are not the logo
++
++The op7418 skill makes presentation images with a Gemini image model from an
++exported PNG. That is fine for a mockup or a hero. Never let a generated image
++become the mark: the mark is drawn (this skill's "draw, do not source"), and
++generated showcases get a provenance line (`image-direction.md`).
++
++## 8. Exit criteria
++
++- [ ] Six ideas from six families on one page; five rejection notes written.
++- [ ] The kept mark states its argument in one sentence without naming a shape.
++- [ ] `score-mark.py`: no FAIL; every WARN has a written reason.
++- [ ] Compact read at 16px on light and dark chrome by a human.
++- [ ] Not a letter alone, not an effect alone, no orphan parts.
+diff --git a/.agents/skills/sunnyside-brand-system/references/logo-system.md b/.agents/skills/sunnyside-brand-system/references/logo-system.md
+index ae46bc9..7881639 100644
+--- a/.agents/skills/sunnyside-brand-system/references/logo-system.md
++++ b/.agents/skills/sunnyside-brand-system/references/logo-system.md
+@@ -135,9 +135,14 @@ with a complete, tested family instead of a blank file.
+ | `hatch` | diagonal lines + a disc | drawing, shading, craft | line gap must grow in the compact |
+ | `stack` | offset plates | layers, versions, depth | keep ≤ 3 plates, 2 in compact |
+ | `facet` | circle cut by a diagonal | decision, split, light | thin cut disappears at 16px |
+-
+-Process: `--init <concept>` for three or four concepts → compare each
+-`sheet.html` at 16px → keep one → write why the rest lost → hand-refine points on
++| `dotmatrix` | aligned rings of dots, empty centre, one gap | data, signal, texture | dots under 4 units wide vanish at 16px; keep two rings in compact |
++| `lines` | disc hatched with weight-swelling lines | flow, shading, signal | reads as a striped planet unless the story is shading |
++| `overprint` | two flat discs, clipped lens | merge, agreement, two inks | lens colour must be a real third colour, not a blend mode |
++| `nodes` | asymmetric nodes + thick edges | agents, links, route | no orphan satellites; every dot attached |
++| `monogram` | geometric monoline letter + printed offset | initial | a letter alone is not an idea: add a cut, join or light |
++
++Process: `--bakeoff brand.json` (six families, one material) → `score-mark.py` →
++compare at 16px → keep one → write why the rest lost → hand-refine points on
+ the grid → re-run. Vary **theme DNA** before geometry; material is what makes the
+ mark yours.
+ 
+diff --git a/.agents/skills/sunnyside-brand-system/references/skill-audit.md b/.agents/skills/sunnyside-brand-system/references/skill-audit.md
+index 86b45a0..495ed4e 100644
+--- a/.agents/skills/sunnyside-brand-system/references/skill-audit.md
++++ b/.agents/skills/sunnyside-brand-system/references/skill-audit.md
+@@ -1,4 +1,4 @@
+-# Skill audit: sunnyside-brand-system v2.0 → v2.1
++# Skill audit: sunnyside-brand-system v2.0 → v2.2
+ 
+ An audit of the skill itself. Findings are ordered by how much they hurt a
+ real run. Each states the fix and where it landed.
+@@ -17,6 +17,15 @@ real run. Each states the fix and where it landed.
+ | 8 | Missing blank line before `## Pen.dev` in SKILL.md; version still 2.0. | Cosmetic; renders as a run-on heading in some viewers. | Fixed; version 2.1. |
+ | 9 | `templates/brandkit.html` had a fixed palette and no story panel. | Boards looked like Sunnyside regardless of brand. | Story panel guidance added to `board-and-images.md`; generator emits palette from config. |
+ 
++## v2.2 findings (from a real output sheet)
++
++| # | Finding | Fix |
++| --- | --- | --- |
++| 10 | Three brands (Huginn, Riso Co., Hachure) all came out as an initial or a blob with an effect. No family diversity, name meaning ignored, orphan accent, offset that dies at 16px. | `logo-brainstorm.md` (diagnosis, concept bank, six families, design rules); `--bakeoff`. |
++| 11 | No objective gate; the skill relied on "looks good". | `score-mark.py`: compact stroke/dot floor, silhouette, 16px contrast, specks, negative space, symmetry note. |
++| 12 | Concept set was too narrow (six geometric methods). | Added dotmatrix, lines, overprint, nodes, monogram, fused from the op7418 pattern families; `hatch` rebuilt as a real hachure. |
++| 13 | No worked redo to show the method beats the failure. | `examples/brainstorm-huginn-riso-hachure.md` + runnable configs. |
++
+ ## Known gaps (not fixed here)
+ 
+ - **Wordmark outlining still needs `uharfbuzz` + a font file.** `brand-forge`
+@@ -26,6 +35,10 @@ real run. Each states the fix and where it landed.
+   drawing, then the same family/tokens/forms pipeline.
+ - **Form kit is native HTML.** Radix/shadcn mapping is documented, not generated.
+ - **Chromium only** for `qa.mjs` and `render-icons.mjs`.
++- **Figurative marks (a raven, a leaf) are still hand-drawn.** The generator
++  covers constructed geometry; the bake-off and scorer apply to hand-drawn SVGs
++  too (drop them in `mark.svg`, `mark-compact.svg`, `glyph.svg`).
++- **score-mark.py needs cairosvg + Pillow** and is a proxy, not a taste test.
+ - **Story quality is a human judgement.** The audit checks structure only.
+ 
+ ## Re-run the audit
+diff --git a/.agents/skills/sunnyside-brand-system/scripts/brand-forge.mjs b/.agents/skills/sunnyside-brand-system/scripts/brand-forge.mjs
+index 3a7282d..9448164 100644
+--- a/.agents/skills/sunnyside-brand-system/scripts/brand-forge.mjs
++++ b/.agents/skills/sunnyside-brand-system/scripts/brand-forge.mjs
+@@ -26,6 +26,7 @@
+  */
+ import { mkdir, readFile, writeFile } from 'node:fs/promises'
+ import { join, resolve } from 'node:path'
++import { execFileSync } from 'node:child_process'
+ 
+ const args = process.argv.slice(2)
+ const flag = (name, fallback) => {
+@@ -34,7 +35,9 @@ const flag = (name, fallback) => {
+ }
+ const has = (name) => args.includes(`--${name}`)
+ 
+-const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet']
++const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet', 'dotmatrix', 'lines', 'overprint', 'nodes', 'monogram']
++// Six families for a bake-off (geometry, dots, lines, dots+geometry, lines+geometry, network)
++const BAKEOFF = ['aperture', 'dotmatrix', 'lines', 'overprint', 'hatch', 'nodes']
+ 
+ const STARTER = {
+   name: 'Sunnyside',
+@@ -89,10 +92,65 @@ if (has('init')) {
+     cfg.dna.radius = 6
+   }
+   if (concept === 'orbit') cfg.dna.tile = 'circle'
++  if (concept === 'monogram') cfg.params.letter = cfg.name[0]
+   console.log(JSON.stringify(cfg, null, 2))
+   process.exit(0)
+ }
+ 
++
++// ───────────────────────── bake-off ─────────────────────────
++// Six concepts from six different families, same palette and material (theme DNA),
++// so the only variable is the idea. Pick one; write down why five lost.
++if (has('bakeoff')) {
++  const cfgFile = resolve(process.cwd(), flag('bakeoff'))
++  const outRoot = resolve(process.cwd(), flag('out', 'bakeoff'))
++  const base0 = JSON.parse(await readFile(cfgFile, 'utf8'))
++  const families = {
++    aperture: 'pure geometry',
++    dotmatrix: 'dot matrix',
++    lines: 'line system',
++    overprint: 'dots + geometry (two inks)',
++    hatch: 'lines + geometry',
++    nodes: 'node network',
++  }
++  const picks = (base0.bakeoff ?? BAKEOFF).filter((c) => CONCEPTS.includes(c))
++  if (base0.params?.letter || base0.letter) picks.splice(picks.length > 5 ? 5 : picks.length, picks.length > 5 ? 1 : 0, 'monogram')
++  await mkdir(outRoot, { recursive: true })
++  for (const c of picks) {
++    const tmp = join(outRoot, `.${c}.json`)
++    await writeFile(tmp, JSON.stringify({ ...base0, concept: c }))
++    try {
++      execFileSync(process.execPath, [process.argv[1], '--config', tmp, '--out', join(outRoot, c)], { stdio: 'pipe' })
++    } catch (error) {
++      console.error(`bake-off: ${c} failed\n${error.stdout?.toString() ?? ''}`)
++    }
++  }
++  const sizes = [16, 32, 64, 128]
++  const card = (c, i) => {
++    const row = (bg, fg) =>
++      `<div style="background:${bg};color:${fg};padding:12px;display:flex;gap:14px;align-items:end;border-radius:8px">${sizes
++        .map((z) => `<img src="${c}/${z <= 32 ? 'mark-compact' : 'mark'}.svg" width="${z}" height="${z}" alt="">`)
++        .join('')}</div>`
++    return `<article style="background:#fff;border:1px solid #0002;border-radius:12px;padding:18px;display:grid;gap:12px">
++<header style="display:flex;justify-content:space-between;font:600 13px ui-monospace,monospace"><span>${String(i + 1).padStart(2, '0')} · ${c}</span><span style="opacity:.6">${families[c] ?? 'monogram'}</span></header>
++<img src="${c}/mark.svg" width="180" height="180" alt="${c} mark" style="justify-self:center">
++${row('#f6f1e7', '#111')}${row('#14141f', '#fff')}
++<p style="font:12px/1.4 system-ui;margin:0;color:#444">One sentence this mark argues (no shape names): <br><strong>________________</strong></p>
++<p style="font:12px/1.4 system-ui;margin:0;color:#444">Keep / lost because: <strong>________________</strong></p></article>`
++  }
++  await writeFile(
++    join(outRoot, 'bakeoff.html'),
++    `<!doctype html><meta charset="utf-8"><title>${base0.name ?? 'brand'} — bake-off</title>
++<body style="margin:0;padding:28px;background:#e9e4d8;font-family:system-ui"><h1 style="font:700 20px system-ui;margin:0 0 6px">${base0.name ?? 'brand'} — six ideas, one material</h1>
++<p style="margin:0 0 20px;max-width:70ch;color:#444;font-size:14px">Same palette and theme DNA; only the idea changes. Judge at 16px first. Keep one. Write why five lost: that note becomes the guide.</p>
++<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">${picks.map(card).join('')}</div></body>
++`,
++  )
++  console.log(`bake-off · ${picks.join(', ')} → ${outRoot}/bakeoff.html`)
++  console.log('Next: python scripts/score-mark.py --dir ' + outRoot + ' (objective checks), then choose and refine.')
++  process.exit(0)
++}
++
+ function fail(message) {
+   console.error(`brand-forge: ${message}`)
+   process.exit(1)
+@@ -110,7 +168,8 @@ const merged = {
+   params: { ...STARTER.params, ...cfg.params },
+   story: { ...STARTER.story, ...cfg.story },
+ }
+-const { name, slug, concept, palette: P, dna, params, story } = merged
++let { concept } = merged
++const { name, slug, palette: P, dna, params, story } = merged
+ if (!CONCEPTS.includes(concept)) fail(`unknown concept "${concept}". Use: ${CONCEPTS.join(', ')}`)
+ for (const [key, value] of Object.entries(P)) {
+   if (!/^#[0-9a-f]{6}$/i.test(value)) fail(`palette.${key} must be #rrggbb, got ${value}`)
+@@ -142,12 +201,31 @@ function tileShape(extra = '', inset = 0) {
+   const x = T.x + inset
+   const y = T.y + inset
+   const s = T.s - inset * 2
++  if (dna.tile === 'none') return `<circle cx="32" cy="32" r="${r(28 - inset)}" ${extra}/>`
+   if (dna.tile === 'circle') return `<circle cx="${r(x + s / 2)}" cy="${r(y + s / 2)}" r="${r(s / 2)}" ${extra}/>`
+   const rx = dna.tile === 'square' ? Math.min(dna.radius, 4) : Math.max(dna.radius - inset, 2)
+   return `<rect x="${r(x)}" y="${r(y)}" width="${r(s)}" height="${r(s)}" rx="${r(rx)}" ${extra}/>`
+ }
+ const clipId = `${slug}-tile`
+ 
++
++// Geometric monoline capitals on a 40 × 48 box (stroke is applied by the concept).
++const LETTERS = {
++  A: 'M2 48L20 2L38 48M9 31H31', B: 'M3 2V46M3 2H20A11 11 0 0 1 20 24H3M3 24H22A11 11 0 0 1 22 46H3',
++  C: 'M37.3 11.1A20 20 0 1 0 37.3 36.9', D: 'M3 2V46H16A22 22 0 0 0 16 2Z',
++  E: 'M37 2H3V46H37M3 24H29', F: 'M37 2H3V46M3 24H29',
++  G: 'M37.3 11.1A20 20 0 1 0 41 24H24', H: 'M3 2V46M37 2V46M3 24H37',
++  I: 'M10 2H30M20 2V46M10 46H30', J: 'M33 2V30A13 13 0 0 1 7 30',
++  K: 'M3 2V46M37 2L3 28M12 20L37 46', L: 'M3 2V46H37',
++  M: 'M3 46V2L20 30L37 2V46', N: 'M3 46V2L37 46V2',
++  O: 'M20 2A17 22 0 0 0 20 46A17 22 0 0 0 20 2Z', P: 'M3 46V2H20A12 12 0 0 1 20 26H3',
++  Q: 'M20 2A17 22 0 0 0 20 46A17 22 0 0 0 20 2ZM26 34L39 48', R: 'M3 46V2H20A12 12 0 0 1 20 26H3M19 26L37 46',
++  S: 'M35 9C28 0 5 0 5 12C5 25 35 21 35 36C35 49 10 48 3 39', T: 'M2 2H38M20 2V46',
++  U: 'M3 2V28A17 17 0 0 0 37 28V2', V: 'M2 2L20 46L38 2',
++  W: 'M0 2L10 46L20 14L30 46L40 2', X: 'M3 2L37 46M37 2L3 46',
++  Y: 'M2 2L20 24L38 2M20 24V46', Z: 'M3 2H37L3 46H37',
++}
++
+ // ───────────────────────── concepts ─────────────────────────
+ // Each returns inner SVG for the content sitting INSIDE the tile, in a palette
+ // object c = {field, core, spark, ink}. `compact` builds a separate drawing.
+@@ -204,14 +282,21 @@ const concepts = {
+     )
+   },
+   hatch(c, compact) {
+-    const gap = compact ? 9 : 5.5
+-    const w = compact ? 3.6 : 2
+-    const lines = []
+-    for (let x = -64; x < 128; x += gap) lines.push(`M${r(x)} 64L${r(x + 64)} 0`)
+-    const orb = compact ? 13 : 15
++    // Hachure: short strokes on the shaded side only, steepest at the edge; the lit half stays empty.
++    const gap = compact ? 9 : 5
++    const w = compact ? 3.6 : 1.9
++    const segs = []
++    for (let k = 64 + gap * 1.5; k < 124; k += gap * 1.4142) {
++      const t = (k - 64) / 60
++      const inset = (1 - t) * 10 // lines start further in near the lit side: a falling-off shade
++      segs.push(`M${r(k - 64 + inset)} ${r(64 - inset)}L${r(64 - inset)} ${r(k - 64 + inset)}`)
++    }
++    const orb = compact ? 13 : 14
++    const ring = dna.tile === 'none' ? `<circle cx="32" cy="32" r="${compact ? 27 : 27.4}" fill="none" stroke="${c.lead}" stroke-width="${compact ? 3 : 1.8}"/>` : ''
+     return (
+-      `<g clip-path="url(#${clipId})"><path d="${lines.join('')}" fill="none" stroke="${c.ink}" stroke-width="${w}"/></g>` +
+-      `<circle cx="32" cy="32" r="${orb}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.4}"/>`
++      `<g clip-path="url(#${clipId})"><path d="${segs.join('')}" fill="none" stroke="${c.lead}" stroke-width="${w}" stroke-linecap="butt"/></g>` +
++      ring +
++      `<circle cx="28.5" cy="28.5" r="${orb}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.4}"/>`
+     )
+   },
+   stack(c, compact) {
+@@ -227,6 +312,85 @@ const concepts = {
+     }
+     return out
+   },
++  dotmatrix(c, compact) {
++    // Concentric dots, empty centre, one wedge removed: tension without noise.
++    const rings = compact ? [[6, 10, 4.4], [12, 21, 3.4]] : [[6, 9, 3.4], [12, 18, 2.9], [18, 26.5, 2.4]]
++    const gapAt = -50 // degrees; the wedge opens to the upper right
++    const gapHalf = compact ? 30 : 24
++    let out = ''
++    for (const [n, ringR, dotR] of rings) {
++      for (let i = 0; i < n; i++) {
++        const a = (360 / n) * i - 90
++        const d = Math.abs((((a - gapAt) % 360) + 540) % 360 - 180)
++        if (d < gapHalf) continue
++        const [x, y] = pt(32, 32, ringR, a)
++        out += `<circle cx="${r(x)}" cy="${r(y)}" r="${dotR}" fill="${c.lead}"/>`
++      }
++    }
++    const [ax, ay] = pt(32, 32, compact ? 21 : 26, gapAt)
++    return out + `<circle cx="${r(ax)}" cy="${r(ay)}" r="${compact ? 5 : 4.4}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 2.4 : 1.8}"/>`
++  },
++  lines(c, compact) {
++    // A disc hatched with lines whose weight swells through the middle (a lit sphere, drawn).
++    const n = compact ? 5 : 9
++    const R = compact ? 23 : 22
++    const top = 32 - R
++    const step = (2 * R) / n
++    let out = `<defs><clipPath id="${slug}-disc"><circle cx="32" cy="32" r="${R}"/></clipPath></defs><g clip-path="url(#${slug}-disc)">`
++    for (let i = 0; i < n; i++) {
++      const t = (i + 0.5) / n
++      const w = (compact ? 2.2 : 1.1) + Math.sin(t * Math.PI) * (compact ? 3.4 : 3.1)
++      const y = top + (i + 0.5) * step
++      out += `<line x1="6" y1="${r(y)}" x2="58" y2="${r(y)}" stroke="${c.lead}" stroke-width="${r(w)}"/>`
++    }
++    out += '</g>'
++    const [sx, sy] = pt(32, 32, R + 1, -45)
++    return out + `<circle cx="${r(sx)}" cy="${r(sy)}" r="${compact ? 5.4 : 4.6}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 2.4 : 1.8}"/>`
++  },
++  overprint(c, compact) {
++    // Two inks, one lens. Flat fills only; the lens is clipped, not blended.
++    const rr = compact ? 15.5 : 16
++    const a = [compact ? 25 : 24.5, compact ? 35 : 36]
++    const b = [compact ? 39 : 39.5, compact ? 29 : 28]
++    const sw = compact ? 2.8 : 2
++    return (
++      `<defs><clipPath id="${slug}-lens"><circle cx="${a[0]}" cy="${a[1]}" r="${rr}"/></clipPath></defs>` +
++      `<circle cx="${a[0]}" cy="${a[1]}" r="${rr}" fill="${c.spark}"/>` +
++      `<circle cx="${b[0]}" cy="${b[1]}" r="${rr}" fill="${c.core}"/>` +
++      `<circle cx="${b[0]}" cy="${b[1]}" r="${rr}" fill="${params.lens && c.ink === P.ink ? params.lens : c.ink}" clip-path="url(#${slug}-lens)"/>` +
++      `<circle cx="${a[0]}" cy="${a[1]}" r="${rr}" fill="none" stroke="${c.ink}" stroke-width="${sw}"/>` +
++      `<circle cx="${b[0]}" cy="${b[1]}" r="${rr}" fill="none" stroke="${c.ink}" stroke-width="${sw}"/>`
++    )
++  },
++  nodes(c, compact) {
++    // Three nodes on a diagonal, thick edges, one satellite. Asymmetric on purpose.
++    const N = compact ? [[17, 44, 7], [45, 20, 8]] : [[16, 45, 6.4], [30, 28, 7.8], [48, 20, 5.4]]
++    const w = compact ? 3.8 : 3
++    let edges = ''
++    for (let i = 0; i < N.length - 1; i++) {
++      const [x1, y1] = N[i]
++      const [x2, y2] = N[i + 1]
++      const mx = (x1 + x2) / 2 + (i % 2 ? 6 : -6)
++      const my = (y1 + y2) / 2 + (i % 2 ? 6 : 6)
++      edges += `<path d="M${x1} ${y1}Q${r(mx)} ${r(my)} ${x2} ${y2}" fill="none" stroke="${c.lead}" stroke-width="${w}" stroke-linecap="round"/>`
++    }
++    const fills = [c.spark, c.core, c.lead]
++    const nodes = N.map(([x, y, rr], i) => `<circle cx="${x}" cy="${y}" r="${rr}" fill="${fills[i % 3]}" stroke="${c.ink}" stroke-width="${compact ? 2.6 : 2}"/>`).join('')
++    return edges + nodes
++  },
++  monogram(c, compact) {
++    const ch = String(params.letter || name[0] || 'A').toUpperCase()
++    const glyph = LETTERS[ch]
++    if (!glyph) return ''
++    const w = compact ? 7.4 : 6
++    const s = compact ? 0.82 : 0.8
++    const tx = 32 - 20 * s
++    const ty = 32 - 24 * s
++    const lay = (stroke, dx, dy) =>
++      `<g transform="translate(${r(tx + dx)} ${r(ty + dy)}) scale(${s})" fill="none" stroke="${stroke}" stroke-width="${r(w / s)}" stroke-linecap="round" stroke-linejoin="round"><path d="${glyph}"/></g>`
++    // printed offset sits behind the letter; compact drops it (it dies below 1.5px at 16px)
++    return (compact ? '' : lay(c.core, 2.2, 2.2)) + lay(c.lead, 0, 0)
++  },
+   facet(c, compact) {
+     const rr = compact ? 19 : 17
+     const cut = compact ? 4 : 3
+@@ -255,7 +419,8 @@ function face(cx, cy, c) {
+ const svgOpen = (w = 64, h = 64, title = name) =>
+   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${title}">`
+ 
+-function buildMark({ colors, compact = false, tile = true, shadow = true, field = colors.field }) {
++function buildMark({ colors, compact = false, tile = true, shadow = true, field = colors.field, forceTile = false }) {
++  if (dna.tile === 'none' && !forceTile) { tile = false; shadow = false }
+   const off = compact || !shadow || dna.edge === 'none' ? 0 : dna.offset
+   const stroke = compact ? 3.2 : dna.stroke
+   const defs = `<defs><clipPath id="${clipId}">${tileShape('', 0)}</clipPath></defs>`
+@@ -266,23 +431,23 @@ function buildMark({ colors, compact = false, tile = true, shadow = true, field
+   parts.push(concepts[concept](colors, compact))
+   return `${svgOpen()}${parts.join('')}</svg>\n`
+ }
+-const base = { field: P.field, core: P.core, spark: P.spark, ink: P.ink, paper: P.paperHi }
++const base = { field: P.field, core: P.core, spark: P.spark, ink: P.ink, paper: P.paperHi, lead: dna.tile === 'none' ? P.ink : P.paperHi }
+ const outputs = {}
+ outputs['mark.svg'] = buildMark({ colors: base })
+ outputs['mark-compact.svg'] = buildMark({ colors: base, compact: true })
+ outputs['glyph.svg'] = buildMark({ colors: base, tile: false, shadow: false })
+ // Reversed: tile in ink, drawing lines in paper so it holds on a dark ground.
+ outputs['mark-reverse.svg'] = buildMark({
+-  colors: { field: P.ink, core: P.core, spark: P.spark, ink: P.paperHi, paper: P.ink },
++  colors: { field: P.ink, core: P.core, spark: P.spark, ink: P.paperHi, paper: P.ink, lead: P.paperHi },
+   shadow: false,
+ })
+ // One-colour stamp is DRAWN: all fills collapse to ink/paper with the same geometry.
+ outputs['mark-mono.svg'] = buildMark({
+-  colors: { field: P.paperHi, core: P.paperHi, spark: P.paperHi, ink: P.ink, paper: P.paperHi },
++  colors: { field: P.paperHi, core: P.paperHi, spark: P.paperHi, ink: P.ink, paper: P.paperHi, lead: P.ink },
+   shadow: dna.edge === 'hard',
+ })
+ // Favicon field: the compact mark, with an opaque ground so it never vanishes on chrome.
+-outputs['icon.svg'] = buildMark({ colors: base, compact: true })
++outputs['icon.svg'] = buildMark({ colors: base, compact: true, forceTile: true })
+ 
+ // Lockups (need an outlined wordmark)
+ const wordPath = flag('wordmark')
+diff --git a/.agents/skills/sunnyside-brand-system/scripts/score-mark.py b/.agents/skills/sunnyside-brand-system/scripts/score-mark.py
+new file mode 100644
+index 0000000..6a1d651
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/scripts/score-mark.py
+@@ -0,0 +1,145 @@
++#!/usr/bin/env python3
++"""
++Objective checks for a generated mark family. It cannot judge taste; it catches
++the failures a human eye misses at 16px and the ones an AI reviewer talks itself
++out of (stray specks, thin strokes, solid blobs).
++
++  python scripts/score-mark.py --dir public/brand/<slug>
++  python scripts/score-mark.py --dir bakeoff          # scores every subfolder
++
++Requires: pip install cairosvg pillow
++
++Checks (FAIL stops the mark, WARN needs a written reason, NOTE is information):
++  FAIL  compact has a stroke thinner than 2.4 units or a dot under 4 units wide
++        (on the 64 grid that is 0.6px / 1px at 16px)
++  FAIL  glyph silhouette at 32px covers < 10% or > 88% of the box
++  FAIL  compact mark has no contrast at 16px (luminance spread < 0.10)
++  WARN  detached speck: a component under 15% of the median component area
++  WARN  element count above 24 (op7418 rule: 1–2 core elements)
++  WARN  negative space inside the tile outside 25–80%
++  NOTE  mirror symmetry above 0.97 on both axes (add intentional imbalance)
++"""
++import argparse, io, re, statistics, sys, warnings
++warnings.filterwarnings("ignore", category=DeprecationWarning)
++from pathlib import Path
++
++import cairosvg
++from PIL import Image
++
++ap = argparse.ArgumentParser()
++ap.add_argument('--dir', required=True)
++args = ap.parse_args()
++
++
++def raster(path, size, bg=None):
++    png = cairosvg.svg2png(url=str(path), output_width=size, output_height=size, background_color=bg)
++    return Image.open(io.BytesIO(png)).convert('RGBA')
++
++
++def components(img, thresh=128):
++    w, h = img.size
++    a = img.getchannel('A').point(lambda v: 255 if v >= thresh else 0)
++    px = a.load()
++    seen = [[False] * w for _ in range(h)]
++    out = []
++    for y in range(h):
++        for x in range(w):
++            if px[x, y] and not seen[y][x]:
++                stack, n = [(x, y)], 0
++                seen[y][x] = True
++                while stack:
++                    cx, cy = stack.pop()
++                    n += 1
++                    for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
++                        if 0 <= nx < w and 0 <= ny < h and px[nx, ny] and not seen[ny][nx]:
++                            seen[ny][nx] = True
++                            stack.append((nx, ny))
++                out.append(n)
++    return out
++
++
++def mirror_similarity(img):
++    a = img.getchannel('A')
++    px = a.load()
++    w, h = a.size
++    tot = h_same = v_same = 0
++    for y in range(h):
++        for x in range(w):
++            on = px[x, y] > 127
++            if on or px[w - 1 - x, y] > 127:
++                tot += 1
++                h_same += (px[w - 1 - x, y] > 127) == on
++            if px[x, h - 1 - y] > 127 or on:
++                v_same += (px[x, h - 1 - y] > 127) == on
++    return (h_same / tot if tot else 0), (v_same / tot if tot else 0)
++
++
++def score(folder):
++    fails, warns, notes = [], [], []
++    mark, compact, glyph = folder / 'mark.svg', folder / 'mark-compact.svg', folder / 'glyph.svg'
++    for f in (mark, compact, glyph):
++        if not f.exists():
++            return [f'missing {f.name}'], [], []
++    msrc, csrc = mark.read_text(), compact.read_text()
++    shapes = len(re.findall(r'<(path|circle|rect|ellipse|polygon|line)[\s>]', msrc))
++    if shapes > 24:
++        warns.append(f'{shapes} elements in the primary mark (aim for 1–2 ideas)')
++
++    strokes = [float(v) for v in re.findall(r'stroke-width="([\d.]+)"', csrc) if float(v) > 0]
++    if strokes and min(strokes) < 2.4:
++        fails.append(f'compact stroke {min(strokes)} < 2.4 units; it dies at 16px')
++    dots = [float(v) * 2 for v in re.findall(r'<circle[^>]* r="([\d.]+)"', csrc)]
++    if dots and min(dots) < 4:
++        fails.append(f'compact dot {min(dots):.1f} units wide < 4; under 1px at 16px')
++
++    g32 = raster(glyph, 32)
++    cover = sum(1 for v in g32.getchannel('A').getdata() if v > 127) / (32 * 32)
++    if cover < 0.10 or cover > 0.88:
++        fails.append(f'glyph silhouette covers {cover:.0%} at 32px; it does not read as a shape')
++
++    c16 = raster(compact, 16, '#ffffff').convert('L')
++    vals = list(c16.getdata())
++    spread = statistics.pstdev(vals) / 255
++    if spread < 0.10:
++        fails.append(f'compact contrast at 16px is {spread:.2f} (< 0.10); a smudge')
++
++    comps = [a for a in components(raster(glyph, 128)) if a > 3]
++    if len(comps) >= 2:
++        med = statistics.median(comps)
++        specks = [a for a in comps if a < 0.15 * med]
++        if specks and len(specks) <= 2:
++            warns.append(f'{len(specks)} detached speck(s) smaller than 15% of the median part; attach it or delete it')
++
++    p128 = raster(mark, 128)
++    cols = {}
++    for r, g, b, a in p128.getdata():
++        if a > 250:
++            cols[(r, g, b)] = cols.get((r, g, b), 0) + 1
++    if cols:
++        total = sum(cols.values())
++        field_share = max(cols.values()) / total
++        if not 0.25 <= field_share <= 0.80:
++            warns.append(f'dominant field is {field_share:.0%} of the mark (target 25–80% negative space)')
++        else:
++            notes.append(f'negative space {field_share:.0%}')
++
++    hs, vs = mirror_similarity(raster(glyph, 64))
++    if hs > 0.97 and vs > 0.97:
++        notes.append('fully symmetric on both axes; consider intentional imbalance')
++    return fails, warns, notes
++
++
++root = Path(args.dir)
++folders = [root] if (root / 'mark.svg').exists() else sorted(p for p in root.iterdir() if p.is_dir() and (p / 'mark.svg').exists())
++if not folders:
++    sys.exit(f'no mark.svg under {root}')
++bad = 0
++for f in folders:
++    fails, warns, notes = score(f)
++    verdict = 'FAIL' if fails else ('WARN' if warns else 'PASS')
++    print(f'{verdict}  {f.name}')
++    for m in fails: print(f'   FAIL  {m}')
++    for m in warns: print(f'   WARN  {m}')
++    for m in notes: print(f'   NOTE  {m}')
++    bad += bool(fails)
++sys.exit(1 if bad else 0)
+diff --git a/skills/sunnyside-brand-system/README.md b/skills/sunnyside-brand-system/README.md
+index 8f162a7..6d4a7a1 100644
+--- a/skills/sunnyside-brand-system/README.md
++++ b/skills/sunnyside-brand-system/README.md
+@@ -16,6 +16,11 @@ approved kit to **`implement-brand-system`** for the build:
+ 
+ Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
+ 
++**v2.2:** fuses [op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill)
++(six-family brainstorm, design rules, pattern families): `--bakeoff`, five new
++concepts, `score-mark.py`, `references/logo-brainstorm.md` and a worked redo in
++`examples/brainstorm-huginn-riso-hachure.md`.
++
+ **v2.1:** a generated vector logo family (`scripts/brand-forge.mjs`: six
+ construction concepts, tokens, theme-matched form kit, proof sheet, story
+ scaffold), a storytelling layer, theme-matched forms and stronger audit checks.
+@@ -71,6 +76,10 @@ node scripts/audit.mjs --manifest audit.json
+ node scripts/brand-forge.mjs --init orbit > brand.json
+ node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> --wordmark wordmark.svg
+ 
++# Six ideas from six families, one material; then objective checks
++node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff
++python3 scripts/score-mark.py --dir bakeoff   # pip install cairosvg pillow
++
+ # Keep the .agents/skills mirror identical
+ bash scripts/sync-skill.sh
+ 
+diff --git a/skills/sunnyside-brand-system/SKILL.md b/skills/sunnyside-brand-system/SKILL.md
+index c5e1375..0878661 100644
+--- a/skills/sunnyside-brand-system/SKILL.md
++++ b/skills/sunnyside-brand-system/SKILL.md
+@@ -4,7 +4,7 @@ description: Design and ship a brand kit or design system from a brief — strat
+ metadata:
+   author: adityahimaone
+   source: https://github.com/adityahimaone/sunnyside
+-  version: '2.1'
++  version: '2.2'
+ ---
+ 
+ # Sunnyside brand system
+@@ -15,6 +15,12 @@ A method for shipping a **brand kit** or **design system** quickly without losin
+ the reasoning. The output is a page or a small set of files, not a folder of
+ exports. Sunnyside and Vitrine are evidence, not templates.
+ 
++**v2.2:** fuses the discipline and pattern families of
++[op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill):
++a six-family brainstorm (`references/logo-brainstorm.md`), a bake-off command,
++five more concepts (dotmatrix, lines, overprint, nodes, monogram) and an
++objective mark scorer (`scripts/score-mark.py`).
++
+ **v2.1:** adds a generated vector logo family (`scripts/brand-forge.mjs`), a
+ storytelling layer (`references/storytelling.md`), theme-matched form fields
+ (`references/form-theming.md`) and stronger audit checks. The audit of this
+@@ -49,9 +55,10 @@ drawing; mark unknowns `ASSUMPTION`. Template: `references/brief.md`.
+ 1. **Brief and one sentence** the work can be rejected against.
+ 2. **One idea**: monogram + meaning, product action, metaphor fusion, negative
+    space, or construction geometry. One metaphor, one loud field.
+-3. **Draw six, keep one** on the same 64 grid. Write down why five lost. Fastest
+-   route: `brand-forge.mjs --init <concept>` for each candidate concept, compare
+-   `sheet.html`, keep one.
++3. **Brainstorm six, keep one** across six *families* (geometry, dots, lines,
++   shapes+geometry, lines+geometry, network), not six tweaks of a letter. Fastest
++   route: `brand-forge.mjs --bakeoff brand.json`, then `score-mark.py`, keep one,
++   write why five lost. Protocol: `references/logo-brainstorm.md`.
+ 4. **Generate the family** (`node scripts/brand-forge.mjs --config brand.json`):
+    mark, compact, glyph, reverse, mono, icon, lockups, tokens, form kit, proof
+    sheet. Then hand-refine the mark; the generator is a start, not a ceiling.
+@@ -129,7 +136,9 @@ Details: `references/design-systems.md`.
+ 64 grid. It is the fast path for step 3–4; it does not replace judgement.
+ 
+ ```bash
+-node scripts/brand-forge.mjs --list                       # sunburst aperture orbit hatch stack facet
++node scripts/brand-forge.mjs --list                       # 11 concepts: sunburst aperture orbit hatch stack facet dotmatrix lines overprint nodes monogram
++node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff   # six families, one material
++python3 scripts/score-mark.py --dir bakeoff               # numbers before taste
+ node scripts/brand-forge.mjs --init orbit > brand.json    # starter config, edit palette/dna/params
+ node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> \
+   --wordmark wordmark.svg                                 # from extract-wordmark.py
+@@ -141,6 +150,11 @@ tokens (CSS + JSON with contrast pairs), the form kit, `sheet.html` (16/32/64/12
+ on light + dark) and `story.md`. Exit code 1 if any contrast pair or SVG check
+ fails. Without `--wordmark` it skips lockups; it never fakes one with `<text>`.
+ 
++Avoid the three failure modes seen in the wild (`logo-brainstorm.md` §0): a bare
++initial or letter-in-a-box, an orphan accent that dies at 16px, and an effect
++(offset, misregistration) standing in for an idea. A letter earns its place only
++if something is cut, joined or lit.
++
+ Make it better than the default:
+ 
+ - Vary the **theme DNA** (`edge`, `offset`, `stroke`, `tile`, `radius`) before
+@@ -272,6 +286,7 @@ Use the companion **`pen-dev`** skill for the full workflow. In short:
+ Run these from this skill folder, or copy `scripts/` into the project.
+ 
+ ```bash
++python3 scripts/score-mark.py --dir public/brand/<slug>   # 16px, silhouette, specks, negative space
+ node scripts/audit.mjs --manifest audit.json   # files, SVG, ICO, PNG, tokens, family, forms, story
+ node scripts/qa.mjs --url <the surface URL or file:// path> \
+   --out docs/screenshots --name <slug>
+@@ -352,6 +367,7 @@ and runs the QA gate.
+ 
+ - `brief.md` — brief and review gates.
+ - `logo-system.md` — concepts, grid, family, favicon.
++- `logo-brainstorm.md` — six-family brainstorm, design rules, scoring, why marks come out ugly.
+ - `board-and-images.md` — board, render pipeline, image QA.
+ - `image-direction.md` — prompts and provenance.
+ - `tokens-and-docs.md` — token layers and agent-readable docs.
+@@ -366,10 +382,11 @@ and runs the QA gate.
+ - `form-theming.md` — theme DNA, material → field recipes, states, shadcn mapping.
+ - `skill-audit.md` — audit of this skill, fixes, known gaps.
+ - `examples/sunnyside.md`, `examples/vitrine.md` — the two cases (evidence, not defaults).
++- `examples/brainstorm-huginn-riso-hachure.md` + `examples/configs/` — a worked redo of three weak marks.
+ 
+ ## Scripts and templates
+ 
+-`brand-forge.mjs` (generate the family), `render-board.mjs`, `render-icons.mjs`,
++`brand-forge.mjs` (generate the family, `--bakeoff`), `score-mark.py` (objective mark checks), `render-board.mjs`, `render-icons.mjs`,
+ `favicons.py`, `downscale.py`, `extract-wordmark.py`, `audit.mjs`, `qa.mjs`,
+ `sync-skill.sh` (keep `.agents/skills` mirror identical).
+ 
+@@ -383,6 +400,6 @@ and runs the QA gate.
+ 3. Choose the surface and HTML/TSX before building.
+ 4. shadcn/Radix where accessible primitives matter; native for the rest.
+ 5. Typography gate before the first screenshot.
+-6. Generate with `brand-forge`, then refine by hand; write the story; match the fields.
++6. Bake off six families with `brand-forge`, score, then refine by hand; write the story; match the fields.
+ 7. Scripts for audit/QA; one look; fix the root cause; stop.
+ 8. Name what is missing. A guide that hides its gaps is a brochure.
+diff --git a/skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md b/skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md
+new file mode 100644
+index 0000000..8e5d68d
+--- /dev/null
++++ b/skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md
+@@ -0,0 +1,50 @@
++# Worked brainstorm: Huginn, Riso Co., Hachure
++
++The v2.0 sheet gave each brand a letter or a blob. This is the same brief run
++through `references/logo-brainstorm.md`. Configs are in `examples/configs/`.
++
++```bash
++node scripts/brand-forge.mjs --config examples/configs/huginn.json  --out out/huginn
++node scripts/brand-forge.mjs --config examples/configs/riso-co.json --out out/riso-co
++node scripts/brand-forge.mjs --config examples/configs/hachure.json --out out/hachure
++python3 scripts/score-mark.py --dir out
++```
++
++## Huginn
++
++- **Name says:** one of Odin's two ravens; Huginn is thought, Muninn is memory.
++- **Kept idea:** `overprint`. Two discs, thought (bone) and memory (ash); where
++  they overlap the field is cut away. *What two minds agree on is the answer.*
++- **Why not the H:** a letter says nothing about thinking, and the detached
++  square read as a typo.
++- **Lost:** `nodes` (right idea, reads as generic AI), `dotmatrix` (too
++  decorative for a calm product), `monogram H` (the original sheet).
++- **Next:** try a raven silhouette by hand on the same 64 grid; the overlap
++  lens could become the raven's eye.
++
++## Riso Co.
++
++- **Name says:** risograph; two spot inks printed in two passes.
++- **Kept idea:** `overprint`, in real riso inks (fluorescent pink, blue); the
++  lens is the colour the inks actually make where they overlap.
++- **Why not the pennant:** a shield has no relation to print, and the
++  misregistration offset was the *only* idea; at 16px it became a smudge.
++- **Lost:** `stack` (layers, but reads as a design tool), `lines` (halftone
++  reading is too fine at 16px).
++- **Next:** a second compact for single-colour stamps: the lens only.
++
++## Hachure
++
++- **Name says:** the short parallel lines that shade slopes on old maps.
++- **Kept idea:** `hatch`. A lit disc, a shaded side drawn in lines that fall
++  off toward the light. *Relief, drawn the old way.*
++- **Why not the notched H:** it never drew a line, so the name was missing.
++- **Lost:** `lines` (reads as a striped planet), `orbit` (wrong domain).
++- **Next:** make the line spacing follow the slope of a real contour.
++
++## What changed in the pipeline
++
++- Six different families, not six tweaks of one letter.
++- `score-mark.py` flags the orphan square pattern, thin compacts and blob
++  silhouettes before a human sees them.
++- Compact marks drop offsets and heavy detail by rule.
+diff --git a/skills/sunnyside-brand-system/examples/configs/hachure.json b/skills/sunnyside-brand-system/examples/configs/hachure.json
+new file mode 100644
+index 0000000..4081aaf
+--- /dev/null
++++ b/skills/sunnyside-brand-system/examples/configs/hachure.json
+@@ -0,0 +1,14 @@
++{
++  "name": "Hachure",
++  "slug": "hachure",
++  "concept": "hatch",
++  "palette": { "paper": "#ece7d6", "paperHi": "#f6f2e4", "ink": "#16201a", "field": "#f6f2e4", "core": "#e8b84a", "spark": "#c4572b", "muted": "#4f5a50", "danger": "#a3261f", "success": "#2f6b3f" },
++  "dna": { "edge": "none", "offset": 0, "stroke": 2.2, "radius": 8, "tile": "none", "density": "compact", "label": "small-caps", "ring": "solid", "font": { "display": "Newsreader", "ui": "Inter", "mono": "IBM Plex Mono" } },
++  "params": {},
++  "story": {
++    "belief": "Slope is something you should be able to read at a glance.",
++    "enemy": "Maps that flatten terrain into colour.",
++    "promise": "Relief drawn the old way: short lines, steepest where it matters.",
++    "proof": "Every contour is traceable to a source survey."
++  }
++}
+diff --git a/skills/sunnyside-brand-system/examples/configs/huginn.json b/skills/sunnyside-brand-system/examples/configs/huginn.json
+new file mode 100644
+index 0000000..7a1479d
+--- /dev/null
++++ b/skills/sunnyside-brand-system/examples/configs/huginn.json
+@@ -0,0 +1,14 @@
++{
++  "name": "Huginn",
++  "slug": "huginn",
++  "concept": "overprint",
++  "palette": { "paper": "#efe9db", "paperHi": "#f7f2e6", "ink": "#0d0d0f", "field": "#0d0d0f", "core": "#e9e2cf", "spark": "#7d8794", "muted": "#55524b", "danger": "#a3261f", "success": "#2a6b4a" },
++  "dna": { "edge": "none", "offset": 0, "stroke": 2.2, "radius": 14, "tile": "rounded", "density": "cosy", "label": "mono-caps", "ring": "solid", "font": { "display": "Fraunces", "ui": "Inter", "mono": "JetBrains Mono" } },
++  "params": { "lens": "#0d0d0f" },
++  "story": {
++    "belief": "An agent should think and remember in the open.",
++    "enemy": "Black-box assistants that forget what they decided.",
++    "promise": "Two ravens, thought and memory; what they agree on is the answer.",
++    "proof": "Every decision is logged with its reason and can be replayed."
++  }
++}
+diff --git a/skills/sunnyside-brand-system/examples/configs/riso-co.json b/skills/sunnyside-brand-system/examples/configs/riso-co.json
+new file mode 100644
+index 0000000..d54e062
+--- /dev/null
++++ b/skills/sunnyside-brand-system/examples/configs/riso-co.json
+@@ -0,0 +1,14 @@
++{
++  "name": "Riso Co.",
++  "slug": "riso-co",
++  "concept": "overprint",
++  "palette": { "paper": "#f0e9d8", "paperHi": "#faf5e8", "ink": "#2a2540", "field": "#faf5e8", "core": "#0078bf", "spark": "#ff48b0", "muted": "#5c5870", "danger": "#b3261e", "success": "#1f7a4d" },
++  "dna": { "edge": "none", "offset": 0, "stroke": 0, "radius": 10, "tile": "none", "density": "cosy", "label": "mono-caps", "ring": "offset", "font": { "display": "Space Grotesk", "ui": "Inter", "mono": "Space Mono" } },
++  "params": { "lens": "#6b2f9e" },
++  "story": {
++    "belief": "Two honest colours beat ten fake ones.",
++    "enemy": "Print that hides its process.",
++    "promise": "Small-run print where the overlap is the point.",
++    "proof": "Every file ships as separated spot-colour layers."
++  }
++}
+diff --git a/skills/sunnyside-brand-system/references/logo-brainstorm.md b/skills/sunnyside-brand-system/references/logo-brainstorm.md
+new file mode 100644
+index 0000000..d3c3cce
+--- /dev/null
++++ b/skills/sunnyside-brand-system/references/logo-brainstorm.md
+@@ -0,0 +1,116 @@
++# Logo brainstorm: from name to six honest ideas
++
++Fusion of this skill's six-keep-one method with the design discipline and
++pattern families of
++[op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill)
++(paraphrased, with credit; install it separately if you want its Gemini
++showcase step). The fused rule: **explore wide across families, judge with
++numbers, then draw by hand.**
++
++## 0. Why marks come out ugly
++
++Diagnosis from a real proof sheet (Huginn, Riso Co., Hachure, all v2.0 output):
++
++| Symptom | What it was | Rule that prevents it |
++| --- | --- | --- |
++| Initial in a box, or a bare initial | Every brand became "H" or a blob; nothing said what the product does | A letter alone is a typeface choice, not an idea. Use a letter only when something is cut, joined or lit (§3). |
++| Detached square next to a letter (Huginn) | An accent with no job; vanishes at 16px | Every part is attached or deleted. `score-mark.py` flags specks under 15% of the median part. |
++| Pennant/shield blob with a misregistration offset (Riso) | Offset effect with no shape idea; reads as a render bug small | Effects at < 1.5px at 16px are noise. Compact drops them. The *idea* must survive flat. |
++| Chamfered letter with notches (Hachure) | Name's meaning (hatching) never drawn | Draw the thing the name points at. Hachure = short lines on a slope. |
++| Same drawing move three times | One construction method (letter + decoration) | Draw from **six different families**, not six tweaks. |
++
++## 1. Gather (one round, five lines)
++
++Name · category · audience · core concept (one verb or image) · mood and
++palette limits. Etymology counts: what does the *name itself* depict?
++
++## 2. Concept bank (before any drawing)
++
++Fill four columns, three entries each, from the product's world:
++
++| Name says | Product does | Material it is made of | What it is *not* |
++| --- | --- | --- | --- |
++| e.g. Huginn = Odin's raven "thought" (pair with Muninn "memory") | remembers decisions | black ink, feather, bone | a chatbot bubble, a circuit brain |
++| e.g. Riso = risograph | overprints two spot inks | paper, fluorescent ink, drum | a printer icon |
++| e.g. Hachure = map shading lines | shows slope | line, paper, survey | a topo-map pin |
++
++Rank the entries by **how little explanation they need**. The top two or three
++become the briefs for the bake-off. Cut anything that works for any product in
++the category.
++
++## 3. Six families, six ideas
++
++Allocate across families (from the op7418 method), one idea each:
++
++| # | Family | `brand-forge` concept | Reads as |
++| --- | --- | --- | --- |
++| 1 | pure geometry | `aperture`, `orbit`, `facet`, `sunburst` | focus, cycle, decision, origin |
++| 2 | dot matrix | `dotmatrix` | data, signal, texture with a void |
++| 3 | line system | `lines` | flow, signal, shading |
++| 4 | dots/shapes + geometry | `overprint`, `stack` | merge, layers, two things that agree |
++| 5 | lines + geometry | `hatch` | drawing, relief, craft |
++| 6 | node network | `nodes` | agents, links, route |
++| + | letter with a cut | `monogram` | only if the letter carries an idea |
++
++Run it:
++
++```bash
++node scripts/brand-forge.mjs --init sunburst > brand.json      # edit palette + dna + story
++node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff
++python3 scripts/score-mark.py --dir bakeoff
++```
++
++`bakeoff.html` shows six cards on the same palette and material, each with the
++16/32/64/128 row on light and dark, and two lines to fill: *the sentence this
++mark argues* and *why it was kept or lost*. Same material on purpose: the only
++variable is the idea.
++
++## 4. Design rules (paraphrased from the op7418 reference)
++
++1. **One or two core ideas.** Six shapes is already a lot.
++2. **Generous negative space.** Roughly 40–50% of the mark should be empty
++   (the field counts). `score-mark.py` reports the share.
++3. **Stroke weight on a 100 grid: 2.5–4** (≈ 1.6–2.6 on our 64 grid). Thinner
++   looks fragile, heavier looks clumsy. Compact strokes go up, not down.
++4. **Intentional imbalance.** Perfect symmetry is inert; shift weight.
++5. **Restraint.** No gradient, shadow or extra colour that does not carry meaning.
++6. **One focal point.** The eye knows where to land.
++7. **Structural mass.** Two thin lines feel weak; use dense repetition or a
++   solid shape.
++8. **Round the cuts.** Negative-space cuts and stroke ends are rounded, not
++   sharp, unless the brand is deliberately hard-edged and says so.
++
++## 5. Judge with numbers, then with eyes
++
++`scripts/score-mark.py` fails or warns on: compact strokes under 2.4 units,
++dots under 4 units, a silhouette that covers < 10% or > 88% of the box, no
++contrast at 16px, detached specks, more than 24 elements, and negative space
++outside 25–80%. It notes full symmetry. It cannot judge taste; it only removes
++the failures not worth discussing.
++
++Then the six tests in `logo-system.md` §2. Keep one. Write why five lost
++into `story.md`.
++
++## 6. Refine by hand
++
++The generator is draft one. Open the SVG, move points on the 64 grid, keep one
++viewBox, re-run `score-mark.py` and `audit.mjs`. Ideas to push a kept mark:
++
++- Change **material** (edge, offset, stroke) before you change geometry.
++- Break one rule on purpose: a gap, an off-centre disc, a cut that stays.
++- Build the compact as a separate drawing with fewer parts and heavier strokes.
++
++## 7. Showcase images are not the logo
++
++The op7418 skill makes presentation images with a Gemini image model from an
++exported PNG. That is fine for a mockup or a hero. Never let a generated image
++become the mark: the mark is drawn (this skill's "draw, do not source"), and
++generated showcases get a provenance line (`image-direction.md`).
++
++## 8. Exit criteria
++
++- [ ] Six ideas from six families on one page; five rejection notes written.
++- [ ] The kept mark states its argument in one sentence without naming a shape.
++- [ ] `score-mark.py`: no FAIL; every WARN has a written reason.
++- [ ] Compact read at 16px on light and dark chrome by a human.
++- [ ] Not a letter alone, not an effect alone, no orphan parts.
+diff --git a/skills/sunnyside-brand-system/references/logo-system.md b/skills/sunnyside-brand-system/references/logo-system.md
+index ae46bc9..7881639 100644
+--- a/skills/sunnyside-brand-system/references/logo-system.md
++++ b/skills/sunnyside-brand-system/references/logo-system.md
+@@ -135,9 +135,14 @@ with a complete, tested family instead of a blank file.
+ | `hatch` | diagonal lines + a disc | drawing, shading, craft | line gap must grow in the compact |
+ | `stack` | offset plates | layers, versions, depth | keep ≤ 3 plates, 2 in compact |
+ | `facet` | circle cut by a diagonal | decision, split, light | thin cut disappears at 16px |
+-
+-Process: `--init <concept>` for three or four concepts → compare each
+-`sheet.html` at 16px → keep one → write why the rest lost → hand-refine points on
++| `dotmatrix` | aligned rings of dots, empty centre, one gap | data, signal, texture | dots under 4 units wide vanish at 16px; keep two rings in compact |
++| `lines` | disc hatched with weight-swelling lines | flow, shading, signal | reads as a striped planet unless the story is shading |
++| `overprint` | two flat discs, clipped lens | merge, agreement, two inks | lens colour must be a real third colour, not a blend mode |
++| `nodes` | asymmetric nodes + thick edges | agents, links, route | no orphan satellites; every dot attached |
++| `monogram` | geometric monoline letter + printed offset | initial | a letter alone is not an idea: add a cut, join or light |
++
++Process: `--bakeoff brand.json` (six families, one material) → `score-mark.py` →
++compare at 16px → keep one → write why the rest lost → hand-refine points on
+ the grid → re-run. Vary **theme DNA** before geometry; material is what makes the
+ mark yours.
+ 
+diff --git a/skills/sunnyside-brand-system/references/skill-audit.md b/skills/sunnyside-brand-system/references/skill-audit.md
+index 86b45a0..495ed4e 100644
+--- a/skills/sunnyside-brand-system/references/skill-audit.md
++++ b/skills/sunnyside-brand-system/references/skill-audit.md
+@@ -1,4 +1,4 @@
+-# Skill audit: sunnyside-brand-system v2.0 → v2.1
++# Skill audit: sunnyside-brand-system v2.0 → v2.2
+ 
+ An audit of the skill itself. Findings are ordered by how much they hurt a
+ real run. Each states the fix and where it landed.
+@@ -17,6 +17,15 @@ real run. Each states the fix and where it landed.
+ | 8 | Missing blank line before `## Pen.dev` in SKILL.md; version still 2.0. | Cosmetic; renders as a run-on heading in some viewers. | Fixed; version 2.1. |
+ | 9 | `templates/brandkit.html` had a fixed palette and no story panel. | Boards looked like Sunnyside regardless of brand. | Story panel guidance added to `board-and-images.md`; generator emits palette from config. |
+ 
++## v2.2 findings (from a real output sheet)
++
++| # | Finding | Fix |
++| --- | --- | --- |
++| 10 | Three brands (Huginn, Riso Co., Hachure) all came out as an initial or a blob with an effect. No family diversity, name meaning ignored, orphan accent, offset that dies at 16px. | `logo-brainstorm.md` (diagnosis, concept bank, six families, design rules); `--bakeoff`. |
++| 11 | No objective gate; the skill relied on "looks good". | `score-mark.py`: compact stroke/dot floor, silhouette, 16px contrast, specks, negative space, symmetry note. |
++| 12 | Concept set was too narrow (six geometric methods). | Added dotmatrix, lines, overprint, nodes, monogram, fused from the op7418 pattern families; `hatch` rebuilt as a real hachure. |
++| 13 | No worked redo to show the method beats the failure. | `examples/brainstorm-huginn-riso-hachure.md` + runnable configs. |
++
+ ## Known gaps (not fixed here)
+ 
+ - **Wordmark outlining still needs `uharfbuzz` + a font file.** `brand-forge`
+@@ -26,6 +35,10 @@ real run. Each states the fix and where it landed.
+   drawing, then the same family/tokens/forms pipeline.
+ - **Form kit is native HTML.** Radix/shadcn mapping is documented, not generated.
+ - **Chromium only** for `qa.mjs` and `render-icons.mjs`.
++- **Figurative marks (a raven, a leaf) are still hand-drawn.** The generator
++  covers constructed geometry; the bake-off and scorer apply to hand-drawn SVGs
++  too (drop them in `mark.svg`, `mark-compact.svg`, `glyph.svg`).
++- **score-mark.py needs cairosvg + Pillow** and is a proxy, not a taste test.
+ - **Story quality is a human judgement.** The audit checks structure only.
+ 
+ ## Re-run the audit
+diff --git a/skills/sunnyside-brand-system/scripts/brand-forge.mjs b/skills/sunnyside-brand-system/scripts/brand-forge.mjs
+index 3a7282d..9448164 100644
+--- a/skills/sunnyside-brand-system/scripts/brand-forge.mjs
++++ b/skills/sunnyside-brand-system/scripts/brand-forge.mjs
+@@ -26,6 +26,7 @@
+  */
+ import { mkdir, readFile, writeFile } from 'node:fs/promises'
+ import { join, resolve } from 'node:path'
++import { execFileSync } from 'node:child_process'
+ 
+ const args = process.argv.slice(2)
+ const flag = (name, fallback) => {
+@@ -34,7 +35,9 @@ const flag = (name, fallback) => {
+ }
+ const has = (name) => args.includes(`--${name}`)
+ 
+-const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet']
++const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet', 'dotmatrix', 'lines', 'overprint', 'nodes', 'monogram']
++// Six families for a bake-off (geometry, dots, lines, dots+geometry, lines+geometry, network)
++const BAKEOFF = ['aperture', 'dotmatrix', 'lines', 'overprint', 'hatch', 'nodes']
+ 
+ const STARTER = {
+   name: 'Sunnyside',
+@@ -89,10 +92,65 @@ if (has('init')) {
+     cfg.dna.radius = 6
+   }
+   if (concept === 'orbit') cfg.dna.tile = 'circle'
++  if (concept === 'monogram') cfg.params.letter = cfg.name[0]
+   console.log(JSON.stringify(cfg, null, 2))
+   process.exit(0)
+ }
+ 
++
++// ───────────────────────── bake-off ─────────────────────────
++// Six concepts from six different families, same palette and material (theme DNA),
++// so the only variable is the idea. Pick one; write down why five lost.
++if (has('bakeoff')) {
++  const cfgFile = resolve(process.cwd(), flag('bakeoff'))
++  const outRoot = resolve(process.cwd(), flag('out', 'bakeoff'))
++  const base0 = JSON.parse(await readFile(cfgFile, 'utf8'))
++  const families = {
++    aperture: 'pure geometry',
++    dotmatrix: 'dot matrix',
++    lines: 'line system',
++    overprint: 'dots + geometry (two inks)',
++    hatch: 'lines + geometry',
++    nodes: 'node network',
++  }
++  const picks = (base0.bakeoff ?? BAKEOFF).filter((c) => CONCEPTS.includes(c))
++  if (base0.params?.letter || base0.letter) picks.splice(picks.length > 5 ? 5 : picks.length, picks.length > 5 ? 1 : 0, 'monogram')
++  await mkdir(outRoot, { recursive: true })
++  for (const c of picks) {
++    const tmp = join(outRoot, `.${c}.json`)
++    await writeFile(tmp, JSON.stringify({ ...base0, concept: c }))
++    try {
++      execFileSync(process.execPath, [process.argv[1], '--config', tmp, '--out', join(outRoot, c)], { stdio: 'pipe' })
++    } catch (error) {
++      console.error(`bake-off: ${c} failed\n${error.stdout?.toString() ?? ''}`)
++    }
++  }
++  const sizes = [16, 32, 64, 128]
++  const card = (c, i) => {
++    const row = (bg, fg) =>
++      `<div style="background:${bg};color:${fg};padding:12px;display:flex;gap:14px;align-items:end;border-radius:8px">${sizes
++        .map((z) => `<img src="${c}/${z <= 32 ? 'mark-compact' : 'mark'}.svg" width="${z}" height="${z}" alt="">`)
++        .join('')}</div>`
++    return `<article style="background:#fff;border:1px solid #0002;border-radius:12px;padding:18px;display:grid;gap:12px">
++<header style="display:flex;justify-content:space-between;font:600 13px ui-monospace,monospace"><span>${String(i + 1).padStart(2, '0')} · ${c}</span><span style="opacity:.6">${families[c] ?? 'monogram'}</span></header>
++<img src="${c}/mark.svg" width="180" height="180" alt="${c} mark" style="justify-self:center">
++${row('#f6f1e7', '#111')}${row('#14141f', '#fff')}
++<p style="font:12px/1.4 system-ui;margin:0;color:#444">One sentence this mark argues (no shape names): <br><strong>________________</strong></p>
++<p style="font:12px/1.4 system-ui;margin:0;color:#444">Keep / lost because: <strong>________________</strong></p></article>`
++  }
++  await writeFile(
++    join(outRoot, 'bakeoff.html'),
++    `<!doctype html><meta charset="utf-8"><title>${base0.name ?? 'brand'} — bake-off</title>
++<body style="margin:0;padding:28px;background:#e9e4d8;font-family:system-ui"><h1 style="font:700 20px system-ui;margin:0 0 6px">${base0.name ?? 'brand'} — six ideas, one material</h1>
++<p style="margin:0 0 20px;max-width:70ch;color:#444;font-size:14px">Same palette and theme DNA; only the idea changes. Judge at 16px first. Keep one. Write why five lost: that note becomes the guide.</p>
++<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">${picks.map(card).join('')}</div></body>
++`,
++  )
++  console.log(`bake-off · ${picks.join(', ')} → ${outRoot}/bakeoff.html`)
++  console.log('Next: python scripts/score-mark.py --dir ' + outRoot + ' (objective checks), then choose and refine.')
++  process.exit(0)
++}
++
+ function fail(message) {
+   console.error(`brand-forge: ${message}`)
+   process.exit(1)
+@@ -110,7 +168,8 @@ const merged = {
+   params: { ...STARTER.params, ...cfg.params },
+   story: { ...STARTER.story, ...cfg.story },
+ }
+-const { name, slug, concept, palette: P, dna, params, story } = merged
++let { concept } = merged
++const { name, slug, palette: P, dna, params, story } = merged
+ if (!CONCEPTS.includes(concept)) fail(`unknown concept "${concept}". Use: ${CONCEPTS.join(', ')}`)
+ for (const [key, value] of Object.entries(P)) {
+   if (!/^#[0-9a-f]{6}$/i.test(value)) fail(`palette.${key} must be #rrggbb, got ${value}`)
+@@ -142,12 +201,31 @@ function tileShape(extra = '', inset = 0) {
+   const x = T.x + inset
+   const y = T.y + inset
+   const s = T.s - inset * 2
++  if (dna.tile === 'none') return `<circle cx="32" cy="32" r="${r(28 - inset)}" ${extra}/>`
+   if (dna.tile === 'circle') return `<circle cx="${r(x + s / 2)}" cy="${r(y + s / 2)}" r="${r(s / 2)}" ${extra}/>`
+   const rx = dna.tile === 'square' ? Math.min(dna.radius, 4) : Math.max(dna.radius - inset, 2)
+   return `<rect x="${r(x)}" y="${r(y)}" width="${r(s)}" height="${r(s)}" rx="${r(rx)}" ${extra}/>`
+ }
+ const clipId = `${slug}-tile`
+ 
++
++// Geometric monoline capitals on a 40 × 48 box (stroke is applied by the concept).
++const LETTERS = {
++  A: 'M2 48L20 2L38 48M9 31H31', B: 'M3 2V46M3 2H20A11 11 0 0 1 20 24H3M3 24H22A11 11 0 0 1 22 46H3',
++  C: 'M37.3 11.1A20 20 0 1 0 37.3 36.9', D: 'M3 2V46H16A22 22 0 0 0 16 2Z',
++  E: 'M37 2H3V46H37M3 24H29', F: 'M37 2H3V46M3 24H29',
++  G: 'M37.3 11.1A20 20 0 1 0 41 24H24', H: 'M3 2V46M37 2V46M3 24H37',
++  I: 'M10 2H30M20 2V46M10 46H30', J: 'M33 2V30A13 13 0 0 1 7 30',
++  K: 'M3 2V46M37 2L3 28M12 20L37 46', L: 'M3 2V46H37',
++  M: 'M3 46V2L20 30L37 2V46', N: 'M3 46V2L37 46V2',
++  O: 'M20 2A17 22 0 0 0 20 46A17 22 0 0 0 20 2Z', P: 'M3 46V2H20A12 12 0 0 1 20 26H3',
++  Q: 'M20 2A17 22 0 0 0 20 46A17 22 0 0 0 20 2ZM26 34L39 48', R: 'M3 46V2H20A12 12 0 0 1 20 26H3M19 26L37 46',
++  S: 'M35 9C28 0 5 0 5 12C5 25 35 21 35 36C35 49 10 48 3 39', T: 'M2 2H38M20 2V46',
++  U: 'M3 2V28A17 17 0 0 0 37 28V2', V: 'M2 2L20 46L38 2',
++  W: 'M0 2L10 46L20 14L30 46L40 2', X: 'M3 2L37 46M37 2L3 46',
++  Y: 'M2 2L20 24L38 2M20 24V46', Z: 'M3 2H37L3 46H37',
++}
++
+ // ───────────────────────── concepts ─────────────────────────
+ // Each returns inner SVG for the content sitting INSIDE the tile, in a palette
+ // object c = {field, core, spark, ink}. `compact` builds a separate drawing.
+@@ -204,14 +282,21 @@ const concepts = {
+     )
+   },
+   hatch(c, compact) {
+-    const gap = compact ? 9 : 5.5
+-    const w = compact ? 3.6 : 2
+-    const lines = []
+-    for (let x = -64; x < 128; x += gap) lines.push(`M${r(x)} 64L${r(x + 64)} 0`)
+-    const orb = compact ? 13 : 15
++    // Hachure: short strokes on the shaded side only, steepest at the edge; the lit half stays empty.
++    const gap = compact ? 9 : 5
++    const w = compact ? 3.6 : 1.9
++    const segs = []
++    for (let k = 64 + gap * 1.5; k < 124; k += gap * 1.4142) {
++      const t = (k - 64) / 60
++      const inset = (1 - t) * 10 // lines start further in near the lit side: a falling-off shade
++      segs.push(`M${r(k - 64 + inset)} ${r(64 - inset)}L${r(64 - inset)} ${r(k - 64 + inset)}`)
++    }
++    const orb = compact ? 13 : 14
++    const ring = dna.tile === 'none' ? `<circle cx="32" cy="32" r="${compact ? 27 : 27.4}" fill="none" stroke="${c.lead}" stroke-width="${compact ? 3 : 1.8}"/>` : ''
+     return (
+-      `<g clip-path="url(#${clipId})"><path d="${lines.join('')}" fill="none" stroke="${c.ink}" stroke-width="${w}"/></g>` +
+-      `<circle cx="32" cy="32" r="${orb}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.4}"/>`
++      `<g clip-path="url(#${clipId})"><path d="${segs.join('')}" fill="none" stroke="${c.lead}" stroke-width="${w}" stroke-linecap="butt"/></g>` +
++      ring +
++      `<circle cx="28.5" cy="28.5" r="${orb}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.4}"/>`
+     )
+   },
+   stack(c, compact) {
+@@ -227,6 +312,85 @@ const concepts = {
+     }
+     return out
+   },
++  dotmatrix(c, compact) {
++    // Concentric dots, empty centre, one wedge removed: tension without noise.
++    const rings = compact ? [[6, 10, 4.4], [12, 21, 3.4]] : [[6, 9, 3.4], [12, 18, 2.9], [18, 26.5, 2.4]]
++    const gapAt = -50 // degrees; the wedge opens to the upper right
++    const gapHalf = compact ? 30 : 24
++    let out = ''
++    for (const [n, ringR, dotR] of rings) {
++      for (let i = 0; i < n; i++) {
++        const a = (360 / n) * i - 90
++        const d = Math.abs((((a - gapAt) % 360) + 540) % 360 - 180)
++        if (d < gapHalf) continue
++        const [x, y] = pt(32, 32, ringR, a)
++        out += `<circle cx="${r(x)}" cy="${r(y)}" r="${dotR}" fill="${c.lead}"/>`
++      }
++    }
++    const [ax, ay] = pt(32, 32, compact ? 21 : 26, gapAt)
++    return out + `<circle cx="${r(ax)}" cy="${r(ay)}" r="${compact ? 5 : 4.4}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 2.4 : 1.8}"/>`
++  },
++  lines(c, compact) {
++    // A disc hatched with lines whose weight swells through the middle (a lit sphere, drawn).
++    const n = compact ? 5 : 9
++    const R = compact ? 23 : 22
++    const top = 32 - R
++    const step = (2 * R) / n
++    let out = `<defs><clipPath id="${slug}-disc"><circle cx="32" cy="32" r="${R}"/></clipPath></defs><g clip-path="url(#${slug}-disc)">`
++    for (let i = 0; i < n; i++) {
++      const t = (i + 0.5) / n
++      const w = (compact ? 2.2 : 1.1) + Math.sin(t * Math.PI) * (compact ? 3.4 : 3.1)
++      const y = top + (i + 0.5) * step
++      out += `<line x1="6" y1="${r(y)}" x2="58" y2="${r(y)}" stroke="${c.lead}" stroke-width="${r(w)}"/>`
++    }
++    out += '</g>'
++    const [sx, sy] = pt(32, 32, R + 1, -45)
++    return out + `<circle cx="${r(sx)}" cy="${r(sy)}" r="${compact ? 5.4 : 4.6}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 2.4 : 1.8}"/>`
++  },
++  overprint(c, compact) {
++    // Two inks, one lens. Flat fills only; the lens is clipped, not blended.
++    const rr = compact ? 15.5 : 16
++    const a = [compact ? 25 : 24.5, compact ? 35 : 36]
++    const b = [compact ? 39 : 39.5, compact ? 29 : 28]
++    const sw = compact ? 2.8 : 2
++    return (
++      `<defs><clipPath id="${slug}-lens"><circle cx="${a[0]}" cy="${a[1]}" r="${rr}"/></clipPath></defs>` +
++      `<circle cx="${a[0]}" cy="${a[1]}" r="${rr}" fill="${c.spark}"/>` +
++      `<circle cx="${b[0]}" cy="${b[1]}" r="${rr}" fill="${c.core}"/>` +
++      `<circle cx="${b[0]}" cy="${b[1]}" r="${rr}" fill="${params.lens && c.ink === P.ink ? params.lens : c.ink}" clip-path="url(#${slug}-lens)"/>` +
++      `<circle cx="${a[0]}" cy="${a[1]}" r="${rr}" fill="none" stroke="${c.ink}" stroke-width="${sw}"/>` +
++      `<circle cx="${b[0]}" cy="${b[1]}" r="${rr}" fill="none" stroke="${c.ink}" stroke-width="${sw}"/>`
++    )
++  },
++  nodes(c, compact) {
++    // Three nodes on a diagonal, thick edges, one satellite. Asymmetric on purpose.
++    const N = compact ? [[17, 44, 7], [45, 20, 8]] : [[16, 45, 6.4], [30, 28, 7.8], [48, 20, 5.4]]
++    const w = compact ? 3.8 : 3
++    let edges = ''
++    for (let i = 0; i < N.length - 1; i++) {
++      const [x1, y1] = N[i]
++      const [x2, y2] = N[i + 1]
++      const mx = (x1 + x2) / 2 + (i % 2 ? 6 : -6)
++      const my = (y1 + y2) / 2 + (i % 2 ? 6 : 6)
++      edges += `<path d="M${x1} ${y1}Q${r(mx)} ${r(my)} ${x2} ${y2}" fill="none" stroke="${c.lead}" stroke-width="${w}" stroke-linecap="round"/>`
++    }
++    const fills = [c.spark, c.core, c.lead]
++    const nodes = N.map(([x, y, rr], i) => `<circle cx="${x}" cy="${y}" r="${rr}" fill="${fills[i % 3]}" stroke="${c.ink}" stroke-width="${compact ? 2.6 : 2}"/>`).join('')
++    return edges + nodes
++  },
++  monogram(c, compact) {
++    const ch = String(params.letter || name[0] || 'A').toUpperCase()
++    const glyph = LETTERS[ch]
++    if (!glyph) return ''
++    const w = compact ? 7.4 : 6
++    const s = compact ? 0.82 : 0.8
++    const tx = 32 - 20 * s
++    const ty = 32 - 24 * s
++    const lay = (stroke, dx, dy) =>
++      `<g transform="translate(${r(tx + dx)} ${r(ty + dy)}) scale(${s})" fill="none" stroke="${stroke}" stroke-width="${r(w / s)}" stroke-linecap="round" stroke-linejoin="round"><path d="${glyph}"/></g>`
++    // printed offset sits behind the letter; compact drops it (it dies below 1.5px at 16px)
++    return (compact ? '' : lay(c.core, 2.2, 2.2)) + lay(c.lead, 0, 0)
++  },
+   facet(c, compact) {
+     const rr = compact ? 19 : 17
+     const cut = compact ? 4 : 3
+@@ -255,7 +419,8 @@ function face(cx, cy, c) {
+ const svgOpen = (w = 64, h = 64, title = name) =>
+   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${title}">`
+ 
+-function buildMark({ colors, compact = false, tile = true, shadow = true, field = colors.field }) {
++function buildMark({ colors, compact = false, tile = true, shadow = true, field = colors.field, forceTile = false }) {
++  if (dna.tile === 'none' && !forceTile) { tile = false; shadow = false }
+   const off = compact || !shadow || dna.edge === 'none' ? 0 : dna.offset
+   const stroke = compact ? 3.2 : dna.stroke
+   const defs = `<defs><clipPath id="${clipId}">${tileShape('', 0)}</clipPath></defs>`
+@@ -266,23 +431,23 @@ function buildMark({ colors, compact = false, tile = true, shadow = true, field
+   parts.push(concepts[concept](colors, compact))
+   return `${svgOpen()}${parts.join('')}</svg>\n`
+ }
+-const base = { field: P.field, core: P.core, spark: P.spark, ink: P.ink, paper: P.paperHi }
++const base = { field: P.field, core: P.core, spark: P.spark, ink: P.ink, paper: P.paperHi, lead: dna.tile === 'none' ? P.ink : P.paperHi }
+ const outputs = {}
+ outputs['mark.svg'] = buildMark({ colors: base })
+ outputs['mark-compact.svg'] = buildMark({ colors: base, compact: true })
+ outputs['glyph.svg'] = buildMark({ colors: base, tile: false, shadow: false })
+ // Reversed: tile in ink, drawing lines in paper so it holds on a dark ground.
+ outputs['mark-reverse.svg'] = buildMark({
+-  colors: { field: P.ink, core: P.core, spark: P.spark, ink: P.paperHi, paper: P.ink },
++  colors: { field: P.ink, core: P.core, spark: P.spark, ink: P.paperHi, paper: P.ink, lead: P.paperHi },
+   shadow: false,
+ })
+ // One-colour stamp is DRAWN: all fills collapse to ink/paper with the same geometry.
+ outputs['mark-mono.svg'] = buildMark({
+-  colors: { field: P.paperHi, core: P.paperHi, spark: P.paperHi, ink: P.ink, paper: P.paperHi },
++  colors: { field: P.paperHi, core: P.paperHi, spark: P.paperHi, ink: P.ink, paper: P.paperHi, lead: P.ink },
+   shadow: dna.edge === 'hard',
+ })
+ // Favicon field: the compact mark, with an opaque ground so it never vanishes on chrome.
+-outputs['icon.svg'] = buildMark({ colors: base, compact: true })
++outputs['icon.svg'] = buildMark({ colors: base, compact: true, forceTile: true })
+ 
+ // Lockups (need an outlined wordmark)
+ const wordPath = flag('wordmark')
+diff --git a/skills/sunnyside-brand-system/scripts/score-mark.py b/skills/sunnyside-brand-system/scripts/score-mark.py
+new file mode 100644
+index 0000000..6a1d651
+--- /dev/null
++++ b/skills/sunnyside-brand-system/scripts/score-mark.py
+@@ -0,0 +1,145 @@
++#!/usr/bin/env python3
++"""
++Objective checks for a generated mark family. It cannot judge taste; it catches
++the failures a human eye misses at 16px and the ones an AI reviewer talks itself
++out of (stray specks, thin strokes, solid blobs).
++
++  python scripts/score-mark.py --dir public/brand/<slug>
++  python scripts/score-mark.py --dir bakeoff          # scores every subfolder
++
++Requires: pip install cairosvg pillow
++
++Checks (FAIL stops the mark, WARN needs a written reason, NOTE is information):
++  FAIL  compact has a stroke thinner than 2.4 units or a dot under 4 units wide
++        (on the 64 grid that is 0.6px / 1px at 16px)
++  FAIL  glyph silhouette at 32px covers < 10% or > 88% of the box
++  FAIL  compact mark has no contrast at 16px (luminance spread < 0.10)
++  WARN  detached speck: a component under 15% of the median component area
++  WARN  element count above 24 (op7418 rule: 1–2 core elements)
++  WARN  negative space inside the tile outside 25–80%
++  NOTE  mirror symmetry above 0.97 on both axes (add intentional imbalance)
++"""
++import argparse, io, re, statistics, sys, warnings
++warnings.filterwarnings("ignore", category=DeprecationWarning)
++from pathlib import Path
++
++import cairosvg
++from PIL import Image
++
++ap = argparse.ArgumentParser()
++ap.add_argument('--dir', required=True)
++args = ap.parse_args()
++
++
++def raster(path, size, bg=None):
++    png = cairosvg.svg2png(url=str(path), output_width=size, output_height=size, background_color=bg)
++    return Image.open(io.BytesIO(png)).convert('RGBA')
++
++
++def components(img, thresh=128):
++    w, h = img.size
++    a = img.getchannel('A').point(lambda v: 255 if v >= thresh else 0)
++    px = a.load()
++    seen = [[False] * w for _ in range(h)]
++    out = []
++    for y in range(h):
++        for x in range(w):
++            if px[x, y] and not seen[y][x]:
++                stack, n = [(x, y)], 0
++                seen[y][x] = True
++                while stack:
++                    cx, cy = stack.pop()
++                    n += 1
++                    for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
++                        if 0 <= nx < w and 0 <= ny < h and px[nx, ny] and not seen[ny][nx]:
++                            seen[ny][nx] = True
++                            stack.append((nx, ny))
++                out.append(n)
++    return out
++
++
++def mirror_similarity(img):
++    a = img.getchannel('A')
++    px = a.load()
++    w, h = a.size
++    tot = h_same = v_same = 0
++    for y in range(h):
++        for x in range(w):
++            on = px[x, y] > 127
++            if on or px[w - 1 - x, y] > 127:
++                tot += 1
++                h_same += (px[w - 1 - x, y] > 127) == on
++            if px[x, h - 1 - y] > 127 or on:
++                v_same += (px[x, h - 1 - y] > 127) == on
++    return (h_same / tot if tot else 0), (v_same / tot if tot else 0)
++
++
++def score(folder):
++    fails, warns, notes = [], [], []
++    mark, compact, glyph = folder / 'mark.svg', folder / 'mark-compact.svg', folder / 'glyph.svg'
++    for f in (mark, compact, glyph):
++        if not f.exists():
++            return [f'missing {f.name}'], [], []
++    msrc, csrc = mark.read_text(), compact.read_text()
++    shapes = len(re.findall(r'<(path|circle|rect|ellipse|polygon|line)[\s>]', msrc))
++    if shapes > 24:
++        warns.append(f'{shapes} elements in the primary mark (aim for 1–2 ideas)')
++
++    strokes = [float(v) for v in re.findall(r'stroke-width="([\d.]+)"', csrc) if float(v) > 0]
++    if strokes and min(strokes) < 2.4:
++        fails.append(f'compact stroke {min(strokes)} < 2.4 units; it dies at 16px')
++    dots = [float(v) * 2 for v in re.findall(r'<circle[^>]* r="([\d.]+)"', csrc)]
++    if dots and min(dots) < 4:
++        fails.append(f'compact dot {min(dots):.1f} units wide < 4; under 1px at 16px')
++
++    g32 = raster(glyph, 32)
++    cover = sum(1 for v in g32.getchannel('A').getdata() if v > 127) / (32 * 32)
++    if cover < 0.10 or cover > 0.88:
++        fails.append(f'glyph silhouette covers {cover:.0%} at 32px; it does not read as a shape')
++
++    c16 = raster(compact, 16, '#ffffff').convert('L')
++    vals = list(c16.getdata())
++    spread = statistics.pstdev(vals) / 255
++    if spread < 0.10:
++        fails.append(f'compact contrast at 16px is {spread:.2f} (< 0.10); a smudge')
++
++    comps = [a for a in components(raster(glyph, 128)) if a > 3]
++    if len(comps) >= 2:
++        med = statistics.median(comps)
++        specks = [a for a in comps if a < 0.15 * med]
++        if specks and len(specks) <= 2:
++            warns.append(f'{len(specks)} detached speck(s) smaller than 15% of the median part; attach it or delete it')
++
++    p128 = raster(mark, 128)
++    cols = {}
++    for r, g, b, a in p128.getdata():
++        if a > 250:
++            cols[(r, g, b)] = cols.get((r, g, b), 0) + 1
++    if cols:
++        total = sum(cols.values())
++        field_share = max(cols.values()) / total
++        if not 0.25 <= field_share <= 0.80:
++            warns.append(f'dominant field is {field_share:.0%} of the mark (target 25–80% negative space)')
++        else:
++            notes.append(f'negative space {field_share:.0%}')
++
++    hs, vs = mirror_similarity(raster(glyph, 64))
++    if hs > 0.97 and vs > 0.97:
++        notes.append('fully symmetric on both axes; consider intentional imbalance')
++    return fails, warns, notes
++
++
++root = Path(args.dir)
++folders = [root] if (root / 'mark.svg').exists() else sorted(p for p in root.iterdir() if p.is_dir() and (p / 'mark.svg').exists())
++if not folders:
++    sys.exit(f'no mark.svg under {root}')
++bad = 0
++for f in folders:
++    fails, warns, notes = score(f)
++    verdict = 'FAIL' if fails else ('WARN' if warns else 'PASS')
++    print(f'{verdict}  {f.name}')
++    for m in fails: print(f'   FAIL  {m}')
++    for m in warns: print(f'   WARN  {m}')
++    for m in notes: print(f'   NOTE  {m}')
++    bad += bool(fails)
++sys.exit(1 if bad else 0)
+-- 
+2.43.0
+

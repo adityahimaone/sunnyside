@@ -1,18 +1,18 @@
 {
   "meta": {
     "name": "Vitrine",
-    "version": "2.3.0",
+    "version": "2.5.0",
     "year": 2026,
     "author": "Aditya Himawan",
     "essence": "A glass case for a low-resolution light.",
     "case": "Case 02",
     "namespace": "--vt-",
-    "family": "Continuous ribbon",
-    "gate": "v2.3",
-    "oneSentence": "Vitrine is a design system for design engineers building translucent product interfaces that keeps depth readable, made of one folded ribbon mark, one glass container, one halftone label and native fields."
+    "family": "Architectural monogram",
+    "gate": "v2.3 constructed",
+    "oneSentence": "Vitrine is a design system for design engineers building translucent product interfaces that keeps depth readable, made of one half-light V mark, one glass container, one halftone light and native fields."
   },
   "theme": {
-    "family": "continuous-ribbon",
+    "family": "architectural-monogram",
     "material": "liquid-glass",
     "edge": "hard",
     "offset": "1px",
@@ -23,9 +23,11 @@
     "density": "cosy",
     "label": "mono-caps",
     "field-recipe": "liquid-glass",
-    "mark-fold": "sharp",
-    "mark-gap": "9 units",
-    "mark-label": "10x8 units"
+    "mark-form": "half-light V",
+    "mark-frame": "8 units",
+    "mark-vertex": "32/34",
+    "mark-plinth": "16x22 units",
+    "mark-arms": "16 units"
   },
   "primitives": [
     {

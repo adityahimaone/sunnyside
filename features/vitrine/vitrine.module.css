@@ -2614,6 +2614,7 @@
   display: grid;
   place-items: center;
   flex: 1;
+  gap: 22px;
   padding: 30px 0;
 }
 

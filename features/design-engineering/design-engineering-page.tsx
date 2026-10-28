@@ -523,7 +523,7 @@ export function DesignEngineeringPage() {
                   sizes="(max-width: 900px) 100vw, 760px"
                 />
                 <figcaption>
-                  The Vitrine brand kit — a folded ribbon V, Case and Frost, one
+                  The Vitrine brand kit — a half-light V, Case and Frost, one
                   Signal field, the form specimen and the audit.
                 </figcaption>
               </figure>

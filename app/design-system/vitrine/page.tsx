@@ -36,7 +36,7 @@ import styles from '@/features/vitrine/vitrine.module.css'
 export const metadata: Metadata = {
   title: 'Vitrine — Design System',
   description:
-    'Vitrine v2.3 is a glass-and-dither design system: a continuous-ribbon mark, three token layers, ten form controls and a case study. A glass case for a low-resolution light.',
+    'Vitrine v2.5 is a glass-and-dither design system: a half-light V mark, three token layers, ten form controls and a case study. A glass case for a low-resolution light.',
   alternates: {
     canonical: '/design-system/vitrine',
     types: { 'text/markdown': '/design-system/vitrine/llms.txt' },
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Vitrine — Design System',
     description:
-      'A glass case for a low-resolution light. A v2.3 ribbon mark, tokens, form controls and the audit behind them.',
+      'A glass case for a low-resolution light. A v2.5 half-light V mark, tokens, form controls and the audit behind them.',
     type: 'website',
     url: '/design-system/vitrine',
     images: [
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
         url: '/brand/vitrine/vitrine-brandkit.png',
         width: 1500,
         height: 1125,
-        alt: 'Vitrine brand board: the folded V mark, Case and Frost palette, Signal field, type and form specimen',
+        alt: 'Vitrine brand board: the half-light V mark, one glass arm and one Signal arm, Case and Frost palette, Signal field, type and form specimen',
       },
     ],
   },
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
         url: '/brand/vitrine/vitrine-brandkit.png',
         width: 1500,
         height: 1125,
-        alt: 'Vitrine brand board: the folded V mark, Case and Frost palette, Signal field, type and form specimen',
+        alt: 'Vitrine brand board: the half-light V mark, one glass arm and one Signal arm, Case and Frost palette, Signal field, type and form specimen',
       },
     ],
   },
@@ -220,6 +220,7 @@ function InlineMark({
         <path
           key={`${path.d}-${index}`}
           d={path.d}
+          fillRule="evenodd"
           fill={path.accent ? 'var(--vt-signal)' : 'currentColor'}
         />
       ))}
@@ -267,16 +268,16 @@ export default function DesignSystemPage() {
             <div className={styles.heroCopy}>
               <p className={styles.eyebrow}>
                 <span className={styles.eyebrowDot} aria-hidden />
-                Case 02 / v2.3 design system
+                Case 02 / v2.5 design system
               </p>
               <h1 id="hero-title" className={styles.heroTitle}>
                 A glass case for a{' '}
                 <span className={styles.signalText}>low‑resolution</span> light.
               </h1>
               <p className={styles.heroLead}>
-                Vitrine is a design system for depth you can read: one folded
-                ribbon mark, one glass container, one halftone label, and a form
-                kit that refuses to disappear into the blur.
+                Vitrine is a design system for depth you can read: one
+                half-light V, one glass container, one halftone light, and a
+                form kit that refuses to disappear into the blur.
               </p>
               <div className={styles.heroActions}>
                 <a className={styles.primaryButton} href="#marks">
@@ -292,8 +293,8 @@ export default function DesignSystemPage() {
                   <dd>Glass + dither</dd>
                 </div>
                 <div>
-                  <dt>Family</dt>
-                  <dd>Ribbon V</dd>
+                  <dt>Mark</dt>
+                  <dd>Half-light V</dd>
                 </div>
                 <div>
                   <dt>Tokens</dt>
@@ -309,7 +310,7 @@ export default function DesignSystemPage() {
             <aside className={`${styles.heroPlate} ${styles.glassPanel}`}>
               <div className={styles.ditherEdge} aria-hidden />
               <div className={styles.plateHead}>
-                <span className={styles.cardLabel}>Case file / v2.3</span>
+                <span className={styles.cardLabel}>Case file / v2.5</span>
                 <span className={styles.liveTag}>
                   <span aria-hidden /> Live specimen
                 </span>
@@ -330,7 +331,7 @@ export default function DesignSystemPage() {
                 </div>
                 <div>
                   <dt>Family</dt>
-                  <dd>Continuous ribbon</dd>
+                  <dd>Architectural monogram</dd>
                 </div>
                 <div>
                   <dt>Contrast</dt>
@@ -338,7 +339,7 @@ export default function DesignSystemPage() {
                 </div>
                 <div>
                   <dt>Version</dt>
-                  <dd>2.3 / 2026</dd>
+                  <dd>2.5 / 2026</dd>
                 </div>
               </dl>
               <div className={styles.plateFoot}>
@@ -352,8 +353,8 @@ export default function DesignSystemPage() {
         </section>
 
         <div className={styles.metaStrip} aria-label="Case metadata">
-          <span>Identity / Vitrine v2.3</span>
-          <span>Mark / Continuous ribbon</span>
+          <span>Identity / Vitrine v2.5</span>
+          <span>Mark / Half-light V</span>
           <span>Type / Space Grotesk + Geist</span>
           <span>Status / Shipped</span>
         </div>
@@ -396,8 +397,8 @@ export default function DesignSystemPage() {
                   One sentence
                 </p>
                 <blockquote>
-                  Vitrine keeps <em>depth</em> readable: a folded V, a glass
-                  container, and a label that never sits under the words.
+                  Vitrine keeps <em>depth</em> readable: a half-light V, a glass
+                  container, and a light that never sits under the words.
                 </blockquote>
               </div>
               <div className={styles.storyStatementFoot}>
@@ -456,27 +457,28 @@ export default function DesignSystemPage() {
             label="Marks"
             title={
               <>
-                One fold,
+                One letter,
                 <br />
-                two primitives.
+                two materials.
               </>
             }
-            lead="The V is not a letter with an ornament. One beam folds into the case, the flat plinth holds the printed label, and the compact drawing drops the label rather than shrinking it into a speck."
+            lead="The V is the case in section: one arm is glass, one is the light. Two solid primitives; the compact drops the Signal arm rather than shrinking the split into a speck."
           />
 
           <div className={styles.marksLayout}>
             <div className={`${styles.markStage} ${styles.onCase}`}>
               <div className={styles.markStageTop}>
                 <span className={styles.cardLabel}>Construction / 64 grid</span>
-                <span className={styles.stageTag}>v2.3</span>
+                <span className={styles.stageTag}>v2.5</span>
               </div>
               <div className={styles.markStageCenter}>
-                <VitrineMark size={220} />
+                <VitrineMark size={190} />
+                <VitrineLockup />
               </div>
               <div className={styles.markStageFoot}>
-                <span>Fold / sharp</span>
-                <span>Gap / 9 units</span>
-                <span>Label / 10×8</span>
+                <span>Frame / 8 units</span>
+                <span>Vertex / 32 / 34</span>
+                <span>Plinth / 16 × 22</span>
                 <span>Primitives / 2</span>
               </div>
             </div>
@@ -484,10 +486,10 @@ export default function DesignSystemPage() {
             <aside className={styles.markNotes}>
               <p className={styles.cardLabel}>Hard gate / six checks</p>
               <p>
-                The family is <strong>continuous ribbon</strong>: one filled
-                beam, one flat plinth, one Signal inlay. Remove the label and
-                the case still stands. Add a second accent and the hierarchy
-                breaks.
+                The family is <strong>architectural monogram</strong>: one V,
+                split vertically. The ink arm is the glass, the Signal arm is
+                the light. The plinth is flat; the letter is the case in
+                section. Remove the Signal arm and the V still stands.
               </p>
               <div className={styles.gateGrid}>
                 {MARK_GATE.map((check) => (
@@ -505,7 +507,7 @@ export default function DesignSystemPage() {
               <div className={styles.applicationNote}>
                 <code>score-mark.py</code> returns PASS: no circle, no stroke,
                 two primitives in the primary, one in the compact, and a
-                silhouette that covers 30% of the grid at 32px.
+                silhouette that covers 32% of the grid at 32px.
               </div>
             </aside>
           </div>
@@ -513,7 +515,7 @@ export default function DesignSystemPage() {
           <div className={styles.bakeoffHead}>
             <div>
               <p className={styles.cardLabel}>Five families / one material</p>
-              <h3>Why the ribbon won</h3>
+              <h3>Why the V won</h3>
             </div>
             <p className={styles.tableNote}>
               All five passed the scorer. The choice is silhouette and meaning,
@@ -1042,7 +1044,7 @@ export default function DesignSystemPage() {
                 every size.
               </>
             }
-            lead="The compact drawing carries the identity below 32px; the primary carries the label above it. Clear space is half the mark height. The favicon is the one place the Signal field leads."
+            lead="The compact V carries the identity below 32px; the primary carries the split above it. Clear space is half the mark height. The favicon is the one place the Signal field leads."
           />
 
           <div className={styles.applicationsGrid}>
@@ -1069,9 +1071,9 @@ export default function DesignSystemPage() {
                 ))}
               </div>
               <p className={styles.applicationNote}>
-                The full mark is used at 32px and above. The compact drawing is
-                a separate one-path mark for 16–24px; it drops the Signal label
-                rather than shrinking it into a speck.
+                The full mark is used at 32px and above. The compact is a
+                separate one-path V for 16–24px; it drops the Signal arm rather
+                than shrinking the split into a speck.
               </p>
               <div className={styles.applicationDownloads}>
                 <a href="/brand/vitrine/mark.svg" download>
@@ -1165,7 +1167,7 @@ export default function DesignSystemPage() {
               </div>
               <h3>The same edge for mark and field</h3>
               <p>
-                One small object drives the fold, the field radius, the focus
+                One small object drives the case, the field radius, the focus
                 ring and the label. Change it here, not in a screenshot.
               </p>
               <div className={styles.componentList}>
@@ -1372,7 +1374,7 @@ export default function DesignSystemPage() {
                 asked for.
               </>
             }
-            lead="The v2.3 skill lists its resources, the dithercn skill lists its engine, and the mark scorer gives a verdict. Both were checked on disk. Present is not the same as used, and a pass is not the same as a good idea."
+            lead="The v2.4 skill lists its resources, the dithercn skill lists its engine, and the mark scorer gives a verdict. Both were checked on disk. Present is not the same as used, and a pass is not the same as a good idea."
           />
 
           <div className={styles.auditSummary}>
@@ -1390,7 +1392,7 @@ export default function DesignSystemPage() {
               <span className={styles.auditNumber}>
                 {RESOURCE_SUMMARY.present}/{SKILL_RESOURCES.length}
               </span>
-              <p>v2.3 resources present</p>
+              <p>v2.4 resources present</p>
             </div>
             <div>
               <span className={styles.auditNumber}>{GAPS.length}</span>
@@ -1413,7 +1415,7 @@ export default function DesignSystemPage() {
               <div className={styles.tableScroll}>
                 <table className={styles.table}>
                   <caption className={styles.srOnly}>
-                    v2.3 brand-system resources, whether they are present, and
+                    v2.4 brand-system resources, whether they are present, and
                     how the Vitrine build used them
                   </caption>
                   <thead>
@@ -1603,8 +1605,8 @@ export default function DesignSystemPage() {
           </div>
         </div>
         <div className={styles.footerBottom}>
-          <span>Vitrine 2.3 · 2026 · Aditya Himawan</span>
-          <span>Continuous ribbon · no generated imagery</span>
+          <span>Vitrine 2.5 · 2026 · Aditya Himawan</span>
+          <span>Half-light V · no generated imagery</span>
         </div>
       </footer>
     </div>

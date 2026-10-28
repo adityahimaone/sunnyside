@@ -1,9 +1,9 @@
-# Vitrine — Case 02 (v2.3)
+# Vitrine — Case 02 (v2.5)
 
 The second worked example. It tests the method against a different material:
 glass and dither. It is a separate brand from Sunnyside; only the method carries
-over. The v2.3 pass replaced the old stroke-and-dot Split V with a fill-only
-continuous ribbon.
+over. Vitrine is the **constructed track**: v2.5 replaces the v2.4 open case with
+a half-light V — one architectural monogram split by its material.
 
 - Live case: `/design-system/vitrine`
 - Case library: `/design-system`
@@ -11,7 +11,7 @@ continuous ribbon.
 - Board: `/brand/vitrine/vitrine-brandkit.png`
 - Tokens: `features/vitrine/tokens.json`
 - Story: `design/brand/vitrine/story.md`
-- Bake-off: `design/brand/vitrine/explorations/marks.html`
+- Bake-off: `design/brand/vitrine/explorations/marks-v2.5.html`
 - Audit: `docs/vitrine-design-system-audit.md`
 
 ## The brief
@@ -22,24 +22,24 @@ continuous ribbon.
 
 ## The one idea
 
-**The case and the grain.** A vitrine holds one lit object; the halftone label is
-the only print. Glass is the container; dither is the information layer. The
-glass never becomes the content, and the dither never sits under the words that
-explain it.
+**The glass arm and the light arm.** One V is split by its material: the ink arm
+is the glass, the Signal arm is the light. Glass is the container; dither is the
+information layer. The glass never becomes the content, and the dither never sits
+under the words that explain it.
 
 - Essence: “A glass case for a low-resolution light.”
 - Promise: depth without fog.
-- Family: continuous ribbon.
-- Gate: v2.3 — zero circle, fill-only, 2–4 primitives, one accent.
+- Family: architectural monogram.
+- Gate: v2.3 constructed — zero circle, fill-only, 2–4 primitives, one accent.
 - Not this: a frosted card with unreadable copy; a 1-bit retro toy; a Sunnyside
   re-skin.
 
 ## The identity
 
-- **Mark:** Folded V. One continuous beam folds into the V and a flat plinth; the
-  plinth carries one Signal label. Two solid primitives in the primary
-  (`M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z` + a 10 × 8 label), one in the
-  compact (`M12 6L32 42L52 6L61 12L42 58L22 58L3 12Z`). 64 grid, 9-unit channel,
+- **Mark:** Half-light V. One architectural monogram split vertically at x32: the
+  glass arm `M8 8H24L32 34V56H24Z` and the Signal arm
+  `M32 34L40 8H56L40 56H32Z`. Two primitives in the primary, one in the compact
+  (`M6 6H22L32 32L42 6H58L42 58H22Z`). Vertex 32/34, plinth 16 × 22, arms 16,
   no stroke, no circle.
 - **Wordmark:** Space Grotesk 700, −0.04em, seven glyph paths, no `<text>`.
 - **Palette:** Case `#0B0D10`, Frost `#F2F6F8`, Signal `#D9FF43`, Iris `#5B4BE8`,
@@ -53,13 +53,14 @@ explain it.
 ## Five families, one material
 
 `brand-forge.mjs --bakeoff` generated bracket, planes, louvers, ribbon and
-horizon on one palette. All five pass `score-mark.py`. The ribbon won on
-silhouette and meaning; the other four lost because Huginn, Riso and Hachure
-already own those silhouettes. Full reasons: `story.md`.
+horizon on one palette. All five pass `score-mark.py`. The architectural
+monogram was re-drawn as the half-light V and won on silhouette and meaning; the
+other four lost because Huginn, Riso and Hachure already own those silhouettes.
+Full reasons: `story.md`.
 
 ## The system
 
-- 159 token declarations: 14 theme-DNA values, primitive → semantic → component.
+- 161 token declarations: 16 theme-DNA values, primitive → semantic → component.
 - One `DitherShader` field (caustic lens, iris→signal colour field); no example
   component installed.
 - Ten native controls: text, email, password, select, radio, textarea, checkbox,
@@ -75,61 +76,60 @@ already own those silhouettes. Full reasons: `story.md`.
 
 | Check | Result |
 | --- | --- |
-| v2.3 hard gate | 6/6 pass |
+| Constructed v2.3 hard gate | 6/6 pass |
 | Mark score | PASS, no failures |
-| Brand-system skill resources present | 28/28 |
-| Used as shipped / substituted / not used | 22 / 4 / 2 |
+| Brand-system skill resources present | 31/31 |
+| Used as shipped / substituted / not used | 23 / 4 / 4 |
 | Output contract | 16/16 shipped |
 | dithercn install | 31 files, engine current |
 | Custom shader fields | 1 |
-| Browser pass | 1440 / 390, light / dark, reduced motion, Chromium |
+| One-command QA | 29 pass, 1 GPU warning, 0 fail |
 | Gaps named | 8 |
 
 Substitutions: the favicon/icon and downscale scripts, and the board starter.
-Unused: the AI image direction and the Sunnyside example (read, not copied).
+Unused: the AI image direction, the Sunnyside example, the v2.4 cast-forge and
+the drawn marks-section template (this is the constructed track).
 
-Gaps: board 1.10 MB; no social/print crops; no visual/a11y CI; favicon uses a
-Signal field and the compact mark; the Signal label is dropped below 32px; the
+Gaps: board 1.03 MB; no social/print crops; no visual/a11y CI; favicon uses a
+Signal field and the compact V; the compact drops the Signal arm below 32px; the
 portable form CSS is an export, not the route stylesheet; no generated imagery;
 Chromium-only.
 
 ## What still misses the Case 01 bar
 
-Vitrine's v2.3 folded V is a strong constructed mark, but its marks section is a
-construction card plus a gate. It has no drawn wordmark, no cast, and no
-four-movement composition. The next pass should add:
+Vitrine's half-light V is a strong constructed mark, and its marks section is a
+construction card plus bake-off. It does not use the v2.4 drawn cast or the
+four-movement composition because it is a technical system; the constructed
+track does not require them. If the identity ever needs a warmer expression, the
+next step is the drawn track: a custom-cut wordmark, a 4–6 cast from glass and
+dither, and the marks composition in `templates/marks-section.html`.
 
-- a cast derived from glass and dither — a lens arc, a dot, a signal burst, a
-  bracket, a glare, a registration mark — each with one job;
-- a custom-cut or drawn wordmark that belongs to the folded V;
-- a logo card, wordmark scale, cast drawer and usage rule
-  (`templates/marks-section.html`).
-
-That is the difference between “a good mark” and the Case 01 bar.
+That is a deliberate track choice, not a hole in the kit.
 
 ## What this case changed in the skill
 
-1. **The hard gate is a build step.** Five families, one palette, score, then
+1. **Choose the track first.** The constructed v2.3 gate is enough for this
+   technical system; the drawn track stays for warm/editorial identities.
+2. **The hard gate is a build step.** Five families, one palette, score, then
    hand-refine. A letter with a detached accent is not a mark.
-2. **Compact is a separate drawing.** It drops the label rather than shrinking
-   it; the mono glyph drops it at every size.
-3. **Theme DNA makes the fields.** Hard edge, square tile, solid ring and cosy
+3. **Compact is a separate drawing.** It drops the Signal arm rather than
+   shrinking the split; the mono drops the Signal at every size.
+4. **Theme DNA makes the fields.** Hard edge, square tile, solid ring and cosy
    density drive both the mark and `--field-*`.
-4. **The story is part of the kit.** Seven beats, eight decision cards, a voice
+5. **The story is part of the kit.** Seven beats, eight decision cards, a voice
    card, and a named gap.
-5. **Dev origin is a QA target.** Next 16 blocks dev resources from `127.0.0.1`;
+6. **Dev origin is a QA target.** Next 16 blocks dev resources from `127.0.0.1`;
    use `localhost` or hydration appears to fail.
-6. **State pairs need tests.** Empty submit → one focused alert, three invalid
+7. **State pairs need tests.** Empty submit → one focused alert, three invalid
    fields; reduced motion → `data-state="static"`.
-7. **Boards overflow silently.** Check 3000 and 1500; the 2× render is not the
-   web copy.
-8. **Lean QA.** Static audit + one browser pass; computed styles for the states
-   that are easy to break.
+8. **One command is enough.** `qa.mjs` runs the audit, the score and the browser
+   pass; inspect only what it cannot see.
 
 ## Reuse checklist
 
 - [ ] Brief and one-sentence direction.
-- [ ] Five v2.3 families in one file; four rejected with reasons.
+- [ ] Track named: constructed or drawn.
+- [ ] Five constructed families in one file; four rejected with reasons.
 - [ ] Mark + compact + glyph + mono; compact simpler.
 - [ ] Theme DNA + tokens → CSS + JSON.
 - [ ] Story spine, decision cards and voice card.
@@ -137,5 +137,5 @@ That is the difference between “a good mark” and the Case 01 bar.
 - [ ] One board rendered from HTML; one web copy.
 - [ ] One case page and one index card.
 - [ ] One form kit with all states, plus a portable CSS export.
-- [ ] Static audit + one browser pass on `localhost`.
+- [ ] One-command audit + score + browser pass on `localhost`.
 - [ ] Gaps named.

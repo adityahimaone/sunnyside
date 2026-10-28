@@ -10,7 +10,7 @@ export type SkillResource = {
 }
 
 /**
- * The v2.3 sunnyside-brand-system skill advertises these resources in its
+ * The v2.4 sunnyside-brand-system skill advertises these resources in its
  * SKILL.md. This is the audit of that claim against the checkout, not a wish
  * list: every path was read, and the status records whether the build used it
  * as shipped.
@@ -22,7 +22,7 @@ export const SKILL_RESOURCES: readonly SkillResource[] = [
     present: true,
     status: 'used',
     evidence:
-      'The v2.3 method for the brief, five families, story, proof and audit.',
+      'The v2.4 method for the track choice, five families, story, proof and audit.',
   },
   {
     path: 'skills/sunnyside-brand-system/references/brief.md',
@@ -36,8 +36,8 @@ export const SKILL_RESOURCES: readonly SkillResource[] = [
     kind: 'reference',
     present: true,
     status: 'used',
-    evidence: 'design/brand/vitrine/explorations/marks.html',
-    note: 'The v2.3 five-family bake-off, one kept and four rejected with reasons.',
+    evidence: 'design/brand/vitrine/explorations/marks-v2.5.html',
+    note: 'The v2.3 five-family bake-off, then a v2.5 six-direction review; the half-light V was kept.',
   },
   {
     path: 'skills/sunnyside-brand-system/references/logo-system.md',
@@ -154,8 +154,33 @@ export const SKILL_RESOURCES: readonly SkillResource[] = [
     kind: 'script',
     present: true,
     status: 'used',
-    evidence: 'scripts/vitrine-qa.mjs',
-    note: 'Desktop, mobile, dark, reduced motion, overflow and console checks.',
+    evidence: 'docs/vitrine-qa.md',
+    note: 'One command runs audit, score and browser; 29 pass, 1 GPU warning, 0 fail.',
+  },
+  {
+    path: 'skills/sunnyside-brand-system/references/craft-bar.md',
+    kind: 'reference',
+    present: true,
+    status: 'used',
+    evidence: 'design/brand/vitrine/story.md',
+    note: 'The constructed track was chosen; the drawn cast was evaluated and skipped for this technical system.',
+  },
+  {
+    path: 'skills/sunnyside-brand-system/scripts/cast-forge.mjs',
+    kind: 'script',
+    present: true,
+    status: 'not used',
+    evidence: 'No cast in the constructed Vitrine kit.',
+    note: 'The drawn track is optional; the constructed track keeps the logo, wordmark and lockups.',
+  },
+  {
+    path: 'skills/sunnyside-brand-system/templates/marks-section.html',
+    kind: 'template',
+    present: true,
+    status: 'not used',
+    evidence:
+      'The Vitrine marks section is a construction card plus bake-off, not the drawn four-movement composition.',
+    note: 'The cast drawer is not required on the constructed track.',
   },
   {
     path: 'skills/sunnyside-brand-system/scripts/render-board.mjs',
@@ -225,7 +250,7 @@ export const SKILL_RESOURCES: readonly SkillResource[] = [
     kind: 'example',
     present: true,
     status: 'used',
-    evidence: 'This case, revised to the v2.3 ribbon V.',
+    evidence: 'This case, revised to the v2.5 half-light V.',
   },
   {
     path: 'skills/sunnyside-brand-system/README.md',
@@ -253,7 +278,7 @@ export const OUTPUT_CONTRACT: readonly ContractItem[] = [
     item: 'Five v2.3 families, one kept, four rejected with reasons',
     status: 'shipped',
     evidence: 'design/brand/vitrine/explorations/marks.html',
-    note: 'Architectural monogram, offset planes, louvers, ribbon, horizon.',
+    note: 'The architectural monogram was re-drawn as the half-light V in v2.5; the open case was retired.',
   },
   {
     item: 'Story spine and decision cards',
@@ -296,7 +321,7 @@ export const OUTPUT_CONTRACT: readonly ContractItem[] = [
     status: 'shipped',
     evidence:
       'features/vitrine/tokens.json → vitrine-tokens.css + public/brand/vitrine/vitrine-tokens.json',
-    note: '159 declarations, including fourteen theme-DNA tokens.',
+    note: '161 declarations, including sixteen theme-DNA tokens.',
   },
   {
     item: 'Theme DNA and portable form kit',
@@ -390,11 +415,11 @@ export const DITHER_AUDIT: readonly DitherAudit[] = [
 ]
 
 export const GAPS = [
-  'The board is 1.10 MB at 3000 × 2250, above the skill’s ~1 MB target. The 1500 × 1125 web copy is 450 KB.',
+  'The board is 1.03 MB at 3000 × 2250, above the skill’s ~1 MB target. The 1500 × 1125 web copy is 431 KB.',
   'No social, print or Open Graph crops were produced; the case ships the board and the SVG family only.',
   'There is no automated visual regression or axe CI for the Vitrine route or the case library. The checks here are a manual Playwright pass.',
   'The favicon deliberately uses a Signal field and the compact mark instead of a transparent primary mark, so it survives dark browser chrome. The transparent marks still ship.',
-  'The Signal label in the primary mark is under 2px at 16px. The compact drawing drops it and is used below 32px; the mono glyph drops it at every size.',
+  'The compact mark drops the Signal arm: below 32px the V is one colour, so the two-material idea is carried by the favicon’s Signal field, not by the drawing.',
   'The portable form CSS is a generated export for reuse; the live route consumes the same tokens through its CSS module, not the exported file.',
   'No AI-generated atmosphere image. The board and page use CSS dots and the real mark, so the kit has no generated-image provenance to maintain.',
   'The dither was checked in Chromium (Playwright). Safari and Firefox were not part of this pass.',
@@ -429,21 +454,21 @@ export type MarkFamily = {
 }
 
 /**
- * The five v2.3 families, generated with brand-forge on Vitrine's palette and
- * theme DNA. The kept ribbon was hand-refined to the shipped V and plinth.
+ * The five v2.3 families on Vitrine's palette and theme DNA, re-judged in
+ * v2.5. The architectural monogram was re-drawn as the half-light V; the open
+ * case was retired because it drew the container and withheld the light.
  */
 export const MARK_FAMILIES: readonly MarkFamily[] = [
   {
     id: 'monogram',
-    name: 'Bracket monogram',
+    name: 'Half-light V',
     family: 'Architectural monogram',
-    verdict: 'rejected',
+    verdict: 'kept',
     reason:
-      'Huginn already owns the two-bracket silhouette. Repeating it makes the library read as one family.',
+      'One V, split by its material: the ink arm is the glass, the Signal arm is the light. It joins the wordmark, holds at 16px, and no other mark in the library is a two-material letter.',
     paths: [
-      { d: 'M8 8H20V28H30V36H20V56H8Z' },
-      { d: 'M56 8H44V28H34V36H44V56H56Z' },
-      { d: 'M32 22L38 32L32 42L26 32Z', accent: true },
+      { d: 'M8 8H24L32 34V56H24Z' },
+      { d: 'M32 34L40 8H56L40 56H32Z', accent: true },
     ],
   },
   {
@@ -485,15 +510,15 @@ export const MARK_FAMILIES: readonly MarkFamily[] = [
     ],
   },
   {
-    id: 'ribbon',
-    name: 'Folded V',
+    id: 'case',
+    name: 'Open case',
     family: 'Continuous ribbon',
-    verdict: 'kept',
+    verdict: 'rejected',
     reason:
-      'The fold makes the V and the case; the flat plinth gives the printed label a home; the silhouette is open, angular and unused in the library.',
+      'Retired in v2.5: it draws the case but withholds the light. The empty U reads as a letter at 16px and cannot show the dither.',
     paths: [
-      { d: 'M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z' },
-      { d: 'M27 46H37V54H27Z', accent: true },
+      { d: 'M12 8L8 12V56H56V12L52 8H48V48H16V8Z' },
+      { d: 'M22 49H42V54H22Z', accent: true },
     ],
   },
 ]
@@ -511,42 +536,42 @@ export const MARK_GATE: readonly GateCheck[] = [
     title: 'Zero circle / zero Venn',
     result: 'pass',
     evidence:
-      'No <circle> in the mark family. The V is a filled polygon, not a disc or a ring.',
+      'No <circle> in the family. The V is a filled letterform, not a disc or a ring.',
   },
   {
     gate: 'B',
     title: 'Fill-only',
     result: 'pass',
     evidence:
-      'No stroke attribute in mark.svg or mark-compact.svg. The seam is a 9-unit negative channel, above the 5.1-unit floor.',
+      'No stroke attribute in mark.svg or mark-compact.svg. The two solid arms meet at x32; the compact is one solid path.',
   },
   {
     gate: 'C',
     title: '2–4 primitives, one accent',
     result: 'pass',
     evidence:
-      'Two primitives in the primary (beam + label), one in the compact. Signal appears once, on the label.',
+      'Two primitives in the primary (glass arm + light arm), one in the compact. Signal appears once, as the light arm.',
   },
   {
     gate: 'D',
     title: 'One family, distinct silhouette',
     result: 'pass',
     evidence:
-      'Continuous ribbon. Distinct from Huginn’s brackets, Riso’s planes, Hachure’s louvers and Sunnyside’s tile.',
+      'Architectural monogram. The half-light V is distinct from Huginn’s brackets, Riso’s planes, Hachure’s louvers and Sunnyside’s tile.',
   },
   {
     gate: 'E',
     title: 'Compact is simpler',
     result: 'pass',
     evidence:
-      'The compact is a separate one-path drawing with heavier arms; the primary is a path plus the label.',
+      'The compact is a separate one-path V with heavier walls; the primary is the same silhouette split into two materials.',
   },
   {
     gate: 'F',
     title: 'Test 16px first',
     result: 'pass',
     evidence:
-      'score-mark.py PASS: compact contrast at 16px, glyph coverage 30%, no specks, no thin strokes.',
+      'score-mark.py PASS: compact contrast at 16px, glyph coverage 32%, no specks, no thin strokes.',
   },
 ]
 
@@ -566,7 +591,7 @@ export const STORY_BEATS: readonly StoryBeat[] = [
   },
   {
     beat: 'Mark',
-    line: 'The object and its label are one drawing. A single beam folds into a V and a plinth; the plinth carries the only print.',
+    line: 'The V is the case in section: one arm is glass, one arm is the light. A single vertical split at x32 makes the material the idea; the plinth is flat.',
   },
   {
     beat: 'Material',
@@ -578,11 +603,11 @@ export const STORY_BEATS: readonly StoryBeat[] = [
   },
   {
     beat: 'Proof',
-    line: '17.89:1 body contrast, 159 tokens, ten native controls, a 30% silhouette and a compact mark that reads at 16px.',
+    line: '17.89:1 body contrast, 161 tokens, ten native controls, a 32% half-light V and a compact V that reads at 16px.',
   },
   {
     beat: 'Gap',
-    line: 'Board weight, social crops, axe CI, Chromium-only QA, and a Signal label that is dropped below 32px.',
+    line: 'Board weight, social crops, axe CI, Chromium-only QA, and a compact that drops the Signal arm below 32px.',
   },
 ]
 
@@ -596,14 +621,15 @@ export type Decision = {
 
 export const DECISIONS: readonly Decision[] = [
   {
-    title: 'Fold, do not draw a letter',
+    title: 'Draw the V, light one arm',
     decision:
-      'One continuous beam folds into the V; the label is an inlay in the plinth, not a dot beside the letter.',
+      'The mark is an architectural monogram: a V split vertically, the ink arm glass and the Signal arm the light.',
     because:
-      'A typed initial is a typeface choice. A fold is a construction, and the label then has a job.',
-    notWhen: 'The mark has to carry a halftone texture at 16px.',
+      'A letter alone is a typeface choice; a letter split by its material is an idea, and it joins the wordmark.',
+    notWhen:
+      'The mark must read as a container before it reads as a name; use the perspective case.',
     breaksNext:
-      'At 16px the label is under 2px, so the compact drops it and keeps the heavier fold.',
+      'The split is a hard colour boundary, not a cut. The compact drops it and keeps a heavier V.',
   },
   {
     title: 'Glass is a container',
@@ -626,7 +652,7 @@ export const DECISIONS: readonly Decision[] = [
   {
     title: 'Hard 1px cut edge',
     decision: 'Glass uses a 1px edge, one top specular and a hard 1px shadow.',
-    because: 'The mark is a solid fold; a soft glow would change the material.',
+    because: 'The mark is a solid V; a soft glow would change the material.',
     notWhen: 'The panel floats over a photograph; use a scrim first.',
     breaksNext:
       'The dark edge is 18% white and can disappear on Frost; it is a container edge, not a body-copy border.',
@@ -652,13 +678,14 @@ export const DECISIONS: readonly Decision[] = [
       'The 10px label sits below the 13px caption floor; on the page it is paired with larger text.',
   },
   {
-    title: 'The Signal label is punctuation',
-    decision: 'One Signal inlay in the plinth; no second accent in the mark.',
-    because: 'The accent marks the printed label, the one focal element.',
+    title: 'The Signal arm is material',
+    decision: 'The lime arm is the light, half the mark, not a label.',
+    because:
+      'The two materials are the idea; a thin accent would be an ornament.',
     notWhen:
-      'The mark is used as a favicon or below 32px; the compact is mono.',
+      'The mark is one colour (mono, favicon on Signal); the split is dropped and the silhouette carries it.',
     breaksNext:
-      'The inlay is tiny at 32px and absent at 16px. The mono glyph and compact carry the identity without it.',
+      'The Signal arm is 50% of the mark, so the mono and compact drawings drop it.',
   },
   {
     title: 'The board is HTML',

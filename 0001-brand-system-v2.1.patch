@@ -1,0 +1,2706 @@
+From c8c936d0d8dba6d6db87b1cf11f7b778d6b52980 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 28 Oct 2026 02:08:53 +0000
+Subject: [PATCH] feat(brand-system): generate vector logo family, story layer,
+ theme-matched forms
+
+- scripts/brand-forge.mjs: one JSON config -> drawn, text-free mark family on
+  the 64 grid (mark, compact, glyph, reverse, mono, icon, lockups), tokens
+  (CSS+JSON with contrast pairs), themed form kit, proof sheet and story
+  scaffold. Six construction concepts: sunburst, aperture, orbit, hatch,
+  stack, facet.
+- references/storytelling.md: story spine, one sentence, decision cards,
+  specimen reading order, story audit.
+- references/form-theming.md: shared theme DNA, material -> field recipes,
+  states, shadcn mapping. Fields read --field-* tokens only.
+- audit.mjs: new family, formsCss and story checks; audit.json template
+  updated.
+- references/skill-audit.md: audit of the skill itself, fixes, known gaps.
+- scripts/sync-skill.sh keeps .agents/skills mirror identical.
+- SKILL.md/README/logo-system/design-systems/board/guidelines updated; v2.1.
+---
+ .../skills/sunnyside-brand-system/README.md   |  15 +-
+ .../skills/sunnyside-brand-system/SKILL.md    | 107 +++-
+ .../references/board-and-images.md            |   7 +
+ .../references/design-systems.md              |  10 +
+ .../references/form-theming.md                | 108 ++++
+ .../references/logo-system.md                 |  26 +
+ .../references/skill-audit.md                 |  38 ++
+ .../references/storytelling.md                | 122 ++++
+ .../sunnyside-brand-system/scripts/audit.mjs  |  64 ++
+ .../scripts/brand-forge.mjs                   | 549 ++++++++++++++++++
+ .../scripts/sync-skill.sh                     |  12 +
+ .../templates/audit.json                      |  19 +-
+ .../templates/guidelines.md                   |  26 +
+ skills/sunnyside-brand-system/README.md       |  15 +-
+ skills/sunnyside-brand-system/SKILL.md        | 107 +++-
+ .../references/board-and-images.md            |   7 +
+ .../references/design-systems.md              |  10 +
+ .../references/form-theming.md                | 108 ++++
+ .../references/logo-system.md                 |  26 +
+ .../references/skill-audit.md                 |  38 ++
+ .../references/storytelling.md                | 122 ++++
+ .../sunnyside-brand-system/scripts/audit.mjs  |  64 ++
+ .../scripts/brand-forge.mjs                   | 549 ++++++++++++++++++
+ .../scripts/sync-skill.sh                     |  12 +
+ .../templates/audit.json                      |  19 +-
+ .../templates/guidelines.md                   |  26 +
+ 26 files changed, 2160 insertions(+), 46 deletions(-)
+ create mode 100644 .agents/skills/sunnyside-brand-system/references/form-theming.md
+ create mode 100644 .agents/skills/sunnyside-brand-system/references/skill-audit.md
+ create mode 100644 .agents/skills/sunnyside-brand-system/references/storytelling.md
+ create mode 100644 .agents/skills/sunnyside-brand-system/scripts/brand-forge.mjs
+ create mode 100755 .agents/skills/sunnyside-brand-system/scripts/sync-skill.sh
+ create mode 100644 skills/sunnyside-brand-system/references/form-theming.md
+ create mode 100644 skills/sunnyside-brand-system/references/skill-audit.md
+ create mode 100644 skills/sunnyside-brand-system/references/storytelling.md
+ create mode 100644 skills/sunnyside-brand-system/scripts/brand-forge.mjs
+ create mode 100755 skills/sunnyside-brand-system/scripts/sync-skill.sh
+
+diff --git a/.agents/skills/sunnyside-brand-system/README.md b/.agents/skills/sunnyside-brand-system/README.md
+index da23d4f..8f162a7 100644
+--- a/.agents/skills/sunnyside-brand-system/README.md
++++ b/.agents/skills/sunnyside-brand-system/README.md
+@@ -8,13 +8,19 @@ approved kit to **`implement-brand-system`** for the build:
+ - favicon and app icons;
+ - primitive → semantic → component tokens, CSS + JSON;
+ - single-page HTML or TSX proof;
+-- shadcn/Radix component and form kit;
++- shadcn/Radix component and a form kit themed from the same DNA as the mark;
++- brand story: spine, one sentence, decision cards, story audit;
+ - typography gate;
+ - lean audit and browser QA;
+ - pen.dev design-source integration.
+ 
+ Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
+ 
++**v2.1:** a generated vector logo family (`scripts/brand-forge.mjs`: six
++construction concepts, tokens, theme-matched form kit, proof sheet, story
++scaffold), a storytelling layer, theme-matched forms and stronger audit checks.
++Audit of the skill itself: [`references/skill-audit.md`](references/skill-audit.md).
++
+ **v2.0 provenance:** rebuilt after auditing
+ [ui-skills.com](https://www.ui-skills.com/) — 439 skills across 27 categories;
+ 22 relevant skills inspected and fused in
+@@ -61,6 +67,13 @@ Run these from the skill folder, or copy `scripts/` and `templates/` into the pr
+ # Static audit: required files, SVG text, ICO sizes, PNG dimensions, contrast
+ node scripts/audit.mjs --manifest audit.json
+ 
++# Generate the whole family from one config (concepts: sunburst aperture orbit hatch stack facet)
++node scripts/brand-forge.mjs --init orbit > brand.json
++node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> --wordmark wordmark.svg
++
++# Keep the .agents/skills mirror identical
++bash scripts/sync-skill.sh
++
+ # Browser QA: 1440 + 390, light + dark, reduced motion, console, overflow
+ node scripts/qa.mjs \
+   --url http://localhost:3000/design-system/vitrine \
+diff --git a/.agents/skills/sunnyside-brand-system/SKILL.md b/.agents/skills/sunnyside-brand-system/SKILL.md
+index 569bf89..c5e1375 100644
+--- a/.agents/skills/sunnyside-brand-system/SKILL.md
++++ b/.agents/skills/sunnyside-brand-system/SKILL.md
+@@ -1,10 +1,10 @@
+ ---
+ name: sunnyside-brand-system
+-description: Design and ship a brand kit or design system from a brief — strategy, logo family, 3×3 board, favicons, tokens, single-page HTML/TSX proof, components and forms, and a fast audit. Use when creating or auditing an identity, design-system page, mockup, or pen.dev design source. Includes shadcn/Radix defaults, a typography gate, lean QA, and pen.dev integration.
++description: Design and ship a brand kit or design system from a brief — strategy, a generated vector logo family, brand story, 3×3 board, favicons, tokens, theme-matched form kit, single-page HTML/TSX proof, and a fast audit. Use when creating or auditing an identity, design-system page, mockup, or pen.dev design source. Includes shadcn/Radix defaults, a typography gate, lean QA, and pen.dev integration.
+ metadata:
+   author: adityahimaone
+   source: https://github.com/adityahimaone/sunnyside
+-  version: '2.0'
++  version: '2.1'
+ ---
+ 
+ # Sunnyside brand system
+@@ -15,6 +15,11 @@ A method for shipping a **brand kit** or **design system** quickly without losin
+ the reasoning. The output is a page or a small set of files, not a folder of
+ exports. Sunnyside and Vitrine are evidence, not templates.
+ 
++**v2.1:** adds a generated vector logo family (`scripts/brand-forge.mjs`), a
++storytelling layer (`references/storytelling.md`), theme-matched form fields
++(`references/form-theming.md`) and stronger audit checks. The audit of this
++skill is in `references/skill-audit.md`.
++
+ **v2.0 provenance:** rebuilt after an audit of [ui-skills.com](https://www.ui-skills.com/)
+ (439 skills / 27 categories; 22 relevant skills inspected). The fusion is in
+ `references/ui-skills-fusion.md`; the implementation half is `implement-brand-system`.
+@@ -44,12 +49,17 @@ drawing; mark unknowns `ASSUMPTION`. Template: `references/brief.md`.
+ 1. **Brief and one sentence** the work can be rejected against.
+ 2. **One idea**: monogram + meaning, product action, metaphor fusion, negative
+    space, or construction geometry. One metaphor, one loud field.
+-3. **Draw six, keep one** on the same 64 grid. Write down why five lost.
+-4. **Build identity first** (`mark → family → tokens`) or **tokens first**
+-   (`tokens → primitives → forms`), never both at once.
+-5. **One proof page** with real copy and states. HTML for a board/mockup, TSX for
+-   an interactive system.
+-6. **Audit and stop**: static audit + one QA pass. Fix only what fails. Name gaps.
++3. **Draw six, keep one** on the same 64 grid. Write down why five lost. Fastest
++   route: `brand-forge.mjs --init <concept>` for each candidate concept, compare
++   `sheet.html`, keep one.
++4. **Generate the family** (`node scripts/brand-forge.mjs --config brand.json`):
++   mark, compact, glyph, reverse, mono, icon, lockups, tokens, form kit, proof
++   sheet. Then hand-refine the mark; the generator is a start, not a ceiling.
++5. **Write the story** (`story.md`): belief, enemy, mark as argument, material,
++   proof, gap. Decision cards for every non-obvious rule.
++6. **One proof page** with real copy and states. HTML for a board/mockup, TSX for
++   an interactive system. Form fields use the same theme DNA as the mark.
++7. **Audit and stop**: static audit + one QA pass. Fix only what fails. Name gaps.
+ 
+ ## Domain before defaults
+ 
+@@ -113,6 +123,59 @@ Start from `templates/design-system.html` for a specimen, `templates/single-page
+ 
+ Details: `references/design-systems.md`.
+ 
++## Generate the logo family
++
++`scripts/brand-forge.mjs` turns one JSON config into a drawn, text-free kit on the
++64 grid. It is the fast path for step 3–4; it does not replace judgement.
++
++```bash
++node scripts/brand-forge.mjs --list                       # sunburst aperture orbit hatch stack facet
++node scripts/brand-forge.mjs --init orbit > brand.json    # starter config, edit palette/dna/params
++node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> \
++  --wordmark wordmark.svg                                 # from extract-wordmark.py
++```
++
++It writes `mark`, `mark-compact` (a separate, simpler drawing), `glyph`,
++`mark-reverse`, `mark-mono` (drawn one-colour stamp), `icon`, three lockups,
++tokens (CSS + JSON with contrast pairs), the form kit, `sheet.html` (16/32/64/128
++on light + dark) and `story.md`. Exit code 1 if any contrast pair or SVG check
++fails. Without `--wordmark` it skips lockups; it never fakes one with `<text>`.
++
++Make it better than the default:
++
++- Vary the **theme DNA** (`edge`, `offset`, `stroke`, `tile`, `radius`) before
++  you vary the concept. Material makes a mark ownable; geometry alone does not.
++- Treat output as draft one. Open the SVG, nudge points on the grid, keep it in
++  the same viewBox, re-run `audit.mjs` (`family` check).
++- The compact mark must have **fewer shapes** than the primary (audited).
++- Run the six-concept bake-off, then write why five lost into `story.md`.
++
++Recipes and tests: `references/logo-system.md` §9.
++
++## Storytelling
++
++The kit argues; it does not just show. Read `references/storytelling.md`.
++
++- **Story spine:** belief → enemy → mark → material → voice → proof → gap.
++- **One sentence** the work can be rejected against.
++- **Decision cards:** Decision / Because / Not when / Breaks next, ≤ 8 per system.
++- **Specimen as essay:** every section has a one-sentence caption that states a
++  reason, not a label. Real copy, a voice card, a named gap.
++- Audit enforces structure (`story` check); a human judges the argument.
++
++## Forms that match the theme
++
++Fields are cut from the same sheet as the mark. Read `references/form-theming.md`.
++
++- One **theme DNA** (edge, offset, stroke, tile/radius, ring, density, label)
++  drives the mark *and* the `--field-*` tokens.
++- Pick the **material → field recipe** row that matches the brief; never mix rows.
++- Fields read component tokens only; no raw hex (audited).
++- All states in the same material: hover, focus-visible, invalid, disabled,
++  success, pressed. Never colour alone.
++- Generated: `<slug>-forms.css` + `forms.html` (error summary, password toggle,
++  counter, switch, radio fieldset, file, disabled).
++
+ ## Typography gate
+ 
+ Run before the first screenshot:
+@@ -188,6 +251,7 @@ If routes exist, use the host’s convention and update only what exists: canoni
+ OG, icons, sitemap, llms, nav/footer, tests. If no route exists, do not create
+ empty metadata, a sitemap entry or a case card to satisfy a template. The
+ specimen can be one file; the board can be the deliverable.
++
+ ## Pen.dev
+ 
+ Use the companion **`pen-dev`** skill for the full workflow. In short:
+@@ -208,7 +272,7 @@ Use the companion **`pen-dev`** skill for the full workflow. In short:
+ Run these from this skill folder, or copy `scripts/` into the project.
+ 
+ ```bash
+-node scripts/audit.mjs --manifest audit.json
++node scripts/audit.mjs --manifest audit.json   # files, SVG, ICO, PNG, tokens, family, forms, story
+ node scripts/qa.mjs --url <the surface URL or file:// path> \
+   --out docs/screenshots --name <slug>
+ ```
+@@ -246,9 +310,10 @@ claim points to a file or route; icons are tested at 16px; the page is readable
+ without JS.
+ 
+ ```
+-brand/         brief.md, DESIGN.md, brandkit.html, <slug>-brandkit.png (3000×2250), assets/
++brand/         brief.md, story.md, DESIGN.md, brandkit.html, <slug>-brandkit.png (3000×2250), assets/
+ public/brand/<slug>/   mark*, wordmark, lockups, glyph, favicons, icons,
+-                       <slug>-brandkit.png, <slug>-tokens.css/json
++                       <slug>-brandkit.png, <slug>-tokens.css/json,
++                       <slug>-forms.css, sheet.html
+ docs/                  <slug>-design-system-audit.md
+ ```
+ 
+@@ -270,12 +335,13 @@ promise only the page and its tokens.
+ Stop when the kit is approved. Do not build the product page inside the brand
+ pass. Hand off:
+ 
+-- `brief.md` and `DESIGN.md` (or the project's design guide/README: the decisions,
+-  rules and what not to do);
++- `brief.md`, `story.md` and `DESIGN.md` (or the project's design guide/README: the
++  decisions, rules and what not to do);
+ - `tokens.json` + `tokens.css`, with the contrast pairs;
+ - `public/brand/<slug>/` (mark, compact mark, wordmark, lockups, favicons, icons);
+ - the board PNG and `brandkit.html`;
+-- the component inventory, form states, motion rule and named gaps;
++- the component inventory, form states and `<slug>-forms.css`, motion rule, theme DNA
++  and named gaps;
+ - the audit and the target surface/stack (route, Storybook, standalone file, pen or print).
+ 
+ Load **`implement-brand-system`** for the HTML/TSX build. It will not redesign
+@@ -296,12 +362,16 @@ and runs the QA gate.
+ - `typography.md` — the typography gate.
+ - `verification.md` — ship checklist and audit format.
+ - `lessons.md` — Case 02 failures and rules.
++- `storytelling.md` — story spine, decision cards, specimen as essay, story audit.
++- `form-theming.md` — theme DNA, material → field recipes, states, shadcn mapping.
++- `skill-audit.md` — audit of this skill, fixes, known gaps.
+ - `examples/sunnyside.md`, `examples/vitrine.md` — the two cases (evidence, not defaults).
+ 
+ ## Scripts and templates
+ 
+-`render-board.mjs`, `render-icons.mjs`, `favicons.py`, `downscale.py`,
+-`extract-wordmark.py`, `audit.mjs`, `qa.mjs`.
++`brand-forge.mjs` (generate the family), `render-board.mjs`, `render-icons.mjs`,
++`favicons.py`, `downscale.py`, `extract-wordmark.py`, `audit.mjs`, `qa.mjs`,
++`sync-skill.sh` (keep `.agents/skills` mirror identical).
+ 
+ `templates/`: `design-system.html`, `brandkit.html`, `single-page.html`,
+ `case-page.tsx`, `audit.json`, `guidelines.md`.
+@@ -313,5 +383,6 @@ and runs the QA gate.
+ 3. Choose the surface and HTML/TSX before building.
+ 4. shadcn/Radix where accessible primitives matter; native for the rest.
+ 5. Typography gate before the first screenshot.
+-6. Scripts for audit/QA; one look; fix the root cause; stop.
+-7. Name what is missing. A guide that hides its gaps is a brochure.
++6. Generate with `brand-forge`, then refine by hand; write the story; match the fields.
++7. Scripts for audit/QA; one look; fix the root cause; stop.
++8. Name what is missing. A guide that hides its gaps is a brochure.
+diff --git a/.agents/skills/sunnyside-brand-system/references/board-and-images.md b/.agents/skills/sunnyside-brand-system/references/board-and-images.md
+index 74a7f54..504af46 100644
+--- a/.agents/skills/sunnyside-brand-system/references/board-and-images.md
++++ b/.agents/skills/sunnyside-brand-system/references/board-and-images.md
+@@ -133,3 +133,10 @@ board will fail the one test that matters: the name.
+ 
+ If the client insists on an AI-generated board, the deliverable is a moodboard,
+ not a brand kit. Say so.
++
++## Story panel
++
++One of the nine panels should argue, not display: the one sentence, the mark's
++argument, and the line "why the other five lost". Pull it from `story.md`. If the
++board has no panel that explains a decision, it is a poster. Palette and tokens
++come from `brand.json`; do not hard-code the starter's Sunnyside colours.
+diff --git a/.agents/skills/sunnyside-brand-system/references/design-systems.md b/.agents/skills/sunnyside-brand-system/references/design-systems.md
+index 5567042..7c1d3db 100644
+--- a/.agents/skills/sunnyside-brand-system/references/design-systems.md
++++ b/.agents/skills/sunnyside-brand-system/references/design-systems.md
+@@ -88,6 +88,15 @@ The form-level error summary:
+ Do not use a custom div as a checkbox, radio, select or switch. Do not hide the
+ only focus indicator. Do not use colour as the only error signal.
+ 
++## 3b. Theme the form kit
++
++A form kit that ignores the brand is a different product. Derive the fields from
++the same theme DNA as the mark (edge, offset, stroke, radius, ring, density,
++label): see `form-theming.md` for the material → field recipe table, state rules
++and shadcn mapping. `scripts/brand-forge.mjs` generates `--field-*` tokens,
++`<slug>-forms.css` and a working `forms.html`. Field CSS reads tokens only; the
++audit fails raw colours.
++
+ ## 4. Page anatomy
+ 
+ Choose the surface before the route. A proof does not require a router.
+@@ -148,6 +157,7 @@ not source. If no route exists, skip the metadata/route checklist and say
+ - [ ] Tokens generate CSS + JSON from one source.
+ - [ ] 5–10 primitives maximum; each has a documented state.
+ - [ ] One form with all states; keyboard and error summary verified.
++- [ ] Fields share the mark's material (edge, radius, ring); no raw hex in field CSS.
+ - [ ] Light/dark both intentional; text contrast measured.
+ - [ ] 1440 and 390; no horizontal scroll.
+ - [ ] Reduced motion keeps a finished state.
+diff --git a/.agents/skills/sunnyside-brand-system/references/form-theming.md b/.agents/skills/sunnyside-brand-system/references/form-theming.md
+new file mode 100644
+index 0000000..a951e0f
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/references/form-theming.md
+@@ -0,0 +1,108 @@
++# Form theming: fields that match the mark
++
++A form field is the most-used piece of a design system and the first place a
++brand falls apart. Generic inputs on a branded page look like a different
++product. The rule: **the form kit reads the same theme DNA as the mark.**
++
++## 1. Theme DNA
++
++Define one small object. The logo and the fields both read it.
++
++| Key | Values | Mark uses it for | Field uses it for |
++| --- | --- | --- | --- |
++| `edge` | `hard` / `soft` / `none` | tile shadow | field shadow |
++| `offset` | grid units (0 = none) | shadow offset | field shadow offset |
++| `stroke` | grid units | ink edge | border weight (×0.6, min 1.5px) |
++| `radius` + `tile` | rounded / circle / square | tile corners | field radius (half) |
++| `ring` | `offset` / `solid` / `glow` | n/a | focus ring |
++| `density` | compact / cosy / roomy | n/a | field height + gap |
++| `label` | sentence / mono-caps / small-caps | n/a | label style |
++
++`scripts/brand-forge.mjs` derives `--field-*` tokens and `<slug>-forms.css` from
++this object and writes a working `forms.html`. Hand-written fields follow the
++same table.
++
++## 2. Material → field recipe
++
++| Material | Border | Shadow | Focus | Hover | Label | Trap |
++| --- | --- | --- | --- | --- | --- | --- |
++| **Paper / hard offset** (Sunnyside) | 1.5px ink | hard 2.5 offset, no blur | 2px paper gap + 2px accent ring | lift −1px | sentence | blur breaks the "cut paper" idea |
++| **Liquid glass** | 1px edge at 30% | inner highlight, soft | solid 2px ring on a solid chip | brighten fill | sentence | text on blur under 4.5:1; put text on a solid surface |
++| **Dither / 1-bit** | 1px solid ink | none | invert fill | dither step | mono-caps | pattern behind text hurts legibility |
++| **Neo-brutalist** | 3px black | hard 4–6 offset | thick accent bar | offset grows | mono-caps / caps | offset animation janks on mobile |
++| **Editorial / Swiss** | bottom rule only | none | rule thickens + accent | none | small-caps | placeholder-as-label |
++| **Bento / modular** | 1px hairline | soft 1–2px | solid ring | tint | sentence | too many radii; one radius only |
++| **Grain / riso** | 1.5px, slight misregistration | offset in a second ink | accent ring | none | mono-caps | grain texture over text |
++| **Mono / terminal** | 1px, square | none | block cursor + underline | none | mono-caps | tiny type; keep ≥14px |
++
++Pick the row that matches the material you named in the brief. Do not mix
++rows. A hard-offset field next to a glass card is two brands.
++
++## 3. Tokens, not values
++
++Fields read **component tokens**; components read semantic; semantic reads
++primitive. No raw hex inside field CSS (`audit.mjs` fails it).
++
++```css
++--field-bg      --field-fg      --field-border   --field-radius
++--field-shadow  --field-h       --field-gap      --field-pad
++--field-ring    --button-bg     --button-ink
++```
++
++Dark theme: re-derive, do not invert. A hard ink offset vanishes on an ink
++ground, so the dark scope swaps it for the core colour (`brand-forge` does this).
++
++## 4. States are part of the theme
++
++Every control ships these, all in the same material:
++
++| State | Rule |
++| --- | --- |
++| Default | Visible border; placeholder in `--muted`, never a label |
++| Hover | One physical response (lift, tint, dither step); not colour only |
++| Focus-visible | Ring from `--field-ring`; never `outline: none` without it |
++| Filled | No visual change except text; do not turn green on filled |
++| Invalid | `aria-invalid`, border `--danger`, message with a `!` glyph and text |
++| Disabled | 55% opacity, no shadow, no hover; keep value and label |
++| Success | Text confirmation; never a green border alone |
++| Active/pressed | Press into the page (offset → 0) when the material is raised |
++
++Never use colour as the only signal. The error glyph and text are not optional.
++
++## 5. Control checklist
++
++- Text, email, password (show/hide as a button with `aria-pressed`), select,
++  textarea + counter, checkbox, radio (fieldset + legend), switch
++  (`role="switch"`, `aria-checked`), range, file, submit/reset, disabled.
++- Visible `<label>` for every control; hint for non-obvious formats.
++- 44px minimum target where practical; 16px type on mobile inputs.
++- Error summary: `role="alert"`, `tabindex="-1"`, focused on invalid submit,
++  links to each field, cleared per-field on edit.
++- Native elements first; Radix for Select/Dialog/Popover/Switch/Slider when the
++  host already has it. Style Radix with the same `--field-*` tokens via
++  `data-slot` / `data-state`.
++
++## 6. shadcn / Tailwind mapping
++
++```css
++/* host app owns --input, --ring, --radius: map, do not rename */
++:root {
++  --input: var(--field-border-color);
++  --ring: var(--focus);
++  --radius: var(--field-radius);
++}
++```
++
++Style shadcn `Input`, `Textarea`, `Select`, `Checkbox`, `Switch` by
++overriding the class with the field tokens, not by forking the primitive.
++Keep `data-slot` and `data-state` intact.
++
++## 7. Acceptance
++
++- [ ] The field has the same edge, radius family and shadow logic as the mark.
++- [ ] A screenshot of mark + field + button reads as one sheet of material.
++- [ ] All states present in light and dark, keyboard focus visible in both.
++- [ ] No raw hex in field CSS; contrast measured for text, border and ring.
++- [ ] Error, disabled and success verified in the browser, not assumed.
++- [ ] Reduced motion keeps the finished state.
++- [ ] Theme DNA recorded in tokens JSON so the next person can regenerate.
+diff --git a/.agents/skills/sunnyside-brand-system/references/logo-system.md b/.agents/skills/sunnyside-brand-system/references/logo-system.md
+index 6ee6c17..ae46bc9 100644
+--- a/.agents/skills/sunnyside-brand-system/references/logo-system.md
++++ b/.agents/skills/sunnyside-brand-system/references/logo-system.md
+@@ -121,3 +121,29 @@ palette is the system, not a mood.
+ - [ ] all SVGs use the same viewBox and colours
+ - [ ] no clipart, no copied mark, no live text
+ - [ ] the guide explains why this mark, not just what it is
++
++## 9. Generating the family (vector, text-free)
++
++`scripts/brand-forge.mjs` implements the build above as code so every run starts
++with a complete, tested family instead of a blank file.
++
++| Concept | Construction | Reads as | Watch for |
++| --- | --- | --- | --- |
++| `sunburst` | n rays clipped by the tile, one disc | day, warmth, output | the stock sun; fix with material (offset, crop, stroke) |
++| `aperture` | n blades around a hole | focus, capture, decision | blade count above 6 turns to mud at 16px |
++| `orbit` | concentric rings + one dot | system, cycle, signal | compact needs a single ring |
++| `hatch` | diagonal lines + a disc | drawing, shading, craft | line gap must grow in the compact |
++| `stack` | offset plates | layers, versions, depth | keep ≤ 3 plates, 2 in compact |
++| `facet` | circle cut by a diagonal | decision, split, light | thin cut disappears at 16px |
++
++Process: `--init <concept>` for three or four concepts → compare each
++`sheet.html` at 16px → keep one → write why the rest lost → hand-refine points on
++the grid → re-run. Vary **theme DNA** before geometry; material is what makes the
++mark yours.
++
++Guarantees the generator makes (and `audit.mjs` re-checks): one viewBox for the
++whole family, no `<text>`, compact has fewer shapes, reverse and mono are drawn
++not flattened, every contrast pair measured.
++
++Not guaranteed: that the idea is good. A generated mark is a draft. Judge it with
++the six tests in §2, then argue for it in `story.md` (`storytelling.md`).
+diff --git a/.agents/skills/sunnyside-brand-system/references/skill-audit.md b/.agents/skills/sunnyside-brand-system/references/skill-audit.md
+new file mode 100644
+index 0000000..86b45a0
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/references/skill-audit.md
+@@ -0,0 +1,38 @@
++# Skill audit: sunnyside-brand-system v2.0 → v2.1
++
++An audit of the skill itself. Findings are ordered by how much they hurt a
++real run. Each states the fix and where it landed.
++
++## Findings
++
++| # | Finding | Impact | Fix (v2.1) |
++| --- | --- | --- | --- |
++| 1 | Logo guidance was prose only. Every run redrew the mark by hand and rebuilt tokens, forms and a proof sheet separately. | Slow, inconsistent, easy to ship a mark that was never tested at 16px. | `scripts/brand-forge.mjs`: one config → full mark family, tokens, form kit, proof sheet, story scaffold. |
++| 2 | Only one construction method existed in code terms (Sunnyside's cut sun). | Marks converged on rays and circles. | Six construction concepts: sunburst, aperture, orbit, hatch, stack, facet. Add more as evidence, not as templates. |
++| 3 | Storytelling lived in one-line rules ("document the decision"). | Guides described assets and never argued. | `references/storytelling.md`: story spine, one sentence, decision cards, specimen reading order, story audit. |
++| 4 | The form kit was specified as controls and ARIA, not as *theme*. Fields looked generic next to a distinctive mark. | Brand broke at the first input. | `references/form-theming.md` + generated `--field-*` tokens and `<slug>-forms.css` from shared theme DNA. |
++| 5 | `audit.mjs` checked files, ICO, PNG, contrast. It could not tell a good family from a broken one. | Mismatched viewBoxes, a compact mark more complex than the primary, raw hex in field CSS and an unfinished guide all passed. | New checks: `family`, `formsCss`, `story`. |
++| 6 | The skill lives twice: `skills/` and `.agents/skills/`. | Silent drift between the two copies. | `scripts/sync-skill.sh` copies one to the other and verifies with `diff -rq`. |
++| 7 | Output contract did not list `story.md`, the form CSS or the proof sheet. | Handoff to `implement-brand-system` missed the narrative and form rules. | Contract and handoff updated. |
++| 8 | Missing blank line before `## Pen.dev` in SKILL.md; version still 2.0. | Cosmetic; renders as a run-on heading in some viewers. | Fixed; version 2.1. |
++| 9 | `templates/brandkit.html` had a fixed palette and no story panel. | Boards looked like Sunnyside regardless of brand. | Story panel guidance added to `board-and-images.md`; generator emits palette from config. |
++
++## Known gaps (not fixed here)
++
++- **Wordmark outlining still needs `uharfbuzz` + a font file.** `brand-forge`
++  consumes the output of `extract-wordmark.py`; it does not shape type itself.
++- **No in-repo visual regression.** `sheet.html` is for human review at 16px.
++- **Concepts are geometric.** Figurative or hand-drawn marks still need hand
++  drawing, then the same family/tokens/forms pipeline.
++- **Form kit is native HTML.** Radix/shadcn mapping is documented, not generated.
++- **Chromium only** for `qa.mjs` and `render-icons.mjs`.
++- **Story quality is a human judgement.** The audit checks structure only.
++
++## Re-run the audit
++
++```bash
++node scripts/brand-forge.mjs --init sunburst > brand.json
++node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug>
++node scripts/audit.mjs --manifest audit.json
++bash scripts/sync-skill.sh   # when this skill is mirrored in .agents/skills
++```
+diff --git a/.agents/skills/sunnyside-brand-system/references/storytelling.md b/.agents/skills/sunnyside-brand-system/references/storytelling.md
+new file mode 100644
+index 0000000..81a3b5a
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/references/storytelling.md
+@@ -0,0 +1,122 @@
++# Storytelling: the brand kit and the design system as an argument
++
++A kit that only shows assets is a poster. A kit that explains *why* is a
++system. Storytelling here is not copywriting polish. It is the reasoning,
++ordered so a stranger can follow it, reject it, or extend it.
++
++## 1. The story spine (brand kit)
++
++Write these seven beats in `story.md` (`brand-forge.mjs` scaffolds it). One or
++two sentences each. If a beat needs a paragraph, the idea is not reduced yet.
++
++| Beat | Question it answers | Sunnyside example |
++| --- | --- | --- |
++| **Belief** | What do we hold that others do not? | Work should feel made by a person. |
++| **Enemy** | What does that belief push against? | Identity that looks generated and cannot be inspected. |
++| **Mark** | What does the symbol argue, without naming the shape? | A day cut from paper and stuck on the page. |
++| **Material** | What is everything made of? | Paper, hard ink offset, one cobalt field. |
++| **Voice** | How does it sound when it is the one speaking? | Plain, warm, first person, no superlatives. |
++| **Proof** | What can be checked? | 14.55:1 ink on paper; a 16px compact mark that reads. |
++| **Gap** | What is not done yet? | No visual regression; no motion spec. |
++
++Rules:
++
++- **The enemy is a practice, not a competitor.** "Generic marks" is an enemy.
++  "Acme Corp" is not.
++- **The mark argues.** "A sun" describes. "The sunny side of a record" argues.
++- **Material before mood.** Say what it is made of, not how it should feel.
++- **Proof is a number, a path or a screenshot.** Adjectives are not proof.
++- **The gap is mandatory.** A story with no gap is marketing.
++
++## 2. The one sentence
++
++Everything is judged against one sentence that can be *rejected*:
++
++> `<Name>` is `<category>` for `<audience>` that `<promise>`, made of `<material>`.
++
++Test: can a reviewer say "no, that is not it" about a specific asset? If every
++asset passes trivially, the sentence is too vague.
++
++## 3. Decision cards (design system)
++
++A design system's story is its decisions. Every non-obvious token, component or
++rule gets a card. Four lines, always the same shape:
++
++```
++Decision    Hard 2.5 offset, never a blur.
++Because     The mark is cut paper; a blur changes the material.
++Not when    A floating overlay that must read above content (use a solid scrim).
++Breaks next Dark mode: the ink offset vanishes; swap it for the core colour.
++```
++
++- Write cards for: the material, the focus ring, the field edge, the radius
++  scale, the motion rule, the one loud colour.
++- No more than ~8 cards. Every extra card dilutes the ones that matter.
++- "Breaks next" is the honest part. It becomes the audit backlog.
++
++## 4. The reading order of a specimen
++
++A design-system page should read like an essay with proof, not a catalogue.
++
++| Section | Role in the story | Caption formula |
++| --- | --- | --- |
++| Hero | The promise + one number | "`<Name>` v`<n>`: `<promise>`. `<stat>`." |
++| Foundation | The belief | "Why this exists." |
++| Material | The one effect | "What everything is made of, and what it is not." |
++| Marks | The argument | "Why this mark, why the other five lost." |
++| Colour | Roles, not swatches | "Each colour has one job. Contrast measured." |
++| Type | The voice | "Display for names, reading for sentences, mono for facts." |
++| Parts | The material applied | "Same edge as the mark." |
++| Forms | The proof | "A field is cut from the same sheet as the logo." |
++| Motion | The temperament | "One ease, three durations, a finished still." |
++| Voice | The words | "Do / don't, with real sentences." |
++| Tokens | The contract | "Copy this. Do not hand-edit it." |
++| Audit / endcap | The gap | "What is not verified." |
++
++Captions are one sentence, present tense, and state the reason, not the label.
++"Hard offset" is a label. "Hard offset, because the mark is cut paper" is a
++caption.
++
++## 5. Writing the captions and the hero
++
++- **Hero:** name, one-line promise, three stats (assets, contrast, tokens), one
++  sheet. No adjectives that need proof.
++- **Captions:** reason first, then the value. Max 20 words.
++- **Empty states and errors are story too.** They are where the voice is
++  tested. Write them in the brand voice, plainly. Never "Oops!".
++- **Use real copy.** Lorem proves nothing about the voice.
++
++## 6. Voice card
++
++```
++We are      plain, specific, warm, first person
++We are not  hyped, vague, apologetic, jargon-first
++Say         "Saved. You can close this tab."
++Don't say   "Awesome! Your changes have been successfully saved!"
++```
++
++Give the voice three real sentences: a headline, an error, a success. If they
++could belong to any product, rewrite them.
++
++## 7. Story audit (run before the board)
++
++- [ ] The one sentence is on the first screen and can be rejected.
++- [ ] The mark has an argument, not a description.
++- [ ] The rejection note for the other five marks exists.
++- [ ] Every non-obvious rule has a decision card with a "breaks next".
++- [ ] Captions state reasons. No caption is only a label.
++- [ ] Copy is real; the three voice sentences are on the page.
++- [ ] Gaps are named, with an owner or a next step.
++- [ ] No claim without a number, path or screenshot.
++- [ ] A reader who skips the visuals can still follow the argument.
++
++`audit.mjs` can enforce the structure (`story` check: required sections, no
++TODO). Whether the argument is good is a human judgement; do not fake it.
++
++## 8. Anti-patterns
++
++- **The mood board narrative:** "warm, human, bold" with no material or number.
++- **The origin myth:** a founder story that does not change a single decision.
++- **The fortune cookie:** a belief nobody could disagree with.
++- **The museum:** every token documented, no card explaining why any exists.
++- **The brochure:** no gap section.
+diff --git a/.agents/skills/sunnyside-brand-system/scripts/audit.mjs b/.agents/skills/sunnyside-brand-system/scripts/audit.mjs
+index 205f7e3..36dd780 100755
+--- a/.agents/skills/sunnyside-brand-system/scripts/audit.mjs
++++ b/.agents/skills/sunnyside-brand-system/scripts/audit.mjs
+@@ -7,6 +7,8 @@
+  * Manifest paths resolve from the current working directory. A manifest can
+  * name required files, SVG folders, assets that must not contain <text>, the
+  * favicon ICO, PNG dimensions, and a tokens JSON with contrast pairs.
++ * Optional: `family` (mark viewBox + compact simplicity), `formsCss` (tokens
++ * only, focus/error/disabled states) and `story` (required sections, no TODO).
+  *
+  * Exit code 1 means at least one check failed.
+  */
+@@ -197,6 +199,68 @@ if (manifest.tokens) {
+   }
+ }
+ 
++// 6. Mark family: same viewBox, compact is a separate and simpler drawing
++if (manifest.family) {
++  const dir = join(root, manifest.family)
++  const names = ['mark', 'mark-compact', 'glyph', 'mark-reverse', 'mark-mono']
++  const boxes = new Map()
++  const counts = {}
++  for (const name of names) {
++    try {
++      const source = await readFile(join(dir, `${name}.svg`), 'utf8')
++      boxes.set(name, source.match(/viewBox\s*=\s*["']([^"']+)["']/)?.[1])
++      counts[name] = (source.match(/<(path|circle|rect|ellipse|polygon|line)[\s>]/g) || []).length
++    } catch {
++      warn(`family: ${name}.svg missing in ${manifest.family}`)
++    }
++  }
++  if (new Set(boxes.values()).size > 1) {
++    fail(`family: marks use different viewBoxes (${[...boxes].map(([n, v]) => `${n} ${v}`).join('; ')})`)
++  } else if (boxes.size) {
++    pass(`family: ${boxes.size} marks share viewBox ${[...boxes.values()][0]}`)
++  }
++  if (counts['mark-compact'] && counts.mark && counts['mark-compact'] > counts.mark) {
++    fail(`family: compact mark has more shapes (${counts['mark-compact']}) than the primary (${counts.mark})`)
++  }
++}
++
++// 7. Form CSS derives from the theme: no raw colours, real focus, reduced motion
++if (manifest.formsCss) {
++  try {
++    const css = await readFile(join(root, manifest.formsCss), 'utf8')
++    const body = css.replace(/\/\*[\s\S]*?\*\//g, '')
++    const raw = body.match(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/gi) || []
++    if (raw.length) fail(`forms: ${raw.length} raw colour value(s) in ${manifest.formsCss}; read tokens instead`)
++    else pass('forms: no raw colours, tokens only')
++    if (!/:focus-visible/.test(body)) fail('forms: no :focus-visible state')
++    if (!/\[aria-invalid/.test(body)) fail('forms: no aria-invalid error state')
++    if (!/:disabled/.test(body)) fail('forms: no disabled state')
++    if (!/prefers-reduced-motion/.test(body)) warn('forms: no prefers-reduced-motion block')
++    if (/outline\s*:\s*(none|0)\b/.test(body) && !/box-shadow\s*:\s*var\(--[\w-]*ring/.test(body)) {
++      fail('forms: outline removed without a replacement focus ring')
++    }
++  } catch (error) {
++    fail(`forms check failed: ${manifest.formsCss} (${error.message})`)
++  }
++}
++
++// 8. Story: the guide must argue, not only describe
++if (manifest.story) {
++  try {
++    const md = await readFile(join(root, manifest.story), 'utf8')
++    const need = manifest.storyHeadings ?? ['belief', 'enemy', 'mark', 'material', 'proof', 'missing']
++    const lower = md.toLowerCase()
++    const absent = need.filter((word) => !new RegExp(`^#{1,3}\\s.*${word}`, 'm').test(lower))
++    if (absent.length) fail(`story: missing section(s): ${absent.join(', ')}`)
++    else pass(`story: ${need.length} required sections present`)
++    const todos = (md.match(/TODO/g) || []).length
++    if (todos) fail(`story: ${todos} TODO left in ${manifest.story}`)
++    if (!/why the other .* lost|rejected|lost because/i.test(md)) warn('story: no note on why the other marks lost')
++  } catch (error) {
++    fail(`story check failed: ${manifest.story} (${error.message})`)
++  }
++}
++
+ function contrast(fg, bg) {
+   const luminance = (hex) => {
+     const channels = hex
+diff --git a/.agents/skills/sunnyside-brand-system/scripts/brand-forge.mjs b/.agents/skills/sunnyside-brand-system/scripts/brand-forge.mjs
+new file mode 100644
+index 0000000..3a7282d
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/scripts/brand-forge.mjs
+@@ -0,0 +1,549 @@
++#!/usr/bin/env node
++/**
++ * brand-forge — generate a full, drawn (no live text) brand kit from one JSON
++ * config. Dependency-free Node. Every shape sits on a 64-unit grid.
++ *
++ *   node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug>
++ *   node scripts/brand-forge.mjs --init sunburst > brand.json      # starter config
++ *   node scripts/brand-forge.mjs --list                            # concepts
++ *
++ * Writes (all SVG are text-free, share one viewBox per family member):
++ *   mark.svg  mark-compact.svg  glyph.svg  mark-reverse.svg  mark-mono.svg
++ *   icon.svg (favicon field)  lockup.svg  lockup-reverse.svg  lockup-stacked.svg
++ *   <slug>-tokens.css  <slug>-tokens.json   (audit.mjs schema + contrast pairs)
++ *   <slug>-forms.css   forms.html           (form kit derived from the theme DNA)
++ *   sheet.html                              (16/32/64/128 proof on light + dark)
++ *   story.md                                (brand story scaffold from config.story)
++ *
++ * The wordmark is outlined by extract-wordmark.py. Pass its output with
++ * --wordmark wordmark.svg so lockups embed real paths. Without it the lockups
++ * are skipped and the report says so; never fake a wordmark with <text>.
++ *
++ * Concepts are construction methods, not clip art:
++ *   sunburst  rays cut by the tile (Sunnyside)     aperture  n-blade iris
++ *   orbit     rings + one moving dot               hatch     negative-space lines
++ *   stack     offset layered plates                 facet     circle cut by a diagonal
++ */
++import { mkdir, readFile, writeFile } from 'node:fs/promises'
++import { join, resolve } from 'node:path'
++
++const args = process.argv.slice(2)
++const flag = (name, fallback) => {
++  const i = args.indexOf(`--${name}`)
++  return i === -1 ? fallback : args[i + 1]
++}
++const has = (name) => args.includes(`--${name}`)
++
++const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet']
++
++const STARTER = {
++  name: 'Sunnyside',
++  slug: 'sunnyside',
++  concept: 'sunburst',
++  palette: {
++    paper: '#f3ecdf',
++    paperHi: '#fffaf1',
++    ink: '#191a2e',
++    field: '#3d53d6',
++    core: '#ffd23f',
++    spark: '#ff6a2b',
++    muted: '#5f5b6e',
++    danger: '#b3261e',
++    success: '#1f7a4d',
++  },
++  // Theme DNA. One material, read by the mark AND the form kit.
++  dna: {
++    edge: 'hard', // hard | soft | none
++    offset: 2.5, // hard shadow offset on the 64 grid (0 for none)
++    stroke: 2.6, // ink edge on the 64 grid
++    radius: 16, // tile corner radius on the 64 grid
++    tile: 'rounded', // rounded | circle | square
++    face: false,
++    density: 'cosy', // compact | cosy | roomy
++    label: 'sentence', // sentence | mono-caps | small-caps
++    ring: 'offset', // offset | solid | glow
++    font: { display: 'Syne', ui: 'Geist', mono: 'Geist Mono' },
++  },
++  params: { rays: 12, compactRays: 8, sunRadius: 16.5 },
++  story: {
++    belief: 'Work should feel made by a person.',
++    enemy: 'Identity that looks generated and cannot be inspected.',
++    promise: 'A system you can read, copy and extend without asking.',
++    proof: 'Every asset has a size, a source and a reason.',
++  },
++}
++
++if (has('list')) {
++  console.log(CONCEPTS.join('\n'))
++  process.exit(0)
++}
++if (has('init')) {
++  const concept = flag('init', 'sunburst')
++  if (!CONCEPTS.includes(concept)) fail(`unknown concept: ${concept}`)
++  const cfg = structuredClone(STARTER)
++  cfg.concept = concept
++  if (concept === 'hatch' || concept === 'facet') {
++    cfg.dna.offset = 0
++    cfg.dna.edge = 'none'
++    cfg.dna.tile = 'square'
++    cfg.dna.radius = 6
++  }
++  if (concept === 'orbit') cfg.dna.tile = 'circle'
++  console.log(JSON.stringify(cfg, null, 2))
++  process.exit(0)
++}
++
++function fail(message) {
++  console.error(`brand-forge: ${message}`)
++  process.exit(1)
++}
++
++const configPath = flag('config')
++if (!configPath) fail('--config <brand.json> is required (try --init sunburst)')
++const outDir = resolve(process.cwd(), flag('out', 'brand-out'))
++const cfg = JSON.parse(await readFile(resolve(process.cwd(), configPath), 'utf8'))
++const merged = {
++  ...STARTER,
++  ...cfg,
++  palette: { ...STARTER.palette, ...cfg.palette },
++  dna: { ...STARTER.dna, ...cfg.dna, font: { ...STARTER.dna.font, ...cfg.dna?.font } },
++  params: { ...STARTER.params, ...cfg.params },
++  story: { ...STARTER.story, ...cfg.story },
++}
++const { name, slug, concept, palette: P, dna, params, story } = merged
++if (!CONCEPTS.includes(concept)) fail(`unknown concept "${concept}". Use: ${CONCEPTS.join(', ')}`)
++for (const [key, value] of Object.entries(P)) {
++  if (!/^#[0-9a-f]{6}$/i.test(value)) fail(`palette.${key} must be #rrggbb, got ${value}`)
++}
++
++// ───────────────────────── maths ─────────────────────────
++const r = (n) => Math.round(n * 100) / 100
++const rad = (deg) => (deg * Math.PI) / 180
++const pt = (cx, cy, radius, deg) => [cx + radius * Math.cos(rad(deg)), cy + radius * Math.sin(rad(deg))]
++const lum = (hex) => {
++  const c = hex
++    .slice(1)
++    .match(/.{2}/g)
++    .map((v) => parseInt(v, 16) / 255)
++    .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
++  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
++}
++const ratio = (a, b) => {
++  const x = lum(a)
++  const y = lum(b)
++  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
++}
++// Pick the readable one of two inks on a field.
++const onField = (bg) => (ratio(P.ink, bg) >= ratio(P.paperHi, bg) ? P.ink : P.paperHi)
++
++// ───────────────────────── tile ─────────────────────────
++const T = { x: 3, y: 3, s: 58 } // 58 square on the 64 grid; offset eats the margin
++function tileShape(extra = '', inset = 0) {
++  const x = T.x + inset
++  const y = T.y + inset
++  const s = T.s - inset * 2
++  if (dna.tile === 'circle') return `<circle cx="${r(x + s / 2)}" cy="${r(y + s / 2)}" r="${r(s / 2)}" ${extra}/>`
++  const rx = dna.tile === 'square' ? Math.min(dna.radius, 4) : Math.max(dna.radius - inset, 2)
++  return `<rect x="${r(x)}" y="${r(y)}" width="${r(s)}" height="${r(s)}" rx="${r(rx)}" ${extra}/>`
++}
++const clipId = `${slug}-tile`
++
++// ───────────────────────── concepts ─────────────────────────
++// Each returns inner SVG for the content sitting INSIDE the tile, in a palette
++// object c = {field, core, spark, ink}. `compact` builds a separate drawing.
++const concepts = {
++  sunburst(c, compact) {
++    const cx = 32
++    const cy = compact ? 32 : 31
++    const n = compact ? params.compactRays : params.rays
++    const sun = compact ? params.sunRadius + 3.5 : params.sunRadius
++    const w = compact ? 3.4 : 2.2
++    const rays = []
++    for (let i = 0; i < n; i++) {
++      const a = (360 / n) * i - 90
++      const [x1, y1] = pt(cx, cy, sun + 3, a)
++      const [x2, y2] = pt(cx, cy, 46, a)
++      rays.push(`M${r(x1)} ${r(y1)}L${r(x2)} ${r(y2)}`)
++    }
++    const eyes = !dna.face || compact ? '' : face(cx, cy, c)
++    return (
++      `<g clip-path="url(#${clipId})">` +
++      `<path d="${rays.join('')}" fill="none" stroke="${c.ink}" stroke-width="${w}" stroke-linecap="round"/>` +
++      `</g>` +
++      `<circle cx="${cx}" cy="${cy}" r="${sun}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 3 : dna.stroke}"/>` +
++      eyes
++    )
++  },
++  aperture(c, compact) {
++    const n = compact ? 5 : 6
++    const rOut = compact ? 24 : 22
++    const rIn = compact ? 8 : 6
++    const blades = []
++    for (let i = 0; i < n; i++) {
++      const a = (360 / n) * i - 90
++      const [x1, y1] = pt(32, 32, rOut, a)
++      const [x2, y2] = pt(32, 32, rOut, a + 360 / n - 6)
++      const [x3, y3] = pt(32, 32, rIn, a + 360 / n + 40)
++      blades.push(
++        `<path d="M${r(x1)} ${r(y1)}A${rOut} ${rOut} 0 0 1 ${r(x2)} ${r(y2)}L${r(x3)} ${r(y3)}Z" fill="${i % 2 ? c.core : c.spark}" stroke="${c.ink}" stroke-width="${compact ? 2.4 : 1.8}" stroke-linejoin="round"/>`,
++      )
++    }
++    return blades.join('')
++  },
++  orbit(c, compact) {
++    const rings = compact ? [18] : [9, 16, 23]
++    const stroke = compact ? 4 : 2.4
++    const body = rings
++      .map((rr) => `<circle cx="32" cy="32" r="${rr}" fill="none" stroke="${c.ink}" stroke-width="${stroke}"/>`)
++      .join('')
++    const [dx, dy] = pt(32, 32, rings[rings.length - 1], -48)
++    return (
++      body +
++      `<circle cx="32" cy="32" r="${compact ? 6 : 5}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 2.6 : 1.8}"/>` +
++      `<circle cx="${r(dx)}" cy="${r(dy)}" r="${compact ? 5 : 4}" fill="${c.spark}" stroke="${c.ink}" stroke-width="${compact ? 2.4 : 1.8}"/>`
++    )
++  },
++  hatch(c, compact) {
++    const gap = compact ? 9 : 5.5
++    const w = compact ? 3.6 : 2
++    const lines = []
++    for (let x = -64; x < 128; x += gap) lines.push(`M${r(x)} 64L${r(x + 64)} 0`)
++    const orb = compact ? 13 : 15
++    return (
++      `<g clip-path="url(#${clipId})"><path d="${lines.join('')}" fill="none" stroke="${c.ink}" stroke-width="${w}"/></g>` +
++      `<circle cx="32" cy="32" r="${orb}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.4}"/>`
++    )
++  },
++  stack(c, compact) {
++    const plates = compact ? 2 : 3
++    const size = compact ? 28 : 25
++    const step = compact ? 9 : 7.5
++    const fills = [c.spark, c.core, c.paper]
++    let out = ''
++    for (let i = 0; i < plates; i++) {
++      const x = 32 - size / 2 - ((plates - 1) * step) / 2 + i * step
++      const y = 32 - size / 2 + ((plates - 1) * step) / 2 - i * step
++      out += `<rect x="${r(x)}" y="${r(y)}" width="${size}" height="${size}" rx="${compact ? 5 : 4}" fill="${fills[i]}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.2}"/>`
++    }
++    return out
++  },
++  facet(c, compact) {
++    const rr = compact ? 19 : 17
++    const cut = compact ? 4 : 3
++    return (
++      `<defs><clipPath id="${slug}-fa"><circle cx="32" cy="32" r="${rr}"/></clipPath></defs>` +
++      `<g clip-path="url(#${slug}-fa)">` +
++      `<rect x="10" y="10" width="44" height="44" fill="${c.core}"/>` +
++      `<path d="M8 44L44 8L56 8L56 20L20 56L8 56Z" fill="${c.spark}"/>` +
++      `<path d="M8 44L44 8" stroke="${c.ink}" stroke-width="${cut}"/></g>` +
++      `<circle cx="32" cy="32" r="${rr}" fill="none" stroke="${c.ink}" stroke-width="${compact ? 3.2 : 2.4}"/>`
++    )
++  },
++}
++
++function face(cx, cy, c) {
++  const e = 5.4
++  const y = cy - 2
++  return (
++    `<path d="M${cx - e - 2} ${y}h4M${cx + e - 2} ${y}h4" stroke="${c.ink}" stroke-width="2.4" stroke-linecap="round"/>` +
++    `<path d="M${cx - 6} ${cy + 4.5}Q${cx} ${cy + 10} ${cx + 6} ${cy + 4.5}" fill="none" stroke="${c.ink}" stroke-width="2.4" stroke-linecap="round"/>` +
++    `<circle cx="${cx - 10.5}" cy="${cy + 4}" r="2.1" fill="${c.spark}" opacity=".55"/><circle cx="${cx + 10.5}" cy="${cy + 4}" r="2.1" fill="${c.spark}" opacity=".55"/>`
++  )
++}
++
++// ───────────────────────── assemblies ─────────────────────────
++const svgOpen = (w = 64, h = 64, title = name) =>
++  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${title}">`
++
++function buildMark({ colors, compact = false, tile = true, shadow = true, field = colors.field }) {
++  const off = compact || !shadow || dna.edge === 'none' ? 0 : dna.offset
++  const stroke = compact ? 3.2 : dna.stroke
++  const defs = `<defs><clipPath id="${clipId}">${tileShape('', 0)}</clipPath></defs>`
++  const edge = dna.edge === 'none' ? 'none' : colors.ink
++  const parts = [defs]
++  if (tile && off > 0) parts.push(`<g transform="translate(${off} ${off})">${tileShape(`fill="${colors.ink}"`)}</g>`)
++  if (tile) parts.push(tileShape(`fill="${field}" stroke="${edge}" stroke-width="${edge === 'none' ? 0 : stroke}"`))
++  parts.push(concepts[concept](colors, compact))
++  return `${svgOpen()}${parts.join('')}</svg>\n`
++}
++const base = { field: P.field, core: P.core, spark: P.spark, ink: P.ink, paper: P.paperHi }
++const outputs = {}
++outputs['mark.svg'] = buildMark({ colors: base })
++outputs['mark-compact.svg'] = buildMark({ colors: base, compact: true })
++outputs['glyph.svg'] = buildMark({ colors: base, tile: false, shadow: false })
++// Reversed: tile in ink, drawing lines in paper so it holds on a dark ground.
++outputs['mark-reverse.svg'] = buildMark({
++  colors: { field: P.ink, core: P.core, spark: P.spark, ink: P.paperHi, paper: P.ink },
++  shadow: false,
++})
++// One-colour stamp is DRAWN: all fills collapse to ink/paper with the same geometry.
++outputs['mark-mono.svg'] = buildMark({
++  colors: { field: P.paperHi, core: P.paperHi, spark: P.paperHi, ink: P.ink, paper: P.paperHi },
++  shadow: dna.edge === 'hard',
++})
++// Favicon field: the compact mark, with an opaque ground so it never vanishes on chrome.
++outputs['icon.svg'] = buildMark({ colors: base, compact: true })
++
++// Lockups (need an outlined wordmark)
++const wordPath = flag('wordmark')
++let reportLockup = 'skipped (pass --wordmark from extract-wordmark.py)'
++if (wordPath) {
++  const raw = await readFile(resolve(process.cwd(), wordPath), 'utf8')
++  const vb = raw.match(/viewBox\s*=\s*["']([\d.\s-]+)["']/)
++  if (!vb) fail('wordmark.svg has no viewBox')
++  if (/<text[\s>]/.test(raw)) fail('wordmark.svg contains live <text>; outline it first')
++  const [, , ww, wh] = vb[1].trim().split(/\s+/).map(Number)
++  const inner = raw.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '')
++  const markH = 64
++  const targetH = 20 // wordmark cap height on the 64 grid
++  const scale = targetH / wh
++  const gap = 12
++  const wordW = ww * scale
++  const place = (fill, markSvg, stacked) => {
++    const body = markSvg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').replace(new RegExp(clipId, 'g'), `${clipId}-l${stacked ? 's' : 'h'}${fill === P.paperHi ? 'r' : ''}`)
++    const word = `<g transform="translate(${stacked ? r((Math.max(64, wordW) - wordW) / 2) : 64 + gap} ${stacked ? markH + 8 : r((markH - targetH) / 2)}) scale(${r(scale * 1000) / 1000})" fill="${fill}" color="${fill}">${inner}</g>`
++    const markX = stacked ? r((Math.max(64, wordW) - 64) / 2) : 0
++    const w = stacked ? Math.max(64, wordW) : 64 + gap + wordW
++    const h = stacked ? markH + 8 + targetH : markH
++    return `${svgOpen(r(w), r(h), name)}<g transform="translate(${markX} 0)">${body}</g>${word}</svg>\n`
++  }
++  outputs['lockup.svg'] = place(P.ink, outputs['mark.svg'], false)
++  outputs['lockup-reverse.svg'] = place(P.paperHi, outputs['mark-reverse.svg'], false)
++  outputs['lockup-stacked.svg'] = place(P.ink, outputs['mark.svg'], true)
++  outputs['wordmark.svg'] = raw
++  reportLockup = `built from ${wordPath}`
++}
++
++// ───────────────────────── tokens ─────────────────────────
++const dens = { compact: { field: 36, gap: 12, pad: 10 }, cosy: { field: 44, gap: 16, pad: 12 }, roomy: { field: 52, gap: 20, pad: 16 } }[dna.density]
++const ringShadow = {
++  offset: `0 0 0 2px ${P.paperHi}, 0 0 0 4px ${P.field}`,
++  solid: `0 0 0 3px ${P.field}`,
++  glow: `0 0 0 3px ${P.field}55, 0 0 18px ${P.field}66`,
++}[dna.ring]
++const fieldShadow = dna.edge === 'hard' ? `${dna.offset / 16}rem ${dna.offset / 16}rem 0 ${P.ink}` : dna.edge === 'soft' ? `0 1px 2px ${P.ink}22` : 'none'
++const fieldRadius = dna.tile === 'circle' ? '999px' : dna.tile === 'square' ? '4px' : `${Math.round(dna.radius * 0.5)}px`
++const fieldBorder = dna.edge === 'none' ? `1px solid ${P.ink}55` : `${Math.max(1.5, dna.stroke * 0.6).toFixed(1)}px solid ${P.ink}`
++
++const tokensRaw = {
++  primitives: Object.entries(P).map(([k, v]) => ({ name: `--${slug}-${k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())}`, value: v })),
++  semantic: {
++    light: [
++      ['--bg', P.paper], ['--surface', P.paperHi], ['--fg', P.ink], ['--muted', P.muted],
++      ['--border', P.ink], ['--accent', P.field], ['--accent-ink', onField(P.field)],
++      ['--focus', P.field], ['--danger', P.danger], ['--success', P.success],
++    ],
++    dark: [
++      ['--bg', P.ink], ['--surface', '#262742'], ['--fg', P.paper], ['--muted', '#b6b2c4'],
++      ['--border', P.paper], ['--accent', P.core], ['--accent-ink', onField(P.core)],
++      ['--focus', P.core], ['--danger', '#ff8a80'], ['--success', '#6fdc9f'],
++    ],
++  },
++  components: {
++    light: [
++      ['--field-bg', P.paperHi], ['--field-fg', P.ink], ['--field-border', fieldBorder],
++      ['--field-radius', fieldRadius], ['--field-shadow', fieldShadow], ['--field-h', `${dens.field}px`],
++      ['--field-gap', `${dens.gap}px`], ['--field-pad', `${dens.pad}px`], ['--field-ring', ringShadow],
++      ['--button-bg', P.field], ['--button-ink', onField(P.field)],
++    ],
++    dark: [
++      ['--field-bg', '#262742'], ['--field-fg', P.paper], ['--field-border', fieldBorder.replace(P.ink, P.paper)],
++      ['--field-radius', fieldRadius], ['--field-shadow', dna.edge === 'hard' ? `${dna.offset / 16}rem ${dna.offset / 16}rem 0 ${P.core}` : fieldShadow],
++      ['--field-h', `${dens.field}px`], ['--field-gap', `${dens.gap}px`], ['--field-pad', `${dens.pad}px`],
++      ['--field-ring', ringShadow.replaceAll(P.paperHi, P.ink).replaceAll(P.field, P.core)],
++      ['--button-bg', P.core], ['--button-ink', onField(P.core)],
++    ],
++  },
++}
++const asObj = (arr) => arr.map(([name, value]) => ({ name, value }))
++const contrastPairs = [
++  ['ink on paper', P.ink, P.paper], ['ink on surface', P.ink, P.paperHi],
++  ['muted on paper', P.muted, P.paper, 4.5], ['button ink on accent', onField(P.field), P.field],
++  ['danger on surface', P.danger, P.paperHi], ['success on surface', P.success, P.paperHi],
++  ['paper on ink (dark bg)', P.paper, P.ink], ['ink on core (dark button)', onField(P.core), P.core],
++].map(([label, fg, bg, min]) => ({ label, fg, bg, ratio: r(ratio(fg, bg)), min: min ?? 4.5 }))
++
++const tokens = {
++  name,
++  version: '1.0',
++  concept,
++  dna,
++  primitives: tokensRaw.primitives,
++  semantic: { light: asObj(tokensRaw.semantic.light), dark: asObj(tokensRaw.semantic.dark) },
++  components: { light: asObj(tokensRaw.components.light), dark: asObj(tokensRaw.components.dark) },
++  contrast: contrastPairs,
++}
++outputs[`${slug}-tokens.json`] = JSON.stringify(tokens, null, 2) + '\n'
++const cssBlock = (sel, rows) => `${sel} {\n${rows.map(([k, v]) => `  ${k}: ${v};`).join('\n')}\n}\n`
++outputs[`${slug}-tokens.css`] =
++  `/* ${name} tokens — generated by brand-forge. Do not hand-edit. */\n` +
++  cssBlock(':root', [...tokensRaw.primitives.map((t) => [t.name, t.value]), ...tokensRaw.semantic.light, ...tokensRaw.components.light]) +
++  cssBlock(`:root[data-theme='dark']`, [...tokensRaw.semantic.dark, ...tokensRaw.components.dark]) +
++  `@media (prefers-color-scheme: dark) {\n  :root:not([data-theme='light']) {\n${[...tokensRaw.semantic.dark, ...tokensRaw.components.dark].map(([k, v]) => `    ${k}: ${v};`).join('\n')}\n  }\n}\n`
++
++// ───────────────────────── form kit ─────────────────────────
++const labelCss = {
++  sentence: 'font: 600 0.875rem/1.3 var(--ui); letter-spacing: 0;',
++  'mono-caps': 'font: 500 0.75rem/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase;',
++  'small-caps': 'font: 600 0.8125rem/1.3 var(--ui); font-variant-caps: all-small-caps; letter-spacing: 0.06em;',
++}[dna.label]
++const formsCss = `/* ${name} form kit — derived from theme DNA (${dna.edge} edge, ${dna.tile} tile, ${dna.ring} ring, ${dna.density}).
++   Reads ONLY semantic/component tokens from ${slug}-tokens.css. No raw hex below. */
++.ff { --ui: '${dna.font.ui}', system-ui, sans-serif; --mono: '${dna.font.mono}', ui-monospace, monospace;
++  display: grid; gap: var(--field-gap); font-family: var(--ui); color: var(--fg); max-width: 34rem; }
++.ff-row { display: grid; gap: 6px; }
++.ff-label { ${labelCss} }
++.ff-hint, .ff-error { font: 400 0.8125rem/1.4 var(--ui); margin: 0; }
++.ff-hint { color: var(--muted); }
++.ff-error { color: var(--danger); }
++.ff-error::before { content: '! '; font-weight: 700; } /* not colour alone */
++.ff-input, .ff-select, .ff-textarea {
++  box-sizing: border-box; width: 100%; min-height: var(--field-h); padding: 0 var(--field-pad);
++  background: var(--field-bg); color: var(--field-fg); border: var(--field-border);
++  border-radius: var(--field-radius); box-shadow: var(--field-shadow);
++  font: 400 1rem/1.4 var(--ui); transition: box-shadow 160ms ease, transform 160ms ease; }
++.ff-textarea { min-height: calc(var(--field-h) * 2.4); padding-block: var(--field-pad); resize: vertical; }
++.ff-input::placeholder, .ff-textarea::placeholder { color: var(--muted); opacity: 1; }
++.ff-input:hover, .ff-select:hover, .ff-textarea:hover { transform: translate(-1px, -1px); }
++.ff-input:focus-visible, .ff-select:focus-visible, .ff-textarea:focus-visible,
++.ff-check:focus-visible, .ff-btn:focus-visible, .ff-switch:focus-visible { outline: none; box-shadow: var(--field-ring); }
++.ff-input[aria-invalid='true'], .ff-textarea[aria-invalid='true'], .ff-select[aria-invalid='true'] { border-color: var(--danger); }
++.ff-input:disabled, .ff-select:disabled, .ff-textarea:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; transform: none; }
++.ff-check { appearance: none; inline-size: 1.4rem; block-size: 1.4rem; margin: 0; flex: none; display: grid; place-content: center;
++  background: var(--field-bg); border: var(--field-border); border-radius: calc(var(--field-radius) / 2); }
++.ff-check[type='radio'] { border-radius: 50%; }
++.ff-check:checked { background: var(--accent); }
++.ff-check:checked::after { content: ''; inline-size: 0.5rem; block-size: 0.8rem; border: solid var(--accent-ink); border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
++.ff-check[type='radio']:checked::after { inline-size: 0.55rem; block-size: 0.55rem; border: 0; border-radius: 50%; background: var(--accent-ink); transform: none; }
++.ff-inline { display: flex; align-items: center; gap: 10px; min-height: 44px; }
++.ff-switch { position: relative; inline-size: 3rem; block-size: 1.7rem; padding: 0; background: var(--field-bg); border: var(--field-border); border-radius: 999px; cursor: pointer; }
++.ff-switch::after { content: ''; position: absolute; inset-block: 3px; inset-inline-start: 3px; inline-size: 1.1rem; border-radius: 50%; background: var(--fg); transition: transform 160ms ease; }
++.ff-switch[aria-checked='true'] { background: var(--accent); }
++.ff-switch[aria-checked='true']::after { transform: translateX(1.3rem); background: var(--accent-ink); }
++.ff-btn { min-height: var(--field-h); padding: 0 calc(var(--field-pad) * 1.5); border: var(--field-border); border-radius: var(--field-radius);
++  background: var(--button-bg); color: var(--button-ink); font: 700 1rem/1 var(--ui); box-shadow: var(--field-shadow); cursor: pointer; }
++.ff-btn.ghost { background: var(--field-bg); color: var(--field-fg); }
++.ff-btn:active { transform: translate(2px, 2px); box-shadow: none; }
++.ff-summary { border: var(--field-border); border-radius: var(--field-radius); padding: var(--field-pad); background: var(--surface); }
++.ff-summary[hidden] { display: none; }
++.ff-count { font: 500 0.75rem/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); justify-self: end; }
++@media (prefers-reduced-motion: reduce) { .ff * { transition: none !important; } .ff-input:hover { transform: none; } }
++`
++outputs[`${slug}-forms.css`] = formsCss
++
++outputs['forms.html'] = `<!doctype html>
++<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
++<title>${name} — form kit</title>
++<link rel="stylesheet" href="${slug}-tokens.css"><link rel="stylesheet" href="${slug}-forms.css">
++<style>body{margin:0;padding:clamp(16px,5vw,48px);background:var(--bg);color:var(--fg);font-family:'${dna.font.ui}',system-ui,sans-serif}
++h1{font:800 clamp(1.6rem,4vw,2.4rem)/1.1 '${dna.font.display}',system-ui,sans-serif;text-wrap:balance;margin:0 0 .5rem}
++p.lede{max-width:60ch;color:var(--muted);text-wrap:pretty;margin:0 0 2rem}</style></head>
++<body><h1>${name} form kit</h1>
++<p class="lede">Fields inherit the same material as the mark: ${dna.edge} edge, ${dna.tile} corners, ${dna.ring} focus. ${story.belief}</p>
++<form class="ff" id="kit" novalidate>
++  <div class="ff-summary" id="summary" role="alert" tabindex="-1" hidden><strong>Fix these first</strong><ul id="summary-list"></ul></div>
++  <div class="ff-row"><label class="ff-label" for="name">Name</label>
++    <input class="ff-input" id="name" name="name" autocomplete="name" required aria-describedby="name-h"><p class="ff-hint" id="name-h">As it should appear on the page.</p></div>
++  <div class="ff-row"><label class="ff-label" for="email">Email</label>
++    <input class="ff-input" id="email" name="email" type="email" autocomplete="email" required aria-describedby="email-h"><p class="ff-hint" id="email-h">We only use it to reply.</p></div>
++  <div class="ff-row"><label class="ff-label" for="pw">Password</label>
++    <div style="display:flex;gap:8px"><input class="ff-input" id="pw" name="pw" type="password" autocomplete="new-password" minlength="8">
++    <button class="ff-btn ghost" type="button" id="eye" aria-controls="pw" aria-pressed="false">Show</button></div></div>
++  <div class="ff-row"><label class="ff-label" for="topic">Topic</label>
++    <select class="ff-select" id="topic" name="topic"><option>Brand kit</option><option>Design system</option><option>Audit</option></select></div>
++  <div class="ff-row"><label class="ff-label" for="msg">Message</label>
++    <textarea class="ff-textarea" id="msg" name="msg" maxlength="280" aria-describedby="msg-c"></textarea><span class="ff-count" id="msg-c">0 / 280</span></div>
++  <fieldset style="border:0;padding:0;margin:0;display:grid;gap:4px"><legend class="ff-label">Delivery</legend>
++    <label class="ff-inline"><input class="ff-check" type="radio" name="d" checked> Board only</label>
++    <label class="ff-inline"><input class="ff-check" type="radio" name="d"> Board + tokens</label></fieldset>
++  <label class="ff-inline"><input class="ff-check" type="checkbox" name="ok"> I have a brief</label>
++  <div class="ff-inline"><button class="ff-switch" type="button" role="switch" aria-checked="false" id="sw" aria-labelledby="sw-l"></button><span id="sw-l">Reduced motion</span></div>
++  <div class="ff-row"><label class="ff-label" for="rng">Density</label><input id="rng" name="rng" type="range" min="0" max="2" value="1"></div>
++  <div class="ff-row"><label class="ff-label" for="f">Reference file</label><input class="ff-input" id="f" type="file" style="padding-block:8px"></div>
++  <div class="ff-row"><label class="ff-label" for="dis">Locked field</label><input class="ff-input" id="dis" value="Read-only value" disabled></div>
++  <div class="ff-inline"><button class="ff-btn" type="submit">Send</button><button class="ff-btn ghost" type="reset">Reset</button></div>
++</form>
++<script>
++const f=document.getElementById('kit'),s=document.getElementById('summary'),l=document.getElementById('summary-list');
++const msg=document.getElementById('msg'),c=document.getElementById('msg-c');
++msg.addEventListener('input',()=>{c.textContent=msg.value.length+' / 280'});
++document.getElementById('eye').addEventListener('click',e=>{const p=document.getElementById('pw'),on=p.type==='password';p.type=on?'text':'password';e.target.textContent=on?'Hide':'Show';e.target.setAttribute('aria-pressed',on)});
++const sw=document.getElementById('sw');sw.addEventListener('click',()=>sw.setAttribute('aria-checked',sw.getAttribute('aria-checked')!=='true'));
++function err(el,m){let e=document.getElementById(el.id+'-e');if(!e){e=document.createElement('p');e.className='ff-error';e.id=el.id+'-e';el.closest('.ff-row').appendChild(e)}e.textContent=m;el.setAttribute('aria-invalid','true');el.setAttribute('aria-describedby',[el.getAttribute('aria-describedby'),e.id].filter(Boolean).join(' '))}
++function clear(el){const e=document.getElementById(el.id+'-e');if(e)e.remove();el.removeAttribute('aria-invalid')}
++f.addEventListener('input',e=>{if(e.target.id)clear(e.target)});
++f.addEventListener('submit',ev=>{ev.preventDefault();l.innerHTML='';
++ for(const el of f.querySelectorAll('[required]')){clear(el);if(!el.checkValidity()){const m=el.validity.valueMissing?'Required':'Check the format';err(el,m);const li=document.createElement('li');li.innerHTML='<a href="#'+el.id+'">'+el.labels[0].textContent+': '+m+'</a>';l.appendChild(li)}}
++ s.hidden=!l.children.length;if(l.children.length)s.focus()});
++</script></body></html>
++`
++
++// ───────────────────────── proof sheet ─────────────────────────
++const proofSizes = [16, 32, 64, 128]
++const proofAssets = ['mark.svg', 'mark-compact.svg', 'glyph.svg', 'mark-reverse.svg', 'mark-mono.svg']
++const cell = (file, size, bg) =>
++  `<figure style="margin:0;display:grid;gap:6px;justify-items:center"><div style="background:${bg};padding:10px;border-radius:8px"><img src="${file}" width="${size}" height="${size}" alt=""></div><figcaption style="font:11px ui-monospace,monospace;opacity:.7">${file} ${size}px</figcaption></figure>`
++outputs['sheet.html'] = `<!doctype html><meta charset="utf-8"><title>${name} — proof sheet</title>
++<body style="margin:0;font-family:system-ui;background:#888;display:grid;grid-template-columns:1fr 1fr">
++${[P.paperHi, P.ink]
++  .map(
++    (bg) =>
++      `<section style="background:${bg};color:${bg === P.ink ? P.paper : P.ink};padding:24px;display:grid;gap:18px"><h2 style="margin:0;font-size:14px">${bg === P.ink ? 'dark chrome' : 'light chrome'}</h2>${proofAssets
++        .map((a) => `<div style="display:flex;gap:16px;align-items:end;flex-wrap:wrap">${proofSizes.map((s) => cell(a, s, 'transparent')).join('')}</div>`)
++        .join('')}</section>`,
++  )
++  .join('')}</body>
++`
++
++// ───────────────────────── story scaffold ─────────────────────────
++outputs['story.md'] = `# ${name} — brand story
++
++> One sentence the work can be rejected against: **${story.promise}**
++
++## 1. The belief
++${story.belief}
++
++## 2. The enemy
++${story.enemy}
++
++## 3. The mark, as an argument
++- **Concept:** ${concept}. State in one sentence what it says without naming the shape: _TODO_
++- **Why this one:** _TODO (the winning reason)_
++- **Why the other five lost:** _TODO (one line each; this becomes the guide)_
++
++## 4. The material
++Edge **${dna.edge}**, corners **${dna.tile}**, focus **${dna.ring}**, density **${dna.density}**. The mark and the form fields read the same DNA, so a field should look like it was cut from the same sheet as the logo.
++
++## 5. The proof
++${story.proof}
++- Contrast pairs: ${contrastPairs.map((p) => `${p.label} ${p.ratio}:1`).join('; ')}
++
++## 6. The decision cards
++Use the shape in \`references/storytelling.md\`: Decision, Because, Not when, Breaks next.
++
++## 7. What is missing
++_TODO: name the gaps. A guide that hides its gaps is a brochure._
++`
++
++// ───────────────────────── write + verify ─────────────────────────
++await mkdir(outDir, { recursive: true })
++for (const [file, content] of Object.entries(outputs)) await writeFile(join(outDir, file), content)
++
++const problems = []
++for (const [file, content] of Object.entries(outputs)) {
++  if (!file.endsWith('.svg')) continue
++  if (/<text[\s>]/.test(content)) problems.push(`${file}: live <text>`)
++  if (!/viewBox=/.test(content)) problems.push(`${file}: no viewBox`)
++  if (!/<(path|circle|rect)/.test(content)) problems.push(`${file}: empty drawing`)
++  const open = (content.match(/<(g|defs|clipPath|svg)[\s>]/g) || []).length
++  const close = (content.match(/<\/(g|defs|clipPath|svg)>/g) || []).length
++  if (open !== close) problems.push(`${file}: unbalanced tags (${open}/${close})`)
++}
++const weak = contrastPairs.filter((p) => p.ratio + 0.005 < p.min)
++
++console.log(`brand-forge · ${name} · concept=${concept} · ${Object.keys(outputs).length} files → ${outDir}`)
++console.log(`lockups: ${reportLockup}`)
++for (const p of contrastPairs) console.log(`${p.ratio + 0.005 >= p.min ? 'PASS' : 'FAIL'}  ${p.label} ${p.ratio}:1 (min ${p.min})`)
++for (const p of problems) console.log(`FAIL  ${p}`)
++console.log('Next: judge sheet.html at 16px, then fill story.md TODOs. Mark compact is a separate drawing, check it alone.')
++process.exit(problems.length || weak.length ? 1 : 0)
+diff --git a/.agents/skills/sunnyside-brand-system/scripts/sync-skill.sh b/.agents/skills/sunnyside-brand-system/scripts/sync-skill.sh
+new file mode 100755
+index 0000000..5e72ed7
+--- /dev/null
++++ b/.agents/skills/sunnyside-brand-system/scripts/sync-skill.sh
+@@ -0,0 +1,12 @@
++#!/usr/bin/env bash
++# Mirror skills/sunnyside-brand-system into .agents/skills/ (or back with --reverse)
++# and fail loudly if the copies differ afterwards.
++set -euo pipefail
++root="$(git rev-parse --show-toplevel)"
++a="$root/skills/sunnyside-brand-system"
++b="$root/.agents/skills/sunnyside-brand-system"
++if [[ "${1:-}" == "--reverse" ]]; then src="$b"; dst="$a"; else src="$a"; dst="$b"; fi
++rm -rf "$dst"
++mkdir -p "$(dirname "$dst")"
++cp -a "$src" "$dst"
++diff -rq "$a" "$b" && echo "in sync: $src -> $dst"
+diff --git a/.agents/skills/sunnyside-brand-system/templates/audit.json b/.agents/skills/sunnyside-brand-system/templates/audit.json
+index 3195dd7..517557f 100644
+--- a/.agents/skills/sunnyside-brand-system/templates/audit.json
++++ b/.agents/skills/sunnyside-brand-system/templates/audit.json
+@@ -22,10 +22,18 @@
+     "design/brand/<slug>/<slug>-brandkit.png",
+     "design/brand/<slug>/README.md"
+   ],
+-  "svgDirs": ["public/brand/<slug>"],
+-  "noText": ["public/brand/<slug>"],
++  "svgDirs": [
++    "public/brand/<slug>"
++  ],
++  "noText": [
++    "public/brand/<slug>"
++  ],
+   "ico": "public/brand/<slug>/favicon.ico",
+-  "icoSizes": [16, 32, 48],
++  "icoSizes": [
++    16,
++    32,
++    48
++  ],
+   "pngs": [
+     {
+       "path": "design/brand/<slug>/<slug>-brandkit.png",
+@@ -37,5 +45,8 @@
+     }
+   ],
+   "tokens": "features/<slug>/tokens.json",
+-  "contrastMin": 4.5
++  "contrastMin": 4.5,
++  "family": "public/brand/<slug>",
++  "formsCss": "public/brand/<slug>/<slug>-forms.css",
++  "story": "design/brand/<slug>/story.md"
+ }
+diff --git a/.agents/skills/sunnyside-brand-system/templates/guidelines.md b/.agents/skills/sunnyside-brand-system/templates/guidelines.md
+index a9d7a5d..8845044 100644
+--- a/.agents/skills/sunnyside-brand-system/templates/guidelines.md
++++ b/.agents/skills/sunnyside-brand-system/templates/guidelines.md
+@@ -11,6 +11,24 @@
+ - **Metaphor:** [one sentence. The mark should be explainable from this.]
+ - **Direction:** “[The sentence work can be rejected against.]”
+ 
++## The story
++
++- **Belief:** [what we hold that others do not.]
++- **Enemy:** [the practice this pushes against. A practice, not a competitor.]
++- **The mark, as an argument:** [one sentence that does not name the shape.]
++- **Why the other five lost:** [one line each.]
++- **Proof:** [a number, a path or a screenshot per claim.]
++- **Gap:** [what is not done or not verified.]
++
++### Decision cards
++
++```
++Decision    [the rule]
++Because     [the reason, tied to the material or the mark]
++Not when    [the exception]
++Breaks next [what fails first: dark mode, small size, density]
++```
++
+ ## The mark
+ 
+ [Image: mark on paper and on ink.]
+@@ -102,3 +120,11 @@ Rule: [one loud field at a time; accents are not body text.]
+ ## Verification
+ 
+ [Link to the checklist. Name the date and the reviewer.]
++
++## Forms
++
++- **Theme DNA:** edge [hard/soft/none], offset [n], stroke [n], radius [n], ring [offset/solid/glow], density [compact/cosy/roomy], label [sentence/mono-caps/small-caps].
++- **Field recipe:** [row from `form-theming.md`, and why it matches the mark.]
++- **States:** default, hover, focus-visible, invalid, disabled, success, pressed. [Show each.]
++- **Tokens:** `--field-bg`, `--field-border`, `--field-radius`, `--field-shadow`, `--field-ring`. No raw hex.
++- **Do not:** [remove focus, signal with colour alone, mix material rows.]
+diff --git a/skills/sunnyside-brand-system/README.md b/skills/sunnyside-brand-system/README.md
+index da23d4f..8f162a7 100644
+--- a/skills/sunnyside-brand-system/README.md
++++ b/skills/sunnyside-brand-system/README.md
+@@ -8,13 +8,19 @@ approved kit to **`implement-brand-system`** for the build:
+ - favicon and app icons;
+ - primitive → semantic → component tokens, CSS + JSON;
+ - single-page HTML or TSX proof;
+-- shadcn/Radix component and form kit;
++- shadcn/Radix component and a form kit themed from the same DNA as the mark;
++- brand story: spine, one sentence, decision cards, story audit;
+ - typography gate;
+ - lean audit and browser QA;
+ - pen.dev design-source integration.
+ 
+ Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
+ 
++**v2.1:** a generated vector logo family (`scripts/brand-forge.mjs`: six
++construction concepts, tokens, theme-matched form kit, proof sheet, story
++scaffold), a storytelling layer, theme-matched forms and stronger audit checks.
++Audit of the skill itself: [`references/skill-audit.md`](references/skill-audit.md).
++
+ **v2.0 provenance:** rebuilt after auditing
+ [ui-skills.com](https://www.ui-skills.com/) — 439 skills across 27 categories;
+ 22 relevant skills inspected and fused in
+@@ -61,6 +67,13 @@ Run these from the skill folder, or copy `scripts/` and `templates/` into the pr
+ # Static audit: required files, SVG text, ICO sizes, PNG dimensions, contrast
+ node scripts/audit.mjs --manifest audit.json
+ 
++# Generate the whole family from one config (concepts: sunburst aperture orbit hatch stack facet)
++node scripts/brand-forge.mjs --init orbit > brand.json
++node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> --wordmark wordmark.svg
++
++# Keep the .agents/skills mirror identical
++bash scripts/sync-skill.sh
++
+ # Browser QA: 1440 + 390, light + dark, reduced motion, console, overflow
+ node scripts/qa.mjs \
+   --url http://localhost:3000/design-system/vitrine \
+diff --git a/skills/sunnyside-brand-system/SKILL.md b/skills/sunnyside-brand-system/SKILL.md
+index 569bf89..c5e1375 100644
+--- a/skills/sunnyside-brand-system/SKILL.md
++++ b/skills/sunnyside-brand-system/SKILL.md
+@@ -1,10 +1,10 @@
+ ---
+ name: sunnyside-brand-system
+-description: Design and ship a brand kit or design system from a brief — strategy, logo family, 3×3 board, favicons, tokens, single-page HTML/TSX proof, components and forms, and a fast audit. Use when creating or auditing an identity, design-system page, mockup, or pen.dev design source. Includes shadcn/Radix defaults, a typography gate, lean QA, and pen.dev integration.
++description: Design and ship a brand kit or design system from a brief — strategy, a generated vector logo family, brand story, 3×3 board, favicons, tokens, theme-matched form kit, single-page HTML/TSX proof, and a fast audit. Use when creating or auditing an identity, design-system page, mockup, or pen.dev design source. Includes shadcn/Radix defaults, a typography gate, lean QA, and pen.dev integration.
+ metadata:
+   author: adityahimaone
+   source: https://github.com/adityahimaone/sunnyside
+-  version: '2.0'
++  version: '2.1'
+ ---
+ 
+ # Sunnyside brand system
+@@ -15,6 +15,11 @@ A method for shipping a **brand kit** or **design system** quickly without losin
+ the reasoning. The output is a page or a small set of files, not a folder of
+ exports. Sunnyside and Vitrine are evidence, not templates.
+ 
++**v2.1:** adds a generated vector logo family (`scripts/brand-forge.mjs`), a
++storytelling layer (`references/storytelling.md`), theme-matched form fields
++(`references/form-theming.md`) and stronger audit checks. The audit of this
++skill is in `references/skill-audit.md`.
++
+ **v2.0 provenance:** rebuilt after an audit of [ui-skills.com](https://www.ui-skills.com/)
+ (439 skills / 27 categories; 22 relevant skills inspected). The fusion is in
+ `references/ui-skills-fusion.md`; the implementation half is `implement-brand-system`.
+@@ -44,12 +49,17 @@ drawing; mark unknowns `ASSUMPTION`. Template: `references/brief.md`.
+ 1. **Brief and one sentence** the work can be rejected against.
+ 2. **One idea**: monogram + meaning, product action, metaphor fusion, negative
+    space, or construction geometry. One metaphor, one loud field.
+-3. **Draw six, keep one** on the same 64 grid. Write down why five lost.
+-4. **Build identity first** (`mark → family → tokens`) or **tokens first**
+-   (`tokens → primitives → forms`), never both at once.
+-5. **One proof page** with real copy and states. HTML for a board/mockup, TSX for
+-   an interactive system.
+-6. **Audit and stop**: static audit + one QA pass. Fix only what fails. Name gaps.
++3. **Draw six, keep one** on the same 64 grid. Write down why five lost. Fastest
++   route: `brand-forge.mjs --init <concept>` for each candidate concept, compare
++   `sheet.html`, keep one.
++4. **Generate the family** (`node scripts/brand-forge.mjs --config brand.json`):
++   mark, compact, glyph, reverse, mono, icon, lockups, tokens, form kit, proof
++   sheet. Then hand-refine the mark; the generator is a start, not a ceiling.
++5. **Write the story** (`story.md`): belief, enemy, mark as argument, material,
++   proof, gap. Decision cards for every non-obvious rule.
++6. **One proof page** with real copy and states. HTML for a board/mockup, TSX for
++   an interactive system. Form fields use the same theme DNA as the mark.
++7. **Audit and stop**: static audit + one QA pass. Fix only what fails. Name gaps.
+ 
+ ## Domain before defaults
+ 
+@@ -113,6 +123,59 @@ Start from `templates/design-system.html` for a specimen, `templates/single-page
+ 
+ Details: `references/design-systems.md`.
+ 
++## Generate the logo family
++
++`scripts/brand-forge.mjs` turns one JSON config into a drawn, text-free kit on the
++64 grid. It is the fast path for step 3–4; it does not replace judgement.
++
++```bash
++node scripts/brand-forge.mjs --list                       # sunburst aperture orbit hatch stack facet
++node scripts/brand-forge.mjs --init orbit > brand.json    # starter config, edit palette/dna/params
++node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> \
++  --wordmark wordmark.svg                                 # from extract-wordmark.py
++```
++
++It writes `mark`, `mark-compact` (a separate, simpler drawing), `glyph`,
++`mark-reverse`, `mark-mono` (drawn one-colour stamp), `icon`, three lockups,
++tokens (CSS + JSON with contrast pairs), the form kit, `sheet.html` (16/32/64/128
++on light + dark) and `story.md`. Exit code 1 if any contrast pair or SVG check
++fails. Without `--wordmark` it skips lockups; it never fakes one with `<text>`.
++
++Make it better than the default:
++
++- Vary the **theme DNA** (`edge`, `offset`, `stroke`, `tile`, `radius`) before
++  you vary the concept. Material makes a mark ownable; geometry alone does not.
++- Treat output as draft one. Open the SVG, nudge points on the grid, keep it in
++  the same viewBox, re-run `audit.mjs` (`family` check).
++- The compact mark must have **fewer shapes** than the primary (audited).
++- Run the six-concept bake-off, then write why five lost into `story.md`.
++
++Recipes and tests: `references/logo-system.md` §9.
++
++## Storytelling
++
++The kit argues; it does not just show. Read `references/storytelling.md`.
++
++- **Story spine:** belief → enemy → mark → material → voice → proof → gap.
++- **One sentence** the work can be rejected against.
++- **Decision cards:** Decision / Because / Not when / Breaks next, ≤ 8 per system.
++- **Specimen as essay:** every section has a one-sentence caption that states a
++  reason, not a label. Real copy, a voice card, a named gap.
++- Audit enforces structure (`story` check); a human judges the argument.
++
++## Forms that match the theme
++
++Fields are cut from the same sheet as the mark. Read `references/form-theming.md`.
++
++- One **theme DNA** (edge, offset, stroke, tile/radius, ring, density, label)
++  drives the mark *and* the `--field-*` tokens.
++- Pick the **material → field recipe** row that matches the brief; never mix rows.
++- Fields read component tokens only; no raw hex (audited).
++- All states in the same material: hover, focus-visible, invalid, disabled,
++  success, pressed. Never colour alone.
++- Generated: `<slug>-forms.css` + `forms.html` (error summary, password toggle,
++  counter, switch, radio fieldset, file, disabled).
++
+ ## Typography gate
+ 
+ Run before the first screenshot:
+@@ -188,6 +251,7 @@ If routes exist, use the host’s convention and update only what exists: canoni
+ OG, icons, sitemap, llms, nav/footer, tests. If no route exists, do not create
+ empty metadata, a sitemap entry or a case card to satisfy a template. The
+ specimen can be one file; the board can be the deliverable.
++
+ ## Pen.dev
+ 
+ Use the companion **`pen-dev`** skill for the full workflow. In short:
+@@ -208,7 +272,7 @@ Use the companion **`pen-dev`** skill for the full workflow. In short:
+ Run these from this skill folder, or copy `scripts/` into the project.
+ 
+ ```bash
+-node scripts/audit.mjs --manifest audit.json
++node scripts/audit.mjs --manifest audit.json   # files, SVG, ICO, PNG, tokens, family, forms, story
+ node scripts/qa.mjs --url <the surface URL or file:// path> \
+   --out docs/screenshots --name <slug>
+ ```
+@@ -246,9 +310,10 @@ claim points to a file or route; icons are tested at 16px; the page is readable
+ without JS.
+ 
+ ```
+-brand/         brief.md, DESIGN.md, brandkit.html, <slug>-brandkit.png (3000×2250), assets/
++brand/         brief.md, story.md, DESIGN.md, brandkit.html, <slug>-brandkit.png (3000×2250), assets/
+ public/brand/<slug>/   mark*, wordmark, lockups, glyph, favicons, icons,
+-                       <slug>-brandkit.png, <slug>-tokens.css/json
++                       <slug>-brandkit.png, <slug>-tokens.css/json,
++                       <slug>-forms.css, sheet.html
+ docs/                  <slug>-design-system-audit.md
+ ```
+ 
+@@ -270,12 +335,13 @@ promise only the page and its tokens.
+ Stop when the kit is approved. Do not build the product page inside the brand
+ pass. Hand off:
+ 
+-- `brief.md` and `DESIGN.md` (or the project's design guide/README: the decisions,
+-  rules and what not to do);
++- `brief.md`, `story.md` and `DESIGN.md` (or the project's design guide/README: the
++  decisions, rules and what not to do);
+ - `tokens.json` + `tokens.css`, with the contrast pairs;
+ - `public/brand/<slug>/` (mark, compact mark, wordmark, lockups, favicons, icons);
+ - the board PNG and `brandkit.html`;
+-- the component inventory, form states, motion rule and named gaps;
++- the component inventory, form states and `<slug>-forms.css`, motion rule, theme DNA
++  and named gaps;
+ - the audit and the target surface/stack (route, Storybook, standalone file, pen or print).
+ 
+ Load **`implement-brand-system`** for the HTML/TSX build. It will not redesign
+@@ -296,12 +362,16 @@ and runs the QA gate.
+ - `typography.md` — the typography gate.
+ - `verification.md` — ship checklist and audit format.
+ - `lessons.md` — Case 02 failures and rules.
++- `storytelling.md` — story spine, decision cards, specimen as essay, story audit.
++- `form-theming.md` — theme DNA, material → field recipes, states, shadcn mapping.
++- `skill-audit.md` — audit of this skill, fixes, known gaps.
+ - `examples/sunnyside.md`, `examples/vitrine.md` — the two cases (evidence, not defaults).
+ 
+ ## Scripts and templates
+ 
+-`render-board.mjs`, `render-icons.mjs`, `favicons.py`, `downscale.py`,
+-`extract-wordmark.py`, `audit.mjs`, `qa.mjs`.
++`brand-forge.mjs` (generate the family), `render-board.mjs`, `render-icons.mjs`,
++`favicons.py`, `downscale.py`, `extract-wordmark.py`, `audit.mjs`, `qa.mjs`,
++`sync-skill.sh` (keep `.agents/skills` mirror identical).
+ 
+ `templates/`: `design-system.html`, `brandkit.html`, `single-page.html`,
+ `case-page.tsx`, `audit.json`, `guidelines.md`.
+@@ -313,5 +383,6 @@ and runs the QA gate.
+ 3. Choose the surface and HTML/TSX before building.
+ 4. shadcn/Radix where accessible primitives matter; native for the rest.
+ 5. Typography gate before the first screenshot.
+-6. Scripts for audit/QA; one look; fix the root cause; stop.
+-7. Name what is missing. A guide that hides its gaps is a brochure.
++6. Generate with `brand-forge`, then refine by hand; write the story; match the fields.
++7. Scripts for audit/QA; one look; fix the root cause; stop.
++8. Name what is missing. A guide that hides its gaps is a brochure.
+diff --git a/skills/sunnyside-brand-system/references/board-and-images.md b/skills/sunnyside-brand-system/references/board-and-images.md
+index 74a7f54..504af46 100644
+--- a/skills/sunnyside-brand-system/references/board-and-images.md
++++ b/skills/sunnyside-brand-system/references/board-and-images.md
+@@ -133,3 +133,10 @@ board will fail the one test that matters: the name.
+ 
+ If the client insists on an AI-generated board, the deliverable is a moodboard,
+ not a brand kit. Say so.
++
++## Story panel
++
++One of the nine panels should argue, not display: the one sentence, the mark's
++argument, and the line "why the other five lost". Pull it from `story.md`. If the
++board has no panel that explains a decision, it is a poster. Palette and tokens
++come from `brand.json`; do not hard-code the starter's Sunnyside colours.
+diff --git a/skills/sunnyside-brand-system/references/design-systems.md b/skills/sunnyside-brand-system/references/design-systems.md
+index 5567042..7c1d3db 100644
+--- a/skills/sunnyside-brand-system/references/design-systems.md
++++ b/skills/sunnyside-brand-system/references/design-systems.md
+@@ -88,6 +88,15 @@ The form-level error summary:
+ Do not use a custom div as a checkbox, radio, select or switch. Do not hide the
+ only focus indicator. Do not use colour as the only error signal.
+ 
++## 3b. Theme the form kit
++
++A form kit that ignores the brand is a different product. Derive the fields from
++the same theme DNA as the mark (edge, offset, stroke, radius, ring, density,
++label): see `form-theming.md` for the material → field recipe table, state rules
++and shadcn mapping. `scripts/brand-forge.mjs` generates `--field-*` tokens,
++`<slug>-forms.css` and a working `forms.html`. Field CSS reads tokens only; the
++audit fails raw colours.
++
+ ## 4. Page anatomy
+ 
+ Choose the surface before the route. A proof does not require a router.
+@@ -148,6 +157,7 @@ not source. If no route exists, skip the metadata/route checklist and say
+ - [ ] Tokens generate CSS + JSON from one source.
+ - [ ] 5–10 primitives maximum; each has a documented state.
+ - [ ] One form with all states; keyboard and error summary verified.
++- [ ] Fields share the mark's material (edge, radius, ring); no raw hex in field CSS.
+ - [ ] Light/dark both intentional; text contrast measured.
+ - [ ] 1440 and 390; no horizontal scroll.
+ - [ ] Reduced motion keeps a finished state.
+diff --git a/skills/sunnyside-brand-system/references/form-theming.md b/skills/sunnyside-brand-system/references/form-theming.md
+new file mode 100644
+index 0000000..a951e0f
+--- /dev/null
++++ b/skills/sunnyside-brand-system/references/form-theming.md
+@@ -0,0 +1,108 @@
++# Form theming: fields that match the mark
++
++A form field is the most-used piece of a design system and the first place a
++brand falls apart. Generic inputs on a branded page look like a different
++product. The rule: **the form kit reads the same theme DNA as the mark.**
++
++## 1. Theme DNA
++
++Define one small object. The logo and the fields both read it.
++
++| Key | Values | Mark uses it for | Field uses it for |
++| --- | --- | --- | --- |
++| `edge` | `hard` / `soft` / `none` | tile shadow | field shadow |
++| `offset` | grid units (0 = none) | shadow offset | field shadow offset |
++| `stroke` | grid units | ink edge | border weight (×0.6, min 1.5px) |
++| `radius` + `tile` | rounded / circle / square | tile corners | field radius (half) |
++| `ring` | `offset` / `solid` / `glow` | n/a | focus ring |
++| `density` | compact / cosy / roomy | n/a | field height + gap |
++| `label` | sentence / mono-caps / small-caps | n/a | label style |
++
++`scripts/brand-forge.mjs` derives `--field-*` tokens and `<slug>-forms.css` from
++this object and writes a working `forms.html`. Hand-written fields follow the
++same table.
++
++## 2. Material → field recipe
++
++| Material | Border | Shadow | Focus | Hover | Label | Trap |
++| --- | --- | --- | --- | --- | --- | --- |
++| **Paper / hard offset** (Sunnyside) | 1.5px ink | hard 2.5 offset, no blur | 2px paper gap + 2px accent ring | lift −1px | sentence | blur breaks the "cut paper" idea |
++| **Liquid glass** | 1px edge at 30% | inner highlight, soft | solid 2px ring on a solid chip | brighten fill | sentence | text on blur under 4.5:1; put text on a solid surface |
++| **Dither / 1-bit** | 1px solid ink | none | invert fill | dither step | mono-caps | pattern behind text hurts legibility |
++| **Neo-brutalist** | 3px black | hard 4–6 offset | thick accent bar | offset grows | mono-caps / caps | offset animation janks on mobile |
++| **Editorial / Swiss** | bottom rule only | none | rule thickens + accent | none | small-caps | placeholder-as-label |
++| **Bento / modular** | 1px hairline | soft 1–2px | solid ring | tint | sentence | too many radii; one radius only |
++| **Grain / riso** | 1.5px, slight misregistration | offset in a second ink | accent ring | none | mono-caps | grain texture over text |
++| **Mono / terminal** | 1px, square | none | block cursor + underline | none | mono-caps | tiny type; keep ≥14px |
++
++Pick the row that matches the material you named in the brief. Do not mix
++rows. A hard-offset field next to a glass card is two brands.
++
++## 3. Tokens, not values
++
++Fields read **component tokens**; components read semantic; semantic reads
++primitive. No raw hex inside field CSS (`audit.mjs` fails it).
++
++```css
++--field-bg      --field-fg      --field-border   --field-radius
++--field-shadow  --field-h       --field-gap      --field-pad
++--field-ring    --button-bg     --button-ink
++```
++
++Dark theme: re-derive, do not invert. A hard ink offset vanishes on an ink
++ground, so the dark scope swaps it for the core colour (`brand-forge` does this).
++
++## 4. States are part of the theme
++
++Every control ships these, all in the same material:
++
++| State | Rule |
++| --- | --- |
++| Default | Visible border; placeholder in `--muted`, never a label |
++| Hover | One physical response (lift, tint, dither step); not colour only |
++| Focus-visible | Ring from `--field-ring`; never `outline: none` without it |
++| Filled | No visual change except text; do not turn green on filled |
++| Invalid | `aria-invalid`, border `--danger`, message with a `!` glyph and text |
++| Disabled | 55% opacity, no shadow, no hover; keep value and label |
++| Success | Text confirmation; never a green border alone |
++| Active/pressed | Press into the page (offset → 0) when the material is raised |
++
++Never use colour as the only signal. The error glyph and text are not optional.
++
++## 5. Control checklist
++
++- Text, email, password (show/hide as a button with `aria-pressed`), select,
++  textarea + counter, checkbox, radio (fieldset + legend), switch
++  (`role="switch"`, `aria-checked`), range, file, submit/reset, disabled.
++- Visible `<label>` for every control; hint for non-obvious formats.
++- 44px minimum target where practical; 16px type on mobile inputs.
++- Error summary: `role="alert"`, `tabindex="-1"`, focused on invalid submit,
++  links to each field, cleared per-field on edit.
++- Native elements first; Radix for Select/Dialog/Popover/Switch/Slider when the
++  host already has it. Style Radix with the same `--field-*` tokens via
++  `data-slot` / `data-state`.
++
++## 6. shadcn / Tailwind mapping
++
++```css
++/* host app owns --input, --ring, --radius: map, do not rename */
++:root {
++  --input: var(--field-border-color);
++  --ring: var(--focus);
++  --radius: var(--field-radius);
++}
++```
++
++Style shadcn `Input`, `Textarea`, `Select`, `Checkbox`, `Switch` by
++overriding the class with the field tokens, not by forking the primitive.
++Keep `data-slot` and `data-state` intact.
++
++## 7. Acceptance
++
++- [ ] The field has the same edge, radius family and shadow logic as the mark.
++- [ ] A screenshot of mark + field + button reads as one sheet of material.
++- [ ] All states present in light and dark, keyboard focus visible in both.
++- [ ] No raw hex in field CSS; contrast measured for text, border and ring.
++- [ ] Error, disabled and success verified in the browser, not assumed.
++- [ ] Reduced motion keeps the finished state.
++- [ ] Theme DNA recorded in tokens JSON so the next person can regenerate.
+diff --git a/skills/sunnyside-brand-system/references/logo-system.md b/skills/sunnyside-brand-system/references/logo-system.md
+index 6ee6c17..ae46bc9 100644
+--- a/skills/sunnyside-brand-system/references/logo-system.md
++++ b/skills/sunnyside-brand-system/references/logo-system.md
+@@ -121,3 +121,29 @@ palette is the system, not a mood.
+ - [ ] all SVGs use the same viewBox and colours
+ - [ ] no clipart, no copied mark, no live text
+ - [ ] the guide explains why this mark, not just what it is
++
++## 9. Generating the family (vector, text-free)
++
++`scripts/brand-forge.mjs` implements the build above as code so every run starts
++with a complete, tested family instead of a blank file.
++
++| Concept | Construction | Reads as | Watch for |
++| --- | --- | --- | --- |
++| `sunburst` | n rays clipped by the tile, one disc | day, warmth, output | the stock sun; fix with material (offset, crop, stroke) |
++| `aperture` | n blades around a hole | focus, capture, decision | blade count above 6 turns to mud at 16px |
++| `orbit` | concentric rings + one dot | system, cycle, signal | compact needs a single ring |
++| `hatch` | diagonal lines + a disc | drawing, shading, craft | line gap must grow in the compact |
++| `stack` | offset plates | layers, versions, depth | keep ≤ 3 plates, 2 in compact |
++| `facet` | circle cut by a diagonal | decision, split, light | thin cut disappears at 16px |
++
++Process: `--init <concept>` for three or four concepts → compare each
++`sheet.html` at 16px → keep one → write why the rest lost → hand-refine points on
++the grid → re-run. Vary **theme DNA** before geometry; material is what makes the
++mark yours.
++
++Guarantees the generator makes (and `audit.mjs` re-checks): one viewBox for the
++whole family, no `<text>`, compact has fewer shapes, reverse and mono are drawn
++not flattened, every contrast pair measured.
++
++Not guaranteed: that the idea is good. A generated mark is a draft. Judge it with
++the six tests in §2, then argue for it in `story.md` (`storytelling.md`).
+diff --git a/skills/sunnyside-brand-system/references/skill-audit.md b/skills/sunnyside-brand-system/references/skill-audit.md
+new file mode 100644
+index 0000000..86b45a0
+--- /dev/null
++++ b/skills/sunnyside-brand-system/references/skill-audit.md
+@@ -0,0 +1,38 @@
++# Skill audit: sunnyside-brand-system v2.0 → v2.1
++
++An audit of the skill itself. Findings are ordered by how much they hurt a
++real run. Each states the fix and where it landed.
++
++## Findings
++
++| # | Finding | Impact | Fix (v2.1) |
++| --- | --- | --- | --- |
++| 1 | Logo guidance was prose only. Every run redrew the mark by hand and rebuilt tokens, forms and a proof sheet separately. | Slow, inconsistent, easy to ship a mark that was never tested at 16px. | `scripts/brand-forge.mjs`: one config → full mark family, tokens, form kit, proof sheet, story scaffold. |
++| 2 | Only one construction method existed in code terms (Sunnyside's cut sun). | Marks converged on rays and circles. | Six construction concepts: sunburst, aperture, orbit, hatch, stack, facet. Add more as evidence, not as templates. |
++| 3 | Storytelling lived in one-line rules ("document the decision"). | Guides described assets and never argued. | `references/storytelling.md`: story spine, one sentence, decision cards, specimen reading order, story audit. |
++| 4 | The form kit was specified as controls and ARIA, not as *theme*. Fields looked generic next to a distinctive mark. | Brand broke at the first input. | `references/form-theming.md` + generated `--field-*` tokens and `<slug>-forms.css` from shared theme DNA. |
++| 5 | `audit.mjs` checked files, ICO, PNG, contrast. It could not tell a good family from a broken one. | Mismatched viewBoxes, a compact mark more complex than the primary, raw hex in field CSS and an unfinished guide all passed. | New checks: `family`, `formsCss`, `story`. |
++| 6 | The skill lives twice: `skills/` and `.agents/skills/`. | Silent drift between the two copies. | `scripts/sync-skill.sh` copies one to the other and verifies with `diff -rq`. |
++| 7 | Output contract did not list `story.md`, the form CSS or the proof sheet. | Handoff to `implement-brand-system` missed the narrative and form rules. | Contract and handoff updated. |
++| 8 | Missing blank line before `## Pen.dev` in SKILL.md; version still 2.0. | Cosmetic; renders as a run-on heading in some viewers. | Fixed; version 2.1. |
++| 9 | `templates/brandkit.html` had a fixed palette and no story panel. | Boards looked like Sunnyside regardless of brand. | Story panel guidance added to `board-and-images.md`; generator emits palette from config. |
++
++## Known gaps (not fixed here)
++
++- **Wordmark outlining still needs `uharfbuzz` + a font file.** `brand-forge`
++  consumes the output of `extract-wordmark.py`; it does not shape type itself.
++- **No in-repo visual regression.** `sheet.html` is for human review at 16px.
++- **Concepts are geometric.** Figurative or hand-drawn marks still need hand
++  drawing, then the same family/tokens/forms pipeline.
++- **Form kit is native HTML.** Radix/shadcn mapping is documented, not generated.
++- **Chromium only** for `qa.mjs` and `render-icons.mjs`.
++- **Story quality is a human judgement.** The audit checks structure only.
++
++## Re-run the audit
++
++```bash
++node scripts/brand-forge.mjs --init sunburst > brand.json
++node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug>
++node scripts/audit.mjs --manifest audit.json
++bash scripts/sync-skill.sh   # when this skill is mirrored in .agents/skills
++```
+diff --git a/skills/sunnyside-brand-system/references/storytelling.md b/skills/sunnyside-brand-system/references/storytelling.md
+new file mode 100644
+index 0000000..81a3b5a
+--- /dev/null
++++ b/skills/sunnyside-brand-system/references/storytelling.md
+@@ -0,0 +1,122 @@
++# Storytelling: the brand kit and the design system as an argument
++
++A kit that only shows assets is a poster. A kit that explains *why* is a
++system. Storytelling here is not copywriting polish. It is the reasoning,
++ordered so a stranger can follow it, reject it, or extend it.
++
++## 1. The story spine (brand kit)
++
++Write these seven beats in `story.md` (`brand-forge.mjs` scaffolds it). One or
++two sentences each. If a beat needs a paragraph, the idea is not reduced yet.
++
++| Beat | Question it answers | Sunnyside example |
++| --- | --- | --- |
++| **Belief** | What do we hold that others do not? | Work should feel made by a person. |
++| **Enemy** | What does that belief push against? | Identity that looks generated and cannot be inspected. |
++| **Mark** | What does the symbol argue, without naming the shape? | A day cut from paper and stuck on the page. |
++| **Material** | What is everything made of? | Paper, hard ink offset, one cobalt field. |
++| **Voice** | How does it sound when it is the one speaking? | Plain, warm, first person, no superlatives. |
++| **Proof** | What can be checked? | 14.55:1 ink on paper; a 16px compact mark that reads. |
++| **Gap** | What is not done yet? | No visual regression; no motion spec. |
++
++Rules:
++
++- **The enemy is a practice, not a competitor.** "Generic marks" is an enemy.
++  "Acme Corp" is not.
++- **The mark argues.** "A sun" describes. "The sunny side of a record" argues.
++- **Material before mood.** Say what it is made of, not how it should feel.
++- **Proof is a number, a path or a screenshot.** Adjectives are not proof.
++- **The gap is mandatory.** A story with no gap is marketing.
++
++## 2. The one sentence
++
++Everything is judged against one sentence that can be *rejected*:
++
++> `<Name>` is `<category>` for `<audience>` that `<promise>`, made of `<material>`.
++
++Test: can a reviewer say "no, that is not it" about a specific asset? If every
++asset passes trivially, the sentence is too vague.
++
++## 3. Decision cards (design system)
++
++A design system's story is its decisions. Every non-obvious token, component or
++rule gets a card. Four lines, always the same shape:
++
++```
++Decision    Hard 2.5 offset, never a blur.
++Because     The mark is cut paper; a blur changes the material.
++Not when    A floating overlay that must read above content (use a solid scrim).
++Breaks next Dark mode: the ink offset vanishes; swap it for the core colour.
++```
++
++- Write cards for: the material, the focus ring, the field edge, the radius
++  scale, the motion rule, the one loud colour.
++- No more than ~8 cards. Every extra card dilutes the ones that matter.
++- "Breaks next" is the honest part. It becomes the audit backlog.
++
++## 4. The reading order of a specimen
++
++A design-system page should read like an essay with proof, not a catalogue.
++
++| Section | Role in the story | Caption formula |
++| --- | --- | --- |
++| Hero | The promise + one number | "`<Name>` v`<n>`: `<promise>`. `<stat>`." |
++| Foundation | The belief | "Why this exists." |
++| Material | The one effect | "What everything is made of, and what it is not." |
++| Marks | The argument | "Why this mark, why the other five lost." |
++| Colour | Roles, not swatches | "Each colour has one job. Contrast measured." |
++| Type | The voice | "Display for names, reading for sentences, mono for facts." |
++| Parts | The material applied | "Same edge as the mark." |
++| Forms | The proof | "A field is cut from the same sheet as the logo." |
++| Motion | The temperament | "One ease, three durations, a finished still." |
++| Voice | The words | "Do / don't, with real sentences." |
++| Tokens | The contract | "Copy this. Do not hand-edit it." |
++| Audit / endcap | The gap | "What is not verified." |
++
++Captions are one sentence, present tense, and state the reason, not the label.
++"Hard offset" is a label. "Hard offset, because the mark is cut paper" is a
++caption.
++
++## 5. Writing the captions and the hero
++
++- **Hero:** name, one-line promise, three stats (assets, contrast, tokens), one
++  sheet. No adjectives that need proof.
++- **Captions:** reason first, then the value. Max 20 words.
++- **Empty states and errors are story too.** They are where the voice is
++  tested. Write them in the brand voice, plainly. Never "Oops!".
++- **Use real copy.** Lorem proves nothing about the voice.
++
++## 6. Voice card
++
++```
++We are      plain, specific, warm, first person
++We are not  hyped, vague, apologetic, jargon-first
++Say         "Saved. You can close this tab."
++Don't say   "Awesome! Your changes have been successfully saved!"
++```
++
++Give the voice three real sentences: a headline, an error, a success. If they
++could belong to any product, rewrite them.
++
++## 7. Story audit (run before the board)
++
++- [ ] The one sentence is on the first screen and can be rejected.
++- [ ] The mark has an argument, not a description.
++- [ ] The rejection note for the other five marks exists.
++- [ ] Every non-obvious rule has a decision card with a "breaks next".
++- [ ] Captions state reasons. No caption is only a label.
++- [ ] Copy is real; the three voice sentences are on the page.
++- [ ] Gaps are named, with an owner or a next step.
++- [ ] No claim without a number, path or screenshot.
++- [ ] A reader who skips the visuals can still follow the argument.
++
++`audit.mjs` can enforce the structure (`story` check: required sections, no
++TODO). Whether the argument is good is a human judgement; do not fake it.
++
++## 8. Anti-patterns
++
++- **The mood board narrative:** "warm, human, bold" with no material or number.
++- **The origin myth:** a founder story that does not change a single decision.
++- **The fortune cookie:** a belief nobody could disagree with.
++- **The museum:** every token documented, no card explaining why any exists.
++- **The brochure:** no gap section.
+diff --git a/skills/sunnyside-brand-system/scripts/audit.mjs b/skills/sunnyside-brand-system/scripts/audit.mjs
+index 205f7e3..36dd780 100755
+--- a/skills/sunnyside-brand-system/scripts/audit.mjs
++++ b/skills/sunnyside-brand-system/scripts/audit.mjs
+@@ -7,6 +7,8 @@
+  * Manifest paths resolve from the current working directory. A manifest can
+  * name required files, SVG folders, assets that must not contain <text>, the
+  * favicon ICO, PNG dimensions, and a tokens JSON with contrast pairs.
++ * Optional: `family` (mark viewBox + compact simplicity), `formsCss` (tokens
++ * only, focus/error/disabled states) and `story` (required sections, no TODO).
+  *
+  * Exit code 1 means at least one check failed.
+  */
+@@ -197,6 +199,68 @@ if (manifest.tokens) {
+   }
+ }
+ 
++// 6. Mark family: same viewBox, compact is a separate and simpler drawing
++if (manifest.family) {
++  const dir = join(root, manifest.family)
++  const names = ['mark', 'mark-compact', 'glyph', 'mark-reverse', 'mark-mono']
++  const boxes = new Map()
++  const counts = {}
++  for (const name of names) {
++    try {
++      const source = await readFile(join(dir, `${name}.svg`), 'utf8')
++      boxes.set(name, source.match(/viewBox\s*=\s*["']([^"']+)["']/)?.[1])
++      counts[name] = (source.match(/<(path|circle|rect|ellipse|polygon|line)[\s>]/g) || []).length
++    } catch {
++      warn(`family: ${name}.svg missing in ${manifest.family}`)
++    }
++  }
++  if (new Set(boxes.values()).size > 1) {
++    fail(`family: marks use different viewBoxes (${[...boxes].map(([n, v]) => `${n} ${v}`).join('; ')})`)
++  } else if (boxes.size) {
++    pass(`family: ${boxes.size} marks share viewBox ${[...boxes.values()][0]}`)
++  }
++  if (counts['mark-compact'] && counts.mark && counts['mark-compact'] > counts.mark) {
++    fail(`family: compact mark has more shapes (${counts['mark-compact']}) than the primary (${counts.mark})`)
++  }
++}
++
++// 7. Form CSS derives from the theme: no raw colours, real focus, reduced motion
++if (manifest.formsCss) {
++  try {
++    const css = await readFile(join(root, manifest.formsCss), 'utf8')
++    const body = css.replace(/\/\*[\s\S]*?\*\//g, '')
++    const raw = body.match(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/gi) || []
++    if (raw.length) fail(`forms: ${raw.length} raw colour value(s) in ${manifest.formsCss}; read tokens instead`)
++    else pass('forms: no raw colours, tokens only')
++    if (!/:focus-visible/.test(body)) fail('forms: no :focus-visible state')
++    if (!/\[aria-invalid/.test(body)) fail('forms: no aria-invalid error state')
++    if (!/:disabled/.test(body)) fail('forms: no disabled state')
++    if (!/prefers-reduced-motion/.test(body)) warn('forms: no prefers-reduced-motion block')
++    if (/outline\s*:\s*(none|0)\b/.test(body) && !/box-shadow\s*:\s*var\(--[\w-]*ring/.test(body)) {
++      fail('forms: outline removed without a replacement focus ring')
++    }
++  } catch (error) {
++    fail(`forms check failed: ${manifest.formsCss} (${error.message})`)
++  }
++}
++
++// 8. Story: the guide must argue, not only describe
++if (manifest.story) {
++  try {
++    const md = await readFile(join(root, manifest.story), 'utf8')
++    const need = manifest.storyHeadings ?? ['belief', 'enemy', 'mark', 'material', 'proof', 'missing']
++    const lower = md.toLowerCase()
++    const absent = need.filter((word) => !new RegExp(`^#{1,3}\\s.*${word}`, 'm').test(lower))
++    if (absent.length) fail(`story: missing section(s): ${absent.join(', ')}`)
++    else pass(`story: ${need.length} required sections present`)
++    const todos = (md.match(/TODO/g) || []).length
++    if (todos) fail(`story: ${todos} TODO left in ${manifest.story}`)
++    if (!/why the other .* lost|rejected|lost because/i.test(md)) warn('story: no note on why the other marks lost')
++  } catch (error) {
++    fail(`story check failed: ${manifest.story} (${error.message})`)
++  }
++}
++
+ function contrast(fg, bg) {
+   const luminance = (hex) => {
+     const channels = hex
+diff --git a/skills/sunnyside-brand-system/scripts/brand-forge.mjs b/skills/sunnyside-brand-system/scripts/brand-forge.mjs
+new file mode 100644
+index 0000000..3a7282d
+--- /dev/null
++++ b/skills/sunnyside-brand-system/scripts/brand-forge.mjs
+@@ -0,0 +1,549 @@
++#!/usr/bin/env node
++/**
++ * brand-forge — generate a full, drawn (no live text) brand kit from one JSON
++ * config. Dependency-free Node. Every shape sits on a 64-unit grid.
++ *
++ *   node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug>
++ *   node scripts/brand-forge.mjs --init sunburst > brand.json      # starter config
++ *   node scripts/brand-forge.mjs --list                            # concepts
++ *
++ * Writes (all SVG are text-free, share one viewBox per family member):
++ *   mark.svg  mark-compact.svg  glyph.svg  mark-reverse.svg  mark-mono.svg
++ *   icon.svg (favicon field)  lockup.svg  lockup-reverse.svg  lockup-stacked.svg
++ *   <slug>-tokens.css  <slug>-tokens.json   (audit.mjs schema + contrast pairs)
++ *   <slug>-forms.css   forms.html           (form kit derived from the theme DNA)
++ *   sheet.html                              (16/32/64/128 proof on light + dark)
++ *   story.md                                (brand story scaffold from config.story)
++ *
++ * The wordmark is outlined by extract-wordmark.py. Pass its output with
++ * --wordmark wordmark.svg so lockups embed real paths. Without it the lockups
++ * are skipped and the report says so; never fake a wordmark with <text>.
++ *
++ * Concepts are construction methods, not clip art:
++ *   sunburst  rays cut by the tile (Sunnyside)     aperture  n-blade iris
++ *   orbit     rings + one moving dot               hatch     negative-space lines
++ *   stack     offset layered plates                 facet     circle cut by a diagonal
++ */
++import { mkdir, readFile, writeFile } from 'node:fs/promises'
++import { join, resolve } from 'node:path'
++
++const args = process.argv.slice(2)
++const flag = (name, fallback) => {
++  const i = args.indexOf(`--${name}`)
++  return i === -1 ? fallback : args[i + 1]
++}
++const has = (name) => args.includes(`--${name}`)
++
++const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet']
++
++const STARTER = {
++  name: 'Sunnyside',
++  slug: 'sunnyside',
++  concept: 'sunburst',
++  palette: {
++    paper: '#f3ecdf',
++    paperHi: '#fffaf1',
++    ink: '#191a2e',
++    field: '#3d53d6',
++    core: '#ffd23f',
++    spark: '#ff6a2b',
++    muted: '#5f5b6e',
++    danger: '#b3261e',
++    success: '#1f7a4d',
++  },
++  // Theme DNA. One material, read by the mark AND the form kit.
++  dna: {
++    edge: 'hard', // hard | soft | none
++    offset: 2.5, // hard shadow offset on the 64 grid (0 for none)
++    stroke: 2.6, // ink edge on the 64 grid
++    radius: 16, // tile corner radius on the 64 grid
++    tile: 'rounded', // rounded | circle | square
++    face: false,
++    density: 'cosy', // compact | cosy | roomy
++    label: 'sentence', // sentence | mono-caps | small-caps
++    ring: 'offset', // offset | solid | glow
++    font: { display: 'Syne', ui: 'Geist', mono: 'Geist Mono' },
++  },
++  params: { rays: 12, compactRays: 8, sunRadius: 16.5 },
++  story: {
++    belief: 'Work should feel made by a person.',
++    enemy: 'Identity that looks generated and cannot be inspected.',
++    promise: 'A system you can read, copy and extend without asking.',
++    proof: 'Every asset has a size, a source and a reason.',
++  },
++}
++
++if (has('list')) {
++  console.log(CONCEPTS.join('\n'))
++  process.exit(0)
++}
++if (has('init')) {
++  const concept = flag('init', 'sunburst')
++  if (!CONCEPTS.includes(concept)) fail(`unknown concept: ${concept}`)
++  const cfg = structuredClone(STARTER)
++  cfg.concept = concept
++  if (concept === 'hatch' || concept === 'facet') {
++    cfg.dna.offset = 0
++    cfg.dna.edge = 'none'
++    cfg.dna.tile = 'square'
++    cfg.dna.radius = 6
++  }
++  if (concept === 'orbit') cfg.dna.tile = 'circle'
++  console.log(JSON.stringify(cfg, null, 2))
++  process.exit(0)
++}
++
++function fail(message) {
++  console.error(`brand-forge: ${message}`)
++  process.exit(1)
++}
++
++const configPath = flag('config')
++if (!configPath) fail('--config <brand.json> is required (try --init sunburst)')
++const outDir = resolve(process.cwd(), flag('out', 'brand-out'))
++const cfg = JSON.parse(await readFile(resolve(process.cwd(), configPath), 'utf8'))
++const merged = {
++  ...STARTER,
++  ...cfg,
++  palette: { ...STARTER.palette, ...cfg.palette },
++  dna: { ...STARTER.dna, ...cfg.dna, font: { ...STARTER.dna.font, ...cfg.dna?.font } },
++  params: { ...STARTER.params, ...cfg.params },
++  story: { ...STARTER.story, ...cfg.story },
++}
++const { name, slug, concept, palette: P, dna, params, story } = merged
++if (!CONCEPTS.includes(concept)) fail(`unknown concept "${concept}". Use: ${CONCEPTS.join(', ')}`)
++for (const [key, value] of Object.entries(P)) {
++  if (!/^#[0-9a-f]{6}$/i.test(value)) fail(`palette.${key} must be #rrggbb, got ${value}`)
++}
++
++// ───────────────────────── maths ─────────────────────────
++const r = (n) => Math.round(n * 100) / 100
++const rad = (deg) => (deg * Math.PI) / 180
++const pt = (cx, cy, radius, deg) => [cx + radius * Math.cos(rad(deg)), cy + radius * Math.sin(rad(deg))]
++const lum = (hex) => {
++  const c = hex
++    .slice(1)
++    .match(/.{2}/g)
++    .map((v) => parseInt(v, 16) / 255)
++    .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
++  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
++}
++const ratio = (a, b) => {
++  const x = lum(a)
++  const y = lum(b)
++  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
++}
++// Pick the readable one of two inks on a field.
++const onField = (bg) => (ratio(P.ink, bg) >= ratio(P.paperHi, bg) ? P.ink : P.paperHi)
++
++// ───────────────────────── tile ─────────────────────────
++const T = { x: 3, y: 3, s: 58 } // 58 square on the 64 grid; offset eats the margin
++function tileShape(extra = '', inset = 0) {
++  const x = T.x + inset
++  const y = T.y + inset
++  const s = T.s - inset * 2
++  if (dna.tile === 'circle') return `<circle cx="${r(x + s / 2)}" cy="${r(y + s / 2)}" r="${r(s / 2)}" ${extra}/>`
++  const rx = dna.tile === 'square' ? Math.min(dna.radius, 4) : Math.max(dna.radius - inset, 2)
++  return `<rect x="${r(x)}" y="${r(y)}" width="${r(s)}" height="${r(s)}" rx="${r(rx)}" ${extra}/>`
++}
++const clipId = `${slug}-tile`
++
++// ───────────────────────── concepts ─────────────────────────
++// Each returns inner SVG for the content sitting INSIDE the tile, in a palette
++// object c = {field, core, spark, ink}. `compact` builds a separate drawing.
++const concepts = {
++  sunburst(c, compact) {
++    const cx = 32
++    const cy = compact ? 32 : 31
++    const n = compact ? params.compactRays : params.rays
++    const sun = compact ? params.sunRadius + 3.5 : params.sunRadius
++    const w = compact ? 3.4 : 2.2
++    const rays = []
++    for (let i = 0; i < n; i++) {
++      const a = (360 / n) * i - 90
++      const [x1, y1] = pt(cx, cy, sun + 3, a)
++      const [x2, y2] = pt(cx, cy, 46, a)
++      rays.push(`M${r(x1)} ${r(y1)}L${r(x2)} ${r(y2)}`)
++    }
++    const eyes = !dna.face || compact ? '' : face(cx, cy, c)
++    return (
++      `<g clip-path="url(#${clipId})">` +
++      `<path d="${rays.join('')}" fill="none" stroke="${c.ink}" stroke-width="${w}" stroke-linecap="round"/>` +
++      `</g>` +
++      `<circle cx="${cx}" cy="${cy}" r="${sun}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 3 : dna.stroke}"/>` +
++      eyes
++    )
++  },
++  aperture(c, compact) {
++    const n = compact ? 5 : 6
++    const rOut = compact ? 24 : 22
++    const rIn = compact ? 8 : 6
++    const blades = []
++    for (let i = 0; i < n; i++) {
++      const a = (360 / n) * i - 90
++      const [x1, y1] = pt(32, 32, rOut, a)
++      const [x2, y2] = pt(32, 32, rOut, a + 360 / n - 6)
++      const [x3, y3] = pt(32, 32, rIn, a + 360 / n + 40)
++      blades.push(
++        `<path d="M${r(x1)} ${r(y1)}A${rOut} ${rOut} 0 0 1 ${r(x2)} ${r(y2)}L${r(x3)} ${r(y3)}Z" fill="${i % 2 ? c.core : c.spark}" stroke="${c.ink}" stroke-width="${compact ? 2.4 : 1.8}" stroke-linejoin="round"/>`,
++      )
++    }
++    return blades.join('')
++  },
++  orbit(c, compact) {
++    const rings = compact ? [18] : [9, 16, 23]
++    const stroke = compact ? 4 : 2.4
++    const body = rings
++      .map((rr) => `<circle cx="32" cy="32" r="${rr}" fill="none" stroke="${c.ink}" stroke-width="${stroke}"/>`)
++      .join('')
++    const [dx, dy] = pt(32, 32, rings[rings.length - 1], -48)
++    return (
++      body +
++      `<circle cx="32" cy="32" r="${compact ? 6 : 5}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 2.6 : 1.8}"/>` +
++      `<circle cx="${r(dx)}" cy="${r(dy)}" r="${compact ? 5 : 4}" fill="${c.spark}" stroke="${c.ink}" stroke-width="${compact ? 2.4 : 1.8}"/>`
++    )
++  },
++  hatch(c, compact) {
++    const gap = compact ? 9 : 5.5
++    const w = compact ? 3.6 : 2
++    const lines = []
++    for (let x = -64; x < 128; x += gap) lines.push(`M${r(x)} 64L${r(x + 64)} 0`)
++    const orb = compact ? 13 : 15
++    return (
++      `<g clip-path="url(#${clipId})"><path d="${lines.join('')}" fill="none" stroke="${c.ink}" stroke-width="${w}"/></g>` +
++      `<circle cx="32" cy="32" r="${orb}" fill="${c.core}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.4}"/>`
++    )
++  },
++  stack(c, compact) {
++    const plates = compact ? 2 : 3
++    const size = compact ? 28 : 25
++    const step = compact ? 9 : 7.5
++    const fills = [c.spark, c.core, c.paper]
++    let out = ''
++    for (let i = 0; i < plates; i++) {
++      const x = 32 - size / 2 - ((plates - 1) * step) / 2 + i * step
++      const y = 32 - size / 2 + ((plates - 1) * step) / 2 - i * step
++      out += `<rect x="${r(x)}" y="${r(y)}" width="${size}" height="${size}" rx="${compact ? 5 : 4}" fill="${fills[i]}" stroke="${c.ink}" stroke-width="${compact ? 3 : 2.2}"/>`
++    }
++    return out
++  },
++  facet(c, compact) {
++    const rr = compact ? 19 : 17
++    const cut = compact ? 4 : 3
++    return (
++      `<defs><clipPath id="${slug}-fa"><circle cx="32" cy="32" r="${rr}"/></clipPath></defs>` +
++      `<g clip-path="url(#${slug}-fa)">` +
++      `<rect x="10" y="10" width="44" height="44" fill="${c.core}"/>` +
++      `<path d="M8 44L44 8L56 8L56 20L20 56L8 56Z" fill="${c.spark}"/>` +
++      `<path d="M8 44L44 8" stroke="${c.ink}" stroke-width="${cut}"/></g>` +
++      `<circle cx="32" cy="32" r="${rr}" fill="none" stroke="${c.ink}" stroke-width="${compact ? 3.2 : 2.4}"/>`
++    )
++  },
++}
++
++function face(cx, cy, c) {
++  const e = 5.4
++  const y = cy - 2
++  return (
++    `<path d="M${cx - e - 2} ${y}h4M${cx + e - 2} ${y}h4" stroke="${c.ink}" stroke-width="2.4" stroke-linecap="round"/>` +
++    `<path d="M${cx - 6} ${cy + 4.5}Q${cx} ${cy + 10} ${cx + 6} ${cy + 4.5}" fill="none" stroke="${c.ink}" stroke-width="2.4" stroke-linecap="round"/>` +
++    `<circle cx="${cx - 10.5}" cy="${cy + 4}" r="2.1" fill="${c.spark}" opacity=".55"/><circle cx="${cx + 10.5}" cy="${cy + 4}" r="2.1" fill="${c.spark}" opacity=".55"/>`
++  )
++}
++
++// ───────────────────────── assemblies ─────────────────────────
++const svgOpen = (w = 64, h = 64, title = name) =>
++  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${title}">`
++
++function buildMark({ colors, compact = false, tile = true, shadow = true, field = colors.field }) {
++  const off = compact || !shadow || dna.edge === 'none' ? 0 : dna.offset
++  const stroke = compact ? 3.2 : dna.stroke
++  const defs = `<defs><clipPath id="${clipId}">${tileShape('', 0)}</clipPath></defs>`
++  const edge = dna.edge === 'none' ? 'none' : colors.ink
++  const parts = [defs]
++  if (tile && off > 0) parts.push(`<g transform="translate(${off} ${off})">${tileShape(`fill="${colors.ink}"`)}</g>`)
++  if (tile) parts.push(tileShape(`fill="${field}" stroke="${edge}" stroke-width="${edge === 'none' ? 0 : stroke}"`))
++  parts.push(concepts[concept](colors, compact))
++  return `${svgOpen()}${parts.join('')}</svg>\n`
++}
++const base = { field: P.field, core: P.core, spark: P.spark, ink: P.ink, paper: P.paperHi }
++const outputs = {}
++outputs['mark.svg'] = buildMark({ colors: base })
++outputs['mark-compact.svg'] = buildMark({ colors: base, compact: true })
++outputs['glyph.svg'] = buildMark({ colors: base, tile: false, shadow: false })
++// Reversed: tile in ink, drawing lines in paper so it holds on a dark ground.
++outputs['mark-reverse.svg'] = buildMark({
++  colors: { field: P.ink, core: P.core, spark: P.spark, ink: P.paperHi, paper: P.ink },
++  shadow: false,
++})
++// One-colour stamp is DRAWN: all fills collapse to ink/paper with the same geometry.
++outputs['mark-mono.svg'] = buildMark({
++  colors: { field: P.paperHi, core: P.paperHi, spark: P.paperHi, ink: P.ink, paper: P.paperHi },
++  shadow: dna.edge === 'hard',
++})
++// Favicon field: the compact mark, with an opaque ground so it never vanishes on chrome.
++outputs['icon.svg'] = buildMark({ colors: base, compact: true })
++
++// Lockups (need an outlined wordmark)
++const wordPath = flag('wordmark')
++let reportLockup = 'skipped (pass --wordmark from extract-wordmark.py)'
++if (wordPath) {
++  const raw = await readFile(resolve(process.cwd(), wordPath), 'utf8')
++  const vb = raw.match(/viewBox\s*=\s*["']([\d.\s-]+)["']/)
++  if (!vb) fail('wordmark.svg has no viewBox')
++  if (/<text[\s>]/.test(raw)) fail('wordmark.svg contains live <text>; outline it first')
++  const [, , ww, wh] = vb[1].trim().split(/\s+/).map(Number)
++  const inner = raw.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '')
++  const markH = 64
++  const targetH = 20 // wordmark cap height on the 64 grid
++  const scale = targetH / wh
++  const gap = 12
++  const wordW = ww * scale
++  const place = (fill, markSvg, stacked) => {
++    const body = markSvg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').replace(new RegExp(clipId, 'g'), `${clipId}-l${stacked ? 's' : 'h'}${fill === P.paperHi ? 'r' : ''}`)
++    const word = `<g transform="translate(${stacked ? r((Math.max(64, wordW) - wordW) / 2) : 64 + gap} ${stacked ? markH + 8 : r((markH - targetH) / 2)}) scale(${r(scale * 1000) / 1000})" fill="${fill}" color="${fill}">${inner}</g>`
++    const markX = stacked ? r((Math.max(64, wordW) - 64) / 2) : 0
++    const w = stacked ? Math.max(64, wordW) : 64 + gap + wordW
++    const h = stacked ? markH + 8 + targetH : markH
++    return `${svgOpen(r(w), r(h), name)}<g transform="translate(${markX} 0)">${body}</g>${word}</svg>\n`
++  }
++  outputs['lockup.svg'] = place(P.ink, outputs['mark.svg'], false)
++  outputs['lockup-reverse.svg'] = place(P.paperHi, outputs['mark-reverse.svg'], false)
++  outputs['lockup-stacked.svg'] = place(P.ink, outputs['mark.svg'], true)
++  outputs['wordmark.svg'] = raw
++  reportLockup = `built from ${wordPath}`
++}
++
++// ───────────────────────── tokens ─────────────────────────
++const dens = { compact: { field: 36, gap: 12, pad: 10 }, cosy: { field: 44, gap: 16, pad: 12 }, roomy: { field: 52, gap: 20, pad: 16 } }[dna.density]
++const ringShadow = {
++  offset: `0 0 0 2px ${P.paperHi}, 0 0 0 4px ${P.field}`,
++  solid: `0 0 0 3px ${P.field}`,
++  glow: `0 0 0 3px ${P.field}55, 0 0 18px ${P.field}66`,
++}[dna.ring]
++const fieldShadow = dna.edge === 'hard' ? `${dna.offset / 16}rem ${dna.offset / 16}rem 0 ${P.ink}` : dna.edge === 'soft' ? `0 1px 2px ${P.ink}22` : 'none'
++const fieldRadius = dna.tile === 'circle' ? '999px' : dna.tile === 'square' ? '4px' : `${Math.round(dna.radius * 0.5)}px`
++const fieldBorder = dna.edge === 'none' ? `1px solid ${P.ink}55` : `${Math.max(1.5, dna.stroke * 0.6).toFixed(1)}px solid ${P.ink}`
++
++const tokensRaw = {
++  primitives: Object.entries(P).map(([k, v]) => ({ name: `--${slug}-${k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())}`, value: v })),
++  semantic: {
++    light: [
++      ['--bg', P.paper], ['--surface', P.paperHi], ['--fg', P.ink], ['--muted', P.muted],
++      ['--border', P.ink], ['--accent', P.field], ['--accent-ink', onField(P.field)],
++      ['--focus', P.field], ['--danger', P.danger], ['--success', P.success],
++    ],
++    dark: [
++      ['--bg', P.ink], ['--surface', '#262742'], ['--fg', P.paper], ['--muted', '#b6b2c4'],
++      ['--border', P.paper], ['--accent', P.core], ['--accent-ink', onField(P.core)],
++      ['--focus', P.core], ['--danger', '#ff8a80'], ['--success', '#6fdc9f'],
++    ],
++  },
++  components: {
++    light: [
++      ['--field-bg', P.paperHi], ['--field-fg', P.ink], ['--field-border', fieldBorder],
++      ['--field-radius', fieldRadius], ['--field-shadow', fieldShadow], ['--field-h', `${dens.field}px`],
++      ['--field-gap', `${dens.gap}px`], ['--field-pad', `${dens.pad}px`], ['--field-ring', ringShadow],
++      ['--button-bg', P.field], ['--button-ink', onField(P.field)],
++    ],
++    dark: [
++      ['--field-bg', '#262742'], ['--field-fg', P.paper], ['--field-border', fieldBorder.replace(P.ink, P.paper)],
++      ['--field-radius', fieldRadius], ['--field-shadow', dna.edge === 'hard' ? `${dna.offset / 16}rem ${dna.offset / 16}rem 0 ${P.core}` : fieldShadow],
++      ['--field-h', `${dens.field}px`], ['--field-gap', `${dens.gap}px`], ['--field-pad', `${dens.pad}px`],
++      ['--field-ring', ringShadow.replaceAll(P.paperHi, P.ink).replaceAll(P.field, P.core)],
++      ['--button-bg', P.core], ['--button-ink', onField(P.core)],
++    ],
++  },
++}
++const asObj = (arr) => arr.map(([name, value]) => ({ name, value }))
++const contrastPairs = [
++  ['ink on paper', P.ink, P.paper], ['ink on surface', P.ink, P.paperHi],
++  ['muted on paper', P.muted, P.paper, 4.5], ['button ink on accent', onField(P.field), P.field],
++  ['danger on surface', P.danger, P.paperHi], ['success on surface', P.success, P.paperHi],
++  ['paper on ink (dark bg)', P.paper, P.ink], ['ink on core (dark button)', onField(P.core), P.core],
++].map(([label, fg, bg, min]) => ({ label, fg, bg, ratio: r(ratio(fg, bg)), min: min ?? 4.5 }))
++
++const tokens = {
++  name,
++  version: '1.0',
++  concept,
++  dna,
++  primitives: tokensRaw.primitives,
++  semantic: { light: asObj(tokensRaw.semantic.light), dark: asObj(tokensRaw.semantic.dark) },
++  components: { light: asObj(tokensRaw.components.light), dark: asObj(tokensRaw.components.dark) },
++  contrast: contrastPairs,
++}
++outputs[`${slug}-tokens.json`] = JSON.stringify(tokens, null, 2) + '\n'
++const cssBlock = (sel, rows) => `${sel} {\n${rows.map(([k, v]) => `  ${k}: ${v};`).join('\n')}\n}\n`
++outputs[`${slug}-tokens.css`] =
++  `/* ${name} tokens — generated by brand-forge. Do not hand-edit. */\n` +
++  cssBlock(':root', [...tokensRaw.primitives.map((t) => [t.name, t.value]), ...tokensRaw.semantic.light, ...tokensRaw.components.light]) +
++  cssBlock(`:root[data-theme='dark']`, [...tokensRaw.semantic.dark, ...tokensRaw.components.dark]) +
++  `@media (prefers-color-scheme: dark) {\n  :root:not([data-theme='light']) {\n${[...tokensRaw.semantic.dark, ...tokensRaw.components.dark].map(([k, v]) => `    ${k}: ${v};`).join('\n')}\n  }\n}\n`
++
++// ───────────────────────── form kit ─────────────────────────
++const labelCss = {
++  sentence: 'font: 600 0.875rem/1.3 var(--ui); letter-spacing: 0;',
++  'mono-caps': 'font: 500 0.75rem/1.3 var(--mono); letter-spacing: 0.08em; text-transform: uppercase;',
++  'small-caps': 'font: 600 0.8125rem/1.3 var(--ui); font-variant-caps: all-small-caps; letter-spacing: 0.06em;',
++}[dna.label]
++const formsCss = `/* ${name} form kit — derived from theme DNA (${dna.edge} edge, ${dna.tile} tile, ${dna.ring} ring, ${dna.density}).
++   Reads ONLY semantic/component tokens from ${slug}-tokens.css. No raw hex below. */
++.ff { --ui: '${dna.font.ui}', system-ui, sans-serif; --mono: '${dna.font.mono}', ui-monospace, monospace;
++  display: grid; gap: var(--field-gap); font-family: var(--ui); color: var(--fg); max-width: 34rem; }
++.ff-row { display: grid; gap: 6px; }
++.ff-label { ${labelCss} }
++.ff-hint, .ff-error { font: 400 0.8125rem/1.4 var(--ui); margin: 0; }
++.ff-hint { color: var(--muted); }
++.ff-error { color: var(--danger); }
++.ff-error::before { content: '! '; font-weight: 700; } /* not colour alone */
++.ff-input, .ff-select, .ff-textarea {
++  box-sizing: border-box; width: 100%; min-height: var(--field-h); padding: 0 var(--field-pad);
++  background: var(--field-bg); color: var(--field-fg); border: var(--field-border);
++  border-radius: var(--field-radius); box-shadow: var(--field-shadow);
++  font: 400 1rem/1.4 var(--ui); transition: box-shadow 160ms ease, transform 160ms ease; }
++.ff-textarea { min-height: calc(var(--field-h) * 2.4); padding-block: var(--field-pad); resize: vertical; }
++.ff-input::placeholder, .ff-textarea::placeholder { color: var(--muted); opacity: 1; }
++.ff-input:hover, .ff-select:hover, .ff-textarea:hover { transform: translate(-1px, -1px); }
++.ff-input:focus-visible, .ff-select:focus-visible, .ff-textarea:focus-visible,
++.ff-check:focus-visible, .ff-btn:focus-visible, .ff-switch:focus-visible { outline: none; box-shadow: var(--field-ring); }
++.ff-input[aria-invalid='true'], .ff-textarea[aria-invalid='true'], .ff-select[aria-invalid='true'] { border-color: var(--danger); }
++.ff-input:disabled, .ff-select:disabled, .ff-textarea:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; transform: none; }
++.ff-check { appearance: none; inline-size: 1.4rem; block-size: 1.4rem; margin: 0; flex: none; display: grid; place-content: center;
++  background: var(--field-bg); border: var(--field-border); border-radius: calc(var(--field-radius) / 2); }
++.ff-check[type='radio'] { border-radius: 50%; }
++.ff-check:checked { background: var(--accent); }
++.ff-check:checked::after { content: ''; inline-size: 0.5rem; block-size: 0.8rem; border: solid var(--accent-ink); border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
++.ff-check[type='radio']:checked::after { inline-size: 0.55rem; block-size: 0.55rem; border: 0; border-radius: 50%; background: var(--accent-ink); transform: none; }
++.ff-inline { display: flex; align-items: center; gap: 10px; min-height: 44px; }
++.ff-switch { position: relative; inline-size: 3rem; block-size: 1.7rem; padding: 0; background: var(--field-bg); border: var(--field-border); border-radius: 999px; cursor: pointer; }
++.ff-switch::after { content: ''; position: absolute; inset-block: 3px; inset-inline-start: 3px; inline-size: 1.1rem; border-radius: 50%; background: var(--fg); transition: transform 160ms ease; }
++.ff-switch[aria-checked='true'] { background: var(--accent); }
++.ff-switch[aria-checked='true']::after { transform: translateX(1.3rem); background: var(--accent-ink); }
++.ff-btn { min-height: var(--field-h); padding: 0 calc(var(--field-pad) * 1.5); border: var(--field-border); border-radius: var(--field-radius);
++  background: var(--button-bg); color: var(--button-ink); font: 700 1rem/1 var(--ui); box-shadow: var(--field-shadow); cursor: pointer; }
++.ff-btn.ghost { background: var(--field-bg); color: var(--field-fg); }
++.ff-btn:active { transform: translate(2px, 2px); box-shadow: none; }
++.ff-summary { border: var(--field-border); border-radius: var(--field-radius); padding: var(--field-pad); background: var(--surface); }
++.ff-summary[hidden] { display: none; }
++.ff-count { font: 500 0.75rem/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); justify-self: end; }
++@media (prefers-reduced-motion: reduce) { .ff * { transition: none !important; } .ff-input:hover { transform: none; } }
++`
++outputs[`${slug}-forms.css`] = formsCss
++
++outputs['forms.html'] = `<!doctype html>
++<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
++<title>${name} — form kit</title>
++<link rel="stylesheet" href="${slug}-tokens.css"><link rel="stylesheet" href="${slug}-forms.css">
++<style>body{margin:0;padding:clamp(16px,5vw,48px);background:var(--bg);color:var(--fg);font-family:'${dna.font.ui}',system-ui,sans-serif}
++h1{font:800 clamp(1.6rem,4vw,2.4rem)/1.1 '${dna.font.display}',system-ui,sans-serif;text-wrap:balance;margin:0 0 .5rem}
++p.lede{max-width:60ch;color:var(--muted);text-wrap:pretty;margin:0 0 2rem}</style></head>
++<body><h1>${name} form kit</h1>
++<p class="lede">Fields inherit the same material as the mark: ${dna.edge} edge, ${dna.tile} corners, ${dna.ring} focus. ${story.belief}</p>
++<form class="ff" id="kit" novalidate>
++  <div class="ff-summary" id="summary" role="alert" tabindex="-1" hidden><strong>Fix these first</strong><ul id="summary-list"></ul></div>
++  <div class="ff-row"><label class="ff-label" for="name">Name</label>
++    <input class="ff-input" id="name" name="name" autocomplete="name" required aria-describedby="name-h"><p class="ff-hint" id="name-h">As it should appear on the page.</p></div>
++  <div class="ff-row"><label class="ff-label" for="email">Email</label>
++    <input class="ff-input" id="email" name="email" type="email" autocomplete="email" required aria-describedby="email-h"><p class="ff-hint" id="email-h">We only use it to reply.</p></div>
++  <div class="ff-row"><label class="ff-label" for="pw">Password</label>
++    <div style="display:flex;gap:8px"><input class="ff-input" id="pw" name="pw" type="password" autocomplete="new-password" minlength="8">
++    <button class="ff-btn ghost" type="button" id="eye" aria-controls="pw" aria-pressed="false">Show</button></div></div>
++  <div class="ff-row"><label class="ff-label" for="topic">Topic</label>
++    <select class="ff-select" id="topic" name="topic"><option>Brand kit</option><option>Design system</option><option>Audit</option></select></div>
++  <div class="ff-row"><label class="ff-label" for="msg">Message</label>
++    <textarea class="ff-textarea" id="msg" name="msg" maxlength="280" aria-describedby="msg-c"></textarea><span class="ff-count" id="msg-c">0 / 280</span></div>
++  <fieldset style="border:0;padding:0;margin:0;display:grid;gap:4px"><legend class="ff-label">Delivery</legend>
++    <label class="ff-inline"><input class="ff-check" type="radio" name="d" checked> Board only</label>
++    <label class="ff-inline"><input class="ff-check" type="radio" name="d"> Board + tokens</label></fieldset>
++  <label class="ff-inline"><input class="ff-check" type="checkbox" name="ok"> I have a brief</label>
++  <div class="ff-inline"><button class="ff-switch" type="button" role="switch" aria-checked="false" id="sw" aria-labelledby="sw-l"></button><span id="sw-l">Reduced motion</span></div>
++  <div class="ff-row"><label class="ff-label" for="rng">Density</label><input id="rng" name="rng" type="range" min="0" max="2" value="1"></div>
++  <div class="ff-row"><label class="ff-label" for="f">Reference file</label><input class="ff-input" id="f" type="file" style="padding-block:8px"></div>
++  <div class="ff-row"><label class="ff-label" for="dis">Locked field</label><input class="ff-input" id="dis" value="Read-only value" disabled></div>
++  <div class="ff-inline"><button class="ff-btn" type="submit">Send</button><button class="ff-btn ghost" type="reset">Reset</button></div>
++</form>
++<script>
++const f=document.getElementById('kit'),s=document.getElementById('summary'),l=document.getElementById('summary-list');
++const msg=document.getElementById('msg'),c=document.getElementById('msg-c');
++msg.addEventListener('input',()=>{c.textContent=msg.value.length+' / 280'});
++document.getElementById('eye').addEventListener('click',e=>{const p=document.getElementById('pw'),on=p.type==='password';p.type=on?'text':'password';e.target.textContent=on?'Hide':'Show';e.target.setAttribute('aria-pressed',on)});
++const sw=document.getElementById('sw');sw.addEventListener('click',()=>sw.setAttribute('aria-checked',sw.getAttribute('aria-checked')!=='true'));
++function err(el,m){let e=document.getElementById(el.id+'-e');if(!e){e=document.createElement('p');e.className='ff-error';e.id=el.id+'-e';el.closest('.ff-row').appendChild(e)}e.textContent=m;el.setAttribute('aria-invalid','true');el.setAttribute('aria-describedby',[el.getAttribute('aria-describedby'),e.id].filter(Boolean).join(' '))}
++function clear(el){const e=document.getElementById(el.id+'-e');if(e)e.remove();el.removeAttribute('aria-invalid')}
++f.addEventListener('input',e=>{if(e.target.id)clear(e.target)});
++f.addEventListener('submit',ev=>{ev.preventDefault();l.innerHTML='';
++ for(const el of f.querySelectorAll('[required]')){clear(el);if(!el.checkValidity()){const m=el.validity.valueMissing?'Required':'Check the format';err(el,m);const li=document.createElement('li');li.innerHTML='<a href="#'+el.id+'">'+el.labels[0].textContent+': '+m+'</a>';l.appendChild(li)}}
++ s.hidden=!l.children.length;if(l.children.length)s.focus()});
++</script></body></html>
++`
++
++// ───────────────────────── proof sheet ─────────────────────────
++const proofSizes = [16, 32, 64, 128]
++const proofAssets = ['mark.svg', 'mark-compact.svg', 'glyph.svg', 'mark-reverse.svg', 'mark-mono.svg']
++const cell = (file, size, bg) =>
++  `<figure style="margin:0;display:grid;gap:6px;justify-items:center"><div style="background:${bg};padding:10px;border-radius:8px"><img src="${file}" width="${size}" height="${size}" alt=""></div><figcaption style="font:11px ui-monospace,monospace;opacity:.7">${file} ${size}px</figcaption></figure>`
++outputs['sheet.html'] = `<!doctype html><meta charset="utf-8"><title>${name} — proof sheet</title>
++<body style="margin:0;font-family:system-ui;background:#888;display:grid;grid-template-columns:1fr 1fr">
++${[P.paperHi, P.ink]
++  .map(
++    (bg) =>
++      `<section style="background:${bg};color:${bg === P.ink ? P.paper : P.ink};padding:24px;display:grid;gap:18px"><h2 style="margin:0;font-size:14px">${bg === P.ink ? 'dark chrome' : 'light chrome'}</h2>${proofAssets
++        .map((a) => `<div style="display:flex;gap:16px;align-items:end;flex-wrap:wrap">${proofSizes.map((s) => cell(a, s, 'transparent')).join('')}</div>`)
++        .join('')}</section>`,
++  )
++  .join('')}</body>
++`
++
++// ───────────────────────── story scaffold ─────────────────────────
++outputs['story.md'] = `# ${name} — brand story
++
++> One sentence the work can be rejected against: **${story.promise}**
++
++## 1. The belief
++${story.belief}
++
++## 2. The enemy
++${story.enemy}
++
++## 3. The mark, as an argument
++- **Concept:** ${concept}. State in one sentence what it says without naming the shape: _TODO_
++- **Why this one:** _TODO (the winning reason)_
++- **Why the other five lost:** _TODO (one line each; this becomes the guide)_
++
++## 4. The material
++Edge **${dna.edge}**, corners **${dna.tile}**, focus **${dna.ring}**, density **${dna.density}**. The mark and the form fields read the same DNA, so a field should look like it was cut from the same sheet as the logo.
++
++## 5. The proof
++${story.proof}
++- Contrast pairs: ${contrastPairs.map((p) => `${p.label} ${p.ratio}:1`).join('; ')}
++
++## 6. The decision cards
++Use the shape in \`references/storytelling.md\`: Decision, Because, Not when, Breaks next.
++
++## 7. What is missing
++_TODO: name the gaps. A guide that hides its gaps is a brochure._
++`
++
++// ───────────────────────── write + verify ─────────────────────────
++await mkdir(outDir, { recursive: true })
++for (const [file, content] of Object.entries(outputs)) await writeFile(join(outDir, file), content)
++
++const problems = []
++for (const [file, content] of Object.entries(outputs)) {
++  if (!file.endsWith('.svg')) continue
++  if (/<text[\s>]/.test(content)) problems.push(`${file}: live <text>`)
++  if (!/viewBox=/.test(content)) problems.push(`${file}: no viewBox`)
++  if (!/<(path|circle|rect)/.test(content)) problems.push(`${file}: empty drawing`)
++  const open = (content.match(/<(g|defs|clipPath|svg)[\s>]/g) || []).length
++  const close = (content.match(/<\/(g|defs|clipPath|svg)>/g) || []).length
++  if (open !== close) problems.push(`${file}: unbalanced tags (${open}/${close})`)
++}
++const weak = contrastPairs.filter((p) => p.ratio + 0.005 < p.min)
++
++console.log(`brand-forge · ${name} · concept=${concept} · ${Object.keys(outputs).length} files → ${outDir}`)
++console.log(`lockups: ${reportLockup}`)
++for (const p of contrastPairs) console.log(`${p.ratio + 0.005 >= p.min ? 'PASS' : 'FAIL'}  ${p.label} ${p.ratio}:1 (min ${p.min})`)
++for (const p of problems) console.log(`FAIL  ${p}`)
++console.log('Next: judge sheet.html at 16px, then fill story.md TODOs. Mark compact is a separate drawing, check it alone.')
++process.exit(problems.length || weak.length ? 1 : 0)
+diff --git a/skills/sunnyside-brand-system/scripts/sync-skill.sh b/skills/sunnyside-brand-system/scripts/sync-skill.sh
+new file mode 100755
+index 0000000..5e72ed7
+--- /dev/null
++++ b/skills/sunnyside-brand-system/scripts/sync-skill.sh
+@@ -0,0 +1,12 @@
++#!/usr/bin/env bash
++# Mirror skills/sunnyside-brand-system into .agents/skills/ (or back with --reverse)
++# and fail loudly if the copies differ afterwards.
++set -euo pipefail
++root="$(git rev-parse --show-toplevel)"
++a="$root/skills/sunnyside-brand-system"
++b="$root/.agents/skills/sunnyside-brand-system"
++if [[ "${1:-}" == "--reverse" ]]; then src="$b"; dst="$a"; else src="$a"; dst="$b"; fi
++rm -rf "$dst"
++mkdir -p "$(dirname "$dst")"
++cp -a "$src" "$dst"
++diff -rq "$a" "$b" && echo "in sync: $src -> $dst"
+diff --git a/skills/sunnyside-brand-system/templates/audit.json b/skills/sunnyside-brand-system/templates/audit.json
+index 3195dd7..517557f 100644
+--- a/skills/sunnyside-brand-system/templates/audit.json
++++ b/skills/sunnyside-brand-system/templates/audit.json
+@@ -22,10 +22,18 @@
+     "design/brand/<slug>/<slug>-brandkit.png",
+     "design/brand/<slug>/README.md"
+   ],
+-  "svgDirs": ["public/brand/<slug>"],
+-  "noText": ["public/brand/<slug>"],
++  "svgDirs": [
++    "public/brand/<slug>"
++  ],
++  "noText": [
++    "public/brand/<slug>"
++  ],
+   "ico": "public/brand/<slug>/favicon.ico",
+-  "icoSizes": [16, 32, 48],
++  "icoSizes": [
++    16,
++    32,
++    48
++  ],
+   "pngs": [
+     {
+       "path": "design/brand/<slug>/<slug>-brandkit.png",
+@@ -37,5 +45,8 @@
+     }
+   ],
+   "tokens": "features/<slug>/tokens.json",
+-  "contrastMin": 4.5
++  "contrastMin": 4.5,
++  "family": "public/brand/<slug>",
++  "formsCss": "public/brand/<slug>/<slug>-forms.css",
++  "story": "design/brand/<slug>/story.md"
+ }
+diff --git a/skills/sunnyside-brand-system/templates/guidelines.md b/skills/sunnyside-brand-system/templates/guidelines.md
+index a9d7a5d..8845044 100644
+--- a/skills/sunnyside-brand-system/templates/guidelines.md
++++ b/skills/sunnyside-brand-system/templates/guidelines.md
+@@ -11,6 +11,24 @@
+ - **Metaphor:** [one sentence. The mark should be explainable from this.]
+ - **Direction:** “[The sentence work can be rejected against.]”
+ 
++## The story
++
++- **Belief:** [what we hold that others do not.]
++- **Enemy:** [the practice this pushes against. A practice, not a competitor.]
++- **The mark, as an argument:** [one sentence that does not name the shape.]
++- **Why the other five lost:** [one line each.]
++- **Proof:** [a number, a path or a screenshot per claim.]
++- **Gap:** [what is not done or not verified.]
++
++### Decision cards
++
++```
++Decision    [the rule]
++Because     [the reason, tied to the material or the mark]
++Not when    [the exception]
++Breaks next [what fails first: dark mode, small size, density]
++```
++
+ ## The mark
+ 
+ [Image: mark on paper and on ink.]
+@@ -102,3 +120,11 @@ Rule: [one loud field at a time; accents are not body text.]
+ ## Verification
+ 
+ [Link to the checklist. Name the date and the reviewer.]
++
++## Forms
++
++- **Theme DNA:** edge [hard/soft/none], offset [n], stroke [n], radius [n], ring [offset/solid/glow], density [compact/cosy/roomy], label [sentence/mono-caps/small-caps].
++- **Field recipe:** [row from `form-theming.md`, and why it matches the mark.]
++- **States:** default, hover, focus-visible, invalid, disabled, success, pressed. [Show each.]
++- **Tokens:** `--field-bg`, `--field-border`, `--field-radius`, `--field-shadow`, `--field-ring`. No raw hex.
++- **Do not:** [remove focus, signal with colour alone, mix material rows.]
+-- 
+2.43.0
+

@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vitrine — v2.5 mark brainstorm</title>
+    <style>
+      @font-face {
+        font-family: 'Space Grotesk';
+        src: url('../assets/SpaceGrotesk.ttf') format('truetype');
+        font-weight: 300 700;
+      }
+      @font-face {
+        font-family: 'Geist Mono';
+        src: url('../assets/GeistMono.ttf') format('truetype');
+        font-weight: 300 600;
+      }
+      :root {
+        --case: #0b0d10;
+        --frost: #f2f6f8;
+        --signal: #d9ff43;
+        --iris: #5b4be8;
+        --muted: #45525b;
+        --line: #c7d2d9;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: clamp(20px, 5vw, 48px);
+        background: var(--frost);
+        color: var(--case);
+        font: 13px/1.5 'Geist Mono', ui-monospace, monospace;
+        -webkit-font-smoothing: antialiased;
+      }
+      main { max-width: 1320px; margin: 0 auto; }
+      .kicker {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .kicker b { color: var(--case); font-weight: 500; }
+      .kicker::before {
+        content: '';
+        width: 8px; height: 8px; border-radius: 50%;
+        background: var(--signal);
+        box-shadow: 0 0 0 4px rgba(217, 255, 67, 0.22);
+      }
+      h1 {
+        max-width: 21ch;
+        margin: 18px 0 12px;
+        font: 700 clamp(2rem, 5vw, 4rem) / 0.94 'Space Grotesk', system-ui, sans-serif;
+        letter-spacing: -0.06em;
+        text-wrap: balance;
+      }
+      h1 em { font-style: normal; color: #6f8000; }
+      .lede {
+        max-width: 78ch;
+        margin: 0 0 22px;
+        color: var(--muted);
+        font: 14px/1.65 'Geist Mono', ui-monospace, monospace;
+        text-wrap: pretty;
+      }
+      .lede strong { color: var(--case); font-weight: 500; }
+      .diagnosis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 12px;
+        margin: 0 0 8px;
+        padding: 0;
+        list-style: none;
+      }
+      .diagnosis li {
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+      .diagnosis b {
+        display: block;
+        margin-bottom: 5px;
+        font: 700 15px/1.2 'Space Grotesk', system-ui, sans-serif;
+        letter-spacing: -0.02em;
+      }
+      .diagnosis span {
+        color: var(--muted);
+        font: 11.5px/1.55 'Geist Mono', ui-monospace, monospace;
+        text-wrap: pretty;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 22px;
+        margin: 24px 0 22px;
+        padding: 12px 0 0;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        display: flex;
+        flex-direction: column;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #fff;
+      }
+      .card.short { border-color: var(--signal); }
+      .card.current { background: #fbfdfe; border-style: dashed; }
+      .top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .num { color: var(--muted); font-size: 10px; letter-spacing: 0.1em; }
+      .family {
+        max-width: 19ch;
+        color: var(--muted);
+        font-size: 9px;
+        line-height: 1.3;
+        letter-spacing: 0.06em;
+        text-align: right;
+        text-transform: uppercase;
+      }
+      h2 {
+        margin: 6px 0 0;
+        font: 700 20px/1.1 'Space Grotesk', system-ui, sans-serif;
+        letter-spacing: -0.035em;
+      }
+      .pill {
+        align-self: flex-start;
+        margin-top: 10px;
+        padding: 4px 7px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        font-size: 8.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .short .pill { border-color: var(--signal); background: var(--signal); }
+      .stage {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 14px;
+        align-items: end;
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 12px;
+        background: var(--case);
+        color: var(--frost);
+      }
+      .stage.light {
+        background: var(--frost);
+        color: var(--case);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+      .sizes { display: flex; align-items: flex-end; gap: 14px; }
+      .s128 { width: 128px; height: 128px; }
+      .s64 { width: 64px; height: 64px; }
+      .s32 { width: 32px; height: 32px; }
+      .s16 { width: 16px; height: 16px; }
+      .stage svg, .lockup svg { display: block; overflow: visible; }
+      .stageLabel {
+        color: #93a3ac;
+        font-size: 8px;
+        letter-spacing: 0.12em;
+        text-align: right;
+        text-transform: uppercase;
+      }
+      .light .stageLabel { color: var(--muted); }
+      .lockup {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-top: 12px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: var(--case);
+        color: var(--frost);
+      }
+      .lockup.light { background: var(--frost); color: var(--case); box-shadow: inset 0 0 0 1px var(--line); }
+      .lockup .mk { width: 30px; height: 30px; flex: 0 0 auto; }
+      .lockup .wm { height: 20px; width: auto; }
+      .reason {
+        margin: 14px 0 0;
+        color: var(--muted);
+        font: 11.5px/1.55 'Geist Mono', ui-monospace, monospace;
+        text-wrap: pretty;
+      }
+      .reason b { color: var(--case); font-weight: 500; }
+      .argument {
+        margin: auto 0 0;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 10.5px;
+        line-height: 1.45;
+      }
+      h3 {
+        margin: 46px 0 6px;
+        font: 700 clamp(1.5rem, 2.4vw, 2rem) / 1 'Space Grotesk', system-ui, sans-serif;
+        letter-spacing: -0.04em;
+      }
+      .sub { max-width: 72ch; margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+      .pick {
+        display: grid;
+        grid-template-columns: 200px minmax(0, 1fr);
+        gap: 20px;
+        align-items: center;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #fff;
+        margin-bottom: 12px;
+      }
+      .pick.first { border-color: var(--signal); box-shadow: inset 0 0 0 1px rgba(217,255,67,0.55); }
+      .pick h4 {
+        margin: 0 0 6px;
+        font: 700 22px/1.05 'Space Grotesk', system-ui, sans-serif;
+        letter-spacing: -0.04em;
+      }
+      .pick p { margin: 0; color: var(--muted); font-size: 11.5px; line-height: 1.55; text-wrap: pretty; }
+      .pick .row { display: flex; align-items: center; gap: 18px; margin-bottom: 10px; }
+      .next {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .next div {
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+      .next b { display: block; font: 700 15px/1.2 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.02em; }
+      .next p { margin: 6px 0 0; color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+      footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px 28px;
+        margin-top: 36px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.5;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      @media (max-width: 640px) {
+        .grid { grid-template-columns: 1fr; }
+        .pick { grid-template-columns: 1fr; }
+        .s128 { width: 84px; height: 84px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="kicker">Vitrine <b>v2.5</b> mark brainstorm</div>
+      <h1>The mark draws the case. It never draws the <em>light</em>.</h1>
+      <p class="lede">
+        The page promises “a glass case for a low-resolution light”, then shows a
+        solid, symmetric U with an underline. <strong>The system’s signature —
+        hard glass against a pixel bloom — is absent from the one asset that has
+        to carry it.</strong> The fix is not a new ornament on the U. The mark has
+        to put both materials in one drawing. Six directions follow, all on the
+        64 grid, fill-only, constructed track, two to three primitives, one
+        Signal element. Judge 16px first.
+      </p>
+
+      <ul class="diagnosis">
+        <li><b>Empty, not lit</b><span>The hero is a dithered bloom inside glass. The mark is an empty bucket: it shows the container and withholds the object.</span></li>
+        <li><b>Heaviest thing on the page</b><span>Every other surface is a 1px edge and translucency. The mark is an 8-unit monolith with no interior, offset or light.</span></li>
+        <li><b>Reads as a letter</b><span>Uniform walls plus a bar at the baseline = a U with an underline, or a USB port. Neither is a vitrine.</span></li>
+        <li><b>No system</b><span>The label is a 5-unit speck that dies under 32px. The compact is the same U with fatter walls, not a second drawing.</span></li>
+      </ul>
+
+      <div class="meta">
+        <span>constructed v2.3 gate</span>
+        <span>Zero circle</span>
+        <span>Fill-only</span>
+        <span>2–3 primitives</span>
+        <span>One Signal element</span>
+        <span>64 grid</span>
+        <span>16 / 32 / 64 / 128</span>
+      </div>
+
+      <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
+        <symbol id="wm" viewBox="0 0 2873 758">
+          <g fill="currentColor">
+            <path transform="translate(15.00 729.00) scale(1 -1)" d="M174 0 16 496H150L265 92H283L398 496H532L374 0Z"/>
+            <path transform="translate(523.00 729.00) scale(1 -1)" d="M70 0V496H196V0ZM133 554Q99 554 75.5 576.0Q52 598 52 634Q52 670 75.5 692.0Q99 714 133 714Q168 714 191.0 692.0Q214 670 214 634Q214 598 191.0 576.0Q168 554 133 554Z"/>
+            <path transform="translate(749.00 729.00) scale(1 -1)" d="M260 0Q211 0 180.5 30.5Q150 61 150 112V392H26V496H150V650H276V496H412V392H276V134Q276 104 304 104H400V0Z"/>
+            <path transform="translate(1165.00 729.00) scale(1 -1)" d="M70 0V496H194V440H212Q223 470 248.5 484.0Q274 498 308 498H368V386H306Q258 386 227.0 360.5Q196 335 196 282V0Z"/>
+            <path transform="translate(1521.00 729.00) scale(1 -1)" d="M70 0V496H196V0ZM133 554Q99 554 75.5 576.0Q52 598 52 634Q52 670 75.5 692.0Q99 714 133 714Q168 714 191.0 692.0Q214 670 214 634Q214 598 191.0 576.0Q168 554 133 554Z"/>
+            <path transform="translate(1747.00 729.00) scale(1 -1)" d="M70 0V496H194V431H212Q224 457 257.0 480.5Q290 504 357 504Q415 504 458.5 477.5Q502 451 526.0 404.5Q550 358 550 296V0H424V286Q424 342 396.5 370.0Q369 398 318 398Q260 398 228.0 359.5Q196 321 196 252V0Z"/>
+            <path transform="translate(2323.00 729.00) scale(1 -1)" d="M296 -14Q222 -14 165.5 17.5Q109 49 77.5 106.5Q46 164 46 242V254Q46 332 77.0 389.5Q108 447 164.0 478.5Q220 510 294 510Q367 510 421.0 477.5Q475 445 505.0 387.5Q535 330 535 254V211H174Q176 160 212.0 128.0Q248 96 300 96Q353 96 378.0 119.0Q403 142 416 170L519 116Q505 90 478.5 59.5Q452 29 408.0 7.5Q364 -14 296 -14ZM175 305H407Q403 348 372.5 374.0Q342 400 293 400Q242 400 212.0 374.0Q182 348 175 305Z"/>
+          </g>
+        </symbol>
+
+        <symbol id="m-current" viewBox="0 0 64 64">
+          <path d="M12 8L8 12V56H56V12L52 8H48V48H16V8Z" fill="currentColor"/>
+          <rect x="22" y="49" width="20" height="5" fill="#D9FF43"/>
+        </symbol>
+
+        <symbol id="m-v" viewBox="0 0 64 64">
+          <path d="M8 8H24L32 30V48H24Z" fill="currentColor"/>
+          <path d="M32 30L40 8H56L40 48H32Z" fill="#D9FF43"/>
+        </symbol>
+
+        <symbol id="m-iso" viewBox="0 0 64 64">
+          <path d="M12 36L32 26V10L12 20Z" fill="currentColor"/>
+          <path d="M32 26L52 36V20L32 10Z" fill="currentColor"/>
+          <path d="M12 36L32 46L52 36L32 26Z" fill="#D9FF43"/>
+        </symbol>
+
+        <symbol id="m-corner" viewBox="0 0 64 64">
+          <path d="M8 8H56V24H48V32H40V40H32V48H24V56H8Z" fill="currentColor"/>
+          <path d="M56 32H48V40H40V48H32V56H56Z" fill="#D9FF43"/>
+        </symbol>
+
+        <symbol id="m-spill" viewBox="0 0 64 64">
+          <path d="M8 8H28V16H16V48H48V32H56V56H8Z" fill="currentColor"/>
+          <path d="M20 48V38H28V28H36V18H44V8H56V48Z" fill="#D9FF43"/>
+        </symbol>
+
+        <symbol id="m-seam" viewBox="0 0 64 64">
+          <path d="M8 8H56V20H52V28H40V38H24V50H8Z" fill="currentColor"/>
+          <path d="M24 56V44H40V34H52V26H56V56Z" fill="#D9FF43"/>
+        </symbol>
+
+        <symbol id="m-lit" viewBox="0 0 64 64">
+          <path d="M12 8L8 12V56H56V12L52 8H48V48H16V8Z" fill="currentColor"/>
+          <path d="M48 8H52L56 12V56H32V48H48Z" fill="#D9FF43"/>
+        </symbol>
+      </svg>
+
+      <div class="grid">
+        <article class="card current">
+          <div class="top"><span class="num">00</span><span class="family">Current · continuous ribbon</span></div>
+          <h2>Open case</h2>
+          <span class="pill">Baseline</span>
+          <div class="stage">
+            <div class="sizes">
+              <svg class="s128" aria-hidden="true"><use href="#m-current" width="100%" height="100%"/></svg>
+              <svg class="s32" aria-hidden="true"><use href="#m-current" width="100%" height="100%"/></svg>
+              <svg class="s16" aria-hidden="true"><use href="#m-current" width="100%" height="100%"/></svg>
+            </div>
+            <span class="stageLabel">Case ground<br/>128 / 32 / 16</span>
+          </div>
+          <div class="lockup">
+            <svg class="mk" aria-hidden="true"><use href="#m-current" width="100%" height="100%"/></svg>
+            <svg class="wm" viewBox="0 0 2873 758" aria-hidden="true"><use href="#wm" width="2873" height="758"/></svg>
+          </div>
+          <p class="reason">
+            <b>The failure is legible here.</b> At 32 and 16 it is a U. The bar is
+            an underline, not a light. Nothing in the silhouette says glass,
+            depth or dither.
+          </p>
+          <p class="argument">Argument: “A case is open; the label is printed.” True, but half the promise is missing.</p>
+        </article>
+
+        <article class="card short">
+          <div class="top"><span class="num">01</span><span class="family">Architectural monogram</span></div>
+          <h2>Half-light V</h2>
+          <span class="pill">Recommended</span>
+          <div class="stage">
+            <div class="sizes">
+              <svg class="s128" aria-hidden="true"><use href="#m-v" width="100%" height="100%"/></svg>
+              <svg class="s32" aria-hidden="true"><use href="#m-v" width="100%" height="100%"/></svg>
+              <svg class="s16" aria-hidden="true"><use href="#m-v" width="100%" height="100%"/></svg>
+            </div>
+            <span class="stageLabel">Case ground<br/>128 / 32 / 16</span>
+          </div>
+          <div class="stage light">
+            <div class="sizes">
+              <svg class="s128" aria-hidden="true"><use href="#m-v" width="100%" height="100%"/></svg>
+              <svg class="s32" aria-hidden="true"><use href="#m-v" width="100%" height="100%"/></svg>
+              <svg class="s16" aria-hidden="true"><use href="#m-v" width="100%" height="100%"/></svg>
+            </div>
+            <span class="stageLabel">Frost ground<br/>128 / 32 / 16</span>
+          </div>
+          <div class="lockup">
+            <svg class="mk" aria-hidden="true"><use href="#m-v" width="100%" height="100%"/></svg>
+            <svg class="wm" viewBox="0 0 2873 758" aria-hidden="true"><use href="#wm" width="2873" height="758"/></svg>
+          </div>
+          <p class="reason">
+            <b>One letter, two materials.</b> The V is the case cut in section:
+            the ink arm is the glass, the Signal arm is the light. Only two
+            primitives, and the best 16px read of the set. It joins the
+            wordmark instead of sitting beside it.
+          </p>
+          <p class="argument">Argument: “The case is half glass, half light.” Risk: a two-tone letter is a material split, not yet a custom cut. Next pass adds one stepped notch at the vertex.</p>
+        </article>
+
+        <article class="card short">
+          <div class="top"><span class="num">02</span><span class="family">Horizon &amp; counter-form</span></div>
+          <h2>Vitrine, in perspective</h2>
+          <span class="pill">Bold option</span>
+          <div class="stage">
+            <div class="sizes">
+              <svg class="s128" aria-hidden="true"><use href="#m-iso" width="100%" height="100%"/></svg>
+              <svg class="s32" aria-hidden="true"><use href="#m-iso" width="100%" height="100%"/></svg>
+              <svg class="s16" aria-hidden="true"><use href="#m-iso" width="100%" height="100%"/></svg>
+            </div>
+            <span class="stageLabel">Case ground<br/>128 / 32 / 16</span>
+          </div>
+          <div class="stage light">
+            <div class="sizes">
+              <svg class="s128" aria-hidden="true"><use href="#m-iso" width="100%" height="100%"/></svg>
+              <svg class="s32" aria-hidden="true"><use href="#m-iso" width="100%" height="100%"/></svg>
+              <svg class="s16" aria-hidden="true"><use href="#m-iso" width="100%" height="100%"/></svg>
+            </div>
+            <span class="stageLabel">Frost ground<br/>128 / 32 / 16</span>
+          </div>
+          <div class="lockup">
+            <svg class="mk" aria-hidden="true"><use href="#m-iso" width="100%" height="100%"/></svg>
+            <svg class="wm" viewBox="0 0 2873 758" aria-hidden="true"><use href="#wm" width="2873" height="758"/></svg>
+          </div>
+          <p class="reason">
+            <b>The only direction with real depth.</b> Two solid walls, one lit
+            floor: a vitrine seen from above, and the Signal is the object rather
+            than a label. Distinct from every other mark in the showcase.
+          </p>
+          <p class="argument">Argument: “An open case, lit from the floor.” Risk: a box is a box; it needs one stepped edge or it reads as a shipping logo.</p>
+        </article>
+
+        <article class="card">
+          <div class="top"><span class="num">03</span><span class="family">Offset planes</span></div>
+          <h2>Corner light</h2>
+          <span class="pill">Explore</span>
+          <div class="stage">
+            <div class="sizes">
+              <svg class="s128" aria-hidden="true"><use href="#m-corner" width="100%" height="100%"/></svg>
+              <svg class="s32" aria-hidden="true"><use href="#m-corner" width="100%" height="100%"/></svg>
+              <svg class="s16" aria-hidden="true"><use href="#m-corner" width="100%" height="100%"/></svg>
+            </div>
+            <span class="stageLabel">Case ground<br/>128 / 32 / 16</span>
+          </div>
+          <div class="lockup">
+            <svg class="mk" aria-hidden="true"><use href="#m-corner" width="100%" height="100%"/></svg>
+            <svg class="wm" viewBox="0 0 2873 758" aria-hidden="true"><use href="#wm" width="2873" height="758"/></svg>
+          </div>
+          <p class="reason">
+            <b>A case with the dither eating one corner.</b> The square is the
+            container; the stepped Signal corner is the low-resolution light. It
+            is the calmest way to put both materials in a square.
+          </p>
+          <p class="argument">Argument: “The light collects in one corner.” Risk: equal steps read as a staircase, not as dot gain. The seam needs varied steps.</p>
+        </article>
+
+        <article class="card">
+          <div class="top"><span class="num">04</span><span class="family">Continuous ribbon + light</span></div>
+          <h2>Spill</h2>
+          <span class="pill">Explore</span>
+          <div class="stage">
+            <div class="sizes">
+              <svg class="s128" aria-hidden="true"><use href="#m-spill" width="100%" height="100%"/></svg>
+              <svg class="s32" aria-hidden="true"><use href="#m-spill" width="100%" height="100%"/></svg>
+              <svg class="s16" aria-hidden="true"><use href="#m-spill" width="100%" height="100%"/></svg>
+            </div>
+            <span class="stageLabel">Case ground<br/>128 / 32 / 16</span>
+          </div>
+          <div class="lockup">
+            <svg class="mk" aria-hidden="true"><use href="#m-spill" width="100%" height="100%"/></svg>
+            <svg class="wm" viewBox="0 0 2873 758" aria-hidden="true"><use href="#wm" width="2873" height="758"/></svg>
+          </div>
+          <p class="reason">
+            <b>The smallest change to the current strategy.</b> Keep the case;
+            add the light inside it and open the corner so it can escape. Still a
+            container, but no longer empty.
+          </p>
+          <p class="argument">Argument: “The case cannot quite contain the light.” Risk: the stepped mass still reads as a bar chart at 128.</p>
+        </article>
+
+        <article class="card">
+          <div class="top"><span class="num">05</span><span class="family">Offset geometric planes</span></div>
+          <h2>Seam</h2>
+          <span class="pill">Explore</span>
+          <div class="stage">
+            <div class="sizes">
+              <svg class="s128" aria-hidden="true"><use href="#m-seam" width="100%" height="100%"/></svg>
+              <svg class="s32" aria-hidden="true"><use href="#m-seam" width="100%" height="100%"/></svg>
+              <svg class="s16" aria-hidden="true"><use href="#m-seam" width="100%" height="100%"/></svg>
+            </div>
+            <span class="stageLabel">Case ground<br/>128 / 32 / 16</span>
+          </div>
+          <div class="lockup">
+            <svg class="mk" aria-hidden="true"><use href="#m-seam" width="100%" height="100%"/></svg>
+            <svg class="wm" viewBox="0 0 2873 758" aria-hidden="true"><use href="#wm" width="2873" height="758"/></svg>
+          </div>
+          <p class="reason">
+            <b>Glass and dither are one square.</b> The stepped channel is the
+            material boundary; the two halves are the two materials. The most
+            abstract and the most graphic.
+          </p>
+          <p class="argument">Argument: “The case is split by its own light.” Risk: a diagonal stair reads as a chart; the top band thins at 16px.</p>
+        </article>
+
+        <article class="card">
+          <div class="top"><span class="num">06</span><span class="family">Continuous ribbon</span></div>
+          <h2>Lit case</h2>
+          <span class="pill">Minimal change</span>
+          <div class="stage">
+            <div class="sizes">
+              <svg class="s128" aria-hidden="true"><use href="#m-lit" width="100%" height="100%"/></svg>
+              <svg class="s32" aria-hidden="true"><use href="#m-lit" width="100%" height="100%"/></svg>
+              <svg class="s16" aria-hidden="true"><use href="#m-lit" width="100%" height="100%"/></svg>
+            </div>
+            <span class="stageLabel">Case ground<br/>128 / 32 / 16</span>
+          </div>
+          <div class="lockup">
+            <svg class="mk" aria-hidden="true"><use href="#m-lit" width="100%" height="100%"/></svg>
+            <svg class="wm" viewBox="0 0 2873 758" aria-hidden="true"><use href="#wm" width="2873" height="758"/></svg>
+          </div>
+          <p class="reason">
+            <b>The current mark with one wall lit.</b> No new geometry: the case
+            gains a glowing side and the accent stops being an underline. The
+            cheapest way to test whether colour alone can rescue the U.
+          </p>
+          <p class="argument">Argument: “The case is lit from one side.” Risk: it is still a U, and the lime bracket reads as a loading state.</p>
+        </article>
+      </div>
+
+      <h3>Shortlist, in a lockup</h3>
+      <p class="sub">
+        The mark has to hold beside the outlined wordmark at 30px and still say
+        “glass + light” without the label copy. Three survive the 16px read.
+      </p>
+
+      <div class="pick first">
+        <div class="row">
+          <svg width="84" height="84" aria-hidden="true"><use href="#m-v" width="100%" height="100%"/></svg>
+          <svg width="26" height="26" aria-hidden="true"><use href="#m-v" width="100%" height="100%"/></svg>
+        </div>
+        <div>
+          <h4>01 · Half-light V — adopted</h4>
+          <p>
+            It is the only option that is bold at 128, clean at 32, legible at 16,
+            and belongs to the wordmark rather than sitting next to it. It uses
+            the system’s two materials as the idea, not as decoration: the ink arm
+            is the glass, the Signal arm is the light. Keep the 6-unit plinth cut
+            as the next refinement so it reads as a custom letterform, not a
+            two-tone font sample.
+          </p>
+        </div>
+      </div>
+
+      <div class="pick">
+        <div class="row">
+          <svg width="84" height="84" aria-hidden="true"><use href="#m-iso" width="100%" height="100%"/></svg>
+          <svg width="26" height="26" aria-hidden="true"><use href="#m-iso" width="100%" height="100%"/></svg>
+        </div>
+        <div>
+          <h4>02 · Vitrine in perspective — bold option</h4>
+          <p>
+            The only mark with depth, which is the system’s actual subject. It is
+            also the riskiest: a box is a box. Develop it only if you want the
+            case to be unmistakable; it needs a stepped edge and an asymmetric
+            wall before it stops reading as a shipping logo.
+          </p>
+        </div>
+      </div>
+
+      <div class="pick">
+        <div class="row">
+          <svg width="84" height="84" aria-hidden="true"><use href="#m-corner" width="100%" height="100%"/></svg>
+          <svg width="26" height="26" aria-hidden="true"><use href="#m-corner" width="100%" height="100%"/></svg>
+        </div>
+        <div>
+          <h4>03 · Corner light — abstract option</h4>
+          <p>
+            The most “design system” silhouette: a square with the dither eating
+            one corner. It needs varied step sizes to read as dot gain instead of
+            stairs, and the Signal corner is small at 16px. A good direction if
+            the brand should stay abstract rather than lettered.
+          </p>
+        </div>
+      </div>
+
+      <h3>What happens after you pick</h3>
+      <div class="next">
+        <div>
+          <b>1 · Draw the compact</b>
+          <p>A separate drawing with fewer shapes and a heavier cut, tested at 16px on paper and ink. No scaled-down primary.</p>
+        </div>
+        <div>
+          <b>2 · Cut the wordmark</b>
+          <p>Freeze Space Grotesk and make one custom cut so the name and the mark share a construction, not just a colour.</p>
+        </div>
+        <div>
+          <b>3 · Build the cast</b>
+          <p>Four to six marks from the vitrine’s world — glint, label, dither dot, bracket — one cut line, one fill, one job each.</p>
+        </div>
+        <div>
+          <b>4 · Compose the marks section</b>
+          <p>Logo card, wordmark scale, cast drawer and one usage rule. The current section is a construction card, not a mark system.</p>
+        </div>
+        <div>
+          <b>5 · Rebuild the assets</b>
+          <p>Mark, compact, glyph, reverse, mono, lockups, favicons, board, tokens. One source, one QA run.</p>
+        </div>
+        <div>
+          <b>6 · Verify</b>
+          <p>16px on light and dark chrome, 390 and 1440, contrast pairs, one <code>qa.mjs</code> pass, gaps named.</p>
+        </div>
+      </div>
+
+      <footer>
+        <span>Six directions · constructed v2.3 gate · 64 grid</span>
+        <span>All primaries fill-only, zero circle, ≤ 3 primitives</span>
+        <span>01 scores PASS on score-mark.py (2 primitives, contrast at 16px)</span>
+        <span>Adopted: 01 in v2.5; 02 remains the bold alternative</span>
+        <span>Built: mark, compact, glyph, lockups, favicons, board, page</span>
+      </footer>
+    </main>
+  </body>
+</html>

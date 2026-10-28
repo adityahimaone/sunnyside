@@ -21,7 +21,7 @@ export function GET() {
     tokens.semantic.dark.map((token) => [token.name, token]),
   ) as Record<string, { value: string; resolved?: string; role: string }>
 
-  const brand = `# Vitrine — design system, brand guide and audit
+  const brand = `# Vitrine — design system, brand guide and audit (v2.5)
 
 > A glass case for a low-resolution light.
 
@@ -40,27 +40,32 @@ sits under the words that explain it.
 
 - Essence: a glass case for a low-resolution light.
 - Promise: depth without fog.
-- Family: continuous ribbon.
-- Gate: v2.3 — zero circle, fill-only, 2–4 primitives, one accent.
+- Family: architectural monogram.
+- Gate: v2.3 constructed — zero circle, fill-only, 2–4 primitives, one accent.
 - Voice: precise, lit, unhurried. Museum labels, not marketing.
 - Not this: a frosted card with an unreadable paragraph, a gradient blob, a
   1-bit retro toy, or a Sunnyside re-skin.
 
 ## 2. Mark
 
-The mark is **Folded V**: one continuous beam folds into the V and a flat
-plinth; the plinth carries one Signal label. Two solid primitives in the
-primary, one in the compact. No stroke, no circle, no detached accent.
+The mark is **Half-light V**: one architectural monogram split vertically at
+x32. The ink arm is the glass, the Signal arm is the light; the plinth is flat.
+Two solid primitives in the primary, one in the compact. No stroke, no circle,
+no detached accent.
 
 | Property | Value |
 | --- | --- |
 | ViewBox | 64 × 64 |
-| Family | Continuous ribbon |
-| Primary path | M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z |
-| Label | rect 27,46 10 × 8, Signal |
-| Compact path | M12 6L32 42L52 6L61 12L42 58L22 58L3 12Z |
+| Family | Architectural monogram |
+| Glass arm | M8 8H24L32 34V56H24Z |
+| Light arm | M32 34L40 8H56L40 56H32Z, Signal |
+| Compact path | M6 6H22L32 32L42 6H58L42 58H22Z |
 | Primitive count | 2 primary / 1 compact |
-| Minimum channel | 9 units (14% of the grid; the gate asks for 5.1) |
+| Frame | 8 units |
+| Vertex | 32 / 34 |
+| Plinth | 16 × 22 units |
+| Arms | 16 units |
+| Bbox | 48 × 48 units |
 | Full mark minimum | 32px |
 | Compact minimum | 16px |
 | Clear space | Half the mark height on every side |
@@ -82,9 +87,9 @@ ${table(
 
 The full rejection notes and eight decision cards are in
 \`design/brand/vitrine/story.md\`; the bake-off sheet is
-\`design/brand/vitrine/explorations/marks.html\`.
+\`design/brand/vitrine/explorations/marks-v2.5.html\`.
 
-### v2.3 gate
+### The constructed gate (v2.3)
 
 ${table(
   ['Gate', 'Result', 'Evidence'],
@@ -109,7 +114,7 @@ The wordmark is the real type, frozen as outlines: Space Grotesk 700,
 | Stacked reverse | \`lockup-stacked-reverse.svg\` | Frost on Case |
 | Wordmark | \`wordmark.svg\` | currentColor; reverse copy exists |
 
-Minimum lockup width: 130px. The Signal label stays Signal in both themes. The
+Minimum lockup width: 130px. The Signal arm stays Signal in both themes. The
 header uses the horizontal lockup at 30px high; the footer uses the wordmark at
 44px high.
 
@@ -125,9 +130,9 @@ header uses the horizontal lockup at 30px high; the footer uses the wordmark at
 | \`--vt-clay\` | #B23A1D | Error on light | 5.49:1 on Frost |
 | \`--vt-mint\` | #7CF0C4 | Success on dark | 14.01:1 on Case |
 
-Rules: one loud field per page. Signal is the field and the mark's label; the
-rest are surfaces, text roles or status accents. Glass is a material, not a
-colour. The mark is Case on light, Frost on dark, with the Signal label fixed.
+Rules: one loud field per page. Signal is the field and the mark's light arm;
+the rest are surfaces, text roles or status accents. Glass is a material, not a
+colour. The mark is Case on light, Frost on dark, with the Signal arm fixed.
 
 ## 5. Type
 
@@ -146,7 +151,7 @@ The wordmark is outlined.
 
 The token source is \`features/vitrine/tokens.json\`. It generates
 \`features/vitrine/vitrine-tokens.css\` and the public JSON/CSS downloads.
-159 declarations across four layers:
+161 declarations across four layers:
 
 1. **Theme DNA** — family, material, hard edge, square tile, solid ring, cosy
    density, mono-caps label. Emitted as \`--vt-dna-*\`.
@@ -316,7 +321,7 @@ ${GAPS.map((gap) => `- ${gap}`).join('\n')}
 | Audit data | \`features/vitrine/audit.ts\` |
 | Brand brief | \`design/brand/vitrine/brief.md\` |
 | Story | \`design/brand/vitrine/story.md\` |
-| Bake-off | \`design/brand/vitrine/explorations/marks.html\` |
+| Bake-off | \`design/brand/vitrine/explorations/marks-v2.5.html\` |
 | Brand board | \`design/brand/vitrine/vitrine-brandkit.png\` |
 | Board source | \`design/brand/vitrine/brandkit.html\` |
 | Guide | \`design/brand/vitrine/README.md\` |

@@ -433,7 +433,7 @@ export const VITRINE_CASE = {
   library: '/design-system',
   cover: '/brand/vitrine/vitrine-brandkit.png',
   coverAlt:
-    'The Vitrine brand board: the folded V mark with a Signal label, the Case and Frost palette, the Signal field, type specimens, favicon sizes and the form specimen.',
+    'The Vitrine brand board: the half-light V mark, one glass arm and one Signal arm, the Case and Frost palette, the Signal field, type specimens, favicon sizes and the form specimen.',
   brief:
     'Give the second system a different material without losing the method: a glass container, a halftone information layer, a form kit and an audit that names its own gaps. Vitrine had to prove that glass and dither can be legible together, not just photogenic.',
   constraints: [
@@ -446,22 +446,22 @@ export const VITRINE_CASE = {
   decisions: [
     {
       title: 'The case and the grain.',
-      line: 'Glass holds the object; the dither is the printed label inside it. The glass never becomes the content, and the dither never sits under the words that explain it.',
+      line: 'Glass holds the object; the dither is the light inside it. The glass never becomes the content, and the dither never sits under the words that explain it.',
     },
     {
-      title: 'A folded ribbon V, one Signal label.',
-      line: 'One beam folds into the V and the case; the flat plinth carries the only print. The compact 16px mark drops the label and keeps the heavier fold.',
+      title: 'A V, split by its material.',
+      line: 'The architectural monogram is one V: the ink arm is the glass, the Signal arm is the light. The compact 16px mark drops the Signal arm and keeps the heavier V.',
     },
     {
       title: 'Audit the method, not just the output.',
-      line: 'The page records 16/16 skill resources present, 10 used as shipped, 4 substitutions and 6 named gaps. A case without its gaps is a brochure.',
+      line: 'The page records 31/31 skill resources present, 23 used as shipped, 4 substitutions and 8 named gaps. A case without its gaps is a brochure.',
     },
   ],
   outcomes: [
-    'A new brand kit, outlined wordmark, favicon set, 3 × 3 board and 125-declaration token system.',
+    'A new brand kit, outlined wordmark, favicon set, 3 × 3 board and 161-declaration token system.',
     'A ten-control form specimen with a focused error summary, password toggle, switch, range and file input.',
     'One custom lens dither on the dithercn engine, static under reduced motion, with no example component installed.',
-    'An honest case page and Markdown twin: 12/12 output-contract items shipped, six gaps named.',
+    'An honest case page and Markdown twin: 16/16 output-contract items shipped, eight gaps named.',
   ],
   evidence: [
     {

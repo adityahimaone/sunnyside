@@ -1,0 +1,282 @@
+{
+  "url": "http://localhost:3000/design-system/vitrine",
+  "slug": "vitrine",
+  "startedAt": "2026-10-28T07:49:23.017Z",
+  "finishedAt": "2026-10-28T07:49:43.212Z",
+  "verdict": "PASS",
+  "checks": [
+    {
+      "status": "pass",
+      "check": "Static audit",
+      "evidence": "Audit: PASS — 16 passed, 0 warnings, 0 failures"
+    },
+    {
+      "status": "pass",
+      "check": "Mark score",
+      "evidence": "PASS  vitrine"
+    },
+    {
+      "status": "pass",
+      "check": "Theme toggle",
+      "evidence": "light → dark"
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 1440-light",
+      "evidence": "16px"
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 1440-light",
+      "evidence": "14px at 1440px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 1440-light",
+      "evidence": "0px"
+    },
+    {
+      "status": "pass",
+      "check": "Shader 1440-light",
+      "evidence": "data-state=\"running\""
+    },
+    {
+      "status": "pass",
+      "check": "Console 1440-light",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "warn",
+      "check": "GPU 1440-light",
+      "evidence": "4 WebGL performance warning(s)."
+    },
+    {
+      "status": "pass",
+      "check": "Form states",
+      "evidence": "1 alert(s); invalid: vt-name, vt-email, vt-password; focus alert."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 1440-dark",
+      "evidence": "16px"
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 1440-dark",
+      "evidence": "14px at 1440px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 1440-dark",
+      "evidence": "0px"
+    },
+    {
+      "status": "pass",
+      "check": "Shader 1440-dark",
+      "evidence": "data-state=\"running\""
+    },
+    {
+      "status": "pass",
+      "check": "Console 1440-dark",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 390-light",
+      "evidence": "16px"
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 390-light",
+      "evidence": "16px at 390px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 390-light",
+      "evidence": "0px"
+    },
+    {
+      "status": "pass",
+      "check": "Shader 390-light",
+      "evidence": "data-state=\"running\""
+    },
+    {
+      "status": "pass",
+      "check": "Console 390-light",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 390-dark",
+      "evidence": "16px"
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 390-dark",
+      "evidence": "16px at 390px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 390-dark",
+      "evidence": "0px"
+    },
+    {
+      "status": "pass",
+      "check": "Shader 390-dark",
+      "evidence": "data-state=\"running\""
+    },
+    {
+      "status": "pass",
+      "check": "Console 390-dark",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 1440-light-reduced",
+      "evidence": "16px"
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 1440-light-reduced",
+      "evidence": "14px at 1440px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 1440-light-reduced",
+      "evidence": "0px"
+    },
+    {
+      "status": "pass",
+      "check": "Reduced motion 1440-light-reduced",
+      "evidence": "data-state=\"static\""
+    },
+    {
+      "status": "pass",
+      "check": "Console 1440-light-reduced",
+      "evidence": "No page errors; no non-shader console errors."
+    }
+  ],
+  "runs": [
+    {
+      "key": "1440-light",
+      "width": 1440,
+      "height": 20462,
+      "theme": "light",
+      "reduced": false,
+      "title": "Vitrine — Design System | Aditya Himawan",
+      "h1": "A glass case for a low‑resolution light.",
+      "overflow": 0,
+      "shader": "running",
+      "typography": {
+        "body": 16,
+        "input": 14,
+        "headingWeight": 700
+      },
+      "errors": [],
+      "warnings": [
+        "[.WebGL-0x10c047d6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "[.WebGL-0x10c047d6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "[.WebGL-0x10c047d6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "[.WebGL-0x10c047d6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+      ]
+    },
+    {
+      "key": "1440-dark",
+      "width": 1440,
+      "height": 20462,
+      "theme": "dark",
+      "reduced": false,
+      "title": "Vitrine — Design System | Aditya Himawan",
+      "h1": "A glass case for a low‑resolution light.",
+      "overflow": 0,
+      "shader": "running",
+      "typography": {
+        "body": 16,
+        "input": 14,
+        "headingWeight": 700
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "390-light",
+      "width": 390,
+      "height": 31174,
+      "theme": "light",
+      "reduced": false,
+      "title": "Vitrine — Design System | Aditya Himawan",
+      "h1": "A glass case for a low‑resolution light.",
+      "overflow": 0,
+      "shader": "running",
+      "typography": {
+        "body": 16,
+        "input": 16,
+        "headingWeight": 700
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "390-dark",
+      "width": 390,
+      "height": 31174,
+      "theme": "dark",
+      "reduced": false,
+      "title": "Vitrine — Design System | Aditya Himawan",
+      "h1": "A glass case for a low‑resolution light.",
+      "overflow": 0,
+      "shader": "running",
+      "typography": {
+        "body": 16,
+        "input": 16,
+        "headingWeight": 700
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "1440-light-reduced",
+      "width": 1440,
+      "height": 20462,
+      "theme": "light",
+      "reduced": true,
+      "title": "Vitrine — Design System | Aditya Himawan",
+      "h1": "A glass case for a low‑resolution light.",
+      "overflow": 0,
+      "shader": "static",
+      "typography": {
+        "body": 16,
+        "input": 14,
+        "headingWeight": 700
+      },
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "statics": {
+    "audit": {
+      "ok": true,
+      "output": "PASS  required files: 28/28\nPASS  SVGs: 13/13 valid, brand assets have no <text>\nPASS  ICO: 16, 32, 48\nPASS  PNG: public/brand/vitrine/favicon-16.png 16×16\nPASS  PNG: public/brand/vitrine/favicon-32.png 32×32\nPASS  PNG: public/brand/vitrine/favicon-48.png 48×48\nPASS  PNG: public/brand/vitrine/apple-icon-180.png 180×180\nPASS  PNG: public/brand/vitrine/icon-192.png 192×192\nPASS  PNG: public/brand/vitrine/icon-512.png 512×512\nPASS  PNG: public/brand/vitrine/mark-1024.png 1024×1024\nPASS  PNG: design/brand/vitrine/vitrine-brandkit.png 3000×2250\nPASS  tokens: primitives 16, semantic.light 22, semantic.dark 22, components.light 24, components.dark 24\nPASS  contrast: 9/9 pairs >= 4.5:1\nPASS  family: 5 marks share viewBox 0 0 64 64\nPASS  forms: no raw colours, tokens only\nPASS  story: 6 required sections present\n\nAudit: PASS — 16 passed, 0 warnings, 0 failures"
+    },
+    "score": {
+      "ok": true,
+      "output": "PASS  vitrine\n   NOTE  dominant field 50% (v2.3 solid mass; channels are the negative space)"
+    }
+  },
+  "notes": [],
+  "screenshots": [
+    "vitrine-1440-light.jpg",
+    "vitrine-hero-light.png",
+    "vitrine-form-errors.png",
+    "vitrine-form-focus.png",
+    "vitrine-section-foundation.jpg",
+    "vitrine-section-marks.jpg",
+    "vitrine-section-colour.jpg",
+    "vitrine-section-applications.jpg",
+    "vitrine-1440-dark.jpg",
+    "vitrine-hero-dark.png",
+    "vitrine-390-light.jpg",
+    "vitrine-390-dark.jpg",
+    "vitrine-reduced-motion.png"
+  ]
+}

@@ -1,5 +1,5 @@
 <svg color="#0B0D10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 138.76 34.00" role="img" aria-label="Vitrine">
-  <g transform="translate(0 1.5) scale(0.53125)"><path d="M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z" fill="#0B0D10"/><rect x="27" y="46" width="10" height="8" fill="#D9FF43"/></g>
+  <g transform="translate(0 0.5) scale(0.53125)"><path d="M8 8H24L32 34V56H24Z" fill="#0B0D10"/><path d="M32 34L40 8H56L40 56H32Z" fill="#D9FF43"/></g>
   <g transform="translate(44 4.5) scale(0.032981530343007916)" fill="currentColor"><path transform="translate(15.00 729.00) scale(1 -1)" d="M174 0 16 496H150L265 92H283L398 496H532L374 0Z"/>
     <path transform="translate(523.00 729.00) scale(1 -1)" d="M70 0V496H196V0ZM133 554Q99 554 75.5 576.0Q52 598 52 634Q52 670 75.5 692.0Q99 714 133 714Q168 714 191.0 692.0Q214 670 214 634Q214 598 191.0 576.0Q168 554 133 554Z"/>
     <path transform="translate(749.00 729.00) scale(1 -1)" d="M260 0Q211 0 180.5 30.5Q150 61 150 112V392H26V496H150V650H276V496H412V392H276V134Q276 104 304 104H400V0Z"/>
