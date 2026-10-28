@@ -16,10 +16,11 @@ import styles from './archive.module.css'
 
 const ROUTES = [
   { href: '/projects', label: 'Projects', number: '01' },
-  { href: '/bookmarks', label: 'Bookmarks', number: '02' },
-  { href: '/skills', label: 'Skills', number: '03' },
-  { href: '/blog', label: 'Blog', number: '04' },
-  { href: '/design-engineering', label: 'Practice', number: '05' },
+  { href: '/design-system', label: 'Design System', number: '02' },
+  { href: '/bookmarks', label: 'Bookmarks', number: '03' },
+  { href: '/skills', label: 'Skills', number: '04' },
+  { href: '/blog', label: 'Blog', number: '05' },
+  { href: '/design-engineering', label: 'Practice', number: '06' },
 ] as const
 
 const ELSEWHERE = [
@@ -36,8 +37,11 @@ const SOCIALS = [
 
 function isHere(href: string, pathname: string) {
   if (href === '/blog' && pathname.startsWith('/guides')) return true
-  // The design-system case library is part of the practice wing.
-  if (href === '/design-engineering' && pathname.startsWith('/design-system'))
+  // The case library and its Sunnyside specimen share one nav entry.
+  if (
+    href === '/design-system' &&
+    (pathname === '/sunnyside' || pathname.startsWith('/design-system'))
+  )
     return true
   return pathname === href || pathname.startsWith(`${href}/`)
 }
@@ -184,7 +188,7 @@ export function ArchiveHeader() {
           >
             <div className={styles.menuTop}>
               <span className={styles.menuLabel}>
-                The back room, four shelves
+                The back room, every shelf
               </span>
               <button
                 ref={closeRef}

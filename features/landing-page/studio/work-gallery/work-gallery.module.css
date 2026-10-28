@@ -1,0 +1,793 @@
+/* The selected-work shelf.
+
+   A cobalt room holding a bento of cream paper. The local variables are the
+   only values this shelf owns; everything else comes from the landing page's
+   palette so the section still reads as the same studio wall. */
+
+.gallery {
+  --card: #faf4e8;
+  --card-ink: #18181b;
+  --tape-yellow: #facc15;
+  --tape-pink: #f4a8d4;
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+
+  display: flex;
+  flex-direction: column;
+  margin-top: clamp(2.1rem, 4.5vw, 3.4rem);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Filter switch ─────────────────────────────────────────────────────── */
+
+.filters {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.15rem;
+  max-width: 100%;
+  padding: 0.32rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: 4px 4px 0 var(--card-ink);
+}
+
+.filterButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.62rem 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--card-ink);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease-spring);
+}
+
+.filterButton:hover:not([data-active='true']) {
+  background: rgb(24 24 27 / 0.06);
+}
+
+.filterButton:focus-visible {
+  outline: 3px solid var(--card-ink);
+  outline-offset: 2px;
+}
+
+.filterPill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 1.5px solid var(--card-ink);
+  border-radius: 999px;
+  background: var(--tape-yellow);
+}
+
+.filterLabel,
+.filterCount {
+  position: relative;
+  z-index: 1;
+}
+
+.filterCount {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.2rem;
+  height: 1.15rem;
+  padding-inline: 0.28rem;
+  border: 1px solid rgb(24 24 27 / 0.22);
+  border-radius: 999px;
+  font-size: 8px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.filterButton[data-active='true'] .filterCount {
+  border-color: rgb(24 24 27 / 0.36);
+}
+
+/* ── Bento grid ────────────────────────────────────────────────────────── */
+
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: clamp(1rem, 1.8vw, 1.5rem);
+  margin-top: clamp(1.7rem, 3.2vw, 2.5rem);
+}
+
+.cell {
+  position: relative;
+  min-width: 0;
+}
+
+.cell:hover,
+.cell:focus-within {
+  z-index: 2;
+}
+
+.cellReveal {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Card ──────────────────────────────────────────────────────────────── */
+
+.card {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  padding: 0.65rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 18px;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--card-ink);
+  container-type: inline-size;
+  transition:
+    transform 0.38s var(--ease-spring),
+    box-shadow 0.38s var(--ease-spring);
+}
+
+.cardLink {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  border-radius: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardLink:focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+}
+
+.tape {
+  position: absolute;
+  z-index: 4;
+  top: -0.72rem;
+  left: 1.45rem;
+  width: 5.4rem;
+  height: 1.32rem;
+  border: 1px solid rgb(24 24 27 / 0.12);
+  background: var(--tape-pink);
+  transform: rotate(-4.5deg);
+  transform-origin: left center;
+  clip-path: polygon(1% 0, 100% 4%, 98% 100%, 0 96%);
+  box-shadow: 0 1px 1px rgb(24 24 27 / 0.12);
+  pointer-events: none;
+  transition: transform 0.32s var(--ease-spring);
+}
+
+.tapeButter {
+  width: 6rem;
+  background: var(--tape-yellow);
+}
+
+.tapePink {
+  background: var(--tape-pink);
+}
+
+.mediaShell {
+  position: relative;
+  display: block;
+  width: 100%;
+  flex: none;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--paper-lo);
+  isolation: isolate;
+}
+
+/* Projects keep their native 16:10 frame; the design-system brand kits keep
+   the 4:3 frame used by /design-system. Each category is consistent, and no
+   screenshot is forced into the other category's crop. */
+.media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  height: auto;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--paper-lo);
+  container-type: inline-size;
+}
+
+.card[data-kind='design-system'] .media {
+  aspect-ratio: 4 / 3;
+}
+
+.mediaInner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px)) scale(1);
+  transition: transform 0.5s var(--ease-spring);
+  will-change: transform;
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+}
+
+.systemBadge {
+  position: absolute;
+  z-index: 5;
+  top: -0.72rem;
+  right: 1.35rem;
+  padding: 0.3rem 0.48rem;
+  border: 1.5px solid var(--card-ink);
+  border-radius: 999px;
+  background: var(--card-ink);
+  color: var(--tape-yellow);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 7.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+  transform: rotate(1.5deg);
+  transform-origin: right center;
+  pointer-events: none;
+}
+
+/* ── Bottom bar ────────────────────────────────────────────────────────── */
+
+.foot {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 0.85rem 0.35rem 0.25rem;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cardIndex {
+  color: var(--cobalt);
+  font-weight: 700;
+}
+
+.cardCategory::before {
+  content: '·';
+  margin-right: 0.45rem;
+  color: rgb(24 24 27 / 0.35);
+}
+
+.cardYear {
+  margin-left: auto;
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.cardTitle {
+  display: -webkit-box;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-family: var(--font-syne), var(--font-space-grotesk), system-ui, sans-serif;
+  font-size: clamp(1.4rem, 6.5cqw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.cardArrow {
+  display: grid;
+  flex: none;
+  width: 1.8rem;
+  height: 1.8rem;
+  margin-top: 0.08rem;
+  place-items: center;
+  border: 1.5px solid rgb(24 24 27 / 0.25);
+  border-radius: 50%;
+  color: var(--ink);
+  transition:
+    transform 0.25s var(--ease-spring),
+    background-color 0.25s var(--ease-spring),
+    border-color 0.25s var(--ease-spring);
+}
+
+.cardArrowIcon {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+/* ── Hover detail drawer ───────────────────────────────────────────────── */
+
+.drawer {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.9rem 0.95rem 1rem;
+  border-top: 2px solid var(--card-ink);
+  border-radius: 12px 12px 0 0;
+  background: var(--paper-hi);
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(calc(100% + 3px));
+  transition:
+    transform 0.48s var(--ease-spring),
+    opacity 0.25s ease;
+  will-change: transform;
+}
+
+.drawer > * {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.24s ease,
+    transform 0.36s var(--ease-spring);
+}
+
+.drawerDescription {
+  max-width: 46ch;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tagList li {
+  padding: 0.23rem 0.5rem;
+  border: 1px solid rgb(24 24 27 / 0.22);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.38rem;
+  margin-top: auto;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.ctaArrow {
+  width: 0.95rem;
+  height: 0.95rem;
+  transition: transform 0.2s var(--ease-spring);
+}
+
+/* Keyboard focus reveals the same drawer as hover. It lives outside the
+   pointer media query so a keyboard reader never depends on having a mouse. */
+.card:focus-within {
+  transform: translateY(-6px);
+  box-shadow: 8px 8px 0 var(--card-ink);
+}
+
+.card:focus-within .tape {
+  transform: rotate(1.8deg) translateY(-2px);
+}
+
+.card:focus-within .mediaInner {
+  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px)) scale(1.04);
+}
+
+.card:focus-within .drawer {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card:focus-within .drawer > * {
+  opacity: 1;
+  transform: none;
+}
+
+.card:focus-within .drawerDescription {
+  transition-delay: 0.04s;
+}
+
+.card:focus-within .tagList {
+  transition-delay: 0.08s;
+}
+
+.card:focus-within .cta {
+  transition-delay: 0.12s;
+}
+
+.card:focus-within .cardArrow {
+  border-color: var(--card-ink);
+  background: var(--tape-yellow);
+  transform: translate(2px, -2px);
+}
+
+.card:focus-within .ctaArrow {
+  transform: translate(3px, -3px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 8px 8px 0 var(--card-ink);
+  }
+
+  .card:hover .tape {
+    transform: rotate(1.8deg) translateY(-2px);
+  }
+
+  .card:hover .mediaInner {
+    transform: translate(var(--pan-x, 0px), var(--pan-y, 0px)) scale(1.04);
+  }
+
+  .card:hover .drawer {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .card:hover .drawer > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  .card:hover .drawerDescription {
+    transition-delay: 0.04s;
+  }
+
+  .card:hover .tagList {
+    transition-delay: 0.08s;
+  }
+
+  .card:hover .cta {
+    transition-delay: 0.12s;
+  }
+
+  .card:hover .cardArrow {
+    border-color: var(--card-ink);
+    background: var(--tape-yellow);
+    transform: translate(2px, -2px);
+  }
+
+  .card:hover .ctaArrow {
+    transform: translate(3px, -3px);
+  }
+
+}
+
+/* ── Generated sleeves for the two releases without artwork ────────────── */
+
+.generatedCover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(0.9rem, 1.8vw, 1.25rem);
+  overflow: hidden;
+  background: var(--cobalt);
+  color: var(--paper-hi);
+  isolation: isolate;
+}
+
+.generatedCover[data-variant='petri'] {
+  background: var(--mint);
+  color: var(--ink);
+}
+
+.genGrid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(currentColor 1px, transparent 1px);
+  background-size: 9px 9px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.genCode,
+.genNote {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+  opacity: 0.78;
+}
+
+.genNote {
+  margin-top: auto;
+}
+
+.genGhost {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  font-family: var(--font-syne), var(--font-space-grotesk), system-ui, sans-serif;
+  font-size: clamp(3rem, 22cqw, 7rem);
+  font-weight: 800;
+  letter-spacing: -0.085em;
+  line-height: 0.7;
+}
+
+.genRing {
+  position: absolute;
+  right: -18%;
+  bottom: -26%;
+  width: 82%;
+  aspect-ratio: 1;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.45;
+}
+
+.genOrbit {
+  position: absolute;
+  z-index: 1;
+  top: 57%;
+  right: -6%;
+  width: 82%;
+  height: 2px;
+  background: var(--tangerine);
+  transform: rotate(-24deg);
+  opacity: 0.9;
+}
+
+.genOrbit::before,
+.genOrbit::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: var(--cobalt);
+  translate: -50% -50%;
+}
+
+.genOrbit::before {
+  left: 0;
+}
+
+.genOrbit::after {
+  left: 100%;
+}
+
+.genCell {
+  position: absolute;
+  z-index: 1;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 38% 34%,
+    color-mix(in srgb, var(--butter) 82%, transparent),
+    transparent 62%
+  );
+  opacity: 0.75;
+}
+
+.genCell[data-size='lg'] {
+  top: 16%;
+  right: 17%;
+  width: 38%;
+  aspect-ratio: 1;
+}
+
+.genCell[data-size='sm'] {
+  top: 40%;
+  right: 11%;
+  width: 19%;
+  aspect-ratio: 1;
+}
+
+/* The five cases come from /design-system, so the DS view uses the same
+   2-up composition as that page; All and Project keep the 3-up bento. */
+@media (min-width: 1024px) {
+  .grid[data-filter='design-system'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ── Tablet ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ── Phone, and any touch device without a hover ───────────────────────── */
+
+@media (max-width: 767px), (hover: none) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cell {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+
+  .card {
+    height: auto;
+  }
+
+  .card:focus-within {
+    transform: none;
+    box-shadow: 4px 4px 0 var(--card-ink);
+  }
+
+  .card:focus-within .mediaInner {
+    transform: none;
+  }
+
+  .cardLink {
+    height: auto;
+  }
+
+  .mediaShell {
+    display: contents;
+  }
+
+  .media {
+    order: 1;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    flex: none;
+  }
+
+  .foot {
+    order: 2;
+  }
+
+  .drawer {
+    position: static;
+    order: 3;
+    margin-top: 0.85rem;
+    padding: 0.85rem 0.35rem 0.2rem;
+    border-top: 2px solid var(--card-ink);
+    border-radius: 0;
+    background: transparent;
+    opacity: 1;
+    transform: none;
+  }
+
+  .drawer > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  .drawerDescription {
+    font-size: 0.82rem;
+  }
+
+  .cardTitle {
+    -webkit-line-clamp: unset;
+    overflow: visible;
+    font-size: clamp(1.55rem, 6vw, 2.1rem);
+  }
+
+  .filters {
+    width: 100%;
+  }
+
+  .filterButton {
+    flex: 1;
+    justify-content: center;
+    padding: 0.58rem 0.5rem;
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .filterCount {
+    min-width: 1.1rem;
+    height: 1.05rem;
+    font-size: 7.5px;
+  }
+}
+
+@media (max-width: 380px) {
+  .filterButton {
+    gap: 0.3rem;
+    padding-inline: 0.34rem;
+    font-size: 7.8px;
+    letter-spacing: 0.07em;
+  }
+
+  .filterLabel {
+    max-width: 5.2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cardArrow,
+  .ctaArrow,
+  .tape,
+  .mediaInner,
+  .drawer,
+  .drawer > * {
+    transition-duration: 0.01ms !important;
+  }
+
+  .card:hover,
+  .card:focus-within {
+    transform: none;
+  }
+
+  .card:hover .mediaInner,
+  .card:focus-within .mediaInner {
+    transform: none !important;
+  }
+
+}

@@ -40,18 +40,24 @@ const DESTINATIONS = [
   {
     href: '/sunnyside',
     label: 'Sunnyside',
-    note: 'the design system',
+    note: 'the specimen',
     number: '00',
   },
-  { href: '/projects', label: 'Projects', note: 'the shelf', number: '01' },
-  { href: '/bookmarks', label: 'Bookmarks', note: 'the crate', number: '02' },
-  { href: '/skills', label: 'Skills', note: 'the toolbox', number: '03' },
-  { href: '/blog', label: 'Blog', note: 'field notes', number: '04' },
+  {
+    href: '/design-system',
+    label: 'Design System',
+    note: 'the case library',
+    number: '01',
+  },
+  { href: '/projects', label: 'Projects', note: 'the shelf', number: '02' },
+  { href: '/bookmarks', label: 'Bookmarks', note: 'the crate', number: '03' },
+  { href: '/skills', label: 'Skills', note: 'the toolbox', number: '04' },
+  { href: '/blog', label: 'Blog', note: 'field notes', number: '05' },
   {
     href: '/design-engineering',
     label: 'Practice',
     note: 'the field manual',
-    number: '05',
+    number: '06',
   },
 ] as const
 
