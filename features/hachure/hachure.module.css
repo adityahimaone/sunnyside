@@ -17,6 +17,13 @@
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
+
+  /* The mark is a #141413 stamp on paper; on night it follows the paper ink. */
+  --hx-mark-ink: #141413;
+}
+
+.page[data-theme='dark'] {
+  --hx-mark-ink: var(--hx-ink);
 }
 
 .page :focus-visible {
@@ -222,6 +229,7 @@
   gap: clamp(16px, 2.6vw, 34px);
   padding: clamp(48px, 7vw, 96px) 0;
   border-top: var(--hx-hairline) solid var(--hx-rule);
+  scroll-margin-top: 84px;
 }
 
 .rail {
@@ -2233,6 +2241,17 @@
 /* ---------------------------------------------------------------- 760px -- */
 
 @media (max-width: 760px) {
+  /* The verdict moves under the idea so the note column cannot clip. */
+  .explorations li {
+    grid-template-columns: 30px minmax(0, 1fr);
+    row-gap: 3px;
+  }
+
+  .explorations em {
+    grid-column: 2;
+    text-align: left;
+  }
+
   .sectionHead {
     grid-template-columns: minmax(0, 1fr);
     align-items: start;

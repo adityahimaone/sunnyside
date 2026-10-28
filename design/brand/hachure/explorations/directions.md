@@ -1,3 +1,5 @@
+> **Historical.** This file records the first and second passes. The current mark is the v2.2 bake-off at the end of the file.
+
 # Six directions, one kept — Hachure
 
 All six were drawn on the same 64 grid, in one colour, and judged at 32px and
@@ -130,9 +132,9 @@ reads as a glitch. The idea is right and the balance is wrong. **Lost.**
 ## 12 · H, printed feet — **kept**
 
 An H on the 64 grid — stems 12, counter 20, crossbar 6 — with the stem tops cut
-on a shallow ridge and the base cut at row 46. Eight 4-unit cells at 82% and 44%
-coverage finish the feet, thresholded with the same Bayer matrix the footer
-samples.
+on a shallow ridge and the base cut at row 46. Each stem finishes in three
+4-unit cells — two columns with a 4-unit gap, the outer column two rows deep and
+the inner one row — so the foot steps into the paper.
 
 **Why it works.**
 
@@ -141,7 +143,7 @@ samples.
   operation: ink running out into paper.
 - It is not a mountain. The range is still the footer's subject; the mark no
   longer has to repeat it.
-- One path, no mask, 8 cells. It favicons without a redraw at 32 and 180; the
+- One path, no mask, 6 cells. It favicons without a redraw at 32 and 180; the
   16px compact only redraws the feet on a 2-unit grid.
 
 ---
@@ -151,3 +153,22 @@ samples.
 12 replaces 03. The first pass's six remain the honest history of the idea — and
 the reason the second pass had something to reject. A mark is allowed a second
 pass; a system that hides its first one is a brochure.
+
+---
+
+# The v2.3 bake-off — the current mark (supersedes the H and the knoll)
+
+The H passed 16px but never drew the slope. The v2.3 gate bans circles and
+outlines, so the five allowed families were drawn with solid fills only:
+
+| # | Family | Idea | Verdict |
+| --- | --- | --- | --- |
+| 01 | architectural monogram | notched letter | a letter, not a slope |
+| 02 | offset planes | sheared sheets | an overprint, not terrain |
+| 03 | louvers | solid stepped bars | **kept** |
+| 04 | ribbon | one folded beam | one beam, no range |
+| 05 | horizon | baseline + keystone | a line, not relief |
+
+The kept mark is four solid wedge-bars, 8 / 10 / 12 / 14 wide, with a lichen
+diamond apex. The compact is three bars on a 32 grid. The H, the knoll and the
+thin hachure lines remain in this file as history, not as the current mark.

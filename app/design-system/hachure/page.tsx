@@ -4,7 +4,6 @@ import Link from 'next/link'
 import '@/features/hachure/hachure-tokens.css'
 
 import {
-  Benchmark,
   DitherStudy,
   ElevationStudy,
   FooterDemo,
@@ -36,7 +35,7 @@ export const metadata: Metadata = {
         url: '/brand/hachure/hachure-brandkit.png',
         width: 1500,
         height: 1125,
-        alt: 'The Hachure brand board: a 3 × 3 identity deck on a night table — the H mark printing into paper, the outlined mono wordmark, the dither plate, the seven-tone ramp and the form kit.',
+        alt: 'The Hachure brand board: a 3 × 3 identity deck on a night table — the solid ridge mark, the outlined mono wordmark, the dither plate, the seven-tone ramp and the form kit.',
       },
     ],
   },
@@ -148,12 +147,11 @@ const FUSIONS = [
 ]
 
 const EXPLORATIONS = [
-  { n: '01', name: 'Ridge, first pass', note: 'a peak at 16px' },
-  { n: '02', name: 'Ridge + gullies', note: 'reads as a tent' },
-  { n: '03', name: 'Comb ridge', note: 'a barcode skyline' },
-  { n: '04', name: 'Range pair', note: 'dots read as sparks' },
-  { n: '05', name: 'H, solid', note: 'clean but plain' },
-  { n: '06', name: 'H, printed feet', note: 'kept' },
+  { n: '01', name: 'Architectural monogram', note: 'a letter, not a slope' },
+  { n: '02', name: 'Offset planes', note: 'an overprint, not terrain' },
+  { n: '03', name: 'Louvers', note: 'kept' },
+  { n: '04', name: 'Ribbon', note: 'one beam, no range' },
+  { n: '05', name: 'Horizon', note: 'a line, not relief' },
 ]
 
 const TIMELINE = [
@@ -306,7 +304,7 @@ export default function HachurePage() {
           <dl className={styles.facts} aria-label="Case facts">
             <div className={styles.fact}>
               <dt>Grid</dt>
-              <dd>64 units / one path</dd>
+              <dd>64 grid / four bars</dd>
             </div>
             <div className={styles.fact}>
               <dt>Tones</dt>
@@ -566,15 +564,15 @@ export default function HachurePage() {
                 id="mark"
                 number="04"
                 label="The mark"
-                title="A letter, printed into paper."
-                lead="The first pass kept a ridge; at 16px it collapsed into the peak every terrain app already uses. The second pass kept the letter: an H whose stem tops are cut on a shallow ridge and whose feet break into the same 4-unit cells the range is printed from."
+                title="Relief, drawn in weight."
+                lead="The first pass drew a letter; the name was not in it. The mark is now four solid wedge-bars that rise and thicken left to right — the width is the density. A lichen diamond caps the summit. No circle, no thin lines, no enclosing ring."
               />
 
               <div className={styles.markGrid}>
                 <div className={styles.markStage}>
                   <HachureMark size={240} title="The mark on a 64 grid" />
                   <span className={styles.markStageNote}>
-                    64 grid / 8 foot cells / one path
+                    64 grid / 4 wedge bars / 1 apex
                   </span>
                 </div>
 
@@ -597,24 +595,21 @@ export default function HachurePage() {
                       <span className={styles.label}>16</span>
                     </div>
                     <div className={styles.familyItem}>
-                      <Benchmark size={30} />
-                      <span className={styles.label}>Benchmark</span>
+                      <HachureMark size={32} mono title="Mono ridge" />
+                      <span className={styles.label}>Mono</span>
                     </div>
                   </div>
 
                   <p className={styles.familyNote}>
-                    At 16px a 4-unit cell is sub-pixel, so the compact variant
-                    redraws the feet on a 2-unit grid and keeps only the row
-                    that survives. Clear space is 10 units on every side. The
-                    benchmark is a section marker only — it is missing its
-                    centre on purpose, because a triangle with a dot already
-                    means
-                    <em> warning</em> in every airport on earth.
+                    At 16px the compact drops to three bars and widens the channels by a
+                    quarter; the widths still read. `mono` collapses the apex to
+                    the ink. Clear space is one channel on every side. The mark
+                    is fill-only: no ring, no stroke, no circle.
                   </p>
 
                   <div>
                     <p className={styles.label} style={{ marginBottom: 10 }}>
-                      Second pass / six drawn, one kept
+                      V2.3 bake-off / five families, one kept
                     </p>
                     <ul className={styles.explorations}>
                       {EXPLORATIONS.map((item) => (
@@ -632,12 +627,11 @@ export default function HachurePage() {
                       Construction
                     </p>
                     <p className={styles.familyNote}>
-                      Stems <span className={styles.mono}>12</span> wide with a{' '}
-                      <span className={styles.mono}>20</span>-unit counter; the
-                      crossbar is <span className={styles.mono}>6</span> and
-                      sits on the letter&apos;s centre. The base is cut at{' '}
-                      <span className={styles.mono}>46</span> and two rows of
-                      4-unit cells at 82% and 44% coverage finish it. The
+                      Four solid bars, <span className={styles.mono}>8 / 10 / 12 / 14</span>{' '}
+                      wide, rise from <span className={styles.mono}>56</span> to
+                      tops at 36 / 26 / 16 / 8. The gaps are{' '}
+                      <span className={styles.mono}>5.3</span> units. A lichen
+                      diamond caps the tallest bar. No stroke, no circle. The
                       wordmark is Geist Mono 700, outlined once, never live
                       text.
                     </p>
@@ -1318,13 +1312,13 @@ export default function HachurePage() {
                       plate is its own ramp, not an inversion.
                     </li>
                     <li>
-                      Every edge, mark, wordmark, favicon and favicon cell is a
-                      path. The page loads no images at runtime.
+                      Every edge, mark, wordmark, favicon and favicon cell is an
+                      SVG drawing. The page loads no images at runtime.
                     </li>
                     <li>
-                      The mark is one path with {`8`} foot cells; the 16px
-                      favicon is the compact drawing on a 32 grid, not the
-                      primary scaled down.
+                      The mark is four solid bars and one lichen apex;
+                      the 16px favicon is the compact drawing on a 32 grid, not
+                      the primary scaled down.
                     </li>
                   </ul>
                 </article>
@@ -1338,7 +1332,7 @@ export default function HachurePage() {
                       <code>hachure-tokens.css</code> and the public JSON.
                     </li>
                     <li>
-                      Marks: <code>public/brand/hachure/</code> — mark, compact,
+                      Marks: <code>public/brand/hachure/</code> — mark, compact, mono,
                       wordmark, lockup, favicons.
                     </li>
                     <li>

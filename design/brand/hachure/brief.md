@@ -95,19 +95,32 @@ six more on the same grid:
 | 11 | H, hachured stem — one stem in stripes | Reads as a glitch, not a system |
 | 12 | **H, printed feet** — the base breaks into cells | **Kept** |
 
-The kept mark is the initial plus the system's operation: an H whose stem tops
-are cut on a shallow ridge and whose feet break into the same 4-unit cells the
-range is printed from. It reads as an H at 16px and as a printed H at 96px. The
-first pass remains the honest history of the idea; the ridge is still the
-footer's subject, which is why the mark no longer has to be a mountain.
+The H was the second pass, not the last word. It passed 16px, but it never drew
+the thing the name means: a line on a slope. The v2.2 bake-off ran the six
+families and replaced it.
+
+### The v2.3 bake-off
+
+| # | Family | Idea | Verdict |
+| --- | --- | --- | --- |
+| 01 | architectural monogram | notched letter | a letter, not a slope |
+| 02 | offset planes | sheared sheets | an overprint, not terrain |
+| 03 | louvers | solid stepped bars | **kept** |
+| 04 | ribbon | one folded beam | one beam, no range |
+| 05 | horizon | baseline + keystone | a line, not relief |
+
+The kept mark is a **ridge of solid bars**: four wedge-bars rise and thicken
+left to right, with a lichen diamond on the summit. Width carries the density;
+the negative channels are the chart's whitespace. It reads at 16px as three
+bold bars and a lime apex.
 
 ## 5. The mark's construction
 
-- 64 grid. Stems 12 wide at `x = 10..22` and `x = 42..54`; counter 20; crossbar 6 at `y = 31..37`.
-- The stem tops are cut on a shallow ridge: `y = 16` at the outside edges, `y = 12` at the inside.
-- The base is cut at `y = 46`; 8 cells of 4 units at 82% and 44% coverage finish it, thresholded against the same Bayer matrix the footer uses.
-- Rendered as **one path** — the body plus the surviving cells — so there is no mask, no clip id to collide, and it holds up as a favicon.
-- Compact variant: the same H on a 32 grid, with the feet redrawn on a 2-unit grid at 55% / 22% coverage, because 4-unit cells are sub-pixel at 16px.
+- 64 grid. Bars 8 / 10 / 12 / 14 wide, gaps 5.3; tops 36 / 26 / 16 / 8; base 56.
+- Bars read #141413 on ground / the paper ink at night; the apex reads #B8CC3B. No stroke, no circle.
+- Compact: a 32 grid with three bars (6 / 8 / 9 wide, 3-unit gaps) and the apex.
+- `mono` collapses the apex to currentColor.
+- Favicon: opaque paper, compact at 16/32, full at 180.
 
 ## 6. Elevation as the hierarchy
 
@@ -138,7 +151,7 @@ That is the whole depth model. There are three levels because there are three le
 ## 9. Deliverables
 
 - `features/hachure/tokens.json` → `features/hachure/hachure-tokens.css`, `public/brand/hachure/hachure-tokens.{css,json}`.
-- `public/brand/hachure/` — `mark.svg`, `mark-compact.svg`, `wordmark.svg`, `lockup.svg`, `favicons/`, `hachure-brandkit.png`.
+- `public/brand/hachure/` — `mark.svg`, `mark-compact.svg`, `mark-mono.svg`, `wordmark.svg`, `lockup.svg`, `favicons/`, `hachure-brandkit.png`.
 - `design/brand/hachure/brandkit.html` — the 1500×1125 board.
 - `app/design-system/hachure` — the proof page, plus an `llms.txt` twin.
 - `components/ui/ridgeline-dither-footer.tsx` — the component, unmodified in behaviour.

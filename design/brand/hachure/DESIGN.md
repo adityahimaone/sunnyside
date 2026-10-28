@@ -58,7 +58,7 @@ becomes the largest plate in a system that was always tonal.
 2. **No gradient sky.** A CSS gradient cannot be printed. Tonal steps are
    discrete palette indices.
 3. **No peak logo.** The triangle is the most used mark in this category. The
-   kept profile is asymmetric, kneed and prints into paper.
+   mark is a ridge of solid wedge-bars with a lichen apex; no circle.
 
 ## 3. Domain
 
@@ -119,22 +119,23 @@ It is never live text.
 
 ## 7. Mark
 
-The initial, not the mountain.
+The mark is the name's operation at full weight: relief drawn by density.
 
-The first pass kept an asymmetric ridge, and at 16px it became the peak glyph
-every terrain app already uses. The second pass kept the letter and the system's
-own move: an H on a 64 grid — stems 12 wide, a 20-unit counter, a 6-unit
-crossbar — whose stem tops are cut on a shallow ridge and whose feet break into
-the same 4-unit cells the range is printed from. Eight cells at 82% and 44%
-coverage, thresholded with the same Bayer matrix as the footer. One path, no
-mask. It reads as an H at 16px and as a printed H at 96px.
+Four solid wedge-bars rise and thicken left to right. The width is the slope:
+8 / 10 / 12 / 14 units, with 5.3-unit negative channels. A lichen diamond caps
+the tallest bar. No circle, no enclosing ring, no stroke.
 
-At 16px the cells are sub-pixel, so the compact drawing redraws the feet on a
-2-unit grid and keeps the row that survives. The primary mark is never scaled
-down for a favicon.
+- 64 grid: `M2 56V36L10 42V56Z M15.3 56V26L25.3 32V56Z M30.6 56V16L42.6 22V56Z
+  M47.9 56V8L61.9 14V56Z`; apex `M54.9 2L61.9 8L54.9 14L47.9 8Z`.
+- Bars read `--hx-mark-ink` (#141413 on ground, the paper ink at night); the apex reads #B8CC3B.
+- Compact: a separate 32-grid drawing with three bars and wider channels.
+- `mono` collapses the apex to currentColor.
+- The favicon is opaque paper so the ink bars survive a dark chrome.
 
-Eleven marks were drawn across two passes; two were kept, one per pass. The
-rejection notes are in [`explorations/directions.md`](./explorations/directions.md).
+The H and its foot cells are gone. The v2.3 five-family bake-off (architectural
+monogram, offset planes, louvers, ribbon, horizon) kept the louver family: it
+draws the name's density with solid weight instead of thin lines. The rejection
+notes are in [`explorations/directions.md`](./explorations/directions.md).
 
 ## 8. Motion
 

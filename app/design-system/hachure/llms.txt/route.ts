@@ -57,7 +57,7 @@ Using the dither plate anywhere but the footer spends the system's one loud fiel
 
 ## Mark
 
-A drawn asymmetric ridge on a 64 grid: apex (26, 13), knee (38, 34), feet (10, 50) and (54, 50). Solid above row 42; rows 42 and 46 break into 4-unit cells at 82% and 44% coverage, thresholded by the same Bayer matrix the footer samples. One path, no mask, no second colour, 14 foot cells. The compact variant redraws the base on a 2-unit grid for 16px. Six marks were drawn and five were rejected in \`design/brand/hachure/explorations/directions.md\`.
+A ridge of four solid wedge-bars on a 64 grid: widths 8 / 10 / 12 / 14, gaps 5.3, tops 36 / 26 / 16 / 8, base 56. The bars read #141413 on ground and the paper ink at night; a lichen diamond #B8CC3B caps the tallest bar. No circle, no ring, no stroke. The compact is a separate 32-grid drawing with three bars (6 / 8 / 9 wide, 3-unit gaps) and the apex; \`mono\` collapses the apex to currentColor. Five families were drawn in the v2.3 bake-off (architectural monogram, offset planes, louvers, ribbon, horizon); louvers kept the name's density. Notes live in \`design/brand/hachure/explorations/directions.md\`.
 
 ## Wordmark
 
@@ -130,7 +130,7 @@ ${failing.length ? `The failing pair is kept visible as a rule rather than fixed
 
 ## Components
 
-- \`features/hachure/components/brand.tsx\`: \`HachureMark\`, \`HachureWordmark\`, \`HachureLockup\`, \`Benchmark\`.
+- \`features/hachure/components/brand.tsx\`: \`HachureMark\`, \`HachureWordmark\`, \`HachureLockup\`.
 - \`features/hachure/components/controls.tsx\`: ground/night switch; the page root carries \`data-theme\` so the token layer decides what each role resolves to.
 - \`features/hachure/components/hero-plate.tsx\`: the hero plate, revealed once by the same engine as the footer.
 - \`features/hachure/components/dither-study.tsx\`: tones, ridges, cell size, mist and a \`develop\` scrub, plus the Bayer matrix.

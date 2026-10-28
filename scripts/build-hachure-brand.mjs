@@ -130,110 +130,42 @@ writeFileSync(join(ROOT, 'features/hachure/hachure-tokens.css'), CSS)
 writeFileSync(join(PUBLIC, 'hachure-tokens.css'), CSS)
 writeFileSync(join(PUBLIC, 'hachure-tokens.json'), JSON.stringify(tokens, null, 2) + '\n')
 
-/* ---------- the mark: the H, printed into its own paper ---------------- */
+/* ---------- the mark: a rising ridge of solid bars -------------------- */
 
 const round = (n) => Number(n.toFixed(2))
 
 /**
- * The mark is the initial, not the mountain.
+ * v2.3: relief drawn by weight, not by thin lines.
  *
- * The first pass kept an asymmetric ridge; at 16px it collapsed into the same
- * peak every terrain app already uses. The second pass keeps the letter and the
- * system's own move: the stem tops are cut on a shallow ridge line, and the feet
- * break into the same 4-unit cells the range is printed from. It reads as an H
- * at 16px and as a printed H at 96px — two jobs, one drawing.
- *
- * 64 grid. Stems 12 wide, a 20-unit counter, a 6-unit crossbar. The base is cut
- * at 46 and two rows of thresholded cells finish it.
+ * Four solid wedge-bars rise left to right and thicken as they rise; the gaps
+ * are negative channels (5.3 units on the 64 grid). A lichen diamond sits on
+ * the summit. No circle, no enclosing ring, no strokes. The compact drops to
+ * three bars and widens the channels; `mono` collapses the apex to currentColor.
  */
-const H = {
-  left: 10,
-  innerLeft: 22,
-  innerRight: 42,
-  right: 54,
-  topLeft: 16,
-  topRight: 12,
-  barTop: 31,
-  barBottom: 37,
-  base: 46,
+const FULL = {
+  box: 64,
+  bars:
+    'M2 56V36L10 42V56Z M15.3 56V26L25.3 32V56Z M30.6 56V16L42.6 22V56Z M47.9 56V8L61.9 14V56Z',
+  apex: 'M54.9 2L61.9 8L54.9 14L47.9 8Z',
 }
-const CELL = 4
-const COVER = [0.82, 0.44]
-
-/** The classic 8×8 Bayer matrix — the same one the footer samples. */
-const BAYER = [
-  0, 32, 8, 40, 2, 34, 10, 42, 48, 16, 56, 24, 50, 18, 58, 26, 12, 44, 4, 36, 14, 46, 6, 38, 60, 28, 52, 20, 62, 30,
-  54, 22, 3, 35, 11, 43, 1, 33, 9, 41, 51, 19, 59, 27, 49, 17, 57, 25, 15, 47, 7, 39, 13, 45, 5, 37, 63, 31, 55, 23,
-  61, 29, 53, 21,
-].map((v) => (v + 0.5) / 64)
-
-function markGeometry({ scale = 1, foot = true, cell = CELL, cover = COVER } = {}) {
-  const p = (x, y) => [round(x * scale), round(y * scale)]
-  const body = [
-    [H.left, H.topLeft],
-    [H.innerLeft, H.topRight],
-    [H.innerLeft, H.barTop],
-    [H.innerRight, H.barTop],
-    [H.innerRight, H.topRight],
-    [H.right, H.topLeft],
-    [H.right, H.base],
-    [H.innerRight, H.base],
-    [H.innerRight, H.barBottom],
-    [H.innerLeft, H.barBottom],
-    [H.innerLeft, H.base],
-    [H.left, H.base],
-  ].map(([x, y]) => p(x, y))
-
-  let d = `M${body[0][0]} ${body[0][1]}` + body.slice(1).map((q) => `L${q[0]} ${q[1]}`).join('') + 'Z'
-  const cells = []
-  const points = [...body]
-
-  if (foot) {
-    const size = cell * scale
-    for (const stem of [H.left, H.innerRight]) {
-      for (let row = 0; row < cover.length; row++) {
-        const y = H.base + row * cell
-        for (let col = 0; col < 3; col++) {
-          if (cover[row] <= BAYER[(row * 8 + col) % 64]) continue
-          const x = stem + col * cell
-          const [qx, qy] = [round(x * scale), round(y * scale)]
-          cells.push(`M${qx} ${qy}h${round(size)}v${round(size)}h${-round(size)}Z`)
-          points.push([qx, qy], [round(qx + size), round(qy + size)])
-        }
-      }
-    }
-  }
-
-  d += cells.join('')
-
-  // Bounds from the points, not from the path string: `h`/`v` are relative and
-  // a regex over the `d` attribute reads their deltas as coordinates.
-  const xs = points.map((q) => q[0])
-  const ys = points.map((q) => q[1])
-  return {
-    d,
-    cells: cells.length,
-    body,
-    bounds: { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) },
-  }
+const COMPACT = {
+  box: 32,
+  bars: 'M2 30V20L8 24V30Z M11 30V14L19 18V30Z M22 30V8L31 12V30Z',
+  apex: 'M26.5 1L31 8L26.5 15L22 8Z',
 }
 
-function centre(shape, size) {
-  const { x0, y0, x1, y1 } = shape.bounds
-  return `translate(${round((size - (x1 - x0)) / 2 - x0)} ${round((size - (y1 - y0)) / 2 - y0)})`
+function markInner(v, apexFill = '#B8CC3B') {
+  return `<path d="${v.bars}" fill="var(--hx-mark-ink, #141413)"/><path d="${v.apex}" fill="${apexFill}"/>`
 }
 
-const mark = markGeometry({ scale: 1, foot: true })
-/* At 16px a 4-unit cell is sub-pixel, so the compact redraws the foot on a
-   2-unit grid and keeps only the row that survives. */
-const compact = markGeometry({ scale: 0.5, foot: true, cell: 2, cover: [0.55, 0.22] })
-
-const markSVG = (shape, size) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="Hachure">
-  <g transform="${centre(shape, size)}"><path d="${shape.d}" fill="var(--hx-ink, #16211B)"/></g>
-</svg>
+const markSVG = (v, size, apexFill = '#B8CC3B') =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${v.box} ${v.box}" width="${size}" height="${size}" role="img" aria-label="Hachure">${markInner(v, apexFill)}</svg>
 `
 
-const compactSVG = markSVG(compact, 32)
+const mark = markSVG(FULL, 64)
+const compact = markSVG(COMPACT, 32)
+const mono = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Hachure mono">${markInner(FULL, 'currentColor')}</svg>
+`
 
 /* ---------- the wordmark ------------------------------------------------- */
 
@@ -262,9 +194,9 @@ const LOCK_W = round(LOCK_MARK + LOCK_GAP + LOCK_WM_W + 2)
 const LOCK_H = LOCK_MARK
 
 const lockup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${LOCK_W} ${LOCK_H}" width="${LOCK_W}" height="${LOCK_H}" role="img" aria-label="Hachure">
-  <g transform="${centre(mark, LOCK_MARK)}"><path d="${mark.d}" fill="var(--hx-ink, #16211B)"/></g>
+  <g transform="translate(0 0) scale(${round(LOCK_MARK / 64)})" color="var(--hx-ink, #141413)">${markInner(FULL)}</g>
   <g transform="translate(${round(LOCK_MARK + LOCK_GAP)} ${round((LOCK_H - LOCK_WM_H) / 2)}) scale(${round(LOCK_WM_H / word.height)}) translate(${WM_X} ${WM_Y})">
-    <path d="${word.d}" fill="var(--hx-ink, #16211B)"/>
+    <path d="${word.d}" fill="var(--hx-ink, #141413)"/>
   </g>
 </svg>
 `
@@ -272,40 +204,37 @@ const lockup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${LOCK_W} $
 /* ---------- write -------------------------------------------------------- */
 
 const write = (path, body) => writeFileSync(path, body)
-write(join(PUBLIC, 'mark.svg'), markSVG(mark, 64))
-write(join(PUBLIC, 'mark-compact.svg'), compactSVG)
+write(join(PUBLIC, 'mark.svg'), mark)
+write(join(PUBLIC, 'mark-compact.svg'), compact)
+write(join(PUBLIC, 'mark-mono.svg'), mono)
+write(join(PUBLIC, 'glyph.svg'), mark)
 write(join(PUBLIC, 'wordmark.svg'), wordmark)
 write(join(PUBLIC, 'lockup.svg'), lockup)
-write(join(DESIGN, 'mark.svg'), markSVG(mark, 64))
+write(join(DESIGN, 'mark.svg'), mark)
+write(join(DESIGN, 'mark-compact.svg'), compact)
+write(join(DESIGN, 'mark-mono.svg'), mono)
 write(join(DESIGN, 'wordmark.svg'), wordmark)
 
-/* Favicons: the mark redrawn at each size rather than scaled, because the foot
-   cells collapse below 32 and the compact profile is what survives. */
-for (const size of [16, 32, 180]) {
-  const shape = size <= 16 ? compact : mark
-  const box = size <= 16 ? 32 : 64
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${box} ${box}" width="${size}" height="${size}">
-  <g transform="${centre(shape, box)}"><path d="${shape.d}" fill="#16211B"/></g>
+/* Favicons: opaque paper, compact 3-bar drawing at 16/32, full 4-bar at 180. */
+const favicon = (size) => {
+  const v = size <= 32 ? COMPACT : FULL
+  const scale = round(size / v.box)
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+  <rect width="${size}" height="${size}" fill="#F2F4EE"/>
+  <g transform="scale(${scale})" color="#141413">${markInner(v)}</g>
 </svg>
 `
-  write(join(PUBLIC, `favicons/favicon-${size}.svg`), svg)
 }
-write(
-  join(PUBLIC, 'favicons/favicon.svg'),
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <g transform="${centre(compact, 32)}"><path d="${compact.d}" fill="#16211B"/></g>
-</svg>
-`,
-)
+for (const size of [16, 32, 180]) write(join(PUBLIC, `favicons/favicon-${size}.svg`), favicon(size))
+write(join(PUBLIC, 'favicons/favicon.svg'), favicon(32))
 
-/* Geometry for React, so the page never re-parses an SVG string. */
+/* Geometry for React. */
 write(
   join(ROOT, 'features/hachure/brand-paths.ts'),
   `/* Generated by scripts/build-hachure-brand.mjs. Do not edit. */
 
-export const MARK_D = '${mark.d}'
-export const MARK_COMPACT_D = '${compact.d}'
-export const MARK_FOOT_CELLS = ${mark.cells}
+export const MARK = ${JSON.stringify(FULL)} as const
+export const COMPACT = ${JSON.stringify(COMPACT)} as const
 export const WORDMARK_D =
   '${word.d}'
 export const WORDMARK_VIEWBOX = '${word.viewBox}'
@@ -318,7 +247,7 @@ export const LOCKUP_H = ${LOCK_H}
 )
 
 console.log(`tokens   ${tokens.semantic.light.length} light / ${tokens.semantic.dark.length} dark / ${tokens.contrast.length} measured pairs`)
-console.log(`mark     64 grid, H ${mark.bounds.x1 - mark.bounds.x0} × ${mark.bounds.y1 - mark.bounds.y0}, ${mark.cells} foot cells`)
+console.log(`mark     64 grid, four wedge bars + apex; compact three bars`)
 console.log(`wordmark ${WM_W} × ${WM_H} from ${word.text}`)
 console.log(`lockup   ${LOCK_W} × ${LOCK_H}`)
 const fails = tokens.contrast.filter((c) => c.level === 'Fail')

@@ -10,15 +10,15 @@ the form, the draft and the case card.
 - Board: `public/brand/hachure/hachure-brandkit.png`
 - Tokens: `features/hachure/tokens.json`
 - Decisions: `design/brand/hachure/brief.md`, `design/brand/hachure/DESIGN.md`
-- Screenshots: `docs/screenshots/hachure-1440-{hero,mark,study,specimen,dark}.png`, `hachure-390-hero.png`, and the mark pass in `hachure-mark-pass.png`
+- Screenshots: `docs/screenshots/hachure-1440-{hero,mark,study,specimen,dark}.png`, `hachure-390-hero.png`, the mark pass in `hachure-mark-pass.png`, and the before/after in `mark-upgrade-pass.png`
 
 ## Scorecard
 
 | Dimension | Result | Evidence |
 | --- | --- | --- |
 | One-sentence brief | Pass | “Relief drawn by density, never by shadow.” in `brief.md` and `DESIGN.md` |
-| Six directions, one kept | Pass | `design/brand/hachure/explorations/directions.md`; the page's section 04 lists all six and why five lost |
-| Mark at 16 / 32 / 64 | Pass | `public/brand/hachure/mark.svg`, `mark-compact.svg`, `favicons/favicon-{16,32,180}.svg`; one path, 8 foot cells, an H that reads at 16px |
+| Five families, one kept | Pass | `design/brand/hachure/explorations/directions.md`; the page's section 04 lists the five v2.3 families and why four lost |
+| Mark at 16 / 32 / 64 | Pass | `public/brand/hachure/mark.svg`, `mark-compact.svg`, `favicons/favicon-{16,32,180}.svg`; four solid wedge-bars and one lichen apex; reads at 16px |
 | Tokens, one source | Pass | `features/hachure/tokens.json` → `hachure-tokens.css`, public CSS/JSON and `brand-paths.ts` by `scripts/build-hachure-brand.mjs`; nothing downstream hand-edited |
 | Contrast measured, not typed | Pass | 18 pairs computed in the build from the semantic layer |
 | Typography gate | Pass | Two families (Geist Mono / Geist); body 17px at 1.6; labels 11px at 0.14em; measure ≤ 68ch; tabular numerals; `text-wrap: balance` on headings |
@@ -41,7 +41,7 @@ the form, the draft and the case card.
 - **Tone ramp:** seven steps per theme. Night is a separate ramp
   (`#0A110D → #A6D2B0`) where near ridges get lighter; it is not the light ramp
   inverted.
-- **Mark:** 64 grid, 44 × 42, 8 foot cells, one path; compact redrawn on a 2-unit grid.
+- **Mark:** 64 grid, four wedge-bars (8/10/12/14) with 5.3 gaps and one apex; compact 3 bars on a 32 grid.
 - **Page weight:** no images at runtime on the route; the hero, study and range
   thumb are canvas drawn by the same engine, and every mark is SVG.
 - **Keyboard:** the skip link is the first tab stop; submitting the empty form
@@ -72,6 +72,10 @@ the form, the draft and the case card.
 7. **“Save as draft” was a dead control.** It now writes the report to
    `localStorage` and restores it on the next visit; filing a report clears the
    draft. The note under the form is true.
+8. **The H lost the v2.3 bake-off.** It passed 16px but never drew the slope.
+   The mark is now four solid wedge-bars that thicken left to right, with a
+   lichen apex; the compact drops to three bars. No circle, no stroke. The old
+   foot-cell mark is history in `design/brand/hachure/explorations/directions.md`.
 
 ## Not verified
 
