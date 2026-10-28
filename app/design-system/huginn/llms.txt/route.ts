@@ -48,16 +48,17 @@ Huginn is Case 03 in the design-system library: a print-first identity for a fic
 
 ## Direction
 
-Everything follows from one sentence: a picture becomes cells, a name becomes cells. The painting is reduced to an ordered dither, the wordmark is cut from a 22-row cell grid, and the dissolve between them runs the same grid at a different resolution. One operation, three scales.
+Everything follows from one sentence: a picture becomes cells, a name becomes cells. The painting is reduced to an ordered dither, the wordmark is cut from a 22-row cell grid, and the dissolve between them runs the same grid at a different resolution. One operation, three scales. The mark is the named exception: an architectural H of two solid brackets and a vermilion keystone, because the name is a relationship, not a picture; it keeps the palette and the one-field rule.
 
 The reference is the printed broadside — one colour, no resolution, type set by hand — not a dashboard. Corners are cut, not rounded. Nothing loops.
 
 ## Mark
 
-The H is missing a cell. It sits one half-cell to the right of the stem, in the air, still flying. That omission is the whole logo: it is why the mark reads at 16px, and it is why the mark is never redrawn or cleaned up.
+Two solid L-brackets, mirrored and almost meeting; the bridge of the H is a vermilion diamond keystone. No stroke, no circle, no detached part. The counters are the negative space.
 
-- Primary: 65 × 50, stray cell included. Clear space is one cell on every side.
-- Compact: 30 × 30, single glyph, stray cell dropped — below 16px the flying cell is noise.
+- Primary: 64 × 64, brackets \`M8 8H20V28H30V36H20V56H8Z\` and mirror, keystone \`M32 22L38 32L32 42L26 32Z\`; brackets #141413 on paper and #F4EFE5 on night, keystone #E03C1F.
+- Compact: 32 × 32, a separate drawing with wider channels; no thin strokes.
+- Stamp: the field favicon uses paper brackets on #E03C1F with an ink keystone; it reads at 16px.
 - Wordmark: 950 × 200, 95 columns, 760 cells, one path. Never live text.
 
 ## Palette

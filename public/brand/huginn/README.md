@@ -18,8 +18,10 @@ blackletter wordmark cut from a 22-row cell grid.
 
 | File | Use |
 | --- | --- |
-| `mark.svg` | primary mark, 65 × 50. The H is missing a cell — the stray cell is part of the mark |
-| `mark-compact.svg` | 30 × 30 single glyph. Below 16 px the flying cell becomes noise, so it is dropped |
+| `mark.svg` | primary mark, 64 × 64. Two brackets; the keystone is the field vermilion |
+| `mark-compact.svg` | 32 × 32. The same two brackets at half scale, wider channels |
+| `keystone.svg` | the vermilion diamond alone; the stamp and the only accent |
+| `mark-mono.svg` | the same drawing in one ink; no field, no stroke |
 | `wordmark.svg` | 950 × 200, 95 columns, 760 cells, one path. Outlined — never live text |
 | `lockup.svg` | mark + name, 329 × 50 |
 | `favicon.svg`, `favicon-{16,32,180}.svg` | the stamp at four sizes |
@@ -31,12 +33,14 @@ blackletter wordmark cut from a 22-row cell grid.
 
 ## The mark
 
-The H is missing a cell. It sits one half-cell to the right of the stem, in the
-air, still flying. That omission is the whole logo: it is why the mark reads at
-16 px, and why it is never redrawn, outlined or "cleaned up".
+Two brackets, one bridge. Two solid L-brackets face each other; the H's bridge
+is a vermilion diamond keystone. The primary is never redrawn, outlined or
+"cleaned up".
 
-Clear space is one cell on every side, measured from the stray cell, which counts
-as part of the mark.
+Clear space is the 8-unit margin the 64 box already carries, measured from the
+outermost stem. The compact is the same two brackets at half scale with wider
+channels. The favicon on the field uses paper for the brackets and ink for the
+keystone, so it reads at 16 px.
 
 ## Colour
 

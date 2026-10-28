@@ -63,7 +63,7 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     material: 'Paper + ink + vermilion',
     cover: '/brand/huginn/huginn-brandkit.png',
     coverAlt:
-      'The Huginn brand board: the missing-cell mark, the drawn blackletter wordmark, the vermilion field, and the painting dissolving into it through an ordered dither.',
+      'The Huginn brand board: the two-bracket keystone mark, the drawn blackletter wordmark, the vermilion field, and the painting dissolving into it through an ordered dither.',
     tags: ['Print', 'Dither', 'Blackletter', 'Forms'],
     tone: 'huginn',
   },
@@ -79,7 +79,7 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     material: 'Paper + orange + blue',
     cover: '/brand/riso/riso-brandkit.png',
     coverAlt:
-      'The Riso Co. brand board: an orange sheet pulled 2.2mm off its blue pass, the deckle-edged mark, five ink chips, the outlined wordmark at three favicon sizes and a torn sheet edge.',
+      'The Riso Co. brand board: an orange sheet pulled 2.2mm off its blue pass, the two-sheet overprint mark, five ink chips, the outlined wordmark at three favicon sizes and a torn sheet edge.',
     tags: ['Risograph', 'Misregistration', 'Overprint', 'Deckle Tear'],
     tone: 'riso',
   },
@@ -89,13 +89,13 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     href: '/design-system/hachure',
     tagline: 'Relief drawn by density, never by shadow.',
     description:
-      'A cartographic interface system built from the supplied ridgeline footer: six ridges from one seed, seven tones from one paper, an H that prints into its own paper, and a footer you can read an altitude off. Every contrast pair is measured in the build.',
+      'A cartographic interface system built from the supplied ridgeline footer: six ridges from one seed, seven tones from one paper, a lichen-capped ridge of solid bars, and a footer you can read an altitude off. Every contrast pair is measured in the build.',
     status: 'Shipped · 2026',
     role: 'Identity · design system · dither engine · form kit',
     material: 'Survey paper + lichen + ordered dither',
     cover: '/brand/hachure/hachure-brandkit.png',
     coverAlt:
-      'The Hachure brand board: a 3 × 3 identity deck on a night table — the H mark printing into paper, the outlined mono wordmark, the dither plate, the seven-tone ramp, the field sheet and the form kit.',
+      'The Hachure brand board: a 3 × 3 identity deck on a night table — the solid ridge mark, the outlined mono wordmark, the dither plate, the seven-tone ramp, the field sheet and the form kit.',
     tags: ['Hachure', 'Bayer Dither', 'Survey', 'Altimeter'],
     tone: 'hachure',
   },

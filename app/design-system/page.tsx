@@ -8,7 +8,7 @@ import { breadcrumbList, itemList, JsonLd } from '@/lib/structured-data'
 export const metadata: Metadata = {
   title: 'Design Systems — Case Library',
   description:
-    'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and print), Riso Co. (torn poster and pushpin physics), and Hachure (survey paper and ordered dither). Briefs, marks, tokens, form kits and audits.',
+    'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and print), Riso Co. (two-pass print and pushpin physics), and Hachure (survey paper and ordered dither). Briefs, marks, tokens, form kits and audits.',
   alternates: { canonical: '/design-system' },
   openGraph: {
     title: 'Design Systems — Case Library | Aditya Himawan',
@@ -50,7 +50,7 @@ export default function DesignSystemLibraryPage() {
   const list = itemList({
     name: 'Design systems — case library',
     description:
-      'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and ordered print), Riso Co. (torn poster and pushpin physics) and Hachure (survey paper and ordered dither).',
+      'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and ordered print), Riso Co. (two-pass print and pushpin physics) and Hachure (survey paper and ordered dither).',
     items: DESIGN_CASES.map((item) => ({
       name: `${item.number} — ${item.name}`,
       url: `${WEBSITE_URL}${item.href}`,

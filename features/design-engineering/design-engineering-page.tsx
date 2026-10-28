@@ -640,7 +640,7 @@ export function DesignEngineeringPage() {
                   sizes="(max-width: 900px) 100vw, 760px"
                 />
                 <figcaption>
-                  Huginn Studio — the missing-cell mark, the drawn blackletter
+                  Huginn Studio — the two-bracket keystone mark, the drawn blackletter
                   wordmark, the vermilion field and the painting dissolving
                   into it.
                 </figcaption>

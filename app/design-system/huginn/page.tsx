@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         url: '/brand/huginn/huginn-brandkit.png',
         width: 1500,
         height: 1125,
-        alt: 'The Huginn brand board: the missing-cell mark, the drawn blackletter wordmark, the vermilion field and the ordered-dither painting.',
+        alt: 'The Huginn brand board: the two-bracket keystone mark, the drawn blackletter wordmark, the vermilion field and the ordered-dither painting.',
       },
     ],
   },

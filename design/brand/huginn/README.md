@@ -24,16 +24,14 @@ The identity depends on a drawing, not on a font. That is both the promise and
 the constraint that produced the look: no webfont to load, no licence to buy, no
 platform where the wordmark falls back to something else.
 
-The **H is missing a cell**. It sits one half-cell to the right of the stem, in
-the air, still flying. The omission is the whole logo — it is why the mark reads
-at 16px, and it is why the mark is never redrawn or cleaned up.
+**Two brackets, one bridge.** The H is cut into two solid L-beams; the
+vermilion diamond keystone is the only loud thing.
 
-- Primary: 65 × 50, stray cell included. Clear space is one cell on every side.
-- Compact: 30 × 30, single glyph, stray cell dropped — below 16px the flying
-  cell is noise.
+- Primary: 64 × 64, two brackets + a keystone, no strokes.
+- Compact: 32 × 32, the same two brackets at half scale with wider channels.
 - Wordmark: 950 × 200, 95 columns, 760 cells, one path. Never live text.
-- Favicons are generated from the primary mark, not redrawn: 16, 32, 180, 192,
-  512, plus a 32px SVG for the case route.
+- Favicons are rendered from the compact stamp, not redrawn per size: 16, 32,
+  180, 192, 512, plus a 32px SVG for the case route.
 
 ## Palette and type
 
@@ -84,10 +82,10 @@ the portfolio's global footer and must not be attached to the site shell.
 ## Do / don't
 
 **Do** use the red as a single field, keep body text on opaque surfaces,
-attribute the painting, test the mark at 16px, and keep the stray cell.
+attribute the painting, test the mark at 16px, and keep the keystone attached to the two brackets.
 
 **Don't** add a raven mascot, distribute runes as decoration, place small copy on
-the painting, use colour as the only state cue, or clean up the missing cell.
+the painting, use colour as the only state cue, or detach the keystone and call it the logo.
 
 ## Audit
 

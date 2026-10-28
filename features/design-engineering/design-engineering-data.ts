@@ -357,13 +357,13 @@ export const HUGINN_CASE = {
   library: '/design-system',
   cover: '/brand/huginn/huginn-brandkit.png',
   coverAlt:
-    'The Huginn brand board: the missing-cell mark, the drawn blackletter wordmark, the vermilion field and the painting dissolving into it through an ordered dither.',
+    'The Huginn brand board: the two-bracket keystone mark, the drawn blackletter wordmark, the vermilion field and the painting dissolving into it through an ordered dither.',
   brief:
     'Give a two-city software studio an identity that depends on a drawing rather than a font: one bone sheet, one vermilion field, a blackletter wordmark cut into a 22-row cell grid, and a painting dissolved into that field by an ordered dither. The case proves the language with a native form kit and a configurable footer, then measures what it shipped.',
   decisions: [
     {
-      title: 'The missing cell is the logo.',
-      line: 'The H sits one half-cell to the right of its stem, still in the air. The omission is why the mark reads at 16px, and why it is never redrawn or cleaned up.',
+      title: 'Two brackets, one bridge.',
+      line: 'The H is cut into two interlocking L-beams; the vermilion diamond keystone is the only loud thing. No strokes, no circles, and the compact widens the channels.',
     },
     {
       title: 'The wordmark is a drawing, not a face.',
@@ -397,7 +397,7 @@ export const RISO_CASE = {
   library: '/design-system',
   cover: '/brand/riso/riso-brandkit.png',
   coverAlt:
-    'The Riso Co. brand board: a fluorescent orange sheet pulled 2.2mm off its federal blue pass, the deckle-edged mark on a 64-unit grid, five ink chips, the outlined wordmark at three favicon sizes, and the torn sheet edge.',
+    'The Riso Co. brand board: a fluorescent orange sheet pulled 2.2mm off its federal blue pass, the two-sheet overprint mark, five ink chips, the outlined wordmark at three favicon sizes, and the torn sheet edge.',
   brief:
     'A risograph prints one drum at a time, so the second impression never lands exactly on the first. Most digital riso pastiche hides that; Riso Co. makes it the rule. Every element is printed twice — fluorescent orange and federal blue — and the 2.5px misregistration is the identity rather than a defect to be corrected.',
   decisions: [
@@ -406,8 +406,8 @@ export const RISO_CASE = {
       line: 'One CSS variable, `--rs-reg`, offsets every display element. A slider in the specimen runs 0–6px so the reader can pull the sheet back into register and watch the idea disappear.',
     },
     {
-      title: 'The mark is the sheet, not a letter.',
-      line: 'A drawn two-pass rectangle on a 64-unit grid, its bottom edge carrying seven ridge points and two deep bites. One path with two strokes, so it still reads at 16px where a monogram would turn to mud.',
+      title: 'The mark is the press behaviour.',
+      line: 'Two sheared sheets are the two drum passes; the overlap is a solid overprint polygon. No strokes, no circles, so the mark survives a favicon and a PDF.',
     },
     {
       title: 'The overprint is measured, not blended.',
@@ -415,7 +415,7 @@ export const RISO_CASE = {
     },
   ],
   outcomes: [
-    'A mark family at 64/32/16px plus a registration target, an outlined wordmark and a lockup — all SVG, no live text, no webfont dependency.',
+    'A mark family at 64/32/16px plus a mono union, an outlined wordmark and a lockup — all SVG, no live text, no webfont dependency.',
     'Three token layers with 16 contrast pairs computed in the build rather than typed, including the one pair that fails: orange as body type at 2.88:1, documented as fills-only.',
     'A native form kit with default, focus, invalid, disabled and success states, and an error summary that moves focus to the first bad field.',
     'The pushpin tear footer rebuilt as a print specimen, with a seed control that re-tears the sheet on demand.',
