@@ -35,9 +35,9 @@ const flag = (name, fallback) => {
 }
 const has = (name) => args.includes(`--${name}`)
 
-const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet', 'dotmatrix', 'lines', 'overprint', 'nodes', 'monogram']
+const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet', 'dotmatrix', 'lines', 'overprint', 'nodes', 'monogram', 'bracket', 'planes', 'louvers', 'ribbon', 'horizon']
 // Six families for a bake-off (geometry, dots, lines, dots+geometry, lines+geometry, network)
-const BAKEOFF = ['aperture', 'dotmatrix', 'lines', 'overprint', 'hatch', 'nodes']
+const BAKEOFF = ['bracket', 'planes', 'louvers', 'ribbon', 'horizon']
 
 const STARTER = {
   name: 'Sunnyside',
@@ -85,7 +85,12 @@ if (has('init')) {
   if (!CONCEPTS.includes(concept)) fail(`unknown concept: ${concept}`)
   const cfg = structuredClone(STARTER)
   cfg.concept = concept
-  if (concept === 'hatch' || concept === 'facet') {
+  if (['bracket', 'planes', 'louvers', 'ribbon', 'horizon'].includes(concept)) {
+    cfg.dna.offset = 0
+    cfg.dna.edge = 'none'
+    cfg.dna.tile = 'none'
+    cfg.dna.radius = 0
+  } else if (concept === 'hatch' || concept === 'facet') {
     cfg.dna.offset = 0
     cfg.dna.edge = 'none'
     cfg.dna.tile = 'square'
@@ -112,6 +117,11 @@ if (has('bakeoff')) {
     overprint: 'dots + geometry (two inks)',
     hatch: 'lines + geometry',
     nodes: 'node network',
+    bracket: 'architectural monogram',
+    planes: 'offset geometric planes',
+    louvers: 'brutalist louvers',
+    ribbon: 'continuous ribbon',
+    horizon: 'horizon & counter-form',
   }
   const picks = (base0.bakeoff ?? BAKEOFF).filter((c) => CONCEPTS.includes(c))
   if (base0.params?.letter || base0.letter) picks.splice(picks.length > 5 ? 5 : picks.length, picks.length > 5 ? 1 : 0, 'monogram')
@@ -140,9 +150,9 @@ ${row('#f6f1e7', '#111')}${row('#14141f', '#fff')}
   }
   await writeFile(
     join(outRoot, 'bakeoff.html'),
-    `<!doctype html><meta charset="utf-8"><title>${base0.name ?? 'brand'} — bake-off</title>
-<body style="margin:0;padding:28px;background:#e9e4d8;font-family:system-ui"><h1 style="font:700 20px system-ui;margin:0 0 6px">${base0.name ?? 'brand'} — six ideas, one material</h1>
-<p style="margin:0 0 20px;max-width:70ch;color:#444;font-size:14px">Same palette and theme DNA; only the idea changes. Judge at 16px first. Keep one. Write why five lost: that note becomes the guide.</p>
+    `<!doctype html><meta charset="utf-8"><title>${base0.name ?? 'brand'} — v2.3 bake-off</title>
+<body style="margin:0;padding:28px;background:#e9e4d8;font-family:system-ui"><h1 style="font:700 20px system-ui;margin:0 0 6px">${base0.name ?? 'brand'} — ${picks.length} ideas, one material</h1>
+<p style="margin:0 0 20px;max-width:70ch;color:#444;font-size:14px">Same palette and theme DNA; only the idea changes. Judge at 16px first. Keep one. Write why the rest lost: that note becomes the guide.</p>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">${picks.map(card).join('')}</div></body>
 `,
   )
@@ -378,6 +388,43 @@ const concepts = {
     const nodes = N.map(([x, y, rr], i) => `<circle cx="${x}" cy="${y}" r="${rr}" fill="${fills[i % 3]}" stroke="${c.ink}" stroke-width="${compact ? 2.6 : 2}"/>`).join('')
     return edges + nodes
   },
+  bracket(c, compact) {
+    // v2.3 family 1: two solid L-brackets, one keystone; no strokes.
+    const v = compact
+      ? { box: 32, l: 'M4 4H10V13H15V19H10V28H4Z', r: 'M28 4H22V13H17V19H22V28H28Z', k: 'M16 11L19 16L16 21L13 16Z' }
+      : { box: 64, l: 'M8 8H20V28H30V36H20V56H8Z', r: 'M56 8H44V28H34V36H44V56H56Z', k: 'M32 22L38 32L32 42L26 32Z' }
+    return `<path d="${v.l}" fill="${c.lead}"/><path d="${v.r}" fill="${c.lead}"/><path d="${v.k}" fill="${c.spark}"/>`
+  },
+  planes(c, compact) {
+    // v2.3 family 2: two sheared sheets, one clipped overprint.
+    const v = compact
+      ? { box: 32, a: 'M12 5H26L18 27H4Z', b: 'M17 2H31L23 24H9Z' }
+      : { box: 64, a: 'M24 10H52L36 54H8Z', b: 'M34 4H62L46 48H18Z' }
+    const id = `${slug}-planes-${compact ? 'c' : 'f'}`
+    const over = params.lens || c.ink
+    return `<defs><clipPath id="${id}"><path d="${v.a}"/></clipPath></defs><path d="${v.a}" fill="${c.core}"/><path d="${v.b}" fill="${c.spark}"/><path d="${v.b}" fill="${over}" clip-path="url(#${id})"/>`
+  },
+  louvers(c, compact) {
+    // v2.3 family 3: solid wedge bars, one apex.
+    const v = compact
+      ? { box: 32, bars: 'M2 30V20L8 24V30Z M11 30V14L19 18V30Z M22 30V8L31 12V30Z', apex: 'M26.5 1L31 8L26.5 15L22 8Z' }
+      : { box: 64, bars: 'M2 56V36L10 42V56Z M15.3 56V26L25.3 32V56Z M30.6 56V16L42.6 22V56Z M47.9 56V8L61.9 14V56Z', apex: 'M54.9 2L61.9 8L54.9 14L47.9 8Z' }
+    return `<path d="${v.bars}" fill="${c.lead}"/><path d="${v.apex}" fill="${c.core}"/>`
+  },
+  ribbon(c, compact) {
+    // v2.3 family 4: one thick folded beam.
+    const d = compact
+      ? 'M4 8H12L20 16H28V24H20L12 16H4Z'
+      : 'M8 14H24L40 30H56V48H40L24 32H8Z'
+    return `<path d="${d}" fill="${c.lead}"/>`
+  },
+  horizon(c, compact) {
+    // v2.3 family 5: a grounded bar and one floating keystone.
+    const v = compact
+      ? { bar: 'M4 21H28V27H4Z', key: 'M16 5L22 13L16 21L10 13Z' }
+      : { bar: 'M8 42H56V52H8Z', key: 'M32 10L42 24L32 38L22 24Z' }
+    return `<path d="${v.bar}" fill="${c.lead}"/><path d="${v.key}" fill="${c.spark}"/>`
+  },
   monogram(c, compact) {
     const ch = String(params.letter || name[0] || 'A').toUpperCase()
     const glyph = LETTERS[ch]
@@ -423,11 +470,18 @@ function buildMark({ colors, compact = false, tile = true, shadow = true, field 
   if (dna.tile === 'none' && !forceTile) { tile = false; shadow = false }
   const off = compact || !shadow || dna.edge === 'none' ? 0 : dna.offset
   const stroke = compact ? 3.2 : dna.stroke
-  const defs = `<defs><clipPath id="${clipId}">${tileShape('', 0)}</clipPath></defs>`
+  const defs = dna.tile === 'none' ? '' : `<defs><clipPath id="${clipId}">${tileShape('', 0)}</clipPath></defs>`
   const edge = dna.edge === 'none' ? 'none' : colors.ink
-  const parts = [defs]
+  const parts = defs ? [defs] : []
   if (tile && off > 0) parts.push(`<g transform="translate(${off} ${off})">${tileShape(`fill="${colors.ink}"`)}</g>`)
-  if (tile) parts.push(tileShape(`fill="${field}" stroke="${edge}" stroke-width="${edge === 'none' ? 0 : stroke}"`))
+  if (tile) {
+    const squareIcon = forceTile && dna.tile === 'none'
+    parts.push(
+      squareIcon
+        ? `<rect x="0" y="0" width="64" height="64" fill="${field}"/>`
+        : tileShape(`fill="${field}" stroke="${edge}" stroke-width="${edge === 'none' ? 0 : stroke}"`),
+    )
+  }
   parts.push(concepts[concept](colors, compact))
   return `${svgOpen()}${parts.join('')}</svg>\n`
 }
@@ -443,7 +497,9 @@ outputs['mark-reverse.svg'] = buildMark({
 })
 // One-colour stamp is DRAWN: all fills collapse to ink/paper with the same geometry.
 outputs['mark-mono.svg'] = buildMark({
-  colors: { field: P.paperHi, core: P.paperHi, spark: P.paperHi, ink: P.ink, paper: P.paperHi, lead: P.ink },
+  // One ink, one silhouette. The accent collapses into the same fill; the
+  // counters/channels are the only negative space.
+  colors: { field: P.ink, core: P.ink, spark: P.ink, ink: P.ink, paper: P.ink, lead: P.ink },
   shadow: dna.edge === 'hard',
 })
 // Favicon field: the compact mark, with an opaque ground so it never vanishes on chrome.

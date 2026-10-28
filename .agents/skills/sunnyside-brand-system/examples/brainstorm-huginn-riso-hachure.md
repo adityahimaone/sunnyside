@@ -1,50 +1,51 @@
-# Worked brainstorm: Huginn, Riso Co., Hachure
+# Worked v2.3 brainstorm: Huginn, Riso Co., Hachure
 
-The v2.0 sheet gave each brand a letter or a blob. This is the same brief run
-through `references/logo-brainstorm.md`. Configs are in `examples/configs/`.
+The v2.2 sheet failed the gate: all three marks were overlapping circles,
+discs with ring outlines, or a striped disc. Three brands, one silhouette. The
+v2.3 five-family bake-off gives each a different outer geometry and removes
+every stroke.
 
 ```bash
-node scripts/brand-forge.mjs --config examples/configs/huginn.json  --out out/huginn
-node scripts/brand-forge.mjs --config examples/configs/riso-co.json --out out/riso-co
-node scripts/brand-forge.mjs --config examples/configs/hachure.json --out out/hachure
+node scripts/brand-forge.mjs --bakeoff examples/configs/huginn.json  --out out/huginn
+node scripts/brand-forge.mjs --bakeoff examples/configs/riso-co.json --out out/riso-co
+node scripts/brand-forge.mjs --bakeoff examples/configs/hachure.json --out out/hachure
 python3 scripts/score-mark.py --dir out
 ```
 
-## Huginn
+## Huginn — architectural monogram
 
-- **Name says:** one of Odin's two ravens; Huginn is thought, Muninn is memory.
-- **Kept idea:** `overprint`. Two discs, thought (bone) and memory (ash); where
-  they overlap the field is cut away. *What two minds agree on is the answer.*
-- **Why not the H:** a letter says nothing about thinking, and the detached
-  square read as a typo.
-- **Lost:** `nodes` (right idea, reads as generic AI), `dotmatrix` (too
-  decorative for a calm product), `monogram H` (the original sheet).
-- **Next:** try a raven silhouette by hand on the same 64 grid; the overlap
-  lens could become the raven's eye.
+- **Kept:** two solid L-brackets facing each other; the H bridge is a vermilion
+  diamond keystone. Charcoal `#141413`, keystone `#E03C1F`.
+- **Why:** the name is a relationship (thought + memory), and the letter finally
+  has a structural job. No circle, no detached accent.
+- **Lost:** planes (a print diagram, not a mind), louvers (a chart, not a name),
+  ribbon (one beam, no bridge), horizon (too quiet).
+- **Compact:** wider channels, no thin strokes; the keystone is the only accent.
 
-## Riso Co.
+## Riso Co. — offset geometric planes
 
-- **Name says:** risograph; two spot inks printed in two passes.
-- **Kept idea:** `overprint`, in real riso inks (fluorescent pink, blue); the
-  lens is the colour the inks actually make where they overlap.
-- **Why not the pennant:** a shield has no relation to print, and the
-  misregistration offset was the *only* idea; at 16px it became a smudge.
-- **Lost:** `stack` (layers, but reads as a design tool), `lines` (halftone
-  reading is too fine at 16px).
-- **Next:** a second compact for single-colour stamps: the lens only.
+- **Kept:** two sheared, unstroked sheets — orange `#F2542D`, blue `#1D63FF` —
+  shifted diagonally. The overlap is a solid overprint polygon `#2B192E`.
+- **Why:** two print passes are planar, not circular; the overprint is the
+  shape, not an offset applied to a silhouette.
+- **Lost:** bracket (a letter, not print), louvers (a chart), ribbon (one beam,
+  no two passes), horizon (no overprint corner).
+- **Compact:** the overprint polygon alone; the mono is the union.
 
-## Hachure
+## Hachure — brutalist louvers
 
-- **Name says:** the short parallel lines that shade slopes on old maps.
-- **Kept idea:** `hatch`. A lit disc, a shaded side drawn in lines that fall
-  off toward the light. *Relief, drawn the old way.*
-- **Why not the notched H:** it never drew a line, so the name was missing.
-- **Lost:** `lines` (reads as a striped planet), `orbit` (wrong domain).
-- **Next:** make the line spacing follow the slope of a real contour.
+- **Kept:** four solid wedge-bars that rise and thicken left to right; a lichen
+  diamond `#B8CC3B` caps the summit.
+- **Why:** the name means hachure; the mark draws slope as density, using solid
+  bar weight instead of thin lines. No enclosing circle.
+- **Lost:** bracket (a letter), planes (an overprint, not terrain), ribbon (one
+  beam, no range), horizon (a line, not relief).
+- **Compact:** three bars, wider channels; the apex stays.
 
 ## What changed in the pipeline
 
-- Six different families, not six tweaks of one letter.
-- `score-mark.py` flags the orphan square pattern, thin compacts and blob
-  silhouettes before a human sees them.
-- Compact marks drop offsets and heavy detail by rule.
+- Five different families, one per brand, enforced by the v2.3 gate.
+- `score-mark.py` fails circles, fill+stroke and >4 primitives; all three final
+  marks pass with no FAIL or WARN.
+- The generator's default `--bakeoff` now runs the five families; the old
+  circle/line concepts remain as legacy only.

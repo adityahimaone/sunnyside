@@ -1,4 +1,52 @@
-# Logo brainstorm: from name to six honest ideas
+# Logo brainstorm: from name to five honest families
+
+## v2.3 — the hard gate
+
+The v2.2 bake-off failed the same way the v2.0 sheet did: Huginn, Riso Co. and
+Hachure all came out as overlapping circles / discs / thin ring outlines. Three
+brands, one silhouette. The v2.3 gate fixes the engine, not the taste:
+
+### A. Zero-circle / zero-Venn
+Banned: overlapping circular Venns, concentric rings, circular badges, discs
+with orbit rings, Mastercard-style intersecting circles. Across a showcase, no
+two logos share the same outer bounding geometry. Every mark has a distinct,
+open, non-circular silhouette.
+
+### B. Fill-only
+Banned: `fill` + `stroke` on the same shape; thin wireframe rings that collapse
+at 32px. Required: solid, unstroked paths separated by negative-space channels
+of at least **8% of the viewBox** (5.1 units on 64).
+
+### C. Universal corporate minimalism
+A mark is a bold architectural stamp, not a diagram of the tagline. **2–4 solid
+primitives.** Monochrome first (`#141413`). At most one accent color on one
+focal element.
+
+### Five allowed families
+
+| # | Family | Construction | Replaces |
+| --- | --- | --- | --- |
+| 1 | Architectural monogram | A custom letterform carved by sharp negative-space cuts or an offset counterweight | the typed initial + ornament |
+| 2 | Offset geometric planes | Two sheared parallelograms/diamonds shifted on a 45°/60° axis, interlocking at a solid corner | circular Venn overprint |
+| 3 | Brutalist louvers | Solid wedge-cut pillars/stepped blocks; density by bar thickness | thin hachure lines in a circle |
+| 4 | Continuous ribbon | One thick beam folding at sharp 45°/90° angles | orbit rings, node chains |
+| 5 | Horizon & counter-form | A grounded baseline/bridge plus one floating keystone or quarter-arch | circular badges, sunbursts |
+
+Pick one family per brand. If a concept cannot be assigned to one of the five,
+it is not in the v2.3 bake-off.
+
+### SVG code-quality checklist
+
+- Are there `<circle>` elements used as outer containers or Venn diagrams? If
+  yes, reject and redraw with `<path>`/`<polygon>`.
+- Are any elements using `stroke` + `fill` to fake a border? If yes, convert to
+  pure fill shapes with negative-space cutouts.
+- Do all three logos have completely different outer silhouettes from 3 metres
+  away? Must be yes.
+
+---
+
+# v2.2 history — six families
 
 Fusion of this skill's six-keep-one method with the design discipline and
 pattern families of

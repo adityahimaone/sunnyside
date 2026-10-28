@@ -1,5 +1,19 @@
 # The logo system
 
+## v2.3 hard gate (read first)
+
+1. **Zero-circle / zero-Venn.** No overlapping circle Venns, concentric rings,
+   orbit badges, or circular containers. Across a showcase, no two logos share
+   an outer silhouette. Use the five families: architectural monogram, offset
+   planes, louvers, ribbon, horizon.
+2. **Fill-only.** No `fill` + `stroke` on one shape, no wireframe rings. Solid
+   unstroked paths with ≥8% viewBox negative channels (5.1 on 64).
+3. **2–4 primitives, one accent.** Monochrome `#141413` first. A letter only
+   earns its place as an architectural monogram (cut / joined / lit), never as
+   a typed initial with an ornament.
+
+The older sections below are the v2.2 tests; use the v2.3 gate above them.
+
 A logo is not a picture of the brand. It is a set of shapes that survive every
 size, ground and handoff the brand will meet.
 

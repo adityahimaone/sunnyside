@@ -1,14 +1,14 @@
 {
   "name": "Huginn",
   "slug": "huginn",
-  "concept": "overprint",
-  "palette": { "paper": "#efe9db", "paperHi": "#f7f2e6", "ink": "#0d0d0f", "field": "#0d0d0f", "core": "#e9e2cf", "spark": "#7d8794", "muted": "#55524b", "danger": "#a3261f", "success": "#2a6b4a" },
-  "dna": { "edge": "none", "offset": 0, "stroke": 2.2, "radius": 14, "tile": "rounded", "density": "cosy", "label": "mono-caps", "ring": "solid", "font": { "display": "Fraunces", "ui": "Inter", "mono": "JetBrains Mono" } },
-  "params": { "lens": "#0d0d0f" },
+  "concept": "bracket",
+  "palette": { "paper": "#EBE5D8", "paperHi": "#F4EFE5", "ink": "#141413", "field": "#E03C1F", "core": "#F4EFE5", "spark": "#E03C1F", "muted": "#6B6155", "danger": "#A31810", "success": "#2C5B45" },
+  "dna": { "edge": "none", "offset": 0, "stroke": 0, "radius": 0, "tile": "none", "density": "cosy", "label": "mono-caps", "ring": "solid", "font": { "display": "Fraunces", "ui": "Inter", "mono": "JetBrains Mono" } },
+  "params": {},
   "story": {
     "belief": "An agent should think and remember in the open.",
     "enemy": "Black-box assistants that forget what they decided.",
-    "promise": "Two ravens, thought and memory; what they agree on is the answer.",
+    "promise": "Two brackets, one bridge: what thought and memory agree on is the answer.",
     "proof": "Every decision is logged with its reason and can be replayed."
   }
 }

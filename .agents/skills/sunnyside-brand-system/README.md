@@ -16,6 +16,13 @@ approved kit to **`implement-brand-system`** for the build:
 
 Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
 
+**v2.3:** the hard gate (zero-circle / zero-Venn, fill-only, 2–4 solid
+primitives, one accent, one family per brand) and five allowed families:
+architectural monogram, offset planes, louvers, ribbon, horizon. Fuses the
+Sunnyside editorial grid, `Leonxlnx/taste-skill` and `MengTo/Skills`
+`company-logos` discipline. The v2.3 bake-off and `score-mark.py` fail circles,
+fill+stroke and >4 primitives.
+
 **v2.2:** fuses [op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill)
 (six-family brainstorm, design rules, pattern families): `--bakeoff`, five new
 concepts, `score-mark.py`, `references/logo-brainstorm.md` and a worked redo in

@@ -10,6 +10,7 @@ out of (stray specks, thin strokes, solid blobs).
 Requires: pip install cairosvg pillow
 
 Checks (FAIL stops the mark, WARN needs a written reason, NOTE is information):
+  FAIL  v2.3: circles, fill+stroke, more than 4 primitives
   FAIL  compact has a stroke thinner than 2.4 units or a dot under 4 units wide
         (on the 64 grid that is 0.6px / 1px at 16px)
   FAIL  glyph silhouette at 32px covers < 10% or > 88% of the box
@@ -81,9 +82,16 @@ def score(folder):
         if not f.exists():
             return [f'missing {f.name}'], [], []
     msrc, csrc = mark.read_text(), compact.read_text()
-    shapes = len(re.findall(r'<(path|circle|rect|ellipse|polygon|line)[\s>]', msrc))
-    if shapes > 24:
-        warns.append(f'{shapes} elements in the primary mark (aim for 1–2 ideas)')
+
+    # v2.3 hard gate: zero circles, fill-only, 2–4 solid primitives.
+    if re.search(r'<circle[\s>]', msrc) or re.search(r'<circle[\s>]', csrc):
+        fails.append('v2.3: <circle> banned; use a non-circular path/polygon silhouette')
+    if re.search(r'stroke="(?!none)[^"]*"', msrc) or re.search(r'stroke="(?!none)[^"]*"', csrc):
+        fails.append('v2.3: fill + stroke banned; build solid fills separated by negative space')
+    visual = re.sub(r'<defs>[\s\S]*?</defs>', '', msrc)
+    shapes = len(re.findall(r'<(path|circle|rect|ellipse|polygon|line)[\s>]', visual))
+    if shapes > 4:
+        fails.append(f'v2.3: {shapes} primitives in the primary (max 2–4); simplify the idea')
 
     strokes = [float(v) for v in re.findall(r'stroke-width="([\d.]+)"', csrc) if float(v) > 0]
     if strokes and min(strokes) < 2.4:
@@ -118,10 +126,10 @@ def score(folder):
     if cols:
         total = sum(cols.values())
         field_share = max(cols.values()) / total
-        if not 0.25 <= field_share <= 0.80:
-            warns.append(f'dominant field is {field_share:.0%} of the mark (target 25–80% negative space)')
-        else:
-            notes.append(f'negative space {field_share:.0%}')
+        # v2.3 asks for architectural mass, not a 40–50% hole. The 8% channels
+        # between solid shapes are the negative space; a solid silhouette is
+        # allowed. Report the share, do not warn on it.
+        notes.append(f'dominant field {field_share:.0%} (v2.3 solid mass; channels are the negative space)')
 
     hs, vs = mirror_similarity(raster(glyph, 64))
     if hs > 0.97 and vs > 0.97:

@@ -4,7 +4,7 @@ description: Design and ship a brand kit or design system from a brief — strat
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '2.2'
+  version: '2.3'
 ---
 
 # Sunnyside brand system
@@ -14,6 +14,8 @@ One idea → one mark → one system → one proof → one audit.
 A method for shipping a **brand kit** or **design system** quickly without losing
 the reasoning. The output is a page or a small set of files, not a folder of
 exports. Sunnyside and Vitrine are evidence, not templates.
+
+**v2.3:** refactors the engine around the **v2.3 hard gate** (zero-circle / fill-only / 2–4 primitives) and five allowed families: architectural monogram, offset planes, louvers, ribbon, horizon. Fuses [adityahimaone.space/design-system](https://adityahimaone.space/design-system) (warm editorial minimalism, architectural grid, solid fills), [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (anti-slop, subject-derived metaphors, no repetitive tropes) and [MengTo/Skills company-logos](https://github.com/MengTo/Skills) (64×64, fill-only, monochrome-first).
 
 **v2.2:** fuses the discipline and pattern families of
 [op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill):
@@ -29,6 +31,50 @@ skill is in `references/skill-audit.md`.
 **v2.0 provenance:** rebuilt after an audit of [ui-skills.com](https://www.ui-skills.com/)
 (439 skills / 27 categories; 22 relevant skills inspected). The fusion is in
 `references/ui-skills-fusion.md`; the implementation half is `implement-brand-system`.
+
+## The v2.3 hard gate
+
+These rules apply **before** any SVG or image is generated. A mark that breaks
+one is rejected, not discussed.
+
+### A. Zero-circle / zero-Venn
+
+- **Banned:** overlapping circular Venn diagrams, concentric rings, circular
+  badges, discs with orbit rings, Mastercard-style intersecting circles.
+- **Required:** across a multi-brand showcase, no two logos share the same outer
+  bounding geometry. Every mark has a distinct, open, non-circular silhouette:
+  angular cantilever, stepped monolith, interlocking chevrons, sheared
+  parallelogram, or carved architectural monogram.
+
+### B. Fill-only (`company-logos` discipline)
+
+- **Banned:** `fill` and `stroke` on the same shape; thin wireframe rings that
+  collapse at 32px or 16px.
+- **Required:** solid, unstroked paths separated by crisp negative-space
+  channels. Minimum gap: **8% of the viewBox** (5.1 units on a 64 grid) so it
+  stays sharp at 32×32 compact.
+
+### C. Universal corporate minimalism (Rand / Pentagram)
+
+- A logo is a bold architectural stamp, not a diagram of the tagline.
+- **2 to 4 solid primitives maximum.**
+- Every mark works in **1-color flat monochrome (`#141413`)** first. At most
+  **one accent color** for a single deliberate focal element.
+
+## Five allowed families
+
+Pick **one** family per brand; do not run the same family twice in a showcase.
+
+| # | Family | Construction | Replaces |
+| --- | --- | --- | --- |
+| 1 | **Architectural monogram** | A custom letterform carved by sharp negative-space cuts or an offset geometric counterweight | the old letter + detached accent |
+| 2 | **Offset geometric planes** | Two crisp rectangular/diamond planes shifted on a 45° or 60° axis, interlocking at a solid corner | circular Venn / overprint |
+| 3 | **Brutalist louvers** | Solid wedge-cut pillars or stepped blocks; relief and density shown by bar thickness | thin hachure lines in a circle |
+| 4 | **Continuous ribbon** | One thick geometric beam folding at sharp 45°/90° angles | orbit rings, node chains |
+| 5 | **Horizon & counter-form** | A grounded baseline/bridge with one floating keystone or quarter-arch | circular badges, sunbursts |
+
+If a concept cannot be assigned to one of these five, it is not in the v2.3
+bake-off.
 
 ## Read this first
 
@@ -55,10 +101,10 @@ drawing; mark unknowns `ASSUMPTION`. Template: `references/brief.md`.
 1. **Brief and one sentence** the work can be rejected against.
 2. **One idea**: monogram + meaning, product action, metaphor fusion, negative
    space, or construction geometry. One metaphor, one loud field.
-3. **Brainstorm six, keep one** across six *families* (geometry, dots, lines,
-   shapes+geometry, lines+geometry, network), not six tweaks of a letter. Fastest
-   route: `brand-forge.mjs --bakeoff brand.json`, then `score-mark.py`, keep one,
-   write why five lost. Protocol: `references/logo-brainstorm.md`.
+3. **Brainstorm five, keep one** across the five families above, one family per
+   brand, never five tweaks of a letter. Fastest route:
+   `brand-forge.mjs --bakeoff brand.json`, then `score-mark.py`, keep one, write
+   why four lost. Protocol: `references/logo-brainstorm.md`.
 4. **Generate the family** (`node scripts/brand-forge.mjs --config brand.json`):
    mark, compact, glyph, reverse, mono, icon, lockups, tokens, form kit, proof
    sheet. Then hand-refine the mark; the generator is a start, not a ceiling.
@@ -96,7 +142,7 @@ reduced motion, and never use a trend as the only idea.
 ## Token budget
 
 - Read this file, then only the reference for the current mode.
-- Six marks in **one** file; one render; one board.
+- Five marks in **one** file; one render; one board.
 - Use the templates and scripts; do not rewrite a renderer.
 - One token source → CSS + JSON; never hand-edit generated output.
 - One screenshot per viewport/theme, one QA run, one fix pass. Full-page only when
@@ -136,9 +182,9 @@ Details: `references/design-systems.md`.
 64 grid. It is the fast path for step 3–4; it does not replace judgement.
 
 ```bash
-node scripts/brand-forge.mjs --list                       # 11 concepts: sunburst aperture orbit hatch stack facet dotmatrix lines overprint nodes monogram
-node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff   # six families, one material
-python3 scripts/score-mark.py --dir bakeoff               # numbers before taste
+node scripts/brand-forge.mjs --list                       # v2.3 concepts: bracket planes louvers ribbon horizon (+ legacy)
+node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff   # five v2.3 families, one material
+python3 scripts/score-mark.py --dir bakeoff               # circles, strokes, primitives, 16px
 node scripts/brand-forge.mjs --init orbit > brand.json    # starter config, edit palette/dna/params
 node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> \
   --wordmark wordmark.svg                                 # from extract-wordmark.py
@@ -150,10 +196,11 @@ tokens (CSS + JSON with contrast pairs), the form kit, `sheet.html` (16/32/64/12
 on light + dark) and `story.md`. Exit code 1 if any contrast pair or SVG check
 fails. Without `--wordmark` it skips lockups; it never fakes one with `<text>`.
 
-Avoid the three failure modes seen in the wild (`logo-brainstorm.md` §0): a bare
-initial or letter-in-a-box, an orphan accent that dies at 16px, and an effect
-(offset, misregistration) standing in for an idea. A letter earns its place only
-if something is cut, joined or lit.
+Avoid the failure modes seen in the wild (`logo-brainstorm.md` §0): a bare
+initial or letter-in-a-box, an orphan accent that dies at 16px, an effect
+(offset, misregistration) standing in for an idea, an overlapping-circle Venn,
+and a fill+stroke wireframe. A letter earns its place only if something is cut,
+joined or lit — the architectural-monogram family, not a typed initial.
 
 Make it better than the default:
 
@@ -162,7 +209,7 @@ Make it better than the default:
 - Treat output as draft one. Open the SVG, nudge points on the grid, keep it in
   the same viewBox, re-run `audit.mjs` (`family` check).
 - The compact mark must have **fewer shapes** than the primary (audited).
-- Run the six-concept bake-off, then write why five lost into `story.md`.
+- Run the five-family bake-off, then write why four lost into `story.md`.
 
 Recipes and tests: `references/logo-system.md` §9.
 
@@ -209,6 +256,8 @@ Full gate and failure table: `references/typography.md`. Upstream source:
 
 ## Brand rules
 
+- **The v2.3 gate first.** No circle/Venn, no fill+stroke, 2–4 primitives,
+  one accent, five families, one family per brand.
 - **One idea, one loud field.** Two metaphors means it is not reduced.
 - **Draw, do not source.** Geometry, not clipart or generated marks.
 - **Test 16px first.** If it fails small, it is not a mark yet.
@@ -216,12 +265,14 @@ Full gate and failure table: `references/typography.md`. Upstream source:
 - **Palette by role.** Accents are punctuation, not body text.
 - **Document the decision.** Why, when not, what breaks next.
 
-## Explore six, keep one
+## Explore five, keep one
+
+One family per brand. No two marks in a showcase share an outer silhouette.
 
 | Test | Pass condition |
 | --- | --- |
-| Silhouette | Black shape at 32px still reads |
-| Reduction | ≤3 shapes or one continuous stroke |
+| Silhouette | Black shape at 32px still reads; no two share a bounding geometry |
+| Reduction | 2–4 solid primitives; fill-only; no stroke |
 | Meaning | One sentence without naming the visual |
 | Scale | 16, 32, 64, 512, favicon |
 | Ownability | Not a generic sun/bolt/leaf/shield/app tile |
@@ -231,7 +282,7 @@ Keep one; the rejection note becomes the guide.
 
 ## Build order
 
-**Brand kit:** brief → six → one mark + compact → outlined wordmark/family →
+**Brand kit:** brief → five → one mark + compact → outlined wordmark/family →
 palette/type/tokens → board → icons → guide → audit.
 
 **Design system:** brief + one effect → token source → primitives → form kit →
@@ -311,6 +362,10 @@ Details: `references/lessons.md`; case: `examples/vitrine.md`.
 
 ## Failure modes
 
+- Overlapping circles / Venn diagrams / concentric rings / orbit badges.
+- Fill + stroke faking a border; a wireframe that dies at 32px.
+- Two brands in one showcase with the same outer silhouette.
+- More than four primitives or more than one accent.
 - Emoji sun / app-store tile: charm or a rounded square instead of an idea.
 - Live text wordmark; fonts fail and the logo changes.
 - A board with no exportable mark/favicon/token file.
@@ -367,7 +422,7 @@ and runs the QA gate.
 
 - `brief.md` — brief and review gates.
 - `logo-system.md` — concepts, grid, family, favicon.
-- `logo-brainstorm.md` — six-family brainstorm, design rules, scoring, why marks come out ugly.
+- `logo-brainstorm.md` — v2.3 hard gate, five families, scoring, why marks come out ugly.
 - `board-and-images.md` — board, render pipeline, image QA.
 - `image-direction.md` — prompts and provenance.
 - `tokens-and-docs.md` — token layers and agent-readable docs.
@@ -382,7 +437,7 @@ and runs the QA gate.
 - `form-theming.md` — theme DNA, material → field recipes, states, shadcn mapping.
 - `skill-audit.md` — audit of this skill, fixes, known gaps.
 - `examples/sunnyside.md`, `examples/vitrine.md` — the two cases (evidence, not defaults).
-- `examples/brainstorm-huginn-riso-hachure.md` + `examples/configs/` — a worked redo of three weak marks.
+- `examples/brainstorm-huginn-riso-hachure.md` + `examples/configs/` — a worked v2.3 redo of three weak marks.
 
 ## Scripts and templates
 
@@ -396,10 +451,10 @@ and runs the QA gate.
 ## How to use this skill well
 
 1. Brief first; write the one-sentence direction.
-2. Six, keep one, write down why.
+2. Five families, keep one, write down why.
 3. Choose the surface and HTML/TSX before building.
 4. shadcn/Radix where accessible primitives matter; native for the rest.
 5. Typography gate before the first screenshot.
-6. Bake off six families with `brand-forge`, score, then refine by hand; write the story; match the fields.
+6. Bake off the five v2.3 families with `brand-forge`, score, then refine by hand; write the story; match the fields.
 7. Scripts for audit/QA; one look; fix the root cause; stop.
 8. Name what is missing. A guide that hides its gaps is a brochure.
