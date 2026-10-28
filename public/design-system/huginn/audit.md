@@ -88,8 +88,8 @@ Screenshots: `docs/shots/`.
 
 | File | Box | Note |
 | --- | --- | --- |
-| `brand/mark.svg` | 65 × 50 | primary; stray cell included |
-| `brand/mark-compact.svg` | 30 × 30 | single glyph, no stray cell |
+| `brand/mark.svg` | 64 × 64 | primary; two brackets + keystone, fill-only |
+| `brand/mark-compact.svg` | 32 × 32 | two brackets at half scale, wider channels |
 | `brand/wordmark.svg` | 950 × 200 | 95 columns, 760 cells, one path |
 | `brand/lockup.svg` | 329 × 50 | mark + name |
 | `brand/favicons/favicon-{16,32,180}.svg` | — | stamp at three sizes |

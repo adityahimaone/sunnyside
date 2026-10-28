@@ -12,27 +12,34 @@ command that measured it is in `docs/huginn-design-system-audit.md`.
 
 Everything follows from that sentence. The painting is reduced to an ordered
 dither; the wordmark is cut from a 22-row cell grid; the dissolve between them
-is the same grid at a different resolution. One operation, three scales. If a
-future addition cannot be described as "cells, or the absence of cells", it does
-not belong in this system.
+is the same grid at a different resolution. One operation, three scales.
+
+The mark is the named exception: an architectural H, not a cell. The name is a
+relationship (two ravens, thought and memory), so the mark carries a bridge
+rather than a picture. It uses the same palette and the same one-field rule; the
+cells remain the operation for the picture and the wordmark. If a future
+addition cannot be described as "cells, or the absence of cells" — with the
+bracket H as the one exception — it does not belong in this system.
 
 ## 2. The mark
 
-The H is missing a cell. It sits one half-cell to the right of the stem, in the
-air, still flying.
+**Two brackets, one bridge.** Two solid L-brackets face each other and almost
+meet; the bridge of the H is a vermilion diamond keystone. There is no stroke,
+no circle and no detached part. The counters are the negative space.
 
-That single omission is the whole logo. It is why the mark works at 16 px — at
-that size the missing cell reads as a notch, which is enough — and it is why the
-mark is never redrawn, outlined, or "cleaned up".
+This is the architectural-monogram family of the v2.3 gate. The old cell H is
+evolved, not discarded: the letter is still the mark, but it is cut into two
+interlocking brackets and a keystone rather than a cell grid.
 
-Rules:
-
-- The mark is drawn, never typed. `brand/mark.svg` is the file.
-- Clear space is one cell on every side. The stray cell counts as part of the
-  mark, so clear space starts after it.
-- One colour. `currentColor`. On the field, paper white; on paper, ink.
-- Below 16 px, use `mark-compact` — the single-glyph stamp, which drops the
-  stray cell because at that size it becomes noise.
+- 64 grid: left bracket `M8 8H20V28H30V36H20V56H8Z`; right bracket mirrored;
+  keystone `M32 22L38 32L32 42L26 32Z`.
+- Brackets read `--hug-mark-ink` (#141413 on paper, #F4EFE5 on night); the keystone reads `--hug-mark-key` (#E03C1F).
+- Compact: a separate 32-grid drawing with wider negative-space channels;
+  bracket strokes are not used — the cuts are wider, not thinner.
+- Clear space is the 8-unit margin the 64 box already carries, measured from
+  the outermost stem. The keystone is part of the drawing.
+- The favicon is the field version: paper brackets on the vermilion field, ink
+  keystone. It reads at 16px.
 
 ## 3. The wordmark
 
@@ -158,7 +165,7 @@ Short sentences. Concrete nouns. No adjective doing the work of a decision.
 - Do not round a corner.
 - Do not animate anything that loops.
 - Do not use the cobalt for decoration — it means "keyboard focus here".
-- Do not redraw the mark to remove the missing cell. That cell is the logo.
+- Do not detach the keystone from the brackets. The bridge is the logo.
 - Do not dim type on the field to create hierarchy. Use size and tracking.
 - Do not read pixels from the painting. Mask it.
 - Do not hand-edit `tokens/*.css`, `tokens/*.json`, `lib/wild-hunt.js`, or

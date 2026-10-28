@@ -68,8 +68,8 @@ like it has a point of view.
 
 ```
 design-system.html                  the specimen, 11 sections, light + dark
-brand/mark.svg                      65 × 50   primary mark
-brand/mark-compact.svg              30 × 30   one-glyph stamp
+brand/mark.svg                      64 × 64   primary mark, two brackets + keystone
+brand/mark-compact.svg              32 × 32   compact, wider channels
 brand/wordmark.svg                  950 × 200 outlined, 760 cells
 brand/lockup.svg                    329 × 50  mark + name
 brand/favicons/favicon{-16,-32,-180}.svg
