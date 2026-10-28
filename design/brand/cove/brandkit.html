@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cove — brand board v1.0</title>
+    <style>
+      @font-face {
+        font-family: 'Cove Serif';
+        src: url('./assets/InstrumentSerif-Regular.ttf') format('truetype');
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Cove Serif';
+        src: url('./assets/InstrumentSerif-Italic.ttf') format('truetype');
+        font-weight: 400;
+        font-style: italic;
+      }
+      @font-face {
+        font-family: 'Cove Sans';
+        src: url('./assets/InstrumentSans.ttf') format('truetype');
+        font-weight: 400 700;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Cove Mono';
+        src: url('./assets/GeistMono.ttf') format('truetype');
+        font-weight: 300 600;
+      }
+      :root {
+        --abyss: #06121c;
+        --deep: #0a1b28;
+        --glass: #123447;
+        --line: #244457;
+        --mist: #9dbccb;
+        --foam: #e9f6fb;
+        --ice: #7ce7ff;
+        --ice-ink: #04212d;
+        --clay: #ff8f80;
+        --moss: #7be0c3;
+        --amber: #ffd08a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--abyss);
+      }
+      body {
+        font-family: 'Cove Sans', system-ui, sans-serif;
+        color: var(--foam);
+        -webkit-font-smoothing: antialiased;
+      }
+      #board {
+        width: 2400px;
+        height: 1800px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 26px;
+        padding: 42px;
+        background: var(--abyss);
+      }
+      .panel {
+        position: relative;
+        overflow: hidden;
+        padding: 46px;
+        border-radius: 30px;
+        background: var(--deep);
+      }
+      .label {
+        color: var(--mist);
+        font: 500 12px/1.3 'Cove Mono', monospace;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+      .mono {
+        font-family: 'Cove Mono', monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      /* 01 cover */
+      .cover {
+        background:
+          radial-gradient(
+            ellipse 52% 48% at 76% 34%,
+            rgba(124, 231, 255, 0.3),
+            transparent 62%
+          ),
+          radial-gradient(
+            ellipse 46% 52% at 56% 72%,
+            rgba(46, 95, 120, 0.55),
+            transparent 72%
+          ),
+          linear-gradient(155deg, #06121c 0%, #0a1b28 48%, #06121c 100%);
+      }
+      .cover::before {
+        content: '';
+        position: absolute;
+        top: -110px;
+        right: -80px;
+        width: 520px;
+        height: 520px;
+        border: 1px solid rgba(124, 231, 255, 0.16);
+        border-radius: 50%;
+        box-shadow: inset 0 0 90px rgba(124, 231, 255, 0.07);
+      }
+      .cover-top {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .cover-lockup {
+        height: 68px;
+        width: auto;
+        display: block;
+      }
+      .cover-meta {
+        color: var(--mist);
+        font-size: 11px;
+        line-height: 1.9;
+        text-align: right;
+      }
+      .cover-headline {
+        position: relative;
+        margin: 150px 0 0;
+        font: 400 92px/0.94 'Cove Serif', Georgia, serif;
+        letter-spacing: -0.035em;
+        text-wrap: balance;
+      }
+      .cover-headline em {
+        color: var(--ice);
+        font-style: italic;
+      }
+      .cover-sub {
+        position: absolute;
+        left: 46px;
+        right: 46px;
+        bottom: 74px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 40px;
+        padding-top: 22px;
+        border-top: 1px solid rgba(233, 246, 251, 0.16);
+      }
+      .cover-sub p {
+        max-width: 560px;
+        margin: 0;
+        color: #bdd3dd;
+        font-size: 17px;
+        line-height: 1.55;
+      }
+      .cover-foot {
+        color: var(--mist);
+        font-size: 11px;
+        line-height: 1.8;
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      /* 02 colour + type */
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 22px;
+      }
+      .swatch {
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+      }
+      .swatch i {
+        display: block;
+        height: 76px;
+        border-radius: 9px;
+      }
+      .swatch b {
+        display: block;
+        margin-top: 10px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .swatch span {
+        display: block;
+        margin-top: 2px;
+        color: var(--mist);
+        font: 400 10px/1.4 'Cove Mono', monospace;
+      }
+      .type-row {
+        display: grid;
+        grid-template-columns: 118px 1fr;
+        gap: 20px;
+        align-items: baseline;
+        padding: 16px 0;
+        border-top: 1px solid var(--line);
+      }
+      .type-row:first-child {
+        margin-top: 22px;
+      }
+      .type-row dt {
+        color: var(--mist);
+        font: 500 10px/1.4 'Cove Mono', monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .type-row dd {
+        margin: 0;
+      }
+      .t-serif {
+        font: 400 42px/1 'Cove Serif', Georgia, serif;
+        letter-spacing: -0.02em;
+      }
+      .t-sans {
+        font: 400 22px/1.3 'Cove Sans', system-ui, sans-serif;
+      }
+      .t-mono {
+        font: 500 14px/1.4 'Cove Mono', monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      /* 03 construction */
+      .stage {
+        position: relative;
+        margin-top: 20px;
+        height: 520px;
+        overflow: hidden;
+        border-radius: 22px;
+        background:
+          radial-gradient(
+            ellipse 50% 52% at 66% 32%,
+            rgba(124, 231, 255, 0.14),
+            transparent 66%
+          ),
+          var(--abyss);
+        background-image:
+          linear-gradient(to right, rgba(233, 246, 251, 0.055) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(233, 246, 251, 0.055) 1px, transparent 1px);
+        background-size:
+          52px 52px,
+          52px 52px;
+      }
+      .stage svg {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 360px;
+        height: 360px;
+        transform: translate(-50%, -50%);
+      }
+      .specs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 26px;
+        margin-top: 18px;
+        color: var(--mist);
+        font: 500 10px/1.4 'Cove Mono', monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .specs b {
+        color: var(--foam);
+        font-weight: 500;
+      }
+      .mark-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-top: 24px;
+      }
+      .mark-row img {
+        height: 54px;
+        width: auto;
+        display: block;
+      }
+      .sizes {
+        display: flex;
+        align-items: flex-end;
+        gap: 18px;
+        color: var(--mist);
+        font: 500 9px/1.4 'Cove Mono', monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .sizes img {
+        display: block;
+      }
+
+      /* 04 glass + form */
+      .glass-panel {
+        position: relative;
+        margin-top: 20px;
+        padding: 26px;
+        border: 1px solid rgba(233, 246, 251, 0.2);
+        border-radius: 24px;
+        background: linear-gradient(
+          150deg,
+          rgba(18, 52, 71, 0.78),
+          rgba(6, 18, 28, 0.55) 55%,
+          rgba(18, 52, 71, 0.68)
+        );
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.35),
+          0 30px 80px -40px rgba(0, 0, 0, 0.7);
+      }
+      .glass-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font: 500 11px/1 'Cove Mono', monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .glass-head svg {
+        width: 28px;
+        height: 28px;
+        display: block;
+      }
+      .glass-panel p {
+        margin: 16px 0;
+        color: #c8dbe4;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .field {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        height: 46px;
+        margin-top: 10px;
+        padding: 0 14px;
+        border: 1px solid rgba(233, 246, 251, 0.22);
+        border-radius: 12px;
+        background: rgba(6, 18, 28, 0.55);
+        color: #8fb0bf;
+        font-size: 13px;
+      }
+      .focus {
+        padding: 4px 7px;
+        border: 1px solid var(--ice);
+        border-radius: 6px;
+        color: var(--ice);
+        font: 500 8px/1 'Cove Mono', monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .button {
+        display: grid;
+        place-items: center;
+        height: 44px;
+        margin-top: 10px;
+        border-radius: 12px;
+        background: var(--ice);
+        color: var(--ice-ink);
+        font: 600 11px/1 'Cove Mono', monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .recipe-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 18px;
+        margin-top: 18px;
+        color: var(--mist);
+        font: 500 9px/1.4 'Cove Mono', monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .states {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 22px;
+      }
+      .states span {
+        padding: 7px 9px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        color: var(--mist);
+        font: 500 9px/1 'Cove Mono', monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .states span:first-child {
+        border-color: var(--ice);
+        color: var(--ice);
+      }
+      .board-note {
+        max-width: 46ch;
+        margin: 26px 0 0;
+        color: var(--mist);
+        font: 400 15px/1.55 'Cove Sans', system-ui, sans-serif;
+        text-wrap: pretty;
+      }
+      .panel-foot {
+        position: absolute;
+        left: 46px;
+        right: 46px;
+        bottom: 34px;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+        color: var(--mist);
+        font: 500 9px/1.4 'Cove Mono', monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="board">
+      <!-- 01 COVER -->
+      <section class="panel cover">
+        <div class="cover-top">
+          <img class="cover-lockup" src="../../../public/brand/cove/lockup-reverse.svg" alt="Cove" />
+          <div class="cover-meta mono">
+            CASE 06<br />
+            V1.0 — 2026<br />
+            DESIGN SYSTEM
+          </div>
+        </div>
+        <h1 class="cover-headline">
+          A calmer<br /><em>kind of depth.</em>
+        </h1>
+        <div class="cover-sub">
+          <p>
+            One glass layer over one blue field, a solid plate for everything
+            you have to read, and a single ice accent. The C is the cove; the
+            inlay is the waterline.
+          </p>
+          <div class="cover-foot mono">
+            adityahimaone.space<br />/design-system/cove
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 COLOUR + TYPE -->
+      <section class="panel">
+        <span class="label">01 / Colour</span>
+        <div class="swatches">
+          <div class="swatch"><i style="background:#06121c"></i><b>Abyss</b><span>#06121C · ground</span></div>
+          <div class="swatch"><i style="background:#E9F6FB"></i><b>Foam</b><span>#E9F6FB · text</span></div>
+          <div class="swatch"><i style="background:#7CE7FF"></i><b>Ice</b><span>#7CE7FF · field</span></div>
+          <div class="swatch"><i style="background:#2E5F78"></i><b>Horizon</b><span>#2E5F78 · structure</span></div>
+          <div class="swatch"><i style="background:#9DBCCB"></i><b>Mist</b><span>#9DBCCB · secondary</span></div>
+          <div class="swatch"><i style="background:#7BE0C3"></i><b>Moss</b><span>#7BE0C3 · success</span></div>
+        </div>
+
+        <div style="margin-top: 30px">
+          <span class="label">02 / Type</span>
+          <dl>
+            <div class="type-row">
+              <dt>Display</dt>
+              <dd class="t-serif">A calmer kind of depth.</dd>
+            </div>
+            <div class="type-row">
+              <dt>Reading</dt>
+              <dd class="t-sans">
+                Instrument Sans carries every field, label and paragraph.
+              </dd>
+            </div>
+            <div class="type-row">
+              <dt>Label</dt>
+              <dd class="t-mono">GEIST MONO / MATERIAL 04</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- 03 CONSTRUCTION -->
+      <section class="panel">
+        <span class="label">03 / Construction</span>
+        <div class="stage">
+          <svg viewBox="0 0 64 64" role="img" aria-label="Cove C on a 64-unit grid">
+            <path d="M56 8H28L8 24V40L28 56H56V44H28L20 36V28L28 20H56Z" fill="#E9F6FB" />
+            <path d="M40 36H56V44H40Z" fill="#7CE7FF" />
+          </svg>
+        </div>
+        <div class="specs">
+          <span>GRID <b>64 × 64</b></span>
+          <span>FRAME <b>8 UNITS</b></span>
+          <span>OPENING <b>24</b></span>
+          <span>ARM <b>12</b></span>
+          <span>INLAY <b>16 × 8</b></span>
+          <span>PRIMITIVES <b>2 / 1</b></span>
+        </div>
+        <div class="mark-row">
+          <img src="../../../public/brand/cove/lockup-reverse.svg" alt="Cove lockup" />
+          <div class="sizes">
+            <span>16</span><span>32</span><span>64</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 GLASS + FORM -->
+      <section class="panel">
+        <span class="label">04 / Glass + form</span>
+        <div class="glass-panel">
+          <div class="glass-head">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M56 6H30L6 24V40L30 58H56V44H30L22 36V28L30 20H56Z" fill="#E9F6FB" />
+            </svg>
+            <span>Glass surface</span>
+          </div>
+          <p>
+            One translucent sheet with a lit cut edge and a top specular. The
+            field stays outside the text block.
+          </p>
+          <div class="field">
+            <span>you@studio.com</span>
+            <span class="focus">Focus</span>
+          </div>
+          <div class="button">Request a key</div>
+        </div>
+        <div class="recipe-row">
+          <span>01 Fill</span>
+          <span>02 Edge</span>
+          <span>03 Specular</span>
+          <span>04 Grain</span>
+        </div>
+        <div class="states">
+          <span>Default</span>
+          <span>Focus</span>
+          <span>Invalid</span>
+          <span>Disabled</span>
+        </div>
+        <p class="board-note">
+          One layer, one reading plate, one ice accent. Frost is the same roles
+          on a light ground; the hero and the material studies stay Deep.
+        </p>
+        <div class="panel-foot">
+          <span>Case 06 · Cove 1.0</span>
+          <span>Liquid glass · no generated imagery</span>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

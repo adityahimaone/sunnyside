@@ -37,7 +37,7 @@ export function CaseLibraryPage() {
               <Sparkle className="size-2.5" />
               Design engineering / Case library
             </span>
-            <span className={layout.kickerText}>Five systems, one method</span>
+            <span className={layout.kickerText}>Six systems, one method</span>
             <span className={layout.kickerText}>
               <span className={layout.num}>{DESIGN_CASES.length}</span> cases
             </span>
@@ -49,14 +49,14 @@ export function CaseLibraryPage() {
             label="Case files"
           />
 
-          <h1 className={layout.title}>Five systems, one paper trail.</h1>
+          <h1 className={layout.title}>Six systems, one paper trail.</h1>
           <p className={layout.intro}>
             A case is not a moodboard. It is a brief, a mark, a system, a proof
             and a written decision. Sunnyside is paper and cobalt; Vitrine is
             glass and dither; Huginn is bone and ordered print; Riso Co. is torn
             poster and pushpin physics; Hachure is survey stock and ordered
-            dither. Each case is documented with its files and gaps left on the
-            table.
+            dither; Cove is blue liquid glass and a solid reading plate. Each
+            case is documented with its files and gaps left on the table.
           </p>
 
           <div className={styles.heroActions}>
@@ -131,7 +131,7 @@ export function CaseLibraryPage() {
         <section className={styles.method} aria-labelledby="method-title">
           <div className={layout.sectionHead}>
             <h2 id="method-title" className={layout.sectionTitle}>
-              The method behind both
+              The method behind all six
             </h2>
             <span className={layout.sectionNote}>
               Brief → explorations → mark → board → tokens → guide → audit
@@ -151,8 +151,8 @@ export function CaseLibraryPage() {
           <p className={styles.methodFoot}>
             The method is documented as a field manual, and packaged as the{' '}
             <Link href="/design-engineering#skill">sunnyside-brand-system</Link>{' '}
-            agent skill. Vitrine, Huginn, Riso Co. and Hachure prove it travels
-            beyond one material.
+            agent skill. Vitrine, Huginn, Riso Co., Hachure and Cove prove it
+            travels beyond one material.
           </p>
         </section>
       </div>

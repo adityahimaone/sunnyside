@@ -10,7 +10,7 @@ export type DesignCase = {
   cover: string
   coverAlt: string
   tags: readonly string[]
-  tone: 'sunnyside' | 'vitrine' | 'huginn' | 'riso' | 'hachure'
+  tone: 'sunnyside' | 'vitrine' | 'huginn' | 'riso' | 'hachure' | 'cove'
 }
 
 /**
@@ -98,5 +98,21 @@ export const DESIGN_CASES: readonly DesignCase[] = [
       'The Hachure brand board: a 3 × 3 identity deck on a night table — the solid ridge mark, the outlined mono wordmark, the dither plate, the seven-tone ramp, the field sheet and the form kit.',
     tags: ['Hachure', 'Bayer Dither', 'Survey', 'Altimeter'],
     tone: 'hachure',
+  },
+  {
+    number: '06',
+    name: 'Cove',
+    href: '/design-system/cove',
+    tagline: 'A calmer kind of depth.',
+    description:
+      'One glass layer over one blue field, a solid reading plate, a squared C with an ice waterline, ten native controls and a measured audit. Case 06 asks what happens when glass is minimal instead of everywhere.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · forms · liquid glass',
+    material: 'Blue glass + ice',
+    cover: '/brand/cove/cove-brandkit.png',
+    coverAlt:
+      'The Cove brand board: the squared C mark with an ice inlay, the Abyss and Foam palette, Instrument Serif and Sans, the glass recipe and the form kit.',
+    tags: ['Liquid Glass', 'Blue', 'Instrument Serif', 'Forms'],
+    tone: 'cove',
   },
 ]

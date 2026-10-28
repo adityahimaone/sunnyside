@@ -28,7 +28,7 @@
 
 - **Studio landing page** — six chapters: Intro, About, Show & tell, Work, Skills, and Contact.
 - **Sunnyside** — a browsable design-system guide with palette, type, components, motion, voice, applications, and copyable/downloadable tokens.
-- **Design-system library** — five documented cases at `/design-system`: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (print cells), Riso Co. (two-pass misregistration) and Hachure (survey paper and ordered dither). Each has a brief, a mark, tokens, a form kit and an honest audit.
+- **Design-system library** — six documented cases at `/design-system`: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (print cells), Riso Co. (two-pass misregistration), Hachure (survey paper and ordered dither) and Cove (blue liquid glass). Each has a brief, a mark, tokens, a form kit and an honest audit.
 - **Projects archive** — project releases, case studies, and GitHub activity.
 - **Blog and guides** — Markdown writing about frontend work, self-hosting, and infrastructure, with filters, reading aids, RSS, and generated social images.
 - **Bookmarks** — a searchable, paginated catalogue backed by Cloudflare D1, with an admin editor.
@@ -50,6 +50,8 @@ Sunnyside is the visual language behind the studio landing page and archive surf
 Vitrine is the second case, deliberately not a Sunnyside variant: a glass container, a halftone information layer, a half-light V mark with one Signal arm, and ten native form controls. Its source lives in `features/vitrine/`, `design/brand/vitrine/` and `public/brand/vitrine/`; the audit is in `docs/vitrine-design-system-audit.md`. Do not import its `--vt-*` tokens into Sunnyside.
 
 Hachure (Case 05) is the opposite test: no blur, no shadow, no rounded corner. It takes the supplied ridgeline dither footer as a **tone engine** and builds a cartographic system around density — survey stock, hachure, an H printed into paper, three elevation bands and a footer you can read an altitude off. Source: `features/hachure/`, `design/brand/hachure/`, `public/brand/hachure/`; audit: `docs/hachure-design-system-audit.md`.
+
+Cove (Case 06) is the liquid-glass test: one blue caustic field, one glass layer, a solid reading plate, a squared C with an ice inlay, Instrument Serif and Instrument Sans, and ten native controls. Deep is the default; Frost is the light surface. Source: `features/cove/`, `design/brand/cove/`, `public/brand/cove/`; audit: `docs/cove-design-system-audit.md`. The supplied background image is the one asset still missing; `--cv-field-image` is the swap point.
 
 The `/design-engineering` docs hub is the practice-facing companion: the loop, the four standards, the Sunnyside case, the capability atlas, the installable brand-system skill and the field notes. It is built for reading and for agents: a sticky contents column, stable heading anchors, real tables, and raw Markdown twins at `/design-engineering/llms.txt` and `/design-engineering/learning/llms.txt`.
 
@@ -86,6 +88,7 @@ The identity is a **die-cut sun sticker** and the site's **marker wordmark**. Th
 | `/design-system/vitrine`         | Vitrine — glass-and-dither case    |
 | `/design-system/riso`            | Riso Co. — two-pass print case     |
 | `/design-system/hachure`         | Hachure — cartographic dither case |
+| `/design-system/cove`            | Cove — blue liquid-glass case      |
 | `/design-engineering`            | Design-engineering docs hub         |
 | `/design-engineering/learning`   | Field notes: Pen.dev, Figma, Craft  |
 | `/design-engineering/llms.txt`   | Markdown twin of the docs hub       |

@@ -118,6 +118,10 @@
   --case-accent: #4a6b33;
 }
 
+.tone_cove {
+  --case-accent: #7ce7ff;
+}
+
 .cardTop {
   display: flex;
   align-items: center;

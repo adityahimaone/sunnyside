@@ -1,0 +1,297 @@
+{
+  "url": "http://localhost:3000/design-system/cove",
+  "slug": "cove",
+  "startedAt": "2026-10-28T11:09:46.335Z",
+  "finishedAt": "2026-10-28T11:10:08.444Z",
+  "verdict": "PASS",
+  "checks": [
+    {
+      "status": "pass",
+      "check": "Static audit",
+      "evidence": "Audit: PASS — 16 passed, 0 warnings, 0 failures"
+    },
+    {
+      "status": "pass",
+      "check": "Mark score",
+      "evidence": "PASS  cove"
+    },
+    {
+      "status": "pass",
+      "check": "Theme toggle",
+      "evidence": "light → dark"
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 1440-light",
+      "evidence": "16px"
+    },
+    {
+      "status": "warn",
+      "check": "Typography heading 1440-light",
+      "evidence": "h1 weight 400; 600+ is expected."
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 1440-light",
+      "evidence": "14px at 1440px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 1440-light",
+      "evidence": "0px"
+    },
+    {
+      "status": "skip",
+      "check": "Shader 1440-light",
+      "evidence": "No dither data-state on the page."
+    },
+    {
+      "status": "pass",
+      "check": "Console 1440-light",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "pass",
+      "check": "Form states",
+      "evidence": "1 alert(s); invalid: cv-name, cv-email, cv-password; focus alert."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 1440-dark",
+      "evidence": "16px"
+    },
+    {
+      "status": "warn",
+      "check": "Typography heading 1440-dark",
+      "evidence": "h1 weight 400; 600+ is expected."
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 1440-dark",
+      "evidence": "14px at 1440px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 1440-dark",
+      "evidence": "0px"
+    },
+    {
+      "status": "skip",
+      "check": "Shader 1440-dark",
+      "evidence": "No dither data-state on the page."
+    },
+    {
+      "status": "pass",
+      "check": "Console 1440-dark",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 390-light",
+      "evidence": "16px"
+    },
+    {
+      "status": "warn",
+      "check": "Typography heading 390-light",
+      "evidence": "h1 weight 400; 600+ is expected."
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 390-light",
+      "evidence": "16px at 390px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 390-light",
+      "evidence": "0px"
+    },
+    {
+      "status": "skip",
+      "check": "Shader 390-light",
+      "evidence": "No dither data-state on the page."
+    },
+    {
+      "status": "pass",
+      "check": "Console 390-light",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 390-dark",
+      "evidence": "16px"
+    },
+    {
+      "status": "warn",
+      "check": "Typography heading 390-dark",
+      "evidence": "h1 weight 400; 600+ is expected."
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 390-dark",
+      "evidence": "16px at 390px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 390-dark",
+      "evidence": "0px"
+    },
+    {
+      "status": "skip",
+      "check": "Shader 390-dark",
+      "evidence": "No dither data-state on the page."
+    },
+    {
+      "status": "pass",
+      "check": "Console 390-dark",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 1440-light-reduced",
+      "evidence": "16px"
+    },
+    {
+      "status": "warn",
+      "check": "Typography heading 1440-light-reduced",
+      "evidence": "h1 weight 400; 600+ is expected."
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 1440-light-reduced",
+      "evidence": "14px at 1440px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 1440-light-reduced",
+      "evidence": "0px"
+    },
+    {
+      "status": "skip",
+      "check": "Shader 1440-light-reduced",
+      "evidence": "No dither data-state on the page."
+    },
+    {
+      "status": "pass",
+      "check": "Console 1440-light-reduced",
+      "evidence": "No page errors; no non-shader console errors."
+    }
+  ],
+  "runs": [
+    {
+      "key": "1440-light",
+      "width": 1440,
+      "height": 19414,
+      "theme": "light",
+      "reduced": false,
+      "title": "Cove — Design System | Aditya Himawan",
+      "h1": "A calmerkind of depth.",
+      "overflow": 0,
+      "shader": null,
+      "typography": {
+        "body": 16,
+        "input": 14,
+        "headingWeight": 400
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "1440-dark",
+      "width": 1440,
+      "height": 19414,
+      "theme": "dark",
+      "reduced": false,
+      "title": "Cove — Design System | Aditya Himawan",
+      "h1": "A calmerkind of depth.",
+      "overflow": 0,
+      "shader": null,
+      "typography": {
+        "body": 16,
+        "input": 14,
+        "headingWeight": 400
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "390-light",
+      "width": 390,
+      "height": 29128,
+      "theme": "light",
+      "reduced": false,
+      "title": "Cove — Design System | Aditya Himawan",
+      "h1": "A calmerkind of depth.",
+      "overflow": 0,
+      "shader": null,
+      "typography": {
+        "body": 16,
+        "input": 16,
+        "headingWeight": 400
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "390-dark",
+      "width": 390,
+      "height": 29128,
+      "theme": "dark",
+      "reduced": false,
+      "title": "Cove — Design System | Aditya Himawan",
+      "h1": "A calmerkind of depth.",
+      "overflow": 0,
+      "shader": null,
+      "typography": {
+        "body": 16,
+        "input": 16,
+        "headingWeight": 400
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "1440-light-reduced",
+      "width": 1440,
+      "height": 19414,
+      "theme": "light",
+      "reduced": true,
+      "title": "Cove — Design System | Aditya Himawan",
+      "h1": "A calmerkind of depth.",
+      "overflow": 0,
+      "shader": null,
+      "typography": {
+        "body": 16,
+        "input": 14,
+        "headingWeight": 400
+      },
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "statics": {
+    "audit": {
+      "ok": true,
+      "output": "PASS  required files: 30/30\nPASS  SVGs: 13/13 valid, brand assets have no <text>\nPASS  ICO: 16, 32, 48\nPASS  PNG: public/brand/cove/favicon-16.png 16×16\nPASS  PNG: public/brand/cove/favicon-32.png 32×32\nPASS  PNG: public/brand/cove/favicon-48.png 48×48\nPASS  PNG: public/brand/cove/apple-icon-180.png 180×180\nPASS  PNG: public/brand/cove/icon-192.png 192×192\nPASS  PNG: public/brand/cove/icon-512.png 512×512\nPASS  PNG: public/brand/cove/mark-1024.png 1024×1024\nPASS  PNG: design/brand/cove/cove-brandkit.png 3000×2250\nPASS  tokens: primitives 17, semantic.light 20, semantic.dark 20, components.light 25, components.dark 25\nPASS  contrast: 14/14 pairs >= 4.5:1\nPASS  family: 5 marks share viewBox 0 0 64 64\nPASS  forms: no raw colours, tokens only\nPASS  story: 6 required sections present\n\nAudit: PASS — 16 passed, 0 warnings, 0 failures"
+    },
+    "score": {
+      "ok": true,
+      "output": "PASS  cove\n   NOTE  dominant field 90% (v2.3 solid mass; channels are the negative space)"
+    }
+  },
+  "notes": [],
+  "screenshots": [
+    "cove-1440-light.jpg",
+    "cove-hero-light.png",
+    "cove-form-errors.png",
+    "cove-form-focus.png",
+    "cove-section-foundation.jpg",
+    "cove-section-marks.jpg",
+    "cove-section-colour.jpg",
+    "cove-section-applications.jpg",
+    "cove-1440-dark.jpg",
+    "cove-hero-dark.png",
+    "cove-390-light.jpg",
+    "cove-390-dark.jpg",
+    "cove-reduced-motion.png"
+  ]
+}

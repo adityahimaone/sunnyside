@@ -97,7 +97,7 @@ export const PROJECT_GALLERY_ITEMS: readonly ProjectGalleryItem[] =
   })
 
 /**
- * The design-system shelf is the same five documented cases as
+ * The design-system shelf is the same six documented cases as
  * `/design-system`, in the same order and with the same covers. This is the
  * single source of truth for the case names, paths and brand-kit thumbnails.
  */

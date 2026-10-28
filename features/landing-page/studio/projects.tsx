@@ -47,7 +47,7 @@ export function Projects() {
 
         <Reveal delay={0.1}>
           <div className={styles.archiveBand}>
-            <p>Six releases · five systems · 2022–26</p>
+            <p>Six releases · six systems · 2022–26</p>
             <Link className={styles.archiveLink} href="/projects">
               The full discography
               <ArrowUpRight className="size-5" />

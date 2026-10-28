@@ -645,7 +645,7 @@
   aspect-ratio: 1;
 }
 
-/* The five cases come from /design-system, so the DS view uses the same
+/* The six cases come from /design-system, so the DS view uses the same
    2-up composition as that page; All and Project keep the 3-up bento. */
 @media (min-width: 1024px) {
   .grid[data-filter='design-system'] {

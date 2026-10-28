@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cove — form kit</title>
+    <link rel="stylesheet" href="./cove-tokens.css" />
+    <link rel="stylesheet" href="./cove-forms.css" />
+    <style>
+      @font-face { font-family: 'Cove Serif'; src: url('./fonts/InstrumentSerif-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+      @font-face { font-family: 'Cove Serif'; src: url('./fonts/InstrumentSerif-Italic.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
+      @font-face { font-family: 'Cove Sans'; src: url('./fonts/InstrumentSans.ttf') format('truetype'); font-weight: 400 700; font-style: normal; font-display: swap; }
+      :root { --font-cove-display: 'Cove Serif'; --font-cove-reading: 'Cove Sans'; --font-geist-mono: ui-monospace, monospace; }
+      body { margin: 0; background: var(--cv-bg); color: var(--cv-fg); font-family: var(--cv-font-reading); }
+      .cv-scope { display: block; }
+      main { max-width: 760px; margin: 0 auto; padding: clamp(24px, 5vw, 64px); }
+      h1 { font-family: var(--cv-font-display); font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -0.055em; line-height: 0.95; margin: 0 0 12px; text-wrap: balance; }
+      .lede { max-width: 62ch; margin: 0 0 32px; color: var(--cv-muted); font-size: 16px; line-height: 1.6; text-wrap: pretty; }
+      h2 { margin: 48px 0 12px; padding-top: 20px; border-top: 1px solid var(--cv-border); font-family: var(--cv-font-display); font-size: 24px; letter-spacing: -0.035em; }
+      .panel { padding: 24px; border: 1px solid var(--cv-border); border-radius: 20px; background: var(--cv-surface); }
+    </style>
+  </head>
+  <body>
+    <div class="cv-scope"><main>
+      <h1>The Cove form kit</h1>
+      <p class="lede">The mark and the fields are cut from the same sheet: a hard 1px edge, square tile, solid focus ring and cosy density. All states below are static specimens; nothing is sent.</p>
+
+      <div class="panel">
+        <form class="cv-form" novalidate>
+          <div class="cv-error-summary" role="alert" tabindex="-1">
+            <h2>2 fields need attention</h2>
+            <ul>
+              <li><a href="#cv-name">Add a name so the case has a file.</a></li>
+              <li><a href="#cv-email">Use a complete email address.</a></li>
+            </ul>
+          </div>
+
+          <div class="cv-field">
+            <label class="cv-label" for="cv-name">Name</label>
+            <input class="cv-input" id="cv-name" name="name" type="text" placeholder="e.g. Ada Lovelace" aria-invalid="true" aria-describedby="cv-name-error" />
+            <p class="cv-error" id="cv-name-error">Add a name so the case has a file.</p>
+          </div>
+
+          <div class="cv-field">
+            <label class="cv-label" for="cv-email">Email</label>
+            <input class="cv-input" id="cv-email" name="email" type="email" placeholder="you@studio.com" autocomplete="email" />
+            <p class="cv-hint">We use this only to reply.</p>
+          </div>
+
+          <div class="cv-field">
+            <label class="cv-label" for="cv-password">Password</label>
+            <input class="cv-input" id="cv-password" name="password" type="password" placeholder="At least 8 characters" autocomplete="new-password" aria-describedby="cv-password-hint" />
+            <p class="cv-hint" id="cv-password-hint">A case is only as private as its key.</p>
+          </div>
+
+          <div class="cv-field">
+            <label class="cv-label" for="cv-role">Role</label>
+            <select class="cv-select" id="cv-role" name="role">
+              <option>Design engineer</option>
+              <option>Product designer</option>
+              <option>Frontend engineer</option>
+              <option>Researcher</option>
+            </select>
+          </div>
+
+          <fieldset class="cv-field">
+            <legend class="cv-legend">Team size</legend>
+            <label class="cv-choice"><input type="radio" name="team" value="1-5" checked /> <span>1–5<small>A studio</small></span></label>
+            <label class="cv-choice"><input type="radio" name="team" value="6-20" /> <span>6–20<small>A product team</small></span></label>
+            <label class="cv-choice"><input type="radio" name="team" value="21+" /> <span>21+<small>A platform group</small></span></label>
+          </fieldset>
+
+          <div class="cv-field">
+            <label class="cv-label" for="cv-message">What are you building?</label>
+            <textarea class="cv-textarea" id="cv-message" name="message" rows="3" maxlength="280" placeholder="e.g. a dashboard with a lot of glass and a little grain."></textarea>
+            <p class="cv-hint">0 / 280</p>
+          </div>
+
+          <div class="cv-field">
+            <label class="cv-label" for="cv-reference">Reference</label>
+            <label class="cv-file"><input id="cv-reference" name="reference" type="file" accept=".png,.jpg,.jpeg,.webp,.svg,.pdf" /><span>Drop a screenshot, or choose a file<small>PNG, JPG, WEBP, SVG or PDF</small></span></label>
+          </div>
+
+          <label class="cv-choice"><input type="checkbox" name="updates" checked /> <span>Send the field notes<small>One short letter when the system changes.</small></span></label>
+
+          <div class="cv-switch-row">
+            <span>Live status<small>Show the case light when the office is open.</small></span>
+            <button class="cv-switch" type="button" role="switch" aria-checked="true" aria-label="Live status"></button>
+          </div>
+
+          <div class="cv-field">
+            <label class="cv-label" for="cv-intensity">Dither intensity</label>
+            <input class="cv-range" id="cv-intensity" name="intensity" type="range" min="0" max="100" value="64" />
+          </div>
+
+          <div class="cv-field">
+            <label class="cv-label" for="cv-disabled">Workspace</label>
+            <input class="cv-input" id="cv-disabled" type="text" value="Assigned by invite" disabled aria-describedby="cv-disabled-hint" />
+            <p class="cv-hint" id="cv-disabled-hint">Disabled fields keep their label and value; they never lose contrast.</p>
+          </div>
+
+          <div class="cv-actions">
+            <button class="cv-button" type="submit">Request a key</button>
+            <button class="cv-button cv-button-secondary" type="reset">Reset</button>
+            <p class="cv-note">A specimen form. Nothing is sent.</p>
+          </div>
+        </form>
+      </div>
+
+      <h2>States</h2>
+      <div class="cv-state-row">
+        <span class="cv-state">Default</span>
+        <span class="cv-state" data-state="focus">Focus</span>
+        <span class="cv-state" data-state="invalid">Invalid</span>
+        <span class="cv-state" data-state="disabled">Disabled</span>
+      </div>
+    </main></div>
+  </body>
+</html>
