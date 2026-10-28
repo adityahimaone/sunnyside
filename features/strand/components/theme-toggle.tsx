@@ -66,7 +66,7 @@ export function StrandThemeToggle({ className }: { className?: string }) {
         aria-label="Night theme (Dark)"
         onClick={() => choose('night')}
       >
-        Night Tide
+        Night
       </button>
     </div>
   )

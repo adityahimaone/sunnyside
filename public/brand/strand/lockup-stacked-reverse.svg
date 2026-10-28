@@ -1,22 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 116" fill="none" role="img" aria-label="Strand stacked lockup reverse">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 116" fill="none" role="img" aria-label="Strand stacked lockup">
   <g transform="translate(48, 6)">
-    <path fill="#FAF8F5" fill-rule="evenodd" clip-rule="evenodd" d="M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z"/>
-    <path fill="#4EA4B5" d="M42 34L56 24V40L42 34Z"/>
+    <defs>
+      <clipPath id="strand-stacked-rev-sand"><path d="M0 -8H64V27.45L0 35.45Z"/></clipPath>
+      <clipPath id="strand-stacked-rev-sea"><path d="M0 36.55L64 28.55V72H0Z"/></clipPath>
+    </defs>
+    <g clip-path="url(#strand-stacked-rev-sand)"><path fill="#FAF8F5" d="M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z"/></g>
+    <g clip-path="url(#strand-stacked-rev-sea)"><path fill="#51BFBB" d="M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z"/></g>
   </g>
   <g transform="translate(14, 82)">
-
-  <!-- S -->
   <path d="M18 4H5C2.239 4 0 6.239 0 9C0 11.761 2.239 14 5 14H13C14.105 14 15 14.895 15 16C15 17.105 14.105 18 13 18H0V21H13C15.761 21 18 18.761 18 16C18 13.239 15.761 11 13 11H5C3.895 11 3 10.105 3 9C3 7.895 3.895 7 5 7H18V4Z" fill="#FAF8F5"/>
-  <!-- T -->
   <path d="M22 4H38V7H31.5V21H28.5V7H22V4Z" fill="#FAF8F5"/>
-  <!-- R -->
   <path d="M42 4H54C57.314 4 60 6.686 60 10C60 12.828 58.049 15.201 55.404 15.828L60.5 21H56.5L51.8 16H45V21H42V4ZM45 7V13H53.5C55.157 13 56.5 11.657 56.5 10C56.5 8.343 55.157 7 53.5 7H45Z" fill="#FAF8F5"/>
-  <!-- A -->
   <path d="M72 4H75L84.5 21H81.2L78.8 16.5H68.2L65.8 21H62.5L72 4ZM73.5 6.6L69.8 13.8H77.2L73.5 6.6Z" fill="#FAF8F5"/>
-  <!-- N -->
   <path d="M89 4H92L102.5 17.2V4H105.5V21H102.5L92 7.8V21H89V4Z" fill="#FAF8F5"/>
-  <!-- D -->
   <path d="M110 4H121C126.523 4 131 8.477 131 14C131 19.523 126.523 24 121 24H110V4ZM113 7V21H120.5C124.642 21 128 17.866 128 14C128 10.134 124.642 7 120.5 7H113Z" fill="#FAF8F5"/>
-
   </g>
 </svg>

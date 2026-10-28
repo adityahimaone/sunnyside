@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Strand icon">
   <rect width="64" height="64" rx="14" fill="#152026"/>
-  <path fill="#FAF8F5" fill-rule="evenodd" clip-rule="evenodd" d="M48 14H24C16.268 14 10 20.268 10 28C10 35.732 16.268 42 24 42H38C39.657 42 41 43.343 41 45C41 46.657 39.657 48 38 48H14V53H38C45.732 53 52 46.732 52 39C52 31.268 45.732 25 38 25H24C22.343 25 21 23.657 21 22C21 20.343 22.343 19 24 19H48V14Z"/>
-  <path fill="#4EA4B5" d="M42 34L52 26V38L42 34Z"/>
+  <defs>
+    <clipPath id="strand-icon-sand"><path d="M0 -8H64V27.45L0 35.45Z"/></clipPath>
+    <clipPath id="strand-icon-sea"><path d="M0 36.55L64 28.55V72H0Z"/></clipPath>
+  </defs>
+  <g clip-path="url(#strand-icon-sand)"><path fill="#FAF8F5" d="M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z"/></g>
+  <g clip-path="url(#strand-icon-sea)"><path fill="#51BFBB" d="M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z"/></g>
 </svg>

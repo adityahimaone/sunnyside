@@ -32,13 +32,13 @@ https://adityahimaone.space/design-system/strand.
 - Essence: where the dunes meet the tide.
 - Promise: quiet surfaces, sharp natural geometry.
 - Family: architectural monogram.
-- Gate: v2.5 constructed — zero circle, fill-only, 2 primitives, one accent.
+- Gate: v3.0 constructed — zero circle, fill-only, 2 primitives, one accent, detach ≥ 70 against every sibling.
 - Voice: serene, architectural, unhurried.
 - Not this: neon gradients, floating glass pills, cartoon beach icons.
 
 ## 2. Mark
 
-The mark is **Dune Crest S**: one architectural monogram carved with wind-swept dune curves, a 5.2-unit tidal channel, and one solid Aquamarine wedge seated in the coastal inlet.
+The mark is **Dune Crest S**: one architectural monogram cut by a single 7.1° shoreline, with a 1.1-unit strand left open between the sand and the sea. The two materials never touch — the gap is the beach. Everything below the cut is tide, 48% of the letter, so the accent is structure rather than ornament. Counters run 5.2–8.5 units; below 32px a separate one-tone compact drawing takes over and the gap closes optically.
 
 ${table(
   ['Rule', 'Status', 'Note'],

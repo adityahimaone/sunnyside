@@ -6,27 +6,28 @@
   --st-dna-family: architectural-monogram;
   --st-dna-material: coastal-sand-plate;
   --st-dna-edge: sand-cut;
-  --st-dna-offset: 1px;
+  --st-dna-offset: 0;
   --st-dna-stroke: 1px;
-  --st-dna-tile: square;
+  --st-dna-tile: none;
   --st-dna-radius: 10px;
-  --st-dna-ring: halo;
+  --st-dna-ring: gap;
   --st-dna-density: airy;
   --st-dna-label: mono-caps;
   --st-dna-field-recipe: coastal-vista;
   --st-dna-mark-form: s-monogram;
-  --st-dna-mark-frame: 8 units;
-  --st-dna-mark-opening: 24 units;
-  --st-dna-mark-arm: 14 units;
-  --st-dna-mark-inlay: 14x16 units;
+  --st-dna-mark-frame: 6-8 units;
+  --st-dna-mark-opening: 5.2-8.5 units;
+  --st-dna-mark-arm: 8 / 12 units;
+  --st-dna-mark-inlay: 1.1-unit open strand;
+  --st-dna-plate-rule: flat;
 
   /* Primitive */
   --st-linen: #FAF7F2;
   --st-quartz: #FFFFFF;
   --st-basalt: #152026;
   --st-haze: #5F727B;
-  --st-aquamarine: #327B8A;
-  --st-seafoam: #E8F4F7;
+  --st-tide: #16716F;
+  --st-seafoam: #DCF7F5;
   --st-straw: #B88B52;
   --st-dune-warm: #E7D6C1;
   --st-dune-shade: #D5C0A8;
@@ -34,7 +35,7 @@
   --st-night-plate: #152026;
   --st-night-text: #F2EFE9;
   --st-night-muted: #8FA0A8;
-  --st-night-signal: #4EA4B5;
+  --st-night-signal: #51BFBB;
 
   /* Type, space, radius, motion */
   --st-font-display: var(--font-syne), 'Syne', sans-serif;
@@ -83,11 +84,11 @@
   --st-muted: #5F727B;
   --st-line: rgba(21, 32, 38, 0.08);
   --st-line-strong: rgba(21, 32, 38, 0.16);
-  --st-signal: #327B8A;
+  --st-signal: #16716F;
   --st-signal-fg: #FFFFFF;
-  --st-signal-wash: #E8F4F7;
+  --st-signal-wash: #DCF7F5;
   --st-accent: #B88B52;
-  --st-focus: #3B8898;
+  --st-focus: #16716F;
   --st-danger: #B33E3E;
   --st-success: #277855;
 
@@ -124,11 +125,11 @@ html[data-strand='night'] .st-scope, .st-scope[data-strand='night'] {
   --st-muted: #8FA0A8;
   --st-line: rgba(242, 239, 233, 0.08);
   --st-line-strong: rgba(242, 239, 233, 0.18);
-  --st-signal: #4EA4B5;
+  --st-signal: #51BFBB;
   --st-signal-fg: #0D1417;
-  --st-signal-wash: rgba(78, 164, 181, 0.12);
+  --st-signal-wash: rgba(81, 191, 187, 0.14);
   --st-accent: #D4A368;
-  --st-focus: #4EA4B5;
+  --st-focus: #51BFBB;
   --st-danger: #E06D6D;
   --st-success: #4DB385;
 

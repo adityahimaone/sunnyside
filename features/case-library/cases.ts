@@ -129,10 +129,10 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     href: '/design-system/strand',
     tagline: 'Where the dunes meet the tide.',
     description:
-      'A quiet coastal interface system: white sand reading plates, marine basalt ink, a Dune Crest S monogram, ten native controls and a panoramic vista framing hero and footer.',
+      'A quiet coastal interface system: flat white quartz reading plates, marine basalt ink, one shallow-tide green signal, a Dune Crest S monogram, ten native controls and a panoramic vista framing hero and footer.',
     status: 'Shipped · 2026',
     role: 'Identity · design system · marks · form kit',
-    material: 'Quartz sand + marine basalt + aquamarine',
+    material: 'Quartz sand + marine basalt + shallow tide',
     cover: '/brand/strand/strand-brandkit.png',
     coverAlt:
       'The Strand brand board: the architectural S mark, coastal shoreline palette, quartz reading plates and form kit.',

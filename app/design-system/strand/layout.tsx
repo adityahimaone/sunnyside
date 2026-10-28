@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Strand — Case 07 | Design System',
   description:
-    'Strand is a quiet coastal design system: white sand reading plates, marine basalt ink, tidal aquamarine signal, and an atmospheric dune vista framing both hero and footer.',
+    'Strand is a quiet coastal design system: flat white quartz reading plates with no lift, marine basalt ink, one shallow-tide green signal, and an atmospheric dune vista framing both hero and footer.',
   alternates: {
     canonical: '/design-system/strand',
     types: { 'text/markdown': '/design-system/strand/llms.txt' },
