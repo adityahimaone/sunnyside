@@ -11,6 +11,24 @@
 - **Metaphor:** [one sentence. The mark should be explainable from this.]
 - **Direction:** “[The sentence work can be rejected against.]”
 
+## The story
+
+- **Belief:** [what we hold that others do not.]
+- **Enemy:** [the practice this pushes against. A practice, not a competitor.]
+- **The mark, as an argument:** [one sentence that does not name the shape.]
+- **Why the other five lost:** [one line each.]
+- **Proof:** [a number, a path or a screenshot per claim.]
+- **Gap:** [what is not done or not verified.]
+
+### Decision cards
+
+```
+Decision    [the rule]
+Because     [the reason, tied to the material or the mark]
+Not when    [the exception]
+Breaks next [what fails first: dark mode, small size, density]
+```
+
 ## The mark
 
 [Image: mark on paper and on ink.]
@@ -102,3 +120,11 @@ Rule: [one loud field at a time; accents are not body text.]
 ## Verification
 
 [Link to the checklist. Name the date and the reviewer.]
+
+## Forms
+
+- **Theme DNA:** edge [hard/soft/none], offset [n], stroke [n], radius [n], ring [offset/solid/glow], density [compact/cosy/roomy], label [sentence/mono-caps/small-caps].
+- **Field recipe:** [row from `form-theming.md`, and why it matches the mark.]
+- **States:** default, hover, focus-visible, invalid, disabled, success, pressed. [Show each.]
+- **Tokens:** `--field-bg`, `--field-border`, `--field-radius`, `--field-shadow`, `--field-ring`. No raw hex.
+- **Do not:** [remove focus, signal with colour alone, mix material rows.]

@@ -8,12 +8,18 @@ approved kit to **`implement-brand-system`** for the build:
 - favicon and app icons;
 - primitive → semantic → component tokens, CSS + JSON;
 - single-page HTML or TSX proof;
-- shadcn/Radix component and form kit;
+- shadcn/Radix component and a form kit themed from the same DNA as the mark;
+- brand story: spine, one sentence, decision cards, story audit;
 - typography gate;
 - lean audit and browser QA;
 - pen.dev design-source integration.
 
 Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
+
+**v2.1:** a generated vector logo family (`scripts/brand-forge.mjs`: six
+construction concepts, tokens, theme-matched form kit, proof sheet, story
+scaffold), a storytelling layer, theme-matched forms and stronger audit checks.
+Audit of the skill itself: [`references/skill-audit.md`](references/skill-audit.md).
 
 **v2.0 provenance:** rebuilt after auditing
 [ui-skills.com](https://www.ui-skills.com/) — 439 skills across 27 categories;
@@ -60,6 +66,13 @@ Run these from the skill folder, or copy `scripts/` and `templates/` into the pr
 ```bash
 # Static audit: required files, SVG text, ICO sizes, PNG dimensions, contrast
 node scripts/audit.mjs --manifest audit.json
+
+# Generate the whole family from one config (concepts: sunburst aperture orbit hatch stack facet)
+node scripts/brand-forge.mjs --init orbit > brand.json
+node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> --wordmark wordmark.svg
+
+# Keep the .agents/skills mirror identical
+bash scripts/sync-skill.sh
 
 # Browser QA: 1440 + 390, light + dark, reduced motion, console, overflow
 node scripts/qa.mjs \

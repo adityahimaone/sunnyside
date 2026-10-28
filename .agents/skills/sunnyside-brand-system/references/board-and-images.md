@@ -133,3 +133,10 @@ board will fail the one test that matters: the name.
 
 If the client insists on an AI-generated board, the deliverable is a moodboard,
 not a brand kit. Say so.
+
+## Story panel
+
+One of the nine panels should argue, not display: the one sentence, the mark's
+argument, and the line "why the other five lost". Pull it from `story.md`. If the
+board has no panel that explains a decision, it is a poster. Palette and tokens
+come from `brand.json`; do not hard-code the starter's Sunnyside colours.

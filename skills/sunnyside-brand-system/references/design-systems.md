@@ -88,6 +88,15 @@ The form-level error summary:
 Do not use a custom div as a checkbox, radio, select or switch. Do not hide the
 only focus indicator. Do not use colour as the only error signal.
 
+## 3b. Theme the form kit
+
+A form kit that ignores the brand is a different product. Derive the fields from
+the same theme DNA as the mark (edge, offset, stroke, radius, ring, density,
+label): see `form-theming.md` for the material → field recipe table, state rules
+and shadcn mapping. `scripts/brand-forge.mjs` generates `--field-*` tokens,
+`<slug>-forms.css` and a working `forms.html`. Field CSS reads tokens only; the
+audit fails raw colours.
+
 ## 4. Page anatomy
 
 Choose the surface before the route. A proof does not require a router.
@@ -148,6 +157,7 @@ not source. If no route exists, skip the metadata/route checklist and say
 - [ ] Tokens generate CSS + JSON from one source.
 - [ ] 5–10 primitives maximum; each has a documented state.
 - [ ] One form with all states; keyboard and error summary verified.
+- [ ] Fields share the mark's material (edge, radius, ring); no raw hex in field CSS.
 - [ ] Light/dark both intentional; text contrast measured.
 - [ ] 1440 and 390; no horizontal scroll.
 - [ ] Reduced motion keeps a finished state.

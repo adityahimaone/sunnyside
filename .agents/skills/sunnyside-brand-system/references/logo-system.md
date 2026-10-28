@@ -121,3 +121,29 @@ palette is the system, not a mood.
 - [ ] all SVGs use the same viewBox and colours
 - [ ] no clipart, no copied mark, no live text
 - [ ] the guide explains why this mark, not just what it is
+
+## 9. Generating the family (vector, text-free)
+
+`scripts/brand-forge.mjs` implements the build above as code so every run starts
+with a complete, tested family instead of a blank file.
+
+| Concept | Construction | Reads as | Watch for |
+| --- | --- | --- | --- |
+| `sunburst` | n rays clipped by the tile, one disc | day, warmth, output | the stock sun; fix with material (offset, crop, stroke) |
+| `aperture` | n blades around a hole | focus, capture, decision | blade count above 6 turns to mud at 16px |
+| `orbit` | concentric rings + one dot | system, cycle, signal | compact needs a single ring |
+| `hatch` | diagonal lines + a disc | drawing, shading, craft | line gap must grow in the compact |
+| `stack` | offset plates | layers, versions, depth | keep ≤ 3 plates, 2 in compact |
+| `facet` | circle cut by a diagonal | decision, split, light | thin cut disappears at 16px |
+
+Process: `--init <concept>` for three or four concepts → compare each
+`sheet.html` at 16px → keep one → write why the rest lost → hand-refine points on
+the grid → re-run. Vary **theme DNA** before geometry; material is what makes the
+mark yours.
+
+Guarantees the generator makes (and `audit.mjs` re-checks): one viewBox for the
+whole family, no `<text>`, compact has fewer shapes, reverse and mono are drawn
+not flattened, every contrast pair measured.
+
+Not guaranteed: that the idea is good. A generated mark is a draft. Judge it with
+the six tests in §2, then argue for it in `story.md` (`storytelling.md`).

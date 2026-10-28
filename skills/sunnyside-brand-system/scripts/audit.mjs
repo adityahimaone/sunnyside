@@ -7,6 +7,8 @@
  * Manifest paths resolve from the current working directory. A manifest can
  * name required files, SVG folders, assets that must not contain <text>, the
  * favicon ICO, PNG dimensions, and a tokens JSON with contrast pairs.
+ * Optional: `family` (mark viewBox + compact simplicity), `formsCss` (tokens
+ * only, focus/error/disabled states) and `story` (required sections, no TODO).
  *
  * Exit code 1 means at least one check failed.
  */
@@ -194,6 +196,68 @@ if (manifest.tokens) {
     }
   } catch (error) {
     fail(`tokens check failed: ${rel(join(root, manifest.tokens))} (${error.message})`)
+  }
+}
+
+// 6. Mark family: same viewBox, compact is a separate and simpler drawing
+if (manifest.family) {
+  const dir = join(root, manifest.family)
+  const names = ['mark', 'mark-compact', 'glyph', 'mark-reverse', 'mark-mono']
+  const boxes = new Map()
+  const counts = {}
+  for (const name of names) {
+    try {
+      const source = await readFile(join(dir, `${name}.svg`), 'utf8')
+      boxes.set(name, source.match(/viewBox\s*=\s*["']([^"']+)["']/)?.[1])
+      counts[name] = (source.match(/<(path|circle|rect|ellipse|polygon|line)[\s>]/g) || []).length
+    } catch {
+      warn(`family: ${name}.svg missing in ${manifest.family}`)
+    }
+  }
+  if (new Set(boxes.values()).size > 1) {
+    fail(`family: marks use different viewBoxes (${[...boxes].map(([n, v]) => `${n} ${v}`).join('; ')})`)
+  } else if (boxes.size) {
+    pass(`family: ${boxes.size} marks share viewBox ${[...boxes.values()][0]}`)
+  }
+  if (counts['mark-compact'] && counts.mark && counts['mark-compact'] > counts.mark) {
+    fail(`family: compact mark has more shapes (${counts['mark-compact']}) than the primary (${counts.mark})`)
+  }
+}
+
+// 7. Form CSS derives from the theme: no raw colours, real focus, reduced motion
+if (manifest.formsCss) {
+  try {
+    const css = await readFile(join(root, manifest.formsCss), 'utf8')
+    const body = css.replace(/\/\*[\s\S]*?\*\//g, '')
+    const raw = body.match(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/gi) || []
+    if (raw.length) fail(`forms: ${raw.length} raw colour value(s) in ${manifest.formsCss}; read tokens instead`)
+    else pass('forms: no raw colours, tokens only')
+    if (!/:focus-visible/.test(body)) fail('forms: no :focus-visible state')
+    if (!/\[aria-invalid/.test(body)) fail('forms: no aria-invalid error state')
+    if (!/:disabled/.test(body)) fail('forms: no disabled state')
+    if (!/prefers-reduced-motion/.test(body)) warn('forms: no prefers-reduced-motion block')
+    if (/outline\s*:\s*(none|0)\b/.test(body) && !/box-shadow\s*:\s*var\(--[\w-]*ring/.test(body)) {
+      fail('forms: outline removed without a replacement focus ring')
+    }
+  } catch (error) {
+    fail(`forms check failed: ${manifest.formsCss} (${error.message})`)
+  }
+}
+
+// 8. Story: the guide must argue, not only describe
+if (manifest.story) {
+  try {
+    const md = await readFile(join(root, manifest.story), 'utf8')
+    const need = manifest.storyHeadings ?? ['belief', 'enemy', 'mark', 'material', 'proof', 'missing']
+    const lower = md.toLowerCase()
+    const absent = need.filter((word) => !new RegExp(`^#{1,3}\\s.*${word}`, 'm').test(lower))
+    if (absent.length) fail(`story: missing section(s): ${absent.join(', ')}`)
+    else pass(`story: ${need.length} required sections present`)
+    const todos = (md.match(/TODO/g) || []).length
+    if (todos) fail(`story: ${todos} TODO left in ${manifest.story}`)
+    if (!/why the other .* lost|rejected|lost because/i.test(md)) warn('story: no note on why the other marks lost')
+  } catch (error) {
+    fail(`story check failed: ${manifest.story} (${error.message})`)
   }
 }
 

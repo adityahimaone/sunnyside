@@ -22,10 +22,18 @@
     "design/brand/<slug>/<slug>-brandkit.png",
     "design/brand/<slug>/README.md"
   ],
-  "svgDirs": ["public/brand/<slug>"],
-  "noText": ["public/brand/<slug>"],
+  "svgDirs": [
+    "public/brand/<slug>"
+  ],
+  "noText": [
+    "public/brand/<slug>"
+  ],
   "ico": "public/brand/<slug>/favicon.ico",
-  "icoSizes": [16, 32, 48],
+  "icoSizes": [
+    16,
+    32,
+    48
+  ],
   "pngs": [
     {
       "path": "design/brand/<slug>/<slug>-brandkit.png",
@@ -37,5 +45,8 @@
     }
   ],
   "tokens": "features/<slug>/tokens.json",
-  "contrastMin": 4.5
+  "contrastMin": 4.5,
+  "family": "public/brand/<slug>",
+  "formsCss": "public/brand/<slug>/<slug>-forms.css",
+  "story": "design/brand/<slug>/story.md"
 }

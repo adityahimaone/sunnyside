@@ -1,10 +1,10 @@
 ---
 name: sunnyside-brand-system
-description: Design and ship a brand kit or design system from a brief — strategy, logo family, 3×3 board, favicons, tokens, single-page HTML/TSX proof, components and forms, and a fast audit. Use when creating or auditing an identity, design-system page, mockup, or pen.dev design source. Includes shadcn/Radix defaults, a typography gate, lean QA, and pen.dev integration.
+description: Design and ship a brand kit or design system from a brief — strategy, a generated vector logo family, brand story, 3×3 board, favicons, tokens, theme-matched form kit, single-page HTML/TSX proof, and a fast audit. Use when creating or auditing an identity, design-system page, mockup, or pen.dev design source. Includes shadcn/Radix defaults, a typography gate, lean QA, and pen.dev integration.
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '2.0'
+  version: '2.1'
 ---
 
 # Sunnyside brand system
@@ -14,6 +14,11 @@ One idea → one mark → one system → one proof → one audit.
 A method for shipping a **brand kit** or **design system** quickly without losing
 the reasoning. The output is a page or a small set of files, not a folder of
 exports. Sunnyside and Vitrine are evidence, not templates.
+
+**v2.1:** adds a generated vector logo family (`scripts/brand-forge.mjs`), a
+storytelling layer (`references/storytelling.md`), theme-matched form fields
+(`references/form-theming.md`) and stronger audit checks. The audit of this
+skill is in `references/skill-audit.md`.
 
 **v2.0 provenance:** rebuilt after an audit of [ui-skills.com](https://www.ui-skills.com/)
 (439 skills / 27 categories; 22 relevant skills inspected). The fusion is in
@@ -44,12 +49,17 @@ drawing; mark unknowns `ASSUMPTION`. Template: `references/brief.md`.
 1. **Brief and one sentence** the work can be rejected against.
 2. **One idea**: monogram + meaning, product action, metaphor fusion, negative
    space, or construction geometry. One metaphor, one loud field.
-3. **Draw six, keep one** on the same 64 grid. Write down why five lost.
-4. **Build identity first** (`mark → family → tokens`) or **tokens first**
-   (`tokens → primitives → forms`), never both at once.
-5. **One proof page** with real copy and states. HTML for a board/mockup, TSX for
-   an interactive system.
-6. **Audit and stop**: static audit + one QA pass. Fix only what fails. Name gaps.
+3. **Draw six, keep one** on the same 64 grid. Write down why five lost. Fastest
+   route: `brand-forge.mjs --init <concept>` for each candidate concept, compare
+   `sheet.html`, keep one.
+4. **Generate the family** (`node scripts/brand-forge.mjs --config brand.json`):
+   mark, compact, glyph, reverse, mono, icon, lockups, tokens, form kit, proof
+   sheet. Then hand-refine the mark; the generator is a start, not a ceiling.
+5. **Write the story** (`story.md`): belief, enemy, mark as argument, material,
+   proof, gap. Decision cards for every non-obvious rule.
+6. **One proof page** with real copy and states. HTML for a board/mockup, TSX for
+   an interactive system. Form fields use the same theme DNA as the mark.
+7. **Audit and stop**: static audit + one QA pass. Fix only what fails. Name gaps.
 
 ## Domain before defaults
 
@@ -112,6 +122,59 @@ Start from `templates/design-system.html` for a specimen, `templates/single-page
 - **One effect** (glass, dither, grain, gradient, motion); everything else quiet.
 
 Details: `references/design-systems.md`.
+
+## Generate the logo family
+
+`scripts/brand-forge.mjs` turns one JSON config into a drawn, text-free kit on the
+64 grid. It is the fast path for step 3–4; it does not replace judgement.
+
+```bash
+node scripts/brand-forge.mjs --list                       # sunburst aperture orbit hatch stack facet
+node scripts/brand-forge.mjs --init orbit > brand.json    # starter config, edit palette/dna/params
+node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> \
+  --wordmark wordmark.svg                                 # from extract-wordmark.py
+```
+
+It writes `mark`, `mark-compact` (a separate, simpler drawing), `glyph`,
+`mark-reverse`, `mark-mono` (drawn one-colour stamp), `icon`, three lockups,
+tokens (CSS + JSON with contrast pairs), the form kit, `sheet.html` (16/32/64/128
+on light + dark) and `story.md`. Exit code 1 if any contrast pair or SVG check
+fails. Without `--wordmark` it skips lockups; it never fakes one with `<text>`.
+
+Make it better than the default:
+
+- Vary the **theme DNA** (`edge`, `offset`, `stroke`, `tile`, `radius`) before
+  you vary the concept. Material makes a mark ownable; geometry alone does not.
+- Treat output as draft one. Open the SVG, nudge points on the grid, keep it in
+  the same viewBox, re-run `audit.mjs` (`family` check).
+- The compact mark must have **fewer shapes** than the primary (audited).
+- Run the six-concept bake-off, then write why five lost into `story.md`.
+
+Recipes and tests: `references/logo-system.md` §9.
+
+## Storytelling
+
+The kit argues; it does not just show. Read `references/storytelling.md`.
+
+- **Story spine:** belief → enemy → mark → material → voice → proof → gap.
+- **One sentence** the work can be rejected against.
+- **Decision cards:** Decision / Because / Not when / Breaks next, ≤ 8 per system.
+- **Specimen as essay:** every section has a one-sentence caption that states a
+  reason, not a label. Real copy, a voice card, a named gap.
+- Audit enforces structure (`story` check); a human judges the argument.
+
+## Forms that match the theme
+
+Fields are cut from the same sheet as the mark. Read `references/form-theming.md`.
+
+- One **theme DNA** (edge, offset, stroke, tile/radius, ring, density, label)
+  drives the mark *and* the `--field-*` tokens.
+- Pick the **material → field recipe** row that matches the brief; never mix rows.
+- Fields read component tokens only; no raw hex (audited).
+- All states in the same material: hover, focus-visible, invalid, disabled,
+  success, pressed. Never colour alone.
+- Generated: `<slug>-forms.css` + `forms.html` (error summary, password toggle,
+  counter, switch, radio fieldset, file, disabled).
 
 ## Typography gate
 
@@ -188,6 +251,7 @@ If routes exist, use the host’s convention and update only what exists: canoni
 OG, icons, sitemap, llms, nav/footer, tests. If no route exists, do not create
 empty metadata, a sitemap entry or a case card to satisfy a template. The
 specimen can be one file; the board can be the deliverable.
+
 ## Pen.dev
 
 Use the companion **`pen-dev`** skill for the full workflow. In short:
@@ -208,7 +272,7 @@ Use the companion **`pen-dev`** skill for the full workflow. In short:
 Run these from this skill folder, or copy `scripts/` into the project.
 
 ```bash
-node scripts/audit.mjs --manifest audit.json
+node scripts/audit.mjs --manifest audit.json   # files, SVG, ICO, PNG, tokens, family, forms, story
 node scripts/qa.mjs --url <the surface URL or file:// path> \
   --out docs/screenshots --name <slug>
 ```
@@ -246,9 +310,10 @@ claim points to a file or route; icons are tested at 16px; the page is readable
 without JS.
 
 ```
-brand/         brief.md, DESIGN.md, brandkit.html, <slug>-brandkit.png (3000×2250), assets/
+brand/         brief.md, story.md, DESIGN.md, brandkit.html, <slug>-brandkit.png (3000×2250), assets/
 public/brand/<slug>/   mark*, wordmark, lockups, glyph, favicons, icons,
-                       <slug>-brandkit.png, <slug>-tokens.css/json
+                       <slug>-brandkit.png, <slug>-tokens.css/json,
+                       <slug>-forms.css, sheet.html
 docs/                  <slug>-design-system-audit.md
 ```
 
@@ -270,12 +335,13 @@ promise only the page and its tokens.
 Stop when the kit is approved. Do not build the product page inside the brand
 pass. Hand off:
 
-- `brief.md` and `DESIGN.md` (or the project's design guide/README: the decisions,
-  rules and what not to do);
+- `brief.md`, `story.md` and `DESIGN.md` (or the project's design guide/README: the
+  decisions, rules and what not to do);
 - `tokens.json` + `tokens.css`, with the contrast pairs;
 - `public/brand/<slug>/` (mark, compact mark, wordmark, lockups, favicons, icons);
 - the board PNG and `brandkit.html`;
-- the component inventory, form states, motion rule and named gaps;
+- the component inventory, form states and `<slug>-forms.css`, motion rule, theme DNA
+  and named gaps;
 - the audit and the target surface/stack (route, Storybook, standalone file, pen or print).
 
 Load **`implement-brand-system`** for the HTML/TSX build. It will not redesign
@@ -296,12 +362,16 @@ and runs the QA gate.
 - `typography.md` — the typography gate.
 - `verification.md` — ship checklist and audit format.
 - `lessons.md` — Case 02 failures and rules.
+- `storytelling.md` — story spine, decision cards, specimen as essay, story audit.
+- `form-theming.md` — theme DNA, material → field recipes, states, shadcn mapping.
+- `skill-audit.md` — audit of this skill, fixes, known gaps.
 - `examples/sunnyside.md`, `examples/vitrine.md` — the two cases (evidence, not defaults).
 
 ## Scripts and templates
 
-`render-board.mjs`, `render-icons.mjs`, `favicons.py`, `downscale.py`,
-`extract-wordmark.py`, `audit.mjs`, `qa.mjs`.
+`brand-forge.mjs` (generate the family), `render-board.mjs`, `render-icons.mjs`,
+`favicons.py`, `downscale.py`, `extract-wordmark.py`, `audit.mjs`, `qa.mjs`,
+`sync-skill.sh` (keep `.agents/skills` mirror identical).
 
 `templates/`: `design-system.html`, `brandkit.html`, `single-page.html`,
 `case-page.tsx`, `audit.json`, `guidelines.md`.
@@ -313,5 +383,6 @@ and runs the QA gate.
 3. Choose the surface and HTML/TSX before building.
 4. shadcn/Radix where accessible primitives matter; native for the rest.
 5. Typography gate before the first screenshot.
-6. Scripts for audit/QA; one look; fix the root cause; stop.
-7. Name what is missing. A guide that hides its gaps is a brochure.
+6. Generate with `brand-forge`, then refine by hand; write the story; match the fields.
+7. Scripts for audit/QA; one look; fix the root cause; stop.
+8. Name what is missing. A guide that hides its gaps is a brochure.
