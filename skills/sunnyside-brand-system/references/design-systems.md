@@ -105,8 +105,13 @@ Choose the surface before the route. A proof does not require a router.
 `templates/design-system.html`:
 
 topbar → contents → hero (name, version, promise, stats, sheet) → foundation →
-material → marks → colour → type → parts → motion → voice → applications →
-tokens → audit/endcap.
+material → marks (logo card + wordmark + cast drawer + rule) → colour → type →
+parts → motion → voice → applications → tokens → audit/endcap.
+
+The marks section is the identity proof, not a logo grid. It has four movements:
+logo card, wordmark scale, cast drawer, one usage rule. A drawn track also
+publishes its 4–6 cast marks. `templates/marks-section.html` is the page-scale
+implementation; `references/craft-bar.md` is the reasoning.
 
 **Product or case page:** nav → hero → material → components/forms → tokens →
 audit → footer. Use only the sections the brief needs.

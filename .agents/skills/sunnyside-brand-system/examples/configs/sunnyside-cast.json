@@ -1,0 +1,23 @@
+{
+  "name": "Sunnyside",
+  "slug": "sunnyside",
+  "palette": {
+    "paper": "#f3ecdf",
+    "paperHi": "#fffaf1",
+    "ink": "#191a2e",
+    "field": "#3d53d6",
+    "core": "#ffd23f",
+    "spark": "#ff6a2b",
+    "muted": "#5f5b6e",
+    "danger": "#b3261e",
+    "success": "#1f7a4d"
+  },
+  "cast": [
+    { "id": "sun", "name": "Sun", "note": "Welcome, stamp, chapter mark" },
+    { "id": "smiley", "name": "Smiley", "note": "A friendly aside" },
+    { "id": "daisy", "name": "Daisy", "note": "A small celebration" },
+    { "id": "burst", "name": "Burst", "note": "A loud note, never a headline" },
+    { "id": "heart", "name": "Heart", "note": "For the things worth keeping" },
+    { "id": "bolt", "name": "Bolt", "note": "A little energy, used once" }
+  ]
+}

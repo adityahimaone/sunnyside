@@ -5,26 +5,33 @@ good; it is done when the smallest file works.
 
 ## Lean path
 
-Do not read every file. Run the static audit, one browser pass, and look at the
-screens the scripts cannot judge.
+Do not read every file. Run one command, then look at the screens the script
+cannot judge.
 
 ```bash
-node scripts/audit.mjs --manifest audit.json
 node scripts/qa.mjs --url http://localhost:3000/design-system/<slug> \
-  --out docs/screenshots --name <slug>
+  --slug <slug> --manifest audit.json --mark public/brand/<slug> --sections
 ```
+
+It runs `audit.mjs` from the manifest directory, `score-mark.py` on the mark
+directory, and one browser pass at 1440 and 390, light and dark, plus reduced
+motion. It writes `docs/<slug>-qa.md` and a JSON twin. `--quick` skips the 390
+dark run, full-page captures and sections. Use `localhost`, not `127.0.0.1`, for
+Next dev; the script rewrites the IP and says so.
 
 Then inspect:
 
 1. the mark at 16px and the header size, light and dark;
 2. the lockup at 130/240 and the 390px header;
-3. the board at 100% and 50%;
-4. form focus, error, disabled and success;
-5. one dark and one light section with the effect behind text;
-6. no horizontal scroll at 390 and no console/shader errors.
+3. the marks composition: logo card, wordmark scale, cast drawer, usage rule;
+4. the board at 100% and 50%;
+5. form focus, error, disabled and success;
+6. one dark and one light section with the effect behind text;
+7. no horizontal scroll at 390 and no console/shader errors.
 
 Write **Not verified** for anything you could not inspect. Never approve
-coverage you did not see.
+coverage you did not see. The generated report is the audit; a screenshot alone
+is not a verdict.
 
 ## Review order and escalation
 
@@ -93,6 +100,19 @@ with no gap probably did not look.
 - [ ] Reversed version exists and uses the paper wordmark.
 - [ ] The glyph (no tile) is not used as a favicon.
 
+## Mark system
+
+- [ ] The track is named (constructed or drawn) and the gate matches it.
+- [ ] The primary, compact and glyph exist; the compact is a separate drawing.
+- [ ] The wordmark is drawn or outlined; no `<text>`; clear space and minimum.
+- [ ] Drawn track: one cut line, one flat fill, one hard offset, 2–3 inks.
+- [ ] The cast has 4–6 marks; each has a one-line job; one cut line, one fill.
+- [ ] Drawn track: `"cast"` is in `audit.json`; the audit checks 64 grid, cut line, live text and 4–6.
+- [ ] The cast is `aria-hidden` and never carries a fact alone.
+- [ ] The marks composition has a logo card, wordmark scale, cast drawer and one rule.
+- [ ] The composition reads at 1440 and 390; the cast drawer does not become a table.
+- [ ] The guide says when to use the cast and when to skip it.
+
 ## Family
 
 - [ ] Mark, wordmark, horizontal lockup, stacked lockup, compact mark.
@@ -137,6 +157,7 @@ with no gap probably did not look.
 
 - [ ] 2400 × 1800, 3 × 3, 54px outer padding, 14px gutters.
 - [ ] The real SVG mark, not a screenshot.
+- [ ] The marks composition is present: logo card, wordmark, cast or rule.
 - [ ] The real fonts loaded; no fallback visible.
 - [ ] Sparse text, no fake copy.
 - [ ] One loud field, quiet cover.
@@ -147,6 +168,8 @@ with no gap probably did not look.
 ## Docs
 
 - [ ] The idea, the mark, the family, colour, type, icons, do/don't, gaps.
+- [ ] The wordmark route is named (drawn or outlined) and frozen.
+- [ ] The cast, if present, has 4–6 jobs and one usage rule; if absent, say why.
 - [ ] Clear space and minimums are specific.
 - [ ] Every claim points to a shipped file or route.
 - [ ] File paths are real.
@@ -184,8 +207,11 @@ with no gap probably did not look.
 `Block` if any of these is true:
 
 - the mark fails at 16 or 32px;
-- the wordmark is live text;
+- the wordmark is live text or missing;
 - there is no compact/favicon variant;
+- a brand kit or design system has no marks composition (logo card, wordmark
+  scale, cast or rule);
+- a drawn identity has no cast and no reason to skip it;
 - contrast fails on body text;
 - the guide hides a known gap;
 - the board is an AI image with the logo in it;

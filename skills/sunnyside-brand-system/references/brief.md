@@ -20,6 +20,11 @@ stated assumption and mark it `ASSUMPTION` so it can be rejected later.
 ## Positioning
 [What it is not. The nearest thing it must not look like.]
 
+## Track
+- [ ] Constructed (v2.3 gate): corporate, technical, architectural.
+- [ ] Drawn (v2.4 gate): editorial, warm, human, object-led.
+Why: [one sentence. Do not mix the tracks.]
+
 ## Constraints
 - Stack / media:
 - Sizes that must work: 16px, 32px, navbar, social, print?
@@ -34,12 +39,16 @@ stated assumption and mark it `ASSUMPTION` so it can be rejected later.
 
 ## Deliverables
 - [ ] mark
-- [ ] wordmark
+- [ ] wordmark (drawn or outlined)
 - [ ] lockups
 - [ ] compact/favicon
+- [ ] cast of 4–6 (drawn track; optional constructed)
+- [ ] marks composition (logo card, wordmark scale, cast drawer, rule)
 - [ ] board
 - [ ] tokens
+- [ ] story + decision cards
 - [ ] guide
+- [ ] audit + QA report
 
 ## Non-goals
 - [What this version will not do.]
@@ -65,6 +74,10 @@ stated assumption and mark it `ASSUMPTION` so it can be rejected later.
    file", the docs and tokens are part of the brief.
 6. **What does success look like at 16px?** If nobody can answer, the favicon
    will be an afterthought.
+7. **Does the brand have a character or a hand?** If yes, name the drawn track
+   and the cast. If no, say why the constructed track is right.
+8. **What are the 4–6 small marks for?** If nobody can name a job for each, the
+   cast is decoration; skip it.
 
 ## Review gates
 
@@ -72,6 +85,7 @@ A brief is ready when:
 
 - the job fits in one sentence;
 - the audience and the context are named;
+- the track is named and the gate matches it;
 - the constraints include the smallest and largest output;
 - the non-goals are explicit;
 - the references name what to take, not just a mood;

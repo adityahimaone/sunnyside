@@ -3,9 +3,16 @@
   "required": [
     "public/brand/<slug>/mark.svg",
     "public/brand/<slug>/mark-compact.svg",
+    "public/brand/<slug>/mark-reverse.svg",
+    "public/brand/<slug>/mark-compact-reverse.svg",
+    "public/brand/<slug>/mark-mono.svg",
+    "public/brand/<slug>/glyph.svg",
     "public/brand/<slug>/wordmark.svg",
+    "public/brand/<slug>/wordmark-reverse.svg",
     "public/brand/<slug>/lockup.svg",
     "public/brand/<slug>/lockup-reverse.svg",
+    "public/brand/<slug>/lockup-stacked.svg",
+    "public/brand/<slug>/lockup-stacked-reverse.svg",
     "public/brand/<slug>/favicon.ico",
     "public/brand/<slug>/favicon-16.png",
     "public/brand/<slug>/favicon-32.png",
@@ -17,10 +24,14 @@
     "public/brand/<slug>/<slug>-brandkit.png",
     "public/brand/<slug>/<slug>-tokens.css",
     "public/brand/<slug>/<slug>-tokens.json",
+    "public/brand/<slug>/<slug>-forms.css",
+    "public/brand/<slug>/<slug>-forms.html",
     "features/<slug>/tokens.json",
     "design/brand/<slug>/brandkit.html",
     "design/brand/<slug>/<slug>-brandkit.png",
-    "design/brand/<slug>/README.md"
+    "design/brand/<slug>/README.md",
+    "design/brand/<slug>/brief.md",
+    "design/brand/<slug>/story.md"
   ],
   "svgDirs": [
     "public/brand/<slug>"
@@ -47,6 +58,7 @@
   "tokens": "features/<slug>/tokens.json",
   "contrastMin": 4.5,
   "family": "public/brand/<slug>",
+  "cast": "public/brand/<slug>/cast",
   "formsCss": "public/brand/<slug>/<slug>-forms.css",
   "story": "design/brand/<slug>/story.md"
 }

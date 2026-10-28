@@ -1,5 +1,10 @@
 # Logo brainstorm: from name to five honest families
 
+> **Scope.** This file is the **constructed track**. For a warm, editorial or
+> object-led brand, use the **drawn track** in `craft-bar.md` first. The five
+> families and the zero-circle gate are not universal; applying them to every
+> brief is how the skill produced good logos and thin brands.
+
 ## v2.3 — the hard gate
 
 The v2.2 bake-off failed the same way the v2.0 sheet did: Huginn, Riso Co. and

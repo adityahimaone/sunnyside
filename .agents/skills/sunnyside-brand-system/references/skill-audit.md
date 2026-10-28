@@ -1,4 +1,4 @@
-# Skill audit: sunnyside-brand-system v2.0 → v2.2
+# Skill audit: sunnyside-brand-system v2.0 → v2.4
 
 An audit of the skill itself. Findings are ordered by how much they hurt a
 real run. Each states the fix and where it landed.
@@ -26,26 +26,44 @@ real run. Each states the fix and where it landed.
 | 12 | Concept set was too narrow (six geometric methods). | Added dotmatrix, lines, overprint, nodes, monogram, fused from the op7418 pattern families; `hatch` rebuilt as a real hachure. |
 | 13 | No worked redo to show the method beats the failure. | `examples/brainstorm-huginn-riso-hachure.md` + runnable configs. |
 
+## v2.4 findings (from Case 01)
+
+| # | Finding | Fix |
+| --- | --- | --- |
+| 14 | The v2.3 constructed gate was applied to every brief. The best warm/editorial result (Sunnyside) could not be produced by the skill. | Added the **drawn track** and its gate in `craft-bar.md`: one subject, one cut line, one fill, one hard offset, 2–3 inks, 16px; a circle only as the subject. The v2.3 gate remains the constructed track. |
+| 15 | The mark was treated as the whole identity. Case 01 wins on the wordmark, the cast and the composition. | Added the **mark system**: primary + compact + glyph + drawn wordmark + 4–6 cast + four-movement composition. |
+| 16 | No drawn wordmark standard beyond “outline a font”. | `craft-bar.md` §5: drawn/outlined routes, single-stroke 3.3, `skewX(-9)`, no `<text>`, scale and clear space. |
+| 17 | No cast generator or cast standard. | `cast-forge.mjs`, `examples/configs/sunnyside-cast.json`, `craft-bar.md` §4. One cut line, one fill, one job per mark. |
+| 18 | The marks section in the template was three equal tiles. | `templates/marks-section.html` and the design-system template now use the logo card, wordmark scale, cast drawer and usage rule. |
+| 19 | Verification was three commands and a manual pass; the dev origin trap was invisible. | One `qa.mjs` command runs audit + score + browser, normalizes `127.0.0.1` → `localhost`, checks theme/overflow/shader/typography/forms/console, and writes `docs/<slug>-qa.md`. |
+| 20 | The Case 01 example listed assets but not the reason it is the bar. | `examples/sunnyside.md` now documents the mark system, the cast, the composition and what not to copy. |
+
 ## Known gaps (not fixed here)
 
-- **Wordmark outlining still needs `uharfbuzz` + a font file.** `brand-forge`
-  consumes the output of `extract-wordmark.py`; it does not shape type itself.
-- **No in-repo visual regression.** `sheet.html` is for human review at 16px.
-- **Concepts are geometric.** Figurative or hand-drawn marks still need hand
-  drawing, then the same family/tokens/forms pipeline.
+- **The cast generator is a draft.** It draws 13 shapes on a 64 grid; a real
+  figurative cast still needs hand drawing. The script checks viewBox, live text
+  and the shape list; it does not judge the drawing.
+- **The drawn wordmark is still hand-drawn.** There is no auto-tracer. The type
+  route uses `extract-wordmark.py`; the hand route is a drawing.
+- **The cast is exempt from the v2.3 gate**, but it must share one cut line and
+  one fill. `score-mark.py` scores the primary family, not the cast.
+- **The cast can use a circle** (a face, a sun, an eye). The constructed gate
+  does not apply; the drawn gate says a circle is allowed only as the subject.
+- **No in-repo visual regression.** `sheet.html` and `cast.html` are for human
+  review at 16px/24px.
 - **Form kit is native HTML.** Radix/shadcn mapping is documented, not generated.
-- **Chromium only** for `qa.mjs` and `render-icons.mjs`.
-- **Figurative marks (a raven, a leaf) are still hand-drawn.** The generator
-  covers constructed geometry; the bake-off and scorer apply to hand-drawn SVGs
-  too (drop them in `mark.svg`, `mark-compact.svg`, `glyph.svg`).
-- **score-mark.py needs cairosvg + Pillow** and is a proxy, not a taste test.
-- **Story quality is a human judgement.** The audit checks structure only.
+- **Chromium only** for `qa.mjs` and `render-icons.mjs`; no production build in
+  the QA script.
+- **Story and cast quality are human judgements.** The audit checks structure and
+  the gate, not taste.
 
 ## Re-run the audit
 
 ```bash
 node scripts/brand-forge.mjs --init sunburst > brand.json
 node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug>
-node scripts/audit.mjs --manifest audit.json
+node scripts/cast-forge.mjs --config brand.json --out public/brand/<slug>
+node scripts/qa.mjs --url http://localhost:3000/design-system/<slug> \
+  --slug <slug> --manifest audit.json --mark public/brand/<slug> --sections
 bash scripts/sync-skill.sh   # when this skill is mirrored in .agents/skills
 ```

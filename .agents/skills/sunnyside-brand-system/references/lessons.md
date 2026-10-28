@@ -1,4 +1,22 @@
-# Lessons from Case 02: Vitrine
+# Lessons from Case 01 and Case 02
+
+## Case 01: the bar
+
+Sunnyside is the best result because it ships a **mark system**, not a mark:
+
+- one primary mark, a separate compact drawing and a glyph;
+- a hand-drawn marker wordmark, frozen as outlines;
+- a cast of six supporting marks with one cut line, one fill and one job each;
+- a four-movement marks composition: logo card, wordmark scale, cast drawer,
+  one usage rule;
+- a dark stage, paper cards, rails, specs and do/don't that make the system
+  inspectable in one screen.
+
+The rule is not “add a smiley”. It is: **copy the principle, not the sun.** A
+database brand with a sun and a smiley is lying. A database brand can still have
+a drawn wordmark, a 4–6 cast derived from its own world, and the composition.
+
+## Case 02: the caution
 
 The Vitrine audit is the evidence for this revision. It shipped a new brand, a
 design system, forms, a case page and a case library; the failures below are the
@@ -122,10 +140,12 @@ probably did not look.
 ## 4. What to keep doing
 
 - Brief before canvas; one sentence the work can be rejected against.
+- Choose the track: constructed (v2.3 gate) or drawn (v2.4 gate).
 - Six marks in one file; one kept; five rejected with reasons.
-- Wordmark as outlines; compact mark as a separate drawing.
+- Wordmark as outlines or a frozen drawing; compact mark as a separate drawing.
+- A drawn identity ships a 4–6 cast and the marks composition.
 - One token source → CSS + JSON; no raw hex in components.
 - One signature effect; everything else quiet.
 - One full HTML board rendered from source; one downscaled web copy.
 - The page readable without JavaScript, with a Markdown twin.
-- One static audit + one browser pass, then stop.
+- One `qa.mjs` command (audit + score + browser), one look, one fix pass, stop.

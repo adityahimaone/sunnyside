@@ -49,6 +49,24 @@ Do not make every panel equally loud. The rhythm is: quiet cover, functional
 application, technical construction, colour, type, playful icon, loud
 atmosphere, quiet essence. One loud field is enough.
 
+### The marks composition
+
+If the identity is drawn, one panel or one page section is the **mark system**,
+not five equal logo tiles:
+
+- a logo card with a dark stage, clear-space box, lockup, specs, icons and two
+  rules;
+- a wordmark card with a large specimen, a dashed clear-space box and a 40/24/16
+  scale row;
+- a cast drawer of 4–6 tiles with uneven spans (4 / 5 / 4 / 3 / …), each with a
+  name and a one-line job;
+- one usage rule: punctuation, not structure, not the only place a fact lives.
+
+On the 3 × 3 board, replace the atmosphere panel with the marks panel when the
+cast is the point. On a web page, use `templates/marks-section.html`; it is the
+same four movements at page scale. A row of five logo variants is not a mark
+system.
+
 ## 3. Text rules
 
 - Brand name, one tagline, one URL, 2–5 section labels, short captions.
@@ -100,6 +118,9 @@ Before shipping the board:
 - [ ] view at 100%: every label is readable, nothing clipped;
 - [ ] view at 50%: the hierarchy still reads, one loud field;
 - [ ] the lockup is the actual SVG, not a screenshot;
+- [ ] the marks composition is present (logo card, wordmark, cast, rule);
+- [ ] the wordmark is a drawing, not live text;
+- [ ] the cast has 4–6 marks, one cut line and one job each;
 - [ ] the palette chips are opaque (a common bug: a parent opacity washes them);
 - [ ] the grid and gutters are consistent;
 - [ ] no placeholder text, no broken asset, no emoji as an icon;

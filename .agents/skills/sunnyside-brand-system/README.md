@@ -16,6 +16,13 @@ approved kit to **`implement-brand-system`** for the build:
 
 Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
 
+**v2.4:** the Case 01 **mark system**. The v2.3 gate is the **constructed
+track**; a new **drawn track** covers warm, editorial and object-led brands. Both
+tracks ship a primary + compact + glyph and a drawn/outlined wordmark; the drawn
+track adds a **4–6 mark cast** and the **four-movement marks composition**. One
+`qa.mjs` command runs the audit, the score and the browser pass. Read
+[`references/craft-bar.md`](references/craft-bar.md).
+
 **v2.3:** the hard gate (zero-circle / zero-Venn, fill-only, 2–4 solid
 primitives, one accent, one family per brand) and five allowed families:
 architectural monogram, offset planes, louvers, ribbon, horizon. Fuses the
@@ -60,16 +67,20 @@ npx skills add ./skills/sunnyside-brand-system
 
 ## The method in one screen
 
-1. **Pick the smallest mode**: brand kit, design system, mockup, audit or pen.
+1. **Pick the smallest mode** — brand kit, design system, mockup, audit or pen —
+   and the **track**: constructed (v2.3 gate) or drawn (v2.4 gate).
 2. Write `brief.md` and the one sentence the work can be rejected against.
 3. Draw six marks; keep one; write down why the other five lost.
-4. Build the mark + compact + outlined wordmark, or start with tokens.
-5. Use one token source → CSS + JSON. Never hand-edit generated output.
-6. Write `DESIGN.md`: decisions, token roles, component rules, what not to do.
-7. Render the board from HTML at 2×; downscale.
-8. Run the static audit and one browser QA pass. Name the gaps.
-9. **Hand off** to `implement-brand-system` for the HTML/TSX proof page. Do not
-   redesign the kit in the implementation pass.
+4. Build the mark + compact + glyph and the wordmark. On the drawn track, add a
+   **4–6 cast** with one cut line, one fill and one job per mark.
+5. Compose the **marks section**: logo card, wordmark scale, cast drawer, one
+   usage rule (`templates/marks-section.html`).
+6. Use one token source → CSS + JSON. Never hand-edit generated output.
+7. Write `DESIGN.md`: decisions, token roles, component rules, what not to do.
+8. Render the board from HTML at 2×; downscale.
+9. Run one `qa.mjs` command (audit + score + browser). Name the gaps.
+10. **Hand off** to `implement-brand-system` for the HTML/TSX proof page. Do not
+    redesign the kit in the implementation pass.
 
 ## Fast commands
 
@@ -79,9 +90,13 @@ Run these from the skill folder, or copy `scripts/` and `templates/` into the pr
 # Static audit: required files, SVG text, ICO sizes, PNG dimensions, contrast
 node scripts/audit.mjs --manifest audit.json
 
-# Generate the whole family from one config (concepts: sunburst aperture orbit hatch stack facet)
+# Generate the whole family from one config (concepts: bracket planes louvers ribbon horizon + legacy)
 node scripts/brand-forge.mjs --init orbit > brand.json
 node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> --wordmark wordmark.svg
+
+# Drawn track: a 4–6 cast with one cut line and one fill
+node scripts/cast-forge.mjs --list
+node scripts/cast-forge.mjs --config brand.json --out public/brand/<slug>
 
 # Six ideas from six families, one material; then objective checks
 node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff
@@ -90,10 +105,13 @@ python3 scripts/score-mark.py --dir bakeoff   # pip install cairosvg pillow
 # Keep the .agents/skills mirror identical
 bash scripts/sync-skill.sh
 
-# Browser QA: 1440 + 390, light + dark, reduced motion, console, overflow
+# One-command verification: audit + score + browser QA, Markdown report
 node scripts/qa.mjs \
-  --url http://localhost:3000/design-system/vitrine \
-  --out docs/screenshots --name vitrine
+  --url http://localhost:3000/design-system/<slug> \
+  --slug <slug> --manifest audit.json --mark public/brand/<slug> --sections
+
+# The four-movement marks section, copyable into a board or page
+# templates/marks-section.html
 
 # Board render and web copy
 node scripts/render-board.mjs \
@@ -117,6 +135,7 @@ sunnyside-brand-system/
   SKILL.md                     modes, fast path, rules, contract
   references/
     brief.md                   one-page brief and review gates
+    craft-bar.md               Case 01 mark system: tracks, wordmark, cast, composition
     logo-system.md             concepts, grid, family, favicon, tests
     board-and-images.md        the 3×3 board and render pipeline
     image-direction.md         prompts, provenance and QA for generated images
@@ -127,25 +146,28 @@ sunnyside-brand-system/
     workspace-contexts.md      app, docs, portfolio, standalone, Storybook, pen, print
     typography.md              the typography gate + better-typography source
     verification.md            the ship checklist and audit format
-    lessons.md                 Case 02 failures and the rules they produced
+    lessons.md                 Case 01 bar + Case 02 failure rules
   scripts/
     render-board.mjs           HTML board → PNG (Playwright)
     render-icons.mjs           SVG → exact-size transparent PNGs
     favicons.py                PNG → ICO, apple and app icons (Pillow)
     downscale.py               Lanczos downscale for the web copy
     extract-wordmark.py        shaped text → SVG outlines (fontTools + HarfBuzz)
+    cast-forge.mjs             config → 4–6 supporting marks + cast.html
     audit.mjs                  static artifact/contrast audit (no deps)
-    qa.mjs                     one browser QA pass (Playwright)
+    qa.mjs                     audit + score + browser QA, Markdown report
   templates/
     brandkit.html              3×3 board starter
     design-system.html         /sunnyside-style single-page system specimen
+    marks-section.html         four-movement marks composition (copyable)
     single-page.html           static brand mockup
     case-page.tsx              Next/React case-page scaffold
     audit.json                 audit manifest template
     guidelines.md              brand-guide starter
   examples/
-    sunnyside.md               the paper/cobalt case
+    sunnyside.md               the paper/cobalt case, the quality bar
     vitrine.md                 the glass/dither case + audit
+    configs/sunnyside-cast.json  the six-mark Case 01 cast
 ```
 
 ## Companion skills
@@ -168,6 +190,9 @@ case library or a route the host does not have.
 - Inventing a case library, `/design-system` route or sitemap entry.
 - Live text as the wordmark.
 - A mark that only reads at poster size.
+- A logo grid with no wordmark, cast or usage rule.
+- A drawn identity with no wordmark and no reason to skip the cast.
+- A cast of 12 cute shapes with no jobs.
 - Boards with no exportable assets.
 - Guidelines that live only in a PDF or Figma file.
 - A component museum with no form kit.

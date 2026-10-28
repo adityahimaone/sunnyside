@@ -49,6 +49,24 @@ Breaks next [what fails first: dark mode, small size, density]
 - **Responsive:** [name drops at X; wordmark drops at Y.]
 - **Do not:** [retype, re-space, outline, add effects.]
 
+## The cast
+
+[Image: 4–6 cast marks, one cut line, one fill.]
+
+- **Track:** [constructed / drawn.]
+- **Cast:** [name — one-line job; four to six only.]
+- **Material:** [the cut line and fill shared with the primary.]
+- **Use:** [welcome, aside, celebration, energy, keep, point.]
+- **Do not:** [use as structure, as the only place a fact lives, over type, or as a second logo set.]
+
+## The marks composition
+
+- Logo card: [stage, clear space, lockup, specs, icons, downloads, do/don't.]
+- Wordmark: [large specimen, clear-space box, 40/24/16 scale.]
+- Cast drawer: [4–6 tiles, uneven spans, one job per mark.]
+- Usage rule: [punctuation, never structure; four to six per composition.]
+- Implementation: `templates/marks-section.html`.
+
 ## Colour
 
 | Role | Token | Hex | Use |
@@ -93,6 +111,7 @@ Rule: [one loud field at a time; accents are not body text.]
 - [Use the supplied SVG; keep the hard offset.]
 - [Use the compact mark below 24px.]
 - [Keep the wordmark in ink on paper.]
+- [Use the cast as punctuation; four to six per composition.]
 
 **Don't**
 
@@ -100,12 +119,17 @@ Rule: [one loud field at a time; accents are not body text.]
 - [Stretch or re-space the lockup.]
 - [Add gradients, glows, soft shadows.]
 - [Place the ink wordmark on cobalt.]
+- [Use the cast as structure or a second logo set.]
+- [Retype the wordmark or use live text.]
 
 ## Implementation
 
+- Track: `[constructed / drawn]`
 - Mark: `[path]`
 - Wordmark: `[path]`
 - Lockups: `[paths]`
+- Cast: `[paths; optional]`
+- Marks composition: `templates/marks-section.html`
 - Tokens: `[CSS / JSON paths]`
 - Component: `[component path]`
 - Docs page: `[route]`

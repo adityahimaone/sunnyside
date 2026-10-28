@@ -96,7 +96,9 @@ for (const svg of svgs) {
   svgOk += 1
 }
 if (svgs.length > 0) {
-  pass(`SVGs: ${svgOk}/${svgs.length} valid${noText.length ? ', brand assets have no <text>' : ''}`)
+  pass(
+    `SVGs: ${svgOk}/${svgs.length} valid${noText.length ? ', brand assets have no <text>' : ''}`,
+  )
 }
 
 // 3. ICO sizes
@@ -156,7 +158,9 @@ if (Array.isArray(manifest.pngs)) {
 // 5. Tokens and contrast
 if (manifest.tokens) {
   try {
-    const tokens = JSON.parse(await readFile(join(root, manifest.tokens), 'utf8'))
+    const tokens = JSON.parse(
+      await readFile(join(root, manifest.tokens), 'utf8'),
+    )
     const groups = [
       ['primitives', tokens.primitives?.length],
       ['semantic.light', tokens.semantic?.light?.length],
@@ -168,7 +172,9 @@ if (manifest.tokens) {
     if (missing.length > 0) {
       fail(`tokens missing groups: ${missing.map(([name]) => name).join(', ')}`)
     } else {
-      pass(`tokens: ${groups.map(([name, count]) => `${name} ${count}`).join(', ')}`)
+      pass(
+        `tokens: ${groups.map(([name, count]) => `${name} ${count}`).join(', ')}`,
+      )
     }
 
     const pairs = Array.isArray(tokens.contrast) ? tokens.contrast : []
@@ -178,7 +184,12 @@ if (manifest.tokens) {
       const min = manifest.contrastMin ?? 4.5
       let ok = 0
       for (const pair of pairs) {
-        if (!pair.fg || !pair.bg || !/^#[0-9a-f]{6}$/i.test(pair.fg) || !/^#[0-9a-f]{6}$/i.test(pair.bg)) {
+        if (
+          !pair.fg ||
+          !pair.bg ||
+          !/^#[0-9a-f]{6}$/i.test(pair.fg) ||
+          !/^#[0-9a-f]{6}$/i.test(pair.bg)
+        ) {
           warn(`contrast skipped (not hex): ${pair.label ?? 'unlabelled'}`)
           continue
         }
@@ -195,7 +206,9 @@ if (manifest.tokens) {
       pass(`contrast: ${ok}/${pairs.length} pairs >= ${min}:1`)
     }
   } catch (error) {
-    fail(`tokens check failed: ${rel(join(root, manifest.tokens))} (${error.message})`)
+    fail(
+      `tokens check failed: ${rel(join(root, manifest.tokens))} (${error.message})`,
+    )
   }
 }
 
@@ -209,18 +222,67 @@ if (manifest.family) {
     try {
       const source = await readFile(join(dir, `${name}.svg`), 'utf8')
       boxes.set(name, source.match(/viewBox\s*=\s*["']([^"']+)["']/)?.[1])
-      counts[name] = (source.match(/<(path|circle|rect|ellipse|polygon|line)[\s>]/g) || []).length
+      counts[name] = (
+        source.match(/<(path|circle|rect|ellipse|polygon|line)[\s>]/g) || []
+      ).length
     } catch {
       warn(`family: ${name}.svg missing in ${manifest.family}`)
     }
   }
   if (new Set(boxes.values()).size > 1) {
-    fail(`family: marks use different viewBoxes (${[...boxes].map(([n, v]) => `${n} ${v}`).join('; ')})`)
+    fail(
+      `family: marks use different viewBoxes (${[...boxes].map(([n, v]) => `${n} ${v}`).join('; ')})`,
+    )
   } else if (boxes.size) {
     pass(`family: ${boxes.size} marks share viewBox ${[...boxes.values()][0]}`)
   }
-  if (counts['mark-compact'] && counts.mark && counts['mark-compact'] > counts.mark) {
-    fail(`family: compact mark has more shapes (${counts['mark-compact']}) than the primary (${counts.mark})`)
+  if (
+    counts['mark-compact'] &&
+    counts.mark &&
+    counts['mark-compact'] > counts.mark
+  ) {
+    fail(
+      `family: compact mark has more shapes (${counts['mark-compact']}) than the primary (${counts.mark})`,
+    )
+  }
+}
+
+// 6b. Optional identity cast: 4–6 marks, 64 grid, one cut line, no live text.
+if (manifest.cast) {
+  try {
+    const castDir = join(root, manifest.cast)
+    const castSvgs = await walk(castDir)
+    if (castSvgs.length === 0) {
+      warn(`cast: no SVGs in ${manifest.cast}`)
+    } else {
+      let bad = 0
+      for (const svg of castSvgs) {
+        const source = await readFile(svg, 'utf8')
+        const box = source.match(/viewBox\s*=\s*["']([^"']+)["']/)?.[1]
+        const cut = /stroke-width\s*=\s*["']?([2-9](?:\.\d+)?)/.test(source)
+        if (box !== '0 0 64 64') {
+          fail(
+            `cast: ${rel(svg)} viewBox ${box ?? 'missing'}, expected 0 0 64 64`,
+          )
+          bad += 1
+        }
+        if (/<text[\s>]/.test(source)) {
+          fail(`cast: ${rel(svg)} contains live <text>`)
+          bad += 1
+        }
+        if (!cut) {
+          fail(`cast: ${rel(svg)} has no cut line (stroke-width 2–9)`)
+          bad += 1
+        }
+      }
+      if (castSvgs.length < 4 || castSvgs.length > 6) {
+        warn(`cast: ${castSvgs.length} marks; the bar is 4–6`)
+      }
+      if (bad === 0)
+        pass(`cast: ${castSvgs.length} marks, 64 grid, cut line, no text`)
+    }
+  } catch (error) {
+    fail(`cast check failed: ${manifest.cast} (${error.message})`)
   }
 }
 
@@ -230,13 +292,20 @@ if (manifest.formsCss) {
     const css = await readFile(join(root, manifest.formsCss), 'utf8')
     const body = css.replace(/\/\*[\s\S]*?\*\//g, '')
     const raw = body.match(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/gi) || []
-    if (raw.length) fail(`forms: ${raw.length} raw colour value(s) in ${manifest.formsCss}; read tokens instead`)
+    if (raw.length)
+      fail(
+        `forms: ${raw.length} raw colour value(s) in ${manifest.formsCss}; read tokens instead`,
+      )
     else pass('forms: no raw colours, tokens only')
     if (!/:focus-visible/.test(body)) fail('forms: no :focus-visible state')
     if (!/\[aria-invalid/.test(body)) fail('forms: no aria-invalid error state')
     if (!/:disabled/.test(body)) fail('forms: no disabled state')
-    if (!/prefers-reduced-motion/.test(body)) warn('forms: no prefers-reduced-motion block')
-    if (/outline\s*:\s*(none|0)\b/.test(body) && !/box-shadow\s*:\s*var\(--[\w-]*ring/.test(body)) {
+    if (!/prefers-reduced-motion/.test(body))
+      warn('forms: no prefers-reduced-motion block')
+    if (
+      /outline\s*:\s*(none|0)\b/.test(body) &&
+      !/box-shadow\s*:\s*var\(--[\w-]*ring/.test(body)
+    ) {
       fail('forms: outline removed without a replacement focus ring')
     }
   } catch (error) {
@@ -248,14 +317,24 @@ if (manifest.formsCss) {
 if (manifest.story) {
   try {
     const md = await readFile(join(root, manifest.story), 'utf8')
-    const need = manifest.storyHeadings ?? ['belief', 'enemy', 'mark', 'material', 'proof', 'missing']
+    const need = manifest.storyHeadings ?? [
+      'belief',
+      'enemy',
+      'mark',
+      'material',
+      'proof',
+      'missing',
+    ]
     const lower = md.toLowerCase()
-    const absent = need.filter((word) => !new RegExp(`^#{1,3}\\s.*${word}`, 'm').test(lower))
+    const absent = need.filter(
+      (word) => !new RegExp(`^#{1,3}\\s.*${word}`, 'm').test(lower),
+    )
     if (absent.length) fail(`story: missing section(s): ${absent.join(', ')}`)
     else pass(`story: ${need.length} required sections present`)
     const todos = (md.match(/TODO/g) || []).length
     if (todos) fail(`story: ${todos} TODO left in ${manifest.story}`)
-    if (!/why the other .* lost|rejected|lost because/i.test(md)) warn('story: no note on why the other marks lost')
+    if (!/why the other .* lost|rejected|lost because/i.test(md))
+      warn('story: no note on why the other marks lost')
   } catch (error) {
     fail(`story check failed: ${manifest.story} (${error.message})`)
   }

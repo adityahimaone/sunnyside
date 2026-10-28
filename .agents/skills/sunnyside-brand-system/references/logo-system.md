@@ -14,6 +14,23 @@
 
 The older sections below are the v2.2 tests; use the v2.3 gate above them.
 
+## The mark system (v2.4)
+
+A logo is half the identity. The full system is primary + compact + glyph +
+wordmark + cast + composition. Read `references/craft-bar.md` before choosing a
+method.
+
+- **Constructed track:** the five v2.3 families. Corporate, technical and
+  infrastructure brands. Wordmark may be outlined type.
+- **Drawn track:** one subject, one cut line, one flat fill, one hard offset,
+  2–3 inks, 16px. Warm, editorial and object-led brands. A circle is allowed
+  only when it is the subject (sun, lens, face), never a badge or Venn. Ships a
+  drawn wordmark and an optional 4–6 mark cast.
+- **Cast:** punctuation, not a second logo set. One cut line, one flat fill, one
+  job per mark. Use `scripts/cast-forge.mjs` for a starting set.
+- **Composition:** logo card, wordmark scale, cast drawer, one rule. A row of
+  equal logo tiles is not a mark system.
+
 A logo is not a picture of the brand. It is a set of shapes that survive every
 size, ground and handoff the brand will meet.
 
@@ -97,6 +114,7 @@ Every complete brand needs:
 - **compact mark** — 16–24px, favicon
 - **reversed lockup/wordmark** — for ink or cobalt
 - **glyph** — the mark without its tile, for pattern and stickers
+- **cast** — optional 4–6 supporting marks for the drawn track; each has one job
 
 Define **clear space** (half the mark height), **minimums** (full mark 24,
 compact 16, wordmark 72 wide, lockup 130 wide) and the **responsive lockup**
@@ -132,6 +150,9 @@ palette is the system, not a mood.
 - [ ] clear space drawn and measured
 - [ ] lockup responsive at 480 and 360
 - [ ] reversed assets exist
+- [ ] wordmark is drawn or outlined; no live text
+- [ ] drawn track: 4–6 cast marks, one cut line, one fill, one job each
+- [ ] marks composition: logo card, wordmark scale, cast drawer, usage rule
 - [ ] all SVGs use the same viewBox and colours
 - [ ] no clipart, no copied mark, no live text
 - [ ] the guide explains why this mark, not just what it is
