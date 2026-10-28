@@ -1,0 +1,615 @@
+{
+  "meta": {
+    "name": "Strand",
+    "version": "1.0.0",
+    "year": 2026,
+    "author": "Aditya Himawan",
+    "case": "Case 07",
+    "namespace": "--st-",
+    "essence": "Where the dunes meet the tide.",
+    "promise": "Quiet surfaces, sharp natural geometry.",
+    "family": "Architectural monogram",
+    "track": "constructed",
+    "gate": "v2.5 constructed",
+    "oneSentence": "Strand is a quiet coastal design system: white sand reading plates, marine basalt ink, tidal aquamarine signal, and an atmospheric vista framing both hero and footer.",
+    "fieldImage": "/brand/strand/strand-vista.webp"
+  },
+  "theme": {
+    "family": "architectural-monogram",
+    "material": "coastal-sand-plate",
+    "edge": "sand-cut",
+    "offset": "1px",
+    "stroke": "1px",
+    "tile": "square",
+    "radius": "10px",
+    "ring": "halo",
+    "density": "airy",
+    "label": "mono-caps",
+    "field-recipe": "coastal-vista",
+    "mark-form": "s-monogram",
+    "mark-frame": "8 units",
+    "mark-opening": "24 units",
+    "mark-arm": "14 units",
+    "mark-inlay": "14x16 units"
+  },
+  "primitives": [
+    {
+      "name": "linen",
+      "value": "#FAF7F2",
+      "role": "Dune sand ground canvas"
+    },
+    {
+      "name": "quartz",
+      "value": "#FFFFFF",
+      "role": "Solid white reading plate"
+    },
+    {
+      "name": "basalt",
+      "value": "#152026",
+      "role": "Marine basalt ink on light"
+    },
+    {
+      "name": "haze",
+      "value": "#5F727B",
+      "role": "Headland fog and dune shadow"
+    },
+    {
+      "name": "aquamarine",
+      "value": "#327B8A",
+      "role": "Tidal ocean signal"
+    },
+    {
+      "name": "seafoam",
+      "value": "#E8F4F7",
+      "role": "Soft surf wash tint"
+    },
+    {
+      "name": "straw",
+      "value": "#B88B52",
+      "role": "Sunlit marram grass seed"
+    },
+    {
+      "name": "dune-warm",
+      "value": "#E7D6C1",
+      "role": "Sunlit sand crest highlight"
+    },
+    {
+      "name": "dune-shade",
+      "value": "#D5C0A8",
+      "role": "Sand ripple contour shadow"
+    },
+    {
+      "name": "night-deep",
+      "value": "#0D1417",
+      "role": "Night ocean dark ground"
+    },
+    {
+      "name": "night-plate",
+      "value": "#152026",
+      "role": "Night coastal reading plate"
+    },
+    {
+      "name": "night-text",
+      "value": "#F2EFE9",
+      "role": "Pale sand ink on dark"
+    },
+    {
+      "name": "night-muted",
+      "value": "#8FA0A8",
+      "role": "Night headland haze"
+    },
+    {
+      "name": "night-signal",
+      "value": "#4EA4B5",
+      "role": "Luminescent night tide"
+    }
+  ],
+  "semantic": {
+    "light": [
+      {
+        "name": "bg",
+        "value": "#FAF7F2",
+        "role": "Ground canvas"
+      },
+      {
+        "name": "plate",
+        "value": "#FFFFFF",
+        "role": "Reading surface"
+      },
+      {
+        "name": "plate-raised",
+        "value": "#FFFFFF",
+        "role": "Raised surface"
+      },
+      {
+        "name": "plate-muted",
+        "value": "#F4F0E8",
+        "role": "Recessed plate"
+      },
+      {
+        "name": "fg",
+        "value": "#152026",
+        "role": "Primary ink"
+      },
+      {
+        "name": "muted",
+        "value": "#5F727B",
+        "role": "Secondary ink"
+      },
+      {
+        "name": "line",
+        "value": "rgba(21, 32, 38, 0.08)",
+        "role": "Hairline divider"
+      },
+      {
+        "name": "line-strong",
+        "value": "rgba(21, 32, 38, 0.16)",
+        "role": "Emphasised boundary"
+      },
+      {
+        "name": "signal",
+        "value": "#327B8A",
+        "role": "Tidal signal accent"
+      },
+      {
+        "name": "signal-fg",
+        "value": "#FFFFFF",
+        "role": "Ink on signal"
+      },
+      {
+        "name": "signal-wash",
+        "value": "#E8F4F7",
+        "role": "Soft accent wash"
+      },
+      {
+        "name": "accent",
+        "value": "#B88B52",
+        "role": "Marram straw secondary"
+      },
+      {
+        "name": "focus",
+        "value": "#3B8898",
+        "role": "Focus halo"
+      },
+      {
+        "name": "danger",
+        "value": "#B33E3E",
+        "role": "Destructive states"
+      },
+      {
+        "name": "success",
+        "value": "#277855",
+        "role": "Confirmation states"
+      }
+    ],
+    "dark": [
+      {
+        "name": "bg",
+        "value": "#0D1417",
+        "role": "Night ocean ground"
+      },
+      {
+        "name": "plate",
+        "value": "#152026",
+        "role": "Night reading surface"
+      },
+      {
+        "name": "plate-raised",
+        "value": "#1A272E",
+        "role": "Night raised surface"
+      },
+      {
+        "name": "plate-muted",
+        "value": "#111A1E",
+        "role": "Night recessed plate"
+      },
+      {
+        "name": "fg",
+        "value": "#F2EFE9",
+        "role": "Primary sand ink"
+      },
+      {
+        "name": "muted",
+        "value": "#8FA0A8",
+        "role": "Secondary mist ink"
+      },
+      {
+        "name": "line",
+        "value": "rgba(242, 239, 233, 0.08)",
+        "role": "Hairline divider"
+      },
+      {
+        "name": "line-strong",
+        "value": "rgba(242, 239, 233, 0.18)",
+        "role": "Emphasised boundary"
+      },
+      {
+        "name": "signal",
+        "value": "#4EA4B5",
+        "role": "Night tide signal"
+      },
+      {
+        "name": "signal-fg",
+        "value": "#0D1417",
+        "role": "Ink on night signal"
+      },
+      {
+        "name": "signal-wash",
+        "value": "rgba(78, 164, 181, 0.12)",
+        "role": "Night accent wash"
+      },
+      {
+        "name": "accent",
+        "value": "#D4A368",
+        "role": "Night straw secondary"
+      },
+      {
+        "name": "focus",
+        "value": "#4EA4B5",
+        "role": "Focus halo"
+      },
+      {
+        "name": "danger",
+        "value": "#E06D6D",
+        "role": "Destructive states"
+      },
+      {
+        "name": "success",
+        "value": "#4DB385",
+        "role": "Confirmation states"
+      }
+    ]
+  },
+  "components": {
+    "light": [
+      {
+        "name": "btn-primary-bg",
+        "value": "var(--st-signal)",
+        "role": "Primary action fill"
+      },
+      {
+        "name": "btn-primary-fg",
+        "value": "var(--st-signal-fg)",
+        "role": "Primary action ink"
+      },
+      {
+        "name": "btn-secondary-bg",
+        "value": "var(--st-plate)",
+        "role": "Secondary action fill"
+      },
+      {
+        "name": "btn-secondary-fg",
+        "value": "var(--st-fg)",
+        "role": "Secondary action ink"
+      },
+      {
+        "name": "btn-secondary-border",
+        "value": "var(--st-line-strong)",
+        "role": "Secondary action border"
+      },
+      {
+        "name": "field-bg",
+        "value": "var(--st-plate)",
+        "role": "Form input background"
+      },
+      {
+        "name": "field-fg",
+        "value": "var(--st-fg)",
+        "role": "Form input text"
+      },
+      {
+        "name": "field-border",
+        "value": "var(--st-line-strong)",
+        "role": "Form input border"
+      },
+      {
+        "name": "field-focus-ring",
+        "value": "var(--st-signal)",
+        "role": "Form input focus"
+      },
+      {
+        "name": "card-bg",
+        "value": "var(--st-plate)",
+        "role": "Content card fill"
+      },
+      {
+        "name": "card-border",
+        "value": "var(--st-line)",
+        "role": "Content card border"
+      },
+      {
+        "name": "card-shadow",
+        "value": "0 2px 8px -2px rgba(21, 32, 38, 0.05)",
+        "role": "Card elevation"
+      },
+      {
+        "name": "tag-bg",
+        "value": "var(--st-signal-wash)",
+        "role": "Tag pill fill"
+      },
+      {
+        "name": "tag-fg",
+        "value": "var(--st-signal)",
+        "role": "Tag pill ink"
+      }
+    ],
+    "dark": [
+      {
+        "name": "btn-primary-bg",
+        "value": "var(--st-signal)",
+        "role": "Primary action fill"
+      },
+      {
+        "name": "btn-primary-fg",
+        "value": "var(--st-signal-fg)",
+        "role": "Primary action ink"
+      },
+      {
+        "name": "btn-secondary-bg",
+        "value": "var(--st-plate)",
+        "role": "Secondary action fill"
+      },
+      {
+        "name": "btn-secondary-fg",
+        "value": "var(--st-fg)",
+        "role": "Secondary action ink"
+      },
+      {
+        "name": "btn-secondary-border",
+        "value": "var(--st-line-strong)",
+        "role": "Secondary action border"
+      },
+      {
+        "name": "field-bg",
+        "value": "var(--st-plate-muted)",
+        "role": "Form input background"
+      },
+      {
+        "name": "field-fg",
+        "value": "var(--st-fg)",
+        "role": "Form input text"
+      },
+      {
+        "name": "field-border",
+        "value": "var(--st-line-strong)",
+        "role": "Form input border"
+      },
+      {
+        "name": "field-focus-ring",
+        "value": "var(--st-signal)",
+        "role": "Form input focus"
+      },
+      {
+        "name": "card-bg",
+        "value": "var(--st-plate)",
+        "role": "Content card fill"
+      },
+      {
+        "name": "card-border",
+        "value": "var(--st-line)",
+        "role": "Content card border"
+      },
+      {
+        "name": "card-shadow",
+        "value": "0 2px 10px -2px rgba(0, 0, 0, 0.35)",
+        "role": "Card elevation"
+      },
+      {
+        "name": "tag-bg",
+        "value": "var(--st-signal-wash)",
+        "role": "Tag pill fill"
+      },
+      {
+        "name": "tag-fg",
+        "value": "var(--st-signal)",
+        "role": "Tag pill ink"
+      }
+    ]
+  },
+  "type": [
+    {
+      "name": "font-display",
+      "value": "var(--font-syne), 'Syne', sans-serif"
+    },
+    {
+      "name": "font-reading",
+      "value": "var(--font-geist), 'Geist', -apple-system, sans-serif"
+    },
+    {
+      "name": "font-mono",
+      "value": "var(--font-geist-mono), 'Geist Mono', monospace"
+    },
+    {
+      "name": "scale-display",
+      "value": "clamp(2.5rem, 6vw, 4.5rem)"
+    },
+    {
+      "name": "scale-h1",
+      "value": "clamp(2rem, 4.2vw, 3.25rem)"
+    },
+    {
+      "name": "scale-h2",
+      "value": "clamp(1.5rem, 2.8vw, 2.25rem)"
+    },
+    {
+      "name": "scale-h3",
+      "value": "clamp(1.2rem, 2vw, 1.5rem)"
+    },
+    {
+      "name": "scale-body",
+      "value": "1rem"
+    },
+    {
+      "name": "scale-caption",
+      "value": "0.875rem"
+    },
+    {
+      "name": "scale-micro",
+      "value": "0.75rem"
+    },
+    {
+      "name": "leading-display",
+      "value": "0.96"
+    },
+    {
+      "name": "leading-heading",
+      "value": "1.12"
+    },
+    {
+      "name": "leading-body",
+      "value": "1.6"
+    },
+    {
+      "name": "tracking-display",
+      "value": "-0.04em"
+    },
+    {
+      "name": "tracking-heading",
+      "value": "-0.025em"
+    },
+    {
+      "name": "tracking-micro",
+      "value": "0.08em"
+    }
+  ],
+  "space": [
+    {
+      "name": "space-1",
+      "value": "0.25rem"
+    },
+    {
+      "name": "space-2",
+      "value": "0.5rem"
+    },
+    {
+      "name": "space-3",
+      "value": "0.75rem"
+    },
+    {
+      "name": "space-4",
+      "value": "1rem"
+    },
+    {
+      "name": "space-6",
+      "value": "1.5rem"
+    },
+    {
+      "name": "space-8",
+      "value": "2rem"
+    },
+    {
+      "name": "space-12",
+      "value": "3rem"
+    },
+    {
+      "name": "space-16",
+      "value": "4rem"
+    },
+    {
+      "name": "space-24",
+      "value": "6rem"
+    },
+    {
+      "name": "space-32",
+      "value": "8rem"
+    }
+  ],
+  "radius": [
+    {
+      "name": "radius-none",
+      "value": "0"
+    },
+    {
+      "name": "radius-sm",
+      "value": "4px"
+    },
+    {
+      "name": "radius-md",
+      "value": "8px"
+    },
+    {
+      "name": "radius-lg",
+      "value": "12px"
+    },
+    {
+      "name": "radius-pill",
+      "value": "9999px"
+    }
+  ],
+  "motion": [
+    {
+      "name": "duration-fast",
+      "value": "140ms"
+    },
+    {
+      "name": "duration-base",
+      "value": "240ms"
+    },
+    {
+      "name": "duration-slow",
+      "value": "400ms"
+    },
+    {
+      "name": "ease-out",
+      "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+    },
+    {
+      "name": "ease-in-out",
+      "value": "cubic-bezier(0.65, 0, 0.35, 1)"
+    }
+  ],
+  "contrast": [
+    {
+      "fg": "#152026",
+      "bg": "#FFFFFF",
+      "label": "Basalt on Quartz",
+      "ratio": 16.5,
+      "use": "Primary body copy and headings on plate"
+    },
+    {
+      "fg": "#152026",
+      "bg": "#FAF7F2",
+      "label": "Basalt on Linen",
+      "ratio": 15.6,
+      "use": "Headings and display text on ground"
+    },
+    {
+      "fg": "#5F727B",
+      "bg": "#FFFFFF",
+      "label": "Haze on Quartz",
+      "ratio": 4.88,
+      "use": "Secondary metadata and labels on plate"
+    },
+    {
+      "fg": "#FFFFFF",
+      "bg": "#327B8A",
+      "label": "Quartz on Aquamarine",
+      "ratio": 4.84,
+      "use": "Action button text and signal pills"
+    },
+    {
+      "fg": "#F2EFE9",
+      "bg": "#152026",
+      "label": "Pale sand on Basalt",
+      "ratio": 15.8,
+      "use": "Dark mode primary text on night plate"
+    },
+    {
+      "fg": "#8FA0A8",
+      "bg": "#152026",
+      "label": "Night mist on Basalt",
+      "ratio": 6.2,
+      "use": "Dark mode secondary text on night plate"
+    }
+  ],
+  "mark": {
+    "primary": "M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z",
+    "inlay": "M42 34L56 24V40L42 34Z",
+    "compact": "M58 6H22C12.059 6 4 14.059 4 24C4 33.941 12.059 42 22 42H38C39.105 42 40 42.895 40 44C40 45.105 39.105 46 38 46H8V58H38C47.941 58 56 49.941 56 40C56 30.059 47.941 22 38 22H22C20.895 22 20 21.105 20 20C20 18.895 20.895 18 22 18H58V6Z",
+    "glyph": "M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z",
+    "bbox": "50 × 48 units",
+    "arm": "14 units",
+    "opening": "24 units",
+    "curve": "Radial dune crest on left"
+  }
+}

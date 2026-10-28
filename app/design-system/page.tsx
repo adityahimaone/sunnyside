@@ -8,12 +8,12 @@ import { breadcrumbList, itemList, JsonLd } from '@/lib/structured-data'
 export const metadata: Metadata = {
   title: 'Design Systems — Case Library',
   description:
-    'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and print), Riso Co. (two-pass print and pushpin physics), Hachure (survey paper and ordered dither), and Cove (blue liquid glass and one reading plate). Briefs, marks, tokens, form kits and audits.',
+    'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and print), Riso Co. (two-pass print and pushpin physics), Hachure (survey paper and ordered dither), Cove (blue liquid glass and one reading plate), and Strand (quartz sand plates and a coastal vista). Briefs, marks, tokens, form kits and audits.',
   alternates: { canonical: '/design-system' },
   openGraph: {
     title: 'Design Systems — Case Library | Aditya Himawan',
     description:
-      'Sunnyside, Vitrine, Huginn Studio, Riso Co., Hachure and Cove: distinct interface systems, one design-engineering method. Open the case files.',
+      'Sunnyside, Vitrine, Huginn Studio, Riso Co., Hachure, Cove and Strand: distinct interface systems, one design-engineering method. Open the case files.',
     url: `${WEBSITE_URL}/design-system`,
     type: 'website',
     images: [
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Design Systems — Case Library | Aditya Himawan',
     description:
-      'Explore documented design systems: Sunnyside, Vitrine, Huginn Studio, Riso Co., Hachure and Cove.',
+      'Explore documented design systems: Sunnyside, Vitrine, Huginn Studio, Riso Co., Hachure, Cove and Strand.',
     images: [
       {
         url: '/brand/vitrine/vitrine-brandkit.png',
@@ -50,7 +50,7 @@ export default function DesignSystemLibraryPage() {
   const list = itemList({
     name: 'Design systems — case library',
     description:
-      'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and ordered print), Riso Co. (two-pass print and pushpin physics), Hachure (survey paper and ordered dither) and Cove (blue liquid glass and one reading plate).',
+      'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and ordered print), Riso Co. (two-pass print and pushpin physics), Hachure (survey paper and ordered dither), Cove (blue liquid glass and one reading plate) and Strand (quartz sand plates and a coastal vista).',
     items: DESIGN_CASES.map((item) => ({
       name: `${item.number} — ${item.name}`,
       url: `${WEBSITE_URL}${item.href}`,

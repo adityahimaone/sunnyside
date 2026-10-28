@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Strand icon">
+  <rect width="64" height="64" rx="14" fill="#152026"/>
+  <path fill="#FAF8F5" fill-rule="evenodd" clip-rule="evenodd" d="M48 14H24C16.268 14 10 20.268 10 28C10 35.732 16.268 42 24 42H38C39.657 42 41 43.343 41 45C41 46.657 39.657 48 38 48H14V53H38C45.732 53 52 46.732 52 39C52 31.268 45.732 25 38 25H24C22.343 25 21 23.657 21 22C21 20.343 22.343 19 24 19H48V14Z"/>
+  <path fill="#4EA4B5" d="M42 34L52 26V38L42 34Z"/>
+</svg>

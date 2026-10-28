@@ -10,7 +10,14 @@ export type DesignCase = {
   cover: string
   coverAlt: string
   tags: readonly string[]
-  tone: 'sunnyside' | 'vitrine' | 'huginn' | 'riso' | 'hachure' | 'cove'
+  tone:
+    | 'sunnyside'
+    | 'vitrine'
+    | 'huginn'
+    | 'riso'
+    | 'hachure'
+    | 'cove'
+    | 'strand'
 }
 
 /**
@@ -114,5 +121,21 @@ export const DESIGN_CASES: readonly DesignCase[] = [
       'The Cove brand board: the squared C mark with an ice inlay, the Abyss and Foam palette, Instrument Serif and Sans, the glass recipe and the form kit.',
     tags: ['Liquid Glass', 'Blue', 'Instrument Serif', 'Forms'],
     tone: 'cove',
+  },
+  {
+    number: '07',
+    name: 'Strand',
+    href: '/design-system/strand',
+    tagline: 'Where the dunes meet the tide.',
+    description:
+      'A quiet coastal interface system: white sand reading plates, marine basalt ink, a Dune Crest S monogram, ten native controls and a panoramic vista framing hero and footer.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · marks · form kit',
+    material: 'Quartz sand + marine basalt + aquamarine',
+    cover: '/brand/strand/strand-brandkit.png',
+    coverAlt:
+      'The Strand brand board: the architectural S mark, coastal shoreline palette, quartz reading plates and form kit.',
+    tags: ['Coastal', 'Minimalist', 'Monogram', 'Forms'],
+    tone: 'strand',
   },
 ]

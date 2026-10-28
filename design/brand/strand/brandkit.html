@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Strand — brand board v1.0</title>
+    <style>
+      :root {
+        --st-linen: #FAF7F2;
+        --st-quartz: #FFFFFF;
+        --st-basalt: #152026;
+        --st-haze: #5F727B;
+        --st-aquamarine: #3B8898;
+        --st-seafoam: #E8F4F7;
+        --st-straw: #B88B52;
+        --st-sand-warm: #E7D6C1;
+        --st-sand-shade: #D5C0A8;
+        --st-line: rgba(21, 32, 38, 0.08);
+        --st-line-strong: rgba(21, 32, 38, 0.16);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #F3EFE8;
+        color: var(--st-basalt);
+        -webkit-font-smoothing: antialiased;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+      #board {
+        width: 2400px;
+        height: 1800px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 28px;
+        padding: 42px;
+        background: #F3EFE8;
+      }
+      .panel {
+        position: relative;
+        overflow: hidden;
+        padding: 52px;
+        border-radius: 28px;
+        background: var(--st-quartz);
+        border: 1px solid var(--st-line);
+        box-shadow: 0 4px 24px -6px rgba(21, 32, 38, 0.05);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .label {
+        color: var(--st-haze);
+        font: 600 13px/1.3 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      /* Panel 1: Cover / Vista */
+      .cover {
+        background: linear-gradient(180deg, #FFFFFF 0%, #FAF7F2 100%);
+      }
+      .cover-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .cover-title {
+        font-size: 72px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 0.95;
+        margin: 18px 0 10px;
+      }
+      .cover-tagline {
+        font-size: 24px;
+        color: var(--st-haze);
+        margin: 0;
+        font-weight: 400;
+        line-height: 1.4;
+      }
+      .vista-crop {
+        width: 100%;
+        height: 440px;
+        border-radius: 18px;
+        object-fit: cover;
+        border: 1px solid var(--st-line);
+      }
+      .cover-foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-top: 1px solid var(--st-line);
+        padding-top: 24px;
+        margin-top: 24px;
+      }
+
+      /* Panel 2: Mark Geometry */
+      .mark-stage {
+        display: flex;
+        gap: 40px;
+        align-items: center;
+        background: var(--st-linen);
+        padding: 36px;
+        border-radius: 20px;
+        border: 1px solid var(--st-line);
+      }
+      .mark-svg-large {
+        width: 220px;
+        height: 220px;
+        flex-shrink: 0;
+      }
+      .specs-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .spec-item {
+        background: var(--st-quartz);
+        padding: 16px 20px;
+        border-radius: 12px;
+        border: 1px solid var(--st-line);
+      }
+      .spec-val {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--st-basalt);
+        margin-top: 4px;
+      }
+      .mark-family-row {
+        display: flex;
+        gap: 24px;
+        margin-top: 32px;
+      }
+      .mark-tile {
+        flex: 1;
+        background: var(--st-linen);
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid var(--st-line);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      /* Panel 3: Palette */
+      .palette-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 28px;
+      }
+      .color-card {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--st-line);
+        background: var(--st-quartz);
+      }
+      .color-chip {
+        height: 120px;
+        width: 100%;
+      }
+      .color-meta {
+        padding: 18px 20px;
+      }
+      .color-name {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 4px;
+      }
+      .color-hex {
+        font-family: ui-monospace, monospace;
+        font-size: 14px;
+        color: var(--st-haze);
+      }
+      .color-role {
+        font-size: 13px;
+        color: var(--st-haze);
+        margin-top: 8px;
+        line-height: 1.4;
+      }
+
+      /* Panel 4: Typography & Controls */
+      .type-specimen {
+        border-bottom: 1px solid var(--st-line);
+        padding-bottom: 24px;
+        margin-bottom: 24px;
+      }
+      .display-sample {
+        font-size: 56px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        margin: 12px 0;
+      }
+      .reading-sample {
+        font-size: 18px;
+        line-height: 1.6;
+        color: var(--st-basalt);
+        max-width: 900px;
+      }
+      .controls-preview {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin-top: 24px;
+      }
+      .btn-primary {
+        background: var(--st-aquamarine);
+        color: #FFFFFF;
+        font-weight: 600;
+        font-size: 16px;
+        padding: 16px 28px;
+        border-radius: 10px;
+        border: none;
+      }
+      .btn-secondary {
+        background: var(--st-quartz);
+        color: var(--st-basalt);
+        font-weight: 600;
+        font-size: 16px;
+        padding: 16px 28px;
+        border-radius: 10px;
+        border: 1px solid var(--st-line-strong);
+      }
+      .tag-pill {
+        background: var(--st-seafoam);
+        color: var(--st-aquamarine);
+        font-weight: 600;
+        font-size: 14px;
+        padding: 8px 16px;
+        border-radius: 9999px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="board">
+      <!-- 01 Cover & Image Vista -->
+      <section class="panel cover">
+        <div class="cover-top">
+          <div>
+            <span class="label">Case 07 · Design System · v1.0</span>
+            <h1 class="cover-title">STRAND</h1>
+            <p class="cover-tagline">Where the dunes meet the tide. A quiet shore interface.</p>
+          </div>
+          <svg width="68" height="68" viewBox="0 0 64 64" fill="none">
+            <path fill="#152026" fill-rule="evenodd" clip-rule="evenodd" d="M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z"/>
+            <path fill="#3B8898" d="M42 34L56 24V40L42 34Z"/>
+          </svg>
+        </div>
+
+        <img src="../../../public/brand/strand/strand-vista.webp" alt="Coastal Dune Vista" class="vista-crop" />
+
+        <div class="cover-foot">
+          <div class="mono" style="font-size:14px;color:var(--st-haze)">
+            Material: Quartz Sand + Marine Basalt + Tidal Aquamarine
+          </div>
+          <div class="label">Shipped · 2026</div>
+        </div>
+      </section>
+
+      <!-- 02 Mark System & Geometry -->
+      <section class="panel">
+        <div>
+          <span class="label">Marks System · v2.5 Gate Pass</span>
+          <h2 style="font-size:36px;font-weight:800;letter-spacing:-0.03em;margin:12px 0 28px;">Architectural Monogram</h2>
+          <div class="mark-stage">
+            <svg class="mark-svg-large" viewBox="0 0 64 64" fill="none">
+              <path fill="#152026" fill-rule="evenodd" clip-rule="evenodd" d="M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z"/>
+              <path fill="#3B8898" d="M42 34L56 24V40L42 34Z"/>
+            </svg>
+            <div class="specs-grid">
+              <div class="spec-item">
+                <div class="label" style="font-size:11px">Grid & Bounds</div>
+                <div class="spec-val">64 × 64 (50 × 48)</div>
+              </div>
+              <div class="spec-item">
+                <div class="label" style="font-size:11px">Primitives</div>
+                <div class="spec-val">2 Solid Fills</div>
+              </div>
+              <div class="spec-item">
+                <div class="label" style="font-size:11px">Tidal Channel</div>
+                <div class="spec-val">5.2 Units (≥ 8%)</div>
+              </div>
+              <div class="spec-item">
+                <div class="label" style="font-size:11px">16px Legibility</div>
+                <div class="spec-val">Zero Fails / 100%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="label" style="margin-bottom:12px">Mark Suite (Primary, Compact, Glyph, Tile)</div>
+          <div class="mark-family-row">
+            <div class="mark-tile">
+              <svg width="48" height="48" viewBox="0 0 64 64" fill="none">
+                <path fill="#152026" fill-rule="evenodd" clip-rule="evenodd" d="M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z"/>
+                <path fill="#3B8898" d="M42 34L56 24V40L42 34Z"/>
+              </svg>
+              <span class="label" style="font-size:11px">Primary</span>
+            </div>
+            <div class="mark-tile">
+              <svg width="48" height="48" viewBox="0 0 64 64" fill="none">
+                <path fill="#152026" fill-rule="evenodd" clip-rule="evenodd" d="M58 6H22C12.059 6 4 14.059 4 24C4 33.941 12.059 42 22 42H38C39.105 42 40 42.895 40 44C40 45.105 39.105 46 38 46H8V58H38C47.941 58 56 49.941 56 40C56 30.059 47.941 22 38 22H22C20.895 22 20 21.105 20 20C20 18.895 20.895 18 22 18H58V6Z"/>
+              </svg>
+              <span class="label" style="font-size:11px">Compact (16px)</span>
+            </div>
+            <div class="mark-tile">
+              <svg width="48" height="48" viewBox="0 0 64 64" fill="none">
+                <path fill="#152026" fill-rule="evenodd" clip-rule="evenodd" d="M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z"/>
+              </svg>
+              <span class="label" style="font-size:11px">Mono Glyph</span>
+            </div>
+            <div class="mark-tile" style="background:#152026">
+              <svg width="48" height="48" viewBox="0 0 64 64" fill="none">
+                <path fill="#FAF8F5" fill-rule="evenodd" clip-rule="evenodd" d="M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z"/>
+                <path fill="#4EA4B5" d="M42 34L56 24V40L42 34Z"/>
+              </svg>
+              <span class="label" style="font-size:11px;color:#8FA0A8">Reverse</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 Coastal Palette (5 + 1 Law) -->
+      <section class="panel">
+        <div>
+          <span class="label">Color System · 5 + 1 Law</span>
+          <h2 style="font-size:36px;font-weight:800;letter-spacing:-0.03em;margin:12px 0 10px;">Sampled Shoreline Palette</h2>
+          <p style="color:var(--st-haze);font-size:16px;margin:0 0 24px;">Direct physical sampling from coastal dune silica, tidal wash and headland haze.</p>
+          <div class="palette-grid">
+            <div class="color-card">
+              <div class="color-chip" style="background:#FAF7F2;border-bottom:1px solid var(--st-line)"></div>
+              <div class="color-meta">
+                <h3 class="color-name">Dune Linen</h3>
+                <div class="color-hex">#FAF7F2</div>
+                <div class="color-role">Canvas Ground · Soft, non-glare reading base</div>
+              </div>
+            </div>
+            <div class="color-card">
+              <div class="color-chip" style="background:#FFFFFF;border-bottom:1px solid var(--st-line)"></div>
+              <div class="color-meta">
+                <h3 class="color-name">Quartz White</h3>
+                <div class="color-hex">#FFFFFF</div>
+                <div class="color-role">Solid Reading Plate · 16.5:1 Contrast ratio</div>
+              </div>
+            </div>
+            <div class="color-card">
+              <div class="color-chip" style="background:#152026"></div>
+              <div class="color-meta">
+                <h3 class="color-name">Marine Basalt</h3>
+                <div class="color-hex">#152026</div>
+                <div class="color-role">Primary Ink & Mark · Deep, authoritative tone</div>
+              </div>
+            </div>
+            <div class="color-card">
+              <div class="color-chip" style="background:#5F727B"></div>
+              <div class="color-meta">
+                <h3 class="color-name">Coastal Haze</h3>
+                <div class="color-hex">#5F727B</div>
+                <div class="color-role">Secondary Muted Ink · 4.88:1 on quartz plate</div>
+              </div>
+            </div>
+            <div class="color-card">
+              <div class="color-chip" style="background:#3B8898"></div>
+              <div class="color-meta">
+                <h3 class="color-name">Aquamarine</h3>
+                <div class="color-hex">#3B8898</div>
+                <div class="color-role">Single Signal Focal · ≤ 8% Viewport budget</div>
+              </div>
+            </div>
+            <div class="color-card">
+              <div class="color-chip" style="background:#B88B52"></div>
+              <div class="color-meta">
+                <h3 class="color-name">Marram Grass</h3>
+                <div class="color-hex">#B88B52</div>
+                <div class="color-role">Secondary Accent · Sunlit coastal straw indicator</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 Typography & Component Kit -->
+      <section class="panel">
+        <div>
+          <span class="label">Typography & Controls DNA</span>
+          <h2 style="font-size:36px;font-weight:800;letter-spacing:-0.03em;margin:12px 0 20px;">Quiet Reading Hierarchy</h2>
+          <div class="type-specimen">
+            <div class="label" style="font-size:11px">Display · Syne Bold 800 · -0.04em tracking</div>
+            <div class="display-sample">Precision meets the open coastline.</div>
+            <div class="reading-sample">
+              The interface is designed like wet sand under morning sun: crisp lines, balanced density,
+              and empty ground that performs work instead of acting as ornament. Every control responds
+              with zero layout thrash and high accessible contrast.
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="label" style="margin-bottom:12px">Native Component Controls</div>
+          <div class="controls-preview">
+            <button class="btn-primary">Reserve Horizon</button>
+            <button class="btn-secondary">Inspect Audit</button>
+            <span class="tag-pill">Case 07 · Verified</span>
+            <span class="tag-pill" style="background:#FAF7F2;color:var(--st-haze);border:1px solid var(--st-line)">v2.5 Pass</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
