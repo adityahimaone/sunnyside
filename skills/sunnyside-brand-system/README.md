@@ -16,6 +16,33 @@ approved kit to **`implement-brand-system`** for the build:
 
 Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
 
+**v3.0 — fresh init and the detach gate.** The skill could build a system on an
+empty machine; it could not start a *ninth* system in a repo that already held
+eight. It inherited the neighbour's hue, radius, display face and section order,
+then called the result new. v3.0 adds the missing half:
+
+- **`scripts/init-system.mjs`** — scaffolds a case that inherits nothing: a free
+  two-letter namespace, a 5+1 palette derived from a hue seed, the twelve-key DNA
+  object, both theme ramps with **stable primitive names**, the token CSS, the
+  layout module, the copy data, the brand components, the page, the layout and
+  the `llms.txt` route. Refuses an existing slug, a taken namespace, a hue within
+  8° of a sibling, or a full colour wheel without `--force`. `--peek` writes
+  nothing and prints the palette, the nearest neighbours and the free arcs.
+- **`scripts/detach-check.mjs`** — a 100-point separation scorecard in OKLCH.
+  Five hard fails (namespace, material, display face, accent hex, one sentence)
+  and seven scored dimensions (hue, value, material, geometry, type, structure,
+  copy). Passes at 70 against **every** sibling; `--scan` scores the whole
+  portfolio and names the weakest pair.
+- Four references: [`fresh-init.md`](references/fresh-init.md),
+  [`detach.md`](references/detach.md),
+  [`case-architecture.md`](references/case-architecture.md) and
+  [`design-intel.md`](references/design-intel.md) — the last one uses the
+  `ui-ux-pro-max` corpus as a **negative prior**: query it to learn the category
+  default, then stand outside it on purpose.
+
+Both scripts are dependency-free and read `tokens.json` in either shape, so they
+work on cases written before this version.
+
 **v2.4:** the Case 01 **mark system**. The v2.3 gate is the **constructed
 track**; a new **drawn track** covers warm, editorial and object-led brands. Both
 tracks ship a primary + compact + glyph and a drawn/outlined wordmark; the drawn
@@ -67,8 +94,12 @@ npx skills add ./skills/sunnyside-brand-system
 
 ## The method in one screen
 
-1. **Pick the smallest mode** — brand kit, design system, mockup, audit or pen —
-   and the **track**: constructed (v2.3 gate) or drawn (v2.4 gate).
+0. **Init and detach** when the host already has cases: peek the hue map,
+   scaffold, fill the DNA, score against every sibling. A duplicated palette
+   cannot be rescued by a better mark.
+1. **Pick the smallest mode** — fresh init, brand kit, design system, mockup,
+   audit or pen — and the **track**: constructed (v2.3 gate) or drawn (v2.4
+   gate).
 2. Write `brief.md` and the one sentence the work can be rejected against.
 3. Draw six marks; keep one; write down why the other five lost.
 4. Build the mark + compact + glyph and the wordmark. On the drawn track, add a
@@ -87,6 +118,14 @@ npx skills add ./skills/sunnyside-brand-system
 Run these from the skill folder, or copy `scripts/` and `templates/` into the project.
 
 ```bash
+# Fresh init — a case that inherits nothing (no deps)
+node scripts/init-system.mjs --slug <slug> --name "<Name>" --case 09 --hue 28 --peek
+node scripts/init-system.mjs --slug <slug> --name "<Name>" --case 09 --hue 28 --mode light
+
+# Detach gate — how far is this from the systems it sits beside?
+node scripts/detach-check.mjs --new features/<slug>/tokens.json --ref features/<ref>/tokens.json
+node scripts/detach-check.mjs --scan features --min 70
+
 # Static audit: required files, SVG text, ICO sizes, PNG dimensions, contrast
 node scripts/audit.mjs --manifest audit.json
 
@@ -134,6 +173,10 @@ the icon and wordmark scripts. The static audit has no dependencies.
 sunnyside-brand-system/
   SKILL.md                     modes, fast path, rules, contract
   references/
+    fresh-init.md              v3.0 borrow the shell, refuse the identity, novelty ledger
+    detach.md                  v3.0 the gate: hard fails, weights, a worked pair
+    case-architecture.md       v3.0 folder shape, token contract, component contract
+    design-intel.md            v3.0 the ui-ux-pro-max corpus as a negative prior
     brief.md                   one-page brief and review gates
     craft-bar.md               Case 01 mark system: tracks, wordmark, cast, composition
     logo-system.md             concepts, grid, family, favicon, tests
@@ -148,6 +191,8 @@ sunnyside-brand-system/
     verification.md            the ship checklist and audit format
     lessons.md                 Case 01 bar + Case 02 failure rules
   scripts/
+    init-system.mjs            v3.0 scaffold a fresh case (no deps)
+    detach-check.mjs           v3.0 OKLCH separation scorecard (no deps)
     render-board.mjs           HTML board → PNG (Playwright)
     render-icons.mjs           SVG → exact-size transparent PNGs
     favicons.py                PNG → ICO, apple and app icons (Pillow)
@@ -186,6 +231,8 @@ case library or a route the host does not have.
 
 ## What this skill refuses
 
+- A ninth case with the eighth case's palette, display face or section list.
+- A namespace that is already in use, and a hue within 8° of a neighbour.
 - AI-generated logos, wordmarks, type specimens or whole boards.
 - Inventing a case library, `/design-system` route or sitemap entry.
 - Live text as the wordmark.

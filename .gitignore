@@ -71,6 +71,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# python bytecode from the brand-system skill scripts
+__pycache__/
+*.pyc
+
 # local agent tooling state
 .commandcode/
 

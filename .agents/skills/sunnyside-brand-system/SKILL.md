@@ -1,10 +1,10 @@
 ---
 name: sunnyside-brand-system
-description: Design and ship a brand kit or design system from a brief — strategy, a generated vector logo family, brand story, 3×3 board, favicons, tokens, theme-matched form kit, single-page HTML/TSX proof, and a fast audit. Use when creating or auditing an identity, design-system page, mockup, or pen.dev design source. Includes shadcn/Radix defaults, a typography gate, lean QA, and pen.dev integration.
+description: Design and ship a brand kit or design system from a brief — fresh init, a generated vector logo family, brand story, 3×3 board, favicons, tokens, theme-matched form kit, single-page HTML/TSX proof, and a fast audit. Includes a detach gate that measures how far a new system is from the ones it sits beside. Use when creating, initialising or auditing an identity, design-system page, mockup, or pen.dev design source. Includes shadcn/Radix defaults, a typography gate, lean QA, and pen.dev integration.
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '2.3'
+  version: '3.0'
 ---
 
 # Sunnyside brand system
@@ -15,7 +15,34 @@ A method for shipping a **brand kit** or **design system** quickly without losin
 the reasoning. The output is a page or a small set of files, not a folder of
 exports. Sunnyside and Vitrine are evidence, not templates.
 
-**v2.3:** refactors the engine around the **v2.3 hard gate** (zero-circle / fill-only / 2–4 primitives) and five allowed families: architectural monogram, offset planes, louvers, ribbon, horizon. Fuses [adityahimaone.space/design-system](https://adityahimaone.space/design-system) (warm editorial minimalism, architectural grid, solid fills), [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (anti-slop, subject-derived metaphors, no repetitive tropes) and [MengTo/Skills company-logos](https://github.com/MengTo/Skills) (64×64, fill-only, monochrome-first).
+**v3.0 — fresh init and the detach gate.** The skill could build a system on an
+empty machine; it could not start a *ninth* system in a repo that already held
+eight. It inherited the neighbour's hue, radius, display face and section order
+and called the result new. v3.0 adds the missing half:
+
+- **`fresh` mode** — a scaffold command (`scripts/init-system.mjs`) that
+  allocates a free namespace, derives a 5+1 palette from a hue seed, prints the
+  free arcs on the colour wheel, and writes a compiling case with no identity
+  inherited from anyone.
+- **The detach gate** (`scripts/detach-check.mjs`) — a 100-point scorecard in
+  OKLCH with five hard fails (namespace, material, display face, accent hex, one
+  sentence) and seven scored dimensions. Measured against every sibling, not the
+  average.
+- **`references/fresh-init.md`** — borrow the shell, refuse the identity, prove
+  the distance; the novelty ledger; the two-section rule.
+- **`references/detach.md`** — the thresholds, a worked 46/100 pair, and the
+  levers to use when the hue wheel is full.
+- **`references/case-architecture.md`** — the real folder shape: one token
+  source, two ramps with stable names, the brand-component contract, the section
+  anatomy, the `llms.txt` twin.
+- **`references/design-intel.md`** — the `ui-ux-pro-max` corpus used as a
+  **negative prior**: query it to learn the category default, then stand outside
+  it on purpose.
+
+**v2.5:** adds an opt-in **lean mode** (5 sections, 28 tokens, one winning SVG,
+4 controls), a **Symbools/Kuwayama fallback** archetype for marks that come out
+as stiff block letters, and a **craft gate** in `scripts/score-mark.py`
+(`check_geometric_craft`). Read `references/lean-and-symbools.md`.
 
 **v2.4:** adds the Case 01 **mark system**. The v2.3 gate becomes the
 **constructed track**; a new **drawn track** covers warm, editorial and
@@ -31,6 +58,12 @@ a six-family brainstorm (`references/logo-brainstorm.md`), a bake-off command,
 five more concepts (dotmatrix, lines, overprint, nodes, monogram) and an
 objective mark scorer (`scripts/score-mark.py`).
 
+**v2.3:** the hard gate (zero-circle / zero-Venn, fill-only, 2–4 solid
+primitives, one accent, one family per brand) and five constructed families.
+Fuses [adityahimaone.space/design-system](https://adityahimaone.space/design-system),
+[Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) and
+[MengTo/Skills company-logos](https://github.com/MengTo/Skills).
+
 **v2.1:** adds a generated vector logo family (`scripts/brand-forge.mjs`), a
 storytelling layer (`references/storytelling.md`), theme-matched form fields
 (`references/form-theming.md`) and stronger audit checks. The audit of this
@@ -39,6 +72,77 @@ skill is in `references/skill-audit.md`.
 **v2.0 provenance:** rebuilt after an audit of [ui-skills.com](https://www.ui-skills.com/)
 (439 skills / 27 categories; 22 relevant skills inspected). The fusion is in
 `references/ui-skills-fusion.md`; the implementation half is `implement-brand-system`.
+
+## Fresh init and the detach gate (v3.0)
+
+A skill that only knows how to build a system on an empty machine will, on its
+ninth system, copy its eighth. Fresh init is step 0: start from nothing, then
+prove the nothing is not a costume.
+
+**Borrow the shell, refuse the identity.** Copying plumbing is what makes nine
+cases feel like one portfolio; copying identity is what makes them one case
+repeated.
+
+| Borrow — it is plumbing | Regenerate — it is identity |
+| --- | --- |
+| Folder shape, file naming, token layering | Hue family, value structure |
+| Scope class, `html[data-<slug>]` toggle, one-hide-rule | Material string, radius, edge, tile |
+| The brand-component contract, `llms.txt`, metadata shape | Display face, section list, section order |
+| The audit table format | One sentence, story beats, decision cards |
+
+```bash
+# 1 · palette, neighbours, free arcs — writes nothing
+node scripts/init-system.mjs --slug <slug> --name "<Name>" --case 09 --hue 28 --peek
+
+# 2 · scaffold: tokens, CSS, data, brand components, page, layout, llms.txt
+node scripts/init-system.mjs --slug <slug> --name "<Name>" --case 09 --hue 28 --mode light
+
+# 3 · measure the distance before drawing anything
+node scripts/detach-check.mjs --new features/<slug>/tokens.json \
+  --ref features/<ref>/tokens.json --ref features/<ref2>/tokens.json
+
+# 4 · the whole portfolio, weakest pair first
+node scripts/detach-check.mjs --scan features --min 70
+```
+
+The scaffolder refuses four things: an existing slug, a taken namespace, a hue
+within 8° of a sibling accent, and a full colour wheel without `--force`. Each
+refusal is a duplicate, not a taste preference.
+
+**The gate.** 100 points; pass at 70 against **every** sibling. Five hard fails
+that no score rescues: same namespace, same material, same display face, same
+accent hex, one-sentence overlap > 60%.
+
+Placeholders score **zero** — a `TODO` in the DNA, an unnamed display face, an
+unfilled one sentence. A fresh scaffold therefore scores about 40: it has a
+namespace and a hue and no identity yet. That is the gate working. Fill the DNA,
+name the faces, write the sentence, re-run.
+
+| Dimension | Pts | Full marks |
+| --- | --- | --- |
+| Hue | 25 | ≥ 25° apart in OKLCH (chroma ≥ 0.045 only) |
+| Value | 15 | different mean lightness, chroma and spread |
+| Material | 15 | 10+ of the 12 DNA keys differ |
+| Geometry | 15 | radius, edge, tile, offset, stroke all differ |
+| Type | 10 | different display face |
+| Structure | 10 | section ids not present in the reference |
+| Copy | 10 | no shared nouns in the claim |
+
+Read the breakdown, not the total. `hue 25 · structure 5` is a new colour on the
+old skeleton; `hue 5 · structure 10` is an old colour on a new one. Neither is
+finished.
+
+**The two-section rule.** The scaffold ships eight sections because that is the
+shape of a design-system page, not of *this* system. Replace at least two ids
+with sections this system actually needs, and delete any that has nothing true
+to say. Renaming an id does not count.
+
+**When the wheel is full** — normal at eight cases — hue is only 25 points. Move
+value structure (`--mode dark`), then material, then geometry, then structure.
+
+Read `references/fresh-init.md` for the protocol and the novelty ledger,
+`references/detach.md` for the thresholds and a worked 46/100 pair, and
+`references/case-architecture.md` for the folder shape the scaffold writes.
 
 ## The constructed gate (v2.3)
 
@@ -111,11 +215,16 @@ Pick the smallest deliverable that answers the request.
 
 | Mode | Use when | Deliverable | Stop rule |
 | --- | --- | --- | --- |
+| **Fresh init** | A new system must join an existing set | Brief, namespace, 5+1 palette, DNA, scaffolded case, detach scorecard | Gate ≥ 70 against every sibling, no hard fails, 2 new section ids |
 | **Brand kit** | A named identity is needed | Brief, track, mark system (mark + compact + wordmark + optional cast), board, favicon set, tokens, guide, audit | Every asset has a use, size and source |
 | **Design system** | Components/forms must be reusable | Tokens, 5–10 primitives, one form kit, marks composition, proof page, docs | Keyboard + light/dark proof pass |
 | **Mockup** | A visual direction needs to be seen | One HTML/TSX page, real copy, 3–5 sections, one component group | Reads at 1440 and 390; no asset set promised |
 | **Audit / QA** | Something exists and needs a verdict | Scorecard, evidence paths, fixes, gaps | Every claim has a file or a browser check |
 | **pen.dev** | A canvas/board source is wanted | `.pen` + 2× PNG, reconciled with code tokens | Code remains the source of truth |
+
+**Fresh init is step 0 for every other mode when the host already has cases.**
+Run it first; it costs one command and it is the only thing that stops the new
+system from becoming the last one.
 
 If the ask is to **build the page**, finish the kit and hand off to
 `implement-brand-system`. This skill owns the decision; that skill owns the
@@ -127,8 +236,13 @@ drawing; mark unknowns `ASSUMPTION`. Template: `references/brief.md`.
 
 ## Fast path
 
+0. **Init and detach, if the host has cases.** `init-system.mjs --peek`, pick a
+   free hue or accept a forced one, scaffold, then `detach-check.mjs` against
+   every sibling. Do this before the brief if the brief is still vague: the
+   refusal is the first useful constraint.
 1. **Brief, one sentence and a track.** Constructed or drawn. Write the sentence
-   the work can be rejected against.
+   the work can be rejected against. Fill the twelve DNA keys — a `TODO` there
+   becomes a copy of the neighbour.
 2. **One idea.** Monogram + meaning, product action, metaphor fusion, negative
    space, or construction geometry. One metaphor, one loud field.
 3. **Draw six, keep one.** Constructed: the five v2.3 families plus one wildcard;
@@ -311,6 +425,9 @@ Full gate and failure table: `references/typography.md`. Upstream source:
 
 ## Brand rules
 
+- **Detach before drawing.** In a host that already has cases, the first
+  deliverable is a scorecard, not an SVG. A mark cannot rescue a duplicated
+  palette.
 - **Choose the track first.** Constructed: the v2.3 gate (no circle/Venn, no
   fill+stroke, 2–4 primitives, one accent, five families). Drawn: one subject,
   one cut line, one fill, one hard offset, 2–3 inks, 16px.
@@ -319,6 +436,8 @@ Full gate and failure table: `references/typography.md`. Upstream source:
 - **Test 16px first.** If it fails small, it is not a mark yet.
 - **Wordmark is a drawing.** Outlines, never live text.
 - **Palette by role.** Accents are punctuation, not body text.
+- **One name per primitive, two ramps per name.** A mode-prefixed primitive
+  (`--night-ground`) breaks the semantic layer on the first toggle.
 - **Document the decision.** Why, when not, what breaks next.
 
 ## Explore five, keep one
@@ -341,6 +460,10 @@ silhouette.
 Keep one; the rejection note becomes the guide.
 
 ## Build order
+
+**Fresh init:** peek the hue map → scaffold → fill the DNA → detach ≥ 70 →
+brief → track → six marks → one mark + compact → wordmark + cast → sections that
+are not the neighbour's → palette/type/tokens → forms → proof → audit.
 
 **Brand kit:** brief → track → six → one mark + compact → drawn wordmark + cast
 → marks composition → palette/type/tokens → board → icons → guide → audit.
@@ -415,6 +538,20 @@ section, the marks composition, no 390 overflow. Body 4.5:1, large 3:1; measure.
 Write **Not verified** for anything you did not inspect. Fix root causes
 (specificity, tokens), not screenshots. Full checklist: `references/verification.md`.
 
+**Fast pass (default for a first draft).** `--quick`, one viewport, no full-page
+captures, no sections. Then run the two checks that catch the expensive bugs:
+
+```bash
+node scripts/detach-check.mjs --new features/<slug>/tokens.json --ref …   # identity
+node scripts/audit.mjs --manifest audit.json                              # artifacts
+```
+
+**Out of scope.** Unit tests and e2e are not part of this skill. The gates that
+matter here are the detach score, the artifact audit, the mark score and one
+browser pass — all four are single commands, and none of them needs a test
+runner. If the host already has Playwright specs, do not add to them for a
+design-system page.
+
 ## Lessons from Case 01 and Case 02
 
 **Case 01 is the bar.** A mark is not a system. The page needs a drawn wordmark,
@@ -457,6 +594,24 @@ line and a subject circle, but not a badge/Venn, a second accent or no cast.
 - A component museum with no form kit.
 - “Looks good” with no computed values or file paths.
 
+The v3.0 failures — a new case that is the last case renamed:
+
+- A ninth case whose section ids match a sibling's. Same skeleton, new paint.
+- An accent within 8° of a neighbour's, described as "different because the
+  material is different".
+- A namespace collision (`--st-` twice), which silently merges two token sets.
+- Mode-prefixed primitives (`--night-ground`), so the semantic layer points at
+  names that do not exist after a theme flip.
+- A scaffold shipped with `TODO` in the DNA object; the next agent fills it with
+  the neighbour's material.
+- A detach score reported as an average instead of the weakest pair.
+- Reading a low `--scan` score as a visual collision when it is really the
+  scored side's tokens being incomplete. The verdict column now says
+  `incomplete tokens` for exactly this case; fix the tokens, don't move the hue.
+- Publishing detach numbers that `detach-check.mjs` does not reproduce. Run
+  `--new` against every `--ref` and paste the real output; a scorecard nobody
+  can re-derive is the same as no scorecard.
+
 ## Output contract
 
 Adapt paths to the host project. Every asset has a use, size and source; every
@@ -464,11 +619,15 @@ claim points to a file or route; icons are tested at 16px; the page is readable
 without JS.
 
 ```
+features/<slug>/        tokens.json, <slug>-tokens.css, <slug>.module.css,
+                       <slug>-data.ts, components/brand.tsx, theme-toggle.tsx
+app/design-system/<slug>/   page.tsx, layout.tsx, llms.txt/route.ts, icon.svg
 brand/         brief.md, story.md, DESIGN.md, brandkit.html, <slug>-brandkit.png (3000×2250), assets/
 public/brand/<slug>/   mark*, wordmark, lockups, glyph, favicons, icons,
                        cast/ (optional drawn track), <slug>-brandkit.png,
                        <slug>-tokens.css/json, <slug>-forms.css, sheet.html
-docs/                  <slug>-design-system-audit.md, <slug>-qa.md
+docs/                  <slug>-design-system-audit.md, <slug>-qa.md,
+                       <slug>-detach.md (the scorecard against every sibling)
 ```
 
 Every asset has a use, size and source; every claim points to a file or route.
@@ -511,9 +670,14 @@ and runs the QA gate.
 
 ## References
 
+- `fresh-init.md` — **v3.0** the init protocol: borrow the shell, refuse the identity, the novelty ledger, the two-section rule.
+- `detach.md` — **v3.0** the gate: five hard fails, seven scored dimensions, a worked 46/100 pair, levers when the wheel is full.
+- `case-architecture.md` — **v3.0** the folder shape, one token source, two ramps with stable names, the brand-component contract, section anatomy.
+- `design-intel.md` — **v3.0** the `ui-ux-pro-max` corpus as a negative prior; what to take, what to refuse.
 - `brief.md` — brief and review gates.
 - `craft-bar.md` — the Case 01 mark system: two tracks, drawn gate, wordmark, cast, four-movement composition, anti-slop.
 - `logo-system.md` — concepts, grid, family, favicon.
+- `lean-and-symbools.md` — opt-in lean budget, 5+1 colour law, Symbools fallback archetype, craft gate.
 - `logo-brainstorm.md` — v2.3 hard gate, five families, scoring, why marks come out ugly.
 - `board-and-images.md` — board, render pipeline, image QA.
 - `image-direction.md` — prompts and provenance.
@@ -533,17 +697,26 @@ and runs the QA gate.
 
 ## Scripts and templates
 
-`brand-forge.mjs` (generate the family, `--bakeoff`), `cast-forge.mjs` (draw a
-4–6 mark cast), `score-mark.py` (objective mark checks), `render-board.mjs`,
-`render-icons.mjs`, `favicons.py`, `downscale.py`, `extract-wordmark.py`,
-`audit.mjs`, `qa.mjs` (one-command audit + score + browser), `sync-skill.sh`
-(keep `.agents/skills` mirror identical).
+`init-system.mjs` (**v3.0** scaffold a fresh case: namespace, hue-seeded 5+1
+palette, DNA, tokens, CSS, data, brand components, page, layout, `llms.txt`),
+`detach-check.mjs` (**v3.0** OKLCH separation scorecard, `--scan` for the whole
+portfolio), `brand-forge.mjs` (generate the family, `--bakeoff`),
+`cast-forge.mjs` (draw a 4–6 mark cast), `score-mark.py` (objective mark checks),
+`render-board.mjs`, `render-icons.mjs`, `favicons.py`, `downscale.py`,
+`extract-wordmark.py`, `audit.mjs`, `qa.mjs` (one-command audit + score +
+browser), `sync-skill.sh` (keep `.agents/skills` mirror identical).
+
+`init-system.mjs` and `detach-check.mjs` have **no dependencies** — Node only.
+Both read `tokens.json` in either shape (`primitives[]` + `theme{}`, or `color{}`
++ `radius{}` + `track`), so they work on cases written before this version.
 
 `templates/`: `design-system.html`, `brandkit.html`, `marks-section.html`,
 `single-page.html`, `case-page.tsx`, `audit.json`, `guidelines.md`.
 
 ## How to use this skill well
 
+0. **Init and detach first when the host has cases.** One command to scaffold,
+   one to score. A duplicated palette cannot be fixed by a better mark.
 1. Brief first; choose the constructed or drawn track and write the one-sentence direction.
 2. Constructed: five families and a bake-off. Drawn: six subjects and one cast.
 3. Freeze the wordmark; draw 4–6 cast marks with one cut line and one fill.

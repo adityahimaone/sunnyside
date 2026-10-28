@@ -13,6 +13,8 @@ Checks (FAIL stops the mark, WARN needs a written reason, NOTE is information):
   FAIL  v2.3: circles, fill+stroke, more than 4 primitives
   FAIL  compact has a stroke thinner than 2.4 units or a dot under 4 units wide
         (on the 64 grid that is 0.6px / 1px at 16px)
+  FAIL  craft: no <path>, under 8 path commands, or a flat silhouette with no
+        curve, evenodd counter-form or second subpath (stiff block letter)
   FAIL  glyph silhouette at 32px covers < 10% or > 88% of the box
   FAIL  compact mark has no contrast at 16px (luminance spread < 0.10)
   WARN  detached speck: a component under 15% of the median component area
@@ -75,6 +77,28 @@ def mirror_similarity(img):
     return (h_same / tot if tot else 0), (v_same / tot if tot else 0)
 
 
+def check_geometric_craft(svg_content):
+    """Anti-blockiness gate: the negative bans above would pass a plain <rect>.
+    Rejects marks with no path, a trivial command count, or a flat silhouette.
+    A failure points at references/lean-and-symbools.md (fallback archetypes)."""
+    errors = []
+    paths = re.findall(r'<path[^>]*\sd=[\"\']([^\"\']+)[\"\']', svg_content)
+    if not paths:
+        return ['craft: no <path> found; use a compound <path>, not <rect>/<polygon>']
+    d = ' '.join(paths)
+    commands = re.findall(r'[MLHVCSQTAZmlhvcsqtaz]', d)
+    if len(commands) < 8:
+        errors.append(f'craft: path too simple ({len(commands)} commands); use figure-ground '
+                      'cuts, chamfers or curves (Symbools fallback archetype)')
+    has_curves = bool(re.search(r'[CSQTAcsqta]', d))
+    subpaths = len(re.findall(r'[Mm]', d))
+    has_evenodd = 'fill-rule="evenodd"' in svg_content
+    if not (has_curves or has_evenodd or subpaths >= 2):
+        errors.append('craft: flat silhouette with no counter-form or curve; add an evenodd '
+                      'cut or a Bezier, or fall back to a Symbools archetype')
+    return errors
+
+
 def score(folder):
     fails, warns, notes = [], [], []
     mark, compact, glyph = folder / 'mark.svg', folder / 'mark-compact.svg', folder / 'glyph.svg'
@@ -92,6 +116,15 @@ def score(folder):
     shapes = len(re.findall(r'<(path|circle|rect|ellipse|polygon|line)[\s>]', visual))
     if shapes > 4:
         fails.append(f'v2.3: {shapes} primitives in the primary (max 2–4); simplify the idea')
+
+    for label, src in (('primary', msrc), ('compact', csrc)):
+        for e in check_geometric_craft(src):
+            # A compact is one deliberately plain path (gaps >= 4 units at 16px), so
+            # a flat silhouette there is a WARN; the primary must carry the craft.
+            if label == 'compact' and 'flat silhouette' in e:
+                warns.append(f'{e} [{label}]')
+            else:
+                fails.append(f'{e} [{label}]')
 
     strokes = [float(v) for v in re.findall(r'stroke-width="([\d.]+)"', csrc) if float(v) > 0]
     if strokes and min(strokes) < 2.4:
