@@ -4,7 +4,7 @@ description: Design and ship a brand kit or design system from a brief — strat
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '2.3'
+  version: '2.5'
 ---
 
 # Sunnyside brand system
@@ -16,6 +16,11 @@ the reasoning. The output is a page or a small set of files, not a folder of
 exports. Sunnyside and Vitrine are evidence, not templates.
 
 **v2.3:** refactors the engine around the **v2.3 hard gate** (zero-circle / fill-only / 2–4 primitives) and five allowed families: architectural monogram, offset planes, louvers, ribbon, horizon. Fuses [adityahimaone.space/design-system](https://adityahimaone.space/design-system) (warm editorial minimalism, architectural grid, solid fills), [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (anti-slop, subject-derived metaphors, no repetitive tropes) and [MengTo/Skills company-logos](https://github.com/MengTo/Skills) (64×64, fill-only, monochrome-first).
+
+**v2.5:** adds an opt-in **lean mode** (5 sections, 28 tokens, one winning SVG,
+4 controls), a **Symbools/Kuwayama fallback** archetype for marks that come out
+as stiff block letters, and a **craft gate** in `scripts/score-mark.py`
+(`check_geometric_craft`). Read `references/lean-and-symbools.md`.
 
 **v2.4:** adds the Case 01 **mark system**. The v2.3 gate becomes the
 **constructed track**; a new **drawn track** covers warm, editorial and
@@ -514,6 +519,7 @@ and runs the QA gate.
 - `brief.md` — brief and review gates.
 - `craft-bar.md` — the Case 01 mark system: two tracks, drawn gate, wordmark, cast, four-movement composition, anti-slop.
 - `logo-system.md` — concepts, grid, family, favicon.
+- `lean-and-symbools.md` — opt-in lean budget, 5+1 colour law, Symbools fallback archetype, craft gate.
 - `logo-brainstorm.md` — v2.3 hard gate, five families, scoring, why marks come out ugly.
 - `board-and-images.md` — board, render pipeline, image QA.
 - `image-direction.md` — prompts and provenance.
