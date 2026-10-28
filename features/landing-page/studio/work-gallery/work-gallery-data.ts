@@ -97,9 +97,9 @@ export const PROJECT_GALLERY_ITEMS: readonly ProjectGalleryItem[] =
   })
 
 /**
- * The design-system shelf is the same six documented cases as
- * `/design-system`, in the same order and with the same covers. This is the
- * single source of truth for the case names, paths and brand-kit thumbnails.
+ * The design-system shelf is the same documented cases as `/design-system`,
+ * in the same order and with the same covers. This is the single source of
+ * truth for the case names, paths and brand-kit thumbnails.
  */
 export const SYSTEM_GALLERY_ITEMS: readonly SystemGalleryItem[] =
   DESIGN_CASES.map((item, order) => ({

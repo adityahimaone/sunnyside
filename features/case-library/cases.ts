@@ -18,6 +18,7 @@ export type DesignCase = {
     | 'hachure'
     | 'cove'
     | 'strand'
+    | 'clearing'
 }
 
 /**
@@ -137,5 +138,21 @@ export const DESIGN_CASES: readonly DesignCase[] = [
       'The Strand brand board: the architectural S mark, coastal shoreline palette, quartz reading plates and form kit.',
     tags: ['Coastal', 'Minimalist', 'Monogram', 'Forms'],
     tone: 'strand',
+  },
+  {
+    number: '08',
+    name: 'Clearing',
+    href: '/design-system/clearing',
+    tagline: 'A sighting, not a sticker.',
+    description:
+      'Painted emerald light seen through one pane of glass. A drawn stag on a tapered horizon, an outlined wordmark whose i-tittle is a light disc, five cast marks on one cut line, and an audit that names what it could not verify. No form kit, by request.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · marks · docs',
+    material: 'Painted emerald + cream + glass',
+    cover: '/brand/clearing/clearing-brandkit.png',
+    coverAlt:
+      'The Clearing brand board: the stag on a tapered horizon, the outlined clearing wordmark with a disc tittle, six inks sampled from the painting, and the glass recipe.',
+    tags: ['Painted', 'Emerald', 'Glass', 'Wildlife'],
+    tone: 'clearing',
   },
 ]

@@ -126,6 +126,10 @@
   --case-accent: #327b8a;
 }
 
+.tone_clearing {
+  --case-accent: #0f4a3c;
+}
+
 .cardTop {
   display: flex;
   align-items: center;
