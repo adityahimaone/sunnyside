@@ -14,7 +14,7 @@ Where the two passes coincide, the third colour is a **third clipped path** — 
 - `design/brand/riso/explorations/directions.md` — the six mark directions evaluated and the rejection log.
 - `design/brand/riso/brandkit.html` — the printed board source (1500×1125).
 - `design/brand/riso/assets/wordmark-path.json` — outlined Space Grotesk 700 glyph geometry.
-- `public/brand/riso/` — `mark.svg`, `mark-compact.svg`, `wordmark.svg`, `lockup.svg`, `favicons/favicon.svg` (plus 16/32/180), `riso-tokens.{css,json}`, `riso-brandkit.png`.
+- `public/brand/riso/` — `mark.svg`, `mark-compact.svg`, `mark-mono.svg`, `wordmark.svg`, `lockup.svg`, `favicons/favicon.svg` (plus 16/32/180), `riso-tokens.{css,json}`, `riso-brandkit.png`.
 - `features/riso/tokens.json` — 8 primitives, 22 semantic roles × 2 themes, 16 measured pairs.
 - `features/riso/riso-tokens.css` — generated `--rs-*` custom properties, light + safelight.
 - `features/riso/brand-paths.ts` — generated mark and wordmark geometry.
@@ -33,11 +33,11 @@ Where the two passes coincide, the third colour is a **third clipped path** — 
 | --- | --- | --- | --- |
 | `--rs-surface` | `#f1ede4` | `#141110` | Vellum / safelight ground |
 | `--rs-surface-alt` | `#e8e1d3` | `#1c1815` | Panels and stages |
-| `--rs-sheet` | `#ff4a1c` | `#ff4a1c` | Orange drum — fills only |
-| `--rs-sheet-alt` | `#1a7ff0` | `#1a7ff0` | Blue drum, second pass |
+| `--rs-sheet` | `#f2542d` | `#f2542d` | Orange drum — fills only |
+| `--rs-sheet-alt` | `#1d63ff` | `#1d63ff` | Blue drum, second pass |
 | `--rs-ink` | `#1b1712` | `#f1ede4` | Reading text |
-| `--rs-ghost` | `#1a7ff0` | `#6faeff` | The second impression in type |
-| `--rs-overprint` | `#46212a` | `#6b3040` | The third colour, only where passes cross |
+| `--rs-ghost` | `#1d63ff` | `#6faeff` | The second impression in type |
+| `--rs-overprint` | `#2b192e` | `#6b3040` | The third colour, only where passes cross |
 | `--rs-accent` | `#c22e08` | `#ff7a4d` | Orange **as type** (4.87:1) |
 | `--rs-accent-alt` | `#0e3f8f` | `#6faeff` | Blue as type and links |
 | `--rs-steel` | `#a3a9b2` | `#a3a9b2` | The pushpin needle, and nothing else |
@@ -46,7 +46,7 @@ Where the two passes coincide, the third colour is a **third clipped path** — 
 
 Ratios are computed by the build script from the semantic layer and written into `tokens.contrast` — sixteen pairs, none typed by hand, none rounded up.
 
-All pairs pass WCAG AA except one, which is kept visible as a rule: **fluorescent orange `#ff4a1c` as body type is 2.88:1** against vellum and fails 3:1. The orange drum is therefore fill-only; orange type uses `--rs-accent` `#c22e08` (4.87:1). Darkening the fill until it passes would stop it being fluorescent orange.
+All pairs pass WCAG AA except one, which is kept visible as a rule: **fluorescent orange `#f2542d` as body type is 2.96:1** against vellum and fails 3:1. The orange drum is therefore fill-only; orange type uses `--rs-accent` `#c22e08` (4.87:1). Darkening the fill until it passes would stop it being fluorescent orange.
 
 The footer specimen passes `sheetInk="#1b1712"` (5.30:1 on orange) because the component's white default is 3.36:1 and fails.
 

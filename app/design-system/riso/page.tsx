@@ -1,12 +1,10 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 
 import '@/features/riso/riso-tokens.css'
 import {
   FooterDemo,
   RegistrationDemo,
-  RegistrationTarget,
   RisoControls,
   RisoFormDemo,
   RisoLockup,
@@ -20,7 +18,7 @@ import styles from '@/features/riso/riso.module.css'
 export const metadata: Metadata = {
   title: 'Riso Co. / Atelier Ink — Design System',
   description:
-    'Case 04: a risograph print shop whose identity is the registration error. Two drums, one sheet, and a second impression that is always 2.5px out — a drawn mark, five measured ink pairs, and a footer that tears from its pin.',
+    'Case 04: a risograph print shop whose identity is the registration error. Two drums, one sheet, and a second impression that is always 2.5px out — a two-sheet overprint mark, five measured ink pairs, and a footer that tears from its pin.',
   alternates: {
     canonical: '/design-system/riso',
     types: { 'text/markdown': '/design-system/riso/llms.txt' },
@@ -35,7 +33,7 @@ export const metadata: Metadata = {
         url: '/brand/riso/riso-brandkit.png',
         width: 1500,
         height: 1125,
-        alt: 'The Riso Co. brand board: an orange poster reading “two passes, one sheet”, the torn-sheet mark, five inks and the deckle tear.',
+        alt: 'The Riso Co. brand board: an orange poster reading “two passes, one sheet”, the two-sheet overprint mark, five inks and the deckle tear.',
       },
     ],
   },
@@ -69,12 +67,11 @@ const NAV = [
 ]
 
 const EXPLORATIONS = [
-  { n: '01', name: 'Sheet, torn, keylined', verdict: 'kept', note: 'two shapes, three colours' },
-  { n: '02', name: 'Pushpin alone', verdict: 'cut', note: 'hardware, not the shop' },
-  { n: '03', name: 'Two overlapping circles', verdict: 'cut', note: 'reads as a Venn diagram' },
-  { n: '04', name: 'Halftone R', verdict: 'cut', note: 'a letter in dots is still a letter' },
-  { n: '05', name: 'Drum as a ring', verdict: 'cut', note: 'no edge, so no tear' },
-  { n: '06', name: 'Folded corner', verdict: 'cut', note: 'a folder icon, not a sheet' },
+  { n: '01', name: 'Architectural monogram', verdict: 'cut', note: 'a letter, not print' },
+  { n: '02', name: 'Offset planes', verdict: 'kept', note: 'two passes, one overprint' },
+  { n: '03', name: 'Louvers', verdict: 'cut', note: 'a chart, not a sheet' },
+  { n: '04', name: 'Ribbon', verdict: 'cut', note: 'one beam, not two passes' },
+  { n: '05', name: 'Horizon', verdict: 'cut', note: 'no overprint corner' },
 ]
 
 const SCALE = [
@@ -193,7 +190,7 @@ export default function RisoPage() {
               <span className={styles.crop} data-at="bl" aria-hidden="true" />
               <span className={styles.crop} data-at="br" aria-hidden="true" />
               <div className={styles.posterTop}>
-                <RisoMark size={56} title="The Riso Co. mark" />
+                <span className={styles.posterMark}><RisoMark size={56} title="The Riso Co. mark" /></span>
                 <div className={styles.posterRun}>
                   Run 0412
                   <br />
@@ -229,7 +226,7 @@ export default function RisoPage() {
             </div>
             <div>
               <dt>Mark</dt>
-              <dd>A torn sheet, twice</dd>
+              <dd>Two sheets, one overprint</dd>
             </div>
             <div>
               <dt>Component</dt>
@@ -276,7 +273,7 @@ export default function RisoPage() {
                   <div>
                     <h4>The third colour is measured</h4>
                     <p>
-                      Orange over blue is <span className={styles.mono}>#46212A</span>, sampled
+                      Orange over blue is <span className={styles.mono}>#2B192E</span>, sampled
                       from a press sheet — not a blend mode, not a filter. It only appears where
                       the passes cross.
                     </p>
@@ -292,14 +289,14 @@ export default function RisoPage() {
               id="mark"
               number="02"
               label="The mark"
-              title="A sheet, torn, printed twice."
-              lead="The mark is not a letter. It is the sheet itself: a rectangle with its bottom edge torn away, filled by the orange drum and keylined by the blue one. Two shapes, three colours, and it still reads at 16px."
+              title="Two passes, one overprint."
+              lead="The mark is not a letter. It is the press behaviour: two sheared sheets, orange first, blue second, shifted like two drum passes. The overlap is a sharp overprint polygon — no outlines, no blend modes, and the compact isolates it at 16px."
             />
 
             <div className={styles.markGrid}>
               <div className={styles.markStage}>
                 <RisoMark size={260} title="The mark on a 64 grid" />
-                <span className={styles.markStageNote}>64 grid / 1 unit = 1px at 64</span>
+                <span className={styles.markStageNote}>64 grid / two sheets / one overprint</span>
               </div>
 
               <div className={styles.markFamily}>
@@ -309,28 +306,30 @@ export default function RisoPage() {
                     <span className={styles.label}>Primary</span>
                   </div>
                   <div className={styles.familyItem}>
-                    <RisoMark size={32} compact title="Compact mark" />
-                    <span className={styles.label}>Compact</span>
+                    <RisoMark size={32} compact title="The overprint, isolated" />
+                    <span className={styles.label}>Overprint</span>
+                  </div>
+                  <div className={styles.familyItem}>
+                    <RisoMark size={32} mono title="Mono union" />
+                    <span className={styles.label}>Mono</span>
                   </div>
                   <div className={styles.familyItem}>
                     <RisoMark size={16} compact title="Favicon, 16px" />
                     <span className={styles.label}>16</span>
                   </div>
-                  <div className={styles.familyItem}>
-                    <RegistrationTarget size={44} />
-                    <span className={styles.label}>Register</span>
-                  </div>
                 </div>
 
                 <p className={styles.familyNote}>
-                  At 16px the tear softens into a ragged edge and the keyline becomes the mark
-                  itself, so the compact drawing drops two teeth and thickens the frame. Clear space
-                  is one tooth on every side; the stray keyline counts as part of the drawing.
+                  At 16px the compact isolates the sheared overprint polygon; the full mark is
+                  the two sheets, and the mono is their union in one ink. On safelight the
+                  compact inverts to paper so the intersection stays legible; the primary lens
+                  lifts. Clear space is one negative channel on every side, and the overprint
+                  counts as part of the drawing.
                 </p>
 
                 <div>
                   <p className={styles.label} style={{ marginBottom: 10 }}>
-                    Six drawn, one kept
+                    V2.3 bake-off / five families, one kept
                   </p>
                   <ul className={styles.explorations}>
                     {EXPLORATIONS.map((item) => (
@@ -394,7 +393,7 @@ export default function RisoPage() {
                   </span>
                   <figure>
                     <div className={styles.swatch} style={{ background: 'var(--rs-overprint)' }} aria-hidden="true" />
-                    <figcaption>#46212A</figcaption>
+                    <figcaption>#2B192E</figcaption>
                   </figure>
                 </div>
                 <p className={styles.familyNote} style={{ marginTop: 14 }}>
@@ -411,21 +410,21 @@ export default function RisoPage() {
                   <div
                     style={{
                       background:
-                        'radial-gradient(circle at center, #ff4a1c 1.9px, transparent 2px) 0 0 / 5px 5px, #f1ede4',
+                        'radial-gradient(circle at center, #f2542d 1.9px, transparent 2px) 0 0 / 5px 5px, #f1ede4',
                     }}
                     aria-hidden="true"
                   />
                   <div
                     style={{
                       background:
-                        'radial-gradient(circle at center, #ff4a1c 1.1px, transparent 1.2px) 0 0 / 5px 5px, #f1ede4',
+                        'radial-gradient(circle at center, #f2542d 1.1px, transparent 1.2px) 0 0 / 5px 5px, #f1ede4',
                     }}
                     aria-hidden="true"
                   />
                   <div
                     style={{
                       background:
-                        'radial-gradient(circle at center, #ff4a1c 0.6px, transparent 0.7px) 0 0 / 5px 5px, #f1ede4',
+                        'radial-gradient(circle at center, #f2542d 0.6px, transparent 0.7px) 0 0 / 5px 5px, #f1ede4',
                     }}
                     aria-hidden="true"
                   />
@@ -495,7 +494,7 @@ export default function RisoPage() {
                   person stood there twice.
                 </p>
                 <p className={styles.ruleCallout}>
-                  Fluorescent orange as type is <strong>2.88:1</strong> on vellum — under the 3:1
+                  Fluorescent orange as type is <strong>2.96:1</strong> on vellum — under the 3:1
                   floor even for display. If you need orange letters, you need a second impression:{' '}
                   <span className={styles.mono}>#C22E08</span> at 4.87:1.
                 </p>
@@ -800,7 +799,7 @@ export default function RisoPage() {
                     <code>riso-tokens.css</code>.
                   </li>
                   <li>
-                    Marks: <code>public/brand/riso/</code> — mark, compact, wordmark, lockup,
+                    Marks: <code>public/brand/riso/</code> — mark, compact, mono, wordmark, lockup,
                     favicons.
                   </li>
                   <li>

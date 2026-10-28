@@ -89,108 +89,53 @@ writeFileSync(join(ROOT, 'features/riso/riso-tokens.css'), CSS)
 writeFileSync(join(PUBLIC, 'riso-tokens.css'), CSS)
 writeFileSync(join(PUBLIC, 'riso-tokens.json'), JSON.stringify(tokens, null, 2) + '\n')
 
-/* ---------- the mark: one sheet, two passes ----------------------------- */
+/* ---------- the mark: two passes, one overprint ---------------------- */
 
 /**
- * The sheet is a rectangle whose bottom edge has been torn away. The tear is
- * generated from a fixed seed so the mark is identical everywhere, and the
- * second pass is the same path translated up and right: where the two land on
- * the same fibre, the intersection is filled with the overprint colour. Two
- * inks, three colours, no blend modes (blend modes are not dependable in a
- * favicon or a PDF).
+ * v2.3: two sheared, unstroked sheets. Orange first, blue second, shifted
+ * diagonally like two drum passes. The overlap is a sharp overprint polygon,
+ * not a circle and not a blend mode. No strokes anywhere.
+ *
+ * 64 grid. Orange 24..52 top / 8..36 bottom; blue 34..62 top / 18..46 bottom.
+ * The compact isolates the intersection; the mono is the union of both sheets.
  */
-function deckle(fromX, toX, baseY, amp, steps, seed, deepEvery = 2) {
-  let a = seed >>> 0
-  const rnd = () => {
-    a = (a + 0x6d2b79f5) >>> 0
-    let t = a
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-  const pts = []
-  const seg = (toX - fromX) / steps
-  let drift = 0
-  for (let i = 1; i <= steps; i++) {
-    const t = i / steps
-    drift += (rnd() - 0.5) * amp * 0.4
-    // Few, deep bites with the width jittered: a torn edge has a rhythm, a
-    // saw has a pitch. Every other point is a bite on the 16px variant; the
-    // large mark thins them to every third so it reads as stock, not a saw.
-    const x = fromX + (toX - fromX) * t + (i < steps ? (rnd() - 0.5) * seg * 0.4 : 0)
-    const deep = i % deepEvery === 0
-    const y = baseY + drift * 0.5 + (deep ? amp * (0.5 + rnd() * 0.6) : -amp * (0.1 + rnd() * 0.5))
-    pts.push([x, y])
-  }
-  return pts
+const MARK = {
+  box: 64,
+  a: 'M24 10H52L36 54H8Z',
+  b: 'M34 4H62L46 48H18Z',
 }
-
-function sheetPath(box, tear) {
-  const { x, y, w, h } = box
-  const right = x + w
-  const bottom = y + h
-  let d = `M${x} ${y}H${right}V${bottom}`
-  for (const [px, py] of tear) d += `L${round(px)} ${round(py)}`
-  return d + 'Z'
+const COMPACT = {
+  box: 32,
+  a: 'M12 5H26L18 27H4Z',
+  b: 'M17 2H31L23 24H9Z',
 }
-
 const round = (v) => Math.round(v * 100) / 100
 
-/**
- * One sheet, two passes. The orange drum fills the sheet; the blue drum is a
- * keyline of the same drawing, offset up and right — the plate that never
- * quite registered. Where the blue keyline lands *on* the sheet, both drums
- * have hit the same fibre, so that stretch is the overprint colour. Drawn in
- * three clipped paths rather than with mix-blend-mode, because a favicon and
- * a PDF both have to render this without CSS.
- */
-function markBody({ box, tear, offset, stroke }) {
-  const d = sheetPath(box, tear)
-  const t = `translate(${offset} ${-offset})`
-  return `<path d="${d}" fill="var(--riso-a, #ff4a1c)"/>
-    <path d="${d}" transform="${t}" fill="none" stroke="var(--riso-b, #1a7ff0)" stroke-width="${stroke}" stroke-linejoin="round"/>
-    <g clip-path="url(#clip)"><path d="${d}" transform="${t}" fill="none" stroke="var(--riso-overprint, #46212a)" stroke-width="${stroke}" stroke-linejoin="round"/></g>`
+function markBody(v, clipId) {
+  return `<defs><clipPath id="${clipId}"><path d="${v.a}"/></clipPath></defs>
+    <path d="${v.a}" fill="var(--rs-mark-a, #F2542D)"/>
+    <path d="${v.b}" fill="var(--rs-mark-b, #1D63FF)"/>
+    <path d="${v.b}" fill="var(--rs-mark-over, #2B192E)" clip-path="url(#${clipId})"/>`
 }
 
-/** Optical centring: the drawn bounds, not the box, are what sit in the square. */
-function bounds({ box, tear, offset, stroke }) {
-  const xs = [box.x, box.x + box.w + offset]
-  const ys = [box.y - offset, box.y + box.h, ...tear.map((p) => p[1])]
-  return {
-    x0: Math.min(...xs) - stroke / 2,
-    x1: Math.max(...xs) + stroke / 2,
-    y0: Math.min(...ys) - stroke / 2,
-    y1: Math.max(...ys) + stroke / 2,
-  }
-}
+const markSVG = (v, size, clipId) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${v.box} ${v.box}" width="${size}" height="${size}" role="img" aria-label="Riso Co.">${markBody(v, clipId)}</svg>
+`
 
-function centre(variant, size) {
-  const b = bounds(variant)
-  return `translate(${round((size - (b.x1 - b.x0)) / 2 - b.x0)} ${round((size - (b.y1 - b.y0)) / 2 - b.y0)})`
-}
+const compactSVG = (v, size, clipId) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${v.box} ${v.box}" width="${size}" height="${size}" role="img" aria-label="Riso Co. — overprint">
+    <defs><clipPath id="${clipId}"><path d="${v.a}"/></clipPath></defs>
+    <path d="${v.b}" fill="var(--rs-mark-over, #2B192E)" clip-path="url(#${clipId})"/>
+  </svg>
+`
 
-function markSVG({ size = 64, box, tear, offset, stroke }) {
-  const d = sheetPath(box, tear)
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="Riso Co.">
-  <defs><clipPath id="clip"><path d="${d}"/></clipPath></defs>
-  <g transform="${centre({ box, tear, offset, stroke }, size)}">${markBody({ box, tear, offset, stroke })}</g>
+const mono = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Riso Co. mono">
+  <path d="${MARK.a}" fill="currentColor"/><path d="${MARK.b}" fill="currentColor"/>
 </svg>
 `
-}
 
-/* 64 grid: sheet 11..53 × 13..42, seven ridge points with two deep bites,
-   keyline 2.2 up-right. Three points read as a bookmark; seven read as stock. */
-const MARK_BOX = { x: 11, y: 13, w: 42, h: 29 }
-const MARK_TEAR = deckle(53, 11, 42, 6.5, 7, 412, 3)
-const MARK = { box: MARK_BOX, tear: MARK_TEAR, offset: 2.2, stroke: 1.9 }
-const mark = markSVG({ size: 64, ...MARK })
-
-/* 32 grid: four teeth and a heavier keyline — at 16px a 1.1 unit stroke is
-   sub-pixel, so the compact mark spends its budget on the frame instead. */
-const COMPACT_BOX = { x: 6, y: 7, w: 20, h: 15 }
-const COMPACT_TEAR = deckle(26, 6, 22, 3.4, 2, 412)
-const COMPACT = { box: COMPACT_BOX, tear: COMPACT_TEAR, offset: 1.5, stroke: 2.6 }
-const compact = markSVG({ size: 32, ...COMPACT })
+const mark = markSVG(MARK, 64, 'rs-mark')
+const compact = compactSVG(COMPACT, 32, 'rs-compact')
 
 /* ---------- the wordmark ------------------------------------------------ */
 
@@ -203,7 +148,7 @@ const WM_OFFSET = round(word.height * GHOST)
 const wordmark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${WM_W} ${WM_H}" width="${WM_W}" height="${WM_H}" role="img" aria-label="riso co.">
   <!-- Space Grotesk 700, outlined by scripts/riso-wordmark.py. Never set as live text. -->
   <g transform="scale(${round(WM_H / word.height)}) translate(${round(-parseFloat(word.viewBox.split(' ')[0]))} ${round(-parseFloat(word.viewBox.split(' ')[1]))})">
-    <path d="${word.d}" transform="translate(${WM_OFFSET} ${-WM_OFFSET})" fill="var(--riso-b, #1a7ff0)"/>
+    <path d="${word.d}" transform="translate(${WM_OFFSET} ${-WM_OFFSET})" fill="var(--riso-b, #1d63ff)"/>
     <path d="${word.d}" fill="currentColor"/>
   </g>
 </svg>
@@ -215,12 +160,9 @@ const LOCK_MARK = 56
 const LOCK_WM_H = 30
 const LOCK_WM_W = round((word.width / word.height) * LOCK_WM_H)
 const lockup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${round(14 + LOCK_MARK + 16 + LOCK_WM_W)} 72" role="img" aria-label="Riso Co. — Atelier Ink">
-  <defs><clipPath id="lk"><path d="${sheetPath(MARK_BOX, MARK_TEAR)}"/></clipPath></defs>
-  <g transform="translate(0 4) scale(${round(LOCK_MARK / 64)})">
-    ${markBody({ ...MARK, stroke: 2.6 })}
-  </g>
+  <g transform="translate(0 4) scale(${round(LOCK_MARK / 64)})">${markBody(MARK, 'rs-lockup')}</g>
   <g transform="translate(${round(14 + LOCK_MARK + 16)} 12) scale(${round(LOCK_WM_H / word.height)}) translate(${round(-parseFloat(word.viewBox.split(' ')[0]))} ${round(-parseFloat(word.viewBox.split(' ')[1]))})">
-    <path d="${word.d}" transform="translate(${WM_OFFSET} ${-WM_OFFSET})" fill="var(--riso-b, #1a7ff0)"/>
+    <path d="${word.d}" transform="translate(${WM_OFFSET} ${-WM_OFFSET})" fill="var(--riso-b, #1d63ff)"/>
     <path d="${word.d}" fill="currentColor"/>
   </g>
   <text x="${round(14 + LOCK_MARK + 16)}" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" letter-spacing="1.7" fill="var(--riso-muted, #6b6155)">ATELIER INK / BERLIN</text>
@@ -231,16 +173,16 @@ const lockup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${round(14 
 
 const favicon = (px) => {
   const grid = px <= 32 ? 32 : 64
-  const variant = px <= 32 ? COMPACT : MARK
-  const d = sheetPath(variant.box, variant.tear)
+  const v = px <= 32 ? COMPACT : MARK
   const scale = round(px / grid)
+  const clip = `rs-fav-${px}`
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${px} ${px}" width="${px}" height="${px}">
-  <rect width="${px}" height="${px}" fill="#f1ede4"/>
-  <g transform="scale(${scale}) ${centre(variant, grid)}">
-    <defs><clipPath id="f${px}"><path d="${d}"/></clipPath></defs>
-    <path d="${d}" fill="#ff4a1c"/>
-    <path d="${d}" transform="translate(${variant.offset} ${-variant.offset})" fill="none" stroke="#1a7ff0" stroke-width="${variant.stroke}" stroke-linejoin="round"/>
-    <g clip-path="url(#f${px})"><path d="${d}" transform="translate(${variant.offset} ${-variant.offset})" fill="none" stroke="#46212a" stroke-width="${variant.stroke}" stroke-linejoin="round"/></g>
+  <rect width="${px}" height="${px}" fill="#F1EDE4"/>
+  <g transform="scale(${scale})">
+    <defs><clipPath id="${clip}"><path d="${v.a}"/></clipPath></defs>
+    ${px <= 32
+      ? `<path d="${v.b}" fill="#2B192E" clip-path="url(#${clip})"/>`
+      : `<path d="${v.a}" fill="#F2542D"/><path d="${v.b}" fill="#1D63FF"/><path d="${v.b}" fill="#2B192E" clip-path="url(#${clip})"/>`}
   </g>
 </svg>
 `
@@ -254,12 +196,8 @@ const favicon = (px) => {
  */
 const TS = `/* Generated by scripts/build-riso-brand.mjs — do not edit. */
 
-export const SHEET = '${sheetPath(MARK_BOX, MARK_TEAR)}'
-export const SHEET_COMPACT = '${sheetPath(COMPACT_BOX, COMPACT_TEAR)}'
-export const MARK_OFFSET = ${MARK.offset}
-export const MARK_STROKE = ${MARK.stroke}
-export const COMPACT_OFFSET = ${COMPACT.offset}
-export const COMPACT_STROKE = ${COMPACT.stroke}
+export const MARK = { box: 64, a: 'M24 10H52L36 54H8Z', b: 'M34 4H62L46 48H18Z' } as const
+export const COMPACT = { box: 32, a: 'M12 5H26L18 27H4Z', b: 'M17 2H31L23 24H9Z' } as const
 export const WORDMARK_D = '${word.d}'
 export const WORDMARK_VIEWBOX = '${word.viewBox}'
 export const WORDMARK_RATIO = ${round(word.width / word.height)}
@@ -278,16 +216,20 @@ const write = (path, body) => {
 
 write(join(PUBLIC, 'mark.svg'), mark)
 write(join(PUBLIC, 'mark-compact.svg'), compact)
+write(join(PUBLIC, 'mark-mono.svg'), mono)
+write(join(PUBLIC, 'glyph.svg'), mark)
 write(join(PUBLIC, 'wordmark.svg'), wordmark)
 write(join(PUBLIC, 'lockup.svg'), lockup)
-write(join(PUBLIC, 'favicons/favicon.svg'), favicon(64))
+write(join(PUBLIC, 'favicons/favicon.svg'), favicon(32))
 write(join(PUBLIC, 'favicons/favicon-16.svg'), favicon(16))
 write(join(PUBLIC, 'favicons/favicon-32.svg'), favicon(32))
 write(join(PUBLIC, 'favicons/favicon-180.svg'), favicon(180))
 write(join(DESIGN, 'mark.svg'), mark)
+write(join(DESIGN, 'mark-compact.svg'), compact)
+write(join(DESIGN, 'mark-mono.svg'), mono)
 write(join(DESIGN, 'wordmark.svg'), wordmark)
 
 console.log(`tokens   ${tokens.semantic.light.length} light / ${tokens.semantic.dark.length} dark / ${tokens.contrast.length} measured pairs`)
-console.log(`mark     64 grid, 2 passes, ${MARK_TEAR.length} ridge points`)
+console.log(`mark     64 grid, two sheared sheets; compact = overprint`)
 console.log(`wordmark ${WM_W} × ${WM_H} from ${word.text}`)
 console.log(`lockup   ${round(14 + LOCK_MARK + 16 + LOCK_WM_W)} × 72`)

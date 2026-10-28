@@ -1,9 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
-  <rect width="180" height="180" fill="#f1ede4"/>
-  <g transform="scale(2.81) translate(-1.1 3.55)">
-    <defs><clipPath id="f180"><path d="M11 13H53V42L47.27 38.23L40.92 38.61L35.98 44.68L28.58 40.87L23.84 40.28L17.91 46.11L11 39.2Z"/></clipPath></defs>
-    <path d="M11 13H53V42L47.27 38.23L40.92 38.61L35.98 44.68L28.58 40.87L23.84 40.28L17.91 46.11L11 39.2Z" fill="#ff4a1c"/>
-    <path d="M11 13H53V42L47.27 38.23L40.92 38.61L35.98 44.68L28.58 40.87L23.84 40.28L17.91 46.11L11 39.2Z" transform="translate(2.2 -2.2)" fill="none" stroke="#1a7ff0" stroke-width="1.9" stroke-linejoin="round"/>
-    <g clip-path="url(#f180)"><path d="M11 13H53V42L47.27 38.23L40.92 38.61L35.98 44.68L28.58 40.87L23.84 40.28L17.91 46.11L11 39.2Z" transform="translate(2.2 -2.2)" fill="none" stroke="#46212a" stroke-width="1.9" stroke-linejoin="round"/></g>
+  <rect width="180" height="180" fill="#F1EDE4"/>
+  <g transform="scale(2.81)">
+    <defs><clipPath id="rs-fav-180"><path d="M24 10H52L36 54H8Z"/></clipPath></defs>
+    <path d="M24 10H52L36 54H8Z" fill="#F2542D"/><path d="M34 4H62L46 48H18Z" fill="#1D63FF"/><path d="M34 4H62L46 48H18Z" fill="#2B192E" clip-path="url(#rs-fav-180)"/>
   </g>
 </svg>

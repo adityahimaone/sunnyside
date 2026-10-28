@@ -21,17 +21,17 @@
     },
     {
       "name": "ink-orange",
-      "value": "#ff4a1c",
+      "value": "#f2542d",
       "role": "Fluorescent orange drum, fill only"
     },
     {
       "name": "ink-blue",
-      "value": "#1a7ff0",
+      "value": "#1d63ff",
       "role": "Federal blue drum, the second pass"
     },
     {
       "name": "ink-overprint",
-      "value": "#46212a",
+      "value": "#2b192e",
       "role": "Where both drums land on the same fibre"
     },
     {
@@ -59,12 +59,12 @@
       },
       {
         "name": "sheet",
-        "value": "#ff4a1c",
+        "value": "#f2542d",
         "role": "Orange drum: poster fills and blocks"
       },
       {
         "name": "sheet-alt",
-        "value": "#1a7ff0",
+        "value": "#1d63ff",
         "role": "Blue drum: the cobalt edition"
       },
       {
@@ -104,22 +104,22 @@
       },
       {
         "name": "display-a",
-        "value": "#ff4a1c",
+        "value": "#f2542d",
         "role": "Fluorescent fill, never a paragraph"
       },
       {
         "name": "display-b",
-        "value": "#1a7ff0",
+        "value": "#1d63ff",
         "role": "Blue fill and the misregistered ghost"
       },
       {
         "name": "ghost",
-        "value": "#1a7ff0",
+        "value": "#1d63ff",
         "role": "The second impression in type, 2.5px up and right"
       },
       {
         "name": "overprint",
-        "value": "#46212a",
+        "value": "#2b192e",
         "role": "The third colour, only where passes cross"
       },
       {
@@ -171,12 +171,12 @@
       },
       {
         "name": "sheet",
-        "value": "#ff4a1c",
+        "value": "#f2542d",
         "role": "Orange drum, still luminous"
       },
       {
         "name": "sheet-alt",
-        "value": "#1a7ff0",
+        "value": "#1d63ff",
         "role": "Blue drum, still luminous"
       },
       {
@@ -216,12 +216,12 @@
       },
       {
         "name": "display-a",
-        "value": "#ff4a1c",
+        "value": "#f2542d",
         "role": "Fluorescent fill, never a paragraph"
       },
       {
         "name": "display-b",
-        "value": "#1a7ff0",
+        "value": "#1d63ff",
         "role": "Blue fill and the misregistered ghost"
       },
       {
@@ -408,8 +408,8 @@
       "label": "Carbon on the orange drum",
       "theme": "light",
       "a": "#1b1712",
-      "b": "#ff4a1c",
-      "ratio": 5.3,
+      "b": "#f2542d",
+      "ratio": 5.16,
       "level": "AA",
       "use": "Every word printed on the orange sheet"
     },
@@ -417,9 +417,9 @@
       "label": "Carbon on the blue drum",
       "theme": "light",
       "a": "#1b1712",
-      "b": "#1a7ff0",
-      "ratio": 4.53,
-      "level": "AA",
+      "b": "#1d63ff",
+      "ratio": 3.63,
+      "level": "AA large",
       "use": "The cobalt edition, same master"
     },
     {
@@ -443,9 +443,9 @@
     {
       "label": "Fluorescent orange as type",
       "theme": "light",
-      "a": "#ff4a1c",
+      "a": "#f2542d",
       "b": "#f1ede4",
-      "ratio": 2.88,
+      "ratio": 2.96,
       "level": "Fail",
       "use": "Fails 3:1. Fills only, never letters"
     },
@@ -516,8 +516,8 @@
       "label": "Carbon on the orange drum",
       "theme": "dark",
       "a": "#1b1712",
-      "b": "#ff4a1c",
-      "ratio": 5.3,
+      "b": "#f2542d",
+      "ratio": 5.16,
       "level": "AA",
       "use": "The sheet is unchanged in the darkroom"
     },

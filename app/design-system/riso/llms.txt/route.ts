@@ -23,11 +23,11 @@ Misregistration is the identity, not a defect. Every display element is printed 
 
 ## Overprint
 
-Where the two passes coincide, the third colour (\`overprint\`, #46212a) is rendered as a third clipped path — a fill, an offset stroke, and an offset stroke clipped to the first path. No \`mix-blend-mode\` is used anywhere, so the identity survives a favicon, a PDF export, and a client with blending disabled.
+Where the two passes coincide, the third colour (\`overprint\`, #2b192e) is rendered as a third solid fill clipped to the orange sheet. No stroke and no \`mix-blend-mode\` is used anywhere, so the identity survives a favicon, a PDF export, and a client with blending disabled.
 
 ## Mark
 
-A drawn two-pass rectangle on a 64-unit grid, not a monogram: the bottom edge carries seven ridge points with two deep bites, from a Mulberry32 generator (seed 412), so the sheet reads as torn stock rather than a torn letter. Three points read as a bookmark; seven read as paper. One path, two strokes, optically centred on its drawn bounds rather than its box. Drawn at 64, 32 and 16px; the 16px favicon is a hand-tuned compact variant on a 26-unit grid with two points and a heavier 2.6 stroke so the tear does not disappear. A registration target is part of the family.
+Two sheared, unstroked sheets on a 64 grid: orange \`M24 10H52L36 54H8Z\`, blue \`M34 4H62L46 48H18Z\`, shifted diagonally like two drum passes. The overlap is a sharp overprint polygon (\`#2B192E\`), drawn as a clipped blue sheet — no stroke, no circle, no blend mode. The compact isolates the overprint on a 32 grid; the mono is the union of both sheets in currentColor. Three fills, no outlines. Five families were drawn in the v2.3 bake-off (architectural monogram, offset planes, louvers, ribbon, horizon); offset planes kept the press behaviour.
 
 ## Wordmark
 
@@ -84,7 +84,7 @@ One pair fails and is kept visible as a rule rather than fixed by drifting the c
 
 ## Not verified
 
-Print output. Every claim above is about the screen build. Drum registration on an actual risograph, ink absorption on 270gsm vellum, and the overprint colour under a real second pass have not been proofed — the #46212a value is a screen approximation of a subtractive result.
+Print output. Every claim above is about the screen build. Drum registration on an actual risograph, ink absorption on 270gsm vellum, and the overprint colour under a real second pass have not been proofed — the #2b192e value is a screen approximation of a subtractive result.
 
 Source: https://adityahimaone.space/design-system/riso
 `

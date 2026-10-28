@@ -21,6 +21,14 @@
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
+
+  /* On paper the isolated overprint is the dark intersection. On safelight the
+     same silhouette inverts to paper so it stays legible at 16/32px. */
+  --rs-compact-ink: var(--rs-overprint);
+}
+
+.page[data-theme='dark'] {
+  --rs-compact-ink: var(--rs-stock-paper);
 }
 
 /* A dot screen over the whole sheet. Printed, not photographed: it is a
@@ -441,6 +449,14 @@ a.link:hover {
 .poster > * {
   position: relative;
   z-index: 1;
+}
+
+/* The orange sheet disappears into an orange poster; the mark sits on a
+   paper swatch so both passes are visible. */
+.posterMark {
+  display: inline-flex;
+  background: var(--rs-surface);
+  padding: 8px;
 }
 
 .posterTop {
@@ -868,6 +884,7 @@ a.link:hover {
 
 .familyRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   gap: clamp(20px, 2.6vw, 38px);
   padding-bottom: 20px;
@@ -2070,6 +2087,17 @@ a.link:hover {
 }
 
 @media (max-width: 720px) {
+  /* The note drops under the name rather than pushing the grid past the shell. */
+  .explorations li {
+    grid-template-columns: 22px minmax(0, 1fr);
+    row-gap: 3px;
+  }
+
+  .explorations li em {
+    grid-column: 2;
+    text-align: left;
+  }
+
   .page {
     font-size: 1rem;
   }

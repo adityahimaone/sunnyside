@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Riso Co. — overprint">
+    <defs><clipPath id="rs-compact"><path d="M12 5H26L18 27H4Z"/></clipPath></defs>
+    <path d="M17 2H31L23 24H9Z" fill="var(--rs-mark-over, #2B192E)" clip-path="url(#rs-compact)"/>
+  </svg>

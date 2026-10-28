@@ -21,7 +21,7 @@ export function FooterDemo() {
   const [drum, setDrum] = React.useState<'a' | 'b'>('a')
   const [seed, setSeed] = React.useState(23)
 
-  const sheet = drum === 'a' ? '#ff4a1c' : '#1a7ff0'
+  const sheet = drum === 'a' ? '#f2542d' : '#1d63ff'
 
   return (
     <div className={styles.specimen}>

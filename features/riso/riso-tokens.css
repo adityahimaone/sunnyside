@@ -9,16 +9,16 @@
   --rs-stock-paper: #f1ede4;
   --rs-stock-deep: #e8e1d3;
   --rs-ink-carbon: #1b1712;
-  --rs-ink-orange: #ff4a1c;
-  --rs-ink-blue: #1a7ff0;
-  --rs-ink-overprint: #46212a;
+  --rs-ink-orange: #f2542d;
+  --rs-ink-blue: #1d63ff;
+  --rs-ink-overprint: #2b192e;
   --rs-steel: #a3a9b2;
   --rs-safelight: #141110;
 
   --rs-surface: #f1ede4;
   --rs-surface-alt: #e8e1d3;
-  --rs-sheet: #ff4a1c;
-  --rs-sheet-alt: #1a7ff0;
+  --rs-sheet: #f2542d;
+  --rs-sheet-alt: #1d63ff;
   --rs-on-sheet: #1b1712;
   --rs-ink: #1b1712;
   --rs-ink-muted: #6b6155;
@@ -26,10 +26,10 @@
   --rs-rule-strong: #1b1712;
   --rs-accent: #c22e08;
   --rs-accent-alt: #0e3f8f;
-  --rs-display-a: #ff4a1c;
-  --rs-display-b: #1a7ff0;
-  --rs-ghost: #1a7ff0;
-  --rs-overprint: #46212a;
+  --rs-display-a: #f2542d;
+  --rs-display-b: #1d63ff;
+  --rs-ghost: #1d63ff;
+  --rs-overprint: #2b192e;
   --rs-field: #fbf8f0;
   --rs-field-border: #8c8274;
   --rs-focus: #1b1712;
@@ -46,8 +46,8 @@
 [data-riso-root][data-theme="dark"] {
   --rs-surface: #141110;
   --rs-surface-alt: #1c1815;
-  --rs-sheet: #ff4a1c;
-  --rs-sheet-alt: #1a7ff0;
+  --rs-sheet: #f2542d;
+  --rs-sheet-alt: #1d63ff;
   --rs-on-sheet: #1b1712;
   --rs-ink: #f1ede4;
   --rs-ink-muted: #beb3a2;
@@ -55,8 +55,8 @@
   --rs-rule-strong: #f1ede4;
   --rs-accent: #ff7a4d;
   --rs-accent-alt: #6faeff;
-  --rs-display-a: #ff4a1c;
-  --rs-display-b: #1a7ff0;
+  --rs-display-a: #f2542d;
+  --rs-display-b: #1d63ff;
   --rs-ghost: #6faeff;
   --rs-overprint: #6b3040;
   --rs-field: #1c1815;
