@@ -120,10 +120,9 @@ export function About() {
               <div data-about-now>
                 <div className={styles.nowCard}>
                   <b>Now</b>
-                  Latest release: <strong>Habit Tracker</strong>, a streak that
-                  survives a missed day.
+                  Latest release: <strong>Switchyard</strong>.
                   <br />
-                  Next: more small tools, fewer dashboards.
+                  Next: a few small tools, then a break.
                 </div>
               </div>
             </Reveal>

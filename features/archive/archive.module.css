@@ -143,21 +143,61 @@
   background: var(--ss-tangerine);
 }
 
+/* Liquid glass: a thin frosted sheet with a specular top edge and a warm
+   bounce picked up from the paper behind it. No bottom border — the glass has
+   to end in the page, not on a rule.
+   `prefers-reduced-transparency` drops all of it back to solid paper below. */
 .bar {
-  border-bottom: 1px solid transparent;
-  background: color-mix(in srgb, var(--ss-paper) 86%, transparent);
-  -webkit-backdrop-filter: blur(12px) saturate(1.15);
-  backdrop-filter: blur(12px) saturate(1.15);
+  position: relative;
+  isolation: isolate;
+  border-bottom: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ss-paper-hi) 74%, transparent) 0%,
+    color-mix(in srgb, var(--ss-paper) 52%, transparent) 62%,
+    color-mix(in srgb, var(--ss-paper) 68%, transparent) 100%
+  );
+  -webkit-backdrop-filter: blur(20px) saturate(1.85) brightness(1.04);
+  backdrop-filter: blur(20px) saturate(1.85) brightness(1.04);
+  box-shadow: inset 0 1px 0 0 color-mix(in srgb, #fff 68%, transparent);
   transition:
     background-color var(--ss-ui) var(--ss-ease),
     border-color var(--ss-ui) var(--ss-ease),
-    box-shadow var(--ss-ui) var(--ss-ease);
+    box-shadow var(--ss-ui) var(--ss-ease),
+    -webkit-backdrop-filter var(--ss-ui) var(--ss-ease),
+    backdrop-filter var(--ss-ui) var(--ss-ease);
+}
+
+.bar::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(
+      130% 180% at 8% -60%,
+      color-mix(in srgb, #fff 62%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      90% 150% at 92% 170%,
+      color-mix(in srgb, var(--ss-butter) 26%, transparent),
+      transparent 72%
+    );
+  pointer-events: none;
 }
 
 .barScrolled {
-  border-bottom-color: var(--ss-line);
-  background: color-mix(in srgb, var(--ss-paper) 94%, transparent);
-  box-shadow: 0 10px 24px -22px var(--ss-ink);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ss-paper-hi) 88%, transparent) 0%,
+    color-mix(in srgb, var(--ss-paper) 72%, transparent) 100%
+  );
+  -webkit-backdrop-filter: blur(26px) saturate(2) brightness(1.06);
+  backdrop-filter: blur(26px) saturate(2) brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, #fff 78%, transparent),
+    0 18px 40px -30px var(--ss-ink);
 }
 
 .inner {
@@ -393,9 +433,11 @@
   z-index: 70;
   inset: 0;
   display: flex;
+  height: 100svh;
+  min-height: 0;
   flex-direction: column;
-  overflow-y: auto;
-  padding: 1.1rem clamp(1rem, 4vw, 3.5rem) 2rem;
+  overflow: hidden;
+  padding: 1.1rem clamp(1rem, 4vw, 3.5rem) 1.5rem;
   background: var(--ss-cobalt);
   color: var(--ss-paper-hi);
 }
@@ -406,6 +448,7 @@
 
 .menuTop {
   display: flex;
+  flex: none;
   max-width: var(--ss-shell);
   width: 100%;
   align-items: center;
@@ -435,35 +478,55 @@
   outline-color: var(--ss-butter);
 }
 
+/* Rows share the leftover height equally and the type is measured in cqh
+   against that share, so the list always fills the screen and never scrolls.
+   `--rows` is the number of links, set inline by the header. */
 .menuNav {
   display: flex;
   max-width: var(--ss-shell);
   width: 100%;
+  min-height: 0;
   flex: 1;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.1rem;
+  justify-content: stretch;
+  gap: 0;
   margin-inline: auto;
-  padding-block: 2rem;
+  padding-block: 0;
+  container-type: size;
 }
 
 .menuLink {
   display: flex;
-  align-items: baseline;
+  min-height: 0;
+  flex: 1 1 0;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.7rem 0;
+  overflow: hidden;
+  padding: 0;
   border-bottom: 1px solid var(--ss-paper-line);
   color: var(--ss-paper-hi);
   font-family: var(--ss-display);
-  font-size: clamp(1.9rem, 8vw, 3rem);
+  /* 88% of one row's height, capped so very tall screens stay sane. */
+  font-size: clamp(1.1rem, min(9vw, calc(88cqh / var(--rows, 6))), 4.5rem);
   font-weight: 800;
   letter-spacing: -0.045em;
-  line-height: 1;
+  line-height: 0.94;
   text-decoration: none;
   transition:
     color var(--ss-fast) var(--ss-ease),
     transform var(--ss-fast) var(--ss-ease);
+}
+
+/* Same deal on a phone: a two-word label takes two lines instead of being
+   clipped by the row. */
+@media (max-width: 900px) {
+  .menuLink {
+    /* Two lines have to fit inside one row here, so the size comes down. */
+    font-size: clamp(1.1rem, min(8vw, calc(74cqh / var(--rows, 6))), 3.4rem);
+    white-space: normal;
+    text-wrap: balance;
+  }
 }
 
 .menuLink:hover {
@@ -493,6 +556,7 @@
 
 .menuFoot {
   display: flex;
+  flex: none;
   max-width: var(--ss-shell);
   width: 100%;
   flex-wrap: wrap;
@@ -1040,10 +1104,15 @@
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .bar {
+  .bar,
+  .barScrolled {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     background: var(--ss-paper);
+  }
+
+  .bar::before {
+    display: none;
   }
 
   .grain {

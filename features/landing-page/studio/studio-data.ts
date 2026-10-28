@@ -54,13 +54,12 @@ export const HERO_FACTS = [
 export const ABOUT_FACTS = [
   {
     key: 'Day job',
-    value:
-      'Design engineer at Niqcode — product interfaces for manufacturing, developer tools and finance.',
+    value: 'Frontend Engineer at Fast 8 Group, working on product interfaces.',
   },
   {
     key: 'Practice',
     value:
-      'Four years in React and TypeScript. The browser is where I decide, not just deliver.',
+      'Four years in React and TypeScript. I settle the interface calls in the browser.',
   },
   {
     key: 'Home',
@@ -69,8 +68,7 @@ export const ABOUT_FACTS = [
   },
   {
     key: 'Off-screen',
-    value:
-      'Badminton, coffee that takes too long, and crates of records with one good song.',
+    value: 'Watching movies with a coffee in reach.',
   },
 ] as const
 

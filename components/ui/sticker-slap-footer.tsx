@@ -341,6 +341,8 @@ export type Credit = { role: string; name: string }
 export interface StickerSlapFooterProps {
   /** The giant script wordmark. Letters a–z, `!` and `.`; anything else is a space. */
   wordmark?: string
+  /** The small wordmark in the top bar. Defaults to `wordmark`. */
+  logoWordmark?: string
   /** Where the small wordmark in the top bar points. */
   homeHref?: string
   /** The starburst link in the top-left corner. `""` hides it. */
@@ -906,6 +908,7 @@ type Placed = { x: number; y: number }
 
 export default function StickerSlapFooter({
   wordmark = 'sunny',
+  logoWordmark = wordmark,
   homeHref = '#',
   navLabel = 'work',
   navHref = '#',
@@ -961,7 +964,7 @@ export default function StickerSlapFooter({
   } | null>(null)
 
   const word = React.useMemo(() => layoutScript(wordmark), [wordmark])
-  const small = word
+  const small = React.useMemo(() => layoutScript(logoWordmark), [logoWordmark])
   const pad = STROKE / 2 + 0.6
   const vbX = -1.4 - pad
   const vbY = word.top - pad
@@ -1415,7 +1418,7 @@ export default function StickerSlapFooter({
         <a
           className="ssf-logo"
           {...linkProps(homeHref)}
-          aria-label={wordmark + ', home'}
+          aria-label={logoWordmark + ', home'}
         >
           <svg viewBox={smallVb} aria-hidden="true" focusable="false">
             <path

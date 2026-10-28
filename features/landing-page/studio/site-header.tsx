@@ -8,7 +8,7 @@ import {
 } from 'motion/react'
 import { ArrowUpRight, Menu, X } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { type CSSProperties, useEffect, useRef, useState } from 'react'
 
 import {
   SunnysideMark,
@@ -132,7 +132,7 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
             <a
               href="#home"
               className={archive.brand}
-              aria-label="Sunnyside — Aditya Himawan, back to the top"
+              aria-label="Sunnyside, Aditya Himawan, back to the top"
               onClick={(event) => {
                 event.preventDefault()
                 go('home')
@@ -189,7 +189,7 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
           <motion.div
             ref={panelRef}
             id="chapter-menu"
-            className={archive.menuPanel}
+            className={cn(archive.menuPanel, styles.menuPanel)}
             initial={reduced ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -215,8 +215,9 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
               </div>
 
               <motion.nav
-                className={archive.menuNav}
+                className={cn(archive.menuNav, styles.menuNav)}
                 aria-label="Site"
+                style={{ '--rows': DESTINATIONS.length } as CSSProperties}
                 initial={reduced ? false : { y: 16, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{
@@ -229,7 +230,7 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
                   <Link
                     key={destination.href}
                     href={destination.href}
-                    className={archive.menuLink}
+                    className={cn(archive.menuLink, styles.menuLink)}
                     onClick={() => setOpen(false)}
                   >
                     <span className={styles.menuLinkCopy}>
@@ -245,23 +246,7 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
                 ))}
               </motion.nav>
 
-              <div className={styles.menuChapters}>
-                <span className={archive.menuLabel}>On this page</span>
-                <div className={styles.menuChapterRow}>
-                  {NAV.map((chapter) => (
-                    <button
-                      key={chapter.id}
-                      type="button"
-                      className={styles.menuChapter}
-                      onClick={() => go(chapter.id)}
-                    >
-                      {chapter.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className={archive.menuFoot}>
+              <div className={cn(archive.menuFoot, styles.menuFoot)}>
                 <div className={archive.menuFootLinks}>
                   <Link
                     href="/music"

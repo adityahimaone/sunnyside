@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useReducedMotion } from 'motion/react'
 
 import StickerSlapFooter from '@/components/ui/sticker-slap-footer'
@@ -13,25 +12,19 @@ export function SiteFooter() {
 
   return (
     <div id="outro" className={styles.footerWrap}>
-      <div className={styles.footerNote}>
-        <span>End of side A · written and built in Jakarta</span>
-        <Link
-          href="/sunnyside"
-          className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--ink)]"
-        >
-          The Sunnyside system <span aria-hidden>↗</span>
-        </Link>
+      <div className={styles.footerTop}>
         <button
           type="button"
           onClick={() => scrollToSection('home', reduced)}
-          className="inline-flex items-center gap-1.5 tracking-[0.16em] uppercase transition-colors hover:text-[var(--ink)]"
+          className={styles.footerTopButton}
         >
           Back to the top <span aria-hidden>↑</span>
         </button>
       </div>
 
       <StickerSlapFooter
-        wordmark="aditya"
+        wordmark="himaone"
+        logoWordmark="aditya"
         homeHref="#home"
         navLabel="hi"
         navHref="#contact"
@@ -65,7 +58,7 @@ export function SiteFooter() {
           { kind: 'bolt' },
         ]}
         credits={[
-          { role: 'design & code', name: 'aditya himawan' },
+          { role: 'design & code', name: 'himaone' },
           { role: 'stickers', name: 'drawn in code, peel freely' },
           { role: 'type', name: 'syne, geist, geist mono' },
         ]}

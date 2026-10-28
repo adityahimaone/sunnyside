@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useScroll } from 'motion/react'
 import { ArrowUpRight, Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { type CSSProperties, useEffect, useRef, useState } from 'react'
 
 import {
   SunnysideMark,
@@ -201,7 +201,11 @@ export function ArchiveHeader() {
               </button>
             </div>
 
-            <nav className={styles.menuNav} aria-label="Archive sections">
+            <nav
+              className={styles.menuNav}
+              aria-label="Archive sections"
+              style={{ '--rows': ROUTES.length } as CSSProperties}
+            >
               {ROUTES.map((route) => (
                 <Link
                   key={route.href}
