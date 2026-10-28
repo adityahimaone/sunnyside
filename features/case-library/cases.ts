@@ -41,14 +41,14 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     href: '/design-system/vitrine',
     tagline: 'A glass case for a low-resolution light.',
     description:
-      'Glass containers, a dithered information layer, a Split V mark, ten native form controls and an honest audit. Case 02 asks whether depth can stay legible.',
+      'Glass containers, a dithered information layer, a folded ribbon V, ten native form controls and an honest audit. Case 02 asks whether depth can stay legible.',
     status: 'Shipped · 2026',
     role: 'Identity · design system · forms · dither',
     material: 'Glass + dither + Signal',
     cover: '/brand/vitrine/vitrine-brandkit.png',
     coverAlt:
-      'The Vitrine brand board: Split V mark, Case and Frost palette, Signal field, type specimens, favicon and form specimen.',
-    tags: ['Glass', 'Dither', 'Signal', 'Forms'],
+      'The Vitrine brand board: the folded V mark with a Signal label, Case and Frost palette, Signal field, type specimens, favicon and form specimen.',
+    tags: ['Glass', 'Dither', 'Ribbon', 'Forms'],
     tone: 'vitrine',
   },
   {

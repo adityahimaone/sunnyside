@@ -12,7 +12,9 @@ smooth glass container and a hard dithered information layer.
 - Board: [`vitrine-brandkit.png`](./vitrine-brandkit.png) (3000 × 2250)
 - Board source: [`brandkit.html`](./brandkit.html)
 - Brief: [`brief.md`](./brief.md)
+- Story and decision cards: [`story.md`](./story.md)
 - Explorations: [`explorations/marks.html`](./explorations/marks.html)
+- Audit manifest: [`audit.json`](./audit.json)
 - Agent twin: `/design-system/vitrine/llms.txt`
 - Audit: [`../../../docs/vitrine-design-system-audit.md`](../../../docs/vitrine-design-system-audit.md)
 
@@ -25,6 +27,8 @@ smooth glass container and a hard dithered information layer.
 | Promise    | Depth without fog                                                |
 | Essence    | A glass case for a low-resolution light                          |
 | Metaphor   | A lit vitrine holding one object, with a printed halftone label   |
+| Family     | Continuous ribbon                                                |
+| Gate       | v2.3 — zero circle, fill-only, 2–4 primitives, one accent        |
 | Voice      | Precise, lit, unhurried                                          |
 | Not this   | A frosted card with unreadable body copy; a 1-bit retro toy       |
 
@@ -34,39 +38,50 @@ under the words that explain it.
 
 ## 2. Mark
 
-**Split V** — two panes meeting at a point; one solid, one dithered.
+**Folded V** — one continuous ribbon folds into the V and a flat plinth; the
+plinth carries one Signal label. Two solid primitives in the primary, one in the
+compact. No stroke, no circle, no detached accent.
 
 | Property       | Value                                                        |
 | -------------- | ------------------------------------------------------------ |
 | Grid           | 64 × 64                                                      |
-| Stroke         | 13 units, square caps                                        |
-| Apex           | 32, 49                                                       |
-| Left pane      | `M16 14 32 49`, solid Case (or Frost on dark)                |
-| Right pane     | `M32 49 48 14`, 4-unit checkerboard dither                   |
-| Signal dot     | r 3.2 at 32, 49                                              |
-| Compact mark   | 15-unit strokes, solid panes, 2-unit seam, 16–24px           |
+| Family         | Continuous ribbon                                            |
+| Primary path   | `M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z`                     |
+| Label          | `rect 27,46 10×8`, Signal                                    |
+| Compact path   | `M12 6L32 42L52 6L61 12L42 58L22 58L3 12Z`                   |
+| Primitive count| 2 primary / 1 compact                                        |
+| Minimum gap    | 9 units (14% of the grid; the gate asks for 5.1)             |
 | Full mark min. | 32px                                                         |
 | Compact min.   | 16px                                                         |
 | Clear space    | Half the mark height on every side (16px at a 32px mark)     |
 
-Construction values are exact, not eyeballed. The full mark's dither is a
-4-unit checkerboard; it is not a gradient and it is not scaled. The compact mark
-is a separate drawing: solid panes so the V survives 16px, with the seam and the
-Signal dot as the only details.
+The mark is fill-only. The compact is a separate drawing with heavier arms; it
+drops the label rather than shrinking it into a speck. The mono mark and glyph
+drop the label at every size.
 
-### Explorations and why one won
+### Why the other four lost
 
-Six marks were drawn on the same 64 grid at
-[`explorations/marks.html`](./explorations/marks.html):
+All five v2.3 families were generated with the same palette and theme DNA and
+scored. The choice is silhouette and meaning, not defects.
 
-| Direction      | Result                                                             |
-| -------------- | ------------------------------------------------------------------ |
-| **Split V**    | **Kept.** Reads at 32px, ownable, carries glass + dither in one shape. |
-| Aperture       | Rejected: camera-shutter generic, collapses to a dot at 16px.       |
-| Case tile      | Rejected: app-store tile with a glyph, the failure mode in the brief. |
-| Stacked panes  | Rejected: unreadable at 16px, too close to a bar chart.             |
-| Halftone V     | Rejected: dots vanish at 32px; no silhouette.                       |
-| Lens bar       | Rejected: a pill at small sizes; no letter, no meaning.             |
+| Family                 | Mark                  | Result |
+| ---------------------- | --------------------- | ------ |
+| Architectural monogram | Bracket monogram      | Lost: Huginn owns the silhouette. |
+| Offset geometric planes| Sheared sheets        | Lost: Riso owns the overprint. |
+| Brutalist louvers      | Wedge bars            | Lost: Hachure owns the ridge; reads as a bar chart at 16px. |
+| Horizon & counter-form | Shelf and keystone    | Lost: collapses into Hachure's bar-and-diamond at 16px. |
+| **Continuous ribbon**  | **Folded V**          | **Kept: one fold, one plinth, one label; open, angular and unused in the library.** |
+
+### v2.3 gate
+
+| Gate | Result | Evidence |
+| --- | --- | --- |
+| A. Zero circle / zero Venn | Pass | No `<circle>` in the family. |
+| B. Fill-only | Pass | No `stroke` in `mark.svg` or `mark-compact.svg`; the seam is a 9-unit channel. |
+| C. 2–4 primitives, one accent | Pass | Two in the primary, one in the compact; one Signal inlay. |
+| Family | Pass | Continuous ribbon, distinct from Huginn, Riso, Hachure and Sunnyside. |
+| Compact simpler | Pass | One path versus a path plus the label. |
+| Score | Pass | `score-mark.py` PASS at 16, 32 and 128px. |
 
 ## 3. Wordmark and lockups
 
@@ -84,7 +99,8 @@ The wordmark is the real type frozen as outlines: **Space Grotesk 700**,
 
 Minimums: full lockup 130px wide; wordmark 72px wide; mark 32px full, 16px
 compact. Clear space stays half the mark height. The header uses the horizontal
-lockup at 30px high; the footer uses the wordmark at 44px high.
+lockup at 30px high; the footer uses the wordmark at 44px high. The Signal label
+stays Signal in both themes.
 
 ## 4. Palette
 
@@ -95,14 +111,15 @@ lockup at 30px high; the footer uses the wordmark at 44px high.
 | `--vt-vellum`    | `#DCE4E9` | Quiet light underlay          | 6.25:1 Graphite |
 | `--vt-graphite`  | `#45525B` | Secondary text on light       | 7.40:1 on Frost |
 | `--vt-subtle`    | `#5E6D76` | Hints, placeholders on light  | 4.92:1 on Frost |
-| `--vt-signal`    | `#D9FF43` | The one loud field            | 16.99:1 with Case |
+| `--vt-signal`    | `#D9FF43` | The one loud field and label  | 16.99:1 with Case |
 | `--vt-iris`      | `#5B4BE8` | Focus, links, cool accent     | 5.34:1 on Frost |
 | `--vt-clay`      | `#B23A1D` | Error on light                | 5.49:1 on Frost |
 | `--vt-mint`      | `#7CF0C4` | Success on dark               | 14.01:1 on Case |
 
 Use by role, not as a checklist. Signal is the only field allowed to shout; the
 page gets one. Glass is a material, never a colour. The mark is Case on light and
-Frost on dark, with the Signal dot fixed. Do not recolour the dot for a campaign.
+Frost on dark, with the Signal label fixed. Do not recolour the label for a
+campaign.
 
 ## 5. Type
 
@@ -113,7 +130,9 @@ Frost on dark, with the Signal dot fixed. Do not recolour the dot for a campaign
 | Label   | Geist Mono 500    | Dates, sizes, metadata at 0.14em       |
 
 Display is tight and sentence case; labels are uppercase. Do not set a paragraph
-in Space Grotesk.
+in Space Grotesk. The typography gate is recorded on the case page: three voices,
+body 16–18, inputs 14/16 on mobile, captions 13, unitless leading, balance on
+headings, pretty on paragraphs.
 
 ## 6. Shape and material
 
@@ -134,6 +153,20 @@ Glass recipe:
 - hard line: `0 1px 0 --vt-glass-edge` — the brand's tactile edge;
 - lift: a large, very soft shadow for lighting only;
 - blur: 18px with saturate 1.45, on containers only.
+
+Theme DNA (recorded in `features/vitrine/tokens.json` and emitted as
+`--vt-dna-*`):
+
+| Key | Value | Mark uses it for | Field uses it for |
+| --- | --- | --- | --- |
+| `edge` | hard | plinth and fold | 1px field edge |
+| `offset` | 1px | label seat | hard shadow line |
+| `stroke` | 1px | edge weight | border weight |
+| `tile` | square | label / plinth | field corners |
+| `radius` | 12px | label / plinth | `--vt-field-radius` |
+| `ring` | solid | n/a | `--vt-field-ring-color` |
+| `density` | cosy | n/a | 46px field, 8px gap |
+| `label` | mono-caps | n/a | uppercase label |
 
 Do not put body copy on glass. Do not dither an input surface. Do not add a
 second specular or a gradient mesh behind the panel.
@@ -157,12 +190,15 @@ a real button with `aria-pressed`.
 
 Focus is a 2px outline plus a 3px ring, never removed. The field surface is a
 translucent fill over a solid token, so the text contrast does not depend on
-what is behind the glass. A disabled field keeps its label and value.
+what is behind the glass. A disabled field keeps its label and value. The field
+reads `--vt-field-*` tokens; the portable kit is
+`public/brand/vitrine/vitrine-forms.css` (no raw colours) with a static
+`vitrine-forms.html` sheet.
 
-The page keeps its dark plates (hero, case quote, material stage, footer) on the
-same semantic names with a local `.onCase` inverse scope in `vitrine.module.css`.
-That block mirrors the dark semantic and component tokens; if a dark token
-changes, change the mirror in the same commit.
+The page keeps its dark plates (hero, mark stage, material stage, footer) on the
+same semantic names with a local `.onCase` inverse scope in
+`vitrine.module.css`. That block mirrors the dark semantic and component
+tokens; if a dark token changes, change the mirror in the same commit.
 
 ## 9. Implementation
 
@@ -172,6 +208,7 @@ changes, change the mirror in the same commit.
 | Token source       | `features/vitrine/tokens.json`                    |
 | Generated CSS      | `features/vitrine/vitrine-tokens.css`             |
 | Generated JSON     | `public/brand/vitrine/vitrine-tokens.json`        |
+| Portable form kit  | `public/brand/vitrine/vitrine-forms.css` + `.html` |
 | Page CSS           | `features/vitrine/vitrine.module.css`             |
 | Form specimen      | `features/vitrine/components/form-demo.tsx`       |
 | Dither lens        | `features/vitrine/components/dither-lens.tsx`     |
@@ -180,12 +217,15 @@ changes, change the mirror in the same commit.
 | Logo/favicon SVGs  | `public/brand/vitrine/`                           |
 | Board              | `design/brand/vitrine/vitrine-brandkit.png`       |
 | Board source       | `design/brand/vitrine/brandkit.html`              |
+| Story              | `design/brand/vitrine/story.md`                   |
+| Audit manifest     | `design/brand/vitrine/audit.json`                 |
 | Markdown twin      | `app/design-system/vitrine/llms.txt/route.ts`     |
 
-Regenerate tokens after editing `tokens.json`:
+Regenerate tokens and forms after editing `tokens.json`:
 
 ```bash
 node scripts/generate-vitrine-tokens.mjs
+node scripts/generate-vitrine-forms.mjs
 ```
 
 Regenerate the board:
@@ -209,23 +249,26 @@ Then downscale with Pillow/Lanczos to 3000 × 2250 and 1500 × 1125.
 - Use the compact mark below 32px.
 - Keep the dither outside the text block.
 - Check both themes and the 390px layout.
+- Change the theme DNA before changing the mark's geometry.
 
 **Don't**
 
 - Put body copy on a glass card.
 - Use the dither as a background for a form field.
 - Blur the hard edge into a glow.
-- Swap the Signal dot or the tile for a mood.
-- Use the glyph as a favicon.
+- Add a detached accent or a second primitive to the compact.
+- Use the full mark with its label below 32px.
+- Swap the Signal label or the field for a mood.
 - Add a second loud field.
 
 ## 11. Verification
 
-- [x] Mark at 16, 24, 32, 64, 512 and as a favicon on light/dark chrome
-  (`explorations/logo-qa.png`).
+- [x] Mark at 16, 24, 32, 64, 512 and as a favicon on light/dark chrome.
 - [x] Lockup at 130, 240 and 512; compact at 16 and 24.
 - [x] ICO contains 16, 32 and 48 (verified with Pillow and `file`).
 - [x] Body contrast 4.5:1, large 3:1; every pair in section 4.
+- [x] `score-mark.py`: PASS, no failure; compact simpler than the primary.
+- [x] `audit.mjs`: 16/16 static checks pass, 0 warnings.
 - [x] Page at 1440 and 390, light and dark, reduced motion, in Chromium.
 - [x] Form: labels, hints, errors, error summary, focus, disabled, file, switch.
 - [x] No `[dither-core]` compile errors in the console.
@@ -235,12 +278,16 @@ Evidence and gaps: [`../../../docs/vitrine-design-system-audit.md`](../../../doc
 
 ## 12. Still open
 
-- The board is 1.1 MB at 3000 × 2250 (above the ~1 MB target); the 1500 × 1125
-  web copy is 483 KB.
+- The board is 1.10 MB at 3000 × 2250; the 1500 × 1125 web copy is 450 KB.
 - No social/print crops beyond the board.
 - No automated visual regression or axe CI for `/design-system/vitrine` or the case library.
-- The favicon is deliberately the Signal field rather than a transparent compact
-  mark, so it survives dark browser chrome. The transparent marks still ship.
+- The favicon uses the Signal field and the compact mark rather than a
+  transparent primary mark, so it survives dark browser chrome. The transparent
+  marks still ship.
+- The Signal label in the primary mark is under 2px at 16px. The compact drawing
+  drops it and is used below 32px; the mono glyph drops it at every size.
+- The portable form CSS is a generated export for reuse; the live route consumes
+  the same tokens through its CSS module.
 - No AI-generated atmosphere image; the board uses CSS dots and the real mark.
 - The dither was checked in Chromium; Safari and Firefox were not part of this
   pass.

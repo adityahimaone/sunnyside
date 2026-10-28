@@ -3,6 +3,22 @@
    archive's --ss-* and shadcn's role tokens. */
 
 .vt-scope {
+  /* Theme DNA: the mark and the fields read this object */
+  --vt-dna-family: continuous-ribbon;
+  --vt-dna-material: liquid-glass;
+  --vt-dna-edge: hard;
+  --vt-dna-offset: 1px;
+  --vt-dna-stroke: 1px;
+  --vt-dna-tile: square;
+  --vt-dna-radius: 12px;
+  --vt-dna-ring: solid;
+  --vt-dna-density: cosy;
+  --vt-dna-label: mono-caps;
+  --vt-dna-field-recipe: liquid-glass;
+  --vt-dna-mark-fold: sharp;
+  --vt-dna-mark-gap: 9 units;
+  --vt-dna-mark-label: 10x8 units;
+
   /* Primitive */
   --vt-case: #0B0D10;
   --vt-case-raised: #12171B;
@@ -91,6 +107,16 @@
   --vt-field-text: var(--vt-fg);
   --vt-field-placeholder: var(--vt-subtle);
   --vt-field-focus-ring: 0 0 0 3px rgba(91,75,232,0.3);
+  --vt-field-h: 46px;
+  --vt-field-gap: 8px;
+  --vt-field-pad: 12px 14px;
+  --vt-field-radius: var(--vt-radius-md);
+  --vt-field-shadow: inset 0 1px 0 var(--vt-glass-highlight);
+  --vt-field-ring-width: 3px;
+  --vt-field-ring-color: var(--vt-focus);
+  --vt-button-h: 48px;
+  --vt-button-radius: var(--vt-radius-md);
+  --vt-button-pad: 0 20px;
   --vt-button-bg: var(--vt-signal);
   --vt-button-fg: var(--vt-case);
   --vt-button-border: rgba(11,13,16,0.22);
@@ -155,6 +181,16 @@
   --vt-field-text: var(--vt-fg);
   --vt-field-placeholder: var(--vt-muted);
   --vt-field-focus-ring: 0 0 0 3px rgba(217,255,67,0.28);
+  --vt-field-h: 46px;
+  --vt-field-gap: 8px;
+  --vt-field-pad: 12px 14px;
+  --vt-field-radius: var(--vt-radius-md);
+  --vt-field-shadow: inset 0 1px 0 var(--vt-glass-highlight);
+  --vt-field-ring-width: 3px;
+  --vt-field-ring-color: var(--vt-focus);
+  --vt-button-h: 48px;
+  --vt-button-radius: var(--vt-radius-md);
+  --vt-button-pad: 0 20px;
   --vt-button-bg: var(--vt-signal);
   --vt-button-fg: var(--vt-case);
   --vt-button-border: rgba(255,255,255,0.22);

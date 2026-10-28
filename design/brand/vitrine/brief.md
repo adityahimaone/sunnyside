@@ -23,6 +23,21 @@ Sunnyside re-skin. Vitrine is a **case**, not a filter: the glass is the
 container, the dither is the printed label inside it. The nearest thing it must
 not look like is a dribbble glassmorphism shot with unreadable body copy.
 
+## Domain before defaults
+
+The product's world is a museum vitrine, not a dashboard.
+
+- **Five concepts:** the case, the printed museum label, halftone dot gain, the
+  specular arc of a lens, and the clearance around one lit object.
+- **Five colours from the physical world:** case-black, frost glass, the
+  chartreuse of a safety label, iris flare from a lens, and clay from a
+  registration error.
+- **Signature:** one folded ribbon V with a flat plinth and a single Signal
+  label — the case and its tag are the same drawing.
+- **Obvious defaults to avoid:** a frosted card with a gradient blob, a 1-bit
+  retro toy, an app-store tile with an initial, and a circular orbit badge.
+  Vitrine uses none of them.
+
 ## Constraints
 
 - Stack: Next.js 16, React 19, Tailwind CSS v4, dithercn engine in `lib/dither`.
@@ -45,18 +60,32 @@ not look like is a dribbble glassmorphism shot with unreadable body copy.
 3. Optical instruments — take: the aperture, the specular arc, the idea that a
    lens is a frame for looking, not a decoration.
 
+## v2.3 direction
+
+- **Family:** continuous ribbon. One thick beam folds into the V and a flat
+  plinth. The Signal label is an inlay in the plinth, not a detached dot.
+- **Gate:** zero circle, fill-only, two primitives in the primary, one in the
+  compact, one Signal accent.
+- **Bake-off:** architectural monogram, offset planes, louvers, ribbon and
+  horizon were generated on the same palette and theme DNA. Four lost for
+  silhouette collisions with Huginn, Riso and Hachure; the ribbon won.
+- **Theme DNA:** hard edge, square tile, solid ring, cosy density. The mark and
+  the fields read the same object.
+
 ## Deliverables
 
 - [x] one-page brief (this file)
-- [x] six explorations, one kept, five rejected with reasons
-- [x] mark, compact mark, glyph
+- [x] five-family v2.3 bake-off, one kept, four rejected with reasons
+- [x] story spine, eight decision cards and a voice card
+- [x] mark, compact mark, glyph, mono mark
 - [x] wordmark as outlines
 - [x] horizontal, stacked and reversed lockups
 - [x] 3 × 3 brand board rendered from HTML
 - [x] favicon set and app icons
-- [x] primitive → semantic → component tokens, CSS and JSON
+- [x] theme DNA + primitive → semantic → component tokens, CSS and JSON
+- [x] portable form kit CSS and HTML
 - [x] `/design-system/vitrine` case page with live components and forms
-- [x] skill-resource audit
+- [x] v2.3 skill-resource audit and objective mark score
 
 ## Non-goals
 
@@ -68,9 +97,10 @@ not look like is a dribbble glassmorphism shot with unreadable body copy.
 
 ## Success
 
-After 30 seconds a reviewer can say: “The V is two panes meeting at a point, one
-solid and one dithered; the glass holds the content, and the form fields are
-actually usable.” They can find the tokens, the favicon and the component code.
+After 30 seconds a reviewer can say: “The V is one folded beam with a Signal
+label in its plinth; the compact mark drops the label; the glass holds the
+content, and the form fields are actually usable.” They can find the tokens,
+the favicon, the story and the component code.
 
 ## Voice
 
@@ -82,7 +112,9 @@ Example: “One case. One object. The rest is clearance.”
 - `ASSUMPTION` The brand is a new system called **Vitrine**, not a variant of
   Sunnyside. If it should sit inside Sunnyside, the palette and mark must change
   again.
-- `ASSUMPTION` The page lives at `/design-system/vitrine` and is indexable, under the `/design-system` case library. `/sunnyside`
-  remains the Side A specimen.
+- `ASSUMPTION` The page lives at `/design-system/vitrine` and is indexable, under
+  the `/design-system` case library. `/sunnyside` remains the Side A specimen.
 - `ASSUMPTION` The signature dither is a hero lens-caustic field spilling through
   card edges, chosen by the owner in this session.
+- `ASSUMPTION` The v2.3 mark is a re-construction of the Split V idea, not a new
+  name. The V survives; the stroke, the circle and the dithered pane do not.

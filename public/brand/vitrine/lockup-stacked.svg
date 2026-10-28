@@ -1,6 +1,5 @@
 <svg color="#0B0D10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 106.13 88.00" role="img" aria-label="Vitrine">
-  <defs><pattern id="vt-lockup-dither" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="#0B0D10"/><rect x="2" y="2" width="2" height="2" fill="#0B0D10"/></pattern></defs>
-  <g transform="translate(29.06332453825857 0) scale(0.75)"><path d="M16 14 32 49" stroke="#0B0D10" stroke-width="13" stroke-linecap="square"/><path d="M32 49 48 14" stroke="url(#vt-lockup-dither)" stroke-width="13" stroke-linecap="square"/><circle cx="32" cy="49" r="3.2" fill="#D9FF43"/></g>
+  <g transform="translate(29.06332453825857 3) scale(0.75)"><path d="M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z" fill="#0B0D10"/><rect x="27" y="46" width="10" height="8" fill="#D9FF43"/></g>
   <g transform="translate(0 60) scale(0.036939313984168866)" fill="currentColor"><path transform="translate(15.00 729.00) scale(1 -1)" d="M174 0 16 496H150L265 92H283L398 496H532L374 0Z"/>
     <path transform="translate(523.00 729.00) scale(1 -1)" d="M70 0V496H196V0ZM133 554Q99 554 75.5 576.0Q52 598 52 634Q52 670 75.5 692.0Q99 714 133 714Q168 714 191.0 692.0Q214 670 214 634Q214 598 191.0 576.0Q168 554 133 554Z"/>
     <path transform="translate(749.00 729.00) scale(1 -1)" d="M260 0Q211 0 180.5 30.5Q150 61 150 112V392H26V496H150V650H276V496H412V392H276V134Q276 104 304 104H400V0Z"/>

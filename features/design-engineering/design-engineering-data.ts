@@ -433,7 +433,7 @@ export const VITRINE_CASE = {
   library: '/design-system',
   cover: '/brand/vitrine/vitrine-brandkit.png',
   coverAlt:
-    'The Vitrine brand board: the Split V mark, the Case and Frost palette, the Signal field, type specimens, favicon sizes and the form specimen.',
+    'The Vitrine brand board: the folded V mark with a Signal label, the Case and Frost palette, the Signal field, type specimens, favicon sizes and the form specimen.',
   brief:
     'Give the second system a different material without losing the method: a glass container, a halftone information layer, a form kit and an audit that names its own gaps. Vitrine had to prove that glass and dither can be legible together, not just photogenic.',
   constraints: [
@@ -449,8 +449,8 @@ export const VITRINE_CASE = {
       line: 'Glass holds the object; the dither is the printed label inside it. The glass never becomes the content, and the dither never sits under the words that explain it.',
     },
     {
-      title: 'Split V, one solid and one dithered.',
-      line: 'Two panes meet at a point. The full mark keeps the checkerboard; the compact 16px mark drops it so the silhouette survives a favicon.',
+      title: 'A folded ribbon V, one Signal label.',
+      line: 'One beam folds into the V and the case; the flat plinth carries the only print. The compact 16px mark drops the label and keeps the heavier fold.',
     },
     {
       title: 'Audit the method, not just the output.',

@@ -1,8 +1,11 @@
 import {
   DITHER_AUDIT,
   GAPS,
+  MARK_FAMILIES,
+  MARK_GATE,
   OUTPUT_CONTRACT,
   SKILL_RESOURCES,
+  STORY_BEATS,
 } from '@/features/vitrine/audit'
 import tokens from '@/features/vitrine/tokens.json'
 
@@ -37,38 +40,60 @@ sits under the words that explain it.
 
 - Essence: a glass case for a low-resolution light.
 - Promise: depth without fog.
+- Family: continuous ribbon.
+- Gate: v2.3 — zero circle, fill-only, 2–4 primitives, one accent.
 - Voice: precise, lit, unhurried. Museum labels, not marketing.
 - Not this: a frosted card with an unreadable paragraph, a gradient blob, a
   1-bit retro toy, or a Sunnyside re-skin.
 
 ## 2. Mark
 
-The mark is **Split V**: two panes meeting at a point, one solid, one dithered.
+The mark is **Folded V**: one continuous beam folds into the V and a flat
+plinth; the plinth carries one Signal label. Two solid primitives in the
+primary, one in the compact. No stroke, no circle, no detached accent.
 
 | Property | Value |
 | --- | --- |
 | ViewBox | 64 × 64 |
-| Stroke | 13 units, square caps |
-| Apex | 32, 49 |
-| Left pane | M16 14 32 49, solid |
-| Right pane | M32 49 48 14, 4-unit checker dither |
-| Dot | Signal, r 3.2 at the apex |
-| Compact mark | 15-unit strokes, both panes solid, 2-unit seam, 16–24px |
+| Family | Continuous ribbon |
+| Primary path | M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z |
+| Label | rect 27,46 10 × 8, Signal |
+| Compact path | M12 6L32 42L52 6L61 12L42 58L22 58L3 12Z |
+| Primitive count | 2 primary / 1 compact |
+| Minimum channel | 9 units (14% of the grid; the gate asks for 5.1) |
 | Full mark minimum | 32px |
 | Compact minimum | 16px |
 | Clear space | Half the mark height on every side |
 
 Files: \`public/brand/vitrine/mark.svg\`, \`mark-reverse.svg\`,
-\`mark-compact.svg\`, \`mark-compact-reverse.svg\`, \`glyph.svg\`.
+\`mark-compact.svg\`, \`mark-compact-reverse.svg\`, \`glyph.svg\`,
+\`mark-mono.svg\`.
 
-### Why the other five lost
+### Five families, one material
 
-1. **Aperture** — a split lens; read as a camera shutter and collapsed to a dot
-   at 16px.
-2. **Case tile** — the app-store tile failure: a rounded square with a glyph.
-3. **Stacked panes** — unreadable at 16px and too close to a bar chart.
-4. **Halftone V** — the dots vanished at 32px; no silhouette.
-5. **Lens bar** — a pill at small sizes; no letter and no meaning.
+${table(
+  ['Family', 'Mark', 'Result'],
+  MARK_FAMILIES.map((family) => [
+    family.family,
+    family.name,
+    family.verdict === 'kept' ? 'Kept' : `Lost — ${family.reason}`,
+  ]),
+)}
+
+The full rejection notes and eight decision cards are in
+\`design/brand/vitrine/story.md\`; the bake-off sheet is
+\`design/brand/vitrine/explorations/marks.html\`.
+
+### v2.3 gate
+
+${table(
+  ['Gate', 'Result', 'Evidence'],
+  MARK_GATE.map((check) => [
+    `${check.gate}. ${check.title}`,
+    'Pass',
+    check.evidence,
+  ]),
+)}
 
 ## 3. Wordmark and lockups
 
@@ -84,9 +109,9 @@ The wordmark is the real type, frozen as outlines: Space Grotesk 700,
 | Stacked reverse | \`lockup-stacked-reverse.svg\` | Frost on Case |
 | Wordmark | \`wordmark.svg\` | currentColor; reverse copy exists |
 
-Minimum lockup width: 130px. At 480px the name is not used in this identity; the
-lockup is the mark plus the wordmark at every width. Below 360px use the compact
-mark alone for a header.
+Minimum lockup width: 130px. The Signal label stays Signal in both themes. The
+header uses the horizontal lockup at 30px high; the footer uses the wordmark at
+44px high.
 
 ## 4. Palette
 
@@ -95,14 +120,14 @@ mark alone for a header.
 | \`--vt-case\` | #0B0D10 | Ground, ink, the case | 17.89:1 on Frost |
 | \`--vt-frost\` | #F2F6F8 | Light ground, glass white | 17.89:1 on Case |
 | \`--vt-graphite\` | #45525B | Secondary text on light | 7.40:1 on Frost |
-| \`--vt-signal\` | #D9FF43 | The one loud field | 16.99:1 with Case |
+| \`--vt-signal\` | #D9FF43 | The one loud field and label | 16.99:1 with Case |
 | \`--vt-iris\` | #5B4BE8 | Focus, links, cool accent | 5.34:1 on Frost |
 | \`--vt-clay\` | #B23A1D | Error on light | 5.49:1 on Frost |
 | \`--vt-mint\` | #7CF0C4 | Success on dark | 14.01:1 on Case |
 
-Rules: one loud field per page. Signal is the field; the rest are surfaces,
-text roles or status accents. Glass is a material, not a colour. The mark is
-Case on light, Frost on dark, with a Signal dot.
+Rules: one loud field per page. Signal is the field and the mark's label; the
+rest are surfaces, text roles or status accents. Glass is a material, not a
+colour. The mark is Case on light, Frost on dark, with the Signal label fixed.
 
 ## 5. Type
 
@@ -112,17 +137,35 @@ Case on light, Frost on dark, with a Signal dot.
 | Reading | Geist 400 | 16–18px, 1.6 leading |
 | Label | Geist Mono 500 | 10–12px, 0.14em, uppercase |
 
+Typography gate: three voices; body 16–18px; inputs 14px, 16px on mobile;
+captions 13px; unitless leading; balance on headings, pretty on paragraphs;
+tracking in em; tabular numbers on changing values; real specimens, not lorem.
+The wordmark is outlined.
+
 ## 6. Tokens
 
 The token source is \`features/vitrine/tokens.json\`. It generates
 \`features/vitrine/vitrine-tokens.css\` and the public JSON/CSS downloads.
-125 declarations across three layers:
+159 declarations across four layers:
 
-1. **Primitive** — Case, Frost, Graphite, Signal, Iris, Clay, Mint.
-2. **Semantic** — bg, fg, muted, border, surface, accent, focus, danger,
+1. **Theme DNA** — family, material, hard edge, square tile, solid ring, cosy
+   density, mono-caps label. Emitted as \`--vt-dna-*\`.
+2. **Primitive** — Case, Frost, Graphite, Signal, Iris, Clay, Mint.
+3. **Semantic** — bg, fg, muted, border, surface, accent, focus, danger,
    glass-fill, dither-ink, dither-paper.
-3. **Component** — field-bg, field-border, field-focus-ring, button-bg,
-   card-bg, tab-bg, chip-bg.
+4. **Component** — field-bg, field-border, field-focus-ring, field-h,
+   field-gap, field-pad, field-radius, field-shadow, button-bg, card-bg, tab-bg,
+   chip-bg.
+
+### Theme DNA
+
+${table(
+  ['Token', 'Value'],
+  Object.entries(tokens.theme).map(([name, value]) => [
+    `--vt-dna-${name}`,
+    value,
+  ]),
+)}
 
 ### Semantic roles
 
@@ -168,7 +211,7 @@ ${table(
   tokens.contrast.map((pair) => [pair.label, `${pair.ratio}:1`, pair.use]),
 )}
 
-## 7. Components
+## 7. Components and forms
 
 The case page ships ten native controls in one specimen form. There is no
 component package; the page is the reference and the CSS lives with the feature.
@@ -184,6 +227,11 @@ component package; the page is the reference and the CSS lives with the feature.
 - Focus: 2px outline plus a 3px ring; never removed.
 - Error summary takes focus; fields use \`aria-invalid\` and
   \`aria-describedby\`.
+
+The portable form kit is generated from the same theme DNA:
+\`public/brand/vitrine/vitrine-forms.css\` and \`vitrine-forms.html\`. It has no
+raw colours and includes \`:focus-visible\`, \`[aria-invalid]\`, \`:disabled\`
+and \`prefers-reduced-motion\`.
 
 Paths: \`features/vitrine/components/form-demo.tsx\`,
 \`features/vitrine/vitrine.module.css\`,
@@ -207,7 +255,14 @@ No example component was installed: none of the examples is a lens case. The
 rest of the page uses CSS dot fields (the card edge, material study and case
 quote), so only one WebGL context is live.
 
-## 9. Audit
+## 9. Story spine
+
+${table(
+  ['Beat', 'Line'],
+  STORY_BEATS.map((beat) => [beat.beat, beat.line]),
+)}
+
+## 10. Audit
 
 Skill resources: ${SKILL_RESOURCES.filter((r) => r.present).length}/${SKILL_RESOURCES.length} present.
 Used as shipped: ${SKILL_RESOURCES.filter((r) => r.status === 'used').length};
@@ -246,33 +301,43 @@ ${table(
 
 ${GAPS.map((gap) => `- ${gap}`).join('\n')}
 
-## 10. File map
+## 11. File map
 
 | Concern | Path |
 | --- | --- |
 | Route and tokens | \`app/design-system/vitrine/page.tsx\` (\`.vt-scope\` on the page root) |
 | Token source | \`features/vitrine/tokens.json\` |
 | Generated CSS | \`features/vitrine/vitrine-tokens.css\` |
+| Portable form kit | \`public/brand/vitrine/vitrine-forms.css\` + \`.html\` |
 | Page CSS | \`features/vitrine/vitrine.module.css\` |
 | Form specimen | \`features/vitrine/components/form-demo.tsx\` |
 | Dither lens | \`features/vitrine/components/dither-lens.tsx\` |
 | Brand components | \`features/vitrine/components/brand.tsx\` |
 | Audit data | \`features/vitrine/audit.ts\` |
 | Brand brief | \`design/brand/vitrine/brief.md\` |
+| Story | \`design/brand/vitrine/story.md\` |
+| Bake-off | \`design/brand/vitrine/explorations/marks.html\` |
 | Brand board | \`design/brand/vitrine/vitrine-brandkit.png\` |
 | Board source | \`design/brand/vitrine/brandkit.html\` |
 | Guide | \`design/brand/vitrine/README.md\` |
+| Audit | \`docs/vitrine-design-system-audit.md\` |
 | Logo SVGs | \`public/brand/vitrine/\` |
 | Favicon | \`public/brand/vitrine/favicon.ico\` |
 | Tokens download | \`public/brand/vitrine/vitrine-tokens.json\` |
 
-## 11. Verification
+## 12. Verification
 
 - Mark tested at 16, 24, 32, 64, 512 and as a favicon on light/dark chrome.
 - Lockup tested at 130, 240 and 512; compact mark at 16 and 24.
 - ICO contains 16, 32 and 48.
 - Body contrast 4.5:1; large 3:1; every pair listed in section 6.
 - Page checked at 1440 and 390, light and dark, reduced motion, in Chromium.
+- 1024px: no horizontal overflow; nav fits.
+- Form: empty submit focuses the error summary and marks three fields invalid.
+- Typography: body 16px, desktop input 14px, mobile input 16px, h1 700.
+- Shader: running at 1440; static under reduced motion after 2.5s.
+- Dev note: use \`localhost\`, not \`127.0.0.1\`; Next 16 blocks dev resources
+  from the IP by default.
 - Page is readable without JavaScript: the prose, tables and downloads are
   server-rendered; the dither and form states need JS.
 

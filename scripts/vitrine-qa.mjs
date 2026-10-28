@@ -35,7 +35,12 @@ async function open(width, height, reducedMotion = 'no-preference') {
 }
 
 async function shoot(page, name, fullPage = true) {
-  await page.screenshot({ path: `${out}/${name}`, fullPage })
+  const jpeg = name.endsWith('.jpg')
+  await page.screenshot({
+    path: `${out}/${name}`,
+    fullPage,
+    ...(jpeg ? { type: 'jpeg', quality: 82 } : {}),
+  })
   report.push({ name, ok: true })
 }
 
@@ -48,23 +53,37 @@ async function shoot(page, name, fullPage = true) {
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,
   )
-  await shoot(page, 'vitrine-1440-light.png')
+  await shoot(page, 'vitrine-1440-light.jpg')
   await page.screenshot({ path: `${out}/vitrine-hero-light.png` })
 
   await page.getByRole('button', { name: 'Dark' }).click()
   await page.waitForTimeout(800)
-  await shoot(page, 'vitrine-1440-dark.png')
+  await shoot(page, 'vitrine-1440-dark.jpg')
   await page.screenshot({ path: `${out}/vitrine-hero-dark.png` })
 
-  await page.locator('#forms').scrollIntoViewIfNeeded()
-  await page.waitForTimeout(300)
-  await page.screenshot({ path: `${out}/vitrine-forms-light.png` })
   await page.getByRole('button', { name: 'Light' }).click()
+  await page.locator('#forms').scrollIntoViewIfNeeded()
+  await page.locator('form button[type="submit"]').click()
+  await page.waitForTimeout(300)
+  const formErrors = await page.evaluate(() => ({
+    alerts: document.querySelectorAll('[role="alert"]').length,
+    invalid: [...document.querySelectorAll('[aria-invalid="true"]')].map(
+      (node) => node.id,
+    ),
+  }))
+  await page
+    .locator('#forms')
+    .screenshot({ path: `${out}/vitrine-form-errors.png` })
+  await page.locator('#vt-name').focus()
+  await page
+    .locator('#forms')
+    .screenshot({ path: `${out}/vitrine-form-focus.png` })
 
   report.push({
     viewport: '1440',
     shaderState,
     overflow,
+    formErrors,
     console: messages,
   })
   await context.close()
@@ -76,10 +95,10 @@ async function shoot(page, name, fullPage = true) {
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,
   )
-  await shoot(page, 'vitrine-390-light.png')
+  await shoot(page, 'vitrine-390-light.jpg')
   await page.getByRole('button', { name: 'Dark' }).click()
   await page.waitForTimeout(800)
-  await shoot(page, 'vitrine-390-dark.png')
+  await shoot(page, 'vitrine-390-dark.jpg')
   report.push({ viewport: '390', overflow, console: messages })
   await context.close()
 }

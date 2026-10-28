@@ -47,7 +47,7 @@ Sunnyside is the visual language behind the studio landing page and archive surf
 | **Motion**        | Movement should explain a change, orient the reader, or return feedback. Reduced-motion preferences are respected.                        |
 | **Accessibility** | Contrast pairs and focus treatments are documented; decorative accent colours are not used as small body text.                            |
 
-Vitrine is the second case, deliberately not a Sunnyside variant: a glass container, a halftone information layer, a V mark made of two panes, and ten native form controls. Its source lives in `features/vitrine/`, `design/brand/vitrine/` and `public/brand/vitrine/`; the audit is in `docs/vitrine-design-system-audit.md`. Do not import its `--vt-*` tokens into Sunnyside.
+Vitrine is the second case, deliberately not a Sunnyside variant: a glass container, a halftone information layer, a folded ribbon V with one Signal label, and ten native form controls. Its source lives in `features/vitrine/`, `design/brand/vitrine/` and `public/brand/vitrine/`; the audit is in `docs/vitrine-design-system-audit.md`. Do not import its `--vt-*` tokens into Sunnyside.
 
 Hachure (Case 05) is the opposite test: no blur, no shadow, no rounded corner. It takes the supplied ridgeline dither footer as a **tone engine** and builds a cartographic system around density — survey stock, hachure, an H printed into paper, three elevation bands and a footer you can read an altitude off. Source: `features/hachure/`, `design/brand/hachure/`, `public/brand/hachure/`; audit: `docs/hachure-design-system-audit.md`.
 

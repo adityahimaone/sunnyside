@@ -24,6 +24,11 @@ const staticTokens = [
 ]
 
 const shared = [
+  '  /* Theme DNA: the mark and the fields read this object */',
+  Object.entries(source.theme)
+    .map(([name, value]) => `  --vt-dna-${name}: ${value};`)
+    .join('\n'),
+  '',
   '  /* Primitive */',
   lines(source.primitives),
   '',
@@ -81,6 +86,7 @@ await writeFile(
 )
 
 const count =
+  Object.keys(source.theme).length +
   source.primitives.length +
   source.semantic.light.length +
   source.semantic.dark.length +

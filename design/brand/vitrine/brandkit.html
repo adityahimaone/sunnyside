@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Vitrine — brand board</title>
+    <title>Vitrine — brand board v2.3</title>
     <style>
       @font-face {
         font-family: 'Space Grotesk';
@@ -562,61 +562,68 @@
         margin-left: auto;
       }
 
-      /* Atmosphere */
-      .atmosphere {
-        background: #d9ff43;
-        color: #0b0d10;
-        border-color: #d9ff43;
-        padding: 34px;
+      /* Marks */
+      .marks {
         display: flex;
         flex-direction: column;
       }
-      .atmosphere .label {
-        color: #3f4b12;
-      }
-      .atm-mark {
-        width: 132px;
-        height: 132px;
+      .mk-list {
+        display: grid;
         margin-top: 12px;
       }
-      .atm-head {
-        margin-top: auto;
-        font-family: 'Space Grotesk', sans-serif;
-        font-weight: 700;
-        font-size: 62px;
-        letter-spacing: -0.06em;
-        line-height: 0.92;
-        color: #0b0d10;
-      }
-      .atm-sub {
-        font-size: 15px;
-        line-height: 1.4;
-        color: #38420f;
-        margin-top: 12px;
-        max-width: 420px;
-      }
-      .atm-foot {
-        display: flex;
-        justify-content: space-between;
+      .mk-row {
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr) auto;
+        gap: 12px;
         align-items: center;
-        margin-top: 18px;
-        font-family: 'Geist Mono', monospace;
-        font-size: 10px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: #38420f;
+        padding: 9px 0;
+        border-top: 1px solid #2a343b;
       }
-      .atm-dither {
-        position: absolute;
-        right: -20px;
-        top: -20px;
-        width: 300px;
-        height: 300px;
-        background-image: radial-gradient(circle, #0b0d10 1.2px, transparent 1.4px);
-        background-size: 5px 5px;
-        -webkit-mask-image: radial-gradient(circle at 60% 40%, #000 0%, transparent 66%);
-        mask-image: radial-gradient(circle at 60% 40%, #000 0%, transparent 66%);
-        opacity: 0.55;
+      .mk-row svg {
+        display: block;
+        width: 32px;
+        height: 32px;
+        color: #f2f6f8;
+      }
+      .mk-row b {
+        display: block;
+        color: #f2f6f8;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .mk-row span {
+        display: block;
+        margin-top: 2px;
+        color: #93a3ac;
+        font-size: 10.5px;
+        line-height: 1.35;
+      }
+      .mk-row em {
+        color: #93a3ac;
+        font-family: 'Geist Mono', monospace;
+        font-size: 8.5px;
+        font-style: normal;
+        letter-spacing: 0.1em;
+      }
+      .mk-row.kept {
+        border-top-color: rgba(217, 255, 67, 0.36);
+      }
+      .mk-row.kept em {
+        color: #d9ff43;
+      }
+      .mk-note {
+        margin-top: auto;
+        padding-top: 14px;
+        border-top: 1px solid #2a343b;
+        color: #a9b7be;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .mk-note b {
+        color: #d9ff43;
+        font-weight: 600;
       }
     </style>
   </head>
@@ -629,7 +636,7 @@
           <img class="cover-lockup" src="../../../public/brand/vitrine/lockup-reverse.svg" alt="Vitrine" />
           <div class="mono cover-meta dim">
             CASE 02<br />
-            V1.0 — 2026<br />
+            V2.3 — 2026<br />
             DESIGN SYSTEM
           </div>
         </div>
@@ -638,8 +645,9 @@
         </h1>
         <div class="cover-foot">
           <p class="cover-sub">
-            Glass is the container. Dither is the label. The form is the proof.
-            Built for interfaces that need depth without fog.
+            One folded beam makes the V and the case. The flat plinth carries
+            the printed label. Glass is the container; dither is the label; the
+            form is the proof.
           </p>
           <div class="mono" style="text-align: right; line-height: 1.8; color: #f2f6f8; position: relative; z-index: 2">
             adityahimaone.space<br />/design-system/vitrine
@@ -653,12 +661,13 @@
         <span class="label">01 / Index</span>
         <img class="index-mark" src="../../../public/brand/vitrine/mark-reverse.svg" alt="" />
         <div class="index-body">
-          Two panes meet at a point. One is solid glass; one is printed grain.
-          The case holds one object, and the clearance is the design.
+          One folded beam makes the V and the case. The flat plinth carries the
+          only print. The compact drawing drops the label rather than shrinking
+          it into a speck.
         </div>
         <div class="index-list">
           <span>01 Identity</span>
-          <span>02 Material</span>
+          <span>02 Marks</span>
           <span>03 Forms</span>
           <span>04 Case</span>
         </div>
@@ -681,9 +690,8 @@
           <line x1="0" y1="210" x2="420" y2="210" stroke="#f2f6f8" stroke-width="0.8" opacity="0.25" stroke-dasharray="4 5" />
           <line x1="210" y1="0" x2="210" y2="420" stroke="#f2f6f8" stroke-width="0.8" opacity="0.25" stroke-dasharray="4 5" />
           <g transform="translate(74 16) scale(4.25)">
-            <path d="M16 14 32 49" stroke="#f2f6f8" stroke-width="13" stroke-linecap="square" />
-            <path d="M32 49 48 14" stroke="url(#ditherBoard)" stroke-width="13" stroke-linecap="square" />
-            <circle cx="32" cy="49" r="3.2" fill="#d9ff43" />
+            <path d="M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z" fill="#f2f6f8" />
+            <rect x="27" y="46" width="10" height="8" fill="#d9ff43" />
           </g>
           <line x1="74" y1="352" x2="306" y2="352" stroke="#d9ff43" stroke-width="1" />
           <line x1="74" y1="346" x2="74" y2="358" stroke="#d9ff43" stroke-width="1" />
@@ -692,11 +700,11 @@
         </svg>
         <div class="specs">
           <span>GRID <b>64 × 64</b></span>
-          <span>STROKE <b>13 / 64</b></span>
-          <span>APEX <b>32, 49</b></span>
-          <span>DITHER <b>4 CELL</b></span>
-          <span>DOT <b>r 3.2</b></span>
-          <span>MIN <b>32 / 16</b></span>
+          <span>FOLD <b>SHARP</b></span>
+          <span>PLINTH <b>20 UNITS</b></span>
+          <span>LABEL <b>10 × 8</b></span>
+          <span>GAP <b>9 UNITS</b></span>
+          <span>PRIMITIVES <b>2 / 1</b></span>
         </div>
       </section>
 
@@ -804,26 +812,78 @@
           <div class="icon-cell"><img class="app-icon" src="../../../public/brand/vitrine/icon-192.png" alt="" /><span>192 / 512</span></div>
         </div>
         <p class="icon-note">
-          The favicon is the loud field: Signal tile, Case mark, readable on
-          light and dark chrome. The app icon returns to the Case field.
+          The favicon is the Signal field and the compact mark, readable on
+          light and dark chrome. The app icon returns to the Case field and the
+          full mark with its printed label.
         </p>
       </section>
 
-      <!-- 08 ATMOSPHERE -->
-      <section class="panel atmosphere">
-        <div class="atm-dither"></div>
-        <span class="label">07 / Atmosphere</span>
-        <svg class="atm-mark" viewBox="0 0 64 64" aria-hidden="true">
-          <path d="M13 13 30 47" stroke="#0b0d10" stroke-width="15" stroke-linecap="square" />
-          <path d="M34 47 51 13" stroke="#0b0d10" stroke-width="15" stroke-linecap="square" />
-          <circle cx="32" cy="48" r="3.6" fill="#f2f6f8" />
-        </svg>
-        <div class="atm-head">One case.<br />One object.</div>
-        <p class="atm-sub">The rest is clearance. Signal is the only field that gets to shout.</p>
-        <div class="atm-foot">
-          <span>Signal / #D9FF43</span>
-          <span>Clearance 1/2 mark</span>
+      <!-- 08 FIVE FAMILIES -->
+      <section class="panel marks">
+        <span class="label">07 / Five families</span>
+        <div class="mk-list">
+          <div class="mk-row">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M8 8H20V28H30V36H20V56H8Z" fill="currentColor" />
+              <path d="M56 8H44V28H34V36H44V56H56Z" fill="currentColor" />
+              <path d="M32 22L38 32L32 42L26 32Z" fill="#d9ff43" />
+            </svg>
+            <div>
+              <b>Bracket monogram</b>
+              <span>Architectural monogram · Huginn owns the silhouette</span>
+            </div>
+            <em>LOST</em>
+          </div>
+          <div class="mk-row">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M24 10H52L36 54H8Z" fill="#d9ff43" />
+              <path d="M34 4H62L46 48H18Z" fill="currentColor" />
+            </svg>
+            <div>
+              <b>Sheared sheets</b>
+              <span>Offset planes · Riso owns the overprint</span>
+            </div>
+            <em>LOST</em>
+          </div>
+          <div class="mk-row">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M2 56V36L10 42V56Z M15.3 56V26L25.3 32V56Z M30.6 56V16L42.6 22V56Z M47.9 56V8L61.9 14V56Z" fill="currentColor" />
+              <path d="M54.9 2L61.9 8L54.9 14L47.9 8Z" fill="#d9ff43" />
+            </svg>
+            <div>
+              <b>Wedge bars</b>
+              <span>Brutalist louvers · Hachure owns the ridge</span>
+            </div>
+            <em>LOST</em>
+          </div>
+          <div class="mk-row">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M8 42H56V52H8Z" fill="currentColor" />
+              <path d="M32 10L42 24L32 38L22 24Z" fill="#d9ff43" />
+            </svg>
+            <div>
+              <b>Shelf and keystone</b>
+              <span>Horizon · reads as Hachure at 16px</span>
+            </div>
+            <em>LOST</em>
+          </div>
+          <div class="mk-row kept">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z" fill="currentColor" />
+              <rect x="27" y="46" width="10" height="8" fill="#d9ff43" />
+            </svg>
+            <div>
+              <b>Folded V</b>
+              <span>Continuous ribbon · one fold, one plinth, one label</span>
+            </div>
+            <em>KEPT</em>
+          </div>
         </div>
+        <p class="mk-note">
+          All five pass <b>score-mark</b>. The ribbon wins on silhouette and
+          meaning: the fold makes the V and the case; the plinth gives the
+          printed label a home.
+        </p>
       </section>
     </div>
   </body>

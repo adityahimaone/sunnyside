@@ -523,8 +523,8 @@ export function DesignEngineeringPage() {
                   sizes="(max-width: 900px) 100vw, 760px"
                 />
                 <figcaption>
-                  The Vitrine brand kit — Split V, Case and Frost, one Signal
-                  field, the form specimen and the audit.
+                  The Vitrine brand kit — a folded ribbon V, Case and Frost, one
+                  Signal field, the form specimen and the audit.
                 </figcaption>
               </figure>
 
@@ -640,9 +640,9 @@ export function DesignEngineeringPage() {
                   sizes="(max-width: 900px) 100vw, 760px"
                 />
                 <figcaption>
-                  Huginn Studio — the two-bracket keystone mark, the drawn blackletter
-                  wordmark, the vermilion field and the painting dissolving
-                  into it.
+                  Huginn Studio — the two-bracket keystone mark, the drawn
+                  blackletter wordmark, the vermilion field and the painting
+                  dissolving into it.
                 </figcaption>
               </figure>
               <DocsHeading id="case-huginn-brief" level={3} kicker="Brief">
@@ -729,9 +729,9 @@ export function DesignEngineeringPage() {
                   sizes="(max-width: 900px) 100vw, 760px"
                 />
                 <figcaption>
-                  Riso Co. — the orange sheet pulled 2.2mm off its blue pass, the
-                  deckled mark, five ink chips and the outlined wordmark at three
-                  favicon sizes.
+                  Riso Co. — the orange sheet pulled 2.2mm off its blue pass,
+                  the deckled mark, five ink chips and the outlined wordmark at
+                  three favicon sizes.
                 </figcaption>
               </figure>
               <DocsHeading id="case-riso-brief" level={3} kicker="Brief">

@@ -6,21 +6,12 @@
  */
 import { chromium } from '@playwright/test'
 
-const compact = (color, dot = '#0B0D10') => `
-  <path d="M13 13 30 47" stroke="${color}" stroke-width="15" stroke-linecap="square"/>
-  <path d="M34 47 51 13" stroke="${color}" stroke-width="15" stroke-linecap="square"/>
-  <circle cx="32" cy="48" r="3.6" fill="${dot}"/>`
+const compact = (color) => `
+  <path d="M12 6L32 42L52 6L61 12L42 58L22 58L3 12Z" fill="${color}"/>`
 
 const fullReverse = `
-  <defs>
-    <pattern id="d" width="4" height="4" patternUnits="userSpaceOnUse">
-      <rect width="2" height="2" fill="#F2F6F8"/>
-      <rect x="2" y="2" width="2" height="2" fill="#F2F6F8"/>
-    </pattern>
-  </defs>
-  <path d="M16 14 32 49" stroke="#F2F6F8" stroke-width="13" stroke-linecap="square"/>
-  <path d="M32 49 48 14" stroke="url(#d)" stroke-width="13" stroke-linecap="square"/>
-  <circle cx="32" cy="49" r="3.2" fill="#D9FF43"/>`
+  <path d="M10 4L32 44L54 4L62 8L42 56L22 56L2 8Z" fill="#F2F6F8"/>
+  <rect x="27" y="46" width="10" height="8" fill="#D9FF43"/>`
 
 const icon = (id, size, body, bg) => `
   <div id="${id}" style="width:${size}px;height:${size}px;background:${bg};overflow:hidden">
@@ -31,7 +22,7 @@ const favicon = (size) =>
   icon(
     `fav${size}`,
     size,
-    `<rect width="64" height="64" rx="14" fill="#D9FF43"/>${compact('#0B0D10')}`,
+    `<rect width="64" height="64" fill="#D9FF43"/>${compact('#0B0D10')}`,
     'transparent',
   )
 
@@ -39,7 +30,7 @@ const appIcon = (size) =>
   icon(
     `app${size}`,
     size,
-    `<rect width="64" height="64" fill="#0B0D10"/>${compact('#F2F6F8', '#D9FF43')}`,
+    `<rect width="64" height="64" fill="#0B0D10"/>${fullReverse}`,
     'transparent',
   )
 
@@ -47,7 +38,7 @@ const appleIcon = () =>
   icon(
     'apple',
     180,
-    `<rect width="64" height="64" fill="#0B0D10"/>${compact('#F2F6F8', '#D9FF43')}`,
+    `<rect width="64" height="64" fill="#0B0D10"/>${fullReverse}`,
     'transparent',
   )
 
@@ -96,7 +87,10 @@ await page.setContent(
   `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:transparent}</style></head><body>${mark1024()}</body></html>`,
   { waitUntil: 'load' },
 )
-await page.locator('#mark1024').screenshot({ path: 'public/brand/vitrine/mark-1024.png', omitBackground: true })
+await page.locator('#mark1024').screenshot({
+  path: 'public/brand/vitrine/mark-1024.png',
+  omitBackground: true,
+})
 
 await browser.close()
 console.log('icons rendered')

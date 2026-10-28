@@ -44,6 +44,42 @@ export function VitrineLockup({
   )
 }
 
+export function VitrineStacked({
+  className,
+  height = 88,
+  priority = false,
+}: {
+  className?: string
+  height?: number
+  priority?: boolean
+}) {
+  return (
+    <span
+      className={cn(styles.stacked, className)}
+      style={{ height }}
+      role="img"
+      aria-label="Vitrine"
+    >
+      <Image
+        src="/brand/vitrine/lockup-stacked.svg"
+        alt=""
+        width={106}
+        height={88}
+        priority={priority}
+        className={styles.onlyLight}
+      />
+      <Image
+        src="/brand/vitrine/lockup-stacked-reverse.svg"
+        alt=""
+        width={106}
+        height={88}
+        priority={priority}
+        className={styles.onlyDark}
+      />
+    </span>
+  )
+}
+
 export function VitrineMark({
   className,
   size = 32,
@@ -55,10 +91,11 @@ export function VitrineMark({
   decorative?: boolean
   compact?: boolean
 }) {
-  const light = compact
+  const useCompact = compact || size < 32
+  const light = useCompact
     ? '/brand/vitrine/mark-compact.svg'
     : '/brand/vitrine/mark.svg'
-  const dark = compact
+  const dark = useCompact
     ? '/brand/vitrine/mark-compact-reverse.svg'
     : '/brand/vitrine/mark-reverse.svg'
 
