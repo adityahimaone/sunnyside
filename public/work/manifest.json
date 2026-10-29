@@ -2,7 +2,7 @@
   {
     "slug": "switchyard",
     "cover": "/work/switchyard-cover.webp",
-    "mode": "live 16:10 light mode with sidebar from Blocked (97kb)"
+    "mode": "live 16:10 board capture, inset 28px on cream with 14px radius (edges no longer touch the frame)"
   },
   {
     "slug": "primarindo-asia",
@@ -17,7 +17,7 @@
   {
     "slug": "fullstack-wannabe",
     "cover": "/work/fullstack-wannabe-cover.webp",
-    "mode": "live 1440x900 16:10 desktop, 82 quality webp (77kb)"
+    "mode": "live 16:10 capture, inset 28px on cream with 14px radius (edges no longer touch the frame)"
   },
   {
     "slug": "seaphantom",
