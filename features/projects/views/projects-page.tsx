@@ -24,6 +24,7 @@ import {
 import type { ContributionDay, FeaturedProject, GitHubRepo } from '../index'
 import { LinerSheet } from '../components/liner-sheet'
 import ContributionSkyline from '@/components/ui/contribution-skyline'
+import { GeneratedCover } from '@/features/landing-page/studio/work-gallery/work-gallery'
 import { ScriptWord } from '@/features/landing-page/studio/script-word'
 import { Sparkle } from '@/features/landing-page/studio/doodles'
 import { Reveal } from '@/features/landing-page/studio/reveal'
@@ -421,21 +422,7 @@ export function ProjectsPage({
                           className="object-cover"
                         />
                       ) : (
-                        <span
-                          className={styles.cardGenerated}
-                          style={
-                            {
-                              '--sleeve-a': item.palette.a,
-                              '--sleeve-b': item.palette.b,
-                            } as React.CSSProperties
-                          }
-                          aria-hidden
-                        >
-                          <span>{item.title}</span>
-                          <span className={styles.sleeveCode}>
-                            AH {trackLabel(catalogue)}
-                          </span>
-                        </span>
+                        <GeneratedCover project={item} />
                       )}
                       <span className={styles.cardNumber}>
                         {trackLabel(catalogue)}

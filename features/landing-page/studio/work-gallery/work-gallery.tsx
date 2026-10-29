@@ -19,7 +19,7 @@ import {
 } from './work-gallery-data'
 import styles from './work-gallery.module.css'
 
-function GeneratedCover({ project }: { project: WorkProject }) {
+export function GeneratedCover({ project }: { project: WorkProject }) {
   const lab = project.slug === 'labgrownbeasts'
 
   return (
