@@ -14,18 +14,18 @@ const EMAIL = 'orders@risoco.berlin'
  *
  * The one prop that matters is `sheetInk`. The component defaults to white on
  * the sheet, which is 3.36:1 on this orange and fails AA for the sizes it is
- * set at. Carbon on the same orange is 5.30:1, so the demo prints black — which
- * is also what a risograph does when the second drum is black.
+ * set at. Carbon on the same orange is 5.16:1, so the demo prints black — which
+ * is also what a risograph does when the second drum is carbon.
  */
-export function FooterDemo() {
+export function RisoFooterDemo() {
   const [drum, setDrum] = React.useState<'a' | 'b'>('a')
   const [seed, setSeed] = React.useState(23)
 
   const sheet = drum === 'a' ? '#f2542d' : '#1d63ff'
 
   return (
-    <div className={styles.specimen}>
-      <div className={styles.specimenBar}>
+    <div className={styles.footerSpecimen}>
+      <div className={`${styles.shell} ${styles.footerControls}`}>
         <div className={styles.specimenGroup}>
           <span className={styles.label}>Drum</span>
           <div className={styles.segmented} role="group" aria-label="Drum">
@@ -33,7 +33,6 @@ export function FooterDemo() {
               type="button"
               aria-pressed={drum === 'a'}
               onClick={() => setDrum('a')}
-              data-ink="a"
             >
               Orange
             </button>
@@ -41,7 +40,6 @@ export function FooterDemo() {
               type="button"
               aria-pressed={drum === 'b'}
               onClick={() => setDrum('b')}
-              data-ink="b"
             >
               Blue
             </button>
@@ -51,14 +49,19 @@ export function FooterDemo() {
         <div className={styles.specimenGroup}>
           <span className={styles.label}>Seed</span>
           <span className={styles.seed}>{seed}</span>
-          <button type="button" className={styles.ghostButton} onClick={() => setSeed((s) => s + 1)}>
+          <button
+            type="button"
+            className={styles.ghostButton}
+            onClick={() => setSeed((s) => s + 1)}
+          >
             Re-tear ↻
           </button>
         </div>
 
         <p className={styles.specimenNote}>
-          Scroll it into view. The chrome assembles, the pin drops, and the sheet rips from the
-          pin outward.
+          Scroll it into view. The chrome assembles, the pin drops, and the
+          sheet rips from the pin outward — the same tear as the mark, at page
+          scale.
         </p>
       </div>
 
@@ -66,15 +69,19 @@ export function FooterDemo() {
         <PushpinTearFooter
           brand="ink."
           name="riso co."
-          logoHref="#specimen"
-          logo={<RisoMark size={52} />}
+          logoHref="#sheet"
+          logo={<RisoMark size={52} onDrum />}
           sheet={sheet}
+          pinColor="#1b1712"
           paper="#f1ede4"
           paperInk="#1b1712"
           sheetInk="#1b1712"
           seed={seed}
           email={EMAIL}
-          newsletter={{ label: 'new prints, every other friday', placeholder: 'your@email' }}
+          newsletter={{
+            label: 'new prints, every other friday',
+            placeholder: 'your@email',
+          }}
           status={{ label: 'taking print orders' }}
           mark="run 0412"
           timeZone="Europe/Berlin"

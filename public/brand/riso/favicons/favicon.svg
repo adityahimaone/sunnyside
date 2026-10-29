@@ -1,7 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" fill="#F1EDE4"/>
-  <g transform="scale(1)">
-    <defs><clipPath id="rs-fav-32"><path d="M12 5H26L18 27H4Z"/></clipPath></defs>
-    <path d="M17 2H31L23 24H9Z" fill="#2B192E" clip-path="url(#rs-fav-32)"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Riso Co.">
+  <rect width="32" height="32" fill="#f1ede4"/>
+  <path d="M4 5H15L17.5 10.5L13.5 14L18 19L15 23L19 27H8.5L4 23.5Z" fill="#f2542d"/>
+  <path d="M17 6.5L19.5 12L15.5 15.5L20 20.5L17 24.5L21 28H23.5L28 24V9.5L25.5 6.5Z" fill="#1d63ff"/>
 </svg>

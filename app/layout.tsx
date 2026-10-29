@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import {
+  Bodoni_Moda,
   Geist,
   Geist_Mono,
   Instrument_Sans,
@@ -121,6 +122,17 @@ const instrumentSans = Instrument_Sans({
   preload: false,
 })
 
+/* Huginn v3.0's display face. A Didone, because the system is a printed
+   poster: the cell grid sets the drawing, and the Didone sets the argument.
+   One consumer (the Huginn specimen), so it is not preloaded. */
+const bodoniModa = Bodoni_Moda({
+  variable: '--font-bodoni',
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
+  preload: false,
+})
+
 /* JetBrains Mono and Cormorant Garamond were removed. They were reachable only
    through the `--font-whyte-inktrap-mono` and `--font-grandslang` aliases,
    which no rule in the app reads, and Cormorant was additionally asking for
@@ -145,7 +157,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
-        className={`${geist.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${syne.variable} ${orbitron.variable} ${inter.variable} ${instrumentSans.variable} bg-background text-foreground tracking-tight antialiased`}
+        className={`${geist.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${syne.variable} ${orbitron.variable} ${inter.variable} ${instrumentSans.variable} ${bodoniModa.variable} bg-background text-foreground tracking-tight antialiased`}
       >
         <ThemeProvider
           enableSystem={false}

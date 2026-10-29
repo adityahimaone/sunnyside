@@ -53,12 +53,12 @@ export function CaseLibraryPage() {
           <p className={layout.intro}>
             A case is not a moodboard. It is a brief, a mark, a system, a proof
             and a written decision. Sunnyside is paper and cobalt; Vitrine is
-            glass and dither; Huginn is bone and ordered print; Riso Co. is torn
-            poster and pushpin physics; Hachure is survey stock and ordered
-            dither; Cove is blue liquid glass and a solid reading plate; Strand
-            is quartz sand and a coastal vista; Clearing is painted emerald
-            light behind one pane of glass. Each case is documented with its
-            files and gaps left on the table.
+            glass and dither; Huginn is one cell and an ordered dither; Riso Co.
+            is a pinned sheet torn from the pin; Hachure is survey stock and
+            ordered dither; Cove is blue liquid glass and a solid reading plate;
+            Strand is quartz sand and a coastal vista; Clearing is painted
+            emerald light behind one pane of glass. Each case is documented with
+            its files and gaps left on the table.
           </p>
 
           <div className={styles.heroActions}>

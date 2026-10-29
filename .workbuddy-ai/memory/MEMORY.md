@@ -78,3 +78,36 @@ Rules that keep it working:
   servers do not survive between tool calls, so start the server and run the probe in one
   command. `elementHandle.screenshot()` is the reliable way to shoot a `fixed` element;
   `page.screenshot({ clip })` clips to the viewport.
+
+## Design-system cases: marks, lockups, grids
+
+- **`currentColor` does not cross into an SVG loaded with `<img>`.** It resolves to black inside
+  that document, so a "reverse" lockup built from a currentColor wordmark is invisible on dark.
+  `scripts/build-lockup.mjs --ink <hex>` bakes the ink in; every lockup in `public/brand/*` is
+  generated that way. Inline React marks (`features/<slug>/components/brand.tsx`) are the ones
+  that can read page tokens, which is why both new cases render their mark inline.
+- **`gap: 1px; background: var(--rule)` is a hole generator.** With a partial last row the empty
+  cells paint as a solid block of rule colour. Use exactly 2 columns for 4 items, 3 for 6, or turn
+  the set into a ledger of rows (`border-top` on the list, `border-bottom` per item).
+- **Never declare a default background on a grid child that a modifier class sets.** `.plate span
+  { background: transparent }` (0,1,1) outranks `.plateOn` (0,1,0) and silently erased a whole
+  dither plate; `.plateField .plateOn` won only because it is (0,2,0).
+- **`features/<slug>/brand-paths.ts` mirrors the hand-cut SVGs.** The SVGs are the source of
+  truth; if a point moves it moves in both. Both pages say so in the file header.
+- **Two lockups per case, at minimum:** `lockup.svg` for light grounds and `lockup-mono.svg`
+  (paper ink) for dark stages. A paper+carbon "on-drum" variant is a third file, not a rename of
+  the reverse one.
+- **Boards.** `design/brand/<slug>/brandkit.html` is authored at 1500 × 1125 with local fonts in
+  `assets/`. Render with `@playwright/test`'s chromium from the repo root at
+  `deviceScaleFactor: 2` after `document.fonts.ready`; `scripts/render-riso-board.mjs` is gone
+  because it needed `playwright-core`, which is not installed.
+- **Full-bleed inside a reading column:** `margin-left: calc(-1 * (inset + rail + gap))` with
+  `inset: max(20px, calc((100vw - shell) / 2))`. `100vw` includes the scrollbar, so the band
+  overshoots by half of it and `overflow-x: clip` trims it. Reset to `-inset` on both sides
+  under the layout's single-column breakpoint.
+- **A class name in a CSS module is global across the file.** `.specimen` was both the type
+  specimen row (a 120px + 1fr grid) and the footer wrapper, so the footer was laid out as a
+  two-column table. Name footer wrappers `.footerSpecimen`.
+- **Check that every ref in a component's effect is actually attached.** `swashRef` was
+  declared, read by the effect guard, and never passed to an element — the whole Wild Hunt
+  footer was inert for want of one `ref=`, with no console error to show for it.

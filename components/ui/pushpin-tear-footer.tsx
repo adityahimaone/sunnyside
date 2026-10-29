@@ -221,6 +221,9 @@ export type PushpinTearFooterProps = {
   fontSans?: string
   onSubscribe?: (email: string) => void
   onRepin?: (seed: number) => void
+  /** The pin's body colour. Defaults to the sheet, which makes a monochrome
+      poster — pass carbon when the pin has to read as the pin. */
+  pinColor?: string
   className?: string
 }
 
@@ -581,6 +584,7 @@ export default function PushpinTearFooter({
   fontSans = '"Helvetica Neue", Helvetica, Arial, system-ui, sans-serif',
   onSubscribe,
   onRepin,
+  pinColor,
   className = "",
 }: PushpinTearFooterProps) {
   const uid = React.useId().replace(/[^a-zA-Z0-9]/g, "")
@@ -852,7 +856,8 @@ export default function PushpinTearFooter({
   }
 
   // ---- colours ----------------------------------------------------------------
-  const pinBase = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(sheet) ? sheet : "#1a7ff0"
+  const pinBase =
+    pinColor ?? (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(sheet) ? sheet : "#1a7ff0")
   // flaps are the back of the sheet: paper-white
   const flapBase = mixHex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(paper) ? paper : "#f3f3f1", "#ffffff", 0.35)
   const vars = {

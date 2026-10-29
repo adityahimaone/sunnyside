@@ -1,1 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" color="#141413" fill="currentColor" role="img" aria-label="Huginn"><path d="M8 8H20V28H30V36H20V56H8Z" fill="currentColor"/><path d="M56 8H44V28H34V36H44V56H56Z" fill="currentColor"/><path d="M32 22L38 32L32 42L26 32Z" fill="var(--hug-mark-key, #E03C1F)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" color="#100f0e" fill="currentColor" role="img" aria-label="Huginn">
+  <title>Huginn — the dissolve: a corner of cells, one leaving</title>
+  <!--
+    The only primitive is the cell. Five cells thin toward the corner; the
+    sixth has left the grid and is printed vermilion. Nothing else.
+  -->
+  <rect x="6" y="10" width="14" height="14"/>
+  <rect x="23" y="10" width="14" height="14"/>
+  <rect x="6" y="27" width="14" height="14"/>
+  <rect x="23" y="27" width="14" height="14"/>
+  <rect x="6" y="44" width="14" height="14"/>
+  <rect x="43" y="6" width="14" height="14" fill="var(--hg-escape, #e2281b)"/>
+</svg>

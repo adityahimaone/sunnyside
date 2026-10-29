@@ -2,13 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Huginn brand board</title>
+<title>Huginn — brand board v3.0</title>
 <style>
+  @font-face{
+    font-family:'Bodoni Moda';
+    src:url('./assets/bodoni-moda.woff2') format('woff2');
+    font-weight:400 500;
+    font-display:block;
+  }
   :root{
     --sheet:#EBE5D8; --chalk:#F4EFE5; --ink:#100F0E; --field:#E2281B;
     --accent:#A31810; --cobalt:#1B2DB0; --muted:#5A5346; --paper:#FFFDF9;
     --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    --serif:"Iowan Old Style","Palatino Linotype",Charter,Georgia,serif;
+    --serif:"Bodoni Moda","Iowan Old Style","Palatino Linotype",Georgia,serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{width:1500px;height:1125px;overflow:hidden}
@@ -66,39 +72,47 @@
 <body>
 
 <header class="mono">
-  <span><b>Huginn</b> — brand kit</span>
-  <span>Case 03 · Design systems · 2026</span>
+  <span><b>Huginn</b> — brand kit v3.0 · 29 Oct 2026</span>
+  <span>Case 03 · one cell · 5 stay, 1 leaves</span>
 </header>
 
 <main>
   <div class="field">
     <div class="field-inner">
-      <p class="kicker mono">A studio for slow software</p>
+      <p class="kicker mono">A picture becomes cells · a name becomes cells</p>
       <img class="wordmark" src="./assets/wordmark.svg" alt="HUGINN">
     </div>
 
     <div class="markrow">
       <figure>
         <svg width="72" height="72" viewBox="0 0 64 64" aria-label="Primary mark">
-          <path d="M8 8H20V28H30V36H20V56H8Z" fill="#F4EFE5"/><path d="M56 8H44V28H34V36H44V56H56Z" fill="#F4EFE5"/><path d="M32 22L38 32L32 42L26 32Z" fill="#141413"/>
+          <rect x="6" y="10" width="14" height="14" fill="#F4EFE5"/><rect x="23" y="10" width="14" height="14" fill="#F4EFE5"/>
+          <rect x="6" y="27" width="14" height="14" fill="#F4EFE5"/><rect x="23" y="27" width="14" height="14" fill="#F4EFE5"/>
+          <rect x="6" y="44" width="14" height="14" fill="#F4EFE5"/>
+          <rect x="43" y="6" width="14" height="14" fill="#100F0E"/>
         </svg>
-        <figcaption>Primary · 64 grid</figcaption>
+        <figcaption>Primary · 64 grid · cell 14</figcaption>
       </figure>
       <figure>
         <svg width="38" height="38" viewBox="0 0 32 32" aria-label="Compact mark">
-          <path d="M4 4H10V13H15V19H10V28H4Z" fill="#F4EFE5"/><path d="M28 4H22V13H17V19H22V28H28Z" fill="#F4EFE5"/><path d="M16 11L19 16L16 21L13 16Z" fill="#141413"/>
+          <rect x="2" y="13" width="8" height="8" fill="#F4EFE5"/><rect x="12" y="13" width="8" height="8" fill="#F4EFE5"/>
+          <rect x="2" y="23" width="8" height="8" fill="#F4EFE5"/>
+          <rect x="23" y="2" width="8" height="8" fill="#100F0E"/>
         </svg>
-        <figcaption>Compact · 32 grid</figcaption>
+        <figcaption>Compact · 32 grid · cell 8</figcaption>
       </figure>
       <figure>
-        <svg width="24" height="24" viewBox="0 0 64 64" aria-label="Keystone stamp">
-          <path d="M32 22L38 32L32 42L26 32Z" fill="#141413"/>
+        <svg width="24" height="24" viewBox="0 0 32 32" aria-label="Glyph">
+          <rect x="4" y="17" width="11" height="11" fill="#F4EFE5"/>
+          <rect x="19" y="4" width="9" height="9" fill="#100F0E"/>
         </svg>
-        <figcaption>Keystone · stamp</figcaption>
+        <figcaption>Glyph · 2 cells</figcaption>
       </figure>
       <figure>
         <svg width="16" height="16" viewBox="0 0 32 32" aria-label="Favicon">
-          <path d="M4 4H10V13H15V19H10V28H4Z" fill="#F4EFE5"/><path d="M28 4H22V13H17V19H22V28H28Z" fill="#F4EFE5"/><path d="M16 11L19 16L16 21L13 16Z" fill="#141413"/>
+          <rect x="2" y="13" width="8" height="8" fill="#F4EFE5"/><rect x="12" y="13" width="8" height="8" fill="#F4EFE5"/>
+          <rect x="2" y="23" width="8" height="8" fill="#F4EFE5"/>
+          <rect x="23" y="2" width="8" height="8" fill="#100F0E"/>
         </svg>
         <figcaption>16</figcaption>
       </figure>
@@ -124,14 +138,13 @@
     </section>
 
     <section class="types">
-      <p class="block-h">Three voices, none of them a webfont</p>
+      <p class="block-h">Type · a Didone and a mono</p>
       <p class="t1">Thought leaves at dawn and is back by supper.</p>
-      <p class="t2">Reading · host serif &nbsp;/&nbsp; Label · host mono</p>
+      <p class="t2">Display · Bodoni Moda &nbsp;/&nbsp; Label · Geist Mono</p>
     </section>
 
     <p class="note">
-      The blackletter is drawn in a 22-row cell grid — 760 cells, one path.
-      No typeface is embedded, so the name renders identically offline and in print.
+      The wordmark is drawn in a 22-row cell grid — 760 cells, one path. No font is embedded in any logo file, so the name renders identically offline and in print. The mark is the same cell: five stay in the grid, one leaves.
     </p>
   </aside>
 </main>

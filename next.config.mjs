@@ -159,33 +159,6 @@ const nextConfig = {
           },
         ],
       },
-      {
-        // Exactly one document opts out of DENY: the Huginn specimen, which
-        // /design-system/huginn embeds from this same origin. The blanket DENY
-        // blocked that iframe outright, and relaxing the whole site to
-        // SAMEORIGIN would hand every page here the ability to frame every other
-        // page here -- one page's need is not a reason to weaken the rest.
-        //
-        // Next applies matching header rules in array order with setHeader
-        // semantics, so this later, narrower rule replaces the DENY above rather
-        // than joining it. SAMEORIGIN still blocks every third-party frame; only
-        // this origin may frame this one file. The framing page itself stays
-        // DENY, so the embed cannot be nested inside another copy of itself.
-        //
-        // The file is `specimen.html` and must never be renamed back to
-        // `index.html`. Cloudflare serves static assets before the worker, and
-        // `auto-trailing-slash` maps `/design-system/huginn` to
-        // `huginn/index.html` -- so an index.html there silently replaced the
-        // route and the case page became unreachable in production while still
-        // working in `next dev`. Any name other than index.html keeps the route.
-        source: '/design-system/huginn/specimen.html',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-        ],
-      },
     ]
   },
 }

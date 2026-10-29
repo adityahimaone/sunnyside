@@ -1,137 +1,133 @@
-import Link from 'next/link'
+import { COMPACT, MARK, type MarkGeometry } from '../brand-paths'
 
-import {
-  COMPACT,
-  MARK,
-  WORDMARK_D,
-  WORDMARK_GHOST,
-  WORDMARK_RATIO,
-  WORDMARK_VIEWBOX,
-} from '../brand-paths'
+type RisoMarkProps = {
+  size?: number
+  /** The 16px drawing — two shapes, no pin, a wider channel. */
+  compact?: boolean
+  /** One ink: the pin is punched through both flaps. */
+  mono?: boolean
+  /** Printed on drum A: the second drum becomes carbon, because blue on
+      orange is 1.24:1 and the tear stops reading. */
+  onDrum?: boolean
+  title?: string
+  className?: string
+}
 
 /**
- * The mark: two passes, one overprint.
+ * The mark, inline.
  *
- * Two sheared, unstroked sheets. Orange first, blue second, shifted like two
- * drum passes; the overlap is a sharp overprint polygon, not a circle and not
- * a blend mode. `compact` isolates the overprint; `mono` is the union of the
- * two sheets in currentColor. There are no strokes anywhere.
+ * Inline rather than `<img>` because the flaps are painted from the drum
+ * tokens: on the orange sheet the second drum has to become carbon (blue on
+ * orange is 1.24:1 and the tear stops reading), and an `<img>` cannot see the
+ * page's custom properties.
  */
 export function RisoMark({
   size = 32,
   compact = false,
   mono = false,
+  onDrum = false,
   title,
+  className,
+}: RisoMarkProps) {
+  const geometry: MarkGeometry = compact ? COMPACT : MARK
+  const label = title ?? 'Riso Co.'
+
+  if (mono) {
+    const paths = MARK.mono ?? { a: MARK.a, b: MARK.b }
+    return (
+      <svg
+        viewBox={`0 0 ${MARK.box} ${MARK.box}`}
+        width={size}
+        height={size}
+        role="img"
+        aria-label={label}
+        className={className}
+        fill="currentColor"
+      >
+        <path fillRule="evenodd" d={paths.a} />
+        <path fillRule="evenodd" d={paths.b} />
+      </svg>
+    )
+  }
+
+  return (
+    <svg
+      viewBox={`0 0 ${geometry.box} ${geometry.box}`}
+      width={size}
+      height={size}
+      role="img"
+      aria-label={label}
+      className={className}
+    >
+      <path
+        d={geometry.a}
+        fill={onDrum ? 'var(--rs-paper, #f1ede4)' : 'var(--rs-drum-a, #f2542d)'}
+      />
+      <path
+        d={geometry.b}
+        fill={
+          onDrum ? 'var(--rs-carbon, #1b1712)' : 'var(--rs-drum-b, #1d63ff)'
+        }
+      />
+      {geometry.pin ? (
+        <path d={geometry.pin} fill="var(--rs-pin, #1b1712)" />
+      ) : null}
+    </svg>
+  )
+}
+
+/**
+ * The pushpin, as a flat silhouette.
+ *
+ * The footer's pin is a shaded object — a domed cap with a steel needle. This is
+ * the same drawing reduced to one ink, because the hero is printed and a
+ * gradient would be the only soft thing on the sheet. It sits on the stage at
+ * the top of the sheet, which is where the tear starts.
+ */
+export function RisoPin({
+  size = 56,
   className,
 }: {
   size?: number
-  compact?: boolean
-  mono?: boolean
-  title?: string
   className?: string
 }) {
-  const v = compact ? COMPACT : MARK
-  const clip = `riso-${compact ? 'c' : 'f'}-${size}`
-  const a = compact ? COMPACT.a : MARK.a
-  const b = compact ? COMPACT.b : MARK.b
-
+  const height = Math.round((size * 200) / 100)
   return (
     <svg
-      viewBox={`0 0 ${v.box} ${v.box}`}
+      viewBox="0 0 100 200"
       width={size}
-      height={size}
+      height={height}
+      role="img"
+      aria-label="Pushpin"
       className={className}
-      role={title ? 'img' : undefined}
-      aria-label={title}
-      aria-hidden={title ? undefined : true}
-      focusable="false"
+      fill="currentColor"
     >
-      {mono ? (
-        <>
-          <path d={MARK.a} fill="currentColor" />
-          <path d={MARK.b} fill="currentColor" />
-        </>
-      ) : compact ? (
-        <>
-          <defs>
-            <clipPath id={clip}>
-              <path d={a} />
-            </clipPath>
-          </defs>
-          <path
-            d={b}
-            fill="var(--rs-compact-ink, var(--rs-overprint))"
-            clipPath={`url(#${clip})`}
-          />
-        </>
-      ) : (
-        <>
-          <defs>
-            <clipPath id={clip}>
-              <path d={a} />
-            </clipPath>
-          </defs>
-          <path d={a} fill="var(--rs-display-a)" />
-          <path d={b} fill="var(--rs-display-b)" />
-          <path
-            d={b}
-            fill="var(--rs-overprint)"
-            clipPath={`url(#${clip})`}
-          />
-        </>
-      )}
+      <path d="M24 36V17Q24 2 50 2Q76 2 76 17V36Z" />
+      <path d="M36 36H64L60 98H40Z" />
+      <path d="M20 98H80V116H20Z" />
+      <path d="M47.2 116H52.8L51.4 193H48.6Z" />
     </svg>
   )
 }
 
-/** The name, outlined once from Space Grotesk 700. Never live text. */
-export function RisoWordmark({
-  height = 28,
-  ghost = true,
-  ghostScale = 1,
+/** The lockup as a file — outlined wordmark, no live text. */
+export function RisoLockup({
+  height = 40,
+  reverse = false,
   className,
 }: {
   height?: number
-  ghost?: boolean
-  /** The second impression is 1.8% of the height; on a drum it needs more. */
-  ghostScale?: number
+  reverse?: boolean
   className?: string
 }) {
+  const width = Math.round(height * (224.46 / 56))
   return (
-    <svg
-      viewBox={WORDMARK_VIEWBOX}
+    <img
+      src={`/brand/riso/${reverse ? 'lockup-mono' : 'lockup'}.svg`}
+      width={width}
       height={height}
-      width={Math.round(height * WORDMARK_RATIO)}
+      alt="Riso Co."
       className={className}
-      role="img"
-      aria-label="riso co."
-      focusable="false"
-    >
-      {ghost && (
-        <path
-          d={WORDMARK_D}
-          fill="var(--rs-ghost)"
-          transform={`translate(${WORDMARK_GHOST * ghostScale} ${-WORDMARK_GHOST * ghostScale})`}
-          opacity={0.9}
-        />
-      )}
-      <path d={WORDMARK_D} fill="currentColor" />
-    </svg>
-  )
-}
-
-export function RisoLockup({ size = 30 }: { size?: number }) {
-  return (
-    <Link
-      href="/design-system/riso"
-      className="riso-lockup"
-      aria-label="Riso Co. — design system"
-    >
-      <RisoMark size={size} />
-      <span className="riso-lockup-word">
-        <RisoWordmark height={Math.round(size * 0.66)} />
-        <span className="riso-lockup-sub">Atelier ink / Berlin</span>
-      </span>
-    </Link>
+    />
   )
 }

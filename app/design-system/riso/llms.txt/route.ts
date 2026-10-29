@@ -1,98 +1,140 @@
-import tokens from '@/features/riso/tokens.json'
+import {
+  AUDIT_ROWS,
+  CONTRAST_PAIRS,
+  DECISIONS,
+  GAPS,
+  MARK_SPECS,
+  META,
+  PALETTE,
+  REGISTER_RECIPE,
+  REJECTED_MARKS,
+  STORY_BEATS,
+  TEAR_RECIPE,
+  TOKENS_JSON,
+  TYPE_SCALE,
+  VOICE_SAMPLES,
+} from '@/features/riso/riso-data'
 
-const rows = (items: { name?: string; value?: string; role: string }[]) =>
-  items.map((item) => `| ${item.name ?? item.role} | ${item.value ?? ''} | ${item.role} |`).join('\n')
-
-const pairs = tokens.contrast
-  .map(
-    (pair) =>
-      `| ${pair.label} | ${pair.theme} | ${pair.a} on ${pair.b} | ${pair.ratio.toFixed(2)}:1 | ${pair.level} |`,
-  )
-  .join('\n')
+const table = (head: string[], rows: string[][]) =>
+  [
+    `| ${head.join(' | ')} |`,
+    `| ${head.map(() => '---').join(' | ')} |`,
+    ...rows.map((row) => `| ${row.join(' | ')} |`),
+  ].join('\n')
 
 export function GET() {
-  const content = `# Riso Co. / Atelier Ink — design system
+  const brand = `# Riso Co. — design system, brand guide and audit (${META.version})
 
-> Two passes, one sheet.
+> ${META.promise}
 
-Riso Co. is Case 04 in the design-system library: an identity and interface specimen for a risograph print edition workshop. The system is built on a single fact about the machine it imitates — a risograph prints one drum at a time, so the second impression never lands exactly on the first.
+Riso Co. is ${META.caseNumber} in the Sunnyside portfolio: a two-drum print system at
+https://adityahimaone.space/design-system/riso.
 
-## The rule
+## 1. The one idea
 
-Misregistration is the identity, not a defect. Every display element is printed twice: fluorescent orange first, federal blue second, offset by \`--rs-reg\` (2.5px screen, 2.2mm on paper) up and to the right. The offset is never corrected. In the specimen a 0–6px slider lets the reader pull the sheet back into register, and the idea visibly disappears.
+**${META.oneSentence}**
 
-## Overprint
+- Track: constructed — offset geometric planes, fill only, no stroke.
+- Material: uncoated vellum, one fluorescent orange drum, one federal blue drum, a steel pin.
+- Signature: a sheet pinned at the top and torn from the pin, the right flap 4,3 out of
+  register because the other drum printed it.
+- Enemy: the risograph look as a filter — grain overlays, blend modes, drop shadows
+  pretending to be ink.
 
-Where the two passes coincide, the third colour (\`overprint\`, #2b192e) is rendered as a third solid fill clipped to the orange sheet. No stroke and no \`mix-blend-mode\` is used anywhere, so the identity survives a favicon, a PDF export, and a client with blending disabled.
+## 2. The story, in seven beats
 
-## Mark
+${STORY_BEATS.map((beat) => `- **${beat.beat}.** ${beat.line}`).join('\n')}
 
-Two sheared, unstroked sheets on a 64 grid: orange \`M24 10H52L36 54H8Z\`, blue \`M34 4H62L46 48H18Z\`, shifted diagonally like two drum passes. The overlap is a sharp overprint polygon (\`#2B192E\`), drawn as a clipped blue sheet — no stroke, no circle, no blend mode. The compact isolates the overprint on a 32 grid; the mono is the union of both sheets in currentColor. Three fills, no outlines. Five families were drawn in the v2.3 bake-off (architectural monogram, offset planes, louvers, ribbon, horizon); offset planes kept the press behaviour.
+## 3. Decisions
 
-## Wordmark
+${DECISIONS.map(
+  (d) =>
+    `### ${d.title}\n\n- **Decision.** ${d.decision}\n- **Because.** ${d.because}\n- **Not when.** ${d.notWhen}\n- **Breaks next.** ${d.breaksNext}`,
+).join('\n\n')}
 
-"Riso Co." outlined from Space Grotesk 700 into a single path (viewBox 3514 × 728, ratio 4.83). Never live text, never a webfont dependency. The blue ghost is a second copy of the same path at 1.8% of the cap height, translated up and right.
+## 4. Marks
 
-## Palette
+The mark is three shapes: drum A's flap, drum B's flap (slid 4,3), and the pin. The pin is
+the only element that crosses the tear.
 
-| Primitive | Value | Role |
-| --- | --- | --- |
-${rows(tokens.primitives)}
+${table(
+  ['Property', 'Value'],
+  MARK_SPECS.map((spec) => [spec.key, spec.value]),
+)}
 
-## Semantic tokens — light
+Files: \`public/brand/riso/\` — \`mark.svg\`, \`mark-compact.svg\`, \`mark-mono.svg\`,
+\`mark-reverse.svg\`, \`glyph.svg\`, \`wordmark.svg\`, \`lockup.svg\`, \`lockup-reverse.svg\`,
+\`favicons/\`. The wordmark is outlined; no logo file contains live text.
 
-| Token | Value | Role |
-| --- | --- | --- |
-${rows(tokens.semantic.light)}
+Rejected, and why:
 
-## Semantic tokens — dark (safelight)
+${REJECTED_MARKS.map((mark) => `- **${mark.name}.** ${mark.note}`).join('\n')}
 
-| Token | Value | Role |
-| --- | --- | --- |
-${rows(tokens.semantic.dark)}
+## 5. Ink
 
-## Contrast, measured in the build
+${table(
+  ['Token', 'Name', 'Hex', 'Contrast', 'Job'],
+  PALETTE.map((ink) => [ink.token, ink.name, ink.hex, ink.contrast, ink.job]),
+)}
 
-Sixteen pairs are computed from the semantic layer by \`scripts/build-riso-brand.mjs\` and written into \`tokens.contrast\`. The ratios below are not typed by hand and are not rounded up.
+Measured pairs:
 
-| Pair | Theme | Colours | Ratio | Level |
-| --- | --- | --- | --- | --- |
-${pairs}
+${table(
+  ['Pair', 'Ratio', 'Use'],
+  CONTRAST_PAIRS.map((pair) => [pair.pair, pair.ratio, pair.use]),
+)}
 
-One pair fails and is kept visible as a rule rather than fixed by drifting the colour: fluorescent orange as body type is ${tokens.contrast
-    .find((pair) => pair.level === 'Fail')
-    ?.ratio.toFixed(2)}:1 against vellum. The orange drum is therefore a fill-only ink; orange type uses the darker \`accent\` (#c22e08, 4.87:1). The pushpin footer specimen is set with a carbon \`sheetInk\` (5.30:1) instead of the component's white default (3.36:1), which fails.
+The two failing pairs are published on purpose: fluorescent orange as type (2.96:1) and
+steel as a border (2.03:1). Both are fills only.
 
-## Components
+## 6. Type
 
-- \`features/riso/components/brand.tsx\`: \`RisoMark\`, \`RisoWordmark\`, \`RisoLockup\`, \`RegistrationTarget\`. All SVG, all driven by \`--rs-display-a\`, \`--rs-display-b\`, \`--rs-overprint\` and \`--rs-ghost\`.
-- \`features/riso/components/controls.tsx\`: \`RisoControls\` (drum a/b, Daylight/Safelight) and \`RegistrationDemo\` (0–6px slider with Registered / House / Wrong presets).
-- \`features/riso/components/form-demo.tsx\`: "Request a print run" — studio, email, edition, sheet count, note, proof checkbox. Errors are summarised above the form with anchor links, and focus moves to the first bad field on submit.
-- \`features/riso/components/footer-demo.tsx\`: the \`PushpinTearFooter\` specimen, with a drum switch, a seed control and a "Re-tear" action.
-- \`features/riso/components/tear-study.tsx\`: three tear seeds side by side, showing that the deckle is generated from numbers rather than drawn.
-- \`components/ui/pushpin-tear-footer.tsx\`: the underlying footer component, unmodified in behaviour.
+${table(
+  ['Role', 'Family', 'Size', 'Line', 'Use'],
+  TYPE_SCALE.map((row) => [row.role, row.family, row.size, row.line, row.use]),
+)}
 
-## Assets and files
+Display type carries a 2.2px second impression:
 
-- Tokens: \`features/riso/tokens.json\` → \`features/riso/riso-tokens.css\`, \`public/brand/riso/riso-tokens.css\`, \`public/brand/riso/riso-tokens.json\`.
-- Generator: \`scripts/build-riso-brand.mjs\` (contrast, mark, wordmark, lockup, favicons, \`features/riso/brand-paths.ts\`).
-- Wordmark outlines: \`scripts/riso-wordmark.py\` → \`design/brand/riso/assets/wordmark-path.json\`.
-- Board: \`design/brand/riso/brandkit.html\` rendered by \`scripts/render-riso-board.mjs\` → \`public/brand/riso/riso-brandkit.png\` at 1500×1125.
-- Vectors: \`public/brand/riso/mark.svg\`, \`mark-compact.svg\`, \`wordmark.svg\`, \`lockup.svg\`, \`favicons/favicon.svg\`, \`favicons/favicon-{16,32,180}.svg\`.
-- Route: \`app/design-system/riso/page.tsx\`.
-- Styles: \`features/riso/riso.module.css\` (CSS Modules; no Tailwind on this route).
+\`\`\`css
+${REGISTER_RECIPE}
+\`\`\`
 
-## Not verified
+## 7. The tear
 
-Print output. Every claim above is about the screen build. Drum registration on an actual risograph, ink absorption on 270gsm vellum, and the overprint colour under a real second pass have not been proofed — the #2b192e value is a screen approximation of a subtractive result.
+\`\`\`css
+${TEAR_RECIPE}
+\`\`\`
 
-Source: https://adityahimaone.space/design-system/riso
+## 8. Tokens
+
+\`\`\`json
+${TOKENS_JSON}
+\`\`\`
+
+Three layers (primitive → semantic → component), namespaced \`--rs-*\`. The dark surface is
+\`html[data-riso='safelight']\`: the drums keep their hex and the paper inverts.
+
+## 9. Voice
+
+${VOICE_SAMPLES.map((s) => `- **${s.ctx}.** ${s.line}${s.bad ? ` (Not: ${s.bad})` : ''}`).join('\n')}
+
+## 10. Audit
+
+${table(
+  ['Check', 'Result', 'Evidence'],
+  AUDIT_ROWS.map((row) => [row.check, row.result, row.evidence]),
+)}
+
+Known gaps:
+
+${GAPS.map((gap) => `- ${gap}`).join('\n')}
 `
 
-  return new Response(content, {
+  return new Response(brand, {
     headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, s-maxage=86400',
+      'content-type': 'text/plain; charset=utf-8',
+      'cache-control': 'public, max-age=3600',
     },
   })
 }

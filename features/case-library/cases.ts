@@ -65,30 +65,31 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     href: '/design-system/huginn',
     tagline: 'A picture becomes cells. A name becomes cells.',
     description:
-      'Arbo’s Åsgårdsreien dissolved into one vermilion field by an ordered dither, and a blackletter wordmark cut from a 22-row cell grid. No webfont, no rounded corners, and an audit that names what it could not verify.',
+      'One 14-unit cell draws Arbo’s Åsgårdsreien through an ordered dither, draws the wordmark in 22 rows, and draws the mark — five cells hold the picture and the sixth has left the grid. No font in the logo, no rounded corners, and an audit that names what it could not verify.',
     status: 'Shipped · 2026',
-    role: 'Identity · design system · marks · component proof',
-    material: 'Paper + ink + vermilion',
+    role: 'Identity · design system · marks · dither',
+    material: 'Vermilion field + ink + bone',
     cover: '/brand/huginn/huginn-brandkit.png',
     coverAlt:
-      'The Huginn brand board: the two-bracket keystone mark, the drawn blackletter wordmark, the vermilion field, and the painting dissolving into it through an ordered dither.',
-    tags: ['Print', 'Dither', 'Blackletter', 'Forms'],
+      'The Huginn brand board: the vermilion field with the cell-drawn wordmark, the cell mark with one cell off the grid, and the painting dissolving into the field through an ordered dither.',
+    tags: ['Cells', 'Dither', 'Vermilion', 'Print'],
     tone: 'huginn',
   },
   {
     number: '04',
     name: 'Riso Co.',
     href: '/design-system/riso',
-    tagline: 'Two passes, one sheet.',
+    tagline:
+      'One pin holds the sheet. The tear is what the second drum prints.',
     description:
-      'Fluorescent orange and federal blue, printed one drum at a time. The 2.5px misregistration is the rule, the overprint is a third clipped path instead of a blend mode, and sixteen contrast pairs are measured in the build — including the one that fails.',
+      'A sheet pinned at the top and torn from the pin: the right flap sits 4,3 out of register because the other drum made it. Two drums, never three, zero rounded corners, a tear edge cut from one clip-path, and sixteen contrast pairs measured in the build — including the two that fail.',
     status: 'Shipped · 2026',
     role: 'Identity · design system · form kit · print proof',
-    material: 'Paper + orange + blue',
+    material: 'Vellum + two drums + one pin',
     cover: '/brand/riso/riso-brandkit.png',
     coverAlt:
-      'The Riso Co. brand board: an orange sheet pulled 2.2mm off its blue pass, the two-sheet overprint mark, five ink chips, the outlined wordmark at three favicon sizes and a torn sheet edge.',
-    tags: ['Risograph', 'Misregistration', 'Overprint', 'Deckle Tear'],
+      'The Riso Co. brand board: the pinned sheet torn from the pin, the orange and blue drums, the outlined wordmark at three favicon sizes, and a torn edge cut from one polygon.',
+    tags: ['Risograph', 'Pinned Sheet', 'Two Drums', 'Tear'],
     tone: 'riso',
   },
   {

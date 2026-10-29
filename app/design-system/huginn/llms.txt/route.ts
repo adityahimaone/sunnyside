@@ -1,114 +1,139 @@
-const PRIMITIVES: [string, string, string][] = [
-  ['--hug-vermilion-300', '#FF5B4A', 'Field ink, lifted for dark grounds'],
-  ['--hug-vermilion-500', '#E2281B', 'The poster field. Display and fills only'],
-  ['--hug-vermilion-600', '#C11D12', 'Pressed field'],
-  ['--hug-vermilion-700', '#A31810', 'Field ink that must carry small type'],
-  ['--hug-cobalt-300', '#93A4FF', 'Focus ring on ink'],
-  ['--hug-cobalt-500', '#1B2DB0', 'Focus ring on bone. The only cold note'],
-  ['--hug-ink-950', '#080706', 'Sunken ground'],
-  ['--hug-ink-900', '#100F0E', 'Ink, and the dark ground'],
-  ['--hug-ink-800', '#1B1815', 'Raised ground in dark'],
-  ['--hug-bone-000', '#FFFDF9', 'Paper white. Small type on the field'],
-  ['--hug-bone-100', '#F4EFE5', 'Chalk. Raised ground, ink on dark'],
-  ['--hug-bone-200', '#EBE5D8', 'The sheet'],
-  ['--hug-bone-300', '#DFD6C3', 'Sunken ground'],
-  ['--hug-bone-400', '#C9BFA9', 'Disabled ink'],
-  ['--hug-moss-300', '#7FC49A', 'Success on ink'],
-  ['--hug-moss-700', '#2C5B45', 'Success on bone'],
-]
+import {
+  AUDIT_ROWS,
+  CELL_RECIPE,
+  CONTRAST_PAIRS,
+  DECISIONS,
+  DITHER_RECIPE,
+  GAPS,
+  MARK_SPECS,
+  META,
+  PALETTE,
+  REJECTED_MARKS,
+  STORY_BEATS,
+  TOKENS_JSON,
+  TYPE_SCALE,
+  VOICE_SAMPLES,
+} from '@/features/huginn/huginn-data'
 
-const SEMANTIC: [string, string, string][] = [
-  ['--surface', '#EBE5D8', 'Page ground'],
-  ['--surface-raised', '#F4EFE5', 'Cards, sheets, inputs'],
-  ['--surface-sunken', '#DFD6C3', 'Wells, code, inert areas'],
-  ['--ink', '#100F0E', 'Body text, edges'],
-  ['--ink-muted', '#5A5346', 'Secondary text. 6.06:1'],
-  ['--ink-on-field', '#FFFDF9', 'Type under 18px on the field'],
-  ['--line', 'rgb(16 15 14 / 0.18)', 'Hairlines, input edges'],
-  ['--line-strong', 'rgb(16 15 14 / 0.42)', 'Rules that must hold'],
-  ['--accent', '#A31810', 'Links, buttons, action'],
-  ['--accent-field', '#E2281B', 'The loud field. Display and fills'],
-  ['--accent-ink', '#F4EFE5', 'Ink on accent'],
-  ['--focus', '#1B2DB0', 'Focus ring. Never decorative'],
-  ['--danger', '#A31810', 'Error text and error edge'],
-  ['--ok', '#2C5B45', 'Success'],
-  ['--selection', 'rgb(226 40 27 / 0.22)', 'Text selection'],
-  ['--radius', '0px', 'Corners are cut, not rounded'],
-]
-
-const rows = (items: [string, string, string][]) =>
-  items.map(([name, value, role]) => `| \`${name}\` | \`${value}\` | ${role} |`).join('\n')
+const table = (head: string[], rows: string[][]) =>
+  [
+    `| ${head.join(' | ')} |`,
+    `| ${head.map(() => '---').join(' | ')} |`,
+    ...rows.map((row) => `| ${row.join(' | ')} |`),
+  ].join('\n')
 
 export function GET() {
-  const content = `# Huginn — design system
+  const brand = `# Huginn — design system, brand guide and audit (${META.version})
 
-> A picture becomes cells. A name becomes cells.
+> ${META.promise}
 
-Huginn is Case 03 in the design-system library: a print-first identity for a fictional software studio. It is a standalone specimen, served as one document — not a Sunnyside re-skin, and its footer component is not the portfolio-wide footer.
+Huginn is ${META.caseNumber} in the Sunnyside portfolio: a print-studio system built on a
+single cell, at https://adityahimaone.space/design-system/huginn.
 
-## Direction
+## 1. The one idea
 
-Everything follows from one sentence: a picture becomes cells, a name becomes cells. The painting is reduced to an ordered dither, the wordmark is cut from a 22-row cell grid, and the dissolve between them runs the same grid at a different resolution. One operation, three scales. The mark is the named exception: an architectural H of two solid brackets and a vermilion keystone, because the name is a relationship, not a picture; it keeps the palette and the one-field rule.
+**${META.oneSentence}**
 
-The reference is the printed broadside — one colour, no resolution, type set by hand — not a dashboard. Corners are cut, not rounded. Nothing loops.
+- Track: constructed — a cell matrix, fill only, no stroke.
+- Material: one vermilion field, ink black, bone paper, an ordered 4 × 4 Bayer dither.
+- Signature: five 14-unit cells on a 3-unit gap, and a sixth that has left the grid by six
+  units and is printed in the field colour.
+- Enemy: the editorial dark-mode portfolio — a big serif, a duotone photograph, a gradient;
+  and "dither" used as a texture overlay instead of a rendering rule.
 
-## Mark
+## 2. The story, in seven beats
 
-Two solid L-brackets, mirrored and almost meeting; the bridge of the H is a vermilion diamond keystone. No stroke, no circle, no detached part. The counters are the negative space.
+${STORY_BEATS.map((beat) => `- **${beat.beat}.** ${beat.line}`).join('\n')}
 
-- Primary: 64 × 64, brackets \`M8 8H20V28H30V36H20V56H8Z\` and mirror, keystone \`M32 22L38 32L32 42L26 32Z\`; brackets #141413 on paper and #F4EFE5 on night, keystone #E03C1F.
-- Compact: 32 × 32, a separate drawing with wider channels; no thin strokes.
-- Stamp: the field favicon uses paper brackets on #E03C1F with an ink keystone; it reads at 16px.
-- Wordmark: 950 × 200, 95 columns, 760 cells, one path. Never live text.
+## 3. Decisions
 
-## Palette
+${DECISIONS.map(
+  (d) =>
+    `### ${d.title}\n\n- **Decision.** ${d.decision}\n- **Because.** ${d.because}\n- **Not when.** ${d.notWhen}\n- **Breaks next.** ${d.breaksNext}`,
+).join('\n\n')}
 
-| Token | Value | Role |
-| --- | --- | --- |
-${rows(PRIMITIVES)}
+## 4. Marks
 
-## Semantic tokens (light)
+${table(
+  ['Property', 'Value'],
+  MARK_SPECS.map((spec) => [spec.key, spec.value]),
+)}
 
-| Token | Value | Role |
-| --- | --- | --- |
-${rows(SEMANTIC)}
+Files: \`public/brand/huginn/\` — \`mark.svg\`, \`mark-compact.svg\`, \`mark-mono.svg\`,
+\`mark-reverse.svg\`, \`glyph.svg\`, \`wordmark.svg\`, \`lockup.svg\`, \`lockup-reverse.svg\`,
+\`favicon.svg\`, plus the studio's own plate (\`asgardsreien-1872.jpg\`,
+\`asgardsreien-riders.webp\`). The wordmark is 22 rows of cells; no logo file contains live
+text, and there is no blackletter font in the system.
 
-Dark mode swaps the same sixteen roles; it does not introduce new colours.
+Rejected, and why:
 
-## Type
+${REJECTED_MARKS.map((mark) => `- **${mark.name}.** ${mark.note}`).join('\n')}
 
-Three voices, none of them a webfont: the drawn blackletter for the name only, the host's serif for reading, the host's mono for labels. No typeface is embedded or required, so the name renders identically offline and in print.
+## 5. The field
 
-## The field
+${table(
+  ['Token', 'Name', 'Hex', 'Contrast', 'Job'],
+  PALETTE.map((ink) => [ink.token, ink.name, ink.hex, ink.contrast, ink.job]),
+)}
 
-The field is a display surface, not a background for a page of text. Its measured contrast against paper white is 4.54:1 — enough for body-size type and no more. That single number governs the footer: on the field, hierarchy is carried by size and tracking, never by opacity. An earlier build dimmed its captions and measured 2.40:1.
+Measured pairs:
 
-## Components
+${table(
+  ['Pair', 'Ratio', 'Use'],
+  CONTRAST_PAIRS.map((pair) => [pair.pair, pair.ratio, pair.use]),
+)}
 
-- The Wild Hunt footer: a painting dissolved into the field by an ordered-dither mask, a drawn wordmark, reticle, grain, link columns and a colophon. Configurable wordmark, palette, image, dissolve, grain and interactivity.
-- Native form specimen: label, hint, error, error summary with focus management, \`aria-invalid\`, \`aria-describedby\`.
-- Focus: 3px cobalt ring at 3px offset. Cobalt means "keyboard focus here" and nothing else.
-- Reduced motion lands on a finished still — the resolved wordmark and revealed captions are valid frames.
+The field never carries type below 24px: bone on vermilion is 4.54:1 and ink is 4.15:1, both
+large-text only.
 
-## Assets
+## 6. The dissolve
 
-- Specimen: \`public/design-system/huginn/specimen.html\` (self-contained; zero network requests)
-- Marks: \`public/brand/huginn/{mark,mark-compact,wordmark,lockup}.svg\`
-- Tokens: \`public/brand/huginn/huginn-tokens.{css,json}\`
-- Board: \`public/brand/huginn/huginn-brandkit.png\`
-- Audit: \`public/design-system/huginn/audit.md\`
-- Decisions: \`public/design-system/huginn/DESIGN.md\`
+\`\`\`js
+${DITHER_RECIPE}
+\`\`\`
 
-## Gaps
+## 7. The cell
 
-Verified in Chromium only: 43 rendered elements × 2 themes at 0 contrast failures, 53 focusables all ringed, reduced motion landing on a still, no horizontal overflow at 1440 or 390. Not verified: Safari and Firefox rendering, the print sheet, screen reader output, and real content.
+\`\`\`css
+${CELL_RECIPE}
+\`\`\`
 
-Source: https://adityahimaone.space/design-system/huginn
+## 8. Type
+
+${table(
+  ['Role', 'Family', 'Size', 'Line', 'Use'],
+  TYPE_SCALE.map((row) => [row.role, row.family, row.size, row.line, row.use]),
+)}
+
+## 9. Tokens
+
+\`\`\`json
+${TOKENS_JSON}
+\`\`\`
+
+Three layers (primitive → semantic → component), namespaced \`--hg-*\`. The night surface is
+\`html[data-huginn='night']\`: the field keeps its vermilion and the paper inverts.
+
+## 10. Voice
+
+${VOICE_SAMPLES.map((s) => `- **${s.ctx}.** ${s.line}${s.bad ? ` (Not: ${s.bad})` : ''}`).join('\n')}
+
+## 11. Audit
+
+${table(
+  ['Check', 'Result', 'Evidence'],
+  AUDIT_ROWS.map((row) => [row.check, row.result, row.evidence]),
+)}
+
+Known gaps:
+
+${GAPS.map((gap) => `- ${gap}`).join('\n')}
 `
-  return new Response(content, {
+
+  return new Response(brand, {
     headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, s-maxage=86400',
+      'content-type': 'text/plain; charset=utf-8',
+      'cache-control': 'public, max-age=3600',
     },
   })
 }

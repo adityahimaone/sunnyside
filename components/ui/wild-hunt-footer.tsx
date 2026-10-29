@@ -705,6 +705,7 @@ export default function WildHuntFooter({
       <canvas className="whf-word" ref={wordRef} aria-hidden="true" />
       <svg
         className="whf-swash"
+        ref={swashRef}
         aria-hidden="true"
         viewBox="0 0 760 228"
         preserveAspectRatio="none"

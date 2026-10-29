@@ -1,135 +1,53 @@
-# Brand Brief — Riso Co. / Atelier Ink
+# Riso Co. — brief, v4.0
 
-> Case 04 — Risograph print edition workshop and paper laboratory.
-> Version 3.0.0. Supersedes the "torn poster pinned to cork" direction.
+**Supersedes v3.0 ("two passes, one sheet").** The v3 mark was a registration diagram: two
+offset parallelograms that said "two passes" and nothing about paper. v4.0 starts from the
+thing the system already ended in — the pushpin-and-tear footer — and makes it the identity.
 
-## 1. The idea
+## One sentence
 
-**Two passes, one sheet.**
+> One pin holds the sheet. The tear is what the second drum prints.
 
-A risograph is not a printer with four inks at once. It is one drum, then another drum, and the paper moves between them. The second impression never lands exactly on the first. That error is the most recognisable thing a riso does, and it is the only thing this identity is built on.
+## The five domain concepts
 
-Everything else — paper, orange, blue, the torn edge, the pushpin — is material, not idea. Material can be swapped. The rule cannot.
+1. **The pin** — the only thing holding the sheet to the wall while the second drum runs.
+2. **The tear** — a sheet does not cut along a straight line; the seam records the pull.
+3. **Registration** — the second pass is always a few units off, and the offset is the craft.
+4. **The deckle** — a torn edge is the only ornament a sheet is allowed.
+5. **Overprint** — the third colour exists only where the two drums cross.
 
-**Acceptance test.** Cover the wordmark and the copy. If the remaining page could belong to any warm-paper studio identity, the page has failed. If the orange and blue visibly miss each other on every display element, and pulling them into register makes the design look like a generic editorial site, it has passed.
+## The five colours from the physical world
 
----
+Unbleached vellum (#F1EDE4) · soy carbon (#1B1712) · fluorescent orange drum (#F2542D) ·
+federal blue drum (#1D63FF) · the steel of the pin's needle (#A3A9B2).
 
-## 2. Domain before defaults
+## The signature
 
-### Five things the machine actually does
+A sheet pinned at the top, torn from the pin, the right flap 4,3 out of register. Only the pin
+crosses the tear.
 
-1. **Drum, not cartridge.** One colour is loaded at a time. Changing colour means changing drum.
-2. **Master wrap.** The image is burned onto a master sheet wrapped around the drum; long runs drift, short runs don't.
-3. **Misregistration.** Paper feed tolerance means pass two sits 1–3mm off pass one. Operators call it "out of register"; it is unavoidable, not a mistake.
-4. **Overprint.** Where two translucent inks land on the same fibre, a third colour appears subtractively. Orange over blue is not orange-plus-blue; it is a dark plum.
-5. **Deckle.** Torn stock leaves a fibrous, irregular edge — soft white fibres where the pulp separates.
+## The three defaults this refuses
 
-### Five physical colours
+1. Risograph as a *filter*: grain overlays, blend modes, drop shadows pretending to be ink.
+2. A "print" palette of two pastel spot colours used as accents on white.
+3. A logo built from two overlapping circles, which is what every two-ink brand reaches for.
 
-| Primitive | Value | Where it comes from |
-| --- | --- | --- |
-| `stock-paper` | `#f1ede4` | 270gsm unbleached vellum, the only ground |
-| `stock-deep` | `#e8e1d3` | The same stock, one shade under |
-| `ink-carbon` | `#1b1712` | Soy carbon black, the reading ink |
-| `ink-orange` | `#f2542d` | Fluorescent orange drum — fill only |
-| `ink-blue` | `#1d63ff` | Federal blue drum, the second pass |
-| `ink-overprint` | `#2b192e` | Where both drums land on the same fibre |
-| `steel` | `#a3a9b2` | The pushpin needle, and nothing else |
-| `safelight` | `#141110` | Darkroom ground, the second surface |
+## Deliverables
 
-### The one signature
+- `public/brand/riso/` — mark, compact, mono stamp, reverse, glyph, wordmark, two lockups, favicons.
+- `features/riso/` — tokens (CSS + JSON), page module, data, six primitives, footer demo.
+- `app/design-system/riso/` — the specimen, its layout, `llms.txt`, icon.
+- `design/brand/riso/brandkit.html` → `public/brand/riso/riso-brandkit.png` (1500 × 1125).
 
-**The offset.** Not a texture, not a grain overlay, not a torn-paper mask — a 2.5px screen / 2.2mm paper displacement between two complete impressions of the same element, never corrected.
+## Track and gate
 
-### Three category defaults rejected
+**Constructed**, family 2 (offset geometric planes). Fill only, no stroke, three primitives
+(two flaps and a pin), one accent per surface, zero circles. The compact is a separate drawing
+with two shapes and no pin. The one-colour stamp punches the pin through both flaps with
+`fill-rule: evenodd`.
 
-1. **No CMYK rosettes, no ink splatter.** Those are print *decoration*. Misregistration is print *behaviour*.
-2. **No `mix-blend-mode`.** A blend mode is a lie about the medium: it needs a compositing context, dies in a favicon, and disappears in a PDF. The overprint here is a third clipped path.
-3. **No live-text wordmark.** Outlined, always. A print identity that depends on a webfont loading is not an identity.
+## Non-goals
 
----
-
-## 3. Positioning
-
-- **Category**: Risograph edition workshop, zine publisher, bespoke print lab.
-- **Promise**: A digital interface that behaves like the machine it comes from — two impressions, visible tolerance, no correction.
-- **Audience**: Independent publishers, printmakers, typography directors, design engineers.
-- **Voice**: Press-room exact. Run numbers, sheet counts, ink names, no adjectives about "craft".
-
----
-
-## 4. The mark
-
-The mark is **the press behaviour**, not a letter or a torn silhouette.
-
-Two sheared, unstroked sheets: orange first (`M24 10H52L36 54H8Z`), blue second
-(`M34 4H62L46 48H18Z`), shifted diagonally like two drum passes. The overlap is
-a crisp overprint polygon (`#2B192E`), drawn as a clipped blue sheet. No stroke,
-no circle, no `mix-blend-mode`.
-
-- Primary: 64 grid, three fills (orange #F2542D, blue #1D63FF, overprint #2B192E).
-- Compact: the overprint polygon alone on a 32 grid; the intersection is the stamp.
-- Mono: the union of both sheets in currentColor.
-- No registration target in the family; the old circular target is retired.
-
-The old torn-sheet mark lost the v2.3 bake-off: it was a silhouette with an
-offset effect, not a shape idea. The sheared planes are the idea, and they
-survive flat.
-
-## 5. The wordmark
-
-"Riso Co." outlined from Space Grotesk 700 via `fontTools` (`instantiateVariableFont` → `SVGPathPen` → `TransformPen`), emitted as a single path in `wordmark-path.json`. ViewBox 3514 × 728, ratio 4.83.
-
-The blue ghost is the same path, second copy, at 1.8% of cap height (13.1 units) up and right. In the lockup the ghost is computed in glyph units, not screen units — dividing by the wrong scale produces a ghost the size of the wordmark.
-
----
-
-## 6. Token architecture
-
-Three layers, one direction:
-
-```
-primitives  →  semantic (light | dark)  →  component
-```
-
-- **22 semantic roles** per theme, including `ghost`, `rule`, `rule-strong`, `accent`, `accent-alt`, `overprint`, `field`, `field-border`, `focus`, and the four `button-*` roles.
-- **16 contrast pairs** declared in `tokens.json` and *computed* by `scripts/build-riso-brand.mjs` into `tokens.contrast`. No ratio is typed by hand, and none is rounded up.
-
-### Measured, not asserted
-
-| Pair | Ratio | Level |
-| --- | --- | --- |
-| Carbon on vellum | 15.26:1 | AAA |
-| Carbon on the orange drum | 5.30:1 | AA |
-| Carbon on the blue drum | 4.53:1 | AA |
-| Second-impression orange `#c22e08` | 4.87:1 | AA |
-| Federal blue as type `#0e3f8f` | 8.45:1 | AAA |
-| Press note on vellum | 5.19:1 | AA |
-| Field perimeter | 3.23:1 | — |
-| **Fluorescent orange as type** | **2.96:1** | **Fail** |
-| Vellum on safelight | 16.09:1 | AAA |
-| Press note under safelight | 9.09:1 | AAA |
-| Orange type, dark stock | 7.29:1 | AAA |
-| Blue type, dark stock | 8.21:1 | AAA |
-
-**The failure is a rule, not a bug.** `#f2542d` cannot carry type on paper stock at 2.96:1, and darkening it until it passes would stop it being fluorescent orange. So the orange drum is a **fill-only ink**; orange *type* uses `accent` `#c22e08`. This is documented in the specimen, the tokens, and the audit — not silently swapped.
-
-The same discipline applies to the footer: `PushpinTearFooter`'s default white on orange is 3.36:1 and fails, so the Riso specimen passes `sheetInk="#1b1712"` (5.30:1) instead.
-
----
-
-## 7. Deliverables
-
-- Outlined mark family: `mark.svg`, `mark-compact.svg`, `wordmark.svg`, `lockup.svg`, `favicon.svg`, `favicons/favicon-{16,32,180}.svg`.
-- Token source `features/riso/tokens.json` → `riso-tokens.css` (scoped `--rs-*`) and `public/brand/riso/riso-tokens.{css,json}`.
-- Generated TypeScript geometry: `features/riso/brand-paths.ts`.
-- Printed brand board: `design/brand/riso/brandkit.html` → `public/brand/riso/riso-brandkit.png` at 1500×1125.
-- Proof page: `app/design-system/riso` — nine sections, light and safelight.
-- Native form kit with default / focus / invalid / disabled / success, error summary and focus management.
-- `PushpinTearFooter` specimen with drum switch, seed control and re-tear.
-- Agent twin: `app/design-system/riso/llms.txt`.
-
-## 8. Not verified
-
-Print output. The overprint `#2b192e` is a screen approximation of a subtractive result. Actual drum registration, ink absorption on 270gsm vellum, and the real second-pass colour have not been proofed.
+- No halftone engine. Every dot on the page is a square or a rule.
+- No third ink. The overprint is where the two drums cross, not a new colour.
+- No rounded corner anywhere, including focus rings.

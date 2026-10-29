@@ -8,7 +8,7 @@ import { breadcrumbList, itemList, JsonLd } from '@/lib/structured-data'
 export const metadata: Metadata = {
   title: 'Design Systems — Case Library',
   description:
-    'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and print), Riso Co. (two-pass print and pushpin physics), Hachure (survey paper and ordered dither), Cove (blue liquid glass and one reading plate), Strand (quartz sand plates and a coastal vista), and Clearing (painted emerald, one pane of glass, a drawn stag on a horizon). Briefs, marks, tokens and audits.',
+    'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (cells, vermilion and ordered dither), Riso Co. (a pinned sheet and two drums), Hachure (survey paper and ordered dither), Cove (blue liquid glass and one reading plate), Strand (quartz sand plates and a coastal vista), and Clearing (painted emerald, one pane of glass, a drawn stag on a horizon). Briefs, marks, tokens and audits.',
   alternates: { canonical: '/design-system' },
   openGraph: {
     title: 'Design Systems — Case Library | Aditya Himawan',
@@ -50,7 +50,7 @@ export default function DesignSystemLibraryPage() {
   const list = itemList({
     name: 'Design systems — case library',
     description:
-      'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (bone, vermilion and ordered print), Riso Co. (two-pass print and pushpin physics), Hachure (survey paper and ordered dither), Cove (blue liquid glass and one reading plate), Strand (quartz sand plates and a coastal vista) and Clearing (painted emerald, one pane of glass and a drawn stag on a horizon).',
+      'Documented design systems: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (cells, vermilion and ordered dither), Riso Co. (a pinned sheet and two drums), Hachure (survey paper and ordered dither), Cove (blue liquid glass and one reading plate), Strand (quartz sand plates and a coastal vista) and Clearing (painted emerald, one pane of glass and a drawn stag on a horizon).',
     items: DESIGN_CASES.map((item) => ({
       name: `${item.number} — ${item.name}`,
       url: `${WEBSITE_URL}${item.href}`,
