@@ -1,44 +1,52 @@
-import Image from 'next/image'
-
 import { cn } from '@/lib/utils'
 
 import styles from '../cove.module.css'
 
 /**
- * The shipped SVGs are the logo. Deep is the default surface and Frost is the
- * light scope; the CSS swaps the two-image pair. The mark is opaque, so a
- * favicon that inherited currentColor would disappear in browser chrome.
+ * The shipped SVGs are the logo. Two drawings, not one: `mark.svg` is the ink
+ * block for the night ground, `mark-reverse.svg` is the abyss block for the day
+ * ground. Swapping files instead of filtering keeps the reading's lumen
+ * identical in both ramps — a `filter: invert()` would have turned the signal
+ * magenta.
+ *
+ * The reading is the same width in every size, so the mark is never nudged by
+ * a viewBox.
  */
+const LOCKUP_ASPECT = 165.4 / 64
+const STACKED_ASPECT = 64 / 91.85
+const WORDMARK_ASPECT = 2372 / 611
+
 export function CoveLockup({
   className,
-  priority = false,
+  height = 22,
   label = 'Cove',
 }: {
   className?: string
-  priority?: boolean
+  height?: number
   label?: string
 }) {
+  const width = Math.round(height * LOCKUP_ASPECT * 100) / 100
+
   return (
     <span
       className={cn(styles.lockup, className)}
+      style={{ height, width }}
       role="img"
       aria-label={label}
     >
-      <Image
+      <img
         src="/brand/cove/lockup.svg"
         alt=""
-        width={108}
-        height={34}
-        priority={priority}
-        className={styles.onlyFrost}
+        width={width}
+        height={height}
+        className={styles.onlyNight}
       />
-      <Image
+      <img
         src="/brand/cove/lockup-reverse.svg"
         alt=""
-        width={108}
-        height={34}
-        priority={priority}
-        className={styles.onlyDeep}
+        width={width}
+        height={height}
+        className={styles.onlyDay}
       />
     </span>
   )
@@ -46,35 +54,33 @@ export function CoveLockup({
 
 export function CoveStacked({
   className,
-  height = 88,
-  priority = false,
+  height = 92,
 }: {
   className?: string
   height?: number
-  priority?: boolean
 }) {
+  const width = Math.round(height * STACKED_ASPECT * 100) / 100
+
   return (
     <span
       className={cn(styles.stacked, className)}
-      style={{ height }}
+      style={{ height, width }}
       role="img"
       aria-label="Cove"
     >
-      <Image
+      <img
         src="/brand/cove/lockup-stacked.svg"
         alt=""
-        width={72}
-        height={88}
-        priority={priority}
-        className={styles.onlyFrost}
+        width={width}
+        height={height}
+        className={styles.onlyNight}
       />
-      <Image
+      <img
         src="/brand/cove/lockup-stacked-reverse.svg"
         alt=""
-        width={72}
-        height={88}
-        priority={priority}
-        className={styles.onlyDeep}
+        width={width}
+        height={height}
+        className={styles.onlyDay}
       />
     </span>
   )
@@ -82,7 +88,7 @@ export function CoveStacked({
 
 export function CoveMark({
   className,
-  size = 32,
+  size = 28,
   decorative = false,
   compact = false,
 }: {
@@ -91,13 +97,9 @@ export function CoveMark({
   decorative?: boolean
   compact?: boolean
 }) {
+  // Under 32px the reading closes up and would fill in, so the compact drawing
+  // drops it and thickens the arms instead of downscaling the full mark.
   const useCompact = compact || size < 32
-  const light = useCompact
-    ? '/brand/cove/mark-compact.svg'
-    : '/brand/cove/mark.svg'
-  const dark = useCompact
-    ? '/brand/cove/mark-compact-reverse.svg'
-    : '/brand/cove/mark-reverse.svg'
 
   return (
     <span
@@ -106,19 +108,27 @@ export function CoveMark({
       {...(decorative ? { 'aria-hidden': true } : { role: 'img' })}
       aria-label={decorative ? undefined : 'Cove'}
     >
-      <Image
-        src={light}
+      <img
+        src={
+          useCompact
+            ? '/brand/cove/mark-compact.svg'
+            : '/brand/cove/mark.svg'
+        }
         alt=""
         width={64}
         height={64}
-        className={styles.onlyFrost}
+        className={styles.onlyNight}
       />
-      <Image
-        src={dark}
+      <img
+        src={
+          useCompact
+            ? '/brand/cove/mark-compact-reverse.svg'
+            : '/brand/cove/mark-reverse.svg'
+        }
         alt=""
         width={64}
         height={64}
-        className={styles.onlyDeep}
+        className={styles.onlyDay}
       />
     </span>
   )
@@ -126,31 +136,33 @@ export function CoveMark({
 
 export function CoveWordmark({
   className,
-  height = 26,
+  height = 24,
 }: {
   className?: string
   height?: number
 }) {
+  const width = Math.round(height * WORDMARK_ASPECT * 100) / 100
+
   return (
     <span
       className={cn(styles.wordmark, className)}
-      style={{ height }}
+      style={{ height, width }}
       role="img"
       aria-label="Cove"
     >
-      <Image
+      <img
         src="/brand/cove/wordmark.svg"
         alt=""
-        width={1422}
-        height={555}
-        className={styles.onlyFrost}
+        width={width}
+        height={height}
+        className={styles.onlyNight}
       />
-      <Image
+      <img
         src="/brand/cove/wordmark-reverse.svg"
         alt=""
-        width={1422}
-        height={555}
-        className={styles.onlyDeep}
+        width={width}
+        height={height}
+        className={styles.onlyDay}
       />
     </span>
   )

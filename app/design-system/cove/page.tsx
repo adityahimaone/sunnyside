@@ -1,1595 +1,1190 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
-
-import '@/features/cove/cove-tokens.css'
+import { Fragment } from 'react'
 
 import {
-  COLOUR_MAIN,
+  AUDIT_ROWS,
+  BUDGET_RULES,
+  CONTRAST_PAIRS,
   DECISIONS,
+  DETACH_FLOOR,
+  DETACH_SCORES,
   GAPS,
-  MARK_FAMILIES,
+  INSTRUMENTS,
+  LOG_ROWS,
   MARK_GATE,
-  MOTION,
-  NAV,
+  MARK_SPECS,
+  MATERIAL_RULES,
+  MOTION_RULES,
   OUTPUT_CONTRACT,
-  RESOURCES,
+  PALETTE,
+  READINGS,
+  STATS,
   STORY_BEATS,
+  TIDE_CURVE,
+  TIDE_RULES,
+  TIDE_THRESHOLD,
+  TOKENS_CSS,
+  TOKENS_JSON,
   TYPE_GATE,
-  TYPE_RESEARCH,
-  VOICE,
-  type MarkPath,
+  TYPE_SCALE,
+  VOICE_SAMPLES,
+  type Decision,
 } from '@/features/cove/cove-data'
 import { CopyButton } from '@/features/cove/components/actions'
-import {
-  CoveLockup,
-  CoveMark,
-  CoveStacked,
-  CoveWordmark,
-} from '@/features/cove/components/brand'
+import { CoveLockup, CoveMark } from '@/features/cove/components/brand'
+import { Code } from '@/features/cove/components/code'
+import { CoveContents } from '@/features/cove/components/contents'
 import { CoveChrome } from '@/features/cove/components/cove-chrome'
+import { PartsDemo } from '@/features/cove/components/form-demo'
+import {
+  Alert,
+  Gauge,
+  ReadingCard,
+  Sparkline,
+  TideChart,
+} from '@/features/cove/components/instruments'
 import { CoveThemeToggle } from '@/features/cove/components/theme-toggle'
-import { FormDemo } from '@/features/cove/components/form-demo'
-import tokens from '@/features/cove/tokens.json'
 import styles from '@/features/cove/cove.module.css'
 
 export const metadata: Metadata = {
-  title: 'Cove — Design System',
+  title: 'Cove — Case 09 | Design System',
   description:
-    'Cove v1.0 is a blue liquid-glass design system: one glass layer, one solid reading plate, a C monogram, Instrument Serif and Sans, ten native controls and an honest audit.',
+    'Cove is a tidal observatory design system: a night-first ground, one lumen signal that only appears on live data, mono tabular readings, and a mark cut from two filled blocks.',
   alternates: {
     canonical: '/design-system/cove',
     types: { 'text/markdown': '/design-system/cove/llms.txt' },
   },
   openGraph: {
-    title: 'Cove — Design System',
+    title: 'Cove — Case 09 | Design System',
     description:
-      'A calmer kind of depth. One glass layer over one blue field, a solid reading plate, and a C that is the cove.',
+      'The cove is the cut; the reading is the light that arrived in it. Night-first, one signal, no glass.',
     type: 'website',
     url: '/design-system/cove',
     images: [
       {
         url: '/brand/cove/cove-brandkit.png',
-        width: 1500,
-        height: 1125,
-        alt: 'Cove brand board: the squared C mark with an ice inlay, the Abyss and Foam palette, Instrument Serif and Sans, the glass recipe and the form kit',
+        width: 3000,
+        height: 2250,
+        alt: 'The Cove brand board: the carved-corner mark, the outlined cove wordmark, the night and day ramps, and the gauge.',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Cove — Design System',
+    title: 'Cove — Case 09 | Design System',
     description:
-      'A calmer kind of depth. One glass layer over one blue field, a solid reading plate, and a C that is the cove.',
-    images: [
-      {
-        url: '/brand/cove/cove-brandkit.png',
-        width: 1500,
-        height: 1125,
-        alt: 'Cove brand board: the squared C mark with an ice inlay, the Abyss and Foam palette, Instrument Serif and Sans, the glass recipe and the form kit',
-      },
-    ],
+      'A night-first instrument for reading water: one signal, mono figures, a mark cut from two blocks.',
+    images: ['/brand/cove/cove-brandkit.png'],
   },
 }
 
-type Token = {
-  name: string
-  value: string
-  resolved?: string
-  role: string
-}
+const BRAND = '/brand/cove'
 
-const primitives = tokens.primitives as Token[]
-const deepSemantic = tokens.semantic.dark as Token[]
-const frostSemantic = tokens.semantic.light as Token[]
-const deepComponents = tokens.components.dark as Token[]
-const frostComponents = tokens.components.light as Token[]
-const typeTokens = tokens.type as Token[]
+/** The whole material, in the six declarations that matter. */
+const MATERIAL_RECIPE = `/* ground — one ink, one wash at the top of the page */
+--cv-bg: #060B18;
+--cv-wash: radial-gradient(
+  120% 60% at 50% 0%, rgb(63 227 198 / 0.06), transparent 70%);
 
-const TOKEN_COUNT =
-  Object.keys(tokens.theme).length +
-  primitives.length +
-  deepSemantic.length +
-  frostSemantic.length +
-  deepComponents.length +
-  frostComponents.length +
-  typeTokens.length +
-  tokens.space.length +
-  tokens.radius.length +
-  tokens.motion.length
+/* panel — value, a hairline, a 12px radius, no shadow */
+--cv-plate: #0B1326;
+--cv-panel-edge: 1px solid rgb(150 180 240 / 0.14);
+--cv-radius-md: 12px;
 
-const SEMANTIC_PREVIEW = [
-  'bg',
-  'fg',
-  'muted',
-  'border',
-  'surface',
-  'accent',
-  'focus',
-  'danger',
-  'glass-fill',
-  'field-image',
-]
+/* raised — the fill moves, the edge does not */
+--cv-raise: #111D36;`
 
-const SEMANTIC_TABLE = deepSemantic.map((deep) => ({
-  deep,
-  frost: frostSemantic.find((token) => token.name === deep.name),
-}))
-
-const RESOURCE_SUMMARY = {
-  present: RESOURCES.length,
-  used: RESOURCES.filter((resource) => resource.status === 'used').length,
-  substituted: RESOURCES.filter((resource) => resource.status === 'substituted')
-    .length,
-  untouched: RESOURCES.filter((resource) => resource.status === 'not used')
-    .length,
-}
-
-const CONTRACT_SUMMARY = {
-  shipped: OUTPUT_CONTRACT.filter((item) => item.status === 'shipped').length,
-  total: OUTPUT_CONTRACT.length,
-}
-
-const GATE_SUMMARY = {
-  passed: MARK_GATE.filter((check) => check.result === 'pass').length,
-  total: MARK_GATE.length,
-}
-
-function SectionHead({
-  id,
-  number,
-  label,
-  title,
-  lead,
-}: {
-  id: string
-  number: string
-  label: string
-  title: React.ReactNode
-  lead: string
-}) {
+function Tick() {
   return (
-    <div className={styles.sectionHead}>
-      <p className={styles.sectionLabel}>
-        <span>{number}</span> {label}
-      </p>
-      <h2 id={`${id}-title`} className={styles.sectionTitle}>
-        {title}
-      </h2>
-      <p className={styles.sectionLead}>{lead}</p>
-    </div>
-  )
-}
-
-const STATUS_TONE = {
-  pass: styles.status_pass,
-  note: styles.status_note,
-  used: styles.status_used,
-  substituted: styles.status_substituted,
-  unused: styles.status_unused,
-  shipped: styles.status_shipped,
-} as const
-
-function StatusPill({
-  tone,
-  children,
-}: {
-  tone: keyof typeof STATUS_TONE
-  children: React.ReactNode
-}) {
-  return (
-    <span className={`${styles.statusPill} ${STATUS_TONE[tone]}`}>
-      {children}
-    </span>
-  )
-}
-
-function InlineMark({
-  paths,
-  label,
-}: {
-  paths: readonly MarkPath[]
-  label: string
-}) {
-  return (
-    <svg viewBox="0 0 64 64" role="img" aria-label={label}>
-      {paths.map((path, index) => (
-        <path
-          key={`${path.d}-${index}`}
-          d={path.d}
-          fillRule="evenodd"
-          fill={path.accent ? 'var(--cv-ice)' : 'currentColor'}
-        />
-      ))}
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M3 12.5h6.5L13 6l3 11 2.5-4.5H21"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinecap="square"
+      />
     </svg>
   )
 }
 
+function DecisionCard({ decision }: { decision: Decision }) {
+  const [lead, ...rest] = decision.breaksNext.split(': ')
+
+  return (
+    <div className={styles.decision}>
+      <h3>{decision.title}</h3>
+      <dl>
+        <dt>Decision</dt>
+        <dd>{decision.decision}</dd>
+        <dt>Because</dt>
+        <dd>{decision.because}</dd>
+        <dt>Not when</dt>
+        <dd>{decision.notWhen}</dd>
+        <dt>Breaks next</dt>
+        <dd>
+          {rest.length ? (
+            <>
+              <em>{lead}:</em> {rest.join(': ')}
+            </>
+          ) : (
+            decision.breaksNext
+          )}
+        </dd>
+      </dl>
+    </div>
+  )
+}
+
+const weakest = DETACH_SCORES.reduce(
+  (low, row) => (row.score < low.score ? row : low),
+  DETACH_SCORES[0],
+)
+
 export default function CovePage() {
   return (
-    <div className={`${styles.page} cv-scope`} id="top">
+    <div className={styles.root} id="top">
       <CoveChrome />
-      <a href="#collection" className={styles.skipLink}>
+
+      <a className={styles.skip} href="#main">
         Skip to the system
       </a>
 
-      <header className={styles.nav}>
-        <div className={styles.navInner}>
-          <a
-            href="#top"
-            className={styles.navBrand}
-            aria-label="Cove, back to top"
-          >
-            <CoveLockup priority />
+      {/* ── Topbar ─────────────────────────────────────────────────────── */}
+      <header className={styles.topbar}>
+        <div className={`${styles.shell} ${styles.topbarInner}`}>
+          <a className={styles.brand} href="#top" aria-label="Cove, back to top">
+            <img
+              src={`${BRAND}/mark.svg`}
+              width={26}
+              height={26}
+              alt=""
+              aria-hidden="true"
+              className={styles.onlyNight}
+            />
+            <img
+              src={`${BRAND}/mark-reverse.svg`}
+              width={26}
+              height={26}
+              alt=""
+              aria-hidden="true"
+              className={styles.onlyDay}
+            />
+            <span className={styles.brandName}>cove</span>
           </a>
-          <nav className={styles.navLinks} aria-label="Case contents">
-            {NAV.map((item) => (
-              <a key={item.id} href={`#${item.id}`} className={styles.navLink}>
-                {item.label}
-              </a>
-            ))}
+
+          <nav className={styles.topnav} aria-label="Sections">
+            <a href="#tide">Tide</a>
+            <a href="#marks">Marks</a>
+            <a href="#palette">Palette</a>
+            <a href="#instruments">Instruments</a>
+            <a href="#tokens">Tokens</a>
           </nav>
-          <CoveThemeToggle className={styles.navTheme} />
+
+          <CoveThemeToggle />
         </div>
       </header>
 
-      <main id="collection">
-        <section className={styles.hero} aria-labelledby="hero-title">
-          <div className={styles.heroField} aria-hidden />
-          <div className={styles.heroInner}>
-            <div className={styles.heroCopy}>
-              <p className={styles.eyebrow}>
-                <span className={styles.eyebrowDot} aria-hidden />
-                Case 06 / v1.0 design system
-              </p>
-              <h1 id="hero-title" className={styles.heroTitle}>
-                A calmer
-                <br />
-                <em className={styles.heroTitleEm}>kind of depth.</em>
-              </h1>
-              <p className={styles.heroLead}>
-                Cove is a blue liquid-glass system for interfaces that sit over
-                the world: one glass layer, one solid reading plate, and a type
-                hierarchy calm enough to disappear.
-              </p>
-              <div className={styles.heroActions}>
-                <a className={styles.primaryButton} href="#material">
-                  See the glass <span aria-hidden>↗</span>
-                </a>
-                <a className={styles.ghostButton} href="#forms">
-                  Try the controls
-                </a>
-              </div>
-              <dl className={styles.heroStats}>
-                <div>
-                  <dt>Material</dt>
-                  <dd>Glass + water</dd>
-                </div>
-                <div>
-                  <dt>Mark</dt>
-                  <dd>C monogram</dd>
-                </div>
-                <div>
-                  <dt>Tokens</dt>
-                  <dd>{TOKEN_COUNT}</dd>
-                </div>
-                <div>
-                  <dt>Controls</dt>
-                  <dd>10</dd>
-                </div>
-              </dl>
-            </div>
+      <main id="main">
+        {/* ── Hero: full bleed ─────────────────────────────────────────── */}
+        <section className={styles.hero}>
+          <div className={styles.heroMedia} aria-hidden="true" />
+          <div className={styles.heroScrim} aria-hidden="true" />
 
-            <aside
-              className={`${styles.heroPlate} ${styles.glassPanel} ${styles.onDeep}`}
-            >
-              <div className={styles.plateHead}>
-                <span className={styles.cardLabel}>Case file / 1.0</span>
-                <span className={styles.liveTag}>
-                  <span aria-hidden /> Live surface
-                </span>
-              </div>
-              <div className={styles.plateBrand}>
-                <CoveMark size={56} decorative />
-                <div>
-                  <CoveWordmark height={26} />
-                  <p className={styles.plateSub}>
-                    Identity &amp; interface system
-                  </p>
-                </div>
-              </div>
-              <dl className={styles.plateSpecs}>
-                <div>
-                  <dt>Material</dt>
-                  <dd>Glass + water</dd>
-                </div>
-                <div>
-                  <dt>Family</dt>
-                  <dd>Architectural monogram</dd>
-                </div>
-                <div>
-                  <dt>Contrast</dt>
-                  <dd>17.14:1</dd>
-                </div>
-                <div>
-                  <dt>Version</dt>
-                  <dd>1.0 / 2026</dd>
-                </div>
-              </dl>
-              <div className={styles.plateFoot}>
-                <span>Case 06</span>
-                <a href="/brand/cove/cove-brandkit.png" download>
-                  Board <span aria-hidden>↗</span>
-                </a>
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <div className={styles.metaStrip} aria-label="Case metadata">
-          <span>Identity / Cove 1.0</span>
-          <span>Mark / C monogram</span>
-          <span>Type / Instrument Serif + Sans</span>
-          <span>Status / Shipped</span>
-        </div>
-
-        <section
-          id="foundation"
-          className={styles.section}
-          aria-labelledby="foundation-title"
-        >
-          <SectionHead
-            id="foundation"
-            number="01"
-            label="Foundation"
-            title={
-              <>
-                Depth, without
-                <br />
-                the fog.
-              </>
-            }
-            lead="Cove is not glass everywhere. It is one translucent layer over one field, a solid plate for anything you have to read, and a single ice accent. The restraint is the system."
-          />
-
-          <div className={styles.storyGrid}>
-            <div className={styles.storySpine}>
-              <p className={styles.cardLabel}>Story spine / seven beats</p>
-              <dl className={styles.storyBeats}>
-                {STORY_BEATS.map((beat) => (
-                  <div key={beat.beat} className={styles.storyBeat}>
-                    <dt>{beat.beat}</dt>
-                    <dd>{beat.line}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-
-            <aside className={`${styles.storyStatement} ${styles.onDeep}`}>
+          <div className={`${styles.shell} ${styles.heroInner}`}>
+            <div className={styles.heroGrid}>
               <div>
-                <p className={styles.cardLabel} style={{ color: '#93a3ac' }}>
-                  One sentence
+                <p className={styles.eyebrow}>
+                  Brand kit &amp; design system · v2.0 · 29 Oct 2026
                 </p>
-                <blockquote>
-                  Cove keeps <em>depth</em> readable: one glass layer over one
-                  field, a solid reading plate, and an ice accent that never
-                  becomes a mood.
-                </blockquote>
-              </div>
-              <div className={styles.storyStatementFoot}>
-                <span>Reject it if a second glass layer appears</span>
-                <span>2026</span>
-              </div>
-            </aside>
-          </div>
-
-          <div className={styles.decisionHead}>
-            <div>
-              <p className={styles.cardLabel}>Decision cards</p>
-              <h3>Six rules, each with a failure</h3>
-            </div>
-            <p className={styles.tableNote}>
-              Decision / because / not when / breaks next. The last line is the
-              audit backlog.
-            </p>
-          </div>
-
-          <div className={styles.decisionGrid}>
-            {DECISIONS.map((decision) => (
-              <article key={decision.title} className={styles.decisionCard}>
-                <h4>{decision.title}</h4>
-                <dl className={styles.decisionRows}>
-                  <div className={styles.decisionRow}>
-                    <dt>Decision</dt>
-                    <dd>{decision.decision}</dd>
-                  </div>
-                  <div className={styles.decisionRow}>
-                    <dt>Because</dt>
-                    <dd>{decision.because}</dd>
-                  </div>
-                  <div className={styles.decisionRow}>
-                    <dt>Not when</dt>
-                    <dd>{decision.notWhen}</dd>
-                  </div>
-                  <div className={styles.decisionRow}>
-                    <dt>Breaks next</dt>
-                    <dd>{decision.breaksNext}</dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section
-          id="material"
-          className={styles.section}
-          aria-labelledby="material-title"
-        >
-          <SectionHead
-            id="material"
-            title={
-              <>
-                Glass holds.
-                <br />
-                The field moves.
-              </>
-            }
-            number="02"
-            label="Material"
-            lead="A single translucent sheet with a lit cut edge and one specular. Behind it, the field; on it, nothing you need to read. The copy sits on a solid plate."
-          />
-
-          <div className={styles.materialGrid}>
-            <div className={`${styles.materialStage} ${styles.onDeep}`}>
-              <div className={styles.stageFieldBg} aria-hidden />
-              <div className={styles.stageTop}>
-                <span className={styles.cardLabel} style={{ color: '#93a3ac' }}>
-                  Material study / 01
-                </span>
-                <span className={styles.stageTag}>backdrop-filter</span>
-              </div>
-              <div className={`${styles.stageCard} ${styles.glassPanel}`}>
-                <div className={styles.stageCardHead}>
-                  <CoveMark size={30} decorative />
-                  <span>Glass surface</span>
-                </div>
-                <p>
-                  One translucent sheet with a lit cut edge and a top specular.
-                  The field stays outside the text block; the copy gets a solid
-                  plate.
+                <h1 className={styles.heroTitle}>
+                  The cove is the cut. The reading is <em>the light</em> that
+                  arrived in it.
+                </h1>
+                <p className={styles.heroLede}>
+                  Cove is an instrument for reading water after dark: one
+                  signal, mono figures, and a time on every number. Night is not
+                  a theme here — it is the default surface, and daylight is the
+                  exception that has to be designed second.
                 </p>
-                <div className={styles.stageField}>
-                  <span>you@studio.com</span>
-                  <span className={styles.stageFieldFocus} aria-hidden>
-                    focus
+                <div className={styles.heroMeta}>
+                  <span className={styles.pill}>
+                    <b>112</b> token declarations
+                  </span>
+                  <span className={styles.pill}>
+                    <b>17.19:1</b> ink on abyss
+                  </span>
+                  <span className={styles.pill}>
+                    <b>2%</b> signal budget
+                  </span>
+                  <span className={styles.pill}>
+                    <b>0</b> shadows on panels
                   </span>
                 </div>
-                <div className={styles.stageButton}>Request a key</div>
               </div>
-              <div className={styles.stageLayers}>
-                <span>01 Fill</span>
-                <span>02 Edge</span>
-                <span>03 Specular</span>
-                <span>04 Grain</span>
+
+              <div className={styles.heroPlate}>
+                <div className={styles.heroPlateTop}>
+                  <CoveLockup height={20} />
+                  <span>Station 04 · sample</span>
+                </div>
+                <dl className={styles.heroPlateRows}>
+                  {READINGS.slice(0, 4).map((reading) => (
+                    <div key={reading.id} className={styles.heroPlateRow}>
+                      <dt>{reading.label}</dt>
+                      <dd>
+                        {reading.value}
+                        <small>{reading.unit}</small>
+                      </dd>
+                      <dd className={styles.plateTime}>{reading.time}</dd>
+                    </div>
+                  ))}
+                </dl>
               </div>
             </div>
 
-            <div className={styles.materialNotes}>
-              <p className={styles.cardLabel}>The recipe</p>
-              <ol className={styles.recipe}>
-                <li>
-                  <span>Fill</span>
-                  <code>var(--cv-glass-fill)</code>
-                  <p>
-                    8% foam on Deep, 62% white on Frost. One layer, never a
-                    stack.
-                  </p>
-                </li>
-                <li>
-                  <span>Edge</span>
-                  <code>1px var(--cv-glass-edge)</code>
-                  <p>
-                    A lit cut edge, not a glow. It tells the eye the sheet has a
-                    boundary.
-                  </p>
-                </li>
-                <li>
-                  <span>Specular</span>
-                  <code>inset 0 1px 0 var(--cv-glass-highlight)</code>
-                  <p>
-                    One highlight, top only. A second turns the material into
-                    plastic.
-                  </p>
-                </li>
-                <li>
-                  <span>Grain</span>
-                  <code>feTurbulence / 0.16</code>
-                  <p>
-                    A low-opacity grain on the field, never on the reading
-                    plate.
-                  </p>
-                </li>
-              </ol>
-
-              <div className={styles.doDont}>
-                <div>
-                  <p className={styles.doDontTitle}>Do</p>
-                  <ul>
-                    <li>Use glass for chrome over the field.</li>
-                    <li>Put every paragraph on a solid plate.</li>
-                    <li>Measure the composite, not the page.</li>
-                  </ul>
+            <div className={styles.heroStats}>
+              {STATS.map((stat) => (
+                <div key={stat.label} className={styles.stat}>
+                  <b>{stat.value}</b>
+                  <span>{stat.label}</span>
                 </div>
-                <div>
-                  <p className={styles.doDontTitle}>Don’t</p>
-                  <ul>
-                    <li>Stack two glass layers.</li>
-                    <li>Put body copy on the blur.</li>
-                    <li>Animate the blur or the field.</li>
-                  </ul>
-                </div>
-              </div>
-
-              <p className={styles.fieldNote}>
-                The supplied background image was not in the workspace. The page
-                ships a CSS caustic field; set <code>--cv-field-image</code> to
-                the image and it replaces the gradients everywhere.
-              </p>
+              ))}
             </div>
           </div>
         </section>
 
-        <section
-          id="marks"
-          className={styles.section}
-          aria-labelledby="marks-title"
-        >
-          <SectionHead
-            id="marks"
-            title={
-              <>
-                One letter,
-                <br />
-                one cove.
-              </>
-            }
-            number="03"
-            label="Marks"
-            lead="The C is the cove: a squared letterform with 45° walls and one ice inlay on the lower lip. It works in one colour first; the inlay is punctuation, not structure."
-          />
+        <div className={`${styles.shell} ${styles.layout}`}>
+          <CoveContents />
 
-          <div className={styles.marksLayout}>
-            <div className={`${styles.markStage} ${styles.onDeep}`}>
-              <div className={styles.markStageTop}>
-                <span className={styles.cardLabel}>Construction / 64 grid</span>
-                <span className={styles.stageTag}>v1.0</span>
+          <div className={styles.content}>
+            {/* ── 01 Foundation ────────────────────────────────────────── */}
+            <section id="foundation">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>01 — Foundation</p>
+                <h2>A number without a time on it is decoration.</h2>
+                <p>
+                  Everything below follows from one belief, one enemy and one
+                  material. If a part does not serve the belief, it is
+                  decoration, and decoration is what this system was built to
+                  refuse.
+                </p>
               </div>
-              <div className={styles.markStageCenter}>
-                <CoveMark size={190} decorative />
-                <CoveLockup />
-              </div>
-              <div className={styles.markStageFoot}>
-                <span>Frame / 8 units</span>
-                <span>Opening / 24</span>
-                <span>Arm / 12</span>
-                <span>Inlay / 16 × 8</span>
-                <span>Primitives / 2 · 1</span>
-              </div>
-            </div>
 
-            <aside className={styles.markNotes}>
-              <p className={styles.cardLabel}>Hard gate / six checks</p>
-              <p>
-                The family is <strong>architectural monogram</strong>. One
-                squared C with 45° walls; the ink letter is the cove, the ice
-                inlay is the waterline. Remove the inlay and the letter still
-                stands.
-              </p>
-              <div className={styles.gateGrid}>
-                {MARK_GATE.map((check) => (
-                  <div key={check.gate} className={styles.gateCard}>
-                    <div className={styles.gateCardHead}>
-                      <strong>
-                        {check.gate}. {check.title}
-                      </strong>
-                      <StatusPill tone="pass">Pass</StatusPill>
-                    </div>
-                    <p>{check.evidence}</p>
+              <div className={styles.belief}>
+                {STORY_BEATS.slice(0, 3).map((beat) => (
+                  <div key={beat.beat}>
+                    <h3>{beat.beat}</h3>
+                    <p>{beat.line}</p>
                   </div>
                 ))}
               </div>
-              <div className={styles.applicationNote}>
-                <code>score-mark.py</code> returns PASS: no circle, no stroke,
-                two primitives in the primary, one in the compact, and a C that
-                still reads at 16px.
+
+              <div className={styles.sentence}>
+                <small>The sentence this work can be rejected against</small>
+                <p>
+                  Cove is a tidal observatory for people who read water, that
+                  keeps every value as a reading with a time on it instead of a
+                  dashboard that glows, made of an abyssal ground and one lumen
+                  signal.
+                </p>
               </div>
-            </aside>
-          </div>
 
-          <div className={styles.bakeoffHead}>
-            <div>
-              <p className={styles.cardLabel}>Four directions / one material</p>
-              <h3>Why the C won</h3>
-            </div>
-            <p className={styles.tableNote}>
-              All four were drawn on the same 64 grid. The choice is silhouette
-              and meaning, not a defect.
-            </p>
-          </div>
+              <div className={styles.cards4}>
+                {DECISIONS.map((decision) => (
+                  <DecisionCard key={decision.title} decision={decision} />
+                ))}
+              </div>
+            </section>
 
-          <div className={styles.bakeoffGrid}>
-            {MARK_FAMILIES.map((family) => (
-              <article
-                key={family.id}
-                className={styles.bakeoffCard}
-                data-kept={family.verdict === 'kept'}
-              >
-                <div className={styles.bakeoffTop}>
-                  <div className={styles.bakeoffMark}>
-                    <InlineMark
-                      paths={family.paths}
-                      label={`${family.name} mark`}
+            {/* ── 02 Material ──────────────────────────────────────────── */}
+            <section id="material">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>02 — Material</p>
+                <h2>Ink and lumen. No glass, no shadow, one light.</h2>
+                <p>
+                  Elevation is a value step plus a hairline, because on a
+                  near-black ground a shadow is invisible and a glow reads as
+                  data. The only floating layer in the system is the plate over
+                  the hero photograph, and it is the only element allowed a
+                  shadow.
+                </p>
+              </div>
+
+              <div className={styles.materialGrid}>
+                <div className={styles.demoPanel}>
+                  <div className={styles.demoPlate}>
+                    <div className={styles.demoPlateHead}>
+                      <b>Ground</b>
+                      <code>--cv-bg</code>
+                    </div>
+                    <div className={styles.demoPlateValue}>
+                      <strong>0</strong>
+                      <span>step</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.demoPlate} data-state="hairline">
+                    <div className={styles.demoPlateHead}>
+                      <b>Panel</b>
+                      <code>--cv-plate + hairline</code>
+                    </div>
+                    <div className={styles.demoPlateValue}>
+                      <strong>1.42</strong>
+                      <span>m</span>
+                    </div>
+                    <div className={styles.demoPlateBar}>
+                      <i style={{ width: '71%' }} />
+                    </div>
+                  </div>
+
+                  <div className={styles.demoPlate} data-state="raise">
+                    <div className={styles.demoPlateHead}>
+                      <b>Raised</b>
+                      <code>--cv-raise</code>
+                    </div>
+                    <div className={styles.demoPlateValue}>
+                      <strong>18</strong>
+                      <span>kn</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <p className={styles.blockLabel}>Rules</p>
+                  <ul className={styles.rules}>
+                    {MATERIAL_RULES.map((rule) => (
+                      <li key={rule.rule}>
+                        <Tick />
+                        <span>
+                          <b>{rule.rule}.</b> {rule.note}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className={styles.block}>
+                <div className={styles.codeHead}>
+                  <span>The recipe</span>
+                  <CopyButton text={MATERIAL_RECIPE} />
+                </div>
+                <pre>
+                  <Code source={MATERIAL_RECIPE} />
+                </pre>
+              </div>
+            </section>
+
+            {/* ── 03 Tide ──────────────────────────────────────────────── */}
+            <section id="tide">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>03 — Tide</p>
+                <h2>The data layer is the identity.</h2>
+                <p>
+                  A tidal system that draws its charts like a marketing page has
+                  no identity, only a palette. The curve below is a fixed
+                  24-hour sample — twenty-four numbers, one per hour — and the
+                  page says so wherever it appears.
+                </p>
+              </div>
+
+              <div className={styles.tideGrid}>
+                <div className={styles.tideChart}>
+                  <div className={styles.tideChartHead}>
+                    <b>Water level · 24 h sample</b>
+                    <span>min 0.62 · max 1.36 · now 1.42 m</span>
+                  </div>
+                  <TideChart values={TIDE_CURVE} threshold={TIDE_THRESHOLD} />
+                  <div className={styles.tideAxis}>
+                    <span>00:00</span>
+                    <span>06:00</span>
+                    <span>12:00</span>
+                    <span>18:00</span>
+                    <span>24:00</span>
+                  </div>
+                </div>
+
+                <div className={styles.tideRules}>
+                  {TIDE_RULES.map((rule) => (
+                    <div key={rule.rule} className={styles.tideRule}>
+                      <b>{rule.rule}</b>
+                      <span>{rule.note}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.readingRow}>
+                {READINGS.map((reading) => (
+                  <ReadingCard key={reading.id} reading={reading} />
+                ))}
+              </div>
+
+              <p className={styles.note}>
+                Five readings, one card each. The dot is the only thing that
+                moves: <code>2.4s</code>, one element per view, and it stops
+                under <code>prefers-reduced-motion</code>. A stale reading drops
+                to haze and loses the dot — it does not fade out, it stops
+                claiming to be live.
+              </p>
+            </section>
+
+            {/* ── 04 Marks ─────────────────────────────────────────────── */}
+            <section id="marks">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>04 — Marks</p>
+                <h2>Two filled shapes, six units apart.</h2>
+                <p>
+                  A carved corner and the reading nested in its cut, held apart
+                  by six units of ground. Nine drawings were made; eight lost,
+                  most of them to the 16px test. The survivor is the only one
+                  that still read as a cove when it was the size of a favicon.
+                </p>
+              </div>
+
+              <div className={styles.logoCard}>
+                <div className={styles.stage}>
+                  <div className={styles.stageClear}>
+                    <img
+                      src={`${BRAND}/lockup.svg`}
+                      alt="Cove lockup: the carved-corner mark with the reading nested in its cut, beside the outlined wordmark"
+                      width={330}
+                      height={128}
+                      className={styles.onlyNight}
+                    />
+                    <img
+                      src={`${BRAND}/lockup-reverse.svg`}
+                      alt="Cove lockup on the day ground"
+                      width={330}
+                      height={128}
+                      className={styles.onlyDay}
                     />
                   </div>
-                  <span className={styles.bakeoffFamily}>{family.family}</span>
+                  <div className={styles.stageRail}>
+                    <span>Logo / 01 · mark + wordmark</span>
+                    <span>64 grid · channel 6</span>
+                  </div>
                 </div>
-                <div>
-                  <p className={styles.bakeoffName}>{family.name}</p>
-                  <StatusPill
-                    tone={family.verdict === 'kept' ? 'pass' : 'unused'}
-                  >
-                    {family.verdict}
-                  </StatusPill>
+
+                <div className={styles.logoBody}>
+                  <div>
+                    <p className={styles.blockLabel}>Specs</p>
+                    <dl className={styles.specs}>
+                      {MARK_SPECS.map((spec) => (
+                        <Fragment key={spec.key}>
+                          <dt>{spec.key}</dt>
+                          <dd>{spec.value}</dd>
+                        </Fragment>
+                      ))}
+                      <dt>Files</dt>
+                      <dd>
+                        <code>public/brand/cove/</code>
+                      </dd>
+                    </dl>
+                    <div className={styles.downloads}>
+                      <a href={`${BRAND}/mark.svg`} download>
+                        Mark .svg
+                      </a>
+                      <a href={`${BRAND}/lockup.svg`} download>
+                        Lockup .svg
+                      </a>
+                      <a href={`${BRAND}/mark-compact.svg`} download>
+                        Compact .svg
+                      </a>
+                      <a href={`${BRAND}/wordmark.svg`} download>
+                        Wordmark .svg
+                      </a>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className={styles.blockLabel}>Sizes</p>
+                    <div className={styles.partRow}>
+                      <CoveMark size={64} />
+                      <CoveMark size={32} />
+                      <CoveMark size={24} compact />
+                      <CoveMark size={16} compact />
+                    </div>
+                    <p className={styles.note}>
+                      At 16 and 24 the compact drawing drops the reading and
+                      thickens the arms to 25 units, because a 14-unit block
+                      cannot survive a 3.5px gap. That is a deliberate
+                      degradation, not a downscale.
+                    </p>
+                  </div>
                 </div>
-                <p className={styles.bakeoffReason}>{family.reason}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section
-          id="colour"
-          className={styles.section}
-          aria-labelledby="colour-title"
-        >
-          <SectionHead
-            id="colour"
-            title={
-              <>
-                Blue,
-                <br />
-                by role.
-              </>
-            }
-            number="04"
-            label="Colour"
-            lead="Abyss is the ground; Foam is the text; Ice is the one loud field. Horizon and Mist are structure. Clay, Moss and Amber are status, never decoration. Every pair is measured."
-          />
-
-          <div className={styles.colourGrid}>
-            {COLOUR_MAIN.map((colour) => (
-              <article key={colour.name} className={styles.colourCard}>
-                <div
-                  className={styles.colourSwatch}
-                  style={{ background: colour.value }}
-                  aria-hidden
-                />
-                <div className={styles.colourBody}>
-                  <p className={styles.colourName}>{colour.name}</p>
-                  <p className={styles.colourValue}>
-                    {colour.value} · {colour.ratio}
-                  </p>
-                  <p className={styles.colourRole}>{colour.role}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div className={styles.colourRule}>
-            <span>One loud field / Ice</span>
-            <span>Glass is a material, not a colour</span>
-            <span>Body 4.5:1 · large 3:1</span>
-          </div>
-
-          <div className={styles.tableBlock}>
-            <div className={styles.tableHead}>
-              <div>
-                <p className={styles.cardLabel}>Contrast</p>
-                <h3>Pairs that ship</h3>
               </div>
-              <p className={styles.tableNote}>
-                Accents are checked before they carry text. Status colours are
-                roles, not fields.
+
+              <p className={styles.blockLabel} style={{ marginTop: 26 }}>
+                The mark gate
               </p>
-            </div>
-            <div className={styles.tableScroll}>
-              <table className={styles.table}>
-                <caption className={styles.srOnly}>
-                  Colour pairs with measured contrast ratios and intended use
-                </caption>
+              <div className={styles.gate}>
+                {MARK_GATE.map((row) => (
+                  <div key={row.rule} className={styles.gateRow}>
+                    <span
+                      className={`${styles.gateMark} ${row.pass ? '' : styles.gateFail}`}
+                      aria-hidden
+                    >
+                      {row.pass ? '✓' : '✕'}
+                    </span>
+                    <div>
+                      <b>
+                        {row.rule}
+                        <span className={styles.srOnly}>
+                          {row.pass ? ' — pass' : ' — fail'}
+                        </span>
+                      </b>
+                      <span>{row.note}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ── 05 Palette ───────────────────────────────────────────── */}
+            <section id="palette">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>05 — Palette</p>
+                <h2>Four values of ink, one signal, one alarm.</h2>
+                <p>
+                  The night ramp is a value ladder — abyss, deep, raise — and the
+                  daylight ramp is a second palette, not an inversion. Lumen is
+                  not a brand colour; it is the state of being live.
+                </p>
+              </div>
+
+              <div className={styles.swatches}>
+                {PALETTE.map((ink) => (
+                  <div key={ink.token} className={styles.swatch}>
+                    <div
+                      className={styles.chip}
+                      style={{ background: ink.value, color: ink.ink }}
+                    >
+                      <span>{ink.token.replace('--cv-', '')}</span>
+                    </div>
+                    <div className={styles.meta}>
+                      <b>{ink.name}</b>
+                      <code>{ink.value}</code>
+                      {ink.role}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <table>
+                <caption>Measured pairs — computed, not estimated</caption>
                 <thead>
                   <tr>
                     <th scope="col">Pair</th>
                     <th scope="col">Ratio</th>
-                    <th scope="col">Use</th>
+                    <th scope="col">Allowed use</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tokens.contrast.map((pair) => (
-                    <tr key={pair.label}>
-                      <th scope="row">
-                        <span className={styles.pairCell}>
-                          <span
-                            className={styles.pairChip}
-                            style={{ background: pair.bg }}
-                            aria-hidden
-                          >
-                            <span style={{ color: pair.fg }}>Aa</span>
-                          </span>
-                          {pair.label}
-                        </span>
-                      </th>
-                      <td>
-                        <span className={styles.ratio}>
-                          {pair.ratio.toFixed(2)}:1
-                        </span>
-                      </td>
+                  {CONTRAST_PAIRS.map((pair) => (
+                    <tr key={pair.pair}>
+                      <td>{pair.pair}</td>
+                      <td className={styles.num}>{pair.ratio}</td>
                       <td>{pair.use}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-        </section>
 
-        <section
-          id="type"
-          className={styles.section}
-          aria-labelledby="type-title"
-        >
-          <SectionHead
-            id="type"
-            title={
-              <>
-                Serif for the
-                <br />
-                name, sans
-                <br />
-                for the work.
-              </>
-            }
-            number="05"
-            label="Type"
-            lead="Instrument Serif gives the hero and the wordmark their calm; Instrument Sans carries every field, label and paragraph; Geist Mono keeps the facts. The pairing was chosen for contrast, not novelty."
-          />
-
-          <div className={styles.typeBlock}>
-            <div className={styles.typeBlockHead}>
-              <p className={styles.cardLabel}>Specimen</p>
-              <p className={styles.typeBlockNote}>
-                Instrument Serif / Instrument Sans / Geist Mono
-              </p>
-            </div>
-
-            <div className={styles.typeResearch}>
-              <h3>{TYPE_RESEARCH.title}</h3>
-              <p>{TYPE_RESEARCH.body}</p>
-              <ul className={styles.researchList} aria-label="Type sources">
-                {TYPE_RESEARCH.sources.map((source) => (
-                  <li key={source.href}>
-                    <a href={source.href} target="_blank" rel="noreferrer">
-                      {source.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <p className={styles.typeSpecimen}>A calmer kind of depth.</p>
-            <div className={styles.typeRows}>
-              <div>
-                <span>Display</span>
-                <strong className={styles.typeDisplay}>Instrument Serif</strong>
-                <code>400 / 6.2rem / −0.035em</code>
-              </div>
-              <div>
-                <span>Reading</span>
-                <strong className={styles.typeReading}>
-                  Depth is a surface.
-                </strong>
-                <code>Instrument Sans / 16–18</code>
-              </div>
-              <div>
-                <span>Label</span>
-                <strong className={styles.typeMono}>MATERIAL / 04</strong>
-                <code>Geist Mono 500 / 0.14em</code>
-              </div>
-            </div>
-            <ul className={styles.typeGate}>
-              {TYPE_GATE.map((check) => (
-                <li key={check}>{check}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section
-          id="forms"
-          className={styles.section}
-          aria-labelledby="forms-title"
-        >
-          <SectionHead
-            id="forms"
-            title={
-              <>
-                Controls that
-                <br />
-                survive the glass.
-              </>
-            }
-            number="06"
-            label="Forms"
-            lead="Ten native controls. The field sits on a solid plate; the glass is beside it, never under it. Labels visible, focus a 3px ring, errors linked, and the error summary takes focus."
-          />
-
-          <div className={styles.formsLayout}>
-            <div className={styles.formPanel}>
-              <div className={styles.formPanelHead}>
+              <div className={styles.loudDemo}>
                 <div>
-                  <p className={styles.cardLabel}>Form / 01</p>
-                  <h3>Request a key</h3>
+                  <p>
+                    &ldquo;The signal is a state, never a surface. If a
+                    screenshot has three glowing things, one of them is
+                    wrong.&rdquo;
+                  </p>
+                  <small>Abyss on lumen · 12.18:1 · the only loud field</small>
                 </div>
-                <span className={styles.formBadge}>Specimen</span>
-              </div>
-              <p className={styles.formLead}>
-                The whole kit in one place: text, email, password, select, radio
-                group, textarea, checkbox, switch, range and file. Submit with
-                the fields empty to see the summary.
-              </p>
-              <FormDemo />
-            </div>
-
-            <aside className={styles.formAside}>
-              <p className={styles.cardLabel}>Anatomy</p>
-              <ol className={styles.anatomy}>
-                <li>
-                  <span>01</span>
-                  <div>
-                    <strong>Label</strong>
-                    <p>Always visible. The placeholder never replaces it.</p>
-                  </div>
-                </li>
-                <li>
-                  <span>02</span>
-                  <div>
-                    <strong>Plate</strong>
-                    <p>The input sits on a solid token ground, not the blur.</p>
-                  </div>
-                </li>
-                <li>
-                  <span>03</span>
-                  <div>
-                    <strong>Hint</strong>
-                    <p>Quiet, but never the only place a requirement lives.</p>
-                  </div>
-                </li>
-                <li>
-                  <span>04</span>
-                  <div>
-                    <strong>Error</strong>
-                    <p>
-                      Linked with aria-describedby; the summary takes focus.
-                    </p>
-                  </div>
-                </li>
-              </ol>
-
-              <div className={styles.stateList}>
-                <p className={styles.cardLabel}>States</p>
-                <div className={styles.stateChips}>
-                  <span>Default</span>
-                  <span>Hover</span>
-                  <span className={styles.stateFocus}>Focus</span>
-                  <span className={styles.stateInvalid}>Invalid</span>
-                  <span className={styles.stateDisabled}>Disabled</span>
-                </div>
-              </div>
-
-              <div className={styles.asideNote}>
-                <p>
-                  Theme DNA: lit cut edge, halo ring, airy density. The field
-                  reads <code>--cv-field-*</code>; the mark reads the same
-                  material.
-                </p>
-                <CopyButton
-                  text={`<input className="cv-input" aria-describedby="email-hint" />`}
-                  label="Copy input"
-                  copiedLabel="Input copied"
+                <img
+                  src={`${BRAND}/mark-reverse.svg`}
+                  alt=""
+                  aria-hidden="true"
                 />
               </div>
 
-              <div className={styles.asideNote}>
+              <p className={styles.blockLabel} style={{ marginTop: 26 }}>
+                Signal budget
+              </p>
+              <ul className={styles.budget}>
+                {BUDGET_RULES.map((rule) => (
+                  <li key={rule}>{rule}</li>
+                ))}
+              </ul>
+            </section>
+
+            {/* ── 06 Type ──────────────────────────────────────────────── */}
+            <section id="type">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>06 — Type</p>
+                <h2>
+                  Display for names, reading for sentences, mono for facts.
+                </h2>
                 <p>
-                  Focus is a 3px ring plus a border change. It is never removed,
-                  and it is never the only state.
+                  Three families, no fourth. Sora names the sections, Geist
+                  reads the sentences, and JetBrains Mono carries every number —
+                  with tabular figures, because a column of readings has to
+                  align on the decimal to be scanned.
                 </p>
-                <a
-                  className={styles.textLink}
-                  href="/brand/cove/cove-forms.css"
-                  download
-                >
-                  Download the form kit <span aria-hidden>↓</span>
-                </a>
               </div>
-            </aside>
-          </div>
-        </section>
 
-        <section
-          id="motion"
-          className={styles.section}
-          aria-labelledby="motion-title"
-        >
-          <SectionHead
-            id="motion"
-            title={
-              <>
-                One ease.
-                <br />
-                No drift.
-              </>
-            }
-            number="07"
-            label="Motion"
-            lead="Movement is a response, not an atmosphere. Hover and press in 120ms, state in 240ms, entrance in 480ms; one ease. The field is a still frame."
-          />
-
-          <div className={styles.motionGrid}>
-            {MOTION.map((item) => (
-              <article key={item.name} className={styles.motionCard}>
-                <p className={styles.motionValue}>{item.value}</p>
-                <p>{item.name}</p>
-                <p>{item.note}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section
-          id="voice"
-          className={styles.section}
-          aria-labelledby="voice-title"
-        >
-          <SectionHead
-            id="voice"
-            title={
-              <>
-                Calm, exact,
-                <br />
-                unhurried.
-              </>
-            }
-            number="08"
-            label="Voice"
-            lead="The voice is museum wall text, not a launch post. It says what happened and what to do next. The empty state and the error are where the brand is tested."
-          />
-
-          <div className={styles.voiceGrid}>
-            <article className={styles.voiceCard}>
-              <h3>We are / We are not</h3>
-              <ul className={styles.voiceList}>
-                <li>
-                  <strong>We are</strong> {VOICE.weAre}
-                </li>
-                <li>
-                  <strong>We are not</strong> {VOICE.weAreNot}
-                </li>
-              </ul>
-              <p className={styles.voiceQuote}>{VOICE.quote}</p>
-            </article>
-
-            <article className={styles.voiceCard}>
-              <h3>Say / Don’t say</h3>
-              <ul className={styles.voiceList}>
-                {VOICE.say.map((line) => (
-                  <li key={line}>
-                    <strong>Say</strong> {line}
-                  </li>
-                ))}
-                {VOICE.dontSay.map((line) => (
-                  <li key={line}>
-                    <strong>Don’t say</strong> {line}
-                  </li>
-                ))}
-              </ul>
-              <div className={styles.voiceContext}>
-                {VOICE.contexts.map(([label, line]) => (
-                  <p key={label}>
-                    <strong>{label}</strong> {line}
+              <div className={styles.typeGrid}>
+                <div className={styles.typeCol}>
+                  <span className={styles.label}>Display · Sora 600</span>
+                  <p className={`${styles.spec} ${styles.displaySpec}`}>
+                    Aa 02:10
                   </p>
-                ))}
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section
-          id="applications"
-          className={styles.section}
-          aria-labelledby="applications-title"
-        >
-          <SectionHead
-            id="applications"
-            title={
-              <>
-                One mark,
-                <br />
-                every size.
-              </>
-            }
-            number="09"
-            label="Applications"
-            lead="The compact C carries 16–24px; the primary C carries the inlay above 32. Clear space is half the mark height. The favicon is the one place Ice leads."
-          />
-
-          <div className={styles.applicationsGrid}>
-            <article className={styles.applicationCard}>
-              <p className={styles.cardLabel}>Lockups</p>
-              <div className={styles.applicationRow}>
-                <div>
-                  <CoveLockup />
-                  <p className={styles.applicationLabel}>
-                    Horizontal / 108 × 34
+                  <p>
+                    Names and section headings. 600 only, tracking −0.035em at
+                    display sizes, one hero line per page.
                   </p>
                 </div>
-                <div>
-                  <CoveStacked height={88} />
-                  <p className={styles.applicationLabel}>Stacked / 72 × 88</p>
+                <div className={styles.typeCol}>
+                  <span className={styles.label}>Reading · Geist 400</span>
+                  <p className={`${styles.spec} ${styles.readSpec}`}>
+                    Aa 02:10
+                  </p>
+                  <p>
+                    Body 17px at 1.62, 66ch measure. Nothing is set lighter than
+                    regular, and prose never uses the mono face.
+                  </p>
+                </div>
+                <div className={styles.typeCol}>
+                  <span className={styles.label}>Label · JetBrains 500</span>
+                  <p className={`${styles.spec} ${styles.monoSpec}`}>02:10</p>
+                  <p>
+                    Times, values, units, eyebrows, axis labels. Tabular figures
+                    on every changing number.
+                  </p>
                 </div>
               </div>
-              <div className={styles.applicationRow}>
-                {[16, 32, 64, 128].map((size) => (
-                  <div key={size}>
-                    <CoveMark size={size} decorative />
-                    <p className={styles.applicationLabel}>{size}px</p>
-                  </div>
-                ))}
-              </div>
-              <p className={styles.applicationNote}>
-                The full mark is used at 32px and above. The compact is a
-                separate one-path C for 16–24px; it drops the inlay rather than
-                shrinking the waterline into a speck.
-              </p>
-              <div className={styles.applicationDownloads}>
-                <a href="/brand/cove/mark.svg" download>
-                  Mark SVG
-                </a>
-                <a href="/brand/cove/lockup.svg" download>
-                  Lockup SVG
-                </a>
-                <a href="/brand/cove/lockup-stacked.svg" download>
-                  Stacked SVG
-                </a>
-                <a href="/brand/cove/wordmark.svg" download>
-                  Wordmark SVG
-                </a>
-              </div>
-            </article>
 
-            <article className={styles.applicationCard}>
-              <p className={styles.cardLabel}>Favicon and app icon</p>
-              <div className={styles.applicationRow}>
-                {[16, 32, 48].map((size) => (
-                  <div key={size}>
-                    <span className={styles.iconChip}>
-                      <Image
-                        src={`/brand/cove/favicon-${size}.png`}
-                        width={size}
-                        height={size}
-                        alt={`Cove favicon at ${size} pixels`}
-                      />
-                    </span>
-                    <p className={styles.applicationLabel}>{size}px</p>
-                  </div>
-                ))}
-                <div>
-                  <Image
-                    src="/brand/cove/icon-192.png"
-                    width={72}
-                    height={72}
-                    alt="Cove app icon"
-                    style={{ display: 'block' }}
-                  />
-                  <p className={styles.applicationLabel}>App / 192</p>
-                </div>
-              </div>
-              <p className={styles.applicationNote}>
-                The favicon is an Ice field and the compact C, so it survives
-                dark browser chrome. The app icon returns to Abyss and the full
-                C with its inlay.
-              </p>
-              <div className={styles.applicationDownloads}>
-                <a href="/brand/cove/favicon.ico" download>
-                  Favicon ICO
-                </a>
-                <a href="/brand/cove/icon.svg" download>
-                  Icon SVG
-                </a>
-                <a href="/brand/cove/icon-192.png" download>
-                  Icon 192
-                </a>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section
-          id="tokens"
-          className={styles.section}
-          aria-labelledby="tokens-title"
-        >
-          <SectionHead
-            id="tokens"
-            title={
-              <>
-                Four layers,
-                <br />
-                one source.
-              </>
-            }
-            number="10"
-            label="Tokens"
-            lead="Theme DNA feeds primitive values, primitives feed semantic roles, and roles feed component decisions. The CSS and JSON are generated from features/cove/tokens.json."
-          />
-
-          <div className={styles.tokenGrid}>
-            <article className={styles.tokenCard}>
-              <div className={styles.tokenCardHead}>
-                <span className={styles.tokenLayer}>00 / Theme DNA</span>
-                <span className={styles.tokenCount}>
-                  {Object.keys(tokens.theme).length}
-                </span>
-              </div>
-              <h3>The same edge for mark and field</h3>
-              <p>
-                One small object drives the glass, the field radius, the focus
-                ring and the label. Change it here, not in a screenshot.
-              </p>
-              <div className={styles.componentList}>
-                {Object.entries(tokens.theme).map(([name, value]) => (
-                  <div key={name} className={styles.componentRow}>
-                    <code>--cv-dna-{name}</code>
-                    <span>{value}</span>
-                  </div>
-                ))}
-              </div>
-            </article>
-
-            <article className={styles.tokenCard}>
-              <div className={styles.tokenCardHead}>
-                <span className={styles.tokenLayer}>01 / Primitive</span>
-                <span className={styles.tokenCount}>{primitives.length}</span>
-              </div>
-              <h3>Named values</h3>
-              <p>
-                Abyss, Foam, Ice, Horizon, Mist, Moss. Raw values only; no role
-                in the name.
-              </p>
-              <div className={styles.swatchGrid}>
-                {primitives.map((token) => (
-                  <div key={token.name} className={styles.swatchChip}>
-                    <span
-                      className={styles.swatchColor}
-                      style={{ background: `var(--cv-${token.name})` }}
-                      aria-hidden
-                    />
-                    <span className={styles.swatchName}>{token.name}</span>
-                    <code>{token.value}</code>
-                  </div>
-                ))}
-              </div>
-            </article>
-
-            <article className={styles.tokenCard}>
-              <div className={styles.tokenCardHead}>
-                <span className={styles.tokenLayer}>02 / Semantic</span>
-                <span className={styles.tokenCount}>
-                  {deepSemantic.length * 2}
-                </span>
-              </div>
-              <h3>Roles, Deep and Frost</h3>
-              <p>
-                One role, two surfaces. Components read these names, not the
-                primitives.
-              </p>
-              <div className={styles.tokenMiniTable}>
-                {SEMANTIC_PREVIEW.map((name) => {
-                  const deep = deepSemantic.find((token) => token.name === name)
-                  const frost = frostSemantic.find(
-                    (token) => token.name === name,
-                  )
-                  return (
-                    <div key={name} className={styles.tokenMiniRow}>
-                      <code>--cv-{name}</code>
-                      <span
-                        className={styles.miniChip}
-                        style={{ background: deep?.value }}
-                        title={deep?.value}
-                      />
-                      <span
-                        className={styles.miniChip}
-                        style={{ background: frost?.value }}
-                        title={frost?.value}
-                      />
-                    </div>
-                  )
-                })}
-              </div>
-              <p className={styles.tokenNote}>
-                10 of {deepSemantic.length} roles shown; the table and the
-                download have all {deepSemantic.length}.
-              </p>
-            </article>
-
-            <article className={styles.tokenCard}>
-              <div className={styles.tokenCardHead}>
-                <span className={styles.tokenLayer}>03 / Component</span>
-                <span className={styles.tokenCount}>
-                  {deepComponents.length * 2}
-                </span>
-              </div>
-              <h3>Decisions, not palettes</h3>
-              <p>
-                Field, button, card and chip read from the semantic layer. The
-                field kit reads the theme DNA.
-              </p>
-              <div className={styles.componentList}>
-                {deepComponents.map((deep) => {
-                  const frost = frostComponents.find(
-                    (token) => token.name === deep.name,
-                  )
-                  return (
-                    <div key={deep.name} className={styles.componentRow}>
-                      <code>--cv-{deep.name}</code>
-                      <span>{deep.value}</span>
-                      <span className={styles.componentDark}>
-                        frost: {frost?.value}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </article>
-          </div>
-
-          <div className={styles.tokenDownloads}>
-            <a href="/brand/cove/cove-tokens.css" download>
-              Download CSS <span aria-hidden>↓</span>
-            </a>
-            <a href="/brand/cove/cove-tokens.json" download>
-              Download JSON <span aria-hidden>↓</span>
-            </a>
-            <a href="/brand/cove/cove-forms.css" download>
-              Download forms <span aria-hidden>↓</span>
-            </a>
-            <a href="/brand/cove/cove-brandkit.png" download>
-              Download board <span aria-hidden>↓</span>
-            </a>
-            <span className={styles.tokenTotal}>
-              {TOKEN_COUNT} declarations
-            </span>
-          </div>
-
-          <div className={styles.tableBlock}>
-            <div className={styles.tableHead}>
-              <div>
-                <p className={styles.cardLabel}>Semantic tokens</p>
-                <h3>One role, two surfaces</h3>
-              </div>
-              <CopyButton
-                text={deepSemantic
-                  .slice(0, 6)
-                  .map((token) => `--cv-${token.name}: ${token.value};`)
-                  .join('\n')}
-                label="Copy sample"
-                copiedLabel="Sample copied"
-              />
-            </div>
-            <div className={styles.tableScroll}>
-              <table className={styles.table}>
-                <caption className={styles.srOnly}>
-                  Cove semantic tokens, Deep and Frost values, and their role
-                </caption>
+              <table>
+                <caption>Scale</caption>
                 <thead>
                   <tr>
                     <th scope="col">Token</th>
-                    <th scope="col">Deep</th>
-                    <th scope="col">Frost</th>
-                    <th scope="col">Role</th>
+                    <th scope="col">Size / line</th>
+                    <th scope="col">Face</th>
+                    <th scope="col">Use</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {SEMANTIC_TABLE.map(({ deep, frost }) => (
-                    <tr key={deep.name}>
-                      <th scope="row">
-                        <code>--cv-{deep.name}</code>
-                      </th>
-                      <td>
-                        <span className={styles.valueCell}>
-                          <span
-                            className={styles.valueDot}
-                            style={{ background: deep.value }}
-                            aria-hidden
-                          />
-                          {deep.resolved ?? deep.value}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={styles.valueCell}>
-                          <span
-                            className={styles.valueDot}
-                            style={{ background: frost?.value }}
-                            aria-hidden
-                          />
-                          {frost?.resolved ?? frost?.value}
-                        </span>
-                      </td>
-                      <td>{deep.role}</td>
+                  {TYPE_SCALE.map((row) => (
+                    <tr key={row.token}>
+                      <td className={styles.num}>{row.token}</td>
+                      <td className={styles.num}>{row.size}</td>
+                      <td>{row.face}</td>
+                      <td>{row.use}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-        </section>
 
-        <section
-          id="audit"
-          className={styles.section}
-          aria-labelledby="audit-title"
-        >
-          <SectionHead
-            id="audit"
-            title={
-              <>
-                What shipped,
-                <br />
-                what is missing.
-              </>
-            }
-            number="11"
-            label="Audit"
-            lead="The v2.4 method lists its resources; the mark scorer gives a verdict. Both were checked on disk. Present is not the same as used, and a pass is not the same as a finished kit."
-          />
-
-          <div className={styles.auditSummary}>
-            <div>
-              <span className={styles.auditNumber}>
-                {GATE_SUMMARY.passed}/{GATE_SUMMARY.total}
-              </span>
-              <p>Hard-gate checks pass</p>
-            </div>
-            <div>
-              <span className={styles.auditNumber}>PASS</span>
-              <p>Mark score / no failures</p>
-            </div>
-            <div>
-              <span className={styles.auditNumber}>
-                {RESOURCE_SUMMARY.present}/{RESOURCES.length}
-              </span>
-              <p>v2.4 resources present</p>
-            </div>
-            <div>
-              <span className={styles.auditNumber}>{GAPS.length}</span>
-              <p>Gaps named below</p>
-            </div>
-          </div>
-
-          <div className={styles.auditWide}>
-            <article className={styles.auditCard}>
-              <div className={styles.auditCardHead}>
-                <div>
-                  <p className={styles.cardLabel}>A / Skill resources</p>
-                  <h3>Every advertised path</h3>
-                </div>
-                <span className={styles.auditMeta}>
-                  {RESOURCE_SUMMARY.used} used · {RESOURCE_SUMMARY.substituted}{' '}
-                  substituted · {RESOURCE_SUMMARY.untouched} not used
-                </span>
+              <div className={styles.measureDemo}>
+                <p>
+                  The tide turned at 04:12 and the level fell six centimetres in
+                  the hour after it. Nothing about that sentence belongs in a
+                  heading: the turn is the reading, and the number that carries
+                  it is set in mono so a column of them can be scanned. Cove
+                  keeps the hour and the unit, and prints the station only once.
+                </p>
+                <aside>
+                  Measure: 68 characters at 17px.
+                  <br />
+                  <code>text-wrap: pretty</code> on paragraphs,{' '}
+                  <code>balance</code> on headings.
+                </aside>
               </div>
-              <div className={styles.tableScroll}>
-                <table className={styles.table}>
-                  <caption className={styles.srOnly}>
-                    v2.4 brand-system resources, whether they are present, and
-                    how the Cove build used them
-                  </caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Resource</th>
-                      <th scope="col">Use</th>
-                      <th scope="col">Evidence</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {RESOURCES.map((resource) => (
-                      <tr key={resource.path}>
-                        <th scope="row">
-                          <code>{resource.path}</code>
-                        </th>
-                        <td>
-                          <StatusPill
-                            tone={
-                              resource.status === 'used'
-                                ? 'used'
-                                : resource.status === 'substituted'
-                                  ? 'substituted'
-                                  : 'unused'
-                            }
-                          >
-                            {resource.status}
-                          </StatusPill>
-                        </td>
-                        <td>
-                          {resource.evidence}
-                          {resource.note ? (
-                            <span className={styles.tableSub}>
-                              {resource.note}
-                            </span>
-                          ) : null}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </article>
 
-            <article className={styles.auditCard}>
-              <div className={styles.auditCardHead}>
-                <div>
-                  <p className={styles.cardLabel}>B / Output contract</p>
-                  <h3>What the kit contains</h3>
-                </div>
-                <span className={styles.auditMeta}>
-                  {CONTRACT_SUMMARY.shipped}/{CONTRACT_SUMMARY.total} shipped
-                </span>
-              </div>
-              <ul className={styles.contractList}>
-                {OUTPUT_CONTRACT.map((item) => (
-                  <li key={item.item}>
-                    <StatusPill
-                      tone={item.status === 'shipped' ? 'shipped' : 'note'}
-                    >
-                      {item.status}
-                    </StatusPill>
+              <div className={styles.gate} style={{ marginTop: 12 }}>
+                {TYPE_GATE.map((row) => (
+                  <div key={row.rule} className={styles.gateRow}>
+                    <span className={styles.gateMark} aria-hidden>
+                      {row.pass ? '✓' : '✕'}
+                    </span>
                     <div>
-                      <strong>{item.item}</strong>
-                      <code>{item.evidence}</code>
-                      {item.note ? <p>{item.note}</p> : null}
+                      <b>{row.rule}</b>
+                      <span>{row.note}</span>
                     </div>
-                  </li>
+                  </div>
                 ))}
-              </ul>
-            </article>
-          </div>
+              </div>
+            </section>
 
-          <div className={styles.auditGrid}>
-            <article className={styles.auditCard}>
-              <div className={styles.auditCardHead}>
-                <div>
-                  <p className={styles.cardLabel}>C / Verification</p>
-                  <h3>One command, then eyes</h3>
-                </div>
-                <span className={styles.auditMeta}>Chromium / this pass</span>
+            {/* ── 07 Parts ─────────────────────────────────────────────── */}
+            <section id="parts">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>07 — Parts</p>
+                <h2>Four primitives, cut from the same sheet.</h2>
+                <p>
+                  Radius 12 on panels and 8 on controls, one hairline, no shadow.
+                  Every control is at least 40px tall because it is used at
+                  night, one-handed, and often wet.
+                </p>
               </div>
-              <ul className={styles.passList}>
-                <li>
-                  <StatusPill tone="pass">Pass</StatusPill>
-                  <div>
-                    <strong>Mark score</strong>
-                    <code>score-mark.py --dir public/brand/cove</code>
-                    <p>No failures at 16, 32 and 128px.</p>
-                  </div>
-                </li>
-                <li>
-                  <StatusPill tone="pass">Pass</StatusPill>
-                  <div>
-                    <strong>Static audit</strong>
-                    <code>audit.mjs --manifest audit.json</code>
-                    <p>Required files, SVG, ICO, PNG, tokens and forms.</p>
-                  </div>
-                </li>
-                <li>
-                  <StatusPill tone="pass">Pass</StatusPill>
-                  <div>
-                    <strong>Browser pass</strong>
-                    <code>qa.mjs --url /design-system/cove</code>
-                    <p>1440/390, Deep/Frost, reduced motion, form errors.</p>
-                  </div>
-                </li>
-              </ul>
-              <div className={styles.auditLinks}>
-                <a
-                  href="/design-system/cove/llms.txt"
-                  className={styles.textLink}
-                >
-                  Read the raw Markdown twin <span aria-hidden>↗</span>
-                </a>
-                <a href="/design-system" className={styles.textLink}>
-                  Compare with the other cases <span aria-hidden>↗</span>
-                </a>
-              </div>
-            </article>
 
-            <article className={styles.auditCard}>
-              <div className={styles.auditCardHead}>
-                <div>
-                  <p className={styles.cardLabel}>D / Gaps</p>
-                  <h3>What is not here</h3>
-                </div>
-                <span className={styles.auditMeta}>Named, not hidden</span>
+              <PartsDemo />
+
+              <p className={styles.note}>
+                Focus is a 2px lumen ring at 2px offset, on every control. It is
+                the one place the signal is allowed to appear without a value
+                behind it.
+              </p>
+            </section>
+
+            {/* ── 08 Instruments ───────────────────────────────────────── */}
+            <section id="instruments">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>08 — Instruments</p>
+                <h2>Five parts that only exist to show a number.</h2>
+                <p>
+                  This section is the reason the case is not a colour page. Each
+                  instrument has one job and one rule, and none of them animates
+                  to look alive — the fill settles once, on mount, and stops.
+                </p>
               </div>
-              <ol className={styles.gapList}>
+
+              <div className={styles.instGrid}>
+                <div className={styles.instCard}>
+                  <div className={styles.instHead}>
+                    <h3>{INSTRUMENTS[0].name}</h3>
+                    <span>01</span>
+                  </div>
+                  <Gauge
+                    value={1.42}
+                    max={2}
+                    threshold={1.5}
+                    unit="m"
+                    time="02:10"
+                    label="Water level"
+                  />
+                  <p className={styles.instJob}>{INSTRUMENTS[0].job}</p>
+                  <p className={styles.instRule}>{INSTRUMENTS[0].rule}</p>
+                </div>
+
+                <div className={styles.instCard}>
+                  <div className={styles.instHead}>
+                    <h3>{INSTRUMENTS[1].name}</h3>
+                    <span>02</span>
+                  </div>
+                  <Sparkline
+                    values={TIDE_CURVE}
+                    label="Twenty-four hour water level, no axes"
+                  />
+                  <div className={styles.sparkMeta}>
+                    <span>min 0.62</span>
+                    <span>max 1.36</span>
+                    <span>now 1.42</span>
+                  </div>
+                  <p className={styles.instJob}>{INSTRUMENTS[1].job}</p>
+                  <p className={styles.instRule}>{INSTRUMENTS[1].rule}</p>
+                </div>
+
+                <div className={styles.instCard}>
+                  <div className={styles.instHead}>
+                    <h3>{INSTRUMENTS[2].name}</h3>
+                    <span>03</span>
+                  </div>
+                  <ReadingCard reading={READINGS[1]} />
+                  <p className={styles.instJob}>{INSTRUMENTS[2].job}</p>
+                  <p className={styles.instRule}>{INSTRUMENTS[2].rule}</p>
+                </div>
+
+                <div className={styles.instCard}>
+                  <div className={styles.instHead}>
+                    <h3>{INSTRUMENTS[3].name}</h3>
+                    <span>04</span>
+                  </div>
+                  <div className={styles.log}>
+                    {LOG_ROWS.map((row) => (
+                      <div
+                        key={`${row.time}-${row.label}`}
+                        className={styles.logRow}
+                      >
+                        <span className={styles.logTime}>{row.time}</span>
+                        <span className={styles.logName}>{row.label}</span>
+                        <span className={styles.logVal}>{row.value}</span>
+                        <span
+                          className={[
+                            styles.dot,
+                            row.state === 'slack' ? styles.dotSlack : '',
+                            row.state === 'alarm' ? styles.dotAlarm : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                          aria-hidden
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className={styles.instRule}>{INSTRUMENTS[3].rule}</p>
+                </div>
+
+                <div className={styles.instCard}>
+                  <div className={styles.instHead}>
+                    <h3>{INSTRUMENTS[4].name}</h3>
+                    <span>05</span>
+                  </div>
+                  <Alert
+                    title="Wind crossed 15 kn at 01:48"
+                    body="Readings above the limit are marked. The panel stays deep — an alarm is not a red card."
+                  />
+                  <p className={styles.instJob}>{INSTRUMENTS[4].job}</p>
+                  <p className={styles.instRule}>{INSTRUMENTS[4].rule}</p>
+                </div>
+              </div>
+            </section>
+
+            {/* ── 09 Motion ────────────────────────────────────────────── */}
+            <section id="motion">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>09 — Motion</p>
+                <h2>Five durations, one curve, a finished still.</h2>
+                <p>
+                  Motion is a fill settling, not a performance. The bars below
+                  exist to show the timings; in the product nothing loops except
+                  the live dot.
+                </p>
+              </div>
+
+              <div className={styles.motionGrid}>
+                {MOTION_RULES.map((rule) => (
+                  <div key={rule.name} className={styles.dur}>
+                    <b data-long={rule.value.length > 8}>{rule.value}</b>
+                    <span>
+                      <strong>{rule.name}</strong>
+                      <br />
+                      {rule.note}
+                    </span>
+                    <div className={styles.bar} aria-hidden>
+                      <i style={{ width: '100%' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.settleDemo}>
+                <div className={styles.settle}>
+                  <b>Gauge · settles once</b>
+                  <Gauge
+                    value={0.84}
+                    max={2}
+                    threshold={1.5}
+                    unit="m"
+                    time="02:10"
+                    label="Swell height"
+                  />
+                </div>
+                <div className={styles.settle}>
+                  <b>Sparkline · draws once</b>
+                  <Sparkline
+                    values={TIDE_CURVE}
+                    label="Twenty-four hour water level, drawn once"
+                  />
+                  <div className={styles.sparkMeta}>
+                    <span>1.5px stroke</span>
+                    <span>no area fill</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className={styles.note}>
+                <code>--cv-ease-out: cubic-bezier(0.16, 1, 0.3, 1)</code> — fast
+                out, no bounce. Under <code>prefers-reduced-motion</code> every
+                duration collapses to 0.01ms and the still frame is the designed
+                state.
+              </p>
+            </section>
+
+            {/* ── 10 Voice ─────────────────────────────────────────────── */}
+            <section id="voice">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>10 — Voice</p>
+                <h2>Read it. Do not sell it.</h2>
+                <p>
+                  The voice is a person who took the reading. It states the
+                  value, the unit and the time, then stops. It does not
+                  congratulate, does not describe the weather as a mood, and
+                  never says &ldquo;oops&rdquo;.
+                </p>
+              </div>
+
+              <div className={styles.voiceGrid}>
+                <dl className={styles.voiceCard}>
+                  <div>
+                    <dt>We are</dt>
+                    <dd>exact, unhurried, first person, numeric</dd>
+                  </div>
+                  <div>
+                    <dt>We are not</dt>
+                    <dd>hyped, poetic about water, apologetic, jargon-first</dd>
+                  </div>
+                  <div>
+                    <dt>Say</dt>
+                    <dd>
+                      &ldquo;1.42 m at 02:10. Rising 6 cm in the last hour.&rdquo;
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Don&rsquo;t say</dt>
+                    <dd>&ldquo;The tide is looking great tonight!&rdquo;</dd>
+                  </div>
+                </dl>
+
+                <div className={styles.voiceSamples}>
+                  {VOICE_SAMPLES.map((sample) => (
+                    <div key={sample.ctx} className={styles.sample}>
+                      <div className={styles.ctx}>{sample.ctx}</div>
+                      <p>{sample.good}</p>
+                      <span className={styles.bad}>{sample.bad}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* ── 11 Tokens ────────────────────────────────────────────── */}
+            <section id="tokens">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>11 — Tokens</p>
+                <h2>One source, two exports, one excerpt.</h2>
+                <p>
+                  The block below is an excerpt of the generated sheet — 112
+                  declarations live in the file, and the file is what you should
+                  copy. Nothing in the system reads a raw hex; every part reads a
+                  semantic name.
+                </p>
+              </div>
+
+              <div className={styles.tokenGrid}>
+                <div>
+                  <div className={styles.codeHead}>
+                    <span>cove-tokens.css · excerpt</span>
+                    <CopyButton text={TOKENS_CSS} />
+                  </div>
+                  <pre>
+                    <Code source={TOKENS_CSS} />
+                  </pre>
+                </div>
+                <div>
+                  <div className={styles.codeHead}>
+                    <span>cove-tokens.json · excerpt</span>
+                    <CopyButton text={TOKENS_JSON} />
+                  </div>
+                  <pre>
+                    <Code source={TOKENS_JSON} language="json" />
+                  </pre>
+                </div>
+              </div>
+
+              <p className={styles.note}>
+                Full files:{' '}
+                <a href={`${BRAND}/cove-tokens.css`}>cove-tokens.css</a> ·{' '}
+                <a href={`${BRAND}/cove-tokens.json`}>cove-tokens.json</a> ·{' '}
+                <a href="/design-system/cove/llms.txt">llms.txt</a>
+              </p>
+
+              <table>
+                <caption>Output contract</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Path</th>
+                    <th scope="col">Role</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {OUTPUT_CONTRACT.map((row) => (
+                    <tr key={row.path}>
+                      <td className={styles.num}>{row.path}</td>
+                      <td>{row.role}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+
+            {/* ── 12 Audit ─────────────────────────────────────────────── */}
+            <section id="audit">
+              <div className={styles.secHead}>
+                <p className={styles.eyebrow}>12 — Audit</p>
+                <h2>What is verified, and what is not.</h2>
+                <p>
+                  Every claim above points at a file or a measurement.
+                  Everything else is listed as open — a guide that hides its gaps
+                  is a brochure.
+                </p>
+              </div>
+
+              <table>
+                <caption>Checks</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Check</th>
+                    <th scope="col">Result</th>
+                    <th scope="col">Evidence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {AUDIT_ROWS.map((row) => (
+                    <tr key={row.check}>
+                      <td>{row.check}</td>
+                      <td
+                        className={
+                          row.state === 'pass'
+                            ? styles.pass
+                            : row.state === 'open'
+                              ? styles.open
+                              : styles.noteCell
+                        }
+                      >
+                        {row.result}
+                      </td>
+                      <td>{row.evidence}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className={styles.detach}>
+                <div className={styles.detachHead}>
+                  <span>Detach scorecard · 100 points</span>
+                  <span>floor {DETACH_FLOOR}</span>
+                </div>
+                {DETACH_SCORES.map((row) => (
+                  <div
+                    key={row.ref}
+                    className={styles.detachRow}
+                    data-fail={row.score < DETACH_FLOOR}
+                  >
+                    <b>{row.ref}</b>
+                    <div className={styles.detachTrack}>
+                      <i style={{ width: `${row.score}%` }} />
+                    </div>
+                    <span className={styles.detachScore}>{row.score}</span>
+                  </div>
+                ))}
+                <p className={styles.detachNote}>
+                  The weakest pair is {weakest.ref} at {weakest.score}, against a
+                  floor of {DETACH_FLOOR}. {weakest.finding}
+                </p>
+              </div>
+
+              <p className={styles.blockLabel} style={{ marginTop: 26 }}>
+                Still open
+              </p>
+              <ul className={styles.gaps}>
                 {GAPS.map((gap) => (
                   <li key={gap}>{gap}</li>
                 ))}
-              </ol>
-            </article>
+              </ul>
+            </section>
           </div>
-        </section>
+        </div>
       </main>
 
-      <footer className={`${styles.footer} ${styles.onDeep}`}>
-        <div className={styles.footerTop}>
-          <CoveWordmark height={44} />
-          <p className={styles.footerStatement}>
-            Depth, without the fog.
-            <br />
-            One layer is enough.
-          </p>
-        </div>
-        <div className={styles.footerGrid}>
-          <div>
-            <p className={styles.cardLabel}>Brand</p>
-            <a href="/brand/cove/lockup.svg" download>
-              Lockup SVG
-            </a>
-            <a href="/brand/cove/mark.svg" download>
-              Mark SVG
-            </a>
-            <a href="/brand/cove/favicon.ico" download>
-              Favicon ICO
-            </a>
-            <a href="/brand/cove/cove-brandkit.png" download>
-              Brand board
-            </a>
+      {/* ── Footer: full bleed ─────────────────────────────────────────── */}
+      <footer className={styles.foot}>
+        <div className={styles.footMedia} aria-hidden="true" />
+        <div className={styles.footScrim} aria-hidden="true" />
+
+        <div className={`${styles.shell} ${styles.footInner}`}>
+          <div className={styles.footGrid}>
+            <div>
+              <img
+                src={`${BRAND}/lockup.svg`}
+                alt="Cove"
+                width={260}
+                height={100}
+                className={`${styles.footLockup} ${styles.onlyNight}`}
+              />
+              <img
+                src={`${BRAND}/lockup-reverse.svg`}
+                alt="Cove"
+                width={260}
+                height={100}
+                className={`${styles.footLockup} ${styles.onlyDay}`}
+              />
+              <p className={styles.footLine}>
+                The cove is the cut. The reading is{' '}
+                <em>the light that arrived</em> in it.
+              </p>
+            </div>
+
+            <div className={styles.footCols}>
+              <div className={styles.footCol}>
+                <h4>System</h4>
+                <ul>
+                  <li>
+                    <a href="#foundation">Foundation</a>
+                  </li>
+                  <li>
+                    <a href="#material">Material</a>
+                  </li>
+                  <li>
+                    <a href="#tide">Tide</a>
+                  </li>
+                  <li>
+                    <a href="#instruments">Instruments</a>
+                  </li>
+                </ul>
+              </div>
+              <div className={styles.footCol}>
+                <h4>Assets</h4>
+                <ul>
+                  <li>
+                    <a href={`${BRAND}/mark.svg`} download>
+                      mark.svg
+                    </a>
+                  </li>
+                  <li>
+                    <a href={`${BRAND}/lockup.svg`} download>
+                      lockup.svg
+                    </a>
+                  </li>
+                  <li>
+                    <a href={`${BRAND}/cove-brandkit.png`}>brand board</a>
+                  </li>
+                  <li>
+                    <a href={`${BRAND}/cove-tokens.css`}>tokens.css</a>
+                  </li>
+                </ul>
+              </div>
+              <div className={styles.footCol}>
+                <h4>Reading</h4>
+                <ul>
+                  <li>
+                    <span>Station 04 · north arm</span>
+                  </li>
+                  <li>
+                    <span>sample · 29 Oct 2026</span>
+                  </li>
+                  <li>
+                    <span>night ramp · 02:10</span>
+                  </li>
+                  <li>
+                    <a href="/design-system/cove/llms.txt">llms.txt</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <div>
-            <p className={styles.cardLabel}>System</p>
-            <a href="/brand/cove/cove-tokens.css" download>
-              Tokens CSS
-            </a>
-            <a href="/brand/cove/cove-tokens.json" download>
-              Tokens JSON
-            </a>
-            <a href="/brand/cove/cove-forms.css" download>
-              Form kit CSS
-            </a>
-            <a href="/design-system/cove/llms.txt">Markdown twin</a>
-            <a href="#top">Back to top</a>
+
+          <div className={styles.footBottom}>
+            <span>
+              Cove · brand kit &amp; design system · v2.0 · 29 Oct 2026
+            </span>
+            <span>
+              <a href="/design-system">All cases</a> ·{' '}
+              <a href="/design-system/cove/llms.txt">llms.txt</a> ·{' '}
+              <a href="#top">Back to top</a>
+            </span>
+            <span>Case 09 · night-first · 112 tokens</span>
           </div>
-          <div>
-            <p className={styles.cardLabel}>Elsewhere</p>
-            <a href="/design-system">Case library</a>
-            <a href="/design-system/vitrine">Vitrine</a>
-            <a href="/sunnyside">Sunnyside</a>
-            <a href="/design-engineering">Design engineering</a>
-          </div>
-        </div>
-        <div className={styles.footerBottom}>
-          <span>Cove 1.0 · 2026 · Aditya Himawan</span>
-          <span>Case 06 · liquid glass · no generated imagery</span>
         </div>
       </footer>
     </div>

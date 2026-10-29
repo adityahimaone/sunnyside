@@ -32,24 +32,71 @@
     "app/design-system/cove/llms.txt/route.ts",
     "docs/cove-design-system-audit.md"
   ],
-  "svgDirs": ["public/brand/cove"],
-  "noText": ["public/brand/cove"],
+  "svgDirs": [
+    "public/brand/cove"
+  ],
+  "noText": [
+    "public/brand/cove"
+  ],
   "ico": "public/brand/cove/favicon.ico",
-  "icoSizes": [16, 32, 48],
+  "icoSizes": [
+    16,
+    32,
+    48
+  ],
   "pngs": [
-    { "path": "public/brand/cove/favicon-16.png", "width": 16, "height": 16 },
-    { "path": "public/brand/cove/favicon-32.png", "width": 32, "height": 32 },
-    { "path": "public/brand/cove/favicon-48.png", "width": 48, "height": 48 },
-    { "path": "public/brand/cove/apple-icon-180.png", "width": 180, "height": 180 },
-    { "path": "public/brand/cove/icon-192.png", "width": 192, "height": 192 },
-    { "path": "public/brand/cove/icon-512.png", "width": 512, "height": 512 },
-    { "path": "public/brand/cove/mark-1024.png", "width": 1024, "height": 1024 },
-    { "path": "design/brand/cove/cove-brandkit.png", "width": 3000, "height": 2250 }
+    {
+      "path": "public/brand/cove/favicon-16.png",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "path": "public/brand/cove/favicon-32.png",
+      "width": 32,
+      "height": 32
+    },
+    {
+      "path": "public/brand/cove/favicon-48.png",
+      "width": 48,
+      "height": 48
+    },
+    {
+      "path": "public/brand/cove/apple-icon-180.png",
+      "width": 180,
+      "height": 180
+    },
+    {
+      "path": "public/brand/cove/icon-192.png",
+      "width": 192,
+      "height": 192
+    },
+    {
+      "path": "public/brand/cove/icon-512.png",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "public/brand/cove/mark-1024.png",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "design/brand/cove/cove-brandkit.png",
+      "width": 3000,
+      "height": 2250
+    }
   ],
   "tokens": "features/cove/tokens.json",
   "contrastMin": 4.5,
   "family": "public/brand/cove",
   "formsCss": "public/brand/cove/cove-forms.css",
   "story": "design/brand/cove/story.md",
-  "storyHeadings": ["belief", "enemy", "mark", "material", "proof", "gap"]
+  "storyHeadings": [
+    "belief",
+    "enemy",
+    "mark",
+    "material",
+    "proof",
+    "gap"
+  ]
 }

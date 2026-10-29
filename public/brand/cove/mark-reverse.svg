@@ -1,4 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cove">
-  <path d="M56 8H28L8 24V40L28 56H56V44H28L20 36V28L28 20H56Z" fill="#E9F6FB"/>
-  <path d="M40 36H56V44H40Z" fill="#7CE7FF"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cove"><path fill="#060B18" d="M8 8H56V30H30V56H8Z"/><path fill="#3FE3C6" d="M36 36H50V50H36Z"/></svg>

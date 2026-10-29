@@ -6,37 +6,37 @@ import { cn } from '@/lib/utils'
 
 import styles from '../cove.module.css'
 
-type Surface = 'deep' | 'frost'
+type Ramp = 'night' | 'day'
 
-const KEY = 'cove-surface'
-
-function applySurface(surface: Surface) {
-  const root = document.documentElement
-  root.dataset.cove = surface
-  // A stable hook for QA and for the browser's own light/dark heuristics.
-  root.dataset.theme = surface === 'frost' ? 'light' : 'dark'
-}
+const KEY = 'cove-ramp'
 
 /**
- * Cove is a deep-first system; Frost is the same material on a light ground.
- * The switch is local to the case so it cannot repaint the rest of the site.
+ * Cove is night-first: the base ramp is the abyss and daylight is the override.
+ * The switch writes `data-cove` on `<html>` and nothing else, so the case can
+ * never repaint the host site — the token layer is scoped to `.cv-scope` and
+ * only the selector for the override is global.
  */
+function applyRamp(ramp: Ramp) {
+  document.documentElement.dataset.cove = ramp
+}
+
 export function CoveThemeToggle({ className }: { className?: string }) {
-  const [surface, setSurface] = useState<Surface>('deep')
+  const [ramp, setRamp] = useState<Ramp>('night')
 
   useEffect(() => {
     const saved = window.localStorage.getItem(KEY)
-    if (saved === 'frost' || saved === 'deep') {
-      // Bootstrap the stored surface after hydration; the server render is Deep.
+    if (saved === 'day' || saved === 'night') {
+      // The server render is the night ramp, so the stored choice has to be
+      // applied after hydration rather than during it.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSurface(saved)
-      applySurface(saved)
+      setRamp(saved)
+      applyRamp(saved)
     }
   }, [])
 
-  const choose = (next: Surface) => {
-    setSurface(next)
-    applySurface(next)
+  const choose = (next: Ramp) => {
+    setRamp(next)
+    applyRamp(next)
     try {
       window.localStorage.setItem(KEY, next)
     } catch {
@@ -45,34 +45,26 @@ export function CoveThemeToggle({ className }: { className?: string }) {
   }
 
   return (
-    <div
-      className={cn(styles.themeToggle, className)}
-      role="group"
-      aria-label="Surface"
-    >
+    <div className={cn(styles.themeToggle, className)} role="group" aria-label="Ramp">
       <button
         type="button"
-        className={cn(
-          styles.themeButton,
-          surface === 'deep' && styles.themeButtonOn,
-        )}
-        aria-pressed={surface === 'deep'}
-        aria-label="Deep theme (Dark)"
-        onClick={() => choose('deep')}
+        className={cn(styles.themeButton, ramp === 'night' && styles.themeButtonOn)}
+        aria-pressed={ramp === 'night'}
+        aria-label="Night ramp — the default"
+        onClick={() => choose('night')}
       >
-        Deep
+        <span className={styles.themeDot} aria-hidden />
+        Night
       </button>
       <button
         type="button"
-        className={cn(
-          styles.themeButton,
-          surface === 'frost' && styles.themeButtonOn,
-        )}
-        aria-pressed={surface === 'frost'}
-        aria-label="Frost theme (Light)"
-        onClick={() => choose('frost')}
+        className={cn(styles.themeButton, ramp === 'day' && styles.themeButtonOn)}
+        aria-pressed={ramp === 'day'}
+        aria-label="Day ramp — the daylight override"
+        onClick={() => choose('day')}
       >
-        Frost
+        <span className={styles.themeDot} aria-hidden />
+        Day
       </button>
     </div>
   )

@@ -1,148 +1,67 @@
-# Cove — brand brief
+# Cove — brand brief (v2.0)
 
 ## Job
 
-Give the portfolio a sixth design system that proves blue liquid glass can be
-minimal: one glass layer, one solid reading plate, one ice accent. The page has
-to stay readable at 16px and 390px, not just photogenic.
+Give the portfolio its ninth design system (Case 09): a **tidal observatory** made of an
+abyssal ground and one lumen signal — a number is never shown without the hour it was
+taken, and the light in the interface only ever means "this is live".
 
 ## Audience
 
-Design engineers and product teams building interfaces that sit over imagery,
-video or a rendered field: media tools, AI surfaces, dashboards with a
-background. They already know shadcn, Tailwind and Figma. They meet Cove on a
-case page, a favicon, a form field and a component sheet.
+People who read water: harbour masters, coastal engineers, dive shops, surf forecasters,
+and the design engineers who build their tools. Anyone whose day is organised by a tide
+table and who has to read a screen at 02:00 without waking the room.
 
 ## Promise
 
-**Clarity you can see through.** Depth without the fog.
+**The cove is the cut; the reading is the light that arrived in it.** A surface that stays
+dark because that is when it is used, and puts a single light on the only thing that is
+happening.
 
 ## Positioning
 
-Not the frosted card with a gradient blob. Not glass everywhere. Not a
-blue-purple AI mesh, not a teardrop icon, not a Vitrine re-skin. Cove is a
-**material study with one layer**: the field carries the atmosphere, the glass
-carries the chrome, and the reading plate carries the words. The nearest thing it
-must not look like is a dribbble glassmorphism shot with unreadable body copy.
+Not a dashboard that glows to look alive. Not a dark mode bolted onto a light system with
+`filter: invert()`. Not a "data aesthetic" of grid lines, brackets and monospace costume.
+Cove is an **instrument**: three values of ink, one hairline, one signal, and mono figures
+that align on the decimal.
 
 ## Domain before defaults
 
-The product's world is a cove: sheltered water against a stone edge.
+The product's world is a cove at night: a cut in the rock, water arriving in it, a reading
+taken from the edge.
 
-- **Five concepts:** the cove (a sheltered curve), the waterline, the meniscus,
-  the caustic ring, the depth sounding.
-- **Five colours from the physical world:** abyss, foam, ice, horizon, mist.
-- **Signature:** a squared C with one ice inlay on the lower lip — the cove and
-  its waterline in one letter.
-- **Obvious defaults to avoid:** the frosted card over a gradient, the
-  glass-everywhere dashboard, the blue-purple mesh, the teardrop, the blurry
-  hero.
+- **Five concepts:** the cut, the reading inside it, the water level, the threshold, the
+  hour the reading was taken.
+- **Six inks from the physical world:** abyss (deep water at 02:00), deep (the panel),
+  raise (the step above it), ink (moon on water), haze (spray), lumen (bioluminescence).
+  Ember is not a sixth ink — it is a threshold, and it is used once per view.
+- **Signature:** a carved corner with the reading nested in its cut, separated by six
+  units of ground. The channel is the only part of the mark that is not drawn.
+- **Obvious defaults to avoid:** a glowing hero gradient, a gauge that animates to look
+  alive, a speedometer arc, glass panels on a dark ground (a shadow is invisible there, so
+  the glow becomes the only depth cue — and then the glow means nothing).
 
 ## Constraints
 
-- Stack: Next.js 16, React 19, TypeScript, CSS modules; no component runtime.
-- Sizes: mark at 16, 32, 64, 128; lockup at 30; page at 1440 and 390.
-- Accessibility: WCAG AA body text, visible focus, 44px touch targets,
-  `prefers-reduced-motion: reduce` keeps a still field.
-- Deep is the default surface; Frost is the light scope. The hero, material and
-  mark stages and the footer stay Deep in both.
-- Glass is CSS `backdrop-filter`, not true lensing. Do not claim otherwise.
-- The supplied background image was **not present in the workspace**. The page
-  ships a CSS caustic field and exposes `--cv-field-image` as the single swap
-  point.
-- Must not change Sunnyside, Vitrine, Huginn, Riso Co. or Hachure.
-
-## References
-
-1. Apple Liquid Glass (WWDC25 / HIG Materials) — take: one translucent layer that
-   borrows the backdrop, a lit edge, one specular, and restraint.
-2. Instrument Serif + Instrument Sans (Google Fonts / TypePairs) — take: a
-   high-contrast serif for the few display moments, a Swiss-neutral sans for the
-   work.
-3. Photographic caustics and menisci — take: a blue field with one ring of light,
-   not a gradient mesh.
-
-## Type research
-
-Instrument Serif and Instrument Sans were drawn as a pair. The serif has the
-contrast and the calm for the hero and the outlined wordmark; the sans is neutral
-enough for 14px inputs, 16px body, tables and labels. Geist Mono is already the
-project's label face, so Cove adds two families, not three.
-
-| Voice | Face | Use |
-| --- | --- | --- |
-| Display | Instrument Serif 400 / 400 italic | Hero, section titles, wordmark, the one pull quote |
-| Reading | Instrument Sans 400–600 | Body, controls, tables, UI |
-| Label | Geist Mono 500 | Metadata, sizes, token names, ratios |
-
-Instrument Serif ships **one weight**. Do not synthesise a bold; raise the size
-or use the italic. The serif is never used for a paragraph.
-
-Sources:
-
-- [TypePairs — Instrument Serif + Instrument Sans](https://typepairs.com/pairs/instrument-serif-instrument-sans)
-- [Google Fonts — Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif)
-- [Google Fonts — Instrument Sans](https://fonts.google.com/specimen/Instrument+Sans)
-- [Apple HIG — Materials](https://developer.apple.com/design/human-interface-guidelines/materials)
-- [better-typography](https://www.ui-skills.com/skills/jakubkrehel/better-typography)
-
-## v1.0 direction
-
-- **Track:** constructed. The C is an architectural monogram, not a drawn mascot.
-- **Family:** architectural monogram. One C with 45° walls and one ice inlay.
-- **Gate:** v2.3 constructed — zero circle, fill-only, 2–4 primitives, one
-  accent.
-- **Material:** one glass layer over one field; a solid reading plate; a lit cut
-  edge; one specular; a low-opacity grain on the field only.
-- **Palette:** Abyss `#06121C`, Foam `#E9F6FB`, Ice `#7CE7FF`, Horizon
-  `#2E5F78`, Mist `#9DBCCB`, plus Clay, Moss and Amber for status.
-- **Type:** Instrument Serif / Instrument Sans / Geist Mono.
-- **Theme DNA:** lit-cut edge, 1px offset, square tile, halo ring, airy density,
-  mono-caps label.
-
-## Deliverables
-
-- [x] one-page brief (this file)
-- [x] four mark directions, one kept, three rejected with reasons
-- [x] story spine, six decision cards and a voice card
-- [x] mark, compact mark, glyph, mono, reverse
-- [x] wordmark as outlines (Instrument Serif)
-- [x] horizontal, stacked and reversed lockups
-- [x] brand board rendered from HTML
-- [x] favicon set and app icons
-- [x] theme DNA + primitive → semantic → component tokens, CSS and JSON
-- [x] portable form kit CSS and HTML
-- [x] `/design-system/cove` case page with ten native controls
-- [x] v2.4 skill-resource audit and objective mark score
-
-## Non-goals
-
-- A second published component package. The route is a specimen and case.
-- A light-only system. Deep is the signature; Frost is a surface variant.
-- A shader/refraction layer. CSS glass only.
-- Generated atmosphere imagery. The field is CSS until the supplied image is
-  added.
-- Replacing Vitrine or Sunnyside. Cove is Case 06.
-
-## Success
-
-After 30 seconds a reviewer can say: “One glass layer over one blue field; the
-copy sits on a solid plate; the C has one ice waterline; the form is actually
-usable.” They can find the tokens, the favicon, the story and the component code.
-
-## Voice
-
-**Calm, exact, unhurried.** Museum wall text, not a launch post. Example:
-“One layer. Read on the plate.”
-
-## Assumptions
-
-- `ASSUMPTION` The case is **Cove**, Case 06, at `/design-system/cove`.
-- `ASSUMPTION` Deep is the default; Frost is the light scope. The hero, material
-  and mark stages and the footer stay Deep.
-- `ASSUMPTION` The supplied background image is missing from the workspace. The
-  CSS caustic is a fallback, not a replacement; `--cv-field-image` swaps it.
-- `ASSUMPTION` The field can be photographic or rendered; the system does not
-  ship a generated image, so there is no image provenance yet.
-- `ASSUMPTION` The C mark is the identity; the wordmark is outlined Instrument
-  Serif, not a custom-drawn letter.
+- Stack: Next.js 16, React 19, TypeScript, CSS modules. No component runtime, no chart
+  library — the sparkline and the tide chart are one SVG path each.
+- Gate: Sunnyside Brand System **v3.0 constructed** — fill-only, two solid primitives in
+  the primary mark, one in the compact, no path carrying both `fill` and `stroke`, one
+  accent (the reading), reads at 16px.
+- Detach: floor **70** against every sibling. Measured: Strand **70**, Hachure **73**,
+  Riso **74**, Vitrine **75**. Clearing ships no `tokens.json`, so that pair is a design
+  argument, not a measurement — said out loud in `story.md § Gap`.
+- Contrast: ink on abyss **17.19:1**, ink on a panel **16.18:1**, haze on abyss **7.68:1**,
+  lumen on abyss **12.18:1**, day-ramp tide on mist **5.06:1**. All eleven pairs are
+  computed by `scripts/generate-cove-tokens.mjs`, not estimated.
+- Material: flat panels, 1px hairlines, **no shadow anywhere except** the plate that
+  floats over the hero photograph.
+- Ramps: `night` is the base (an `html` element with no attribute), `day` is an override
+  selected by `html[data-cove='day']`. Both ramps declare the same primitive names; only
+  the values change, so no semantic token breaks on the switch.
+- Type: Sora 600 (display), Geist 400 (reading), JetBrains Mono 500 (labels and every
+  figure, tabular).
+- Imagery: `hero.webp` full-bleed behind the hero, `footer.webp` full-bleed behind the
+  footer. Both 1916 × 821 and both left-dark, which is why the copy sits on the left.
+- Accessibility: 40px controls, 2px signal ring at 2px offset, `prefers-reduced-motion`
+  collapses every duration to 0.01ms at the root.

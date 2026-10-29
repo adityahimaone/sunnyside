@@ -1,164 +1,122 @@
-# Cove — story
+# Cove — story (v2.0)
 
-> Cove is a blue liquid-glass design system for interfaces that sit over the
-> world: one glass layer, one solid reading plate, one squared C with an ice
-> waterline, and a type hierarchy calm enough to disappear.
+> The cove is the cut; the reading is the light that arrived in it.
 
-Reject it if any asset needs a second glass layer, body copy on a blur, or a
-blue-purple gradient doing the work of an idea.
+Cove v1.0 was a blue liquid-glass system: one glass layer, one solid plate, a squared C.
+It was competent and it was the wrong idea. It inherited Clearing's glass, Strand's
+patience, and a palette that sat 8° from its neighbour — three systems in a row that all
+said "calm surface over a photograph". v2.0 throws all of it away and starts from the
+question the other eight cases never had to answer: *what does a system look like when the
+data is the identity?*
 
 ## Belief
 
-Depth should clarify. A surface earns its transparency by holding one thing you
-can actually read.
+**Night is the default, not a theme.**
+
+Every other case in the portfolio is a light system with a dark variant, because they are
+read in daylight. Cove is read at 02:00, from a phone, by someone who does not want a white
+rectangle in a dark room. So the base ramp is the abyss and daylight is the exception. That
+single inversion cascades:
+
+- A shadow is invisible on a near-black ground, so **elevation had to become value** —
+  `--cv-plate` is one step lighter than `--cv-bg`, plus a hairline.
+- A glow is the only depth cue left on a dark ground, so **the glow had to be rationed**.
+  Lumen appears only where a value is live: a filled gauge, a sparkline stroke, a status
+  dot, a primary action. Two percent of the viewport, counted rather than felt.
+- A dark ground makes every light value louder, so **the palette collapsed to three values
+  plus one signal**. v1.0 had eleven inks. v2.0 has abyss, deep, raise, ink, haze, lumen
+  and ember, and haze is the only grey — a fourth neutral would mean the value structure
+  had drifted.
 
 ## Enemy
 
-Glass as wallpaper: five stacked panels, body copy on a blur, a blue-purple mesh
-standing in for a material. The failure is not that glass is ugly; it is that
-glass is used without a reading surface.
+**The dashboard that glows for no reason.**
+
+A gradient in the hero. A gauge that animates so it looks alive. A dark mode chosen because
+dark is fashionable, with a `filter: invert()` and a shadow that no one can see. The enemy
+is not "too much colour" — it is **light used as decoration**, because the moment a glow
+stops meaning "this is happening", the system has no way left to say that anything is.
+
+Cove's answer is a budget: one accent, one meaning, one live dot per view, and a rule that
+the mark is the only place the signal appears at rest.
 
 ## Mark
 
-The C is the cove. One squared letterform with 45° walls, a 24-unit opening and a
-flat 16 × 8 ice inlay on the lower lip. The ink letter is the sheltered curve;
-the inlay is the waterline. Remove the inlay and the C still stands, because the
-letter is the idea and the inlay is punctuation.
+Nine drawings. Eight lost.
 
-The construction is an **architectural monogram**: two solid primitives in the
-primary (C + inlay), one in the compact. The frame is 8 units; the arm is 12; the
-opening is 24. No stroke, no circle, no detached accent.
+The first survivor candidate was a "tide staff": a column with two horizontal dashes
+crossing it, read as a water gauge. At 160px it was elegant. At 16px it was a tuning fork,
+and at 32 it was busy. The second was a "comb": four vertical bars of decreasing height,
+which read as an E and then as a barcode.
+
+The mark that survived is the simplest thing that still says *cove*: **a carved corner with
+the reading nested in its cut.**
+
+```
+block    M8 8H56V30H30V56H8Z   48 × 48, cut 26 × 26
+reading  M36 36H50V50H36Z      14 × 14, six units of ground on every side
+compact  M8 8H56V33H33V56H8Z   one shape, arms thickened to 25
+```
+
+Two filled quadrilaterals. No circle anywhere in the family, no path carrying a stroke —
+the six-unit channel is negative space, not a drawn gap. That is why the mark survives a
+favicon: a stroke cannot be both the edge and the gap, and an outline dies at 16px.
 
 ## Material
 
-One translucent layer over one field. The glass is a container, never a filter:
-an 8% foam fill on Deep, a 1px lit cut edge, one top specular, a hard 1px line
-and a large soft lift. The field can be a caustic, a photo or a render; it never
-sits under the words that explain it. Copy lives on a solid plate. The grain
-belongs to the field, not the type.
+Flat panels, 1px hairlines, and **one shadow in the whole system**: the plate that floats
+over the hero photograph, where a hairline genuinely cannot separate a card from an image.
 
-## Voice
+Everything else separates by value. `--cv-bg` → `--cv-plate` → `--cv-raise` is the entire
+elevation model, and a hover moves the fill without moving the edge. There is no
+`backdrop-filter` except the topbar's 12px blur, which exists so type can pass under it,
+not so a card can look like glass.
 
-Calm, exact, unhurried. Museum wall text, not a launch post. Short sentences,
-real numbers, and an error that says what to do next.
+The two photographs are the one place the system allows a scrim: `hero.webp` is a night
+coastline with the dark water on the left, `footer.webp` is indigo ink in water, dark on
+the left. Both 1916 × 821, both used full-bleed with no max-width wrapper. In the day ramp
+the scrim becomes mist at 88% — the photograph stays, the subject drops into the daylight
+palette, and no second asset is shipped.
 
 ## Proof
 
-- Foam on Abyss 17.14:1; Ink on Frost 15.66:1; Abyss on Ice 13.26:1.
-- 14 measured contrast pairs; every body pair is at least 4.69:1.
-- The C covers the grid cleanly at 16px; the inlay is 16 × 8 and survives 32px.
-- `score-mark.py` PASS on the primary, compact and glyph.
-- The compact C is one shape; the primary is two.
-- Ten native controls, an error summary and a visible focus ring in both
-  surfaces.
-- The page, the board and the form kit read the same `--cv-*` source.
+**The data layer is the identity.** A tidal system that draws its charts like a marketing
+page has a palette, not an identity, so the chart is the specimen:
+
+- **One value per card.** A reading card holds one number, one unit, one time. Two numbers
+  make a table, and a table belongs in the log.
+- **Time is part of the value.** A number without an hour is decoration. The time sits in
+  the same line as the figure, in haze, never in a tooltip.
+- **The gauge is a rail, not a dial.** A vertical track with a filled segment and a single
+  tick at the threshold. No needle, no arc, no speedometer.
+- **Sparklines carry no axes.** Twenty-four points, one stroke, no grid, no dots, no
+  gradient under the line.
+- **Stale is visible.** A reading older than its interval drops to haze and loses the lumen
+  dot. It does not fade out — it stops claiming to be live.
+
+Type carries the same argument. Sora names, Geist reads, JetBrains Mono measures. Every
+figure on the page is mono and tabular, because a column of readings has to align on the
+decimal to be scanned, and a proportional face makes 1.14 and 1.41 the same width and the
+same blur. The wordmark is Sora SemiBold outlined to paths and frozen in
+`features/cove/wordmark-path.ts` — a logo that can swap is not a logo.
+
+The 24-hour curve is a fixed sample of twenty-four numbers. The page says "sample" in the
+plate, in the chart head and in the gaps list; there is no feed behind it, and pretending
+otherwise would have been the easiest lie in the case.
 
 ## Gap
 
-The supplied background image was not in the workspace. The shipped field is a
-CSS caustic; `--cv-field-image` is the swap point. CSS `backdrop-filter` is
-frosted glass, not true lensing. The constructed kit has no cast, so the marks
-section is a logo card, wordmark and rule, not the four-movement composition.
-The wordmark is outlined type, not a hand. The compact drops the inlay. The board
-is the only export; there are no social or print crops. The browser pass is
-Chromium-only and there is no axe or visual-regression CI.
+**The detach score against Strand is 70, exactly at the floor.** The gate passes, and
+"exactly" is the honest word: hue is 117° away and the display face differs, but the value
+ladder is the closest of any sibling (mean L 0.55 against 0.61) and nine of twelve section
+ids are shared. Structure is the dimension that nearly failed, and it nearly failed because
+a specimen page for a design system has a shape — hero, contents, sections, tokens, audit —
+that is hard to escape without making the page worse.
 
-## Why the other three lost
+**Clearing is not scored at all.** It ships no `tokens.json`, so the gate has nothing to
+read. Everything claimed about Cove being unlike Clearing — serif against mono labels,
+cream against abyss, one pane of glass against flat panels — is a design argument, not a
+measurement. Any number in that row would have been invented.
 
-All four directions were drawn on the same 64 grid. The choice is silhouette and
-meaning, not a defect.
-
-| Family | Mark | Why it lost |
-| --- | --- | --- |
-| **Architectural monogram** | **Cove C** | **Kept.** A squared C is the cove; the ice inlay is the waterline. It reads at 16px and joins the serif wordmark. |
-| Continuous ribbon | Liquid ribbon | A wavy ribbon is the first water metaphor everyone draws. At 128px it reads as a brush stroke; at 16px it is a squiggle. |
-| Horizon & counter-form | Wave pane | A square with a wave bottom shares its outer silhouette with Sunnyside's tile. The idea is right; the shape is already in the library. |
-| Brutalist louvers | Two waves | Two waves read as a water icon or a menu glyph, not a brand. The accent makes it a weather symbol. |
-
-## Decision cards
-
-### 1. One glass layer, one reading plate
-
-- **Decision** Glass is for chrome over the field; anything you read sits on a
-  solid plate.
-- **Because** Text contrast must not depend on what is behind the blur.
-- **Not when** A transient overlay must sit above content; use a solid scrim.
-- **Breaks next** The Frost scope lightens the glass; the reading plate still
-  carries the same text roles.
-
-### 2. The field is the image
-
-- **Decision** The blue caustic is one background field with one swap token:
-  `--cv-field-image`.
-- **Because** A real field gives the glass something to refract. A gradient alone
-  is a mood, not a material.
-- **Not when** There is no field to show; use the solid Abyss ground and drop the
-  glass.
-- **Breaks next** The supplied image is missing. The CSS fallback is deliberate;
-  when the file arrives it replaces the gradients at one token.
-
-### 3. Blue is a ground, not a gradient
-
-- **Decision** Abyss and Foam carry the page; Ice is the only field allowed to
-  shout. No purple-blue mesh.
-- **Because** A restrained blue reads as water and glass. A gradient mesh reads
-  as an AI launch page.
-- **Not when** A status needs attention; Clay, Moss and Amber are roles.
-- **Breaks next** Ice is light, so it needs dark ink on top. On Frost, links use
-  the deeper focus blue instead.
-
-### 4. Serif for the name, sans for the work
-
-- **Decision** Instrument Serif is limited to the hero, section titles and the
-  wordmark. Instrument Sans carries every control, label and paragraph.
-- **Because** The serif gives the system a calm editorial voice; the sans keeps
-  14px fields and 16px body unremarkable in the right way.
-- **Not when** A card heading sits inside a dense table; use the reading face at
-  600.
-- **Breaks next** Instrument Serif ships one weight (400). Do not synthesise a
-  bold; raise the size or use the italic.
-
-### 5. Frost is a surface, not a second brand
-
-- **Decision** Deep is the default; Frost swaps the same semantic roles onto a
-  light ground.
-- **Because** A system should survive a bright room without becoming a second
-  palette or a second logo.
-- **Not when** The hero, material and mark stages are the proof; they stay Deep.
-- **Breaks next** Dark plates inside Frost use a local deep scope. If a token
-  changes, change the scope in the same commit.
-
-### 6. No glass on body copy
-
-- **Decision** Paragraphs, labels, errors and table cells never sit directly on
-  a translucent surface.
-- **Because** A blur is not a contrast guarantee.
-- **Not when** A caption is decorative and repeated elsewhere; still prefer the
-  plate.
-- **Breaks next** The glass edge can look like a border. Keep it 1px and do not
-  let it become the only boundary.
-
-## Voice card
-
-```
-We are      calm, exact, unhurried, specific
-We are not  frosted, vague, hyped, blue-purple
-Say         "One layer. Read on the plate."
-Say         "Use at least 8 characters."
-Say         "Depth is a surface, not a fog."
-Don't say   "Oops! Something went wrong."
-Don't say   "Immerse yourself in seamless glass."
-Don't say   "Unlock the power of liquid experiences."
-```
-
-## The constructed gate (v2.3)
-
-| Gate | Result | Evidence |
-| --- | --- | --- |
-| A. Zero circle / zero Venn | Pass | No `<circle>` in the family; the C is a filled letterform with 45° walls. |
-| B. Fill-only | Pass | No `stroke` in `mark.svg` or `mark-compact.svg`; the inlay touches the lower lip. |
-| C. 2–4 primitives, one accent | Pass | Two in the primary (C + ice inlay), one in the compact. |
-| Family | Architectural monogram | One squared C; inlay on the lower lip. |
-| Compact simpler | Pass | Compact is one C path; the primary adds the inlay. |
-| Score | Pass | `score-mark.py` no failures at 16, 32 and 128px. |
-| Showcase silhouette | Pass | Distinct from Vitrine's V, Huginn's brackets, Riso's planes, Hachure's ridge and Sunnyside's tile. |
+Two more gaps are listed on the page and not hidden here: the readings are a fixed sample,
+and the photographs upscale above 2×.
