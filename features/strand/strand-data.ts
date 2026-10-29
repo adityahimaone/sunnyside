@@ -1,185 +1,22 @@
 export type NavItem = { id: string; label: string }
 
+/**
+ * Eleven sections, and every id here is rendered. `glass`, `horizon` and
+ * `palette` are the ids that belong to this system alone; a neighbouring case
+ * cannot borrow them without changing what its page argues.
+ */
 export const NAV: readonly NavItem[] = [
   { id: 'foundation', label: 'Foundation' },
-  { id: 'material', label: 'Material' },
+  { id: 'glass', label: 'Glass' },
   { id: 'marks', label: 'Marks' },
   { id: 'horizon', label: 'Horizon' },
+  { id: 'palette', label: 'Palette' },
   { id: 'type', label: 'Type' },
-  { id: 'forms', label: 'Forms' },
+  { id: 'parts', label: 'Parts' },
   { id: 'motion', label: 'Motion' },
-  { id: 'budget', label: 'Budget' },
-  { id: 'applications', label: 'Applications' },
+  { id: 'voice', label: 'Voice' },
   { id: 'tokens', label: 'Tokens' },
   { id: 'audit', label: 'Audit' },
-]
-
-/**
- * Every id above must be a rendered section. The v1.0 nav advertised `colour`,
- * `motion` and `voice` and the page rendered none of them: three dead anchors.
- * `colour` folded into Material, `voice` into Foundation, and the two sections
- * below are the ones only a coastal system needs.
- */
-
-export type HorizonRule = {
-  rule: string
-  decision: string
-  because: string
-}
-
-export const HORIZON_RULES: readonly HorizonRule[] = [
-  {
-    rule: 'Two placements, never three',
-    decision:
-      'The vista appears at the entrance and at the departure. It appears nowhere in between.',
-    because:
-      'A field photograph repeated through a page stops being a place and becomes wallpaper.',
-  },
-  {
-    rule: 'No text on the photograph',
-    decision:
-      'Every readable word sits on a quartz plate. The image carries a caption bar, not a headline.',
-    because:
-      'The sky is calm and the dunes are not. Contrast measured over an image is a guess; over a plate it is 16.6:1.',
-  },
-  {
-    rule: 'One caption, one measurement',
-    decision:
-      'Each plate states what it is and one sampled reading — a material, a tide height, a time.',
-    because:
-      'A caption that names the place is decoration. A caption that measures it is evidence.',
-  },
-  {
-    rule: 'The fallback is a plate, not a gradient',
-    decision:
-      'If the asset fails, the frame collapses to a basalt plate holding the caption.',
-    because:
-      'A CSS sand gradient pretending to be a photograph is the most obvious tell that a system was never tested offline.',
-  },
-]
-
-export const HORIZON_SPEC = [
-  { key: 'Asset', value: 'strand-vista.webp · 1672 × 941 · WebP' },
-  { key: 'Frame', value: '16:9 plate, max-height 520px, object-fit cover' },
-  { key: 'Caption', value: 'Plate number · material reading · mono caps' },
-  { key: 'Text over image', value: 'None. The footer quote sits on an inset plate.' },
-  { key: 'Motion', value: 'Static. No parallax, no zoom on scroll.' },
-]
-
-export type BudgetSlice = {
-  name: string
-  share: number
-  token: string
-  /** A token reference, not a hex: the bar must invert with the surface. */
-  swatch: string
-  note: string
-}
-
-/**
- * The 5 + 1 law, measured rather than asserted. Shares are the share of a
- * 1440 × 900 viewport at the top of the page, rounded, and they sum to 100.
- */
-export const BUDGET: readonly BudgetSlice[] = [
-  {
-    name: 'Linen ground',
-    share: 61,
-    token: '--st-bg',
-    swatch: 'var(--st-bg)',
-    note: 'The page itself. Most of the viewport is ground, and that is the point.',
-  },
-  {
-    name: 'Quartz plate',
-    share: 30,
-    token: '--st-plate',
-    swatch: 'var(--st-plate)',
-    note: 'Every surface that carries a word.',
-  },
-  {
-    name: 'Basalt ink',
-    share: 6,
-    token: '--st-fg',
-    swatch: 'var(--st-fg)',
-    note: 'Type, the mark body, the night plate.',
-  },
-  {
-    name: 'Tide signal',
-    share: 2,
-    token: '--st-signal',
-    swatch: 'var(--st-signal)',
-    note: 'Primary action, focus ring, mark inlay. Never body text.',
-  },
-  {
-    name: 'Straw accent',
-    share: 1,
-    token: '--st-accent',
-    swatch: 'var(--st-accent)',
-    note: 'A single warm punctuation mark. Not a second accent.',
-  },
-]
-
-export const BUDGET_RULES = [
-  'The signal is a verb: it appears where something happens, not where something is.',
-  'Above 8% of the viewport the page stops being quiet — the budget is the quietness.',
-  'Straw never touches the signal. Two accents is two brands.',
-  'Night Tide inverts the ground and the plate, and keeps every share identical.',
-]
-
-export type MotionRule = { rule: string; value: string; note: string }
-
-export const MOTION_RULES: readonly MotionRule[] = [
-  {
-    rule: 'Duration ladder',
-    value: '140 / 240 / 400 ms',
-    note: 'Fast for colour, base for surfaces, slow for the theme cross-fade. Nothing above 400.',
-  },
-  {
-    rule: 'Properties',
-    value: 'colour, border, opacity',
-    note: 'No transform on hover. A control that moves the layout makes a still page feel unstable.',
-  },
-  {
-    rule: 'Easing',
-    value: 'cubic-bezier(0.16, 1, 0.3, 1)',
-    note: 'One curve out, one in-out. No bounce, no spring.',
-  },
-  {
-    rule: 'Reduced motion',
-    value: 'transition: none',
-    note: 'Honoured at the root. The vista is static in every mode, so nothing is lost.',
-  },
-]
-
-export type StoryBeat = { beat: string; line: string }
-
-export const STORY_BEATS: readonly StoryBeat[] = [
-  {
-    beat: 'Belief',
-    line: 'Quietness is authority. An interface earns trust not by shouting with saturated colors, but by giving ideas room to settle like footsteps on wind-blown sand.',
-  },
-  {
-    beat: 'Enemy',
-    line: 'Digital noise and gratuitous ornament: neon gradient blobs, dense floating glass pills, and interfaces that never allow the eye to rest.',
-  },
-  {
-    beat: 'Mark',
-    line: 'An architectural S cut by one shoreline, with a 1.1-unit strand left open between the sand and the sea. Everything below the cut is tide — 48% of the letter — so the accent is structure, not ornament: remove it and the S loses its foot.',
-  },
-  {
-    beat: 'Material',
-    line: 'Linen sand ground, flat quartz reading plates with no lift, and one panoramic vista grounding the entrance and the departure — and nothing between them.',
-  },
-  {
-    beat: 'Voice',
-    line: 'Serene, architectural, unhurried. Clear declarative prose with no hurried marketing buzzwords.',
-  },
-  {
-    beat: 'Proof',
-    line: '16.6:1 body contrast on the quartz plate, 125 CSS declarations, ten native controls with a gap focus ring, and an S monogram that scores 100% PASS on the craft gate.',
-  },
-  {
-    beat: 'Gap',
-    line: 'The vista photograph is a high-resolution WebP asset rather than a live satellite or dynamic tide telemetry stream.',
-  },
 ]
 
 export type Decision = {
@@ -192,279 +29,421 @@ export type Decision = {
 
 export const DECISIONS: readonly Decision[] = [
   {
-    title: 'Solid quartz plates over ground',
+    title: 'The pane is the surface, the plate is the page',
     decision:
-      'All continuous body text and interactive forms sit on solid quartz plates (#FFFFFF), never directly over photographic grass or sand ripples.',
+      'Chrome, containers and controls are panes of sea-glass. Any paragraph longer than two lines sits on a solid plate inside that pane.',
     because:
-      'Text contrast must remain absolute (≥ 16:1) regardless of viewport zoom or ambient light.',
+      'Glass is a material, not a texture. Blurred ground behind body copy makes contrast a function of the photograph underneath it — measured, not assumed, and never stable.',
     notWhen:
-      'A hero display title is intentionally paired directly with the calm sky region of the vista.',
+      'A caption, a label or a single line may sit directly on the pane. A paragraph may not.',
     breaksNext:
-      'The Night Tide scope switches the reading plate to Marine Basalt (#152026) with 15.8:1 pale sand ink.',
+      'If the blur is unsupported the pane falls back to a solid fill of the same tint, so the layout and the contrast never change.',
   },
   {
-    title: '5 + 1 Color Law with strict focal budget',
+    title: 'One signal, at two percent',
     decision:
-      'Tide (#16716F) is reserved strictly for primary actions, focus rings and the mark inlay, occupying ≤ 2% of the viewport.',
+      'Sun (#A85A22) is the only saturated colour: primary action, focus ring, the upper plane of the mark. It stays under 2% of the viewport.',
     because:
-      'A saturated cyan field turns a quiet shore into a dashboard. The signal is a verb, not a surface.',
+      'A dune at low light has one warm note in a field of grey-blue. A second accent would make the page a dashboard and the photograph a decoration.',
     notWhen:
-      'Tag pills may use the surf wash (#DCF7F5). The signal itself never becomes a background.',
+      'Tags use the sun wash (#F6E6D8). The wash is a tint of the signal, never a second colour.',
     breaksNext:
-      'Night mode shifts the signal to #51BFBB. The hue stays at 192°; only the lightness moves.',
+      'Night raises the signal to #E9A469 and keeps the share identical; only lightness moves.',
   },
   {
-    title: 'Dual photographic grounding (Hero + Footer)',
+    title: 'Two planes and a strand that never closes',
     decision:
-      'The authentic coastal dune vista photograph is anchored at the entrance (hero) and departure (footer), creating visual symmetry.',
+      'The mark is two solid planes with a 6-unit channel between them. The gap is the identity; it is not a stroke, not a shadow and not a divider.',
     because:
-      'A digital design system benefits from tactile physical grounding that reminds the visitor of the real world.',
+      'Strand means the shore between the tide marks. Drawing the gap rather than the objects is the only version of this idea that survives at 16px.',
     notWhen:
-      'On extreme low-bandwidth connections or offline modes where CSS sand gradient falls back.',
+      'The compact drawing widens the channel to 7 units and drops the fine alignment. It never closes the gap to gain weight.',
     breaksNext:
-      'Reduced motion disables zoom or parallax drifts, keeping the photograph pristine and static.',
+      'Monochrome reproduction keeps both planes at one ink; the channel still reads because it is negative space.',
   },
   {
-    title: 'Architectural monogram on 64-grid',
+    title: 'The coast appears twice',
     decision:
-      'Zero circles, zero Venn diagrams, fill-only geometry with at least 8 path commands and an evenodd tidal channel.',
+      'The photograph enters at the entrance (hero, framed) and at the departure (footer, full-bleed). Nowhere else.',
     because:
-      'A logo must be an architectural stamp, not a circular sticker or an AI clipart shell.',
+      'A place repeated through a page becomes wallpaper. Two appearances make an arrival and a leaving; a third makes a background.',
     notWhen:
-      'The compact mark simplifies the inner inlet so it stays legible at 16×16 favicon size.',
+      'The glass demo may sit on the same vista because it is demonstrating the material, not decorating a section.',
     breaksNext:
-      'Single-color mono reproduction maintains identical silhouette recognition.',
-  },
-  {
-    title: 'Airy density and 10px corner radius',
-    decision:
-      'Fields and cards use an airy padding rhythm with 10px corners, matching the natural softness of sand contours.',
-    because:
-      'Sharp 0px corners feel aggressive, while pill shapes feel too bubbly for an architectural system.',
-    notWhen: 'Pills are permitted only for status tags and category chips.',
-    breaksNext:
-      'Compact mobile viewports scale padding smoothly using clamp() without breaking alignment.',
-  },
-  {
-    title: 'Native accessible controls',
-    decision:
-      'Build forms with semantic HTML (input, textarea, select, fieldset) styled through --st-* tokens with zero custom JS wrappers.',
-    because:
-      'Native controls are accessible out of the box, screen-reader friendly, and performant.',
-    notWhen:
-      'Complex composite interactions (e.g. range sliders) add minimal progressive enhancement.',
-    breaksNext:
-      'Form validation uses native aria-invalid and constraint validation APIs.',
+      'The footer image is a CSS background, so a failed request leaves the dune ground and the pane — not a gradient pretending to be a photograph.',
   },
 ]
 
-/**
- * The mark's geometry, in one place. `sPath` and `waterPath` are the same
- * strings baked into public/brand/strand/mark.svg — the construction drawing on
- * the page renders from here, so the spec and the shipped file cannot drift
- * without the page showing it.
- */
-export const MARK_GEOMETRY = {
-  grid: 64,
-  sPath:
-    'M56 8H22C13.163 8 6 15.163 6 24C6 32.837 13.163 40 22 40H38C40.209 40 42 41.791 42 44C42 46.209 40.209 48 38 48H10V56H38C46.837 56 54 48.837 54 40C54 31.163 46.837 24 38 24H22C19.791 24 18 22.209 18 20C18 17.791 19.791 16 22 16H56V8Z',
-  /** Shoreline: 8 units of drop across the 64 grid, from y = 36 at x = 0. */
-  waterY: 36,
-  waterDrop: 8,
-  /** The strand itself — a 1.1-unit gap, so sand and sea never touch. */
-  strandGap: 1.3,
-  sandClip: 'M0 -8H64V27.45L0 35.45Z',
-  seaClip: 'M0 36.55L64 28.55V72H0Z',
-  /** Measured from the shipped path, not estimated. */
-  bounding: '50 × 48',
-  counters: '5.2 – 8.5 units',
-  counterShare: '8.1 – 13.3%',
-  angle: '7.1°',
-} as const
+/** Rendered verbatim in the recipe block and copied to the clipboard. */
+export const GLASS_RECIPE = `/* the pane — one effect, measured once */
+.pane {
+  border-radius: 22px;
+  border: 1px solid var(--st-glass-edge);
+  background: var(--st-glass-fill);      /* 158deg white gradient */
+  -webkit-backdrop-filter: blur(24px) saturate(1.7);
+  backdrop-filter: blur(24px) saturate(1.7);
+  box-shadow:
+    inset 0 1px 0 var(--st-glass-sheen), /* the specular top edge */
+    0 28px 64px -34px rgb(19 35 42 / 0.45);
+}
 
-export const MARK_SPECS = [
-  { label: 'Bounding box', value: '50 × 48 · 64 grid' },
-  { label: 'Solid primitives', value: '2 — basalt + tide' },
-  { label: 'Counters', value: '5.2 – 8.5 units' },
-  { label: 'Shoreline', value: '8 units · 7.1°' },
-  { label: 'Strand gap', value: '1.1 units · never closes' },
-  { label: 'Tide share', value: '48% of the letter' },
-  { label: 'Craft gate', value: 'PASS · score-mark.py' },
-] as const
+/* the plate — where a paragraph is allowed to live */
+.plate {
+  background: var(--st-plate);
+  border-radius: 10px;
+  color: var(--st-fg);
+}`
+
+export const GLASS_RULES = [
+  {
+    title: 'One pane per view',
+    body: 'A pane is a container, not a decoration. Two panes stacked inside each other double the blur and halve the legibility.',
+  },
+  {
+    title: 'The edge is brighter than the ground',
+    body: 'A 1px border at 78% white, plus a 1px inset highlight. The edge is light catching a cut edge — never a grey outline.',
+  },
+  {
+    title: 'The shadow is long and low',
+    body: 'One shadow, 64px blur at −34px spread, 45% ink. It grounds the pane; it never haloes it.',
+  },
+  {
+    title: 'No motion inside the material',
+    body: 'The pane does not drift, parallax or shimmer. Hover raises the sheen by 6% over 260ms and stops.',
+  },
+]
+
+export type MarkSpec = { label: string; value: string }
+
+export const MARK_SPECS: readonly MarkSpec[] = [
+  { label: 'Bounding box', value: '52 × 46 · 64 grid' },
+  { label: 'Solid primitives', value: '2 — sun plane, marine plane' },
+  { label: 'Strand', value: '6 units · 9.4% of the grid' },
+  { label: 'Shear', value: '6 units over 18 · 18.4°' },
+  { label: 'Overhang', value: '8 units, upper plane right' },
+  { label: 'Compact', value: 'Separate drawing · 7-unit strand' },
+  { label: 'Craft gate', value: 'PASS · zero circles, fill-only' },
+]
 
 export const MARK_GATE = [
   {
     rule: 'Zero circles / zero Venn',
     pass: true,
-    note: 'Banned in v2.3; Strand is a carved S cut by one straight shoreline',
+    note: 'Two sheared quadrilaterals; no arc appears anywhere in the family',
   },
   {
-    rule: 'Fill-only (no stroke)',
+    rule: 'Fill-only, no stroke',
     pass: true,
-    note: 'Two solid fills, zero outline borders — the shore is a gap, not a line',
+    note: 'Two solid fills. The strand is a gap, not a 1px line that dies at 16px',
   },
   {
-    rule: '2–4 primitives in primary',
+    rule: '2–4 primitives',
     pass: true,
-    note: 'Exactly 2 solid regions — basalt above the strand, tide below',
+    note: 'Exactly two, and the compact uses the same two',
   },
   {
-    rule: 'Geometric craft check',
+    rule: 'One accent, structural',
     pass: true,
-    note: '14 path commands, smooth Bezier counters, one 7.1° cut',
+    note: 'Sun is the upper plane, not a dot resting on the mark. Remove it and half the landscape is gone',
   },
   {
-    rule: '16px compact legibility',
+    rule: '16px compact',
     pass: true,
-    note: 'Separate compact drawing, one tone, counters 5.2–8.5 units',
-  },
-  {
-    rule: 'Accent is structural',
-    pass: true,
-    note: 'Tide is 48% of the letter, cut from it — not a shard resting on the arm',
+    note: 'A separate drawing with a 7-unit channel; the fine 8-unit overhang is dropped on purpose',
   },
   {
     rule: 'Monochrome-first',
     pass: true,
-    note: 'Glyph stamp functions in 100% flat black on white',
+    note: 'Both planes at one ink still read as two masses with a channel',
   },
 ]
 
-export type DetachRow = {
-  ref: string
-  before: number
-  after: number
-  finding: string
+/** The cast: four readings of the same two planes, on a 24 grid. */
+export type CastMark = { id: string; name: string; job: string; paths: readonly string[] }
+
+export const CAST: readonly CastMark[] = [
+  {
+    id: 'slack',
+    name: 'Slack',
+    job: 'Water level, nothing moving',
+    paths: ['M4 6h12l3 3v2H4z', 'M4 14h12l3 3v2H4z'],
+  },
+  {
+    id: 'rising',
+    name: 'Rising',
+    job: 'Incoming tide, one plane lifting',
+    paths: ['M9 5h7l3 3v2H9z', 'M4 14h16v5H4z'],
+  },
+  {
+    id: 'ebb',
+    name: 'Ebb',
+    job: 'Outgoing tide, the lower plane leads',
+    paths: ['M4 6h16v5H4z', 'M4 14h10l3 3v2H4z'],
+  },
+  {
+    id: 'low',
+    name: 'Low',
+    job: 'Low water, a single plane and a mark',
+    paths: ['M4 14h16v5H4z', 'M4 6h5v5H4z'],
+  },
+]
+
+export type HorizonRule = { rule: string; decision: string; because: string }
+
+export const HORIZON_RULES: readonly HorizonRule[] = [
+  {
+    rule: 'Two placements, never three',
+    decision:
+      'Framed at the entrance, full-bleed at the departure. The image appears nowhere in between except inside the glass demo, where it is the material under test.',
+    because:
+      'A field photograph repeated through a page stops being a place and becomes wallpaper.',
+  },
+  {
+    rule: 'No type on the photograph',
+    decision:
+      'Every readable word in the footer sits in a pane. The image carries no headline, no logotype, no caption burned into the pixels.',
+    because:
+      'Contrast over an image is a guess that changes with every crop. Contrast on a pane is 15.7:1 and does not move.',
+  },
+  {
+    rule: 'Full-bleed means full-bleed',
+    decision:
+      'The footer background spans the viewport edge to edge, under the scrollbar gutter, with no max-width wrapper and no rounded corners.',
+    because:
+      'A photograph inset inside a 1200px shell reads as a card. The coast is the one thing on this page that is allowed to leave the grid.',
+  },
+  {
+    rule: 'The fallback is the ground',
+    decision:
+      'If the asset fails, the footer keeps its dune ground, its pane and its text. Nothing is lost but the photograph.',
+    because:
+      'A CSS gradient pretending to be a photograph is the most obvious tell that a system was never tested offline.',
+  },
+]
+
+export const HORIZON_SPEC = [
+  { key: 'Hero asset', value: 'strand-vista.webp · 1672 × 941 · framed 16:10' },
+  { key: 'Footer asset', value: 'dune-quiet-divider.webp · 1916 × 821 · 2.33:1' },
+  { key: 'Footer frame', value: '100vw · min-height 620px · object-fit cover, 50% 58%' },
+  { key: 'Overlay', value: 'Pane, max 560px, left-aligned at the shell gutter' },
+  { key: 'Scrim', value: 'Linear 180deg, transparent 40% → 55% night at the base' },
+  { key: 'Motion', value: 'Static. No parallax, no zoom on scroll, in either surface.' },
+]
+
+export type Swatch = {
+  name: string
+  value: string
+  token: string
+  role: string
+  ink: string
 }
 
-/**
- * The detach gate, run against every case Strand sits beside. Scores are 0–100
- * and the pass mark is 70 against the weakest neighbour, not the average.
- * v1.0 scored 46 against Cove: the accents were one degree apart and all eleven
- * section ids were shared.
- */
-export const DETACH_SCORES: readonly DetachRow[] = [
+export const PALETTE: readonly Swatch[] = [
   {
-    ref: 'Cove',
-    before: 46,
-    after: 78,
-    finding:
-      'Accents were 1° apart (aquamarine 213° against ice 214°) and all eleven section ids were shared. The signal moved to 192° and two sections were replaced.',
+    name: 'Dune',
+    value: '#F3F0E8',
+    token: '--st-dune',
+    role: 'The ground. Dry sand at four in the afternoon.',
+    ink: '#13232A',
   },
   {
-    ref: 'Hachure',
-    before: 78,
-    after: 78,
-    finding:
-      'Already separate: lichen yellow-green against tide green. Unchanged by the move.',
+    name: 'Quartz',
+    value: '#FFFFFF',
+    token: '--st-quartz',
+    role: 'The pane fill and the reading plate inside it.',
+    ink: '#13232A',
   },
   {
-    ref: 'Riso',
-    before: 80,
-    after: 80,
-    finding: 'Separated by ink weight and overprint. Unchanged.',
+    name: 'Marine',
+    value: '#13232A',
+    token: '--st-marine',
+    role: 'Ink. Deep water at the horizon, never pure black.',
+    ink: '#EFEDE6',
   },
   {
-    ref: 'Vitrine',
-    before: 70,
-    after: 78,
-    finding:
-      'Geometry and material now differ on every key; the flat plate removed the shared halo ring and 1px offset.',
+    name: 'Haze',
+    value: '#57696E',
+    token: '--st-haze',
+    role: 'Secondary text, labels, the rail. 5.75:1 on quartz.',
+    ink: '#EFEDE6',
   },
   {
-    ref: 'Clearing',
-    before: 88,
-    after: 82,
-    finding:
-      'Fell honestly. The new tide green is 19° from Clearing moss, where the old cyan was 39°. Improving against one neighbour cost separation against another — that trade is the whole problem, stated.',
+    name: 'Sun',
+    value: '#A85A22',
+    token: '--st-sun',
+    role: 'The one signal. Action, focus, the mark’s upper plane.',
+    ink: '#FFFFFF',
   },
+  {
+    name: 'Depth',
+    value: '#2F5F6B',
+    token: '--st-depth',
+    role: 'The rare cool ink, used once per section at most.',
+    ink: '#FFFFFF',
+  },
+]
+
+export const BUDGET_RULES = [
+  'The signal is a verb: it appears where something happens, not where something is.',
+  'Above 2% of the viewport the page stops being quiet. The budget is the quietness.',
+  'Depth never touches the signal. Two accents is two brands.',
+  'Night raises the signal’s lightness and keeps every share identical.',
+]
+
+export const TYPE_SCALE = [
+  { name: 'Display', token: '--st-scale-display', size: 'clamp(2.5rem, 6vw, 4.4rem)', use: 'Hero, one per page' },
+  { name: 'H2', token: '--st-scale-h2', size: 'clamp(1.55rem, 2.8vw, 2.3rem)', use: 'Section titles' },
+  { name: 'H3', token: '--st-scale-h3', size: 'clamp(1.15rem, 1.6vw, 1.35rem)', use: 'Block and card titles' },
+  { name: 'Body', token: '--st-scale-body', size: '1.0625rem / 1.62', use: 'Reading, capped at 66ch' },
+  { name: 'Caption', token: '--st-scale-caption', size: '0.875rem / 1.5', use: 'Captions, rail, table cells' },
+  { name: 'Label', token: '--st-scale-label', size: '0.6875rem · 0.14em', use: 'Mono caps on eyebrows and specs' },
 ]
 
 export const TYPE_GATE = [
+  { rule: 'Three families, three jobs', pass: true, note: 'Instrument Sans (display), Geist (reading), Geist Mono (labels)' },
+  { rule: 'Display leading', pass: true, note: '0.98 unitless on the hero, 1.12 on section titles' },
+  { rule: 'Reading measure', pass: true, note: 'Body capped at 66ch; captions at 46ch' },
+  { rule: 'Weight below 18px', pass: true, note: 'Never below 400; labels are 500 mono, not 300' },
+  { rule: 'Numerals', pass: true, note: 'tabular-nums on every ratio, token count and size' },
+  { rule: 'Punctuation', pass: true, note: 'Typographic quotes and apostrophes throughout the copy' },
+]
+
+export type MotionRule = { rule: string; value: string; note: string }
+
+export const MOTION_RULES: readonly MotionRule[] = [
   {
-    rule: 'Hierarchy ceiling',
-    pass: true,
-    note: 'Syne (Display), Geist (Reading), Geist Mono (Code)',
+    rule: 'Duration ladder',
+    value: '160 / 260 / 420 ms',
+    note: 'Fast for colour, base for the sheen and the theme cross-fade, slow for a sheet. Nothing above 420.',
   },
   {
-    rule: 'Display leading',
-    pass: true,
-    note: '0.96 unitless leading on hero and section titles',
+    rule: 'Properties',
+    value: 'colour, border, opacity, box-shadow',
+    note: 'No transform on hover. A control that moves the layout makes a still page feel unstable.',
   },
   {
-    rule: 'Reading measure',
-    pass: true,
-    note: 'Body copy capped at 62ch on solid quartz plates',
+    rule: 'Easing',
+    value: 'cubic-bezier(0.22, 1, 0.36, 1)',
+    note: 'One curve out, one in-out. No bounce, no spring, no overshoot.',
   },
   {
-    rule: 'Punctuation & quotes',
-    pass: true,
-    note: 'Real typographic quotes, apostrophes and em-dash discipline',
+    rule: 'Reduced motion',
+    value: 'transition: none',
+    note: 'Honoured at the root. The vista is static in both surfaces, so nothing is lost.',
+  },
+]
+
+export type StoryBeat = { beat: string; line: string }
+
+export const STORY_BEATS: readonly StoryBeat[] = [
+  {
+    beat: 'Belief',
+    line: 'A quiet interface is a material decision, not a mood. You choose what the surface is made of, and then you stop decorating it.',
   },
   {
-    rule: 'Tabular numerals',
-    pass: true,
-    note: 'Font-variant-numeric: tabular-nums on all metadata',
+    beat: 'Enemy',
+    line: 'Glass as ornament: a frosted pill on every card, a gradient behind every heading, an interface that refracts nothing and hides everything.',
   },
+  {
+    beat: 'Mark',
+    line: 'Two sheared planes with a six-unit channel between them. The upper plane is sand, the lower is sea, and the channel is the strand — the only part of the mark that is not drawn.',
+  },
+  {
+    beat: 'Material',
+    line: 'One pane of sea-glass over dune light: a 158° white gradient, 24px of blur, a specular top edge and one long shadow. Paragraphs sit on solid plates inside it.',
+  },
+  {
+    beat: 'Voice',
+    line: 'Measured and unhurried. State the reading, then stop. No weather metaphors in product copy.',
+  },
+  {
+    beat: 'Proof',
+    line: '15.7:1 body contrast on the pane composite, 127 token declarations, eleven native controls, and a mark that passes the craft gate with two primitives and no stroke.',
+  },
+  {
+    beat: 'Gap',
+    line: 'The coast is two still photographs, not a live tide feed. The blur is composited by the browser, so the measured ratios assume the pane at its declared opacity.',
+  },
+]
+
+export type VoiceSample = { ctx: string; good: string; bad: string }
+
+export const VOICE_SAMPLES: readonly VoiceSample[] = [
+  {
+    ctx: 'Empty state',
+    good: 'No readings yet. The next tide is logged at 06:12.',
+    bad: 'Oops! Looks like there’s nothing here yet — hang tight!',
+  },
+  {
+    ctx: 'Primary action',
+    good: 'Save reading',
+    bad: 'Let’s save this!',
+  },
+  {
+    ctx: 'Error',
+    good: 'That height is above the 4.2 m mark. Use a value between 0 and 4.2.',
+    bad: 'Invalid input.',
+  },
+  {
+    ctx: 'Confirmation',
+    good: 'Reading saved to the 29 October log.',
+    bad: 'Success! 🎉',
+  },
+]
+
+export type AuditRow = { check: string; result: string; state: 'pass' | 'open' | 'note'; evidence: string }
+
+export const AUDIT_ROWS: readonly AuditRow[] = [
+  { check: 'Contrast', result: '15.7:1 body', state: 'pass', evidence: 'Marine on the pane composite, measured in tokens.json' },
+  { check: 'Contrast, night', result: '12.6:1 body', state: 'pass', evidence: 'Night ink on the night pane composite' },
+  { check: 'Signal as text', result: '6.8:1', state: 'pass', evidence: 'Sun ink on quartz — the only sun used for a label' },
+  { check: 'Mark gate', result: 'PASS', state: 'pass', evidence: 'Zero circles, fill-only, two primitives, one accent' },
+  { check: 'Mark at 16px', result: 'PASS', state: 'pass', evidence: 'Separate compact drawing, 7-unit channel' },
+  { check: 'Typography', result: 'PASS', state: 'pass', evidence: 'Six type checks, one measure, no weight below 400' },
+  { check: 'Focus', result: 'PASS', state: 'pass', evidence: 'Gap ring on every control; native outline removed only where replaced' },
+  { check: 'Reduced motion', result: 'PASS', state: 'pass', evidence: 'Root-level duration override, no transform animations' },
+  { check: 'Blur fallback', result: 'PASS', state: 'pass', evidence: '@supports not → solid tint of the same value' },
+  { check: 'Footer full-bleed', result: 'PASS', state: 'pass', evidence: '100vw background, no max-width ancestor, no radius' },
+  { check: 'Detach vs Cove', result: '81/100', state: 'pass', evidence: 'Hue 154° apart; Instrument Sans against Instrument Serif; 4 of 11 ids absent' },
+  { check: 'Detach vs Hachure', result: '73/100', state: 'pass', evidence: 'Hue 55° apart; glass against hachure; Hachure declares no DNA keys' },
+  { check: 'Detach vs Vitrine', result: '75/100', state: 'pass', evidence: 'Both declare glass; separated by hue 59°, radius, labels and section order' },
+  { check: 'Detach vs Riso', result: '69/100', state: 'open', evidence: 'Accent hues 17° apart and Riso’s chroma is nearly double — below the 70 floor' },
+  { check: 'Detach vs Clearing', result: '59/100', state: 'open', evidence: 'Sun sits 9° from hart and night-sun on the same hue — the one real failure' },
+  { check: 'Dark pane measured', result: 'Assumed', state: 'open', evidence: 'Ratios use the declared 10% white composite, not a live sample' },
+  { check: 'Tide data', result: 'Not built', state: 'open', evidence: 'No feed; the readings in the copy are static examples' },
 ]
 
 export const GAPS = [
-  'The vista photograph is a static WebP asset; no tide or weather feed is integrated.',
-  'Display typeface Syne is served through the project webfont layout, not a self-hosted woff2 subset.',
-  'The theme toggle reads localStorage on mount, so the first paint is the dune surface before the stored choice applies.',
-  'The budget shares are measured by hand on a 1440 × 900 viewport, not computed at runtime.',
-  'Four of the five neighbours predate the v3 token shape: they carry no meta.sections and only 0–3 of 12 DNA keys, so their structure key scores neutral (5/10). The detach scores are a floor, not a precise measure.',
-  'The strand gap is 1.1 units — deliberately below the 8% channel floor (5.1 units on this grid). It is a drawn separation, not a counter, so the floor does not govern it; below 32px it closes optically and the mark reads as a solid S. That is the intended degradation, but it means the gap is a large-size detail.',
-  'The compact mark is a separate one-tone drawing, not a downscale of the primary. Its counters are 5.2–8.5 units like the primary, but its silhouette differs slightly, so the two are not pixel-identical at the crossover.',
+  'Detach is the one gate this system does not clear. The floor is 70 and the worst pair is 59 against Clearing, because the sun (52°) sits nine degrees from Clearing’s hart (61°) and the night sun sits on the same hue. Moving the signal to ~35° would pass the threshold by nine degrees while landing within 27° of the same accent, so the number would improve and the resemblance would not. The accent is shared and the surfaces are not; that is the honest trade, and it is reported rather than rounded up.',
+  'The footer photograph is a 1916 × 821 WebP, not a responsive art-directed set. On a 4K display it is upscaled by roughly 1.4×.',
+  'The pane composite ratios are computed from the declared opacity and gradient midpoint. A browser that renders the gradient differently will land within a few tenths, not exactly on 15.7:1.',
+  'Instrument Sans is served through next/font, so the first paint of a heading can swap. The wordmark is outlined and cannot swap.',
+  'The budget figure (2%) is measured by hand on a 1440 × 900 viewport at the top of the page, not computed at runtime.',
+  'The compact mark is a separate drawing, not a downscale. Between 20px and 28px the two drawings are not pixel-identical, and the crossover is chosen by the component, not by the reader.',
+  'Blur is expensive on low-end mobile GPUs. The pane uses 24px, which is under the 30px threshold where frame time visibly degrades on a 2020-era device, but it has not been profiled on real hardware here.',
 ]
 
+export const DETACH_SCORES = [
+  { ref: 'Cove', score: 81, finding: 'Hue 154° apart; Instrument Sans against Instrument Serif; four section ids do not exist in Cove.' },
+  { ref: 'Vitrine', score: 75, finding: 'Both declare glass. Separated by hue 59°, radius, label system and section order — not by material.' },
+  { ref: 'Hachure', score: 73, finding: 'Hue 55° apart; glass against hachure. Hachure declares no DNA keys, so material and structure score neutral.' },
+  { ref: 'Riso', score: 69, finding: 'Below the floor. Accent hues are 17° apart and Riso’s chroma is nearly double; separated by geometry and copy, not by hue.' },
+  { ref: 'Clearing', score: 59, finding: 'The weakest pair. Sun is 9° from hart and night-sun sits on the same hue; every other axis differs.' },
+]
+
+export const DETACH_FLOOR = 70
+
 export const OUTPUT_CONTRACT = [
-  {
-    path: 'public/brand/strand/mark.svg',
-    role: 'Primary 2-color mark on 64 grid',
-  },
-  {
-    path: 'public/brand/strand/mark-compact.svg',
-    role: 'Compact mark for 16px and small footprints',
-  },
-  {
-    path: 'public/brand/strand/mark-reverse.svg',
-    role: 'Reverse mark for dark and night surfaces',
-  },
-  {
-    path: 'public/brand/strand/glyph.svg',
-    role: 'Single-color mono silhouette',
-  },
-  {
-    path: 'public/brand/strand/wordmark.svg',
-    role: 'Outlined geometric uppercase wordmark',
-  },
-  {
-    path: 'public/brand/strand/lockup.svg',
-    role: 'Horizontal mark + wordmark lockup',
-  },
-  {
-    path: 'public/brand/strand/lockup-stacked.svg',
-    role: 'Stacked mark + wordmark lockup',
-  },
-  {
-    path: 'public/brand/strand/favicon.ico',
-    role: '16, 32, 48 multi-resolution favicon',
-  },
-  {
-    path: 'public/brand/strand/strand-tokens.css',
-    role: '125 CSS token declarations',
-  },
-  {
-    path: 'public/brand/strand/strand-forms.css',
-    role: 'Portable standalone form kit',
-  },
-  {
-    path: 'public/brand/strand/strand-brandkit.png',
-    role: 'Shipped 1500 × 1125 brand board (v1.0 render)',
-  },
-  {
-    path: 'public/brand/strand/strand-vista.webp',
-    role: 'High-DPI coastal photograph asset',
-  },
+  { path: 'public/brand/strand/mark.svg', role: 'Primary two-tone mark on the 64 grid' },
+  { path: 'public/brand/strand/mark-compact.svg', role: 'Compact drawing for 16–24px' },
+  { path: 'public/brand/strand/mark-reverse.svg', role: 'Reverse pair for the night surface' },
+  { path: 'public/brand/strand/mark-mono.svg', role: 'One-ink reproduction' },
+  { path: 'public/brand/strand/wordmark.svg', role: 'Outlined lowercase wordmark' },
+  { path: 'public/brand/strand/lockup.svg', role: 'Horizontal lockup' },
+  { path: 'public/brand/strand/lockup-stacked.svg', role: 'Stacked lockup' },
+  { path: 'public/brand/strand/icon.svg', role: 'App tile: mark on dune ground' },
+  { path: 'public/brand/strand/favicon.ico', role: '16 / 32 / 48 multi-resolution favicon' },
+  { path: 'public/brand/strand/strand-tokens.css', role: '127 token declarations' },
+  { path: 'public/brand/strand/strand-tokens.json', role: 'The same source, machine-readable' },
+  { path: 'public/brand/strand/dune-quiet-divider.webp', role: 'Full-bleed footer photograph' },
 ]

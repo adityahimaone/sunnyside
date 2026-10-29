@@ -1,4 +1,6 @@
 import {
+  DETACH_FLOOR,
+  DETACH_SCORES,
   GAPS,
   MARK_GATE,
   OUTPUT_CONTRACT,
@@ -18,72 +20,104 @@ const table = (head: string[], rows: string[][]) =>
   ].join('\n')
 
 export function GET() {
-  const brand = `# Strand — design system, brand guide and audit (v1.0)
+  const brand = `# Strand — design system, brand guide and audit (v2.0)
 
-> Where the dunes meet the tide.
+> Two planes, and the strand between them.
 
-Strand is Case 07 in the Sunnyside portfolio: an architectural coastal design system at
+Strand is Case 07 in the Sunnyside portfolio: a coastal interface system at
 https://adityahimaone.space/design-system/strand.
 
 ## 1. The one idea
 
-**White quartz sand plates, marine basalt ink, and dual coastal vista framing.** All reading copy rests on solid quartz plates, while the real coastal dune photograph grounds both the entrance (hero) and departure (footer).
+**Sea-glass over dune light.** Every container is a pane: a 158° white gradient, 24px of
+backdrop blur, a 1px specular edge and one long shadow. Paragraphs sit on solid plates
+inside the pane. The mark is two sheared planes with a six-unit channel between them; the
+channel is the strand, and it is the only part of the mark that is not drawn.
 
-- Essence: where the dunes meet the tide.
-- Promise: quiet surfaces, sharp natural geometry.
-- Family: architectural monogram.
-- Gate: v3.0 constructed — zero circle, fill-only, 2 primitives, one accent, detach ≥ 70 against every sibling.
-- Voice: serene, architectural, unhurried.
-- Not this: neon gradients, floating glass pills, cartoon beach icons.
+- Essence: two planes, and the strand between them.
+- Promise: quiet glass over dune light, one sun-warm signal.
+- Family: offset geometric planes (constructed track).
+- Gate: v3.0 constructed — zero circles, fill-only, two primitives, one accent.
+- Voice: measured, unhurried, specific.
+- Not this: frosted pills on every card, gradient headings, glass that refracts nothing.
 
-## 2. Mark
+## 2. Material
 
-The mark is **Dune Crest S**: one architectural monogram cut by a single 7.1° shoreline, with a 1.1-unit strand left open between the sand and the sea. The two materials never touch — the gap is the beach. Everything below the cut is tide, 48% of the letter, so the accent is structure rather than ornament. Counters run 5.2–8.5 units; below 32px a separate one-tone compact drawing takes over and the gap closes optically.
+One pane per view. \`--st-glass-fill\` is a 158° white gradient (0.84 → 0.58), the blur is
+24px at 1.7 saturation, the edge is a 1px border at 78% white plus a 1px inset highlight,
+and the shadow is 64px blur at −34px spread and 45% ink. A paragraph never sits on glass:
+it sits on \`--st-plate\` inside the pane. Where \`backdrop-filter\` is unsupported the pane
+falls back to a solid fill of the same tint, so contrast never changes.
+
+## 3. Mark
+
+Two planes on the 64 grid: \`M26 9H58L52 27H20Z\` (sun, upper) and \`M12 33H52L46 55H6Z\`
+(marine, lower), separated by a six-unit channel — 9.4% of the grid. Both are sheared
+18.4°, the upper overhangs the lower by eight units, and nothing is stroked. Below 28px a
+separate compact drawing widens the channel to seven units and drops the fine alignment.
 
 ${table(
   ['Rule', 'Status', 'Note'],
   MARK_GATE.map((r) => [r.rule, r.pass ? 'PASS' : 'FAIL', r.note]),
 )}
 
-## 3. Story spine
+## 4. Story spine
 
 ${table(
   ['Beat', 'Thesis'],
   STORY_BEATS.map((s) => [s.beat, s.line]),
 )}
 
-## 4. Palette
+## 5. Palette
 
 ### Dune (light)
 
 ${palette(tokens.semantic.light)}
 
-### Night Tide (dark)
+### Night (dark)
 
 ${palette(tokens.semantic.dark)}
 
-Measured contrast pairs (WCAG 2.1, sRGB):
+Measured contrast pairs (WCAG 2.1, sRGB, computed on the declared composite):
 
 ${table(
   ['Pair', 'Ratio', 'Use'],
   tokens.contrast.map((c) => [c.label, `${c.ratio}:1`, c.use]),
 )}
 
-## 5. Typography gate
+## 6. Typography
+
+Instrument Sans (display, 600, −0.035em), Geist (reading, 400 at 17px/1.62), Geist Mono
+(labels, 500 at 11px, 0.14em). Three families, three jobs. The wordmark is Helvetica Neue
+Medium outlined at −22/1000 tracking and frozen as paths — a drawing, not live text.
 
 ${table(
   ['Rule', 'Status', 'Implementation'],
   TYPE_GATE.map((t) => [t.rule, t.pass ? 'PASS' : 'FAIL', t.note]),
 )}
 
-## 6. Output contract
+## 7. Sections
+
+foundation · glass · marks · horizon · palette · type · parts · motion · voice · tokens ·
+audit. Every id is rendered; \`glass\`, \`horizon\` and \`palette\` belong to this system alone.
+
+## 8. Output contract
 
 ${table(
   ['Path', 'Role'],
   OUTPUT_CONTRACT.map((o) => [o.path, o.role]),
 )}
 
-## 7. Known gaps
+## 9. Detach, against the five neighbours
+
+Floor ${DETACH_FLOOR}. Two pairs are below it and are reported as such.
+
+${table(
+  ['Reference', 'Score', 'Finding'],
+  DETACH_SCORES.map((d) => [d.ref, `${d.score}/100`, d.finding]),
+)}
+
+## 10. Known gaps
 
 ${GAPS.map((g) => `- ${g}`).join('\n')}
 `

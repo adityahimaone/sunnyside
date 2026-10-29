@@ -6,23 +6,24 @@ import { cn } from '@/lib/utils'
 
 import styles from '../strand.module.css'
 
-type FieldErrors = Partial<Record<'name' | 'email' | 'message', string>>
+type FieldErrors = Partial<Record<'name' | 'email' | 'height', string>>
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const ROLES = [
-  { value: 'architect', label: 'Architectural studio' },
-  { value: 'product-engineer', label: 'Design engineer' },
-  { value: 'creative-director', label: 'Creative director' },
-  { value: 'researcher', label: 'Spatial researcher' },
+const STATIONS = [
+  { value: 'north-strand', label: 'North strand · marker 04' },
+  { value: 'ebb-flat', label: 'Ebb flat · marker 11' },
+  { value: 'old-groyne', label: 'Old groyne · marker 19' },
+  { value: 'quiet-divider', label: 'Quiet divider · marker 27' },
 ]
 
 export function FormDemo() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [role, setRole] = useState(ROLES[0].value)
+  const [station, setStation] = useState(STATIONS[0].value)
+  const [height, setHeight] = useState('')
   const [message, setMessage] = useState('')
-  const [newsletter, setNewsletter] = useState(true)
+  const [reports, setReports] = useState(true)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [submitted, setSubmitted] = useState(false)
 
@@ -39,10 +40,13 @@ export function FormDemo() {
 
   const validate = (): FieldErrors => {
     const next: FieldErrors = {}
-    if (!name.trim()) next.name = 'Please provide a name for the log.'
+    if (!name.trim()) next.name = 'Add the observer’s name to the log.'
     if (!email.trim()) next.email = 'An email address is required.'
-    else if (!EMAIL.test(email))
-      next.email = 'Use a valid format like name@strand.space.'
+    else if (!EMAIL.test(email)) next.email = 'Use a valid address, like name@strand.space.'
+    const value = Number(height)
+    if (height.trim() === '') next.height = 'A height is required.'
+    else if (Number.isNaN(value) || value < 0 || value > 4.2)
+      next.height = 'Use a height between 0 and 4.2 m.'
     return next
   }
 
@@ -58,7 +62,7 @@ export function FormDemo() {
   }
 
   return (
-    <form className={styles.formCard} onSubmit={onSubmit} noValidate>
+    <form className={cn(styles.formCard, styles.pane)} onSubmit={onSubmit} noValidate>
       {Object.keys(errors).length > 0 && (
         <div
           ref={summaryRef}
@@ -67,7 +71,7 @@ export function FormDemo() {
           aria-label="Form validation error summary"
           className={styles.errorSummary}
         >
-          <div className={styles.errorTitle}>Validation alert</div>
+          <div className={styles.errorTitle}>Check two fields</div>
           <ul className={styles.errorList}>
             {Object.entries(errors).map(([field, msg]) => (
               <li key={field}>{msg}</li>
@@ -78,22 +82,23 @@ export function FormDemo() {
 
       {submitted ? (
         <div className={styles.successCard} role="status">
-          <div className={styles.successTitle}>Dispatch Received</div>
+          <div className={styles.successTitle}>Reading saved</div>
           <p className={styles.successMsg}>
-            Thank you, {name}. Your strand inquiry has been logged on the quiet
-            plate.
+            {height} m at {STATIONS.find((s) => s.value === station)?.label}. Logged to
+            the 29 October sheet for {name}.
           </p>
           <button
             type="button"
-            className={styles.btnSecondary}
+            className={cn(styles.btn, styles.btnSecondary)}
             onClick={() => {
               setSubmitted(false)
               setName('')
               setEmail('')
+              setHeight('')
               setMessage('')
             }}
           >
-            Submit Another Query
+            Log another
           </button>
         </div>
       ) : (
@@ -101,7 +106,7 @@ export function FormDemo() {
           <div className={styles.fieldRow}>
             <div className={styles.fieldCol}>
               <label className={styles.fieldLabel} htmlFor="st-name">
-                <span>Name</span>
+                <span>Observer</span>
                 <span className={styles.fieldHint}>Required</span>
               </label>
               <input
@@ -133,10 +138,7 @@ export function FormDemo() {
               <input
                 id="st-email"
                 type="email"
-                className={cn(
-                  styles.input,
-                  errors.email && styles.inputInvalid,
-                )}
+                className={cn(styles.input, errors.email && styles.inputInvalid)}
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value)
@@ -144,7 +146,7 @@ export function FormDemo() {
                 }}
                 aria-invalid={!!errors.email}
                 aria-describedby={errors.email ? 'st-email-error' : undefined}
-                placeholder="aditya@example.space"
+                placeholder="name@strand.space"
                 required
               />
               {errors.email && (
@@ -155,27 +157,59 @@ export function FormDemo() {
             </div>
           </div>
 
-          <div className={styles.fieldCol}>
-            <label className={styles.fieldLabel} htmlFor="st-role">
-              <span>Organization Type</span>
-            </label>
-            <select
-              id="st-role"
-              className={styles.select}
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            >
-              {ROLES.map((r) => (
-                <option key={r.value} value={r.value}>
-                  {r.label}
-                </option>
-              ))}
-            </select>
+          <div className={styles.fieldRow}>
+            <div className={styles.fieldCol}>
+              <label className={styles.fieldLabel} htmlFor="st-station">
+                <span>Station</span>
+              </label>
+              <select
+                id="st-station"
+                className={styles.select}
+                value={station}
+                onChange={(e) => setStation(e.target.value)}
+              >
+                {STATIONS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.fieldCol}>
+              <label className={styles.fieldLabel} htmlFor="st-height">
+                <span>Height (m)</span>
+                <span className={styles.fieldHint}>0 – 4.2</span>
+              </label>
+              <input
+                id="st-height"
+                type="number"
+                step="0.1"
+                min="0"
+                max="4.2"
+                inputMode="decimal"
+                className={cn(styles.input, errors.height && styles.inputInvalid)}
+                value={height}
+                onChange={(e) => {
+                  setHeight(e.target.value)
+                  clearError('height')
+                }}
+                aria-invalid={!!errors.height}
+                aria-describedby={errors.height ? 'st-height-error' : undefined}
+                placeholder="1.8"
+                required
+              />
+              {errors.height && (
+                <span id="st-height-error" className={styles.fieldError}>
+                  {errors.height}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className={styles.fieldCol}>
             <label className={styles.fieldLabel} htmlFor="st-msg">
-              <span>Observation Notes</span>
+              <span>Notes</span>
               <span className={styles.fieldHint}>Optional</span>
             </label>
             <textarea
@@ -184,7 +218,7 @@ export function FormDemo() {
               rows={3}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Notes on shoreline conditions, sand geometry, or coastal deployment…"
+              placeholder="Wind from the west, surface flat, no weed at the marker."
             />
           </div>
 
@@ -193,25 +227,24 @@ export function FormDemo() {
               <input
                 type="checkbox"
                 className={styles.checkbox}
-                checked={newsletter}
-                onChange={(e) => setNewsletter(e.target.checked)}
+                checked={reports}
+                onChange={(e) => setReports(e.target.checked)}
               />
-              <span>
-                Receive monthly tide reports and quiet interface notes
-              </span>
+              <span>Send the monthly tide sheet</span>
             </label>
           </div>
 
           <div className={styles.formActions}>
-            <button type="submit" className={styles.btnPrimary}>
-              Send Observation
+            <button type="submit" className={cn(styles.btn, styles.btnPrimary)}>
+              Save reading
             </button>
             <button
               type="button"
-              className={styles.btnSecondary}
+              className={cn(styles.btn, styles.btnSecondary)}
               onClick={() => {
                 setName('')
                 setEmail('')
+                setHeight('')
                 setMessage('')
                 setErrors({})
               }}

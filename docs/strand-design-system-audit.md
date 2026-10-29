@@ -1,129 +1,138 @@
 # Strand — design-system audit
 
-> **Amended 28 October 2026 — v1.2 mark pass.** This document records the
-> original v1.0 audit under the v2.5 skill, the v1.1 v3.0 detach pass, and the
-> v1.2 mark pass. v1.1 moved the signal from aquamarine (`#327B8A`, 213°) to
-> tide green (`#16716F`, 192°) and made the theme DNA true in CSS. v1.2 opened
-> the shoreline cut into a **1.1-unit strand gap**, so the sand and the sea are
-> held apart instead of welded. The live detach scorecard — the one that counts
-> — is rendered on the page at `/design-system/strand#audit`. Where this
-> document and `features/strand/tokens.json` disagree, the tokens win.
+> **Rewritten 29 October 2026 — v2.0, sea-glass.** v2.0 replaces the v1.x
+> S-monogram with **two sheared planes and a six-unit strand**, replaces the flat
+> quartz plate with a **pane of sea-glass**, moves the display face from Syne to
+> **Instrument Sans**, and moves the signal from tide green to **sun**
+> (`#A85A22`). The footer is now a full-bleed coast rather than a framed card.
+> The live scorecard — the one that counts — is rendered on the page at
+> `/design-system/strand#audit`. Where this document and
+> `features/strand/tokens.json` disagree, the tokens win.
 
 **Scope:** the v3.0 `sunnyside-brand-system` resources, the constructed-track
-architectural mark, the portable form kit, and the shipped Strand case at
+mark, the sea-glass material, the component set, and the shipped case at
 `/design-system/strand`.
-**Method:** sampling physical coastal dunes and tide line from the attached image,
-architectural S monogram on a 64 grid, sixteen further constructions drawn and
-rejected, tokens → CSS/JSON → form kit → proof page → board, then static audit,
-mark score, and browser QA pass.
-**Date:** 28 October 2026.
+**Method:** tokens → CSS/JSON → brand assets → specimen page → static audit,
+mark score, detach score, and a browser QA pass at 1440 and 390 on both
+surfaces.
+**Date:** 29 October 2026.
 
 ## Verdict
 
-The method is **fulfilled with zero failures**. The constructed track is
-selected; the S monogram passes the v3.0 hard gate and the geometric craft
-check; the kit ships a brief, a story, theme DNA, a portable form kit, a
-3000 × 2250 board, and an honest disclosure list.
+The material, the mark and the type pass. **Detach does not.** The worst pair is
+59/100 against Clearing, against a floor of 70, because the sun shares a hue
+family with Clearing's hart. That failure is reported on the page and in
+`design/brand/strand/story.md § Gap`; it is not rounded up, and the hue was not
+nudged nine degrees to clear a threshold while keeping the resemblance.
 
-- Mark score: **PASS** — zero circles, no strokes, 2 primitives in primary, 1 in
-  compact, tide 47.6% of the letter, dominant field 52%.
-- Detach: **78–82** against all five siblings, scored on the weakest pair
-  (threshold 70).
-- Tokens: **96 CSS custom properties** across theme DNA, primitive, semantic and
-  component layers, mirrored in `tokens.json`.
-- Palette: **6 measured contrast pairs**, body text at 16.6:1 on the quartz plate.
-- Forms: accessible native controls, validation alert summary, and a tide gap
-  ring on focus.
-- Imagery: real coastal sand photograph (`strand-vista.webp`) anchored in both
-  Hero and Footer.
+- Mark score: **PASS** — zero circles, no strokes, two primitives in the
+  primary, one in the compact, dominant field 61%.
+- Detach: **81 Cove · 75 Vitrine · 73 Hachure · 69 Riso · 59 Clearing**.
+  Worst pair 59/100 (floor 70).
+- Tokens: **127 CSS custom properties** across primitive, semantic and component
+  layers, mirrored in `tokens.json` (13 primitives, 16 semantic keys per surface).
+- Palette: **11 measured contrast pairs**; body on the pane at 15.71:1, night body
+  at 12.61:1.
+- Page: **11 sections**, all rendered, no horizontal overflow at 390 or 1440.
 - Gaps: **7 named disclosures** in §6.
 
-## 1. What is new
+## 1. What is new in v2.0
 
-Strand is Case 07 in the portfolio. Where Cove was deep blue liquid glass, Strand
-is a quiet coastal architecture of flat white quartz reading plates, deep basalt
-stone ink, and a single shallow-tide green signal.
-
-| System | Material | Mark | Primary Signal |
-| --- | --- | --- | --- |
-| Sunnyside (01) | Paper + Cobalt | Sunburst | Tangerine |
-| Vitrine (02) | Glass + Dither | Half-light V | Signal Lime |
-| Huginn (03) | Print + Blackletter | Keystone Brackets | Vermilion |
-| Riso Co. (04) | Risograph | Overprint Sheets | Federal Blue |
-| Hachure (05) | Survey Paper | Ridge Bars | Lichen Green |
-| Cove (06) | Blue Glass | Squared C | Ice Cyan |
-| Strand (07) | Quartz Sand Plate | Dune Crest S | Shallow Tide |
+| | v1.x | v2.0 |
+| --- | --- | --- |
+| Mark | S-monogram, 7.1° shoreline cut, 1.1-unit gap | Two sheared planes, 18.4° shear, six-unit channel |
+| Material | Flat quartz plate, one hairline | Sea-glass pane: 158° gradient, 24px blur, specular edge, long shadow |
+| Signal | Tide green `#16716F` | Sun `#A85A22` |
+| Display | Syne | Instrument Sans |
+| Footer | Framed card on the page ground | Full-bleed photograph, edge to edge |
+| Sections | foundation, material, marks, horizon, type, forms, motion, budget, applications, tokens, audit | foundation, glass, marks, horizon, palette, type, parts, motion, voice, tokens, audit |
 
 ## 2. The constructed gate (v3.0)
 
 - Zero circles, zero Venn diagrams, fill-only geometry.
-- 2 solid regions in the primary — basalt above the 7.1° shoreline, tide below.
-- 1 solid primitive in the compact, a separate drawing with counters of
-  5.2–8.5 units.
-- Geometric craft check: 14 path commands, smooth Bezier counters, one straight
-  cut.
-- No shape carries both `fill` and `stroke`; the shoreline is a gap, not a line.
+- 2 solid regions in the primary: sun above the channel, marine below.
+- 1 solid primitive in the compact, a separate drawing with a seven-unit channel.
+- No shape carries both `fill` and `stroke`; the channel is a gap, not a line.
+- `score-mark.py` returns **PASS** with a note: *dominant field 61% (v2.3 solid
+  mass; channels are the negative space)*.
 
-## 3. The mark: one cut, one gap
+## 3. The mark: two planes, one channel
 
-The letter occupies 50 × 48 of the 64 grid, leaving 6 units of margin on the
-left and 8 on the other three sides. A single shoreline runs from y = 36 at
-x = 0 to y = 28 at x = 64 — 8 units of drop, 7.1°, taken from the angle of the
-shore in the reference photograph.
+The bounding box is **52 × 46** on the 64 grid. The upper plane is
+`M26 9H58L52 27H20Z`, the lower is `M12 33H52L46 55H6Z`, and the six units
+between them are the only part of the mark that is not drawn — 9.4% of the grid.
 
-The cut is **1.1 units wide**. Sand and sea never touch. Everything below the
-cut is tide: 47.6% of the letter's painted area, measured by pixel count on a
-640 × 640 raster. Delete the tide and the S loses its foot; the accent is
-structure, not ornament.
+Both planes are sheared 18.4°. The upper overhangs the lower by eight units on
+the right, which is what makes the pair read as one cut through one body rather
+than as two stacked bars. Nothing is rounded, so nothing degrades into a pill at
+small sizes.
 
-At 16px the gap is a third of a pixel wide and closes optically, so the mark
-reads as a solid S. That is the intended degradation, and it is why the compact
-mark is a separate one-tone drawing rather than a downscale.
+Below 28px the component swaps to a separate compact drawing: the channel widens
+to seven units and the fine alignment is dropped, because six units at 16px is
+1.5 device pixels. The crossover is chosen by the component, not by the reader.
 
-**Constructions rejected in this pass** (drawn at 240px, then checked at 32 and
-16): severed foot, sheared halves, terminals cut at 7.1°, waterline reflection,
-wave-shaped cut, ramped swell, wedge of sea, dune-profile counters, pool in the
-bay, 4° and 6° lean, and a cut on the letter's own horizontal at y = 40. Each
-failed for a recorded reason; see `design/brand/strand/story.md`.
+**Constructions rejected in this pass** (drawn at 240px, checked at 32 and 16):
+generic trapezoid stacks, wedges, louvers, rounded pills, arcs, and an inverted
+pair that read as a letterform. The reason is consistent: anything with a curve
+or a stroke loses its identity below 24px, and anything with three masses stops
+being two planes.
 
 ## 4. Tokens and contrast
 
 | Pair | Ratio | Use |
 | --- | --- | --- |
-| Basalt on Quartz | 16.6:1 | Body copy on the reading plate |
-| Basalt on Linen | 15.5:1 | Body copy on the page ground |
-| Haze on Quartz | 5.0:1 | Metadata and captions |
-| Quartz on Tide | 5.8:1 | Text on the primary action |
-| Pale sand on Basalt | 14.4:1 | Night reading plate |
-| Night mist on Basalt | 6.1:1 | Night metadata |
+| Marine on quartz | 16.13:1 | Body copy on the solid plate inside a pane |
+| Marine on dune | 14.17:1 | Headings directly on the ground |
+| Marine on glass | 15.71:1 | Copy on the pane composite (measured, not guessed) |
+| Haze on quartz | 5.75:1 | Secondary copy, captions, rail labels |
+| White on sun | 5.06:1 | Primary button label, 14px and up |
+| Sun ink on quartz | 6.82:1 | Signal as text — links, tag labels |
+| Depth on quartz | 7.07:1 | The rare cool ink, used once per section |
+| Night ink on night ground | 16.25:1 | Body copy after dusk |
+| Night ink on night glass | 12.61:1 | Copy on the night pane composite |
+| Night haze on night ground | 7.76:1 | Secondary copy after dusk |
+| Night ground on night sun | 9.05:1 | Primary button label on the night surface |
 
-Plates are flat: offset 0, no drop shadows, one hairline rule. Focus is a
-plate-coloured gap ring, not a glow.
+A paragraph never sits on glass. The pane is a container; the plate inside it is
+the reading surface. That is what keeps the ratio a number instead of a function
+of the photograph underneath.
 
 ## 5. The page
 
-Eleven sections, each on the 64-unit rhythm: foundation, material, marks,
-horizon, type, forms, motion, budget, applications, tokens, audit. The marks
-section is built as four movements — logo card, wordmark scale, construction
-drawing, one usage rule — rather than a row of equal logo tiles.
+Eleven sections: foundation, glass, marks, horizon, palette, type, parts, motion,
+voice, tokens, audit. The marks section is built as four movements — logo stage,
+spec table, wordmark scale, cast — rather than a row of equal logo tiles. The
+palette section prints the contrast table it was built from. The audit section
+prints the detach scores it earned.
 
 ## 6. Gaps
 
-1. The vista photograph is a static WebP asset; no tide or weather feed is integrated.
-2. Syne is served through the project webfont layout, not a self-hosted woff2 subset.
-3. The theme toggle reads localStorage on mount, so first paint is the dune surface before the stored choice applies.
-4. The budget shares are measured by hand on a 1440 × 900 viewport, not computed at runtime.
-5. Four of the five neighbours predate the v3 token shape: they carry no `meta.sections` and only 0–3 of 12 DNA keys, so their structure key scores neutral (5/10). The detach scores are a floor, not a precise measure.
-6. The strand gap is 1.1 units — deliberately below the 8% channel floor (5.1 units on this grid). It is a drawn separation, not a counter, so the floor does not govern it; below 32px it closes optically. The gap is a large-size detail.
-7. The compact mark is a separate one-tone drawing, not a downscale of the primary, so the two are not pixel-identical at the crossover.
+1. **Detach against Clearing is 59/100 against a floor of 70.** Sun is 9° from
+   hart in OKLCH hue and night-sun sits on the same hue. A 35° signal would pass
+   the threshold and stay within 27° of the same accent, so the number would move
+   and the resemblance would not. The accent is shared; the surfaces are not.
+2. The footer photograph is a 1916 × 821 WebP, not a responsive art-directed set.
+   On a 4K display it is upscaled by roughly 1.4×.
+3. Pane composites are computed from the declared opacity and gradient midpoint.
+   A browser that renders the gradient differently lands within a few tenths of
+   15.71:1, not exactly on it.
+4. Instrument Sans is served through `next/font`, so a heading can swap on first
+   paint. The wordmark is outlined and cannot swap.
+5. The 2% signal budget is measured by hand on a 1440 × 900 viewport, not computed
+   at runtime.
+6. The compact mark is a separate drawing, not a downscale, so the two are not
+   pixel-identical between 20px and 28px.
+7. 24px blur is under the 30px threshold where frame time visibly degrades on a
+   2020-era GPU, but it has not been profiled on real hardware here.
 
 ## 7. Reproducing the numbers
 
 ```sh
 # mark craft gate
 DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib \
-  python skills/sunnyside-brand-system/scripts/score-mark.py --dir public/brand/strand
-# → PASS  strand   NOTE dominant field 52%
+  /opt/homebrew/bin/python3 skills/sunnyside-brand-system/scripts/score-mark.py \
+  --dir public/brand/strand
+# → PASS  strand   NOTE dominant field 61%
 
 # detach gate, scored on the weakest pair
 node skills/sunnyside-brand-system/scripts/detach-check.mjs \
@@ -131,8 +140,8 @@ node skills/sunnyside-brand-system/scripts/detach-check.mjs \
   --ref features/cove/tokens.json --ref features/hachure/tokens.json \
   --ref features/riso/tokens.json --ref features/vitrine/tokens.json \
   --ref public/brand/clearing/clearing-tokens.json
-# → 78 Cove · 78 Hachure · 80 Riso Co. · 78 Vitrine · 82 Clearing
-# → worst pair 78/100 (threshold 70)
+# → 81 Cove · 73 Hachure · 69 Riso · 75 Vitrine · 59 Clearing
+# → worst pair 59/100 (threshold 70) — FAIL, disclosed
 ```
 
 Clearing has no `features/clearing/tokens.json`; its token file lives at

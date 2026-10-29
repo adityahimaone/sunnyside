@@ -2,41 +2,46 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import '@/features/strand/strand-tokens.css'
-
 import {
-  BUDGET,
+  AUDIT_ROWS,
   BUDGET_RULES,
+  CAST,
   DECISIONS,
+  DETACH_FLOOR,
   DETACH_SCORES,
   GAPS,
+  GLASS_RECIPE,
+  GLASS_RULES,
   HORIZON_RULES,
   HORIZON_SPEC,
-  MARK_GEOMETRY,
   MARK_GATE,
   MARK_SPECS,
   MOTION_RULES,
-  NAV,
   OUTPUT_CONTRACT,
+  PALETTE,
   STORY_BEATS,
   TYPE_GATE,
+  TYPE_SCALE,
+  VOICE_SAMPLES,
 } from '@/features/strand/strand-data'
 import { CopyButton } from '@/features/strand/components/actions'
 import {
+  CastGlyph,
   StrandLockup,
   StrandMark,
   StrandWordmark,
 } from '@/features/strand/components/brand'
-import { StrandChrome } from '@/features/strand/components/strand-chrome'
-import { StrandThemeToggle } from '@/features/strand/components/theme-toggle'
+import { Code } from '@/features/strand/components/code'
+import { StrandContents } from '@/features/strand/components/contents'
 import { FormDemo } from '@/features/strand/components/form-demo'
+import { StrandThemeToggle } from '@/features/strand/components/theme-toggle'
 import tokens from '@/features/strand/tokens.json'
 import styles from '@/features/strand/strand.module.css'
 
 export const metadata: Metadata = {
   title: 'Strand — Case 07 | Design System',
   description:
-    'Strand is a quiet coastal design system: flat white quartz reading plates with no lift, marine basalt ink, one shallow-tide green signal, and an atmospheric dune vista framing both hero and footer.',
+    'Strand v2.0 is a coastal interface system made of sea-glass: one pane over dune light, marine ink, a single sun-warm signal, two planes with a six-unit strand between them, and a full-bleed coast for a footer.',
   alternates: {
     canonical: '/design-system/strand',
     types: { 'text/markdown': '/design-system/strand/llms.txt' },
@@ -44,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Strand — Case 07 | Design System',
     description:
-      'Where the dunes meet the tide. An architectural coastal interface system.',
+      'Two planes, and the strand between them. Sea-glass panes over dune light, one sun-warm signal, and a coast that appears twice.',
     type: 'website',
     url: '/design-system/strand',
     images: [
@@ -52,1131 +57,1078 @@ export const metadata: Metadata = {
         url: '/brand/strand/strand-brandkit.png',
         width: 1500,
         height: 1125,
-        alt: 'Strand brand board: the architectural S mark, coastal shoreline palette, quartz reading plates and form kit',
+        alt: 'The Strand brand board: two sheared planes with a six-unit channel, the outlined strand wordmark, six inks and the sea-glass recipe.',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Strand — Design System',
-    description:
-      'Where the dunes meet the tide. White sand reading plates, marine basalt ink, and a coastal vista framing both ends of the page.',
-    images: [
-      {
-        url: '/brand/strand/strand-brandkit.png',
-        width: 1500,
-        height: 1125,
-        alt: 'Strand brand board: the architectural S mark with a tidal channel, the sand and sea palette, and the native form kit',
-      },
-    ],
+    title: 'Strand — Case 07 | Design System',
+    description: 'Two planes, and the strand between them.',
+    images: ['/brand/strand/strand-brandkit.png'],
   },
 }
 
+const STATS = [
+  { value: '127', label: 'Token declarations' },
+  { value: '15.7:1', label: 'Body on the pane' },
+  { value: '6', label: 'Unit strand, never closed' },
+  { value: '11', label: 'Sections, all rendered' },
+]
+
 export default function StrandPage() {
+  const cssSample = `:root {
+  /* the ground, and the pane over it */
+  --st-bg: #F3F0E8;
+  --st-glass-fill: linear-gradient(
+    158deg,
+    rgb(255 255 255 / 0.84),
+    rgb(255 255 255 / 0.58)
+  );
+  --st-glass-edge: rgb(255 255 255 / 0.78);
+  --st-glass-blur: 24px;
+
+  /* ink, one signal, one rare cool */
+  --st-fg: #13232A;
+  --st-muted: #57696E;
+  --st-signal: #A85A22;
+  --st-rare: #2F5F6B;
+
+  /* geometry */
+  --st-radius-lg: 22px;
+  --st-radius-md: 14px;
+  --st-duration-base: 260ms;
+}`
+
+  const jsonSample = JSON.stringify(
+    {
+      name: tokens.meta.name,
+      version: tokens.meta.version,
+      material: tokens.meta.material,
+      theme: {
+        material: tokens.theme.material,
+        radius: tokens.theme.radius,
+        edge: tokens.theme.edge,
+      },
+      signal: '#A85A22',
+      contrast: tokens.contrast.slice(0, 2).map((c) => ({
+        pair: c.label,
+        ratio: c.ratio,
+      })),
+    },
+    null,
+    2,
+  )
+
   return (
-    <div className={styles.root} id="top">
-      <StrandChrome />
+    <div className={styles.root}>
+      <div className={styles.wash} aria-hidden />
+      <a className={styles.skip} href="#main">
+        Skip to content
+      </a>
 
-      {/* ── Sticky Topbar ──────────────────────────────────────────────── */}
-      <header className={styles.topbar}>
-        <div className={`${styles.shell} ${styles.topbarInner}`}>
-          <Link
-            href="#top"
-            className={styles.brandLink}
-            aria-label="Strand, back to top"
-          >
-            <StrandLockup priority />
-          </Link>
-
-          <nav className={styles.nav} aria-label="Sections">
-            {NAV.map((item) => (
-              <a key={item.id} href={`#${item.id}`} className={styles.navLink}>
-                {item.label}
-              </a>
-            ))}
-          </nav>
-
-          <div className={styles.topbarTools}>
-            <StrandThemeToggle />
-            <Link
-              href="/design-system"
-              className={`${styles.navLink} ${styles.libraryLink}`}
-            >
-              Case Library <span aria-hidden="true">↗</span>
+      <div className={styles.page}>
+        <header className={styles.topbar}>
+          <div className={`${styles.shell} ${styles.topbarInner}`}>
+            <Link className={styles.brand} href="/design-system/strand">
+              <StrandMark size={28} decorative />
+              <span className={styles.brandName}>strand</span>
             </Link>
-          </div>
-        </div>
-      </header>
 
-      {/* Below 960px the topbar nav is hidden. Eleven sections with no way to
-          reach them is not a responsive layout, it is a missing one. */}
-      <nav className={styles.navScroll} aria-label="Sections">
-        {NAV.map((item) => (
-          <a key={item.id} href={`#${item.id}`} className={styles.navChip}>
-            {item.label}
-          </a>
-        ))}
-      </nav>
+            <nav className={styles.topnav} aria-label="Sections">
+              <a href="#glass">Glass</a>
+              <a href="#marks">Marks</a>
+              <a href="#palette">Palette</a>
+              <a href="#parts">Parts</a>
+              <a href="#audit">Audit</a>
+              <Link href="/design-system">Case library ↗</Link>
+            </nav>
 
-      <main className={styles.shell}>
-        {/* ── Hero ──────────────────────────────────────────────────────── */}
-        <section className={styles.hero}>
-          <div className={styles.heroTag}>
-            Case 07 · Architectural Monogram · v1.1
-          </div>
-          <h1 className={styles.heroTitle}>Where the dunes meet the tide.</h1>
-          <p className={styles.heroDeck}>
-            Strand is a quiet coastal design system for contemplative,
-            high-craft interfaces: flat quartz reading plates with no lift,
-            marine basalt ink, one shallow-tide green signal, and a single
-            panoramic dune vista framing the entrance and the departure.
-          </p>
-
-          {/* Hero Vista Image Frame */}
-          <div className={styles.heroVistaWrap}>
-            <Image
-              src="/brand/strand/strand-vista.webp"
-              alt="Coastal sand dunes sloping down to the calm ocean tide under soft morning sunlight"
-              width={1672}
-              height={941}
-              priority
-              className={styles.heroVistaImg}
-            />
-            <div className={styles.heroVistaCaption}>
-              <span>Plate 01 · Coastal Sand Dunes & Tidal Horizon</span>
-              <span>Sampled Material: Silica Sand 98.4% · Marine Basalt</span>
+            <div className={styles.topbarTools}>
+              <StrandThemeToggle />
             </div>
           </div>
+        </header>
 
-          {/* Four Core Tenet Cards */}
-          <div className={`${styles.cardGrid} ${styles.cardGrid3}`}>
-            <div className={styles.card}>
-              <span className={styles.sectionLabel}>01 · Material</span>
-              <h3
-                style={{
-                  margin: '0 0 0.5rem',
-                  fontSize: '1.2rem',
-                  fontWeight: 700,
-                }}
-              >
-                Quartz Sand Plate
-              </h3>
-              <p
-                style={{
-                  margin: 0,
-                  color: 'var(--st-muted)',
-                  fontSize: '0.9375rem',
-                  lineHeight: 1.5,
-                }}
-              >
-                Content never floats over busy imagery. All readable prose rests
-                on solid quartz plates with an unyielding 16.5:1 contrast ratio.
-              </p>
-            </div>
-            <div className={styles.card}>
-              <span className={styles.sectionLabel}>02 · Mark</span>
-              <h3
-                style={{
-                  margin: '0 0 0.5rem',
-                  fontSize: '1.2rem',
-                  fontWeight: 700,
-                }}
-              >
-                Dune Crest S
-              </h3>
-              <p
-                style={{
-                  margin: 0,
-                  color: 'var(--st-muted)',
-                  fontSize: '0.9375rem',
-                  lineHeight: 1.5,
-                }}
-              >
-                An architectural monogram cut by one shoreline at 7.1°, with a
-                1.1-unit strand left open between the sand and the sea. Zero
-                circles, fill-only, v3.0 craft pass.
-              </p>
-            </div>
-            <div className={styles.card}>
-              <span className={styles.sectionLabel}>03 · Color Law</span>
-              <h3
-                style={{
-                  margin: '0 0 0.5rem',
-                  fontSize: '1.2rem',
-                  fontWeight: 700,
-                }}
-              >
-                5 + 1 Focal Budget
-              </h3>
-              <p
-                style={{
-                  margin: 0,
-                  color: 'var(--st-muted)',
-                  fontSize: '0.9375rem',
-                  lineHeight: 1.5,
-                }}
-              >
-                Sampled from coastal geology. The tide signal is budgeted to
-                2% of the viewport — quietness is a ratio, not a mood.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Section 01: Foundation ────────────────────────────────────── */}
-        <section id="foundation" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>01 / Foundation</span>
-            <h2 className={styles.sectionTitle}>Six Architectural Decisions</h2>
-            <p className={styles.sectionDesc}>
-              Every rule in Strand exists to remove digital friction and
-              preserve the calm of an open shoreline.
-            </p>
-          </div>
-
-          <div className={styles.cardGrid}>
-            {DECISIONS.map((d) => (
-              <div key={d.title} className={styles.decisionCard}>
-                <h3 className={styles.decisionTitle}>{d.title}</h3>
-                <div className={styles.decisionRow}>
-                  <div className={styles.decisionHead}>Decision</div>
-                  <p className={styles.decisionBody}>{d.decision}</p>
-                </div>
-                <div className={styles.decisionRow}>
-                  <div className={styles.decisionHead}>Because</div>
-                  <p className={styles.decisionBody}>{d.because}</p>
-                </div>
-                <div className={styles.decisionRow}>
-                  <div className={styles.decisionHead}>Not When</div>
-                  <p className={styles.decisionBody}>{d.notWhen}</p>
-                </div>
-                <div className={styles.decisionRow}>
-                  <div className={styles.decisionHead}>Breaks Next</div>
-                  <p className={styles.decisionBody}>{d.breaksNext}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className={styles.cardGrid} style={{ marginTop: '1.5rem' }}>
-            {STORY_BEATS.map((beat) => (
-              <div key={beat.beat} className={styles.decisionCard}>
-                <h3 className={styles.decisionTitle}>{beat.beat}</h3>
-                <p className={styles.decisionBody}>{beat.line}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Section 02: Material & Palette ────────────────────────────── */}
-        <section id="material" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>02 / Material & Colour</span>
-            <h2 className={styles.sectionTitle}>
-              The Coastal Shoreline Palette
-            </h2>
-            <p className={styles.sectionDesc}>
-              Directly sampled from the attached coastal vista: bleached dune
-              sand, dark basalt sea-stone, distant headland mist, and ocean
-              surf.
-            </p>
-          </div>
-
-          <div className={styles.paletteGrid}>
-            {tokens.primitives.slice(0, 6).map((p) => (
-              <div key={p.name} className={styles.swatchCard}>
-                <div
-                  className={styles.swatchColor}
-                  style={{ background: p.value }}
-                />
-                <div className={styles.swatchMeta}>
-                  <div className={styles.swatchName}>{p.name}</div>
-                  <div className={styles.swatchHex}>{p.value}</div>
-                  <p className={styles.swatchRole}>{p.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Measured Contrast Table */}
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Foreground</th>
-                  <th>Background</th>
-                  <th>Contrast Ratio</th>
-                  <th>Role & Verification</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tokens.contrast.map((c) => (
-                  <tr key={c.label}>
-                    <td>
-                      <span style={{ fontWeight: 600 }}>{c.fg}</span> (
-                      {c.label.split(' on ')[0]})
-                    </td>
-                    <td>
-                      <span style={{ fontWeight: 600 }}>{c.bg}</span> (
-                      {c.label.split(' on ')[1]})
-                    </td>
-                    <td className={styles.ratioPass}>{c.ratio}:1</td>
-                    <td>{c.use}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* ── Section 03: Marks ─────────────────────────────────────────── */}
-        <section id="marks" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>03 / Marks</span>
-            <h2 className={styles.sectionTitle}>The Tide Line Mark</h2>
-            <p className={styles.sectionDesc}>
-              Four movements instead of a contact sheet: the logo card, the
-              wordmark scale, the construction drawing, and the one rule that
-              keeps the mark intact.
-            </p>
-          </div>
-
-          {/* Movement 1 — logo card */}
-          <div className={styles.logoCard}>
-            <div className={styles.logoCardPlate}>
-              <StrandMark size={200} />
-              <span className={styles.logoCardCaption}>
-                Primary · 64 grid · 2 solids
-              </span>
-            </div>
-            <div>
-              <span className={styles.specLabel}>Movement 1 · Logo card</span>
-              <h3 className={styles.logoCardTitle}>
-                One letter, cut by the tide
-              </h3>
-              <p className={styles.logoCardText}>
-                The S is a single carved monogram, not a letter wearing a badge.
-                A shoreline crosses the whole letter at 7.1°, and everything
-                below it is tide — so the accent is the lower 48% of the mark,
-                not a shard resting on the arm. The cut itself is 1.1 units
-                wide: sand and sea are held apart by the strand, which is what
-                a strand is.
-              </p>
-              <div className={styles.specGrid}>
-                {MARK_SPECS.map((s) => (
-                  <div key={s.label} className={styles.specGridItem}>
-                    <div className={styles.specGridLabel}>{s.label}</div>
-                    <div className={styles.specGridValue}>{s.value}</div>
+        <main id="main">
+          <section className={styles.hero} aria-labelledby="hero-title">
+            <div className={styles.shell}>
+              <div className={styles.heroGrid}>
+                <div>
+                  <p className={styles.eyebrow}>Case 07 · Coastal interface system</p>
+                  <h1 id="hero-title">
+                    Two planes, and the <em>strand</em> between them.
+                  </h1>
+                  <p className={styles.lede}>
+                    Strand is a design system for reading in daylight. Every surface is a
+                    pane of sea-glass over dune light, the ink is the colour of deep water,
+                    and one sun-warm signal marks the place where something happens.
+                  </p>
+                  <div className={styles.heroMeta}>
+                    <span className={styles.pill}>
+                      Version <b>2.0</b>
+                    </span>
+                    <span className={styles.pill}>
+                      Material <b>Sea glass</b>
+                    </span>
+                    <span className={styles.pill}>
+                      Display <b>Instrument Sans</b>
+                    </span>
+                    <span className={styles.pill}>
+                      Contrast <b>AA+</b>
+                    </span>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Movement 2 — wordmark scale */}
-          <div className={styles.movement}>
-            <div className={styles.movementHead}>
-              <span className={styles.movementIndex}>2</span>
-              <h3 className={styles.movementTitle}>Wordmark scale</h3>
-            </div>
-            <p className={styles.movementNote}>
-              The wordmark is outlined geometry, never live text — a missing
-              webfont cannot change the logo. 14px is the floor; below that the
-              lockup carries the name instead.
-            </p>
-            <div className={styles.wordScale}>
-              {[
-                { h: 40, cap: '40px · hero' },
-                { h: 28, cap: '28px · default' },
-                { h: 14, cap: '14px · minimum' },
-              ].map((w) => (
-                <div key={w.h} className={styles.wordScaleItem}>
-                  <StrandWordmark height={w.h} />
-                  <span className={styles.wordScaleCap}>{w.cap}</span>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Movement 3 — construction */}
-          <div className={styles.movement}>
-            <div className={styles.movementHead}>
-              <span className={styles.movementIndex}>3</span>
-              <h3 className={styles.movementTitle}>Construction</h3>
-            </div>
-            <p className={styles.movementNote}>
-              Everything sits on the 64 grid. The only number that is not a
-              multiple of four is the shoreline drop, and that is the point: 8
-              units across 64 is 7.1°, which reads as water rather than as a
-              decorative diagonal.
-            </p>
-            <div className={styles.construction}>
-              <div className={styles.constructionPlate}>
-                <svg
-                  className={styles.constructionSvg}
-                  viewBox="0 0 64 64"
-                  role="img"
-                  aria-label="Construction drawing of the Strand mark on the 64 grid, with the shoreline marked"
-                >
-                  {[8, 16, 24, 32, 40, 48, 56].map((v) => (
-                    <g key={v} stroke="var(--st-line)" strokeWidth="0.25">
-                      <line x1={v} y1="0" x2={v} y2="64" />
-                      <line x1="0" y1={v} x2="64" y2={v} />
-                    </g>
-                  ))}
-                  <defs>
-                    <clipPath id="strand-construction-s">
-                      <path d={MARK_GEOMETRY.sPath} />
-                    </clipPath>
-                    <clipPath id="strand-construction-sea">
-                      <path d={MARK_GEOMETRY.seaClip} />
-                    </clipPath>
-                  </defs>
-                  <path
-                    d={MARK_GEOMETRY.sPath}
-                    fill="var(--st-fg)"
-                    fillOpacity="0.07"
+                <div className={styles.heroMedia}>
+                  <Image
+                    src="/brand/strand/strand-vista.webp"
+                    alt="A dune ridge meeting a flat sea at low light, the horizon a single straight line."
+                    width={1672}
+                    height={941}
+                    priority
+                    sizes="(max-width: 1040px) 100vw, 520px"
                   />
-                  {/* The wash is the tide inside the letter, not a band across
-                      the plate — clip it to the sea side of the strand or it
-                      reads as a background. */}
-                  <g clipPath="url(#strand-construction-s)">
-                    <g clipPath="url(#strand-construction-sea)">
-                      <path
-                        d={MARK_GEOMETRY.sPath}
-                        fill="var(--st-signal)"
-                        fillOpacity="0.22"
-                      />
-                    </g>
-                  </g>
-                  <path
-                    d={MARK_GEOMETRY.sPath}
-                    fill="none"
-                    stroke="var(--st-fg)"
-                    strokeWidth="0.5"
-                    strokeOpacity="0.7"
-                  />
-                  {/* The shoreline is the centre of the gap, not one of its
-                      edges — draw the axis, so the 1.1-unit strand reads as
-                      designed width rather than a seam. */}
-                  <line
-                    x1="0"
-                    y1={MARK_GEOMETRY.waterY}
-                    x2="64"
-                    y2={MARK_GEOMETRY.waterY - MARK_GEOMETRY.waterDrop}
-                    stroke="var(--st-signal)"
-                    strokeWidth="0.5"
-                    strokeDasharray="2 1.5"
-                  />
-                </svg>
-              </div>
-              <ol className={styles.constructionList}>
-                <li className={styles.constructionItem}>
-                  <span className={styles.constructionNum}>01</span>
-                  <span className={styles.constructionText}>
-                    <strong>Grid.</strong> The letter occupies 50 × 48 of the 64
-                    box, which leaves 8 units of air on the long axis and 7 on
-                    the short. <em>Nothing is optically nudged off the grid.</em>
-                  </span>
-                </li>
-                <li className={styles.constructionItem}>
-                  <span className={styles.constructionNum}>02</span>
-                  <span className={styles.constructionText}>
-                    <strong>Counters.</strong> Two openings, 5.2 and 8.5 units —
-                    8.1% and 13.3% of the grid. Both clear the 8% floor, which is
-                    why the S still reads as two openings at 16px.
-                  </span>
-                </li>
-                <li className={styles.constructionItem}>
-                  <span className={styles.constructionNum}>03</span>
-                  <span className={styles.constructionText}>
-                    <strong>Shoreline.</strong> One straight cut, 8 units of drop
-                    across the full width — and the cut is 1.1 units wide. The
-                    sand and the sea never touch: the strand is the gap between
-                    them, not the seam where they meet.
-                  </span>
-                </li>
-                <li className={styles.constructionItem}>
-                  <span className={styles.constructionNum}>04</span>
-                  <span className={styles.constructionText}>
-                    <strong>Tide.</strong> Everything under the line is tide —
-                    48% of the letter&rsquo;s ink. It is a region of the letter,
-                    not an ornament sitting on top of it.
-                  </span>
-                </li>
-                <li className={styles.constructionItem}>
-                  <span className={styles.constructionNum}>05</span>
-                  <span className={styles.constructionText}>
-                    <strong>Compact.</strong> Below 32px a different drawing
-                    takes over: one path, heavier stroke, no shoreline.{' '}
-                    <em>Same letter, fewer claims.</em>
-                  </span>
-                </li>
-              </ol>
-            </div>
-          </div>
-
-          {/* Movement 4 — one rule, drawn */}
-          <div className={styles.movement}>
-            <div className={styles.movementHead}>
-              <span className={styles.movementIndex}>4</span>
-              <h3 className={styles.movementTitle}>
-                One rule: clear space and minimum size
-              </h3>
-            </div>
-            <div className={styles.ruleGrid}>
-              <div className={styles.ruleCard}>
-                <span className={styles.ruleTag}>Clear space</span>
-                <div className={styles.ruleStage}>
-                  <span className={styles.clearSpaceBox}>
-                    <StrandMark size={64} decorative />
-                  </span>
+                  <div className={`${styles.pane} ${styles.heroPane}`}>
+                    <StrandLockup height={26} className={styles.heroLockup} />
+                    <span className={styles.heroPaneText}>
+                      North strand
+                      <br />
+                      Marker 04 · 18:40
+                    </span>
+                  </div>
                 </div>
-                <p className={styles.ruleText}>
-                  Keep <strong>25% of the mark height</strong> clear on every
-                  side. The dashed box is the margin itself, not a caption about
-                  it — nothing enters, including the wordmark in a lockup.
-                </p>
               </div>
-              <div className={styles.ruleCard}>
-                <span className={styles.ruleTag}>Minimum size</span>
-                <div className={styles.ruleStage}>
+
+              <div className={styles.heroStats}>
+                {STATS.map((s) => (
                   <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      gap: '2rem',
-                    }}
+                    key={s.label}
+                    className={`${styles.pane} ${styles.paneQuiet} ${styles.stat}`}
                   >
-                    <span className={styles.wordScaleItem}>
-                      <StrandMark size={16} compact decorative />
-                      <span className={styles.wordScaleCap}>16px mark</span>
-                    </span>
-                    <span className={styles.wordScaleItem}>
-                      <StrandWordmark height={14} />
-                      <span className={styles.wordScaleCap}>14px word</span>
-                    </span>
-                  </div>
-                </div>
-                <p className={styles.ruleText}>
-                  The mark bottoms out at <strong>16px</strong> using the
-                  compact drawing; the wordmark at <strong>14px</strong>. Two
-                  tones at 16px is information the eye cannot use, so the
-                  compact does not pretend to carry it.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Downloads Card */}
-          <div
-            className={styles.card}
-            style={{
-              marginTop: '1.5rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '1rem',
-            }}
-          >
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '1rem' }}>
-                Vector Assets Package
-              </div>
-              <div style={{ color: 'var(--st-muted)', fontSize: '0.875rem' }}>
-                SVGs, Favicons, Brand Board and Standalone Form Kit
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <a
-                href="/brand/strand/mark.svg"
-                download
-                className={styles.btnSecondary}
-                style={{ textDecoration: 'none' }}
-              >
-                Download mark.svg
-              </a>
-              <a
-                href="/brand/strand/strand-brandkit.png"
-                download
-                className={styles.btnPrimary}
-                style={{ textDecoration: 'none' }}
-              >
-                Brand Board PNG
-              </a>
-            </div>
-          </div>
-        </section>
-
-
-        {/* ── Section 04: Horizon ───────────────────────────────────────── */}
-        <section id="horizon" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>04 / Horizon</span>
-            <h2 className={styles.sectionTitle}>One vista, two placements</h2>
-            <p className={styles.sectionDesc}>
-              The photograph is the system&rsquo;s only image. It appears twice
-              and nowhere else: at the entrance and at the departure, with a
-              caption that measures the place instead of naming it.
-            </p>
-          </div>
-
-          <div className={styles.horizonGrid}>
-            <div>
-              {HORIZON_RULES.map((r) => (
-                <div key={r.rule} className={styles.horizonRule}>
-                  <h3 className={styles.horizonRuleTitle}>{r.rule}</h3>
-                  <p className={styles.horizonRuleBody}>{r.decision}</p>
-                  <p className={styles.horizonRuleBecause}>{r.because}</p>
-                </div>
-              ))}
-            </div>
-
-            <div>
-              <span className={styles.sectionLabel}>Field image spec</span>
-              <div className={styles.horizonSpec}>
-                {HORIZON_SPEC.map((s) => (
-                  <div key={s.key} className={styles.horizonSpecRow}>
-                    <div className={styles.horizonSpecKey}>{s.key}</div>
-                    <div className={styles.horizonSpecValue}>{s.value}</div>
+                    <b>{s.value}</b>
+                    <span>{s.label}</span>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* ── Section 05: Typography ────────────────────────────────────── */}
-        <section id="type" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>05 / Typography</span>
-            <h2 className={styles.sectionTitle}>
-              Precision Meets Coastal Space
-            </h2>
-            <p className={styles.sectionDesc}>
-              Display Syne for quiet architectural titles, Geist for body
-              reading, and Geist Mono for exact measurements.
-            </p>
-          </div>
+          <div className={`${styles.shell} ${styles.layout}`}>
+            <StrandContents />
 
-          <div className={styles.card}>
-            <div
-              style={{
-                borderBottom: '1px solid var(--st-line)',
-                paddingBottom: '1.5rem',
-                marginBottom: '1.5rem',
-              }}
-            >
-              <div className={styles.specLabel}>
-                Display · Syne Bold 800 · -0.04em tracking · 0.96 leading
-              </div>
-              <div
-                style={{
-                  fontFamily: 'var(--st-font-display)',
-                  fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-                  fontWeight: 800,
-                  letterSpacing: '-0.04em',
-                  lineHeight: 1,
-                  margin: '0.75rem 0',
-                }}
-              >
-                The wind shapes the surface.
-              </div>
-            </div>
             <div>
-              <div className={styles.specLabel}>
-                Reading · Geist Regular 400 · 1.6 leading · 62ch measure
-              </div>
-              <p
-                style={{
-                  fontSize: '1.0625rem',
-                  lineHeight: 1.6,
-                  color: 'var(--st-fg)',
-                  maxWidth: '62ch',
-                  margin: '0.75rem 0 0',
-                }}
-              >
-                Sand is not static; it is sculpted by the prevailing breeze into
-                aerodynamic curves and sharp crests. In the same way, interfaces
-                under Strand discard decorative weight so that user intent flows
-                without obstruction across solid reading surfaces.
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.tableWrap} style={{ marginTop: '1.5rem' }}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Type Rule</th>
-                  <th>Result</th>
-                  <th>Implementation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {TYPE_GATE.map((t) => (
-                  <tr key={t.rule}>
-                    <td style={{ fontWeight: 600 }}>{t.rule}</td>
-                    <td className={styles.ratioPass}>PASS</td>
-                    <td>{t.note}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* ── Section 06: Forms & Interactive Demo ──────────────────────── */}
-        <section id="forms" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>06 / Form Kit</span>
-            <h2 className={styles.sectionTitle}>Accessible Native Controls</h2>
-            <p className={styles.sectionDesc}>
-              Cut from the same theme DNA as the S monogram: 10px radius, 1px
-              sand-cut border, and a tide gap ring on focus — a plate-coloured
-              spacer, not a glow. Test validation, inputs and state changes
-              below.
-            </p>
-          </div>
-
-          <FormDemo />
-        </section>
-
-
-        {/* ── Section 07: Motion ────────────────────────────────────────── */}
-        <section id="motion" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>07 / Motion</span>
-            <h2 className={styles.sectionTitle}>One ladder, one curve</h2>
-            <p className={styles.sectionDesc}>
-              Motion here is a duration and a property list, not a personality.
-              Three steps, one easing, and nothing that moves the layout.
-            </p>
-          </div>
-
-          <div className={styles.motionGrid}>
-            {MOTION_RULES.map((m) => (
-              <div key={m.rule} className={styles.motionCard}>
-                <span className={styles.sectionLabel}>{m.rule}</span>
-                <div className={styles.motionValue}>{m.value}</div>
-                <p className={styles.motionNote}>{m.note}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Section 08: Budget ────────────────────────────────────────── */}
-        <section id="budget" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>08 / Budget</span>
-            <h2 className={styles.sectionTitle}>The 5 + 1 law, measured</h2>
-            <p className={styles.sectionDesc}>
-              Quietness is a ratio. These are the shares of a 1440 &times; 900
-              viewport at the top of the page, and the signal is two percent of
-              it.
-            </p>
-          </div>
-
-          <div
-            className={styles.budgetBar}
-            role="img"
-            aria-label={BUDGET.map((b) => `${b.name} ${b.share} percent`).join(', ')}
-          >
-            {BUDGET.map((b) => (
-              <div
-                key={b.name}
-                className={styles.budgetSeg}
-                style={{
-                  flex: b.share,
-                  background: b.swatch,
-                  color:
-                    b.token === '--st-fg'
-                      ? 'var(--st-plate)'
-                      : 'var(--st-fg)',
-                }}
-              >
-                {b.share >= 6 ? `${b.share}%` : ''}
-              </div>
-            ))}
-          </div>
-
-          <div className={styles.budgetLegend}>
-            {BUDGET.map((b) => (
-              <div key={b.name} className={styles.budgetRow}>
-                <div className={styles.budgetName}>
-                  <span
-                    className={styles.budgetDot}
-                    style={{ background: b.swatch }}
-                  />
-                  {b.name}
-                  <code className={styles.budgetToken}>{b.token}</code>
+              {/* 1 · foundation */}
+              <section id="foundation">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>01 · Foundation</p>
+                  <h2>A quiet interface is a material decision.</h2>
+                  <p>
+                    Strand began with one photograph: a dune ridge, a flat sea, and a
+                    horizon that does not move. The system keeps that arrangement — a
+                    lighter plane above, a heavier plane below, and a gap that is never
+                    filled — and turns it into glass, ink and one warm signal.
+                  </p>
                 </div>
-                <div className={styles.budgetShare}>{b.share}%</div>
-                <p className={styles.budgetNote}>{b.note}</p>
-              </div>
-            ))}
-          </div>
 
-          <ul className={styles.budgetRules}>
-            {BUDGET_RULES.map((r) => (
-              <li key={r}>{r}</li>
-            ))}
-          </ul>
-        </section>
+                <div className={styles.belief}>
+                  <div className={`${styles.pane} ${styles.paneQuiet}`}>
+                    <h3>Two planes</h3>
+                    <p>
+                      The mark, the pane and the page are all built from the same
+                      arrangement: two masses and a channel. Nothing overlaps; everything
+                      is separated by a gap.
+                    </p>
+                  </div>
+                  <div className={`${styles.pane} ${styles.paneQuiet}`}>
+                    <h3>One pane</h3>
+                    <p>
+                      Glass is the only effect. There is no grain, no gradient mesh, no
+                      noise and no second material. Restraint is what makes the one effect
+                      legible.
+                    </p>
+                  </div>
+                  <div className={`${styles.pane} ${styles.paneQuiet}`}>
+                    <h3>One signal</h3>
+                    <p>
+                      Sun appears where something happens — a primary action, a focus ring,
+                      the upper plane of the mark — and stays under two percent of the
+                      viewport.
+                    </p>
+                  </div>
+                </div>
 
-        {/* ── Section 10: Applications ──────────────────────────────────── */}
-        <section id="applications" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>10 / Applications</span>
-            <h2 className={styles.sectionTitle}>Component Proof in Context</h2>
-            <p className={styles.sectionDesc}>
-              Demonstrating the calm harmony of cards, status tags, action
-              buttons, and metric callouts.
-            </p>
-          </div>
+                <div className={`${styles.pane} ${styles.sentence}`}>
+                  <p>
+                    Strand is a coastal interface system for reading in daylight: every
+                    surface is a pane of sea-glass over dune light, the ink is the colour of
+                    deep water, and one sun-warm signal marks the place where something
+                    happens.
+                  </p>
+                  <small>The one sentence · reject the work against this</small>
+                </div>
 
-          <div className={`${styles.cardGrid} ${styles.cardGrid3}`}>
-            <div className={styles.card}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '1rem',
-                }}
-              >
-                <span className={styles.heroTag} style={{ margin: 0 }}>
-                  Active Basin
-                </span>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontFamily: 'var(--st-font-mono)',
-                    color: 'var(--st-muted)',
-                  }}
-                >
-                  08:42 AM
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: '1.75rem',
-                  fontWeight: 800,
-                  fontFamily: 'var(--st-font-display)',
-                  margin: '0 0 0.25rem',
-                }}
-              >
-                98.4%
-              </div>
-              <div style={{ color: 'var(--st-muted)', fontSize: '0.875rem' }}>
-                Silica Quartz Purity
-              </div>
-            </div>
-
-            <div className={styles.card}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '1rem',
-                }}
-              >
-                <span className={styles.heroTag} style={{ margin: 0 }}>
-                  Tidal Cycle
-                </span>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontFamily: 'var(--st-font-mono)',
-                    color: 'var(--st-muted)',
-                  }}
-                >
-                  GMT+7
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: '1.75rem',
-                  fontWeight: 800,
-                  fontFamily: 'var(--st-font-display)',
-                  margin: '0 0 0.25rem',
-                }}
-              >
-                +1.4 m
-              </div>
-              <div style={{ color: 'var(--st-muted)', fontSize: '0.875rem' }}>
-                Ebb to Shoreline Slack
-              </div>
-            </div>
-
-            <div className={styles.card}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '1rem',
-                }}
-              >
-                <span className={styles.heroTag} style={{ margin: 0 }}>
-                  Audit Pass
-                </span>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontFamily: 'var(--st-font-mono)',
-                    color: 'var(--st-muted)',
-                  }}
-                >
-                  v2.5
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: '1.75rem',
-                  fontWeight: 800,
-                  fontFamily: 'var(--st-font-display)',
-                  margin: '0 0 0.25rem',
-                }}
-              >
-                16.5 : 1
-              </div>
-              <div style={{ color: 'var(--st-muted)', fontSize: '0.875rem' }}>
-                Contrast Margin Level
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Section 09: Tokens ────────────────────────────────────────── */}
-        <section id="tokens" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>09 / Tokens</span>
-            <h2 className={styles.sectionTitle}>CSS Custom Properties</h2>
-            <p className={styles.sectionDesc}>
-              124 token declarations namespaced under --st-*. Primitive,
-              semantic, and component levels.
-            </p>
-          </div>
-
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Token</th>
-                  <th>Value</th>
-                  <th>Role</th>
-                  <th>Copy</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tokens.semantic.light.map((t) => (
-                  <tr key={t.name}>
-                    <td
-                      style={{
-                        fontFamily: 'var(--st-font-mono)',
-                        fontWeight: 600,
-                      }}
+                <div className={styles.cards4}>
+                  {DECISIONS.map((d) => (
+                    <div
+                      key={d.title}
+                      className={`${styles.pane} ${styles.paneQuiet} ${styles.decision}`}
                     >
-                      --st-{t.name}
-                    </td>
-                    <td
-                      style={{
-                        fontFamily: 'var(--st-font-mono)',
-                        color: 'var(--st-muted)',
-                      }}
+                      <p className={styles.decisionTitle}>{d.title}</p>
+                      <dl>
+                        <dt>Decision</dt>
+                        <dd>{d.decision}</dd>
+                        <dt>Because</dt>
+                        <dd>{d.because}</dd>
+                        <dt>Not when</dt>
+                        <dd>{d.notWhen}</dd>
+                        <dt>Breaks next</dt>
+                        <dd>
+                          <em>{d.breaksNext}</em>
+                        </dd>
+                      </dl>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* 2 · glass */}
+              <section id="glass">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>02 · Glass</p>
+                  <h2>One pane, and the plate that keeps it honest.</h2>
+                  <p>
+                    A pane is a container with a material. A plate is a surface that holds a
+                    paragraph. The rule that makes glass usable rather than decorative is
+                    that the two never swap jobs.
+                  </p>
+                </div>
+
+                <div className={styles.materialGrid}>
+                  <div className={styles.demoGlass}>
+                    <Image
+                      src="/brand/strand/strand-vista.webp"
+                      alt="Dune grass against the sea, used as the ground under a pane of glass."
+                      width={1672}
+                      height={941}
+                      sizes="(max-width: 1040px) 100vw, 600px"
+                    />
+                    <div className={styles.pane}>
+                      <div className={styles.plate}>
+                        <strong>Pane over photograph</strong>
+                        <p>
+                          The blur samples the dune behind it. The paragraph sits on a solid
+                          plate inside the pane, so its contrast is 15.7:1 no matter what
+                          the photograph does.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <ul className={styles.rules}>
+                      {GLASS_RULES.map((r) => (
+                        <li key={r.title}>
+                          <b>{r.title}</b>
+                          <span>{r.body}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className={styles.note}>
+                      Measured on the composite: marine ink on a pane at 78% white over the
+                      dune ground is 15.7:1. The night pane at 10% white over #0A1114 is
+                      12.6:1.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.block}>
+                  <div className={styles.codeHead}>
+                    <span>The recipe</span>
+                    <CopyButton text={GLASS_RECIPE} label="Copy CSS" />
+                  </div>
+                  <pre>
+                    <Code source={GLASS_RECIPE} />
+                  </pre>
+                </div>
+              </section>
+
+              {/* 3 · marks */}
+              <section id="marks">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>03 · Marks</p>
+                  <h2>Two planes, one strand.</h2>
+                  <p>
+                    The upper plane is sand, the lower is sea, and the six-unit channel
+                    between them is the only part of the mark that is not drawn. It is a
+                    gap, not a stroke — which is why it survives at 16px.
+                  </p>
+                </div>
+
+                <div className={`${styles.pane} ${styles.logoCard}`}>
+                  <div className={styles.stage}>
+                    <div className={styles.stageClear}>
+                      <StrandMark size={168} variant="reverse" />
+                    </div>
+                    <div className={styles.stageRail}>
+                      <span>64 grid · 52 × 46</span>
+                      <span>Fill only · no stroke</span>
+                      <span>Strand 6 units</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.logoBody}>
+                    <div>
+                      <dl className={styles.specs}>
+                        {MARK_SPECS.map((s) => (
+                          <div key={s.label} style={{ display: 'contents' }}>
+                            <dt>{s.label}</dt>
+                            <dd>{s.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                      <div className={styles.downloads}>
+                        <a href="/brand/strand/mark.svg" download>
+                          mark.svg
+                        </a>
+                        <a href="/brand/strand/mark-compact.svg" download>
+                          compact
+                        </a>
+                        <a href="/brand/strand/mark-mono.svg" download>
+                          mono
+                        </a>
+                        <a href="/brand/strand/favicon.ico" download>
+                          favicon
+                        </a>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className={styles.iconsRow}>
+                        <figure>
+                          <StrandMark size={48} compact />
+                          <figcaption>48</figcaption>
+                        </figure>
+                        <figure>
+                          <StrandMark size={32} compact />
+                          <figcaption>32</figcaption>
+                        </figure>
+                        <figure>
+                          <StrandMark size={24} compact />
+                          <figcaption>24</figcaption>
+                        </figure>
+                        <figure>
+                          <StrandMark size={16} compact />
+                          <figcaption>16</figcaption>
+                        </figure>
+                      </div>
+                      <p className={styles.note}>
+                        Below 28px the component swaps to the compact drawing: a wider
+                        channel, no fine overhang. It is a second drawing, not a downscale,
+                        because a 6-unit gap at 16px is 1.5 device pixels and needs help.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={styles.doDont}>
+                    <div className={styles.yes}>
+                      <b>Do</b>
+                      Keep the channel empty. Let the two planes sit on the 64 grid, sheared
+                      18.4°, with the upper plane overhanging the lower by eight units.
+                    </div>
+                    <div className={styles.no}>
+                      <b>Don’t</b>
+                      Close the gap to gain weight, outline either plane, add a third mass,
+                      rotate the mark, or place it on a busy photograph without a pane.
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`${styles.pane} ${styles.wordmarkCard}`}>
+                  <div className={styles.wmClear}>
+                    <StrandWordmark height={44} />
+                  </div>
+                  <div className={styles.scaleRow}>
+                    <figure>
+                      <StrandWordmark height={44} />
+                      <figcaption>44 · footer</figcaption>
+                    </figure>
+                    <figure>
+                      <StrandWordmark height={26} />
+                      <figcaption>26 · topbar</figcaption>
+                    </figure>
+                    <figure>
+                      <StrandWordmark height={16} />
+                      <figcaption>16 · metadata</figcaption>
+                    </figure>
+                  </div>
+                  <p className={styles.note}>
+                    Lowercase, outlined from Helvetica Neue Medium at −22/1000 tracking, and
+                    frozen as paths. A missing webfont cannot change the logo — the display
+                    face is Instrument Sans, but the wordmark is a drawing.
+                  </p>
+                </div>
+
+                <div className={styles.drawer}>
+                  {CAST.map((c) => (
+                    <div
+                      key={c.id}
+                      className={`${styles.pane} ${styles.paneQuiet} ${styles.castTile}`}
                     >
-                      {t.value}
-                    </td>
-                    <td>{t.role}</td>
-                    <td>
-                      <CopyButton text={`var(--st-${t.name})`} label="Copy" />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+                      <CastGlyph paths={c.paths} />
+                      <b>{c.name}</b>
+                      <span>{c.job}</span>
+                    </div>
+                  ))}
+                </div>
 
-        {/* ── Section 11: Honest Audit ──────────────────────────────────── */}
-        <section id="audit" className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>11 / Audit</span>
-            <h2 className={styles.sectionTitle}>Verification & Gate Status</h2>
-            <p className={styles.sectionDesc}>
-              Zero-claim verification: every rule is measured against the code,
-              the SVGs and a browser. The detach gate is run against the weakest
-              neighbour, not the average.
-            </p>
-          </div>
+                <div className={styles.ruleNote}>
+                  <b>The cast is punctuation, not a second logo set.</b> Four readings of the
+                  same two planes, one 45° cut on every right end, used only as state
+                  glyphs beside a tide reading. They never appear without a label and never
+                  replace the mark.
+                </div>
+              </section>
 
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Gate Rule</th>
-                  <th>Result</th>
-                  <th>Verification Note</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MARK_GATE.map((r) => (
-                  <tr key={r.rule}>
-                    <td style={{ fontWeight: 600 }}>{r.rule}</td>
-                    <td className={styles.ratioPass}>PASS</td>
-                    <td>{r.note}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              {/* 4 · horizon */}
+              <section id="horizon">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>04 · Horizon</p>
+                  <h2>The coast appears twice.</h2>
+                  <p>
+                    A framed entrance and a full-bleed departure. The footer is the one
+                    element on this page allowed to leave the 1180px grid — it spans the
+                    viewport, edge to edge, with no radius and no wrapper.
+                  </p>
+                </div>
 
-          <div className={styles.tableWrap} style={{ marginTop: '1.5rem' }}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Detach gate</th>
-                  <th>v1.0</th>
-                  <th>v1.1</th>
-                  <th>Finding</th>
-                </tr>
-              </thead>
-              <tbody>
-                {DETACH_SCORES.map((r) => {
-                  const fell = r.after < r.before
-                  return (
-                    <tr key={r.ref}>
-                      <td style={{ fontWeight: 600 }}>{r.ref}</td>
-                      <td
-                        style={{
-                          fontFamily: 'var(--st-font-mono)',
-                          color:
-                            r.before < 70
-                              ? 'var(--st-danger)'
-                              : 'var(--st-muted)',
-                        }}
+                <div className={styles.horizonGrid}>
+                  <div>
+                    {HORIZON_RULES.map((r) => (
+                      <div key={r.rule} className={styles.horizonRule}>
+                        <h3>{r.rule}</h3>
+                        <p>{r.decision}</p>
+                        <p>{r.because}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div>
+                    <div className={`${styles.pane} ${styles.horizonSpec}`}>
+                      {HORIZON_SPEC.map((s) => (
+                        <div key={s.key} className={styles.horizonSpecRow}>
+                          <span className={styles.horizonSpecKey}>{s.key}</span>
+                          <span className={styles.horizonSpecValue}>{s.value}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className={styles.footPreview}>
+                      <Image
+                        src="/brand/strand/dune-quiet-divider.webp"
+                        alt="The footer photograph: a quiet dune divider between sand and sea."
+                        width={1916}
+                        height={821}
+                        sizes="(max-width: 1040px) 100vw, 420px"
+                      />
+                      <div className={`${styles.pane} ${styles.footPreviewPane}`}>
+                        Full-bleed · 100vw
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* 5 · palette */}
+              <section id="palette">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>05 · Palette</p>
+                  <h2>Six inks, and a two percent budget.</h2>
+                  <p>
+                    Four of the six are quiet enough to fill a page. One is the signal. One
+                    is the rare cool note that appears once per section, if at all.
+                  </p>
+                </div>
+
+                <div className={styles.swatches}>
+                  {PALETTE.map((s) => (
+                    <div key={s.name} className={styles.swatch}>
+                      <div
+                        className={styles.swatchChip}
+                        style={{ background: s.value, color: s.ink }}
                       >
-                        {r.before}
-                      </td>
-                      <td
-                        className={fell ? styles.ratioHeld : styles.ratioPass}
-                        style={{ fontFamily: 'var(--st-font-mono)' }}
-                      >
-                        {r.after}
-                        {fell && (
-                          <span className={styles.ratioArrow}> ↓</span>
-                        )}
-                      </td>
-                      <td>{r.finding}</td>
+                        <span>{s.value}</span>
+                      </div>
+                      <div className={styles.swatchMeta}>
+                        <b>{s.name}</b>
+                        <code>{s.token}</code>
+                        <p style={{ marginTop: 6 }}>{s.role}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={styles.block}>
+                  <table>
+                    <caption>Contrast, measured on the declared composite</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Pair</th>
+                        <th scope="col">Ratio</th>
+                        <th scope="col">Use</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tokens.contrast.map((c) => (
+                        <tr key={c.label}>
+                          <td>{c.label}</td>
+                          <td className={`${styles.num} ${styles.pass}`}>{c.ratio}:1</td>
+                          <td>{c.use}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className={styles.loudDemo}>
+                  <div>
+                    <p>The signal is a verb: it appears where something happens.</p>
+                    <small>Sun #A85A22 · 2% of the viewport · never body text</small>
+                  </div>
+                  <StrandMark size={52} variant="reverse" />
+                </div>
+
+                <ul className={styles.gaps} style={{ marginTop: 18 }}>
+                  {BUDGET_RULES.map((r) => (
+                    <li key={r}>{r}</li>
+                  ))}
+                </ul>
+              </section>
+
+              {/* 6 · type */}
+              <section id="type">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>06 · Type</p>
+                  <h2>A grotesk that keeps its voice down.</h2>
+                  <p>
+                    Instrument Sans for names and headings, Geist for reading, Geist Mono
+                    for labels and every number in this document. Three jobs, three faces,
+                    no decorative fourth.
+                  </p>
+                </div>
+
+                <div className={styles.typeGrid}>
+                  <div className={styles.typeCol}>
+                    <span className={styles.label}>Display · Instrument Sans</span>
+                    <p className={`${styles.typeSpec} ${styles.displaySpec}`}>Strand</p>
+                    <p>
+                      600 at display size, −0.035em tracking. One per page. It is allowed to
+                      be large because nothing else is.
+                    </p>
+                  </div>
+                  <div className={styles.typeCol}>
+                    <span className={styles.label}>Reading · Geist</span>
+                    <p className={`${styles.typeSpec} ${styles.readingSpec}`}>Tide height</p>
+                    <p>
+                      400 at 17px, 1.62 line height, 66 characters. Body never sits on glass
+                      without a plate beneath it.
+                    </p>
+                  </div>
+                  <div className={styles.typeCol}>
+                    <span className={styles.label}>Label · Geist Mono</span>
+                    <p className={`${styles.typeSpec} ${styles.monoSpec}`}>04 · 18:40</p>
+                    <p>
+                      500 at 11px, 0.14em tracking, uppercase. Every measurement in the
+                      system is set in it, with tabular numerals.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.block}>
+                  <table>
+                    <caption>Scale</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Role</th>
+                        <th scope="col">Token</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Use</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {TYPE_SCALE.map((t) => (
+                        <tr key={t.name}>
+                          <td>{t.name}</td>
+                          <td>
+                            <code>{t.token}</code>
+                          </td>
+                          <td className={styles.num}>{t.size}</td>
+                          <td>{t.use}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className={styles.measureDemo}>
+                  <p>
+                    The tide came in at 18:40 and stopped at the fourth marker, where the
+                    sand turns from dry to dark. Two hours later the line had moved eleven
+                    metres and the wind had not changed. A reading like this is the only kind
+                    of sentence this interface is built to hold: a measurement, a time, and
+                    the place it was taken.
+                  </p>
+                  <aside>
+                    <b className={styles.blockLabel} style={{ display: 'block' }}>
+                      Measure
+                    </b>
+                    66 characters at 17px. The paragraph is 4 lines at 1440 and 7 at 390 —
+                    long enough to prove the measure, short enough to stay on the plate.
+                  </aside>
+                </div>
+
+                <div className={styles.block}>
+                  <table>
+                    <caption>Type gate</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Rule</th>
+                        <th scope="col">State</th>
+                        <th scope="col">Implementation</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {TYPE_GATE.map((t) => (
+                        <tr key={t.rule}>
+                          <td>{t.rule}</td>
+                          <td className={styles.pass}>{t.pass ? 'PASS' : 'FAIL'}</td>
+                          <td>{t.note}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              {/* 7 · parts */}
+              <section id="parts">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>07 · Parts</p>
+                  <h2>Controls cut from the same pane.</h2>
+                  <p>
+                    Eleven native controls, styled through component tokens. The focus ring
+                    is a gap and a ring, never a glow; the primary button is the only place
+                    the signal becomes a surface.
+                  </p>
+                </div>
+
+                <div className={styles.parts}>
+                  <div className={`${styles.pane} ${styles.paneQuiet} ${styles.part}`}>
+                    <div className={styles.plabel}>
+                      <span>Buttons</span>
+                      <span>3 states</span>
+                    </div>
+                    <div className={styles.btnRow}>
+                      <button type="button" className={`${styles.btn} ${styles.btnPrimary}`}>
+                        Save reading
+                      </button>
+                      <button type="button" className={`${styles.btn} ${styles.btnSecondary}`}>
+                        Export
+                      </button>
+                      <button type="button" className={`${styles.btn} ${styles.btnQuiet}`}>
+                        Discard
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={`${styles.pane} ${styles.paneQuiet} ${styles.part}`}>
+                    <div className={styles.plabel}>
+                      <span>Segmented + chips</span>
+                      <span>Selected</span>
+                    </div>
+                    <div className={styles.segmented} role="tablist" aria-label="Range">
+                      <button type="button" role="tab" aria-selected="true">
+                        Day
+                      </button>
+                      <button type="button" role="tab" aria-selected="false">
+                        Week
+                      </button>
+                      <button type="button" role="tab" aria-selected="false">
+                        Month
+                      </button>
+                    </div>
+                    <div className={styles.chips}>
+                      <span className={`${styles.chipState} ${styles.isSlack}`}>
+                        <i aria-hidden /> Slack
+                      </span>
+                      <span className={`${styles.chipState} ${styles.isRising}`}>
+                        <i aria-hidden /> Rising
+                      </span>
+                      <span className={`${styles.chipState} ${styles.isSun}`}>
+                        <i aria-hidden /> Live
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className={`${styles.pane} ${styles.paneQuiet} ${styles.part}`}>
+                    <div className={styles.plabel}>
+                      <span>Row</span>
+                      <span>Hover</span>
+                    </div>
+                    <div className={styles.entry}>
+                      <CastGlyph paths={CAST[2].paths} size={26} className={styles.entryMark} />
+                      <div>
+                        <b>Ebb · marker 11</b>
+                        <span>1.42 m · 06:12</span>
+                      </div>
+                      <time>18:40</time>
+                    </div>
+                    <div className={styles.entry}>
+                      <CastGlyph paths={CAST[0].paths} size={26} className={styles.entryMark} />
+                      <div>
+                        <b>Slack · marker 04</b>
+                        <span>2.06 m · 12:04</span>
+                      </div>
+                      <time>12:04</time>
+                    </div>
+                  </div>
+
+                  <div className={`${styles.pane} ${styles.paneQuiet} ${styles.part}`}>
+                    <div className={styles.plabel}>
+                      <span>Empty</span>
+                      <span>No reading</span>
+                    </div>
+                    <div className={styles.empty}>
+                      <StrandMark size={34} compact className={styles.emptyMark} />
+                      <p>No readings yet. The next tide is logged at 06:12.</p>
+                    </div>
+                  </div>
+
+                  <div className={styles.partWide}>
+                    <div className={styles.plabel} style={{ marginBottom: 10 }}>
+                      <span>Form kit · native controls, component tokens</span>
+                      <span>5 states</span>
+                    </div>
+                    <FormDemo />
+                  </div>
+                </div>
+              </section>
+
+              {/* 8 · motion */}
+              <section id="motion">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>08 · Motion</p>
+                  <h2>The pane brightens; the page does not move.</h2>
+                  <p>
+                    One curve, three durations, no transform on hover. A control that shifts
+                    the layout makes a still page feel unstable, and this page is arguing for
+                    stillness.
+                  </p>
+                </div>
+
+                <div className={styles.motionGrid}>
+                  <div className={`${styles.pane} ${styles.paneQuiet} ${styles.dur}`}>
+                    <b>160 ms</b>
+                    <span>Press, colour, toggle</span>
+                    <div className={styles.durBar} />
+                  </div>
+                  <div className={`${styles.pane} ${styles.paneQuiet} ${styles.dur}`}>
+                    <b>260 ms</b>
+                    <span>Sheen, hover, theme cross-fade</span>
+                    <div className={styles.durBar} />
+                  </div>
+                  <div className={`${styles.pane} ${styles.paneQuiet} ${styles.dur}`}>
+                    <b>420 ms</b>
+                    <span>Sheet and page change</span>
+                    <div className={styles.durBar} />
+                  </div>
+                </div>
+
+                <div className={styles.liftDemo}>
+                  <div className={`${styles.pane} ${styles.lift}`}>
+                    <b>Hover the pane</b>
+                    <span>The sheen rises 6%, the shadow lengthens. Nothing translates.</span>
+                  </div>
+                  <div className={`${styles.pane} ${styles.lift}`}>
+                    <b>Focus a control</b>
+                    <span>A 2px gap then a 2px ring, in the signal. Never a glow.</span>
+                  </div>
+                  <div className={`${styles.pane} ${styles.lift}`}>
+                    <b>Change the surface</b>
+                    <span>Colour only, 260ms. The layout is identical in both surfaces.</span>
+                  </div>
+                </div>
+
+                <div className={styles.block}>
+                  <table>
+                    <caption>Motion rules</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Rule</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Note</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {MOTION_RULES.map((m) => (
+                        <tr key={m.rule}>
+                          <td>{m.rule}</td>
+                          <td>
+                            <code>{m.value}</code>
+                          </td>
+                          <td>{m.note}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              {/* 9 · voice */}
+              <section id="voice">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>09 · Voice</p>
+                  <h2>State the reading, then stop.</h2>
+                  <p>
+                    The interface is a logbook, not a host. It gives you the number, the
+                    time and the place, and it does not congratulate you for reading them.
+                  </p>
+                </div>
+
+                <div className={styles.voiceGrid}>
+                  <div className={`${styles.pane} ${styles.paneQuiet} ${styles.voiceCard}`}>
+                    <div>
+                      <dt>Register</dt>
+                      <dd>Measured, unhurried, specific.</dd>
+                    </div>
+                    <div>
+                      <dt>Person</dt>
+                      <dd>Second person, sparingly.</dd>
+                    </div>
+                    <div>
+                      <dt>Numbers</dt>
+                      <dd>Always with a unit and a time.</dd>
+                    </div>
+                    <div>
+                      <dt>Never</dt>
+                      <dd>Weather metaphors in product copy.</dd>
+                    </div>
+                    <div>
+                      <dt>Enemy</dt>
+                      <dd>The cheerful empty state.</dd>
+                    </div>
+                  </div>
+
+                  <div className={styles.voiceSamples}>
+                    {VOICE_SAMPLES.map((s) => (
+                      <div key={s.ctx} className={styles.sample}>
+                        <div className={styles.sampleCtx}>{s.ctx}</div>
+                        <p>{s.good}</p>
+                        <span className={styles.sampleBad}>{s.bad}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* 10 · tokens */}
+              <section id="tokens">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>10 · Tokens</p>
+                  <h2>One source, three layers.</h2>
+                  <p>
+                    Primitive, semantic, component. The generated stylesheet is the only
+                    file the page reads; the JSON beside it is the same source in a form a
+                    script can diff.
+                  </p>
+                </div>
+
+                <div className={styles.tokenGrid}>
+                  <div>
+                    <div className={styles.codeHead}>
+                      <span>strand-tokens.css</span>
+                      <CopyButton text={cssSample} label="Copy" />
+                    </div>
+                    <pre>
+                      <Code source={cssSample} />
+                    </pre>
+                  </div>
+                  <div>
+                    <div className={styles.codeHead}>
+                      <span>tokens.json</span>
+                      <CopyButton text={jsonSample} label="Copy" />
+                    </div>
+                    <pre>
+                      <Code source={jsonSample} language="json" />
+                    </pre>
+                  </div>
+                </div>
+
+                <div className={styles.block}>
+                  <table>
+                    <caption>Output contract</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Path</th>
+                        <th scope="col">Role</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {OUTPUT_CONTRACT.map((o) => (
+                        <tr key={o.path}>
+                          <td>
+                            <code>{o.path}</code>
+                          </td>
+                          <td>{o.role}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              {/* 11 · audit */}
+              <section id="audit">
+                <div className={styles.secHead}>
+                  <p className={styles.eyebrow}>11 · Audit</p>
+                  <h2>What passed, and what this page cannot claim.</h2>
+                  <p>
+                    Every claim below points at a file, a token or a measured pair. One gate
+                    does not pass — detach against Clearing — and it is shown at the score it
+                    earned rather than at the score it was aiming for.
+                  </p>
+                </div>
+
+                <table className={styles.auditTable}>
+                  <caption>Gate</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Check</th>
+                      <th scope="col">Result</th>
+                      <th scope="col">Evidence</th>
                     </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {AUDIT_ROWS.map((r) => (
+                      <tr key={r.check}>
+                        <td>{r.check}</td>
+                        <td className={r.state === 'pass' ? styles.pass : styles.open}>
+                          {r.result}
+                        </td>
+                        <td>{r.evidence}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
-          <p
-            style={{
-              margin: '0.75rem 0 0',
-              fontSize: '0.8125rem',
-              lineHeight: 1.55,
-              color: 'var(--st-muted)',
-            }}
-          >
-            Green clears the 70-point gate. Amber clears it too, but lost
-            ground against that neighbour — the move to tide green bought
-            separation from Cove and spent it against Clearing. Red was below
-            the gate in v1.0.
-          </p>
+                <div className={styles.block}>
+                  <p className={styles.blockLabel}>
+                    Detach, against the weakest neighbour · floor {DETACH_FLOOR}
+                  </p>
+                  <div className={styles.detach}>
+                    {DETACH_SCORES.map((d) => (
+                      <div key={d.ref} className={styles.detachRow}>
+                        <span>{d.ref}</span>
+                        <b className={d.score >= DETACH_FLOOR ? styles.pass : styles.open}>
+                          {d.score}/100
+                        </b>
+                        <span>{d.finding}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-          <div className={styles.card} style={{ marginTop: '1.5rem' }}>
-            <div
-              className={styles.specLabel}
-              style={{ marginBottom: '0.5rem' }}
-            >
-              Known Gaps & Truthful Disclosures
+                <div className={styles.block}>
+                  <p className={styles.blockLabel}>Mark gate</p>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">Rule</th>
+                        <th scope="col">State</th>
+                        <th scope="col">Note</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {MARK_GATE.map((m) => (
+                        <tr key={m.rule}>
+                          <td>{m.rule}</td>
+                          <td className={styles.pass}>{m.pass ? 'PASS' : 'FAIL'}</td>
+                          <td>{m.note}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className={styles.block}>
+                  <p className={styles.blockLabel}>Named gaps</p>
+                  <ul className={styles.gaps}>
+                    {GAPS.map((g) => (
+                      <li key={g}>{g}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={styles.block}>
+                  <p className={styles.blockLabel}>Story spine</p>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">Beat</th>
+                        <th scope="col">Thesis</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {STORY_BEATS.map((s) => (
+                        <tr key={s.beat}>
+                          <td>{s.beat}</td>
+                          <td>{s.line}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
             </div>
-            <ul
-              style={{
-                margin: 0,
-                paddingLeft: '1.25rem',
-                color: 'var(--st-muted)',
-                fontSize: '0.9375rem',
-                lineHeight: 1.6,
-              }}
-            >
-              {GAPS.map((g) => (
-                <li key={g}>{g}</li>
-              ))}
-            </ul>
           </div>
+        </main>
 
-          <div className={styles.tableWrap} style={{ marginTop: '1.5rem' }}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Output</th>
-                  <th>Role</th>
-                </tr>
-              </thead>
-              <tbody>
-                {OUTPUT_CONTRACT.map((o) => (
-                  <tr key={o.path}>
-                    <td>
-                      <code style={{ fontSize: '0.8125rem' }}>{o.path}</code>
-                    </td>
-                    <td>{o.role}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </main>
+        <footer className={styles.foot}>
+          <div className={styles.footImg} aria-hidden />
+          <div className={styles.footScrim} aria-hidden />
 
-      {/* ── Footer Vista Departure ──────────────────────────────────────── */}
-      <footer className={styles.footer}>
-        <div className={styles.shell}>
-          {/* Footer Vista Image Frame */}
-          <div className={styles.footerVistaWrap}>
-            <Image
-              src="/brand/strand/strand-vista.webp"
-              alt="Panoramic view across sand dunes to the quiet ocean horizon"
-              width={1672}
-              height={941}
-              className={styles.footerVistaImg}
-            />
-            <div className={styles.footerVistaOverlay}>
-              <div className={styles.footerVistaQuote}>
-                Where the dunes meet the tide.
-              </div>
-              <p className={styles.footerVistaSub}>
-                Strand Design System · Case 07 · End of the coastline.
+          <div className={`${styles.shell} ${styles.footInner}`}>
+            <div className={`${styles.pane} ${styles.footPane}`}>
+              <p className={styles.footEyebrow}>Case 07 · Strand · v2.0</p>
+              <p className={styles.footQuote}>Where the dunes meet the tide.</p>
+              <p className={styles.footSub}>
+                Sea-glass over dune light, one sun-warm signal, and a strand that is never
+                closed. Built as a specimen first, a component library second.
               </p>
+              <div className={styles.footLinks}>
+                <a href="/brand/strand/mark.svg" download>
+                  Download the mark
+                </a>
+                <a href="/brand/strand/strand-tokens.css" download>
+                  Tokens
+                </a>
+                <Link href="/design-system">All cases</Link>
+              </div>
             </div>
           </div>
 
-          <div className={styles.footerBottom}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <StrandLockup />
-              <span className={styles.footerNote}>
-                Case 07 · Sunnyside Portfolio
-              </span>
-            </div>
-
-            <div
-              style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}
-            >
-              <a href="#top" className={styles.footerLink}>
-                Back to top ↑
-              </a>
-              <Link href="/design-system" className={styles.footerLink}>
-                All Design Systems ↗
-              </Link>
+          <div className={styles.footBar}>
+            <div className={`${styles.shell} ${styles.footBarInner}`}>
+              <StrandLockup height={22} variant="reverse" />
+              <div className={styles.footBarLinks}>
+                <a href="#main">Back to top</a>
+                <a href="/design-system/strand/llms.txt">llms.txt</a>
+                <span>© 2026 Aditya Himawan</span>
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   )
 }

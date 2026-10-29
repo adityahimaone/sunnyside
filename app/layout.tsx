@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import {
   Geist,
   Geist_Mono,
+  Instrument_Sans,
   Space_Grotesk,
   Syne,
   Orbitron,
@@ -111,6 +112,15 @@ const inter = Inter({
   preload: false,
 })
 
+/* Strand v2.0's display face. One consumer (the Strand specimen and its
+   headings), so it is not preloaded: Geist still paints the first screen. */
+const instrumentSans = Instrument_Sans({
+  variable: '--font-instrument',
+  subsets: ['latin'],
+  display: 'swap',
+  preload: false,
+})
+
 /* JetBrains Mono and Cormorant Garamond were removed. They were reachable only
    through the `--font-whyte-inktrap-mono` and `--font-grandslang` aliases,
    which no rule in the app reads, and Cormorant was additionally asking for
@@ -135,7 +145,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
-        className={`${geist.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${syne.variable} ${orbitron.variable} ${inter.variable} bg-background text-foreground tracking-tight antialiased`}
+        className={`${geist.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${syne.variable} ${orbitron.variable} ${inter.variable} ${instrumentSans.variable} bg-background text-foreground tracking-tight antialiased`}
       >
         <ThemeProvider
           enableSystem={false}
