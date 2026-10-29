@@ -15,6 +15,11 @@
     "mode": "live 16:10 device canvas mockup (20kb)"
   },
   {
+    "slug": "fullstack-wannabe",
+    "cover": "/work/fullstack-wannabe-cover.webp",
+    "mode": "live 1440x900 16:10 desktop, 82 quality webp (77kb)"
+  },
+  {
     "slug": "seaphantom",
     "cover": "https://res.cloudinary.com/deselamak/image/upload/v1699777135/portofolio/y2l1g36bjudgsf6yr0eg.webp",
     "mode": "remote (next/image)"

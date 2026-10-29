@@ -124,6 +124,27 @@ const SEEDS: Seed[] = [
     ],
   },
   {
+    slug: 'fullstack-wannabe',
+    title: 'Fullstack Wannabe',
+    description:
+      'A local-first learning sandbox: draw a schema, seed it, interrogate it with SQL, then rebuild the same backend in Go, TypeScript and PHP. Every answer is checked against real execution, not a video.',
+    cover: '/work/fullstack-wannabe-cover.webp',
+    url: 'https://fs.adityahimaone.space/',
+    genre: 'Learning',
+    problem: 'Learning by doing',
+    year: 2026,
+    role: 'Design and build',
+    stack: ['React', 'TypeScript', 'Vite', 'Tailwind CSS', 'sql.js'],
+    highlights: [
+      'A schema you draw, not one you are given',
+      'Quests checked against real execution',
+      'The same API rebuilt in three stacks',
+      'Progress stays in the browser',
+      'No account, no video, no copy-paste',
+      'Four modules, one chain of work',
+    ],
+  },
+  {
     slug: 'seaphantom',
     title: 'SeaPhantom',
     description:
@@ -207,6 +228,7 @@ const ORDER: readonly string[] = [
   'switchyard',
   'primarindo-asia',
   'habit-tracker',
+  'fullstack-wannabe',
   'seaphantom',
   'seaphantom-p2p',
   'labgrownbeasts',

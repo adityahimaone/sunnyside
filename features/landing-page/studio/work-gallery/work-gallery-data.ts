@@ -49,8 +49,8 @@ const PROJECT_ORDER = [
   'switchyard',
   'primarindo-asia',
   'habit-tracker',
+  'fullstack-wannabe',
   'seaphantom',
-  'seaphantom-p2p',
   'labgrownbeasts',
 ] as const
 
@@ -64,7 +64,7 @@ const PROJECT_POSITION: Record<string, string> = {
   'primarindo-asia': 'center',
   'habit-tracker': 'left center',
   seaphantom: 'center',
-  'seaphantom-p2p': 'center',
+  'fullstack-wannabe': 'top center',
   labgrownbeasts: 'center',
 }
 

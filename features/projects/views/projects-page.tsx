@@ -140,7 +140,7 @@ export function ProjectsPage({
               className={`${layout.intro} ${layout.rise}`}
               style={{ '--rise-delay': '120ms' } as React.CSSProperties}
             >
-              Six production systems. Pick one on the shelf to cue it.
+              Seven production systems. Pick one on the shelf to cue it.
             </p>
 
             <div
