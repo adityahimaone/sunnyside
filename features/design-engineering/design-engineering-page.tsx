@@ -19,16 +19,16 @@ import {
   BRAND_SKILL,
   CAPABILITIES,
   CASE,
+  CASE_FINDINGS,
+  CASE_STATS,
+  CASES,
   GAPS,
-  HUGINN_CASE,
   LOOP,
   PRACTICE,
   PRINCIPLES,
   RESOURCES,
-  RISO_CASE,
   STANDARDS,
   SYSTEM,
-  VITRINE_CASE,
 } from './design-engineering-data'
 import { LEARNING_TRACKS } from './learning-data'
 import styles from './design-engineering.module.css'
@@ -48,24 +48,18 @@ const NAV: DocsNavItem[] = [
     sectionId: 'standards',
   },
   { href: '#system', label: 'The system', number: '03', sectionId: 'system' },
-  { href: '#case', label: 'The case', number: '04', sectionId: 'case' },
+  { href: '#case', label: 'The cases', number: '04', sectionId: 'case' },
   {
-    href: '#case-vitrine',
-    label: 'Vitrine case',
+    href: '#case-findings',
+    label: 'What they prove',
     number: '04b',
-    sectionId: 'case-vitrine',
+    sectionId: 'case-findings',
   },
   {
-    href: '#case-huginn',
-    label: 'Huginn case',
+    href: '#case-deep',
+    label: 'Sunnyside in full',
     number: '04c',
-    sectionId: 'case-huginn',
-  },
-  {
-    href: '#case-riso',
-    label: 'Riso case',
-    number: '04d',
-    sectionId: 'case-riso',
+    sectionId: 'case-deep',
   },
   { href: '#skills', label: 'Capabilities', number: '05', sectionId: 'skills' },
   { href: '#skill', label: 'The skill', number: '06', sectionId: 'skill' },
@@ -169,7 +163,7 @@ export function DesignEngineeringPage() {
         <div className={styles.docs}>
           <DocsNav
             title="Design engineering"
-            subtitle="Field manual / v1.0"
+            subtitle="Field manual / v2.0"
             items={NAV}
             markdownHref="/design-engineering/llms.txt"
             footerLabel="Open the system"
@@ -183,14 +177,14 @@ export function DesignEngineeringPage() {
                 <span>/</span>
                 Design engineering
               </p>
-              <p className={styles.kicker}>Field manual · v1.0 · 2026</p>
+              <p className={styles.kicker}>Field manual · v2.0 · 2026</p>
               <h1>Design engineering</h1>
               <p className={styles.lede}>{PRACTICE.standfirst}</p>
               <p className={styles.intro}>{PRACTICE.intro}</p>
 
               <div className={styles.metaRow}>
                 <span>Updated 2026</span>
-                <span>~14 min read</span>
+                <span>~18 min read</span>
                 <span>For humans and agents</span>
                 <a href="/design-engineering/llms.txt">Read as Markdown</a>
               </div>
@@ -368,24 +362,106 @@ export function DesignEngineeringPage() {
             </section>
 
             <section className={styles.docSection}>
-              <DocsHeading id="case" kicker="04 / Case">
-                {CASE.title}
+              <DocsHeading id="case" kicker="04 / Cases">
+                Eight cases, one method
               </DocsHeading>
-              <p className={styles.caseLede}>{CASE.subtitle}</p>
+              <p className={styles.caseLede}>
+                Every case in the library is a whole identity: a mark system, a
+                token layer, a proof page, a board and an audit. They are not
+                eight variations on one theme — they are eight answers to eight
+                different briefs, and the distance between them is the work.
+              </p>
 
-              <div className={styles.caseSwitch}>
-                <a href="#case" className={styles.caseSwitchActive}>
-                  01 / Sunnyside
-                </a>
-                <a href="#case-vitrine">02 / Vitrine</a>
-                <Link
-                  href={VITRINE_CASE.library}
-                  className={styles.caseSwitchLibrary}
-                >
-                  Case library
-                  <ArrowUpRight className="size-3.5" aria-hidden />
-                </Link>
+              <div className={styles.caseStats}>
+                {CASE_STATS.map((stat) => (
+                  <div key={stat.label} className={styles.caseStat}>
+                    <b>{stat.value}</b>
+                    <span>{stat.label}</span>
+                  </div>
+                ))}
               </div>
+
+              <div className={styles.caseGrid}>
+                {CASES.map((item) => (
+                  <Link
+                    key={item.number}
+                    href={item.href}
+                    className={styles.caseCard}
+                  >
+                    <span className={styles.caseCardMedia}>
+                      <Image
+                        src={item.cover}
+                        alt={item.coverAlt}
+                        width={1500}
+                        height={1125}
+                        sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 380px"
+                      />
+                    </span>
+                    <span className={styles.caseCardBody}>
+                      <span className={styles.caseCardTop}>
+                        <span className={styles.caseCardNumber}>
+                          {item.number}
+                        </span>
+                        <span className={styles.caseCardTrack}>
+                          {item.track}
+                        </span>
+                      </span>
+                      <b className={styles.caseCardName}>{item.name}</b>
+                      <span className={styles.caseCardTagline}>
+                        {item.tagline}
+                      </span>
+                      <span className={styles.caseCardMeta}>
+                        <span className={styles.caseCardSignal}>
+                          <i style={{ background: item.signal }} aria-hidden />
+                          {item.signalName}
+                        </span>
+                        <span>{item.material}</span>
+                        <span>{item.display}</span>
+                      </span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+
+              <DocsHeading
+                id="case-findings"
+                level={3}
+                kicker="What they prove"
+              >
+                Eight findings, each with a case behind it
+              </DocsHeading>
+              <p className={styles.prose}>
+                A portfolio of systems is only worth reading if it can say what
+                the eight have in common and where they disagree. These are the
+                claims the cases actually support — including the two that are
+                failures.
+              </p>
+
+              <ol className={styles.findings}>
+                {CASE_FINDINGS.map((finding) => (
+                  <li key={finding.number}>
+                    <span className={styles.findingNumber}>
+                      {finding.number}
+                    </span>
+                    <div>
+                      <b>{finding.claim}</b>
+                      <p>{finding.evidence}</p>
+                      <small>Cases {finding.case}</small>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+
+              <DocsHeading id="case-deep" level={3} kicker="The worked example">
+                Sunnyside, from brief to browser
+              </DocsHeading>
+              <p className={styles.prose}>
+                One case in full, because the grid shows the range and the range
+                is not the method. The other seven are on their own pages, with
+                their own decisions and their own audits.
+              </p>
+
+              <p className={styles.caseLede}>{CASE.subtitle}</p>
 
               <dl className={styles.caseMeta}>
                 <div>
@@ -479,302 +555,6 @@ export function DesignEngineeringPage() {
             </section>
 
             <section className={styles.docSection}>
-              <DocsHeading id="case-vitrine" kicker="04 / Case 02">
-                {VITRINE_CASE.title}
-              </DocsHeading>
-              <p className={styles.caseLede}>{VITRINE_CASE.subtitle}</p>
-
-              <div className={styles.caseCtaRow}>
-                <Link href={VITRINE_CASE.href} className={styles.caseCta}>
-                  Read the full case
-                  <ArrowRight className="size-4" aria-hidden />
-                </Link>
-                <Link href={VITRINE_CASE.library} className={styles.textLink}>
-                  Case library
-                  <ArrowUpRight className="size-3.5" aria-hidden />
-                </Link>
-              </div>
-
-              <dl className={styles.caseMeta}>
-                <div>
-                  <dt>Role</dt>
-                  <dd>{VITRINE_CASE.role}</dd>
-                </div>
-                <div>
-                  <dt>Status</dt>
-                  <dd>{VITRINE_CASE.status}</dd>
-                </div>
-                <div>
-                  <dt>Stack</dt>
-                  <dd>Next.js · TypeScript · CSS Modules · dithercn</dd>
-                </div>
-                <div>
-                  <dt>System</dt>
-                  <dd>Glass, dither, tokens and a form kit</dd>
-                </div>
-              </dl>
-
-              <figure className={styles.figure}>
-                <Image
-                  src={VITRINE_CASE.cover}
-                  alt={VITRINE_CASE.coverAlt}
-                  width={1500}
-                  height={1125}
-                  sizes="(max-width: 900px) 100vw, 760px"
-                />
-                <figcaption>
-                  The Vitrine brand kit — a half-light V, Case and Frost, one
-                  Signal field, the form specimen and the audit.
-                </figcaption>
-              </figure>
-
-              <DocsHeading id="case-vitrine-brief" level={3} kicker="Brief">
-                What it had to do
-              </DocsHeading>
-              <p className={styles.prose}>{VITRINE_CASE.brief}</p>
-
-              <DocsHeading
-                id="case-vitrine-constraints"
-                level={3}
-                kicker="Constraints"
-              >
-                The edges
-              </DocsHeading>
-              <ul className={styles.list}>
-                {VITRINE_CASE.constraints.map((constraint) => (
-                  <li key={constraint}>{constraint}</li>
-                ))}
-              </ul>
-
-              <DocsHeading
-                id="case-vitrine-decisions"
-                level={3}
-                kicker="Decisions"
-              >
-                What I chose
-              </DocsHeading>
-              <ol className={styles.decisions}>
-                {VITRINE_CASE.decisions.map((decision, index) => (
-                  <li key={decision.title}>
-                    <span>{String(index + 1).padStart(2, '0')}</span>
-                    <div>
-                      <b>{decision.title}</b>
-                      <p>
-                        <CodeText>{decision.line}</CodeText>
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-
-              <DocsHeading id="case-vitrine-outcome" level={3} kicker="Outcome">
-                What shipped
-              </DocsHeading>
-              <ul className={styles.list}>
-                {VITRINE_CASE.outcomes.map((outcome) => (
-                  <li key={outcome} className={styles.checkLine}>
-                    <Check className={styles.checkIcon} aria-hidden />
-                    {outcome}
-                  </li>
-                ))}
-              </ul>
-
-              <DocsHeading
-                id="case-vitrine-evidence"
-                level={3}
-                kicker="Evidence"
-              >
-                Open the files
-              </DocsHeading>
-              <ul className={styles.evidence}>
-                {VITRINE_CASE.evidence.map((item) => (
-                  <li key={item.label}>
-                    <SmartLink href={item.href} className={styles.evidenceLink}>
-                      {item.label}
-                    </SmartLink>
-                    <span>{item.note}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section className={styles.docSection}>
-              <DocsHeading id="case-huginn" kicker="04 / Case 03">
-                {HUGINN_CASE.title}
-              </DocsHeading>
-              <p className={styles.caseLede}>{HUGINN_CASE.subtitle}</p>
-              <div className={styles.caseCtaRow}>
-                <Link href={HUGINN_CASE.href} className={styles.caseCta}>
-                  Read the full case
-                  <ArrowRight className="size-4" aria-hidden />
-                </Link>
-                <Link href={HUGINN_CASE.library} className={styles.textLink}>
-                  Case library
-                  <ArrowUpRight className="size-3.5" aria-hidden />
-                </Link>
-              </div>
-              <dl className={styles.caseMeta}>
-                <div>
-                  <dt>Role</dt>
-                  <dd>{HUGINN_CASE.role}</dd>
-                </div>
-                <div>
-                  <dt>Status</dt>
-                  <dd>{HUGINN_CASE.status}</dd>
-                </div>
-                <div>
-                  <dt>Stack</dt>
-                  <dd>Next.js · TypeScript · CSS Modules · canvas</dd>
-                </div>
-                <div>
-                  <dt>System</dt>
-                  <dd>Bone, ink, vermilion and ordered print</dd>
-                </div>
-              </dl>
-              <figure className={styles.figure}>
-                <Image
-                  src={HUGINN_CASE.cover}
-                  alt={HUGINN_CASE.coverAlt}
-                  width={1200}
-                  height={900}
-                  sizes="(max-width: 900px) 100vw, 760px"
-                />
-                <figcaption>
-                  Huginn Studio — the two-bracket keystone mark, the drawn
-                  blackletter wordmark, the vermilion field and the painting
-                  dissolving into it.
-                </figcaption>
-              </figure>
-              <DocsHeading id="case-huginn-brief" level={3} kicker="Brief">
-                What it had to do
-              </DocsHeading>
-              <p className={styles.prose}>{HUGINN_CASE.brief}</p>
-              <DocsHeading
-                id="case-huginn-decisions"
-                level={3}
-                kicker="Decisions"
-              >
-                What I chose
-              </DocsHeading>
-              <ol className={styles.decisions}>
-                {HUGINN_CASE.decisions.map((decision, index) => (
-                  <li key={decision.title}>
-                    <span>{String(index + 1).padStart(2, '0')}</span>
-                    <div>
-                      <b>{decision.title}</b>
-                      <p>
-                        <CodeText>{decision.line}</CodeText>
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-              <DocsHeading id="case-huginn-outcome" level={3} kicker="Outcome">
-                What shipped
-              </DocsHeading>
-              <ul className={styles.list}>
-                {HUGINN_CASE.outcomes.map((outcome) => (
-                  <li key={outcome} className={styles.checkLine}>
-                    <Check className={styles.checkIcon} aria-hidden />
-                    {outcome}
-                  </li>
-                ))}
-              </ul>
-              <p className={styles.backTop}>
-                <Link href={HUGINN_CASE.href}>
-                  Open Huginn Studio / Case 03
-                </Link>
-              </p>
-            </section>
-
-            <section className={styles.docSection}>
-              <DocsHeading id="case-riso" kicker="04 / Case 04">
-                {RISO_CASE.title}
-              </DocsHeading>
-              <p className={styles.caseLede}>{RISO_CASE.subtitle}</p>
-              <div className={styles.caseCtaRow}>
-                <Link href={RISO_CASE.href} className={styles.caseCta}>
-                  Read the full case
-                  <ArrowRight className="size-4" aria-hidden />
-                </Link>
-                <Link href={RISO_CASE.library} className={styles.textLink}>
-                  Case library
-                  <ArrowUpRight className="size-3.5" aria-hidden />
-                </Link>
-              </div>
-              <dl className={styles.caseMeta}>
-                <div>
-                  <dt>Role</dt>
-                  <dd>{RISO_CASE.role}</dd>
-                </div>
-                <div>
-                  <dt>Status</dt>
-                  <dd>{RISO_CASE.status}</dd>
-                </div>
-                <div>
-                  <dt>Stack</dt>
-                  <dd>Next.js · TypeScript · CSS Modules · SVG/canvas</dd>
-                </div>
-                <div>
-                  <dt>System</dt>
-                  <dd>Two drums, misregistration, measured overprint</dd>
-                </div>
-              </dl>
-              <figure className={styles.figure}>
-                <Image
-                  src={RISO_CASE.cover}
-                  alt={RISO_CASE.coverAlt}
-                  width={1500}
-                  height={1125}
-                  sizes="(max-width: 900px) 100vw, 760px"
-                />
-                <figcaption>
-                  Riso Co. — the orange sheet pulled 2.2mm off its blue pass,
-                  the deckled mark, five ink chips and the outlined wordmark at
-                  three favicon sizes.
-                </figcaption>
-              </figure>
-              <DocsHeading id="case-riso-brief" level={3} kicker="Brief">
-                What it had to do
-              </DocsHeading>
-              <p className={styles.prose}>{RISO_CASE.brief}</p>
-              <DocsHeading
-                id="case-riso-decisions"
-                level={3}
-                kicker="Decisions"
-              >
-                What I chose
-              </DocsHeading>
-              <ol className={styles.decisions}>
-                {RISO_CASE.decisions.map((decision, index) => (
-                  <li key={decision.title}>
-                    <span>{String(index + 1).padStart(2, '0')}</span>
-                    <div>
-                      <b>{decision.title}</b>
-                      <p>
-                        <CodeText>{decision.line}</CodeText>
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-              <DocsHeading id="case-riso-outcome" level={3} kicker="Outcome">
-                What shipped
-              </DocsHeading>
-              <ul className={styles.list}>
-                {RISO_CASE.outcomes.map((outcome) => (
-                  <li key={outcome} className={styles.checkLine}>
-                    <Check className={styles.checkIcon} aria-hidden />
-                    {outcome}
-                  </li>
-                ))}
-              </ul>
-              <p className={styles.backTop}>
-                <Link href={RISO_CASE.href}>Open Riso Co. / Case 04</Link>
-              </p>
-            </section>
-
-            <section className={styles.docSection}>
               <DocsHeading id="skills" kicker="05 / Capabilities">
                 What is actually in the bag
               </DocsHeading>
@@ -855,17 +635,12 @@ export function DesignEngineeringPage() {
               </DocsHeading>
               <p className={styles.prose}>{BRAND_SKILL.description}</p>
               <p className={styles.prose}>
-                v2.0 was rebuilt after an audit of{' '}
-                <SmartLink
-                  href="https://www.ui-skills.com/"
-                  className={styles.textLink}
-                >
-                  ui-skills.com
-                </SmartLink>
-                . The registry lists 439 skills across 27 categories; 22
-                relevant ones were inspected and fused into a brand pass and an
-                implementation pass. The audit is in{' '}
-                <code>references/ui-skills-fusion.md</code>.
+                v3.1 is the first version written from shipped evidence rather
+                than from a survey. The eight cases above are the source: every
+                gate in the skill failed something in one of them, every
+                immersive recipe was proved on a real page, and the two
+                references that never earned a citation were removed. It reads
+                as one file, not twenty.
               </p>
 
               <div className={styles.install}>

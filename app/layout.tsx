@@ -4,6 +4,7 @@ import {
   Geist,
   Geist_Mono,
   Instrument_Sans,
+  Sora,
   Space_Grotesk,
   Syne,
   Orbitron,
@@ -122,6 +123,18 @@ const instrumentSans = Instrument_Sans({
   preload: false,
 })
 
+/* Cove's display face. The token file has referenced --font-sora since v1.0 and
+   the family was never registered here, so the Cove specimen has been setting
+   its headings in the system sans on every machine without Sora installed. One
+   consumer, so it is not preloaded. */
+const sora = Sora({
+  variable: '--font-sora',
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
+  preload: false,
+})
+
 /* Huginn v3.0's display face. A Didone, because the system is a printed
    poster: the cell grid sets the drawing, and the Didone sets the argument.
    One consumer (the Huginn specimen), so it is not preloaded. */
@@ -157,7 +170,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
-        className={`${geist.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${syne.variable} ${orbitron.variable} ${inter.variable} ${instrumentSans.variable} ${bodoniModa.variable} bg-background text-foreground tracking-tight antialiased`}
+        className={`${geist.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${syne.variable} ${orbitron.variable} ${inter.variable} ${instrumentSans.variable} ${bodoniModa.variable} ${sora.variable} bg-background text-foreground tracking-tight antialiased`}
       >
         <ThemeProvider
           enableSystem={false}

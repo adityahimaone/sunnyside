@@ -320,8 +320,13 @@ html[data-riso='safelight'] .themeBtn[aria-pressed='true'] {
 }
 
 .stat {
-  padding-right: 18px;
+  /* the rule sits between cells, so both sides of it get padding */
+  padding: 0 18px;
   border-right: 1px solid rgb(27 23 18 / 0.25);
+}
+
+.stat:first-child {
+  padding-left: 0;
 }
 
 .stat:last-child {
@@ -1848,6 +1853,11 @@ html[data-riso='safelight'] .segmented button[aria-pressed='true'] {
 
   .stat:nth-child(2n) {
     border-right: 0;
+    padding-right: 0;
+  }
+
+  .stat:nth-child(2n + 1) {
+    padding-left: 0;
   }
 
   .inkGrid {

@@ -23,7 +23,7 @@
       "source": "adityahimaone/sunnyside",
       "sourceType": "github",
       "skillPath": "skills/sunnyside-brand-system/SKILL.md",
-      "computedHash": "f08c69736e648b6d1e244a6b330daf36e269690edf082b4fcba8329fc09d9bb4"
+      "computedHash": "9c6b8d9befe58e07f1d878616814510bb87e1d93b352238f38a08a23728b1b32"
     },
     "ui-skills-root": {
       "source": "ibelick/ui-skills",
@@ -36,6 +36,12 @@
       "sourceType": "github",
       "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
       "computedHash": "d63bd281a96b8dfa52a2656ec6e6af743bfcfde6f6bfb6c9edc203cbff377b16"
+    },
+    "sunnyside-print": {
+      "source": "adityahimaone/sunnyside",
+      "sourceType": "github",
+      "skillPath": "skills/sunnyside-print/SKILL.md",
+      "computedHash": "348dba1c154a472a452e779f20ff988491e56e5de1cb46a6a817d7a21a31d6df"
     }
   }
 }

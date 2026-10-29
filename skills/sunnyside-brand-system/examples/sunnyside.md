@@ -148,7 +148,7 @@ A page with five logo variants and no wordmark, cast or rule fails the bar.
   the Case 01 numbers and the anti-slop list.
 - `templates/marks-section.html` — the four-movement composition.
 - `scripts/cast-forge.mjs` — a 4–6 cast from one config.
-- `references/verification.md` — the mark-system checks.
+- `references/gates.md` — the mark-system checks and the QA pass.
 - `scripts/qa.mjs` — one command for audit + score + browser.
 
 ## What to improve next time

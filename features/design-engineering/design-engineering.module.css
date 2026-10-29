@@ -1478,3 +1478,257 @@
   outline-offset: 3px;
 }
 
+
+/* ── The eight cases: a grid of boards ───────────────────────────────────────
+   The covers are 4:3 brand boards, so the card is a board on a shelf: the
+   image carries the identity, the body carries the four facts that tell the
+   cases apart, and the signal chip is the only colour the card adds. */
+
+.caseStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0 0 1.6rem;
+  border-top: 1px solid var(--ss-ink);
+  border-bottom: 1px solid var(--ss-line);
+}
+
+.caseStat {
+  /* a divider needs air on both sides of it: the right padding of one cell and
+     the left padding of the next are what keep a number off the rule */
+  padding: 0.9rem 1.1rem 1rem 1.1rem;
+  border-right: 1px solid var(--ss-line);
+}
+
+.caseStat:first-child {
+  padding-left: 0;
+}
+
+.caseStat:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.caseStat b {
+  display: block;
+  font-family: var(--ss-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.caseStat span {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--ss-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ss-muted);
+}
+
+.caseGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0 0 2rem;
+}
+
+.caseCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ss-line);
+  background: var(--ss-paper-hi);
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  transition:
+    transform 0.35s var(--ss-ease),
+    box-shadow 0.35s var(--ss-ease),
+    border-color 0.35s var(--ss-ease);
+}
+
+.caseCard:hover,
+.caseCard:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--ss-ink);
+  box-shadow: 6px 8px 0 rgb(25 26 46 / 0.1);
+}
+
+.caseCard:focus-visible {
+  outline: 2.5px solid var(--ss-cobalt);
+  outline-offset: 3px;
+}
+
+.caseCardMedia {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-bottom: 1px solid var(--ss-line);
+  background: var(--ss-paper-lo);
+}
+
+.caseCardMedia img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ss-ease);
+}
+
+.caseCard:hover .caseCardMedia img {
+  transform: scale(1.02);
+}
+
+.caseCardSignal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.caseCardSignal i {
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 1px solid rgb(25 26 46 / 0.25);
+}
+
+.caseCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.85rem 0.95rem 0.95rem;
+}
+
+.caseCardTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-family: var(--ss-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ss-muted);
+}
+
+.caseCardNumber {
+  color: var(--ss-cobalt);
+}
+
+.caseCardTrack {
+  padding: 0.12rem 0.4rem;
+  border: 1px solid var(--ss-line-strong);
+  font-size: 0.55rem;
+}
+
+.caseCardName {
+  font-family: var(--ss-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.caseCardTagline {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ss-ink);
+}
+
+.caseCardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.9rem;
+  margin-top: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--ss-line);
+  font-family: var(--ss-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ss-muted);
+}
+
+/* ── the findings: one claim, one case, no hedging ────────────────────────── */
+
+.findings {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--ss-ink);
+}
+
+.findings li {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr);
+  gap: 0.9rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--ss-line);
+}
+
+.findingNumber {
+  font-family: var(--ss-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--ss-cobalt);
+  padding-top: 0.2rem;
+}
+
+.findings b {
+  display: block;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.findings p {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--ss-muted);
+  max-width: 62ch;
+}
+
+.findings small {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-family: var(--ss-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ss-muted);
+  opacity: 0.8;
+}
+
+@media (max-width: 720px) {
+  .caseStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .caseStat:nth-child(2n) {
+    border-right: 0;
+    padding-right: 0;
+  }
+
+  .caseStat:nth-child(2n + 1) {
+    padding-left: 0;
+  }
+
+  .caseGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caseCard,
+  .caseCardMedia img {
+    transition: none;
+  }
+
+  .caseCard:hover {
+    transform: none;
+  }
+}

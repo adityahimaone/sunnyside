@@ -186,4 +186,4 @@ whole family, no `<text>`, compact has fewer shapes, reverse and mono are drawn
 not flattened, every contrast pair measured.
 
 Not guaranteed: that the idea is good. A generated mark is a draft. Judge it with
-the six tests in §2, then argue for it in `story.md` (`storytelling.md`).
+the six tests in §2, then argue for it in `story.md` — the five beats and the decision cards in `SKILL.md`.

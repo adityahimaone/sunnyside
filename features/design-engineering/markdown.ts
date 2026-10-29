@@ -3,6 +3,8 @@ import {
   BRAND_SKILL,
   CAPABILITIES,
   CASE,
+  CASE_FINDINGS,
+  CASES,
   GAPS,
   LOOP,
   PRACTICE,
@@ -10,7 +12,6 @@ import {
   RESOURCES,
   STANDARDS,
   SYSTEM,
-  VITRINE_CASE,
 } from './design-engineering-data'
 import { LEARNING_TRACKS } from './learning-data'
 
@@ -139,41 +140,18 @@ ${CASE.evidence
   .map((item) => `- ${link(item.label, item.href)} — ${item.note}`)
   .join('\n')}
 
-## 04b — The case: ${VITRINE_CASE.title}
+## 04b — The eight cases
 
-${VITRINE_CASE.subtitle}
+| # | Case | Track | Material | Display | Signal | Page |
+| --- | --- | --- | --- | --- | --- | --- |
+${CASES.map(
+  (item) =>
+    `| ${item.number} | ${item.name} | ${item.track} | ${item.material} | ${item.display} | ${item.signalName} (${item.signal}) | ${absolute(item.href)} |`,
+).join('\n')}
 
-- **Role:** ${VITRINE_CASE.role}
-- **Status:** ${VITRINE_CASE.status}
-- **Stack:** Next.js, TypeScript, CSS Modules, dithercn
-- **Full case:** ${absolute(VITRINE_CASE.href)}
-- **Case library:** ${absolute(VITRINE_CASE.library)}
-- **Cover:** ${absolute(VITRINE_CASE.cover)}
+## 04c — What the eight prove
 
-${VITRINE_CASE.brief}
-
-### Constraints
-
-${VITRINE_CASE.constraints.map((item) => `- ${item}`).join('\n')}
-
-### Decisions
-
-${VITRINE_CASE.decisions
-  .map(
-    (decision, index) =>
-      `${String(index + 1).padStart(2, '0')}. **${decision.title}** ${decision.line}`,
-  )
-  .join('\n')}
-
-### What shipped
-
-${VITRINE_CASE.outcomes.map((item) => `- ${item}`).join('\n')}
-
-### Evidence
-
-${VITRINE_CASE.evidence
-  .map((item) => `- ${link(item.label, item.href)} — ${item.note}`)
-  .join('\n')}
+${CASE_FINDINGS.map((finding) => `${finding.number}. **${finding.claim}** ${finding.evidence} _(cases ${finding.case})_`).join('\n\n')}
 
 ## 05 — Capabilities
 

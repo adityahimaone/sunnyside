@@ -57,10 +57,10 @@ export const PRACTICE = {
   title: ['Design', 'engineering'],
   standfirst: 'The work between the drawing and the browser.',
   intro:
-    'I design the system and build the interface: the name, the mark, the type, the tokens, then the page that proves them. Sunnyside is the first worked example — one paper world, a brand kit and the docs that keep it honest. Vitrine is the second: a glass case, a dithered label and a form kit that has to survive the material.',
+    'I design the system and build the interface: the name, the mark, the type, the tokens, then the page that proves them. Eight systems sit behind this page — a paper studio, a glass case, a cell grid, two drums, a survey ridge, a blue field, a coastal plate and a painted clearing. Each one is a whole identity with its own board, tokens and audit, and none of them is a recolour of the last.',
   body: 'Most handoffs lose the reason. A file says what, a ticket says when, and the browser finds out whether it was true. The practice is the loop that keeps the reason attached: one direction, one system, one proof, one written decision.',
   actions: [
-    { href: '#case', label: 'Read the Sunnyside case', kind: 'primary' },
+    { href: '#case', label: 'See the eight cases', kind: 'primary' },
     { href: '/sunnyside', label: 'Open the system', kind: 'secondary' },
   ] as const,
 }
@@ -501,21 +501,18 @@ export const VITRINE_CASE = {
 export const BRAND_SKILL = {
   name: 'sunnyside-brand-system',
   description:
-    'A fast, evidence-led skill for brand kits, design systems and single-page HTML/TSX mockups: strategy, logo family, board, favicons, tokens, forms, modern visual directions, universal surfaces and lean QA. It hands the approved kit to implement-brand-system.',
+    'v3.1 — a fast, evidence-led skill for brand kits and design systems, written from eight shipped cases: one idea, a mark family, a board, tokens, an immersive proof page and an honest audit. One file to read, four references, and the gates that actually failed something.',
   install:
     'npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth',
   folder: 'skills/sunnyside-brand-system',
   repo: 'https://github.com/adityahimaone/sunnyside/tree/main/skills/sunnyside-brand-system',
   file: 'https://github.com/adityahimaone/sunnyside/blob/main/skills/sunnyside-brand-system/SKILL.md',
   includes: [
-    'SKILL.md — modes, fast path, token budget, rules and output contract',
-    '12 references — brief, logo, board, image direction, tokens, design systems, typography, verification, lessons, ui-skills fusion, visual directions, workspace contexts',
-    'UI Skills audit — 22 relevant skills inspected; fused into the brand and implementation passes',
-    '7 scripts — board, icons, favicon, downscale, wordmark, static audit, browser QA',
-    '6 templates — system specimen, brand board, single-page mockup, TSX case page, audit manifest, guide',
-    '2 examples — Sunnyside and Vitrine, with the Case 02 audit',
-    'Companion implement-brand-system skill — HTML/TSX implementation, shadcn/Radix, forms, metadata, QA',
-    'Companion pen-dev skill — delegated agent and MCP-in-the-loop',
+    'SKILL.md — the whole method in one read: fast path, gates, immersive recipes, output contract',
+    '4 references — case evidence from the eight, immersive surfaces, the gates, tokens and docs',
+    'Scripts that earned their place — init, mark forge, cast, score, detach, audit, QA, board',
+    'Templates — specimen, board, marks composition, case page, audit manifest',
+    'Evidence from eight shipped cases, including the two failures the gate caught',
   ],
 }
 
@@ -649,6 +646,14 @@ export const CAPABILITIES: Capability[] = [
 
 export const GAPS = [
   {
+    label: 'Detach',
+    line: 'The weakest pair is 59/100 — Strand against Clearing — below the 70 floor the gate sets. It is published on both pages rather than averaged away.',
+  },
+  {
+    label: 'Type',
+    line: 'Vitrine and Riso Co. both set Space Grotesk. A shared display face is a hard fail in the gate; both shipped before the gate existed.',
+  },
+  {
     label: 'Performance',
     line: 'The perf doc is a recipe, not a committed score for the current routes.',
   },
@@ -659,10 +664,6 @@ export const GAPS = [
   {
     label: 'Images',
     line: 'The identity is drawn, not generated. There is no provenance or rights rule for generated imagery.',
-  },
-  {
-    label: 'Pen.dev',
-    line: 'The pen-dev skill documents the loop, but the CI-gated agent run is still manual.',
   },
   {
     label: 'Components',
@@ -785,4 +786,216 @@ export const RESOURCES: Resource[] = [
     note: 'The identity board, with the lockup, palette, type and favicon sizes.',
     group: 'Artefact',
   },
+]
+
+/* ── The eight cases ─────────────────────────────────────────────────────────
+   One row per documented system. The facts here are the ones a reader needs to
+   tell them apart: the track, the material, the display face, the one signal.
+   Every value is copied from the case's own tokens, not from memory.
+
+   There is deliberately no per-card score. Only five of the eight cases ship a
+   tokens.json the detach gate can read, so a number on every card would be
+   three-quarters invention. The two measured pairs live in CASE_FINDINGS. */
+
+export type CaseCard = {
+  number: string
+  name: string
+  href: string
+  tagline: string
+  track: 'drawn' | 'constructed'
+  material: string
+  display: string
+  signal: string
+  signalName: string
+  cover: string
+  coverAlt: string
+}
+
+export const CASES: readonly CaseCard[] = [
+  {
+    number: '01',
+    name: 'Sunnyside',
+    href: '/sunnyside',
+    tagline: 'A studio wall, not a template.',
+    track: 'drawn',
+    material: 'paper + ink',
+    display: 'Syne',
+    signal: '#3d53d6',
+    signalName: 'cobalt',
+    cover: '/brand/sunnyside-brandkit.png',
+    coverAlt: 'The Sunnyside brand kit: paper and ink board with the sun mark.',
+  },
+  {
+    number: '02',
+    name: 'Vitrine',
+    href: '/design-system/vitrine',
+    tagline: 'A glass case for a low-resolution light.',
+    track: 'constructed',
+    material: 'glass + dither',
+    display: 'Space Grotesk',
+    signal: '#d9ff43',
+    signalName: 'signal',
+    cover: '/brand/vitrine/vitrine-brandkit.png',
+    coverAlt:
+      'The Vitrine brand board: the half-light V mark over a dither field.',
+  },
+  {
+    number: '03',
+    name: 'Huginn',
+    href: '/design-system/huginn',
+    tagline: 'A picture becomes cells. A name becomes cells.',
+    track: 'constructed',
+    material: 'cells + painting',
+    display: 'Bodoni Moda',
+    signal: '#e2281b',
+    signalName: 'vermilion',
+    cover: '/brand/huginn/huginn-brandkit.png',
+    coverAlt:
+      'The Huginn brand board: the cell mark and the cell-drawn wordmark.',
+  },
+  {
+    number: '04',
+    name: 'Riso Co.',
+    href: '/design-system/riso',
+    tagline:
+      'One pin holds the sheet. The tear is what the second drum prints.',
+    track: 'constructed',
+    material: 'vellum + two drums',
+    display: 'Space Grotesk',
+    signal: '#f2542d',
+    signalName: 'drum A',
+    cover: '/brand/riso/riso-brandkit.png',
+    coverAlt: 'The Riso Co. brand board: the pinned sheet torn from the pin.',
+  },
+  {
+    number: '05',
+    name: 'Hachure',
+    href: '/design-system/hachure',
+    tagline: 'Relief drawn by density, never by shadow.',
+    track: 'constructed',
+    material: 'survey paper + ridges',
+    display: 'Geist Mono',
+    signal: '#c9d94e',
+    signalName: 'lichen',
+    cover: '/brand/hachure/hachure-brandkit.png',
+    coverAlt:
+      'The Hachure brand board: the solid ridge mark over a dither plate.',
+  },
+  {
+    number: '06',
+    name: 'Cove',
+    href: '/design-system/cove',
+    tagline: 'A calmer kind of depth.',
+    track: 'constructed',
+    material: 'blue glass + ice',
+    display: 'Sora',
+    signal: '#3fe3c6',
+    signalName: 'lumen',
+    cover: '/brand/cove/cove-brandkit.png',
+    coverAlt: 'The Cove brand board: the squared C mark with an ice inlay.',
+  },
+  {
+    number: '07',
+    name: 'Strand',
+    href: '/design-system/strand',
+    tagline: 'Where the dunes meet the tide.',
+    track: 'constructed',
+    material: 'quartz + basalt + tide',
+    display: 'Instrument Sans',
+    signal: '#a85a22',
+    signalName: 'sun',
+    cover: '/brand/strand/strand-brandkit.png',
+    coverAlt:
+      'The Strand brand board: the architectural S mark over a coastal vista.',
+  },
+  {
+    number: '08',
+    name: 'Clearing',
+    href: '/design-system/clearing',
+    tagline: 'A sighting, not a sticker.',
+    track: 'drawn',
+    material: 'painted light + glass',
+    display: 'Iowan Old Style',
+    signal: '#0f4a3c',
+    signalName: 'emerald',
+    cover: '/brand/clearing/clearing-brandkit.png',
+    coverAlt: 'The Clearing brand board: the stag on a tapered horizon.',
+  },
+]
+
+export type Finding = {
+  number: string
+  claim: string
+  evidence: string
+  case: string
+}
+
+export const CASE_FINDINGS: readonly Finding[] = [
+  {
+    number: '01',
+    claim:
+      'Eight cases, two tracks. Six are built from geometry; two are drawn.',
+    evidence:
+      'Sunnyside and Clearing are drawn marks (a sun cut from paper, a stag on a horizon) because their subjects are objects. The other six are constructed — planes, cells, ridges, louvers — because their subjects are systems.',
+    case: '01 · 08',
+  },
+  {
+    number: '02',
+    claim:
+      'The mark is never the whole identity. Every case ships five things.',
+    evidence:
+      'A mark family, a token layer, a proof page, a board and an audit. A case without a board is a logo; a case without an audit is a brochure.',
+    case: 'all',
+  },
+  {
+    number: '03',
+    claim: 'One signal per case, and it is punctuation, not a palette.',
+    evidence:
+      'Cobalt on Sunnyside, signal on Vitrine, lichen on Hachure, lumen on Cove, sun on Strand, emerald on Clearing. Two loud fields on one page cancel each other — every case states it, and every case enforces it.',
+    case: 'all',
+  },
+  {
+    number: '04',
+    claim:
+      'Two cases share a display face. That is a gate failure, not a coincidence.',
+    evidence:
+      'Vitrine and Riso Co. both set Space Grotesk. The detach gate treats a shared display face as a hard fail; both shipped anyway because they were built before the gate existed. Fixing it means re-cutting one of them, not adjusting the score.',
+    case: '02 · 04',
+  },
+  {
+    number: '05',
+    claim: 'The weakest pair is 59/100 — Strand against Clearing.',
+    evidence:
+      'Strand’s sun sits 9° from Clearing’s hart in OKLCH and the night-sun lands on the same hue. Everything else differs: track, material, geometry, type, structure. The score is published on the page rather than averaged away.',
+    case: '07 · 08',
+  },
+  {
+    number: '06',
+    claim:
+      'A font that is referenced but never registered is a fallback, not a face.',
+    evidence:
+      'Cove declared --cv-font-display: var(--font-sora) and never registered Sora in the root layout, so its display face has been the system sans on every machine that does not have it installed. The token was right; the font was missing.',
+    case: '06',
+  },
+  {
+    number: '07',
+    claim: 'Night is a scope, never a second palette.',
+    evidence:
+      'Every case with a dark surface swaps semantic tokens under html[data-<slug>] and keeps the primitives. Riso keeps its drums, Huginn keeps its field, Clearing keeps its emerald. A second palette drifts; a scope does not.',
+    case: '03 · 04 · 08',
+  },
+  {
+    number: '08',
+    claim: 'The proof page is the contract, and it is a page — not a PDF.',
+    evidence:
+      'Each case is a route with a hero, a contents rail, marks, colour, type, parts, a signature surface, tokens and an audit. The specimen can be linked, screenshotted and diffed; a PDF cannot.',
+    case: 'all',
+  },
+]
+
+export const CASE_STATS = [
+  { value: '8', label: 'documented cases' },
+  { value: '2', label: 'tracks: drawn, constructed' },
+  { value: '59', label: 'weakest detach pair / 100' },
+  { value: '1', label: 'shared display face' },
 ]
