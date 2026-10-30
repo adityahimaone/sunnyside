@@ -1,0 +1,19 @@
+{
+  "_comment": "Optional per-brand overrides for openpencil-design-canvas/scripts/brand_to_pen.py. Drop as openpencil.json beside <slug>-tokens.json.",
+  "mark_size": {
+    "mark": 130,
+    "mark-compact": 16,
+    "mark-mono": 130,
+    "mark-reverse": 130,
+    "glyph": 64,
+    "wordmark": 300,
+    "lockup": 420,
+    "lockup-mono": 420,
+    "lockup-on-drum": 420,
+    "lockup-stacked": 260
+  },
+  "skip": ["og-image", "press-kit"],
+  "ground": "#F3EDDE",
+  "ink": "#0E211C",
+  "mono_marks": false
+}
