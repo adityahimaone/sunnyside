@@ -1,6 +1,6 @@
 ---
 name: sunnyside-brand-system
-description: Design and ship a brand kit or design system from a brief — one idea, a mark family, a board, tokens, an immersive proof page, and an audit that names what it could not verify. v3.1 is written from eight shipped cases: a fast path you can run in one sitting, six gates that each failed something real, and the recipes that make a page feel printed rather than decorated. Use when creating, initialising or auditing an identity, a design-system page, or a single-page proof.
+description: 'Design and ship a brand kit or design system from a brief — one idea, a mark family, a board, tokens, an immersive proof page, and an audit that names what it could not verify. v3.1 is written from eight shipped cases: a fast path you can run in one sitting, six gates that each failed something real, and the recipes that make a page feel printed rather than decorated. Use when creating, initialising or auditing an identity, a design-system page, or a single-page proof.'
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
