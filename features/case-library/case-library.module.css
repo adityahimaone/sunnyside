@@ -130,6 +130,12 @@
   --case-accent: #0f4a3c;
 }
 
+/* Ledger's one signal colour. Every other ink in that system is zinc; this is
+   the only hue it is allowed, and only for state. */
+.tone_ledger {
+  --case-accent: #2563ef;
+}
+
 .cardTop {
   display: flex;
   align-items: center;

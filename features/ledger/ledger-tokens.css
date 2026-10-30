@@ -1,0 +1,279 @@
+/* ─────────────────────────────────────────────────────────────
+   Ledger — Tactile Glass & Crisp Grid
+   ─────────────────────────────────────────────────────────────
+
+   Every value here is scoped to `[data-ledger]`. The site's own shadcn role
+   tokens (`--background`, `--card`, `--border`…) stay untouched at :root; this
+   file swaps them for the duration of one subtree, which is the same move the
+   Sunnyside method calls a "night surface as a scope, never a second palette".
+
+   Three layers, in order: primitive → semantic → the surface recipes.
+   A theme flip only ever rewrites the semantic layer.
+   ───────────────────────────────────────────────────────────── */
+
+[data-ledger] {
+  /* Layer 1 — primitive. The material, named once. Cool zinc. */
+  --lg-zinc-000: oklch(1 0 0);
+  --lg-zinc-025: oklch(0.991 0.001 260);
+  --lg-zinc-050: oklch(0.977 0.003 260);
+  --lg-zinc-100: oklch(0.962 0.004 258);
+  --lg-zinc-150: oklch(0.944 0.005 260);
+  --lg-zinc-200: oklch(0.885 0.006 264);
+  --lg-zinc-300: oklch(0.812 0.007 264);
+  --lg-zinc-400: oklch(0.705 0.008 264);
+  --lg-zinc-500: oklch(0.532 0.011 264);
+  --lg-zinc-600: oklch(0.442 0.01 264);
+  --lg-zinc-700: oklch(0.372 0.008 264);
+  --lg-zinc-800: oklch(0.272 0.007 264);
+  --lg-zinc-850: oklch(0.225 0.006 265);
+  --lg-zinc-900: oklch(0.205 0.006 285.9);
+  --lg-zinc-950: oklch(0.145 0.006 265);
+  --lg-signal-500: oklch(0.548 0.216 262.4);
+
+  /* Layer 2 — semantic. The job, never the material. */
+  --radius: 0.75rem;
+
+  --background: var(--lg-zinc-100);
+  --foreground: var(--lg-zinc-900);
+
+  --card: var(--lg-zinc-000);
+  --card-foreground: var(--lg-zinc-900);
+  --popover: var(--lg-zinc-025);
+  --popover-foreground: var(--lg-zinc-900);
+
+  --primary: var(--lg-zinc-900);
+  --primary-foreground: var(--lg-zinc-050);
+  --secondary: var(--lg-zinc-150);
+  --secondary-foreground: var(--lg-zinc-800);
+
+  --muted: var(--lg-zinc-150);
+  --muted-foreground: var(--lg-zinc-500);
+  --accent: var(--lg-zinc-150);
+  --accent-foreground: var(--lg-zinc-800);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: var(--lg-zinc-050);
+
+  --border: var(--lg-zinc-200);
+  --input: var(--lg-zinc-200);
+  --ring: var(--lg-zinc-500);
+
+  /* One signal colour. Reserved for state, never for decoration. */
+  --signal: var(--lg-signal-500);
+  --signal-ink: oklch(0.472 0.19 262);
+
+  /* Monochrome data ramp — the light surface reads dark → light. */
+  --chart-1: oklch(0.272 0.007 264);
+  --chart-2: oklch(0.442 0.01 264);
+  --chart-3: oklch(0.612 0.009 264);
+  --chart-4: oklch(0.762 0.008 264);
+  --chart-5: oklch(0.885 0.006 264);
+
+  --sidebar: var(--lg-zinc-050);
+  --sidebar-foreground: var(--lg-zinc-900);
+  --sidebar-primary: var(--lg-zinc-900);
+  --sidebar-primary-foreground: var(--lg-zinc-050);
+  --sidebar-accent: var(--lg-zinc-150);
+  --sidebar-accent-foreground: var(--lg-zinc-800);
+  --sidebar-border: var(--lg-zinc-200);
+  --sidebar-ring: var(--lg-zinc-500);
+
+  /* Ambient light, not a colour. */
+  --ambient: oklch(0.62 0.03 258 / 0.16);
+
+  /* Type: the site already loads both faces, so the scope only aliases them. */
+  --font-mono: var(--font-geist-mono);
+
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  color-scheme: light;
+}
+
+/* Dark: next-themes puts `.dark` on <html>, so the scope has to answer to both
+   an ancestor class and its own class (for a standalone render). */
+.dark [data-ledger],
+[data-ledger].dark {
+  --background: oklch(0.155 0.006 265);
+  --foreground: var(--lg-zinc-100);
+
+  --card: oklch(0.215 0.006 265);
+  --card-foreground: var(--lg-zinc-100);
+  --popover: oklch(0.195 0.006 265);
+  --popover-foreground: var(--lg-zinc-100);
+
+  --primary: var(--lg-zinc-100);
+  --primary-foreground: var(--lg-zinc-900);
+  --secondary: oklch(0.262 0.007 265);
+  --secondary-foreground: var(--lg-zinc-100);
+
+  --muted: oklch(0.262 0.007 265);
+  --muted-foreground: oklch(0.702 0.009 264);
+  --accent: oklch(0.272 0.007 265);
+  --accent-foreground: var(--lg-zinc-100);
+
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: var(--lg-zinc-900);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: var(--lg-zinc-400);
+
+  --chart-1: oklch(0.962 0.004 258);
+  --chart-2: oklch(0.802 0.007 264);
+  --chart-3: oklch(0.632 0.009 264);
+  --chart-4: oklch(0.472 0.008 264);
+  --chart-5: oklch(0.342 0.007 264);
+
+  --sidebar: oklch(0.185 0.006 265);
+  --sidebar-foreground: var(--lg-zinc-100);
+  --sidebar-primary: var(--lg-zinc-100);
+  --sidebar-primary-foreground: var(--lg-zinc-900);
+  --sidebar-accent: oklch(0.262 0.007 265);
+  --sidebar-accent-foreground: var(--lg-zinc-100);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: var(--lg-zinc-400);
+
+  --ambient: oklch(0.62 0.05 258 / 0.22);
+  --signal-ink: oklch(0.74 0.15 262);
+
+  color-scheme: dark;
+}
+
+@layer base {
+  /* Tailwind v4 defaults `border` to currentColor; inside the scope it should
+     mean the hairline token, the same way the standalone app did. */
+  [data-ledger] *,
+  [data-ledger] *::before,
+  [data-ledger] *::after {
+    border-color: var(--border);
+  }
+
+  [data-ledger] ::selection {
+    background-color: color-mix(in oklab, var(--foreground) 14%, transparent);
+  }
+}
+
+@layer components {
+  /*
+   * .glass-panel  ≡  bg-card/65 backdrop-blur-xl
+   *                  border-black/[0.06] dark:border-white/[0.08]
+   *                  shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15)]
+   *
+   * color-mix so the panel tracks --card through a theme flip instead of
+   * pinning a literal white.
+   */
+  [data-ledger] .glass-panel {
+    background-color: color-mix(in oklab, var(--card) 65%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgb(0 0 0 / 0.06);
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.15);
+  }
+
+  .dark [data-ledger] .glass-panel,
+  [data-ledger].dark .glass-panel {
+    border-color: rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  }
+
+  /* Panels that float above other glass — popovers, menus, tooltips. */
+  [data-ledger] .glass-float {
+    background-color: color-mix(in oklab, var(--popover) 82%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgb(0 0 0 / 0.07);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.18),
+      0 18px 40px -24px rgb(9 9 11 / 0.35);
+  }
+
+  .dark [data-ledger] .glass-float,
+  [data-ledger].dark .glass-float {
+    border-color: rgb(255 255 255 / 0.1);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.07),
+      0 18px 40px -24px rgb(0 0 0 / 0.7);
+  }
+
+  /* The ambient field: one static radial wash, top-right of the canvas. */
+  [data-ledger] .ambient-field::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        52rem 34rem at 100% 0%,
+        var(--ambient) 0%,
+        transparent 68%
+      ),
+      radial-gradient(
+        34rem 26rem at 88% 8%,
+        color-mix(in oklab, var(--signal) 10%, transparent) 0%,
+        transparent 72%
+      );
+  }
+
+  /* The crisp grid: 1px rules at 96px, barely there. */
+  [data-ledger] .grid-field {
+    background-image:
+      linear-gradient(to right, var(--border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+    background-size: 96px 96px;
+    opacity: 0.28;
+    mask-image: radial-gradient(70% 60% at 100% 0%, #000 0%, transparent 78%);
+  }
+
+  /* Hover on a glass panel: a 2% ink veil, never a background swap. */
+  [data-ledger] .panel-hover {
+    position: relative;
+    isolation: isolate;
+  }
+
+  [data-ledger] .panel-hover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: transparent;
+    transition: background-color 200ms ease;
+    pointer-events: none;
+  }
+
+  [data-ledger] .panel-hover:hover::after {
+    background-color: color-mix(in oklab, var(--foreground) 2%, transparent);
+  }
+
+  .dark [data-ledger] .panel-hover:hover::after,
+  [data-ledger].dark .panel-hover:hover::after {
+    background-color: rgb(255 255 255 / 0.03);
+  }
+}
+
+@layer utilities {
+  /* Figures. Every number in the system uses these two properties. */
+  [data-ledger] .fig {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  [data-ledger] .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  [data-ledger] .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-ledger] *,
+  [data-ledger] *::before,
+  [data-ledger] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

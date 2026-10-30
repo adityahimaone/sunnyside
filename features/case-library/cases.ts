@@ -1,3 +1,5 @@
+import { LEDGER } from '@/features/ledger/data'
+
 export type DesignCase = {
   number: string
   name: string
@@ -19,6 +21,7 @@ export type DesignCase = {
     | 'cove'
     | 'strand'
     | 'clearing'
+    | 'ledger'
 }
 
 /**
@@ -155,5 +158,20 @@ export const DESIGN_CASES: readonly DesignCase[] = [
       'The Clearing brand board: the stag on a tapered horizon, the outlined clearing wordmark with a disc tittle, six inks sampled from the painting, and the glass recipe.',
     tags: ['Painted', 'Emerald', 'Glass', 'Wildlife'],
     tone: 'clearing',
+  },
+  {
+    number: '09',
+    name: LEDGER.name,
+    href: LEDGER.href,
+    tagline: LEDGER.tagline,
+    description: LEDGER.description,
+    status: LEDGER.status,
+    role: LEDGER.role,
+    material: LEDGER.material,
+    cover: '/brand/ledger/ledger-brandkit.png',
+    coverAlt:
+      'The Ledger brand board: the grid mark with one lifted tile, the cool zinc ramp, the glass recipe, the type scale and a dashboard specimen.',
+    tags: LEDGER.tags,
+    tone: 'ledger',
   },
 ]

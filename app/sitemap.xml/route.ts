@@ -53,6 +53,8 @@ export async function GET() {
     { url: '/design-system/cove', changefreq: 'monthly', priority: 0.7 },
     { url: '/design-system/strand', changefreq: 'monthly', priority: 0.7 },
     { url: '/design-system/clearing', changefreq: 'monthly', priority: 0.7 },
+    // The live dashboard under /design-system/ledger is noindex; only the case is listed.
+    { url: '/design-system/ledger', changefreq: 'monthly', priority: 0.7 },
   ].map((page) => ({ ...page, lastmod: fallbackLastmod }))
 
   const blogEntries = posts.map(
