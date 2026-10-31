@@ -1,254 +1,59 @@
 # sunnyside-brand-system
 
-An installable agent skill for shipping **brand kits**, **design systems** and
-**single-page mockups** from a brief. It owns the brand decision and hands the
-approved kit to **`implement-brand-system`** for the build:
+An installable agent skill for shipping **brand kits** and **design systems** from a brief:
+one idea, a mark family, tokens, a board, an immersive proof page, Figma and DESIGN.md exports,
+and an audit that names what it could not verify.
 
-- one idea, one mark family, one 3×3 board;
-- favicon and app icons;
-- primitive → semantic → component tokens, CSS + JSON;
-- single-page HTML or TSX proof;
-- shadcn/Radix component and a form kit themed from the same DNA as the mark;
-- brand story: spine, one sentence, decision cards, story audit;
-- typography gate;
-- lean audit and browser QA;
-- pen.dev design-source integration.
+Built from eight shipped cases: Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand and
+Clearing. The method travels; the marks do not.
 
-Built from the Sunnyside and Vitrine cases. The method travels; the marks do not.
+## v3.3: straighter, with outside eyes
 
-**v3.0 — fresh init and the detach gate.** The skill could build a system on an
-empty machine; it could not start a *ninth* system in a repo that already held
-eight. It inherited the neighbour's hue, radius, display face and section order,
-then called the result new. v3.0 adds the missing half:
+- **No loops.** The fast path is eleven steps after a pre-flight, and each gate names the one
+  step to return to. `gates.mjs` runs the six static gates in a single command right after the
+  tokens exist, instead of five commands at the end, after the board, page and export were built.
+- **Look outward.** `brand-ref.mjs` searches the 69 brands behind design.ricoui.com/brands,
+  shows who already owns your hue, and feeds them to the detach gate. Fetched at runtime, never
+  vendored (the source repo has no licence file).
+- **Free assets, with the paperwork.** `assets.mjs` fetches photos and icons from Openverse,
+  Pexels, Unsplash and Iconify and records each licence; the assets gate fails an unrecorded file.
+- **DESIGN.md out.** `design-md.mjs` writes Google's open format from the tokens and lints it.
+- **Bugs the audit found.** The display-face hard fail was blind to Hachure's `role`/`face`
+  token shape; outside references earned free points for differing from nothing; a typo'd slug
+  could pass. `gates.mjs` also fails a palette that publishes no failing contrast pair, which
+  Cove and Strand do not yet (their lowest ratio is 5.06:1).
+- **Cleaned.** Dropped the `build-lockup.mjs` reference (no such script), the repeated "how to
+  use this well" section, a stale Vitrine to-do, a superseded brainstorm example, and the
+  mismatched counts. The `.agents/skills/` mirror was regenerated.
 
-- **`scripts/init-system.mjs`** — scaffolds a case that inherits nothing: a free
-  two-letter namespace, a 5+1 palette derived from a hue seed, the twelve-key DNA
-  object, both theme ramps with **stable primitive names**, the token CSS, the
-  layout module, the copy data, the brand components, the page, the layout and
-  the `llms.txt` route. Refuses an existing slug, a taken namespace, a hue within
-  8° of a sibling, or a full colour wheel without `--force`. `--peek` writes
-  nothing and prints the palette, the nearest neighbours and the free arcs.
-- **`scripts/detach-check.mjs`** — a 100-point separation scorecard in OKLCH.
-  Five hard fails (namespace, material, display face, accent hex, one sentence)
-  and seven scored dimensions (hue, value, material, geometry, type, structure,
-  copy). Passes at 70 against **every** sibling; `--scan` scores the whole
-  portfolio and names the weakest pair.
-- Four references: [`fresh-init.md`](references/fresh-init.md),
-  [`detach.md`](references/detach.md),
-  [`case-architecture.md`](references/case-architecture.md) and
-  [`design-intel.md`](references/design-intel.md) — the last one uses the
-  `ui-ux-pro-max` corpus as a **negative prior**: query it to learn the category
-  default, then stand outside it on purpose.
+## What is in the box
 
-Both scripts are dependency-free and read `tokens.json` in either shape, so they
-work on cases written before this version.
-
-**v2.4:** the Case 01 **mark system**. The v2.3 gate is the **constructed
-track**; a new **drawn track** covers warm, editorial and object-led brands. Both
-tracks ship a primary + compact + glyph and a drawn/outlined wordmark; the drawn
-track adds a **4–6 mark cast** and the **four-movement marks composition**. One
-`qa.mjs` command runs the audit, the score and the browser pass. Read
-[`references/craft-bar.md`](references/craft-bar.md).
-
-**v2.3:** the hard gate (zero-circle / zero-Venn, fill-only, 2–4 solid
-primitives, one accent, one family per brand) and five allowed families:
-architectural monogram, offset planes, louvers, ribbon, horizon. Fuses the
-Sunnyside editorial grid, `Leonxlnx/taste-skill` and `MengTo/Skills`
-`company-logos` discipline. The v2.3 bake-off and `score-mark.py` fail circles,
-fill+stroke and >4 primitives.
-
-**v2.2:** fuses [op7418/logo-generator-skill](https://github.com/op7418/logo-generator-skill)
-(six-family brainstorm, design rules, pattern families): `--bakeoff`, five new
-concepts, `score-mark.py`, `references/logo-brainstorm.md` and a worked redo in
-`examples/brainstorm-huginn-riso-hachure.md`.
-
-**v2.1:** a generated vector logo family (`scripts/brand-forge.mjs`: six
-construction concepts, tokens, theme-matched form kit, proof sheet, story
-scaffold), a storytelling layer, theme-matched forms and stronger audit checks.
-Audit of the skill itself: [`references/skill-audit.md`](references/skill-audit.md).
-
-**v2.0 provenance:** rebuilt after auditing
-[ui-skills.com](https://www.ui-skills.com/) — 439 skills across 27 categories;
-22 relevant skills inspected and fused in
-[`references/ui-skills-fusion.md`](references/ui-skills-fusion.md).
+```
+SKILL.md                      the whole method in one read
+references/research.md        studying a category, DESIGN.md, free-asset licences
+references/case-evidence.md   the eight cases, their numbers, the recurring decisions
+references/gates.md           the eight checks and the QA checklist
+references/immersive.md       the seven recipes with code
+references/tokens-and-docs.md token layers and the llms twin
+references/figma-export.md    tokens to Figma, the emitters, the traps
+references/logo-system.md     grid, family, favicon
+references/form-theming.md    the form kit every case ships
+references/craft-bar.md       the drawn-track bar and the marks composition
+scripts/                      init, detach, gates, brand-ref, assets, design-md, forge, cast,
+                              score, audit, qa, board, icons, figma, sync-skill.sh
+templates/                    design system page, single page, case page, guidelines, audit
+examples/                     Sunnyside and Vitrine, plus brand-forge configs
+```
 
 ## Install
 
 ```bash
 npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth
-npx skills add adityahimaone/sunnyside --skill implement-brand-system --full-depth
-npx skills add adityahimaone/sunnyside --skill pen-dev --full-depth
 ```
 
-Optional typography companion — the upstream skill by Jakub Krehel:
+Network use (all optional): `brand-ref.mjs` needs raw.githubusercontent.com; `assets.mjs` needs
+its source host, plus `PEXELS_API_KEY` or `UNSPLASH_ACCESS_KEY` for those two; `design-md.mjs
+--lint` needs the npm registry.
 
-```bash
-npx skills add jakubkrehel/skills --skill better-typography
-```
-
-Or point an agent that supports local skill folders at this folder:
-
-```bash
-npx skills add ./skills/sunnyside-brand-system
-```
-
-## The method in one screen
-
-0. **Init and detach** when the host already has cases: peek the hue map,
-   scaffold, fill the DNA, score against every sibling. A duplicated palette
-   cannot be rescued by a better mark.
-1. **Pick the smallest mode** — fresh init, brand kit, design system, mockup,
-   audit or pen — and the **track**: constructed (v2.3 gate) or drawn (v2.4
-   gate).
-2. Write `brief.md` and the one sentence the work can be rejected against.
-3. Draw six marks; keep one; write down why the other five lost.
-4. Build the mark + compact + glyph and the wordmark. On the drawn track, add a
-   **4–6 cast** with one cut line, one fill and one job per mark.
-5. Compose the **marks section**: logo card, wordmark scale, cast drawer, one
-   usage rule (`templates/marks-section.html`).
-6. Use one token source → CSS + JSON. Never hand-edit generated output.
-7. Write `DESIGN.md`: decisions, token roles, component rules, what not to do.
-8. Render the board from HTML at 2×; downscale.
-9. Run one `qa.mjs` command (audit + score + browser). Name the gaps.
-10. **Hand off** to `implement-brand-system` for the HTML/TSX proof page. Do not
-    redesign the kit in the implementation pass.
-
-## Fast commands
-
-Run these from the skill folder, or copy `scripts/` and `templates/` into the project.
-
-```bash
-# Fresh init — a case that inherits nothing (no deps)
-node scripts/init-system.mjs --slug <slug> --name "<Name>" --case 09 --hue 28 --peek
-node scripts/init-system.mjs --slug <slug> --name "<Name>" --case 09 --hue 28 --mode light
-
-# Detach gate — how far is this from the systems it sits beside?
-node scripts/detach-check.mjs --new features/<slug>/tokens.json --ref features/<ref>/tokens.json
-node scripts/detach-check.mjs --scan features --min 70
-
-# Static audit: required files, SVG text, ICO sizes, PNG dimensions, contrast
-node scripts/audit.mjs --manifest audit.json
-
-# Generate the whole family from one config (concepts: bracket planes louvers ribbon horizon + legacy)
-node scripts/brand-forge.mjs --init orbit > brand.json
-node scripts/brand-forge.mjs --config brand.json --out public/brand/<slug> --wordmark wordmark.svg
-
-# Drawn track: a 4–6 cast with one cut line and one fill
-node scripts/cast-forge.mjs --list
-node scripts/cast-forge.mjs --config brand.json --out public/brand/<slug>
-
-# Six ideas from six families, one material; then objective checks
-node scripts/brand-forge.mjs --bakeoff brand.json --out bakeoff
-python3 scripts/score-mark.py --dir bakeoff   # pip install cairosvg pillow
-
-# Keep the .agents/skills mirror identical
-bash scripts/sync-skill.sh
-
-# One-command verification: audit + score + browser QA, Markdown report
-node scripts/qa.mjs \
-  --url http://localhost:3000/design-system/<slug> \
-  --slug <slug> --manifest audit.json --mark public/brand/<slug> --sections
-
-# The four-movement marks section, copyable into a board or page
-# templates/marks-section.html
-
-# Board render and web copy
-node scripts/render-board.mjs \
-  --html design/brand/<slug>/brandkit.html \
-  --out design/brand/<slug>/<slug>-brandkit@2x.png \
-  --width 2400 --height 1800 --scale 2
-
-# pen.dev: delegated agent or MCP-in-the-loop (see skills/pen-dev/SKILL.md)
-pen status
-pen --out design/brand/<slug>/<slug>-board.pen --prompt "…" --agent claude
-pen interactive --out design/brand/<slug>/<slug>-board.pen --enable-preview
-```
-
-Prerequisites: Playwright for the renderer/QA, Pillow + fontTools + HarfBuzz for
-the icon and wordmark scripts. The static audit has no dependencies.
-
-## What is inside
-
-```
-sunnyside-brand-system/
-  SKILL.md                     modes, fast path, rules, contract
-  references/
-    fresh-init.md              v3.0 borrow the shell, refuse the identity, novelty ledger
-    detach.md                  v3.0 the gate: hard fails, weights, a worked pair
-    case-architecture.md       v3.0 folder shape, token contract, component contract
-    design-intel.md            v3.0 the ui-ux-pro-max corpus as a negative prior
-    brief.md                   one-page brief and review gates
-    craft-bar.md               Case 01 mark system: tracks, wordmark, cast, composition
-    logo-system.md             concepts, grid, family, favicon, tests
-    board-and-images.md        the 3×3 board and render pipeline
-    image-direction.md         prompts, provenance and QA for generated images
-    tokens-and-docs.md         token layers and agent-readable docs
-    design-systems.md          shadcn/Radix, primitives, forms, surfaces
-    ui-skills-fusion.md        audit of the ui-skills registry + fused rules
-    visual-directions.md       liquid glass, dither, brutalist, editorial, bento, 3D
-    workspace-contexts.md      app, docs, portfolio, standalone, Storybook, pen, print
-    typography.md              the typography gate + better-typography source
-    verification.md            the ship checklist and audit format
-    lessons.md                 Case 01 bar + Case 02 failure rules
-  scripts/
-    init-system.mjs            v3.0 scaffold a fresh case (no deps)
-    detach-check.mjs           v3.0 OKLCH separation scorecard (no deps)
-    render-board.mjs           HTML board → PNG (Playwright)
-    render-icons.mjs           SVG → exact-size transparent PNGs
-    favicons.py                PNG → ICO, apple and app icons (Pillow)
-    downscale.py               Lanczos downscale for the web copy
-    extract-wordmark.py        shaped text → SVG outlines (fontTools + HarfBuzz)
-    cast-forge.mjs             config → 4–6 supporting marks + cast.html
-    audit.mjs                  static artifact/contrast audit (no deps)
-    qa.mjs                     audit + score + browser QA, Markdown report
-  templates/
-    brandkit.html              3×3 board starter
-    design-system.html         /sunnyside-style single-page system specimen
-    marks-section.html         four-movement marks composition (copyable)
-    single-page.html           static brand mockup
-    case-page.tsx              Next/React case-page scaffold
-    audit.json                 audit manifest template
-    guidelines.md              brand-guide starter
-  examples/
-    sunnyside.md               the paper/cobalt case, the quality bar
-    vitrine.md                 the glass/dither case + audit
-    configs/sunnyside-cast.json  the six-mark Case 01 cast
-```
-
-## Companion skills
-
-- [`implement-brand-system`](../implement-brand-system/SKILL.md) — turns the
-  approved kit into a single-page HTML/TSX proof; never redesigns the brand.
-- [`pen-dev`](../pen-dev/SKILL.md) — `.pen` design source, delegated agent and
-  MCP-in-the-loop.
-
-## Surfaces, not routes
-
-The skill does not assume a portfolio. A system can ship as a single HTML
-specimen, an app route, a Storybook, a pen/Figma file or print. Read
-`references/workspace-contexts.md` before choosing a surface; never invent a
-case library or a route the host does not have.
-
-## What this skill refuses
-
-- A ninth case with the eighth case's palette, display face or section list.
-- A namespace that is already in use, and a hue within 8° of a neighbour.
-- AI-generated logos, wordmarks, type specimens or whole boards.
-- Inventing a case library, `/design-system` route or sitemap entry.
-- Live text as the wordmark.
-- A mark that only reads at poster size.
-- A logo grid with no wordmark, cast or usage rule.
-- A drawn identity with no wordmark and no reason to skip the cast.
-- A cast of 12 cute shapes with no jobs.
-- Boards with no exportable assets.
-- Guidelines that live only in a PDF or Figma file.
-- A component museum with no form kit.
-- “Looks good” audits with no computed values or file paths.
-- Ten exploratory pen prompts for a board that needed one.
-
-## Credits
-
-The method, the Sunnyside and Vitrine cases, and the templates are by
-[Aditya Himawan](https://adityahimaone.space). The typography distillation
-follows [better-typography](https://www.ui-skills.com/skills/jakubkrehel/better-typography)
-by Jakub Krehel. The pen.dev workflow follows the official CLI and MCP tools.
+Companion: **`implement-brand-system`** turns an approved kit into an HTML/TSX proof without
+redesigning it.

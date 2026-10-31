@@ -193,20 +193,6 @@ wordmark is where the hand becomes ownable.
 The numbers are not the style. They are the evidence that the drawing was
 constructed, not eyeballed.
 
-## 7. What Vitrine still misses
-
-Vitrine's v2.3 folded V is a strong constructed mark. Its marks section is still
-a construction card plus a gate, not a mark system. It has no drawn wordmark, no
-cast, and no logo card / wordmark scale / drawer / rule. The next pass should
-add:
-
-- a cast derived from glass and dither — a lens arc, a dot, a signal burst, a
-  bracket, a glare, a registration mark — each with a job;
-- a drawn or custom-cut wordmark that belongs to the folded V;
-- the four-movement composition in §3.
-
-That is the gap between “a good mark” and “the Case 01 bar.”
-
 ## 8. Tools
 
 - `templates/marks-section.html` — the four-movement composition, copyable into
