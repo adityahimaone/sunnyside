@@ -1,11 +1,20 @@
 # The gates
 
-Eight checks. Each one failed a shipped case, so each one is a command, not a discussion.
-**`node scripts/gates.mjs --slug <slug>` runs the six static ones at once** (detach, display
-face, font registered, contrast, assets, export); `qa.mjs` runs the two that need a rendered
-page (mark at 16px, reduced motion). Run `gates.mjs` as soon as the tokens exist, not after
-the page: the first two can invalidate everything that follows. Display face is hard fail H3
-of the detach run; assets applies only when stock images are used (`references/research.md`).
+The checks below each failed a shipped case, so each one is a command, not a discussion.
+**`node scripts/gates.mjs --slug <slug>` runs the static ones at once** (detach, display face,
+palette, font registered, contrast, assets, export); `qa.mjs` runs the two that need a rendered
+page (mark at 16px, reduced motion). Run `gates.mjs` as soon as the tokens exist, not after the
+page: the first two can invalidate everything that follows. Display face is hard fail H3 of the
+detach run; assets applies only when stock images are used (`references/research.md`).
+
+A case folder with no `tokens.json` **fails** rather than skips. A `SKIP` always names why a gate
+could not run and is never a pass; a run where every gate skipped exits 1.
+
+**Palette is one source.** Every primitive in `tokens.json` must be declared in the token CSS at
+the same value (hex or oklch, namespace-aware). It exists because Ledger once shipped swatches
+for `var(--zinc-050)` against a sheet that declared `--lg-zinc-050`: the page rendered nothing.
+`<repo root>/scripts/check-palette.mjs` is Ledger's stricter, hard-wired version (it also
+checks light/dark scopes and hex round-trips); the gate here is the portable subset.
 
 Two behaviours worth knowing: an **incomplete** `tokens.json` (empty DNA) scores low because it
 is unscorable, and `gates.mjs` says so rather than blaming the hue; and an **outside brand**
@@ -45,7 +54,7 @@ Read the breakdown, not the total. `hue 25 · structure 5` is a new colour on th
 sentence is worth nothing — which is why a fresh scaffold scores about 40 and that is the gate
 working.
 
-**When the wheel is full** — normal at eight cases — hue is only 25 points. Move value
+**When the wheel is full** — normal once the wheel is crowded — hue is only 25 points. Move value
 structure (dark mode), then material, then geometry, then structure.
 
 **A low score is not always a collision.** If the scored side has no `tokens.json` the gate
@@ -153,3 +162,25 @@ and an Open is an audit.
 Fix only what fails, then stop. A second pass that adds a section because the page looked thin
 is how a system becomes a moodboard. If the page is thin, the marks composition is usually the
 missing part — not another section.
+
+## Type proof
+
+The scale table says what the sizes are; specimens say whether they work. The Type section shows,
+at real copy from the brand's own domain (never lorem):
+
+1. **Display** at its real size, with the tracking stated (large display usually wants negative
+   tracking; below about 18px it returns to zero so counters do not collide).
+2. **A reading paragraph** at 60–68ch, with the leading stated, and a secondary voice that steps
+   down by size or chroma, not by opacity over an image.
+3. **Figures**, if the system carries numbers: tabular, right-aligned on the decimal, with the
+   micro-label style beside them.
+
+A specimen the case does not have is listed as a *Known gap*, not skipped silently.
+
+## One retry, then publish
+
+Gates measure; they are not objectives to be tuned. Compute once. A failing contrast pair gets a
+job (ground, graphic or large type only) and is printed as a failure. A gate still failing after
+one fix goes into the audit as *Fails* or *Known gap*. Marks are built from stated grid units in
+one write and redrawn at most once. Tuning a hex until the ratio clears produces a passing number
+and a worse palette.

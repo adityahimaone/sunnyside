@@ -10,6 +10,7 @@
  *
  *   detach        weakest score against every sibling in features/*, plus --refs/*.json
  *   display face  H3 from the detach run: the same display face is a hard fail
+ *   palette       every primitive in tokens.json is declared in <slug>-tokens.css at the same value
  *   font          every var(--font-*) in <slug>-tokens.css is declared in a layout
  *   contrast      pairs recomputed from hex, the stated ratio must match, one failure published
  *   assets        every file in public/brand/<slug>/assets has a licence record
@@ -62,11 +63,22 @@ const ratio = (a, b) => {
 }
 const isHex = (v) => typeof v === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})/i.test(v)
 
+/* ── a case without tokens.json cannot be measured ───────────────────────── */
+
+// The output contract says every case ships features/<slug>/tokens.json. When the case folder
+// exists without it, that is a defect to report, not a gate to skip: a green font check beside
+// four silent skips reads as "passed" to anyone skimming the table.
+function missingTokens(name) {
+  const exists = existsSync(at('features', slug))
+  gate(name, exists ? 'FAIL' : 'SKIP', exists ? `features/${slug}/tokens.json is missing — the output contract requires it, and without it nothing here can be measured` : `no features/${slug}`)
+  return true
+}
+
 /* ── 1 + 2 · detach and display face ─────────────────────────────────────── */
 
 async function detach() {
   const own = at('features', slug, 'tokens.json')
-  if (!existsSync(own)) return gate('detach', 'SKIP', `no ${own.replace(`${root}/`, '')}`) && gate('display face', 'SKIP', 'needs detach')
+  if (!existsSync(own)) return missingTokens('detach') && gate('display face', 'SKIP', 'needs detach')
 
   const refs = []
   const featuresDir = at('features')
@@ -102,7 +114,60 @@ async function detach() {
   gate('display face', faceFails.length ? 'FAIL' : 'PASS', faceFails.length ? faceFails.join(' · ') : 'differs from every compared system')
 }
 
-/* ── 3 · font registered ─────────────────────────────────────────────────── */
+/* ── 3 · palette is one source ───────────────────────────────────────────── */
+
+// The page draws swatches from tokens.json; the product draws colour from the CSS. If they
+// disagree the page lies, and a name in one that the other never declares renders as nothing.
+// (This is what shipped once in Ledger: var(--zinc-050) against a sheet that declared --lg-zinc-050.)
+const norm = (v) => {
+  const m = String(v).match(/oklch\(\s*([\d.]+)%?\s+([\d.]+)\s+([\d.]+)/i)
+  if (m) return `oklch(${[m[1], m[2], m[3]].map((n) => Number(n).toFixed(3)).join(' ')})`
+  const h = String(v).trim().toLowerCase()
+  return /^#[0-9a-f]{3}$/.test(h) ? `#${[...h.slice(1)].map((c) => c + c).join('')}` : h.replace(/\s+/g, ' ')
+}
+const comparable = (v) => /^#[0-9a-f]{3,8}$/i.test(String(v).trim()) || /^oklch\(/i.test(String(v).trim())
+
+function primitivesOf(t) {
+  if (Array.isArray(t.primitives)) return t.primitives.map((p) => [p.name, p.value])
+  if (t.primitive && typeof t.primitive === 'object') return Object.entries(t.primitive).map(([k, v]) => [k, typeof v === 'string' ? v : v?.value])
+  return []
+}
+
+async function palette() {
+  const file = at('features', slug, 'tokens.json')
+  const css = [at('features', slug, `${slug}-tokens.css`), at('public', 'brand', slug, `${slug}-tokens.css`)].find(existsSync)
+  if (!existsSync(file) || !css) return gate('palette', 'SKIP', !existsSync(file) ? 'no tokens.json' : `no ${slug}-tokens.css`)
+  const t = await readJson(file)
+  const list = primitivesOf(t)
+  if (!list.length) return gate('palette', 'SKIP', 'tokens.json has no primitives in a shape this gate reads (primitives[] or primitive{})')
+
+  const decl = new Map()
+  const source = (await readFile(css, 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '')
+  for (const m of source.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;{}]+);/gi)) decl.set(m[1], [...(decl.get(m[1]) ?? []), norm(m[2])])
+
+  const ns = t.meta?.namespace ? String(t.meta.namespace).replace(/^-+|-+$/g, '') : ''
+  const bad = []
+  let checked = 0
+  let skipped = 0
+  for (const [name, value] of list) {
+    if (!comparable(value)) {
+      skipped += 1
+      continue
+    }
+    const exact = [ns && `--${ns}-${name}`, `--${name}`].filter(Boolean).find((n) => decl.has(n))
+    const names = exact ? [exact] : [...decl.keys()].filter((n) => n.endsWith(`-${name}`))
+    if (!names.length) {
+      bad.push(`${name} is in tokens.json but not declared in the CSS`)
+      continue
+    }
+    checked += 1
+    const want = norm(value)
+    if (!names.some((n) => decl.get(n).includes(want))) bad.push(`${name}: tokens ${want}, css ${decl.get(names[0]).join(' | ')}`)
+  }
+  gate('palette', bad.length ? 'FAIL' : checked ? 'PASS' : 'SKIP', bad.length ? `${bad.length} mismatch(es): ${bad.slice(0, 3).join(' · ')}${bad.length > 3 ? ' …' : ''}` : checked ? `${checked} primitives match the CSS${skipped ? ` (${skipped} not hex/oklch, not compared)` : ''}` : 'no comparable primitive values')
+}
+
+/* ── 4 · font registered ─────────────────────────────────────────────────── */
 
 async function fonts() {
   const css = [at('features', slug, `${slug}-tokens.css`), at('public', 'brand', slug, `${slug}-tokens.css`)].find(existsSync)
@@ -118,11 +183,11 @@ async function fonts() {
   gate('font', missing.length ? 'FAIL' : 'PASS', missing.length ? `${missing.join(', ')} used in tokens, never declared as a font variable — silent fallback` : `${used.length} alias(es) declared (${used.join(', ')})`)
 }
 
-/* ── 4 · contrast ────────────────────────────────────────────────────────── */
+/* ── 5 · contrast ────────────────────────────────────────────────────────── */
 
 async function contrast() {
   const file = at('features', slug, 'tokens.json')
-  if (!existsSync(file)) return gate('contrast', 'SKIP', 'no tokens.json')
+  if (!existsSync(file)) return missingTokens('contrast')
   const pairs = (await readJson(file)).contrast
   if (!Array.isArray(pairs) || !pairs.length) return gate('contrast', 'FAIL', 'tokens.json publishes no contrast pairs')
 
@@ -143,7 +208,7 @@ async function contrast() {
   gate('contrast', problems.length ? 'FAIL' : 'PASS', problems.length ? problems.join(' · ') : `${checked} pairs recomputed, all stated ratios match, ${failing} failing pair(s) published`)
 }
 
-/* ── 5 · assets ──────────────────────────────────────────────────────────── */
+/* ── 6 · assets ──────────────────────────────────────────────────────────── */
 
 async function assets() {
   const dir = at('public', 'brand', slug, 'assets')
@@ -156,7 +221,7 @@ async function assets() {
   }
 }
 
-/* ── 6 · export ──────────────────────────────────────────────────────────── */
+/* ── 7 · export ──────────────────────────────────────────────────────────── */
 
 async function exported() {
   const code = at('design', 'figma', slug, 'code.js')
@@ -170,6 +235,7 @@ async function exported() {
 }
 
 await detach()
+await palette()
 await fonts()
 await contrast()
 await assets()

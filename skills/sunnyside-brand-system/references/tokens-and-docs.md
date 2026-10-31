@@ -156,3 +156,18 @@ Keep it in sync with the page from one data source, not by hand.
 - `design/manifest.json` — the design-source map
 
 The page is the product. The PDF is a snapshot of the page.
+
+## 8. Accepted `tokens.json` shapes
+
+The output contract requires `features/<slug>/tokens.json`. Three shapes exist in the repo today;
+new cases should use the first.
+
+| Shape | Keys | Read by |
+| --- | --- | --- |
+| **Preferred** | `meta`, `theme` (DNA), `primitives[]` of `{name, value, role}`, `semantic`, `contrast[]` of `{fg\|a, bg\|b, ratio, label}`, `type[]`, `radius[]`, `space[]` | detach, gates, design-md, figma-forge |
+| Role/face type | as above, but `type[]` entries are `{role, face, …}` and `face` may be a CSS alias | detach, gates; design-md skips alias faces |
+| Object-keyed (Ledger) | `primitive{name: {value, hex}}`, `ramp`, `signal`, `roles`, `semantic{light,dark}` | gates (palette only); detach sees no DNA; design-md does not read it |
+
+A contrast entry must carry hex values and the ratio computed from them. Gradients and alpha
+colours cannot be computed and are not counted as passes.
+

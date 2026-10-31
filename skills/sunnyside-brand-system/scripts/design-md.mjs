@@ -28,6 +28,8 @@ import { dirname, join, resolve } from 'node:path'
 import { promisify } from 'node:util'
 
 const run = promisify(execFile)
+// Pinned: --lint downloads and executes a package, so it must not float to whatever is newest.
+const LINTER = '0.4.0'
 const args = process.argv.slice(2)
 const flag = (n, d) => (args.includes(`--${n}`) ? (args[args.indexOf(`--${n}`) + 1]?.startsWith('--') ? true : args[args.indexOf(`--${n}`) + 1]) : d)
 const slug = flag('slug')
@@ -79,7 +81,7 @@ const prims = (tokens.primitives ?? [])
   .map((p) => ({ name: kebab(p.name), hex: hex6(p.value), role: p.role ?? '' }))
   .filter((p) => p.hex && p.name)
 if (!prims.length) {
-  console.error('tokens.json has no hex primitives — nothing to export')
+  console.error('tokens.json has no hex primitives in a shape this exporter reads (primitives[] with name/value). Ledger-style primitive{} with hex is not supported yet.')
   process.exit(1)
 }
 const scored = prims.map((p) => ({ ...p, ...oklch(p.hex) }))
@@ -155,7 +157,7 @@ console.log(`${out}\n  ${Object.keys(colors).length} colours (${Object.keys(role
 
 if (args.includes('--lint')) {
   try {
-    const { stdout } = await run('npx', ['--yes', '@google/design.md', 'lint', '--format', 'json', out], { maxBuffer: 1 << 24, timeout: 120000 })
+    const { stdout } = await run('npx', ['--yes', `@google/design.md@${LINTER}`, 'lint', '--format', 'json', out], { maxBuffer: 1 << 24, timeout: 120000 })
     report(stdout)
   } catch (e) {
     if (e.stdout) report(e.stdout)

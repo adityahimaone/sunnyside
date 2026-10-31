@@ -4,27 +4,29 @@ An installable agent skill for shipping **brand kits** and **design systems** fr
 one idea, a mark family, tokens, a board, an immersive proof page, Figma and DESIGN.md exports,
 and an audit that names what it could not verify.
 
-Built from eight shipped cases: Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand and
+Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand and
 Clearing. The method travels; the marks do not.
 
-## v3.3: straighter, with outside eyes
+## v3.4: audited against the cases that came after it
 
-- **No loops.** The fast path is eleven steps after a pre-flight, and each gate names the one
-  step to return to. `gates.mjs` runs the six static gates in a single command right after the
-  tokens exist, instead of five commands at the end, after the board, page and export were built.
-- **Look outward.** `brand-ref.mjs` searches the 69 brands behind design.ricoui.com/brands,
-  shows who already owns your hue, and feeds them to the detach gate. Fetched at runtime, never
-  vendored (the source repo has no licence file).
-- **Free assets, with the paperwork.** `assets.mjs` fetches photos and icons from Openverse,
-  Pexels, Unsplash and Iconify and records each licence; the assets gate fails an unrecorded file.
-- **DESIGN.md out.** `design-md.mjs` writes Google's open format from the tokens and lints it.
-- **Bugs the audit found.** The display-face hard fail was blind to Hachure's `role`/`face`
-  token shape; outside references earned free points for differing from nothing; a typo'd slug
-  could pass. `gates.mjs` also fails a palette that publishes no failing contrast pair, which
-  Cove and Strand do not yet (their lowest ratio is 5.06:1).
-- **Cleaned.** Dropped the `build-lockup.mjs` reference (no such script), the repeated "how to
-  use this well" section, a stale Vitrine to-do, a superseded brainstorm example, and the
-  mismatched counts. The `.agents/skills/` mirror was regenerated.
+Written after checking an outside review (Gemini's audit of the published page) against the
+repo. Adopted what held up, rejected what would have cost more than it saved.
+
+- **Adopted, adapted:** one retry then publish (never tune a number until it passes); a three-
+  specimen type proof at real copy; the page must prove five jobs; at most one question before
+  building; a stated side-effects table.
+- **Rejected:** a locked six-section spine (the detach gate scores shared section ids, so it
+  would make each case less separate from the last); a mandatory post-build menu and a three-
+  question intake (extra turns, and the tracks already answer "which kind"); a rewritten
+  stub Figma exporter (`figma-forge.mjs` already exists and is smoke-tested); generic Tailwind
+  blueprints (they duplicate `immersive.md`); a promise that scanner warnings will clear.
+- **New gate, from a shipped bug:** *palette is one source* (tokens.json against the token CSS,
+  hex and oklch, with a mutation test). It is the portable form of Ledger's `check-palette.mjs`.
+- **Fixed in the gates:** a case folder with no `tokens.json` (Jakarta) used to pass its font
+  check and skip the rest; it now fails.
+- **Hardened:** `design-md.mjs --lint` pins `@google/design.md@0.4.0` instead of floating.
+- **No more counts in prose.** "Eight systems" no longer matched the repo (Jakarta, Ledger and
+  Porphyry exist); `case-evidence.md` is the one place that keeps a list.
 
 ## What is in the box
 
