@@ -130,7 +130,7 @@ export function FooterDemo({
         <RidgelineDitherFooter
           name="hachure"
           brandHref="#specimen"
-          logo={<HachureMark size={26} compact />}
+          logo={<HachureMark size={26} />}
           tagline="Relief drawn by density, never by shadow. Six ridges from one seed, seven tones from one paper, and a footer you can read an altitude off."
           columns={[
             {

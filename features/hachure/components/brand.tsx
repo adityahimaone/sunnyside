@@ -3,7 +3,6 @@ import Link from 'next/link'
 import styles from '../hachure.module.css'
 
 import {
-  COMPACT,
   MARK,
   WORDMARK_D,
   WORDMARK_RATIO,
@@ -11,31 +10,34 @@ import {
 } from '../brand-paths'
 
 /**
- * The mark: a rising ridge of solid bars.
+ * The mark: a section through rising ground.
  *
- * Four wedge-bars rise and thicken left to right; the gaps are the negative
- * channels and the widths carry the density. A lichen diamond sits on the
- * summit. No circle, no strokes. The compact drops to three bars and widens the
- * channels; `mono` collapses the apex to currentColor.
+ * One solid mass, one lit crest. The mass is bounded by a flat bottom, two
+ * vertical sides and a top edge that climbs left to right; the crest is a band
+ * of constant thickness cut from that edge, so the highest surface of the
+ * silhouette is the lichen. Nothing is hatched inside the mass — internal
+ * hatching is what fails at 16px — so density is carried by the slope of the
+ * top edge instead of by a stroke count.
+ *
+ * There is deliberately no compact variant. The previous seven-stroke drawing
+ * needed a 32-grid redraw because its 2.2-unit channels closed into a block
+ * below 24px; this one has no channel to close, so the same geometry is used at
+ * every size from 16 to 512.
  */
 export function HachureMark({
   size = 32,
-  compact = false,
   mono = false,
   title,
   className,
 }: {
   size?: number
-  compact?: boolean
   mono?: boolean
   title?: string
   className?: string
 }) {
-  const v = compact ? COMPACT : MARK
-
   return (
     <svg
-      viewBox={`0 0 ${v.box} ${v.box}`}
+      viewBox={`0 0 ${MARK.box} ${MARK.box}`}
       width={size}
       height={size}
       className={className}
@@ -44,8 +46,11 @@ export function HachureMark({
       aria-hidden={title ? undefined : true}
       focusable="false"
     >
-      <path d={v.bars} fill="var(--hx-mark-ink, #141413)" />
-      <path d={v.apex} fill={mono ? 'currentColor' : '#B8CC3B'} />
+      <path d={MARK.body} fill="var(--hx-mark-ink, #16211B)" />
+      <path
+        d={MARK.cap}
+        fill={mono ? 'currentColor' : 'var(--hx-sheet, #C9D94E)'}
+      />
     </svg>
   )
 }
@@ -73,14 +78,22 @@ export function HachureWordmark({
   )
 }
 
+/**
+ * Mark and name. The mark is drawn at 0.95 of the lockup size: its ink is
+ * 58 × 52 of its 64 units, so at equal sizes it would stand well over the
+ * wordmark's cap height and swamp the name. 0.95 puts the ink at 1.4 × the
+ * wordmark height, which is where the drawn lockup SVG has it.
+ */
 export function HachureLockup({ size = 30 }: { size?: number }) {
+  const markSize = Math.round(size * 0.95)
+
   return (
     <Link
       href="/design-system/hachure"
       className={styles.lockup}
       aria-label="Hachure — design system"
     >
-      <HachureMark size={size} compact={size <= 32} />
+      <HachureMark size={markSize} />
       <span className={styles.lockupWord} aria-hidden="true">
         <HachureWordmark height={Math.round(size * 0.58)} />
         <span className={styles.lockupSub}>terrain / weather / field data</span>

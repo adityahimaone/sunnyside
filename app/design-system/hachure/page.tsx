@@ -4,6 +4,7 @@ import Link from 'next/link'
 import '@/features/hachure/hachure-tokens.css'
 
 import {
+  DitherField,
   DitherStudy,
   ElevationStudy,
   FooterDemo,
@@ -11,7 +12,6 @@ import {
   HachureLockup,
   HachureMark,
   HachureWordmark,
-  HeroPlate,
   HachureControls,
 } from '@/features/hachure'
 import tokens from '@/features/hachure/tokens.json'
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
         url: '/brand/hachure/hachure-brandkit.png',
         width: 1500,
         height: 1125,
-        alt: 'The Hachure brand board: a 3 × 3 identity deck on a night table — the solid ridge mark, the outlined mono wordmark, the dither plate, the seven-tone ramp and the form kit.',
+        alt: 'The Hachure brand board: a 3 × 3 identity deck on a night table — the lit-crest mark, the outlined mono wordmark, the dither plate, the seven-tone ramp and the form kit.',
       },
     ],
   },
@@ -146,12 +146,30 @@ const FUSIONS = [
   },
 ]
 
+/* V4.0: nine drawn across four rounds, one kept. The rejections are the guide,
+   so they are on the page rather than in a commit message. */
 const EXPLORATIONS = [
-  { n: '01', name: 'Architectural monogram', note: 'a letter, not a slope' },
-  { n: '02', name: 'Offset planes', note: 'an overprint, not terrain' },
-  { n: '03', name: 'Louvers', note: 'kept' },
-  { n: '04', name: 'Ribbon', note: 'one beam, no range' },
-  { n: '05', name: 'Horizon', note: 'a line, not relief' },
+  { n: '01', name: 'Stepped silhouette', note: 'a staircase at 16px' },
+  { n: '02', name: 'One diagonal stroke', note: 'reads as a pen, not a slope' },
+  { n: '03', name: 'Two map-key bars', note: 'a bar chart with a legend' },
+  {
+    n: '04',
+    name: 'Quantised right edge',
+    note: 'a torn sheet of paper',
+  },
+  { n: '05', name: 'Banded solid', note: 'five stripes, still a list icon' },
+  { n: '06', name: 'Thick contour arc', note: 'a rainbow' },
+  {
+    n: '07',
+    name: 'Weight ramp ×3',
+    note: 'flip it and the meaning flips: a diagram, not a mark',
+  },
+  {
+    n: '08',
+    name: 'Heavy base, lit summit',
+    note: 'reads as bedrock under a cap',
+  },
+  { n: '09', name: 'Solid mass, lit crest', note: 'kept' },
 ]
 
 const TIMELINE = [
@@ -243,9 +261,42 @@ export default function HachurePage() {
       </header>
 
       <main id="main">
-        <div className={styles.shell}>
-          <section className={styles.hero} aria-labelledby="hero-title">
-            <div>
+        {/* The hero is the top edge of the sheet: the range across the full
+            viewport, its printed margin, then the title on paper. The field is
+            a row of its own rather than a layer behind the copy — the engine
+            puts the highest crest at 16% of its box, so a field stretched
+            behind the type lifts the terrain into the lead paragraph. A row
+            cannot collide at any width. */}
+        <section className={styles.hero} aria-labelledby="hero-title">
+          <DitherField
+            className={styles.heroField}
+            tones={tokens.tones.light}
+            tonesDark={tokens.tones.dark}
+            seed={7}
+            layers={6}
+            mist={0.9}
+            fadeFrom={0.5}
+            duration={1800}
+          />
+
+          <div className={styles.heroMargin}>
+            <div className={styles.heroMarginInner}>
+              <span className={styles.marginTick}>Sheet 05</span>
+              <span className={styles.marginScale}>
+                <span>0</span>
+                <span className={styles.plateScaleBar} aria-hidden="true" />
+                <span>1 km</span>
+              </span>
+              <span className={styles.marginItem}>1:25 000</span>
+              <span className={styles.marginItem}>47°12′N 8°41′E</span>
+              <span className={styles.marginItem}>
+                seed 7 · six ridges · seven tones
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.heroInner}>
+            <div className={styles.heroCopy}>
               <p className={styles.eyebrow}>
                 Case 05 / Identity and interface system
               </p>
@@ -278,33 +329,21 @@ export default function HachurePage() {
                 ))}
               </nav>
             </div>
+          </div>
+        </section>
 
-            <figure className={styles.plate}>
-              <div className={styles.plateTop}>
-                <span className={styles.plateTick}>Sheet 05</span>
-                <span>1:25 000</span>
-              </div>
-              <HeroPlate tones={tokens.tones.light} seed={7} />
-              <div className={styles.plateFoot}>
-                <span className={styles.plateScale}>
-                  <span>0</span>
-                  <span className={styles.plateScaleBar} aria-hidden="true" />
-                  <span>1 km</span>
-                </span>
-                <span>47°12′N 8°41′E</span>
-              </div>
-              <figcaption className={styles.plateCaption}>
-                The hero plate, drawn live by the same engine as the footer:
-                seed 7, six ridges, seven tones. The plate stays paper at night
-                — it is a sheet on the table, not a screen.
-              </figcaption>
-            </figure>
-          </section>
+        <div className={styles.shell}>
+          <p className={styles.heroNote}>
+            The hero field is drawn live by the same engine as the footer: seed
+            7, six ridges, seven tones, 2px cells. It runs the full width of the
+            viewport and is trimmed at the bottom to a printed margin, because
+            that is where a sheet ends.
+          </p>
 
           <dl className={styles.facts} aria-label="Case facts">
             <div className={styles.fact}>
               <dt>Grid</dt>
-              <dd>64 grid / four bars</dd>
+              <dd>64 grid / one crest</dd>
             </div>
             <div className={styles.fact}>
               <dt>Tones</dt>
@@ -564,15 +603,15 @@ export default function HachurePage() {
                 id="mark"
                 number="04"
                 label="The mark"
-                title="Relief, drawn in weight."
-                lead="The first pass drew a letter; the name was not in it. The mark is now four solid wedge-bars that rise and thicken left to right — the width is the density. A lichen diamond caps the summit. No circle, no thin lines, no enclosing ring."
+                title="Relief, drawn in mass."
+                lead="Three drawings have held this square. The first was a letter. The second used bar height to mean rise, which is the grammar of a bar chart. The third was seven sheared strokes — equal lengths, offset climbing right, so nothing was plotted and the lean was the slope. The reasoning was sound and the drawing still lost: measured against its seven siblings at 112px, Hachure was the only mark built from hairlines. So the mass came back and the hachure moved into the silhouette. One solid section through rising ground, one crest lit by the sheet, nothing hatched inside."
               />
 
               <div className={styles.markGrid}>
                 <div className={styles.markStage}>
                   <HachureMark size={240} title="The mark on a 64 grid" />
                   <span className={styles.markStageNote}>
-                    64 grid / 4 wedge bars / 1 apex
+                    64 grid / crest 7 / rise 24
                   </span>
                 </div>
 
@@ -587,11 +626,7 @@ export default function HachurePage() {
                       <span className={styles.label}>32</span>
                     </div>
                     <div className={styles.familyItem}>
-                      <HachureMark size={32} compact title="Compact mark" />
-                      <span className={styles.label}>Compact</span>
-                    </div>
-                    <div className={styles.familyItem}>
-                      <HachureMark size={16} compact title="Favicon at 16px" />
+                      <HachureMark size={16} title="Favicon at 16px" />
                       <span className={styles.label}>16</span>
                     </div>
                     <div className={styles.familyItem}>
@@ -601,15 +636,19 @@ export default function HachurePage() {
                   </div>
 
                   <p className={styles.familyNote}>
-                    At 16px the compact drops to three bars and widens the channels by a
-                    quarter; the widths still read. `mono` collapses the apex to
-                    the ink. Clear space is one channel on every side. The mark
-                    is fill-only: no ring, no stroke, no circle.
+                    One drawing, every size — there is no compact variant. The
+                    seven-stroke mark needed a 32-grid redraw because its
+                    2.2-unit channels closed into a block below 24px; this one
+                    has no channel to close, so 16px and 512px are the same
+                    geometry. <span className={styles.mono}>mono</span> collapses
+                    the crest to the ink. Clear space is 3 units left and right,
+                    5 above, 7 below. The mark is fill-only: no ring, no stroke,
+                    no circle.
                   </p>
 
                   <div>
                     <p className={styles.label} style={{ marginBottom: 10 }}>
-                      V2.3 bake-off / five families, one kept
+                      V4.0 bake-off / nine drawn, one kept
                     </p>
                     <ul className={styles.explorations}>
                       {EXPLORATIONS.map((item) => (
@@ -627,13 +666,17 @@ export default function HachurePage() {
                       Construction
                     </p>
                     <p className={styles.familyNote}>
-                      Four solid bars, <span className={styles.mono}>8 / 10 / 12 / 14</span>{' '}
-                      wide, rise from <span className={styles.mono}>56</span> to
-                      tops at 36 / 26 / 16 / 8. The gaps are{' '}
-                      <span className={styles.mono}>5.3</span> units. A lichen
-                      diamond caps the tallest bar. No stroke, no circle. The
-                      wordmark is Geist Mono 700, outlined once, never live
-                      text.
+                      Flat bottom at{' '}
+                      <span className={styles.mono}>y57</span>, vertical sides at{' '}
+                      <span className={styles.mono}>x3</span> and{' '}
+                      <span className={styles.mono}>x61</span>, a top edge
+                      climbing <span className={styles.mono}>24</span> units over{' '}
+                      <span className={styles.mono}>58</span> — a 22° slope. The
+                      crest is a <span className={styles.mono}>7</span>-unit band
+                      cut from that edge, so the highest surface of the
+                      silhouette is the lichen and the accent is the ground, not
+                      a stripe laid on it. The wordmark is Geist Mono 700,
+                      outlined once, never live text.
                     </p>
                   </div>
                 </div>
@@ -1316,9 +1359,9 @@ export default function HachurePage() {
                       SVG drawing. The page loads no images at runtime.
                     </li>
                     <li>
-                      The mark is four solid bars and one lichen apex;
-                      the 16px favicon is the compact drawing on a 32 grid, not
-                      the primary scaled down.
+                      The mark is one solid mass and one lit crest, on the same 64
+                      grid as the field; the 16px favicon is that same drawing,
+                      not a compact redraw.
                     </li>
                   </ul>
                 </article>
@@ -1332,7 +1375,7 @@ export default function HachurePage() {
                       <code>hachure-tokens.css</code> and the public JSON.
                     </li>
                     <li>
-                      Marks: <code>public/brand/hachure/</code> — mark, compact, mono,
+                      Marks: <code>public/brand/hachure/</code> — mark, mono,
                       wordmark, lockup, favicons.
                     </li>
                     <li>
@@ -1346,9 +1389,17 @@ export default function HachurePage() {
                       Compiler lint, behaviour unchanged.
                     </li>
                     <li>
+                      Field:{' '}
+                      <code>features/hachure/components/dither-field.tsx</code>{' '}
+                      wraps that engine for the two full-bleed exposures, adding{' '}
+                      <code>develop</code>, <code>fadeFrom</code> and a theme
+                      watcher — a canvas cannot inherit a CSS variable.
+                    </li>
+                    <li>
                       Generators: <code>scripts/build-hachure-brand.mjs</code>,{' '}
                       <code>scripts/hachure-wordmark.py</code>,{' '}
-                      <code>scripts/render-hachure-board.mjs</code>.
+                      <code>scripts/render-hachure-board.mjs</code>,{' '}
+                      <code>scripts/shoot-hachure-docs.mjs</code>.
                     </li>
                     <li>
                       Case docs: <code>design/brand/hachure/brief.md</code>,{' '}
@@ -1366,8 +1417,8 @@ export default function HachurePage() {
                 altimeter reads a generated elevation, not a surveyed one. The
                 component&apos;s{' '}
                 <span className={styles.mono}>backdrop-filter</span> badge has
-                not been checked in Safari, and the automated browser pass was
-                skipped for this case. No photographs are used, and none are
+                not been checked in Safari, and there is no automated
+                accessibility scan. No photographs are used, and none are
                 promised.
               </p>
             </div>
@@ -1376,26 +1427,40 @@ export default function HachurePage() {
       </main>
 
       <footer className={styles.colophon}>
-        <div className={styles.shell}>
-          <div className={styles.colophonInner}>
-            <HachureMark size={34} title="Hachure" />
-            <div className={styles.colophonLinks}>
-              <Link href="/design-system">Case library</Link>
-              <Link href="/design-engineering">Design engineering</Link>
-              <a href="/design-system/hachure/llms.txt">Markdown twin</a>
-              <a href="/brand/hachure/hachure-tokens.json">Tokens</a>
-              <a href="#top">Back to top ↑</a>
+        <div className={styles.colophonBody}>
+          <div className={styles.shell}>
+            <div className={styles.colophonInner}>
+              <HachureMark size={34} title="Hachure" />
+              <div className={styles.colophonLinks}>
+                <Link href="/design-system">Case library</Link>
+                <Link href="/design-engineering">Design engineering</Link>
+                <a href="/design-system/hachure/llms.txt">Markdown twin</a>
+                <a href="/brand/hachure/hachure-tokens.json">Tokens</a>
+                <a href="#top">Back to top ↑</a>
+              </div>
             </div>
+            <p className={styles.colophonNote}>
+              Hachure is a fictional survey practice. The mark, favicons and
+              board are drawn from geometry; the wordmark is Geist Mono 700,
+              outlined and never set as live text. The footer is the supplied{' '}
+              <span className={styles.mono}>ridgeline-dither-footer</span>,
+              re-tokenised through its palette prop rather than rebuilt. The
+              range is the same field as the hero, seeded differently and left
+              to run off the bottom edge of the sheet. Case 05 / 2026.
+            </p>
           </div>
-          <p className={styles.colophonNote}>
-            Hachure is a fictional survey practice. The mark, favicons and board
-            are drawn from geometry; the wordmark is Geist Mono 700, outlined
-            and never set as live text. The footer is the supplied{' '}
-            <span className={styles.mono}>ridgeline-dither-footer</span>,
-            re-tokenised through its palette prop rather than rebuilt. Case 05 /
-            2026.
-          </p>
         </div>
+
+        <DitherField
+          className={styles.footerField}
+          tones={tokens.tones.light}
+          tonesDark={tokens.tones.dark}
+          seed={11}
+          layers={6}
+          mist={0.86}
+          fadeFrom={0.44}
+          duration={1400}
+        />
       </footer>
     </div>
   )

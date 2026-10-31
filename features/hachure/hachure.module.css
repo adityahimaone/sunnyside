@@ -18,8 +18,10 @@
   text-rendering: optimizeLegibility;
   overflow-x: clip;
 
-  /* The mark is a #141413 stamp on paper; on night it follows the paper ink. */
-  --hx-mark-ink: #141413;
+  /* The mark is an ink stamp on paper; at night it follows the paper ink.
+     It reads --hx-ink, not a hand-mixed near-black, so the mark and the body
+     copy are the same ink. */
+  --hx-mark-ink: var(--hx-ink);
 }
 
 .page[data-theme='dark'] {
@@ -287,14 +289,104 @@
   font-weight: 500;
 }
 
-/* ----------------------------------------------------------------- hero -- */
+/* ---------------------------------------------------------------- hero -- */
 
+/* The hero is the top edge of the sheet: the range across the full viewport,
+   its printed margin, then the title on paper.
+
+   The field is a row of its own, not a layer behind the copy. The engine puts
+   the highest crest at 16% of its box, so a field stretched behind the type
+   lifts the terrain straight into the lead paragraph — which is exactly what
+   happened on the first pass. A row cannot collide at any width. */
 .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
-  gap: clamp(24px, 4vw, 56px);
-  align-items: start;
-  padding: clamp(36px, 6vw, 84px) 0 clamp(28px, 4vw, 48px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: clamp(560px, 78vh, 800px);
+  overflow: clip;
+  background: var(--hx-surface);
+}
+
+.heroField {
+  position: relative;
+  flex: 0 0 auto;
+  height: clamp(210px, 32vh, 330px);
+  overflow: hidden;
+}
+
+.heroInner {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(30px, 4.4vw, 56px) clamp(18px, 4vw, 40px) clamp(24px, 4vw, 44px);
+}
+
+.heroCopy {
+  max-width: 44rem;
+}
+
+/* The margin is the sheet's printed strip: the densest tone on paper. At night
+   the ramp inverts — tone 7 is the *lightest* step — so following tone 7 would
+   put a pale bar across a dark page. Night gets surface-alt instead, which
+   keeps the strip a strip and leaves the headline the loudest thing. */
+.heroMargin {
+  position: relative;
+  z-index: 2;
+  background: var(--hx-tone-7);
+  color: var(--hx-tone-1);
+  --hx-margin-muted: var(--hx-tone-3);
+}
+
+.page[data-theme='dark'] .heroMargin {
+  background: var(--hx-surface-alt);
+  color: var(--hx-ink);
+  --hx-margin-muted: var(--hx-ink-muted);
+}
+
+.heroMarginInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(14px, 2.6vw, 34px);
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 13px clamp(18px, 4vw, 40px);
+  font: 500 9.5px/1.2 var(--hx-label-face);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.marginTick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.marginTick::before {
+  content: '';
+  width: 14px;
+  height: 1px;
+  background: currentColor;
+}
+
+.marginScale {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.marginItem {
+  color: var(--hx-margin-muted);
+}
+
+.heroNote {
+  margin: clamp(20px, 2.6vw, 30px) 0 0;
+  max-width: 76ch;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--hx-ink-muted);
 }
 
 .eyebrow {
@@ -471,19 +563,27 @@
   background: currentColor;
 }
 
-.page[data-theme='dark'] .plateStage,
 .page[data-theme='dark'] .studyStage {
   background: var(--hx-tone-1);
 }
 
-.plateStage {
+/* A field is a background: sized by its parent and measured from its parent,
+   never from the canvas. The stylesheet derives the canvas size from the
+   field's own output, so measuring the canvas would feed it back in. */
+.field {
   position: relative;
-  aspect-ratio: 5 / 6;
   overflow: hidden;
-  background: var(--hx-stock);
+  background: var(--hx-surface);
 }
 
-.plateStage canvas,
+.heroField,
+.footerField {
+  overflow: hidden;
+}
+
+.field canvas,
+.heroField canvas,
+.footerField canvas,
 .studyHost canvas {
   position: absolute;
   left: 0;
@@ -491,13 +591,6 @@
   display: block;
   max-width: none;
   image-rendering: pixelated;
-}
-
-.plateCaption {
-  margin-top: 10px;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--hx-ink-muted);
 }
 
 .contentsMobile {
@@ -2111,9 +2204,25 @@
 /* ------------------------------------------------------------- colophon -- */
 
 .colophon {
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
   border-top: var(--hx-hairline) solid var(--hx-rule-strong);
   background: var(--hx-surface);
-  padding: clamp(28px, 4vw, 44px) 0;
+}
+
+/* The range is given the bottom of the footer to run out into, and it runs off
+   the edge of the sheet rather than stopping on a rule. */
+.footerField {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: clamp(160px, 24vh, 300px);
+  overflow: hidden;
+}
+
+.colophonBody {
+  flex: 0 0 auto;
+  padding: clamp(28px, 4vw, 44px) 0 clamp(20px, 3vw, 32px);
 }
 
 .colophonInner {
@@ -2180,11 +2289,7 @@
   }
 
   .hero {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .plateStage {
-    aspect-ratio: 16 / 10;
+    min-height: clamp(520px, 72vh, 700px);
   }
 
   .plate {
@@ -2241,6 +2346,16 @@
 /* ---------------------------------------------------------------- 760px -- */
 
 @media (max-width: 760px) {
+  /* The margin band is a printed strip, not a paragraph: drop the engine note
+     before it is allowed to wrap onto a second line. */
+  .heroMarginInner {
+    gap: 10px 18px;
+  }
+
+  .marginItem:last-child {
+    display: none;
+  }
+
   /* The verdict moves under the idea so the note column cannot clip. */
   .explorations li {
     grid-template-columns: 30px minmax(0, 1fr);
@@ -2315,6 +2430,15 @@
 /* ---------------------------------------------------------------- 520px -- */
 
 @media (max-width: 520px) {
+  /* Sheet number, scale and one coordinate. The rest is a footnote. */
+  .marginItem {
+    display: none;
+  }
+
+  .hero {
+    min-height: 480px;
+  }
+
   .lockupSub {
     display: none;
   }

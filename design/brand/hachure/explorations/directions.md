@@ -172,3 +172,104 @@ outlines, so the five allowed families were drawn with solid fills only:
 The kept mark is four solid wedge-bars, 8 / 10 / 12 / 14 wide, with a lichen
 diamond apex. The compact is three bars on a 32 grid. The H, the knoll and the
 thin hachure lines remain in this file as history, not as the current mark.
+
+---
+
+## v3.0 — the mark drawn from the technique, not the picture
+
+The v2.3 winner was wrong in a way that only showed up when it was set beside
+the other eight case marks: it used **height** to mean rise. Four bars getting
+taller is a bar chart, and a bar chart is the one thing a terrain system must
+not be. So the mark was drawn again — not from the picture of a hill, but from
+the technique the system is named after.
+
+Nine marks, four rounds. Round one drew five; rounds two to four refined the
+only two that survived contact with a 16px favicon.
+
+| # | Family | Idea | Verdict |
+| --- | --- | --- | --- |
+| 01 | contour chevrons | nested chevrons, lichen centre | an upload icon at 16px |
+| 02 | dither tile | one square of dither, four tones | noise, not a mark |
+| 03 | even bars, lichen cap | seven equal bars, top one lime | a striped square with no focal point |
+| 04 | bars cut diagonally | bars growing 16 → 64, bottom lime | reads as signal strength |
+| 05 | right-aligned summit | left ends tracing a ridge in negative space | the best idea of the round; muddy below 32px |
+| 06 | contour diamonds | nested diamonds, `fill-rule="evenodd"`, lichen core | a thin wireframe beside eight solid siblings |
+| 07 | sheared stack, descending | equal bars stepping down-right | reads as falling, not as a slope |
+| 08 | slab ridge | silhouette cut by channels that narrow as they climb | a mountain, so a photo icon |
+| 09 | **sheared stack, climbing** | equal bars stepping up-right, lichen cap | **kept** |
+
+### Why 09
+
+Equal lengths are the argument. Nothing is plotted, so nothing can be misread
+as data; the only variable is the offset. In a real hachure the strokes are
+drawn down the line of steepest slope, so a sheared stack *is* a slope and the
+lean *is* its aspect. The mark is the technique, not an illustration of terrain.
+
+The lichen cap stayed where the old apex diamond was, so the accent did not
+move — only the grammar did.
+
+### What changed around it
+
+- **The channel became a number.** `2.2` on the 64 grid, the same gap the
+  dither leaves between cells, so the mark and the field are ruled alike.
+- **Clear space became a rule.** The first v3.0 drawing ran to the edge of its
+  box, which made it optically larger than the wordmark and impossible to align
+  with anything. It now sits in a channel and a half on every side.
+- **The cap stopped being an off-token lime.** The React component hard-coded
+  `#B8CC3B`, a colour in no token file. It reads `--hx-sheet` (`#C9D94E`), which
+  is what the SVG files always claimed.
+
+## v4.0 — the reset, and why 09 was not enough
+
+09 was argued well and still read weak. The argument was right about charts and
+wrong about weight, because a mark is judged in a row rather than on its own.
+
+Rendering all eight siblings at 112px settles it:
+
+| Sibling | Kind |
+| --- | --- |
+| `cove`, `huginn`, `ledger`, `porphyry`, `strand`, `vitrine` | solid saturated tiles |
+| `riso` | two-plane paper collage |
+| `clearing` | the only free-standing line drawing |
+
+Six solid masses, one collage, one drawing — and Hachure, a stack of hairlines.
+At 46px it sits in the row as a list icon next to a set of blocks. No amount of
+shear tuning fixes a weight failure.
+
+### The round
+
+| # | Family | Idea | Verdict |
+| --- | --- | --- | --- |
+| 01 | stepped silhouette | quantised steps up-right | a staircase at 16px |
+| 02 | single stroke | one thick diagonal | reads as a pen nib |
+| 03 | map key | two stacked legend bars | a bar chart with a legend |
+| 04 | quantised edge | solid field, torn right edge | a sheet of paper |
+| 05 | banded solid | solid mass cut into bands | five stripes, still a list icon |
+| 06 | contour arc | thick arc on a contour | a rainbow |
+| 07 | weight ramp ×3 | equal bars thickening upward | flip it and the meaning flips |
+| 08 | heavy base, lit summit | 07 reversed | bedrock under a cap |
+| 09 | **solid mass, lit crest** | one section, crest cut from the edge | **kept** |
+
+### Why 09, and why 07 lost
+
+07 was the best drawing of the round. Equal bars with thickness climbing encode
+density literally — it is the technique, drawn. Then it was flipped so the heavy
+stroke sat at the base, and it said the opposite thing: bedrock under a cap
+rather than a lit summit. **A mark whose orientation reverses its reading is a
+diagram, not an identity.** That is the whole reason 09 wins: a solid mass with
+one lit crest says "slope" whichever way you turn it, because the slope is the
+silhouette and not an arrangement of parts.
+
+09 is a section through rising ground. Flat bottom, vertical sides, a top edge
+climbing 24 units over 58 — a 22° slope — and a 7-unit band cut from that edge,
+so the highest surface of the silhouette is the lichen. The accent is the
+ground, not a stripe laid on it. Nothing is hatched inside the mass.
+
+### What the reset removed
+
+- **The compact drawing.** It existed because seven 2.2-unit channels closed
+  into a block below 24px. This drawing has no channel to close, so
+  `mark-compact.svg` was deleted and the `compact` prop came off `HachureMark`.
+- **The lockup's 0.86.** The old ink was 58 × 58 of the 64 grid; the new ink is
+  58 × 52, so holding 0.86 would have shrunk the mark by the height it lost.
+  The factor is now 0.95, which keeps the ink at 1.4 × the wordmark height.

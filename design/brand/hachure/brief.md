@@ -96,31 +96,75 @@ six more on the same grid:
 | 12 | **H, printed feet** — the base breaks into cells | **Kept** |
 
 The H was the second pass, not the last word. It passed 16px, but it never drew
-the thing the name means: a line on a slope. The v2.2 bake-off ran the six
-families and replaced it.
+the thing the name means: a line on a slope. A v2.3 round replaced it with four
+wedge-bars that used height to mean rise — which turned out to be the grammar of
+a bar chart. The mark was drawn again in v3.0, this time from the technique
+rather than from the picture of a hill.
 
-### The v2.3 bake-off
+### The v3.0 bake-off
 
 | # | Family | Idea | Verdict |
 | --- | --- | --- | --- |
-| 01 | architectural monogram | notched letter | a letter, not a slope |
-| 02 | offset planes | sheared sheets | an overprint, not terrain |
-| 03 | louvers | solid stepped bars | **kept** |
-| 04 | ribbon | one folded beam | one beam, no range |
-| 05 | horizon | baseline + keystone | a line, not relief |
+| 01 | contour chevrons | nested chevrons | an upload icon at 16px |
+| 02 | dither tile | one square of dither | noise, not a mark |
+| 03 | even bars, cap | equal bars, lichen top | a striped square, no focus |
+| 04 | bars cut diagonally | erosion toward a corner | signal strength, not slope |
+| 05 | right-aligned summit | ridge in negative space | muddy below 32px |
+| 06 | contour diamonds | nested diamonds, lichen core | a wireframe beside solid siblings |
+| 07 | sheared stack, descending | equal bars stepping down-right | reads as falling |
+| 08 | slab ridge | silhouette cut by channels | a mountain, so a photo icon |
+| 09 | **sheared stack, climbing** | equal bars stepping up-right | **kept** |
 
-The kept mark is a **ridge of solid bars**: four wedge-bars rise and thicken
-left to right, with a lichen diamond on the summit. Width carries the density;
-the negative channels are the chart's whitespace. It reads at 16px as three
-bold bars and a lime apex.
+The v2.3 winner — four wedge-bars rising and thickening — used **height** to
+mean rise, which is the grammar of a bar chart. A terrain system cannot be a
+bar chart, so the mark was drawn again from the technique rather than from the
+picture of a hill.
+
+### The v4.0 bake-off
+
+v3.0 kept the climbing shear and it still read weak, for a reason no bake-off
+table could show: the mark is judged in a row. Rendering all eight sibling
+marks at 112px makes the failure plain — six of them are solid, saturated
+tiles, one is a two-plane collage, one is a line drawing, and Hachure was a
+stack of hairlines. At 46px it was a list icon beside a set of blocks.
+
+| # | Family | Idea | Verdict |
+| --- | --- | --- | --- |
+| 01 | stepped silhouette | quantised steps up to the right | a staircase at 16px |
+| 02 | single stroke | one thick diagonal | reads as a pen, not a slope |
+| 03 | map key | two stacked legend bars | a bar chart with a legend |
+| 04 | quantised edge | solid field, torn right edge | a sheet of paper |
+| 05 | banded solid | solid mass cut into bands | five stripes — still a list icon |
+| 06 | contour arc | thick arc following a contour | a rainbow |
+| 07 | weight ramp ×3 | equal bars thickening upward | flip it and the meaning flips |
+| 08 | heavy base, lit summit | the ramp reversed | reads as bedrock under a cap |
+| 09 | **solid mass, lit crest** | one section, crest cut from the edge | **kept** |
+
+The kept mark is **a section through rising ground**: flat bottom, vertical
+sides, a top edge that climbs, and a band of constant thickness cut from that
+edge so the highest surface of the silhouette is the lichen. The accent is the
+ground, not a stripe laid on it. Nothing is hatched inside the mass — internal
+hatching is exactly what fails at 16px — so density is carried by the slope of
+the top edge instead of by a stroke count.
+
+The decisive rejection is **07**: the weight ramp was the best drawing of the
+round, and reversing it changed what it said. A mark whose orientation flips
+its meaning is a diagram.
 
 ## 5. The mark's construction
 
-- 64 grid. Bars 8 / 10 / 12 / 14 wide, gaps 5.3; tops 36 / 26 / 16 / 8; base 56.
-- Bars read #141413 on ground / the paper ink at night; the apex reads #B8CC3B. No stroke, no circle.
-- Compact: a 32 grid with three bars (6 / 8 / 9 wide, 3-unit gaps) and the apex.
-- `mono` collapses the apex to currentColor.
-- Favicon: opaque paper, compact at 16/32, full at 180.
+- 64 grid. Flat bottom at `y57`, sides at `x3` / `x61`, top edge climbing `24`
+  over `58` — a 22° slope. Crest band `7`.
+- Clear space: `3` left and right, `5` above, `7` below — the bottom gets more
+  because the mass is bottom-heavy.
+- Body reads `--hx-mark-ink` (#16211B on ground, the paper ink at night); the
+  crest reads `--hx-sheet` (#C9D94E). No stroke, no circle.
+- **No compact variant.** There is no channel to close, so 16px and 512px are
+  the same geometry.
+- `mono` collapses the crest to currentColor; the slope remains the silhouette.
+- Lockup: the mark is drawn at 0.95 of the lockup size so its ink lands at
+  1.4 × the wordmark height.
+- Favicon: opaque paper, the same drawing at 16, 32 and 180.
 
 ## 6. Elevation as the hierarchy
 
@@ -151,7 +195,7 @@ That is the whole depth model. There are three levels because there are three le
 ## 9. Deliverables
 
 - `features/hachure/tokens.json` → `features/hachure/hachure-tokens.css`, `public/brand/hachure/hachure-tokens.{css,json}`.
-- `public/brand/hachure/` — `mark.svg`, `mark-compact.svg`, `mark-mono.svg`, `wordmark.svg`, `lockup.svg`, `favicons/`, `hachure-brandkit.png`.
+- `public/brand/hachure/` — `mark.svg`, `mark-mono.svg`, `wordmark.svg`, `lockup.svg`, `favicons/`, `hachure-brandkit.png`.
 - `design/brand/hachure/brandkit.html` — the 1500×1125 board.
 - `app/design-system/hachure` — the proof page, plus an `llms.txt` twin.
 - `components/ui/ridgeline-dither-footer.tsx` — the component, unmodified in behaviour.

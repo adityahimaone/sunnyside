@@ -1,1 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Hachure mono"><path d="M2 56V36L10 42V56Z M15.3 56V26L25.3 32V56Z M30.6 56V16L42.6 22V56Z M47.9 56V8L61.9 14V56Z" fill="var(--hx-mark-ink, #141413)"/><path d="M54.9 2L61.9 8L54.9 14L47.9 8Z" fill="currentColor"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Hachure mono"><path d="M3 36L61 12V57H3Z" fill="var(--hx-mark-ink, #16211B)"/><path d="M3 29L61 5V12L3 36Z" fill="currentColor"/></svg>

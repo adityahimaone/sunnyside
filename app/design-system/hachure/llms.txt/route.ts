@@ -49,15 +49,15 @@ There are three bands because an interface has three levels of meaning.
 
 | Band | Altitude | What lives there |
 | --- | --- | --- |
-| Range | 400–3,000 m | The site footer, and only the footer — the one loud field |
+| Range | 400–3,000 m | The two edges of the page: the hero field and the footer field. One field, two exposures |
 | Bench | 40 m | Panels, inputs, table headers: one hairline and one tone |
 | Ground | 0 m | The page, survey stock, reading type. Nothing sits below it |
 
-Using the dither plate anywhere but the footer spends the system's one loud field on the first screen, so it is not allowed.
+The range is the only loud field, and it is allowed at the two edges: it rises under the title and returns at the foot. Both are drawn by the same engine and seeded differently, so they read as one range seen twice rather than two illustrations. A third exposure — a framed plate mid-page — would cancel them, so it is not allowed. The copy never sits on the field: it is a row of its own in the hero's column, because the engine puts the highest crest at 16% of its box and a field stretched behind the type lifts the terrain into the lead paragraph.
 
 ## Mark
 
-A ridge of four solid wedge-bars on a 64 grid: widths 8 / 10 / 12 / 14, gaps 5.3, tops 36 / 26 / 16 / 8, base 56. The bars read #141413 on ground and the paper ink at night; a lichen diamond #B8CC3B caps the tallest bar. No circle, no ring, no stroke. The compact is a separate 32-grid drawing with three bars (6 / 8 / 9 wide, 3-unit gaps) and the apex; \`mono\` collapses the apex to currentColor. Five families were drawn in the v2.3 bake-off (architectural monogram, offset planes, louvers, ribbon, horizon); louvers kept the name's density. Notes live in \`design/brand/hachure/explorations/directions.md\`.
+A section through rising ground: one solid mass, one lit crest, on a 64 grid. The mass has a flat bottom at \`y57\`, vertical sides at \`x3\` and \`x61\`, and a top edge climbing \`24\` units over \`58\` — a 22° slope. The crest is a \`7\`-unit band cut from that edge, so the highest surface of the silhouette is the lichen and the accent is the ground rather than a stripe laid on it. Nothing is hatched inside the mass, because internal hatching is what fails at 16px; density is carried by the slope of the top edge instead of by a stroke count. The body reads \`--hx-mark-ink\` (\`#16211B\` on ground, the paper ink at night) and the crest reads \`--hx-sheet\` \`#C9D94E\`. Clear space is \`3\` left and right, \`5\` above, \`7\` below. No circle, no ring, no stroke. There is no compact variant: with no channel to close, 16px and 512px are the same geometry. \`mono\` collapses the crest to currentColor and the slope remains the silhouette. Nine marks were drawn in the v4.0 bake-off — a stepped silhouette, a single stroke, a map key, a quantised edge, a banded solid, a contour arc, a weight ramp in three weights, a heavy base with a lit summit, and the kept solid mass with a lit crest. The ramp was the best of them and lost because reversing it reversed its meaning. Notes live in \`design/brand/hachure/explorations/directions.md\`.
 
 ## Wordmark
 
@@ -142,7 +142,7 @@ ${failing.length ? `The failing pair is kept visible as a rule rather than fixed
 ## Files
 
 - Tokens: \`features/hachure/tokens.json\` → \`features/hachure/hachure-tokens.css\`, \`public/brand/hachure/hachure-tokens.{css,json}\`.
-- Marks: \`public/brand/hachure/\` — mark, mark-compact, wordmark, lockup, favicons at 16/32/180 and SVG.
+- Marks: \`public/brand/hachure/\` — mark, mark-mono, wordmark, lockup, favicons at 16/32/180 and SVG.
 - Board: \`design/brand/hachure/brandkit.html\` → \`public/brand/hachure/hachure-brandkit.png\` (1500 × 1125).
 - Generators: \`scripts/build-hachure-brand.mjs\`, \`scripts/hachure-wordmark.py\`, \`scripts/render-hachure-board.mjs\`.
 - Case notes: \`design/brand/hachure/brief.md\`, \`design/brand/hachure/explorations/directions.md\`, \`docs/hachure-design-system-audit.md\`.

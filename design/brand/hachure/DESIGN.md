@@ -57,8 +57,10 @@ becomes the largest plate in a system that was always tonal.
    only thing that reaches altitude is the footer.
 2. **No gradient sky.** A CSS gradient cannot be printed. Tonal steps are
    discrete palette indices.
-3. **No peak logo.** The triangle is the most used mark in this category. The
-   mark is a ridge of solid wedge-bars with a lichen apex; no circle.
+3. **No peak logo.** The triangle is the most used mark in this category, so the
+   test is whether the shape narrows to a point. This one never does: flat
+   bottom, two vertical sides, a top edge that climbs — a *section* through
+   ground, not a summit. The crest is lit; no circle.
 
 ## 3. Domain
 
@@ -121,21 +123,34 @@ It is never live text.
 
 The mark is the name's operation at full weight: relief drawn by density.
 
-Four solid wedge-bars rise and thicken left to right. The width is the slope:
-8 / 10 / 12 / 14 units, with 5.3-unit negative channels. A lichen diamond caps
-the tallest bar. No circle, no enclosing ring, no stroke.
+One solid mass, one lit crest. The mass is a section through rising ground —
+flat bottom, vertical sides, a top edge that climbs left to right. The crest is
+a band of constant thickness cut from that edge, so the highest surface of the
+silhouette is the lichen: the accent is the ground, not a stripe laid on it.
+Nothing is hatched inside the mass. No circle, no enclosing ring, no stroke.
 
-- 64 grid: `M2 56V36L10 42V56Z M15.3 56V26L25.3 32V56Z M30.6 56V16L42.6 22V56Z
-  M47.9 56V8L61.9 14V56Z`; apex `M54.9 2L61.9 8L54.9 14L47.9 8Z`.
-- Bars read `--hx-mark-ink` (#141413 on ground, the paper ink at night); the apex reads #B8CC3B.
-- Compact: a separate 32-grid drawing with three bars and wider channels.
-- `mono` collapses the apex to currentColor.
-- The favicon is opaque paper so the ink bars survive a dark chrome.
+- 64 grid: flat bottom at `y57`, sides at `x3` / `x61`, a top edge climbing
+  `24` over `58` (a 22° slope); crest band `7`; clear space `3` left and right,
+  `5` above, `7` below — the bottom gets more because the mass is bottom-heavy.
+- The body reads `--hx-mark-ink` (`#16211B` on ground, the paper ink at night);
+  the crest reads `--hx-sheet` (`#C9D94E`).
+- **No compact variant.** There is no channel to close, so 16px and 512px are
+  the same geometry. A second drawing would be the same bytes.
+- `mono` collapses the crest to currentColor, leaving the slope as the only
+  distinguishing feature — which is enough, because the slope is the silhouette.
+- The lockup draws the mark at 0.95 of the lockup size, so its ink lands at
+  1.4 × the wordmark height.
+- The favicon is opaque paper so the ink survives a dark chrome.
 
-The H and its foot cells are gone. The v2.3 five-family bake-off (architectural
-monogram, offset planes, louvers, ribbon, horizon) kept the louver family: it
-draws the name's density with solid weight instead of thin lines. The rejection
-notes are in [`explorations/directions.md`](./explorations/directions.md).
+The H and its foot cells are gone, and so is the v2.3 louver family. That mark
+used **height** to mean rise — four bars getting taller — which is the grammar
+of a bar chart, and a bar chart is the one thing a terrain system must not be.
+v3.0 replaced it with seven sheared strokes, which argued well and read weak:
+measured against its seven siblings at 112px it was the only mark built from
+hairlines, so at 46px it sat in the row as a list icon next to a set of blocks.
+v4.0 is the reset. The rejection notes for both rounds are in
+[`explorations/directions.md`](./explorations/directions.md) and on the page's
+mark section.
 
 ## 8. Motion
 

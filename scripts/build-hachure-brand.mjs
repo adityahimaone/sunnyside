@@ -130,40 +130,71 @@ writeFileSync(join(ROOT, 'features/hachure/hachure-tokens.css'), CSS)
 writeFileSync(join(PUBLIC, 'hachure-tokens.css'), CSS)
 writeFileSync(join(PUBLIC, 'hachure-tokens.json'), JSON.stringify(tokens, null, 2) + '\n')
 
-/* ---------- the mark: a rising ridge of solid bars -------------------- */
+/* ---------- the mark: a section through rising ground ------------------ */
 
 const round = (n) => Number(n.toFixed(2))
+const fix = (n) => Number(n.toFixed(2))
 
 /**
- * v2.3: relief drawn by weight, not by thin lines.
+ * v4.0: one solid mass, one lit crest.
  *
- * Four solid wedge-bars rise left to right and thicken as they rise; the gaps
- * are negative channels (5.3 units on the 64 grid). A lichen diamond sits on
- * the summit. No circle, no enclosing ring, no strokes. The compact drops to
- * three bars and widens the channels; `mono` collapses the apex to currentColor.
+ * v3.0 drew seven sheared strokes, and the strokes were the argument: equal
+ * lengths, offset climbing to the right, so the lean meant slope and not
+ * height. The reasoning was sound and the drawing still lost. Measured against
+ * its seven siblings at 112px, Hachure was the only mark built from hairlines —
+ * cove, huginn, ledger, porphyry, strand and vitrine are all solid saturated
+ * tiles, riso is a two-plane collage, and clearing is the one free-standing
+ * line drawing. A stripe stack does not read as weak because it is wrong; it
+ * reads as weak because at 46px it is a list icon next to a set of blocks.
+ *
+ * So the mass comes back and the hachure moves into the silhouette. The shape
+ * is a section through rising ground: flat bottom, vertical sides, a top edge
+ * that climbs left to right. The crest is a band of constant thickness cut from
+ * that edge, so the highest surface of the silhouette is the lichen — the lit
+ * crest, not an applied stripe. Nothing is hatched inside the mass, because
+ * internal hatching is exactly what fails at 16px; density is carried by the
+ * slope of the top edge instead.
+ *
+ * One consequence worth stating: there is no compact variant. The old mark
+ * needed a 32-grid redraw because seven channels of 2.2 units closed into a
+ * solid block below 24px. This drawing has no channel to close, so the same
+ * geometry serves 16px and 512px. A second drawing would be the same bytes.
+ *
+ * Clear space is 3 units left and right, 5 top, 7 bottom on the 64 grid. The
+ * bottom gets more because the mass is bottom-heavy: equal padding would make
+ * it look like it was falling out of its own box.
  */
-const FULL = {
+function crestMark({ box, left, right, bottom, topRight, topLeft, band }) {
+  const k = box / 64
+  const s = (n) => fix(n * k)
+  return {
+    box,
+    body: `M${s(left)} ${s(topLeft + band)}L${s(right)} ${s(topRight + band)}V${s(bottom)}H${s(left)}Z`,
+    cap: `M${s(left)} ${s(topLeft)}L${s(right)} ${s(topRight)}V${s(topRight + band)}L${s(left)} ${s(topLeft + band)}Z`,
+    band: fix(band),
+    rise: fix(topLeft - topRight),
+  }
+}
+
+const FULL = crestMark({
   box: 64,
-  bars:
-    'M2 56V36L10 42V56Z M15.3 56V26L25.3 32V56Z M30.6 56V16L42.6 22V56Z M47.9 56V8L61.9 14V56Z',
-  apex: 'M54.9 2L61.9 8L54.9 14L47.9 8Z',
-}
-const COMPACT = {
-  box: 32,
-  bars: 'M2 30V20L8 24V30Z M11 30V14L19 18V30Z M22 30V8L31 12V30Z',
-  apex: 'M26.5 1L31 8L26.5 15L22 8Z',
+  left: 3,
+  right: 61,
+  bottom: 57,
+  topRight: 5,
+  topLeft: 29,
+  band: 7,
+})
+
+function markInner(v, capFill = 'var(--hx-sheet, #C9D94E)') {
+  return `<path d="${v.body}" fill="var(--hx-mark-ink, #16211B)"/><path d="${v.cap}" fill="${capFill}"/>`
 }
 
-function markInner(v, apexFill = '#B8CC3B') {
-  return `<path d="${v.bars}" fill="var(--hx-mark-ink, #141413)"/><path d="${v.apex}" fill="${apexFill}"/>`
-}
-
-const markSVG = (v, size, apexFill = '#B8CC3B') =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${v.box} ${v.box}" width="${size}" height="${size}" role="img" aria-label="Hachure">${markInner(v, apexFill)}</svg>
+const markSVG = (v, size, capFill) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${v.box} ${v.box}" width="${size}" height="${size}" role="img" aria-label="Hachure">${markInner(v, capFill)}</svg>
 `
 
 const mark = markSVG(FULL, 64)
-const compact = markSVG(COMPACT, 32)
 const mono = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Hachure mono">${markInner(FULL, 'currentColor')}</svg>
 `
 
@@ -194,9 +225,9 @@ const LOCK_W = round(LOCK_MARK + LOCK_GAP + LOCK_WM_W + 2)
 const LOCK_H = LOCK_MARK
 
 const lockup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${LOCK_W} ${LOCK_H}" width="${LOCK_W}" height="${LOCK_H}" role="img" aria-label="Hachure">
-  <g transform="translate(0 0) scale(${round(LOCK_MARK / 64)})" color="var(--hx-ink, #141413)">${markInner(FULL)}</g>
+  <g transform="translate(0 0) scale(${round(LOCK_MARK / 64)})" color="var(--hx-ink, #16211B)">${markInner(FULL)}</g>
   <g transform="translate(${round(LOCK_MARK + LOCK_GAP)} ${round((LOCK_H - LOCK_WM_H) / 2)}) scale(${round(LOCK_WM_H / word.height)}) translate(${WM_X} ${WM_Y})">
-    <path d="${word.d}" fill="var(--hx-ink, #141413)"/>
+    <path d="${word.d}" fill="var(--hx-ink, #16211B)"/>
   </g>
 </svg>
 `
@@ -205,23 +236,20 @@ const lockup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${LOCK_W} $
 
 const write = (path, body) => writeFileSync(path, body)
 write(join(PUBLIC, 'mark.svg'), mark)
-write(join(PUBLIC, 'mark-compact.svg'), compact)
 write(join(PUBLIC, 'mark-mono.svg'), mono)
 write(join(PUBLIC, 'glyph.svg'), mark)
 write(join(PUBLIC, 'wordmark.svg'), wordmark)
 write(join(PUBLIC, 'lockup.svg'), lockup)
 write(join(DESIGN, 'mark.svg'), mark)
-write(join(DESIGN, 'mark-compact.svg'), compact)
 write(join(DESIGN, 'mark-mono.svg'), mono)
 write(join(DESIGN, 'wordmark.svg'), wordmark)
 
-/* Favicons: opaque paper, compact 3-bar drawing at 16/32, full 4-bar at 180. */
+/* Favicons: opaque paper, the same drawing at every size. */
 const favicon = (size) => {
-  const v = size <= 32 ? COMPACT : FULL
-  const scale = round(size / v.box)
+  const scale = round(size / FULL.box)
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
   <rect width="${size}" height="${size}" fill="#F2F4EE"/>
-  <g transform="scale(${scale})" color="#141413">${markInner(v)}</g>
+  <g transform="scale(${scale})">${markInner(FULL)}</g>
 </svg>
 `
 }
@@ -234,7 +262,6 @@ write(
   `/* Generated by scripts/build-hachure-brand.mjs. Do not edit. */
 
 export const MARK = ${JSON.stringify(FULL)} as const
-export const COMPACT = ${JSON.stringify(COMPACT)} as const
 export const WORDMARK_D =
   '${word.d}'
 export const WORDMARK_VIEWBOX = '${word.viewBox}'
@@ -247,7 +274,9 @@ export const LOCKUP_H = ${LOCK_H}
 )
 
 console.log(`tokens   ${tokens.semantic.light.length} light / ${tokens.semantic.dark.length} dark / ${tokens.contrast.length} measured pairs`)
-console.log(`mark     64 grid, four wedge bars + apex; compact three bars`)
+console.log(
+  `mark     ${FULL.box} grid, crest band ${FULL.band}, rise ${FULL.rise}, no compact variant`,
+)
 console.log(`wordmark ${WM_W} × ${WM_H} from ${word.text}`)
 console.log(`lockup   ${LOCK_W} × ${LOCK_H}`)
 const fails = tokens.contrast.filter((c) => c.level === 'Fail')
