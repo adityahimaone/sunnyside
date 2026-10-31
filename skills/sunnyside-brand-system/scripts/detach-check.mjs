@@ -111,7 +111,12 @@ function normalize(tokens) {
     : Object.entries(tokens.color ?? {}).map(([name, value]) => ({ name, value, role: '' }))
 
   const typeEntries = Array.isArray(tokens.type)
-    ? tokens.type.map((t) => ({ name: String(t.name ?? ''), value: String(t.value ?? '') }))
+    ? tokens.type.map((t) => ({
+        // `name/value` (Cove, Strand, Vitrine) or `role/face` (Hachure). Reading only
+        // the first shape made the display-face hard fail blind for the second.
+        name: String(t.name ?? t.role ?? ''),
+        value: String(t.value ?? t.face ?? ''),
+      }))
     : Object.entries(tokens.type ?? {}).map(([name, value]) => ({
         name,
         value: typeof value === 'string' ? value : '',
@@ -350,13 +355,20 @@ function compare(newRaw, refRaw, refName) {
   const copyScore = isPlaceholder(claim) ? 0 : Math.max(0, 10 - sentOverlap * 10 * 1.6)
   if (isPlaceholder(claim)) soft.push('one sentence is a placeholder — 0/10')
 
-  const score = Math.round(
-    Math.max(0, hueScore) + valueScore + materialScore + geometryScore + typeScore + structureScore + copyScore,
-  )
+  // An external reference (brand-ref.mjs) has no DNA, sections or one-sentence claim, so
+  // material, geometry, structure and copy would all award points for differing from nothing.
+  // Score only what can be measured — hue, value, type — and scale that 50 to 100.
+  const external = refRaw._external === true
+  if (external) soft.push('external reference: hue, value and type only, scaled to 100 (DNA, structure and copy are not measurable)')
+  const measured = Math.max(0, hueScore) + valueScore + typeScore
+  const score = external
+    ? Math.round((measured / 50) * 100)
+    : Math.round(Math.max(0, hueScore) + valueScore + materialScore + geometryScore + typeScore + structureScore + copyScore)
 
+  const zero = external ? () => 0 : (n) => n
   return { ref: refName, score, hard, soft, evidence, parts: {
-    hue: Math.round(hueScore), value: Math.round(valueScore), material: Math.round(materialScore),
-    geometry: Math.round(geometryScore), type: typeScore, structure: Math.round(structureScore), copy: Math.round(copyScore),
+    hue: Math.round(hueScore), value: Math.round(valueScore), material: zero(Math.round(materialScore)),
+    geometry: zero(Math.round(geometryScore)), type: typeScore, structure: zero(Math.round(structureScore)), copy: zero(Math.round(copyScore)),
   } }
 }
 
