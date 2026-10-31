@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Porphyry — brand board</title>
+    <style>
+      @font-face {
+        font-family: 'Cinzel';
+        src: url('../../public/brand/porphyry/fonts/Cinzel.woff2') format('woff2');
+        font-weight: 400 900;
+      }
+      @font-face {
+        font-family: 'Jost';
+        src: url('../../public/brand/porphyry/fonts/Jost.woff2') format('woff2');
+        font-weight: 100 900;
+      }
+      @font-face {
+        font-family: 'Pinyon Script';
+        src: url('../../public/brand/porphyry/fonts/PinyonScript-Regular.woff2')
+          format('woff2');
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1500px;
+        height: 1125px;
+        overflow: hidden;
+      }
+      body {
+        background: #160a0f;
+        color: #f2ead9;
+        font-family: 'Jost', sans-serif;
+        padding: 54px 60px 44px;
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+      }
+      .top {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        border-bottom: 1px solid #4a3238;
+        padding-bottom: 20px;
+      }
+      .top img {
+        width: 430px;
+        height: auto;
+      }
+      .meta {
+        text-align: right;
+        font-size: 11px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: #b7a99b;
+        line-height: 1.9;
+      }
+      .meta b {
+        color: #c9a45c;
+        font-weight: 500;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        flex: 1;
+        min-height: 0;
+      }
+      .col {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-height: 0;
+      }
+      .stage {
+        position: relative;
+        flex: 1;
+        border: 1px solid #4a3238;
+        overflow: hidden;
+        background: #0f070a;
+      }
+      .stage img.cast {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 22%;
+        filter: grayscale(1) contrast(1.1) brightness(0.82);
+        mix-blend-mode: screen;
+        opacity: 0.95;
+      }
+      .stage .veil {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          #140a0e 14%,
+          rgba(20, 10, 14, 0.55) 44%,
+          rgba(20, 10, 14, 0.72) 100%
+        );
+      }
+      .stage .word {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 26px;
+        padding: 0 18px;
+      }
+      .stage .word img {
+        width: 100%;
+        height: auto;
+      }
+      .stage .plate {
+        position: absolute;
+        right: 16px;
+        top: 14px;
+        font-size: 10px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: #b7a99b;
+      }
+      .stage .stars {
+        position: absolute;
+        left: 18px;
+        top: 14px;
+        color: #c9a45c;
+        font-size: 16px;
+        letter-spacing: 0.4em;
+      }
+      .claim {
+        border: 1px solid #4a3238;
+        padding: 26px 26px 22px;
+        background: #1f1017;
+      }
+      .claim .eyebrow {
+        font-size: 10px;
+        letter-spacing: 0.26em;
+        text-transform: uppercase;
+        color: #c9a45c;
+        margin-bottom: 14px;
+      }
+      .claim h1 {
+        font-family: 'Cinzel', serif;
+        font-weight: 400;
+        font-size: 31px;
+        line-height: 1.16;
+        letter-spacing: 0.01em;
+        text-wrap: balance;
+      }
+      .claim p {
+        margin-top: 16px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #b7a99b;
+      }
+      .claim .sign {
+        font-family: 'Pinyon Script', cursive;
+        font-size: 30px;
+        color: #c9a45c;
+        margin-top: 12px;
+      }
+      .palette {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        border: 1px solid #4a3238;
+      }
+      .sw {
+        min-height: 92px;
+        padding: 10px 9px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 3px;
+        border-right: 1px solid #4a3238;
+      }
+      .sw:last-child {
+        border-right: 0;
+      }
+      .sw b {
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+      .sw span {
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        font-size: 8.5px;
+        opacity: 0.8;
+      }
+      .specimen {
+        border: 1px solid #4a3238;
+        padding: 20px 22px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .specimen .label {
+        font-size: 9.5px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #b7a99b;
+      }
+      .specimen .display {
+        font-family: 'Cinzel', serif;
+        font-size: 38px;
+        line-height: 1.05;
+      }
+      .specimen .body {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #b7a99b;
+        max-width: 52ch;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .marks {
+        border: 1px solid #4a3238;
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .marks img {
+        display: block;
+      }
+      .marks .glyph {
+        color: #f2ead9;
+        width: 40px;
+        height: 40px;
+      }
+      .spec {
+        border: 1px solid #4a3238;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .spec div {
+        padding: 14px 16px 16px;
+        border-right: 1px solid #4a3238;
+      }
+      .spec div:last-child {
+        border-right: 0;
+      }
+      .spec b {
+        display: block;
+        font-family: 'Cinzel', serif;
+        font-size: 22px;
+        font-weight: 400;
+        color: #c9a45c;
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .spec span {
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #b7a99b;
+        line-height: 1.4;
+        display: block;
+      }
+      .tokens {
+        border: 1px solid #4a3238;
+        padding: 16px 20px;
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        font-size: 10px;
+        line-height: 1.75;
+        color: #b7a99b;
+        overflow: hidden;
+      }
+      .tokens b {
+        color: #c9a45c;
+        font-weight: 400;
+      }
+      .foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid #4a3238;
+        padding-top: 14px;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #b7a99b;
+      }
+      .foot b {
+        color: #f2ead9;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <img
+        src="../../public/brand/porphyry/lockup-reverse.svg"
+        alt="Porphyry"
+      />
+      <div class="meta">
+        <div><b>Case 10</b> · brand kit &amp; design system</div>
+        <div>v1.0.0 · October 2026</div>
+        <div>Porphyry + marble + gold leaf</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="col">
+        <div class="stage">
+          <img
+            class="cast"
+            src="../../public/brand/porphyry/cast/flowers.jpg"
+            alt=""
+          />
+          <div class="veil"></div>
+          <div class="stars">✦</div>
+          <div class="plate">Pl. X · 1.0000</div>
+          <div class="word">
+            <img
+              src="../../public/brand/porphyry/wordmark-reverse.svg"
+              alt="Porphyry wordmark"
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="specimen">
+            <div class="label">Display · Cinzel 400</div>
+            <div class="display">One light</div>
+            <div class="body">
+              The inscription is the argument. Marble is the reading ink; gold
+              is the only light.
+            </div>
+          </div>
+          <div class="specimen">
+            <div class="label">Signature · Pinyon Script</div>
+            <div class="sign" style="font-family: 'Pinyon Script', cursive; font-size: 54px; color: #c9a45c;">
+              Porphyry
+            </div>
+            <div class="body">
+              Once per page at most. The gallery label is Jost; the stone is
+              Cinzel.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="claim">
+          <div class="eyebrow">The one sentence</div>
+          <h1>
+            A page composed like a stage: one stone, one light, and a cast that
+            stands in front of the word.
+          </h1>
+          <p>
+            A classical diorama as an interface system. The loader fills the
+            word with marble; three photographs are keyed off their own black
+            ground by luminance; the cast rises in front of the word.
+          </p>
+          <div class="sign">Porphyry</div>
+        </div>
+
+        <div class="palette">
+          <div class="sw" style="background:#160a0f">
+            <b>Stage</b><span>#160a0f</span>
+          </div>
+          <div class="sw" style="background:#7a1f3d">
+            <b>Porphyry</b><span>#7a1f3d</span>
+          </div>
+          <div class="sw" style="background:#4a1226">
+            <b>Stone shadow</b><span>#4a1226</span>
+          </div>
+          <div class="sw" style="background:#c9a45c;color:#241017">
+            <b>Gold leaf</b><span>#c9a45c</span>
+          </div>
+          <div class="sw" style="background:#f2ead9;color:#241017">
+            <b>Marble</b><span>#f2ead9</span>
+          </div>
+          <div class="sw" style="background:#f4ecdd;color:#241017">
+            <b>Vellum</b><span>#f4ecdd</span>
+          </div>
+        </div>
+
+        <div class="marks">
+          <img
+            src="../../public/brand/porphyry/mark-reverse.svg"
+            width="72"
+            height="72"
+            alt=""
+          />
+          <img
+            src="../../public/brand/porphyry/mark-reverse.svg"
+            width="44"
+            height="44"
+            alt=""
+          />
+          <img
+            src="../../public/brand/porphyry/mark-compact-reverse.svg"
+            width="16"
+            height="16"
+            alt=""
+          />
+          <img
+            class="glyph"
+            src="../../public/brand/porphyry/glyph-reverse.svg"
+            alt=""
+          />
+          <img
+            src="../../public/brand/porphyry/favicon.svg"
+            width="48"
+            height="48"
+            alt=""
+          />
+          <div
+            class="label"
+            style="font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:#b7a99b;text-align:right"
+          >
+            Mark · compact<br />glyph · favicon
+          </div>
+        </div>
+
+        <div class="spec">
+          <div><b>64</b><span>grid units</span></div>
+          <div><b>2</b><span>filled shapes</span></div>
+          <div><b>8</b><span>unit lit threshold</span></div>
+          <div><b>1</b><span>accent: gold leaf</span></div>
+        </div>
+
+        <div class="tokens">
+          <div><b>--po-stage</b> #160a0f &nbsp; · &nbsp; <b>--po-porphyry</b> #7a1f3d</div>
+          <div><b>--po-gold</b> #c9a45c &nbsp; · &nbsp; <b>--po-marble</b> #f2ead9</div>
+          <div><b>--po-vellum</b> #f4ecdd &nbsp; · &nbsp; <b>--po-ink</b> #241017</div>
+          <div><b>--po-font-display</b> Cinzel &nbsp; · &nbsp; <b>--po-font-reading</b> Jost</div>
+          <div><b>--po-radius</b> 0 &nbsp; · &nbsp; <b>--po-rule</b> 1px &nbsp; · &nbsp; <b>--po-ease</b> 0.16 1 0.3 1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span><b>Porphyry</b> · porphyry + marble + gold leaf + one dark stage</span>
+      <span>Ars longa · vita brevis</span>
+    </div>
+  </body>
+</html>

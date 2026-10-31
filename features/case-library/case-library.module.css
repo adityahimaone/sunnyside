@@ -133,7 +133,13 @@
 /* Ledger's one signal colour. Every other ink in that system is zinc; this is
    the only hue it is allowed, and only for state. */
 .tone_ledger {
-  --case-accent: #2563ef;
+  --case-accent: #19398d;
+}
+
+/* Porphyry's stone. Gold is the system's only accent, but the card needs a
+   field, not a light: the loud surface of Case 10. */
+.tone_porphyry {
+  --case-accent: #7a1f3d;
 }
 
 .cardTop {

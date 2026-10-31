@@ -22,6 +22,7 @@ export type DesignCase = {
     | 'strand'
     | 'clearing'
     | 'ledger'
+    | 'porphyry'
 }
 
 /**
@@ -170,8 +171,24 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     material: LEDGER.material,
     cover: '/brand/ledger/ledger-brandkit.png',
     coverAlt:
-      'The Ledger brand board: the grid mark with one lifted tile, the cool zinc ramp, the glass recipe, the type scale and a dashboard specimen.',
+      'The Ledger brand board: the grid mark with one lifted tile, the indigo harbor ramp, the glass recipe, the type scale and a dashboard specimen.',
     tags: LEDGER.tags,
     tone: 'ledger',
+  },
+  {
+    number: '10',
+    name: 'Porphyry',
+    href: '/design-system/porphyry',
+    tagline: 'A page composed like a stage: one stone, one light, one cast.',
+    description:
+      'A classical diorama as an interface system. A stage opening cut into a block of stone, with a gold threshold, a loader that fills the wordmark with marble from the floor, three photographs keyed off their own black ground by luminance, a real vellum theme, a ten-part form kit and a detach score against every sibling.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · stage · form kit',
+    material: 'Porphyry + marble + gold leaf + one dark stage',
+    cover: '/brand/porphyry/porphyry-brandkit.png',
+    coverAlt:
+      'The Porphyry brand board: the stone block with its gold threshold, the porphyry and marble palette, the outlined Cinzel wordmark, the keyed statue and the stage tokens.',
+    tags: ['Porphyry', 'Marble', 'Gold Leaf', 'Stage'],
+    tone: 'porphyry',
   },
 ]

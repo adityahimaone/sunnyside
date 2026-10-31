@@ -28,7 +28,7 @@
 
 - **Studio landing page** — six chapters: Intro, About, Show & tell, Work, Skills, and Contact.
 - **Sunnyside** — a browsable design-system guide with palette, type, components, motion, voice, applications, and copyable/downloadable tokens.
-- **Design-system library** — six documented cases at `/design-system`: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (print cells), Riso Co. (two-pass misregistration), Hachure (survey paper and ordered dither) and Cove (blue liquid glass). Each has a brief, a mark, tokens, a form kit and an honest audit.
+- **Design-system library** — ten documented cases at `/design-system`: Sunnyside (paper and cobalt), Vitrine (glass and dither), Huginn Studio (print cells), Riso Co. (two-pass misregistration), Hachure (survey paper and ordered dither), Cove (blue liquid glass), Strand (quartz sand and coast), Clearing (painted light), Ledger (indigo harbor) and Porphyry (porphyry stone and one dark stage). Each has a brief, a mark, tokens, a form kit and an honest audit.
 - **Projects archive** — project releases, case studies, and GitHub activity.
 - **Blog and guides** — Markdown writing about frontend work, self-hosting, and infrastructure, with filters, reading aids, RSS, and generated social images.
 - **Bookmarks** — a searchable, paginated catalogue backed by Cloudflare D1, with an admin editor.
@@ -89,6 +89,7 @@ The identity is a **die-cut sun sticker** and the site's **marker wordmark**. Th
 | `/design-system/riso`            | Riso Co. — two-pass print case     |
 | `/design-system/hachure`         | Hachure — cartographic dither case |
 | `/design-system/cove`            | Cove — blue liquid-glass case      |
+| `/design-system/porphyry`        | Porphyry — classical stage case    |
 | `/design-engineering`            | Design-engineering docs hub         |
 | `/design-engineering/learning`   | Field notes: Pen.dev, Figma, Craft  |
 | `/design-engineering/llms.txt`   | Markdown twin of the docs hub       |
