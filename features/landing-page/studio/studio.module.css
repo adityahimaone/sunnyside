@@ -319,7 +319,6 @@
   padding-top: 0.75rem;
 }
 
-
 /* ── Chapter rail ───────────────────────────────────────────────────────── */
 
 .rail {
@@ -413,65 +412,35 @@
 
 /* ── Hero ───────────────────────────────────────────────────────────────── */
 
+/* Sunrise: the cobalt sky is the page's one loud field. The three variables
+   below place the sun, and the paper ground it rises from, for the scene. */
 .hero {
+  --sun-size: clamp(15rem, min(44vw, 68vh), 38rem);
+  --sun-x: 73%;
+  --ground: clamp(5rem, 13vh, 8.5rem);
+
   position: relative;
   display: flex;
-  min-height: 100svh;
+  min-height: max(100svh, 40rem);
   flex-direction: column;
   justify-content: center;
-  padding-block: clamp(7rem, 12vw, 10rem) clamp(3rem, 6vw, 5rem);
+  padding-block: clamp(6.5rem, 9vw, 8rem) calc(var(--ground) + 2rem);
   isolation: isolate;
+  background: var(--cobalt);
+  color: var(--paper);
 }
 
-.heroHalo {
-  position: absolute;
-  z-index: -2;
-  right: clamp(-18rem, -12vw, -6rem);
-  top: clamp(-16rem, -10vw, -4rem);
-  width: clamp(28rem, 52vw, 52rem);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgb(255 210 63 / 0.55) 0 34%,
-    rgb(255 210 63 / 0.16) 35% 52%,
-    transparent 53%
-  );
-  filter: blur(1px);
-}
-
-.heroDots {
-  position: absolute;
-  z-index: -1;
-  right: 0;
-  top: 0;
-  width: 46vw;
-  height: 56svh;
-  background-image: radial-gradient(var(--ink) 1.2px, transparent 1.2px);
-  background-size: 18px 18px;
-  opacity: 0.16;
-  -webkit-mask-image: radial-gradient(
-    ellipse at 72% 28%,
-    #000 0 30%,
-    transparent 72%
-  );
-  mask-image: radial-gradient(ellipse at 72% 28%, #000 0 30%, transparent 72%);
+.hero :focus-visible {
+  outline-color: var(--butter);
 }
 
 .heroGrid {
-  display: grid;
-  align-items: center;
-  gap: clamp(2rem, 5vw, 4rem);
+  position: relative;
+  z-index: 2;
 }
 
-.heroGrid > * {
-  min-width: 0;
-}
-
-@media (min-width: 1024px) {
-  .heroGrid {
-    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-  }
+.heroCopy {
+  max-width: min(100%, 44rem);
 }
 
 .nameTag {
@@ -494,36 +463,51 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-start;
   gap: 0.6rem;
   font-family: var(--font-geist-mono), monospace;
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--paper);
 }
 
+/* The title is cut from the same cardboard as the sun: paper face, a stepped
+   ink edge to the lower right, the way every sticker here is lit. */
 .heroTitle {
   margin-top: 1.15rem;
   max-width: 100%;
   font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(2.55rem, 10vw, 4rem);
+  font-size: clamp(2.8rem, 10.5vw, 4.4rem);
   font-weight: 800;
-  line-height: 0.88;
+  line-height: 0.9;
   letter-spacing: -0.058em;
-  text-wrap: balance;
+  color: var(--paper-hi);
+  text-shadow:
+    1px 1px 0 var(--ink),
+    2px 2px 0 var(--ink),
+    3px 3px 0 var(--ink),
+    4px 4px 0 var(--ink),
+    5px 5px 0 var(--ink);
 }
 
 @media (min-width: 1024px) {
   .heroTitle {
-    font-size: clamp(3.2rem, 5.4vw, 4.9rem);
+    font-size: clamp(4rem, 6.4vw, 6.6rem);
+    text-shadow:
+      1px 1px 0 var(--ink),
+      2px 2px 0 var(--ink),
+      3px 3px 0 var(--ink),
+      4px 4px 0 var(--ink),
+      5px 5px 0 var(--ink),
+      6px 6px 0 var(--ink),
+      7px 7px 0 var(--ink);
   }
 }
 
 .pulseWord {
   position: relative;
   display: inline-block;
-  color: var(--cobalt);
+  color: var(--butter);
 }
 
 .pulseWord::after {
@@ -550,17 +534,17 @@
 }
 
 .heroLede {
-  margin-top: 1.35rem;
+  margin-top: 1.5rem;
   max-width: 47ch;
   font-size: clamp(0.98rem, 1.2vw, 1.08rem);
   line-height: 1.7;
-  color: var(--muted);
+  color: var(--paper);
   text-wrap: pretty;
 }
 
 .heroLede strong {
-  color: var(--ink);
-  font-weight: 600;
+  color: var(--paper-hi);
+  font-weight: 650;
 }
 
 .heroActions {
@@ -609,6 +593,16 @@
   transform: translate(2px, -2px);
 }
 
+/* On the sky the primary action is the butter tape, not another cobalt. */
+.hero .primaryBtn {
+  background: var(--butter);
+  color: var(--ink);
+}
+
+.hero .primaryBtn:hover {
+  background: var(--paper-hi);
+}
+
 .ghostLink {
   position: relative;
   display: inline-flex;
@@ -618,6 +612,10 @@
   font-size: 0.92rem;
   font-weight: 600;
   color: var(--ink);
+}
+
+.hero .ghostLink {
+  color: var(--paper-hi);
 }
 
 .ghostLink::after {
@@ -641,9 +639,9 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.9rem;
   max-width: 28rem;
-  margin-top: 2.6rem;
+  margin-top: 2.4rem;
   padding-top: 1.2rem;
-  border-top: 1px solid var(--line);
+  border-top: 1.5px solid rgb(255 250 241 / 0.4);
 }
 
 .heroStat b {
@@ -652,6 +650,7 @@
   font-size: clamp(1.5rem, 2.3vw, 2rem);
   line-height: 1;
   letter-spacing: -0.04em;
+  color: var(--paper-hi);
 }
 
 .heroStat span {
@@ -662,131 +661,25 @@
   line-height: 1.35;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--paper);
 }
 
-.heroArt {
-  position: relative;
-  min-height: clamp(27rem, 45vw, 37rem);
-  display: grid;
-  place-items: center;
-}
-
-.artStage {
-  position: relative;
-  width: min(100%, 29rem);
-  aspect-ratio: 0.9;
-  transform-style: preserve-3d;
-}
-
-.sheet {
-  position: absolute;
-  inset: 6% 7%;
-  display: flex;
-  flex-direction: column;
-  padding: clamp(1rem, 2.2vw, 1.55rem);
-  border: 2px solid var(--ink);
-  border-radius: 24px;
-  background: var(--paper-hi);
-  box-shadow: 13px 15px 0 rgb(25 26 46 / 0.12);
-  transform: rotate(2.2deg);
-  transform-origin: 50% 60%;
-}
-
-.sheetTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 8.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.sheetBadge {
+.heroScroll {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.22rem 0.5rem;
-  border: 1px solid var(--ink);
-  border-radius: 999px;
-  background: var(--mint);
-  color: var(--ink);
-  font-size: 8px;
-}
-
-.sheetSun {
-  width: 57%;
-  margin: 0.55rem auto 0;
-  filter: drop-shadow(3px 4px 0 rgb(25 26 46 / 0.12));
-  animation: sway 9s ease-in-out infinite alternate;
-}
-
-.sheetLine {
-  margin-top: auto;
-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
-  font-weight: 750;
-  line-height: 1.02;
-  letter-spacing: -0.04em;
-  text-wrap: balance;
-}
-
-.sheetFoot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 0.9rem;
-  padding-top: 0.75rem;
-  border-top: 1px dashed var(--line);
+  gap: 0.65rem;
+  margin-top: clamp(1.6rem, 4vw, 2.6rem);
   font-family: var(--font-geist-mono), monospace;
-  font-size: 8px;
-  letter-spacing: 0.14em;
+  font-size: 9px;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--paper);
 }
 
-.sheetSwatches {
-  display: flex;
-  gap: 0.28rem;
-}
-
-.sheetSwatches i {
-  display: block;
-  width: 0.7rem;
-  height: 0.7rem;
-  border: 1px solid var(--ink);
-  border-radius: 50%;
-}
-
-.sheetNote {
-  position: absolute;
-  z-index: 7;
-  left: 2%;
-  top: -11%;
-  width: min(46%, 11.5rem);
-  padding: 0.75rem 0.8rem 0.7rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 4px;
-  background: var(--butter);
-  color: var(--ink);
-  box-shadow: 5px 6px 0 rgb(25 26 46 / 0.16);
-  transform: rotate(-5deg);
-  font-size: 0.72rem;
-  line-height: 1.4;
-}
-
-.sheetNote b {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 8px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  opacity: 0.6;
+.heroScroll svg {
+  width: 1.1rem;
+  color: var(--butter);
+  animation: nudge 2.4s ease-in-out infinite;
 }
 
 .tape {
@@ -799,82 +692,18 @@
   clip-path: polygon(2% 0, 100% 4%, 98% 100%, 0 94%);
 }
 
-.tapeTop {
-  top: -0.55rem;
-  left: 50%;
-  transform: translateX(-50%) rotate(-4deg);
-}
+/* Below the desktop split the sun sits under the copy, centred on the ground,
+   and the section reserves room for it. */
+@media (max-width: 1023px) {
+  .hero {
+    --sun-size: min(78vw, 21rem);
+    --sun-x: 50%;
+    padding-bottom: calc(var(--ground) + var(--sun-size) * 0.76 + 1.5rem);
+  }
 
-.heroSticker {
-  position: absolute;
-  z-index: 5;
-  /* Match the journey flyers: warm rim upper-left, ink shadow lower-right. */
-  filter:
-    drop-shadow(3px 4px 0 rgb(25 26 46 / 0.14))
-    drop-shadow(-1.5px -1.5px 0 rgb(255 210 63 / 0.3));
-}
-
-.heroFloat {
-  display: block;
-  animation: bob 7s ease-in-out infinite alternate;
-}
-
-.heroStickerSmiley {
-  left: -7%;
-  top: 21%;
-  width: clamp(3.2rem, 6vw, 5rem);
-}
-
-.heroStickerSmiley .heroFloat {
-  animation-delay: -1.6s;
-}
-
-.heroStickerDaisy {
-  right: 1%;
-  bottom: 4%;
-  width: clamp(3.8rem, 7vw, 5.8rem);
-}
-
-.heroStickerDaisy .heroFloat {
-  animation-delay: -3.2s;
-}
-
-.heroStickerBurst {
-  right: -1%;
-  top: 2%;
-  width: clamp(3.4rem, 6.4vw, 5.1rem);
-}
-
-.heroStickerBurst .heroFloat {
-  animation-delay: -2.4s;
-}
-
-.heroStickerBolt {
-  left: 2%;
-  bottom: 8%;
-  width: clamp(2.8rem, 5vw, 4.2rem);
-}
-
-.heroStickerBolt .heroFloat {
-  animation-delay: -4.1s;
-}
-
-.heroScroll {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-top: clamp(2rem, 5vw, 3.4rem);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.heroScroll svg {
-  width: 1.1rem;
-  color: var(--tangerine);
-  animation: nudge 2.4s ease-in-out infinite;
+  .heroScroll {
+    display: none;
+  }
 }
 
 /* ── Marquee ────────────────────────────────────────────────────────────── */
@@ -997,30 +826,6 @@
   flex-direction: column;
   gap: 1.6rem;
   padding-top: 0.5rem;
-}
-
-/* The flower's landing spot, measured by the sticker journey. A zero-size
-   marker in the side column follows the photo on every breakpoint instead of
-   hard-coding a page coordinate. */
-.journeyDock {
-  position: absolute;
-  top: 42%;
-  right: 2.5rem;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-}
-
-@media (max-width: 1100px) {
-  .journeyDock {
-    right: 1.25rem;
-  }
-}
-
-@media (max-width: 767px) {
-  .journeyDock {
-    top: 38%;
-  }
 }
 
 .photoCard {
@@ -2575,24 +2380,6 @@
 
 /* ── Motion ─────────────────────────────────────────────────────────────── */
 
-@keyframes sway {
-  from {
-    transform: rotate(-5deg);
-  }
-  to {
-    transform: rotate(4deg);
-  }
-}
-
-@keyframes bob {
-  from {
-    transform: translateY(-5px) rotate(-2deg);
-  }
-  to {
-    transform: translateY(6px) rotate(2deg);
-  }
-}
-
 @keyframes nudge {
   0%,
   100% {
@@ -2632,43 +2419,6 @@
 }
 
 @media (max-width: 639px) {
-  .heroArt {
-    min-height: 24rem;
-  }
-
-  .artStage {
-    width: min(100%, 21rem);
-  }
-
-  .heroStickerSmiley {
-    left: 0;
-    top: 17%;
-    width: 2.8rem;
-  }
-
-  .heroStickerBurst {
-    right: 0;
-    top: 1%;
-    width: 3rem;
-  }
-
-  .heroStickerDaisy {
-    right: 0;
-    bottom: 3%;
-    width: 3.2rem;
-  }
-
-  .heroStickerBolt {
-    display: none;
-  }
-
-  .sheetNote {
-    left: 1%;
-    top: -9%;
-    width: min(54%, 11rem);
-    font-size: 0.68rem;
-  }
-
   .aboutFact {
     grid-template-columns: 5.6rem minmax(0, 1fr);
   }
@@ -2687,8 +2437,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sheetSun,
-  .heroFloat,
   .heroScroll svg,
   .marquee,
   .skillAtom {
@@ -2700,7 +2448,6 @@
     transform: translateX(calc(100cqw - 1.1rem));
   }
 
-  .sheet,
   .photoCard,
   .postcard,
   .skillCard,
@@ -2741,25 +2488,6 @@
 .photoTilt {
   position: relative;
   z-index: 1;
-}
-
-/* The thunder sticker lands on the photo's upper-left, in front of the frame.
-   The zero-size marker keeps it anchored to the photo at every breakpoint. */
-.photoBoltDock {
-  position: absolute;
-  z-index: 2;
-  top: 28%;
-  left: 2rem;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-}
-
-@media (max-width: 767px) {
-  .photoBoltDock {
-    top: 24%;
-    left: 1.5rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

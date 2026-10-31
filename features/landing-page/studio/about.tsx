@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { Squiggle } from './doodles'
 import { Reveal } from './reveal'
 import { Tilt } from './tilt'
+import { StickerPit } from './gravity/sticker-pit'
 import { SectionHead, SectionNext } from './section-head'
 import { ABOUT_FACTS, PRINCIPLES } from './studio-data'
 import styles from './studio.module.css'
@@ -34,6 +35,8 @@ export function About() {
           }
           intro="Four years of product work, one habit: decide in the browser, then leave enough structure that the next person can disagree with me."
         />
+
+        <StickerPit />
 
         <div className={styles.aboutGrid}>
           <div>
@@ -72,18 +75,8 @@ export function About() {
           </div>
 
           <div className={styles.aboutSide}>
-            <span
-              className={styles.journeyDock}
-              data-journey-dock="about-flower"
-              aria-hidden
-            />
             <Reveal delay={0.06} y={32}>
               <div className={styles.photoStage} data-about-photo>
-                <span
-                  className={styles.photoBoltDock}
-                  data-journey-dock="about-bolt"
-                  aria-hidden
-                />
                 <Tilt className={styles.photoTilt} max={3.5} lift={4}>
                   <div className={styles.photoCard} data-journey="photo">
                     <span

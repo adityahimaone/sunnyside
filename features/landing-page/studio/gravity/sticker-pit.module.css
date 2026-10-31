@@ -1,0 +1,151 @@
+/* The About tray: a release liner the stickers fall onto. Paper Lo ground, ink
+   edge, one hard offset shadow, like every other Sunnyside surface. */
+
+.wrap {
+  position: relative;
+  z-index: 2;
+  margin-top: clamp(2.2rem, 5vw, 3.4rem);
+}
+
+.pit {
+  position: relative;
+  height: clamp(13.5rem, 25vw, 17.5rem);
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background-color: var(--paper-lo);
+  background-image: radial-gradient(rgb(25 26 46 / 0.16) 1px, transparent 1px);
+  background-size: 16px 16px;
+  box-shadow: 7px 8px 0 rgb(25 26 46 / 0.14);
+  /* Stickers fall in from above the tray, so it must not clip them. */
+  overflow: visible;
+}
+
+.label {
+  position: absolute;
+  top: 0.8rem;
+  left: 1rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ghosts i {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: calc(var(--size) * 0.92);
+  aspect-ratio: 1;
+  border: 1.5px dashed rgb(25 26 46 / 0.28);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(var(--rot));
+}
+
+/* At rest and in reduced motion: the sticker sits in its own outline. The
+   runtime switches the tray to `data-live`, which hands position to the
+   physics and hides each sticker until it is released. */
+.sticker {
+  position: absolute;
+  z-index: 3;
+  left: var(--x);
+  top: var(--y);
+  width: var(--size);
+  height: var(--size);
+  transform: translate(-50%, -50%) rotate(var(--rot));
+  /* The same low sun lights every sticker: a warm rim upper-left and a hard
+     ink shadow lower-right, both offsets rather than blurs. */
+  filter: drop-shadow(3px 5px 0 rgb(25 26 46 / 0.2))
+    drop-shadow(-1.5px -1.5px 0 rgb(255 210 63 / 0.34));
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.sticker svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pit[data-live='true'] .sticker {
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  cursor: grab;
+  /* Only the stickers take the touch, so the rest of the tray still scrolls. */
+  touch-action: none;
+  will-change: transform;
+}
+
+.pit[data-live='true'] .sticker[data-held='true'] {
+  cursor: grabbing;
+  filter: drop-shadow(6px 10px 0 rgb(25 26 46 / 0.22))
+    drop-shadow(-1.5px -1.5px 0 rgb(255 210 63 / 0.34));
+}
+
+.atomDisc {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border: 8px solid var(--paper-hi);
+  border-radius: 50%;
+  background: var(--cobalt);
+  color: var(--paper-hi);
+}
+
+.atomDisc svg {
+  width: 82%;
+  height: 82%;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.1rem;
+}
+
+.hint {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.shake {
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--butter);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition:
+    transform 0.18s var(--ease-out),
+    box-shadow 0.18s var(--ease-out);
+}
+
+.shake:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.shake:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+@media (max-width: 640px) {
+  .hint {
+    display: none;
+  }
+
+  .foot {
+    justify-content: flex-end;
+  }
+}

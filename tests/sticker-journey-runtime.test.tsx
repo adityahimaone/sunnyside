@@ -28,15 +28,6 @@ function buildPage() {
     root.appendChild(el)
   })
 
-  const origs = ['smiley', 'burst', 'daisy', 'bolt'].map((name, i) => {
-    const el = document.createElement('div')
-    el.dataset.journeyFrom = name
-    el.getBoundingClientRect = () =>
-      rect(200 + i * 40 - window.scrollY, 600, 60, 60)
-    root.appendChild(el)
-    return el
-  })
-
   const layer = document.createElement('div')
   FLYERS.forEach((spec) => {
     const f = document.createElement('div')
@@ -56,7 +47,7 @@ function buildPage() {
   layer.appendChild(ring)
   root.appendChild(layer)
   root.getBoundingClientRect = () => rect(-window.scrollY, 0, 1280, 8000)
-  return { root, layer, origs }
+  return { root, layer }
 }
 
 const scrollTo = (y: number) => {
@@ -92,27 +83,9 @@ describe('runJourney', () => {
   })
   afterEach(() => jest.useRealTimers())
 
-  it('keeps hero stickers home at the top, and peels them off once the page moves', () => {
-    const { layer, origs } = buildPage()
-    const stop = runJourney(
-      layer.firstElementChild?.parentElement as HTMLElement,
-    )
-    jest.advanceTimersByTime(900)
-
-    const smileyFlyer = layer.querySelector<HTMLElement>(
-      '[data-flyer="smiley"]',
-    )!
-    expect(smileyFlyer.style.visibility).toBe('hidden')
-    expect(origs[0].style.visibility).toBe('')
-
-    scrollTo(500)
-    jest.advanceTimersByTime(100)
-    expect(smileyFlyer.style.visibility).toBe('visible')
-    expect(origs[0].style.visibility).toBe('hidden')
-    expect(smileyFlyer.style.transform).toMatch(/translate3d\(/)
-
-    stop()
-    expect(origs[0].style.visibility).toBe('')
+  it('flies only the sun and the heart: the hero stickers fall in the About tray', () => {
+    expect(FLYERS.map((f) => f.id)).toEqual(['sun', 'heart'])
+    expect(FLYERS.some((f) => f.from)).toBe(false)
   })
 
   it('spawns the sun only when its first section is near, and not before', () => {

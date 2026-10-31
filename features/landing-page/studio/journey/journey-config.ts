@@ -3,18 +3,16 @@ import type { FlightParams } from './journey-math'
 /**
  * Who flies where.
  *
+ * The hero's four stickers no longer fly: they drop into the About tray under
+ * real gravity (see `../gravity`). What still travels is the sun, from Show &
+ * tell onward, and the heart that follows it to the end of the page.
+ *
  * A dock lives in the empty padding band at the top (or bottom) edge of a
  * section, or on an explicit side marker beside a photo, never in the middle of
  * copy. `x` is a share of the section's width, `oy` is px in from the chosen
  * edge, and `tint` is the colour of the shockwave the sun throws when it lands.
  */
-export type StickerKind =
-  | 'smiley'
-  | 'burst'
-  | 'daisy'
-  | 'bolt'
-  | 'sun'
-  | 'heart'
+export type StickerKind = 'sun' | 'heart'
 
 export type DockSpec = {
   /** CSS selector of the section, or a marker element inside it. */
@@ -64,76 +62,6 @@ export const SPARK_COLOURS = [
 ] as const
 
 export const FLYERS: readonly FlyerSpec[] = [
-  {
-    id: 'smiley',
-    kind: 'smiley',
-    from: 'smiley',
-    mobile: true,
-    params: { lane: -0.1, arc: 0.1, hop: 0.12, spin: 1, wobble: 7, delay: 0 },
-    docks: [{ at: '#about', x: 0.92, oy: 44, rot: 10, size: 70 }],
-  },
-  {
-    id: 'burst',
-    kind: 'burst',
-    text: 'wow!',
-    from: 'burst',
-    mobile: true,
-    params: {
-      lane: 0.12,
-      arc: -0.12,
-      hop: 0.06,
-      spin: -2,
-      wobble: 5,
-      delay: 0.1,
-    },
-    docks: [{ at: '#about', x: 0.06, oy: 56, rot: -12, size: 74 }],
-  },
-  {
-    id: 'daisy',
-    kind: 'daisy',
-    from: 'daisy',
-    mobile: true,
-    params: {
-      lane: -0.16,
-      arc: 0.14,
-      hop: 0.04,
-      spin: 1.5,
-      wobble: 4,
-      delay: 0.18,
-    },
-    docks: [
-      {
-        at: '[data-journey-dock="about-flower"]',
-        x: 0.5,
-        oy: 0,
-        rot: 8,
-        size: 72,
-      },
-    ],
-  },
-  {
-    id: 'bolt',
-    kind: 'bolt',
-    from: 'bolt',
-    mobile: true,
-    params: {
-      lane: 0.06,
-      arc: 0.2,
-      hop: 0.16,
-      spin: 0,
-      wobble: 16,
-      delay: 0.26,
-    },
-    docks: [
-      {
-        at: '[data-journey-dock="about-bolt"]',
-        x: 0.5,
-        oy: 0,
-        rot: -14,
-        size: 60,
-      },
-    ],
-  },
   {
     id: 'sun',
     kind: 'sun',

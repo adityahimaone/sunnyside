@@ -49,11 +49,12 @@ const animate = (
  * not mistaken for mutating render data.
  *
  * What it does:
- *  - stickers peel off the hero's artwork and fly dock to dock down the page,
- *    landing with a squash and a puff of sparks;
+ *  - stickers fly dock to dock down the page, landing with a squash and a
+ *    puff of sparks (the hero's own stickers fall into the About tray instead,
+ *    under real gravity: see `../gravity`);
  *  - the sun throws a tinted shockwave each time it lands, which is the
  *    transition between sections;
- *  - the hero card lifts away, the About photo tilts as it passes, and the
+ *  - the About photo tilts as it passes, and the
  *    marquee swings and speeds up with scroll velocity.
  */
 export function runJourney(layer: HTMLElement): () => void {
@@ -90,7 +91,6 @@ export function runJourney(layer: HTMLElement): () => void {
     ]
   })
 
-  const heroArt = root.querySelector<HTMLElement>('[data-journey="hero-art"]')
   const photo = root.querySelector<HTMLElement>('[data-journey="photo"]')
   const marquee = root.querySelector<HTMLElement>('[data-journey="marquee"]')
 
@@ -249,13 +249,7 @@ export function runJourney(layer: HTMLElement): () => void {
     )
   }
 
-  const scenes = (scrollY: number) => {
-    if (heroArt) {
-      const p = clamp01(scrollY / (vh * 0.95))
-      heroArt.style.translate = `0 ${-p * 70}px`
-      heroArt.style.rotate = `${-p * 7}deg`
-      heroArt.style.scale = `${1 - p * 0.12}`
-    }
+  const scenes = () => {
     if (photo) {
       const rect = photo.getBoundingClientRect()
       const q = clamp01((vh - rect.top) / (vh + rect.height))
@@ -335,7 +329,7 @@ export function runJourney(layer: HTMLElement): () => void {
       item.dock = p.dock
     }
 
-    scenes(scrollY)
+    scenes()
     // Keep ticking until velocity has decayed, or the swing would freeze mid-tilt.
     if (Math.abs(velocity) > 6 || Math.abs(swing) > 0.02) schedule()
   }
@@ -372,7 +366,7 @@ export function runJourney(layer: HTMLElement): () => void {
     window.removeEventListener('load', queueMeasure)
     mobileQuery.removeEventListener('change', queueMeasure)
     for (const item of items) if (item.orig) item.orig.style.visibility = ''
-    for (const el of [heroArt, photo, marquee]) {
+    for (const el of [photo, marquee]) {
       if (!el) continue
       el.style.translate = ''
       el.style.rotate = ''

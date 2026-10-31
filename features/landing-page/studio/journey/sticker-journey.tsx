@@ -3,7 +3,7 @@
 import { useReducedMotion } from 'motion/react'
 import { useEffect, useRef } from 'react'
 
-import { Bolt, Burst, Daisy, Heart, Smiley, Sun } from '../doodles'
+import { Heart, Sun } from '../doodles'
 import { FLYERS, type FlyerSpec } from './journey-config'
 import { runJourney } from './journey-runtime'
 import styles from './sticker-journey.module.css'
@@ -12,14 +12,6 @@ const SPARKS = 10
 
 function Art({ spec }: { spec: FlyerSpec }) {
   switch (spec.kind) {
-    case 'smiley':
-      return <Smiley />
-    case 'burst':
-      return <Burst text={spec.text ?? 'hi!'} />
-    case 'daisy':
-      return <Daisy />
-    case 'bolt':
-      return <Bolt />
     case 'sun':
       return <Sun />
     case 'heart':

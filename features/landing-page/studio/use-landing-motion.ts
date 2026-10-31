@@ -6,11 +6,11 @@ import { useEffect, type RefObject } from 'react'
  * Side A's scroll choreography.
  *
  * Everything here is transform/opacity only and lives in one GSAP context:
- * the hero's paper stage lifts away in 3D, the tape band tilts as it crosses
- * the viewport, section numbers and rules draw, the study prints fan in, the
- * release covers drift inside their frames, and the postcard floats. The
- * reduced-motion query never builds the timelines; it returns the finished
- * page exactly as CSS has it.
+ * the tape band tilts as it crosses the viewport, section numbers and rules
+ * draw, the study prints fan in, the release covers drift inside their frames,
+ * and the postcard floats. The hero has its own pointer and scroll loop
+ * (`hero/use-hero-scene`). The reduced-motion query never builds the
+ * timelines; it returns the finished page exactly as CSS has it.
  */
 export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
   useEffect(() => {
@@ -33,60 +33,9 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
       mm.add(
         {
           reduce: '(prefers-reduced-motion: reduce)',
-          desktop: '(min-width: 900px)',
         },
         (context) => {
           if (context.conditions?.reduce) return
-          const desktop = Boolean(context.conditions?.desktop)
-
-          // Hero background drifts slower than the sheet.
-          const halo = q('[data-hero-halo]')
-          const dots = q('[data-hero-dots]')
-          if (halo.length) {
-            gsap.to(halo, {
-              yPercent: 16,
-              rotate: 6,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: '#home',
-                start: 'top top',
-                end: 'bottom top',
-                scrub: 1,
-              },
-            })
-          }
-          if (dots.length) {
-            gsap.to(dots, {
-              yPercent: 11,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: '#home',
-                start: 'top top',
-                end: 'bottom top',
-                scrub: 1,
-              },
-            })
-          }
-
-          // The paper stage leaves the hero by tipping back into the wall.
-          const heroArt = q('[data-hero-art]')
-          if (desktop && heroArt.length) {
-            gsap.to(heroArt, {
-              y: 72,
-              rotationX: 8,
-              scale: 0.97,
-              opacity: 0.5,
-              transformPerspective: 1100,
-              transformOrigin: 'center center',
-              ease: 'none',
-              scrollTrigger: {
-                trigger: '#home',
-                start: 'top top',
-                end: 'bottom top',
-                scrub: 1,
-              },
-            })
-          }
 
           // The tape band turns a little as it crosses the viewport.
           const marquee = q('[data-marquee]')
