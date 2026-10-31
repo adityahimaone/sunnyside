@@ -1,7 +1,16 @@
 # The gates
 
-Six checks. Each one failed a shipped case, so each one is a command, not a discussion. Run
-them in this order — the first two can invalidate the work that follows.
+Eight checks. Each one failed a shipped case, so each one is a command, not a discussion.
+**`node scripts/gates.mjs --slug <slug>` runs the six static ones at once** (detach, display
+face, font registered, contrast, assets, export); `qa.mjs` runs the two that need a rendered
+page (mark at 16px, reduced motion). Run `gates.mjs` as soon as the tokens exist, not after
+the page: the first two can invalidate everything that follows. Display face is hard fail H3
+of the detach run; assets applies only when stock images are used (`references/research.md`).
+
+Two behaviours worth knowing: an **incomplete** `tokens.json` (empty DNA) scores low because it
+is unscorable, and `gates.mjs` says so rather than blaming the hue; and an **outside brand**
+passed with `--refs` (made by `brand-ref.mjs ref`) is scored on hue, value and type only, scaled
+to 100, because a reference has no DNA or sections to compare.
 
 ## 1 · Detach — 100 points, five hard fails
 

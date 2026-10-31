@@ -1,6 +1,6 @@
 # The logo system
 
-## v2.3 hard gate (read first)
+## Hard gate (read first)
 
 1. **Zero-circle / zero-Venn.** No overlapping circle Venns, concentric rings,
    orbit badges, or circular containers. Across a showcase, no two logos share
@@ -12,9 +12,9 @@
    earns its place as an architectural monogram (cut / joined / lit), never as
    a typed initial with an ornament.
 
-The older sections below are the v2.2 tests; use the v2.3 gate above them.
+Sections 1–9 below are the working method; where one disagrees with the gate above, the gate wins.
 
-## The mark system (v2.4)
+## The mark system
 
 A logo is half the identity. The full system is primary + compact + glyph +
 wordmark + cast + composition. Read `references/craft-bar.md` before choosing a
