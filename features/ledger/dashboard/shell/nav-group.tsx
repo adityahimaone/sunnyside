@@ -41,9 +41,11 @@ export function NavGroup({
 									<CollapsibleTrigger asChild>
 										<SidebarMenuButton isActive={item.path === pathname}>
 											{item.icon}
-											<span>{item.title}</span>
+											<span className="group-data-[collapsible=icon]:hidden">
+												{item.title}
+											</span>
 											<IconPlaceholder
-												className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+												className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden"
 												hugeicons="ArrowRight01Icon"
 												lucide="ChevronRightIcon"
 												phosphor="CaretRightIcon"
@@ -71,10 +73,16 @@ export function NavGroup({
 									</CollapsibleContent>
 								</>
 							) : (
-								<SidebarMenuButton asChild isActive={item.path === pathname}>
+								<SidebarMenuButton
+									asChild
+									isActive={item.path === pathname}
+									tooltip={item.title}
+								>
 									<a href={item.path}>
 										{item.icon}
-										<span>{item.title}</span>
+										<span className="group-data-[collapsible=icon]:hidden">
+											{item.title}
+										</span>
 									</a>
 								</SidebarMenuButton>
 							)}

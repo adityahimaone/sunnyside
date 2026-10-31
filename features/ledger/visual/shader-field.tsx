@@ -7,19 +7,20 @@ import {
 } from "@/features/ledger/visual/mesh-drift";
 
 /**
- * The recipe's five colours, low → high. Blended in OKLab (u_transform.w = 1).
- * Slots 5–7 repeat the last stop because WebGL1 wants a fixed-size array; the
- * shader never reads past u_scene.w = 5.
+ * The field's five colours, low → high, retinted to the harbor ramp:
+ * #060b16 (night ground) → #19398d (harbor indigo). Blended in OKLab
+ * (u_transform.w = 1). Slots 5–7 repeat the last stop because WebGL1 wants a
+ * fixed-size array; the shader never reads past u_scene.w = 5.
  */
 const COLORS = [
-  [0.09, 0.09, 0.09],
-  [0.569, 0.773, 1.0],
-  [0.227, 0.506, 0.965],
-  [0.145, 0.388, 0.937],
-  [0.102, 0.306, 0.855],
-  [0.102, 0.306, 0.855],
-  [0.102, 0.306, 0.855],
-  [0.102, 0.306, 0.855],
+  [0.024, 0.043, 0.086],
+  [0.624, 0.706, 0.918],
+  [0.29, 0.42, 0.753],
+  [0.169, 0.31, 0.659],
+  [0.098, 0.224, 0.553],
+  [0.098, 0.224, 0.553],
+  [0.098, 0.224, 0.553],
+  [0.098, 0.224, 0.553],
 ] as const;
 
 const COLOR_COUNT = 5;

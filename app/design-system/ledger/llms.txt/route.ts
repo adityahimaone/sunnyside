@@ -31,8 +31,8 @@ tokens are untouched at \`:root\`.
 ${table(
   ['Layer', 'What it names', 'Example'],
   [
-    ['Primitive', 'the material, once', '--lg-zinc-100: oklch(0.962 0.004 258)'],
-    ['Semantic', 'the job', '--background: var(--lg-zinc-100)'],
+    ['Primitive', 'the material, once', '--lg-harbor-050: oklch(0.970 0.008 271.3)'],
+    ['Semantic', 'the job', '--background: var(--lg-harbor-050)'],
     ['Surface', 'the recipe', '.glass-panel { card 65% + 24px blur + 1px hairline }'],
   ],
 )}
@@ -55,18 +55,30 @@ labels and axes, tabular figures wherever a number appears.
 ${table(
   ['Pair', 'Light', 'Dark'],
   [
-    ['foreground on canvas', '16.05:1', '17.51:1'],
-    ['foreground on glass', '17.26:1', '16.40:1'],
-    ['muted on canvas', '4.69:1', '7.37:1'],
-    ['muted on glass', '5.04:1', '6.90:1'],
-    ['signal-ink on glass', '6.79:1', '7.74:1'],
+    ['foreground on canvas', '17.29:1', '17.26:1'],
+    ['foreground on glass', '18.30:1', '16.69:1'],
+    ['muted on canvas', '4.93:1', '8.71:1'],
+    ['muted on glass', '5.22:1', '8.42:1'],
+    ['signal-ink on its wash', '10.56:1', '7.01:1'],
+    ['primary on card', '10.44:1', '5.70:1'],
   ],
 )}
 
 Computed OKLCh → linear sRGB → WCAG against the composited surface, not a
 nominal white. Horizontal overflow measured 0 at 1440 / 1024 / 390.
 
-## 5. Known gaps
+One pair fails on purpose: \`chart-4\` #b9c8ee on glass measures 1.93:1. It is a
+fill, not ink — only legible as the fourth step of an ordered ramp.
+
+## 5. The material
+
+Harbor water, not zinc. Every neutral carries chroma toward hue 267 at the
+lightness a zinc step would have had, so the paper reads cool rather than grey.
+One signal hue, harbor indigo \`#19398d\`, does three jobs and no others: it fills
+the primary action, it marks state, and it orders the charts. A second hue
+appears once, as the remainder slice of a donut — a remainder is not a category.
+
+## 6. Known gaps
 
 1. Contrast against the moving field is not measured; no body text sits on it.
 2. No drawn wordmark — the name is set in Geist, only the mark is fixed.
@@ -74,9 +86,12 @@ nominal white. Horizontal overflow measured 0 at 1440 / 1024 / 390.
    the dashboard changes.
 4. Mobile tables scroll inside their own container; the document does not.
 
-## 6. Files
+## 7. Files
 
 - \`features/ledger/ledger-tokens.css\` — the three layers, scoped.
+- \`features/ledger/tokens.json\` — the same values, plus the hex each one renders.
+- \`features/ledger/palette.ts\` — what the case page reads; a missing token throws.
+- \`scripts/check-palette.mjs\` — proves css, tokens and page agree.
 - \`features/ledger/ui/*\` — shadcn primitives, restyled for this system.
 - \`features/ledger/dashboard/*\` — the dashboard; charts are hand-drawn SVG.
 - \`features/ledger/case/ledger-case.tsx\` — the case page.

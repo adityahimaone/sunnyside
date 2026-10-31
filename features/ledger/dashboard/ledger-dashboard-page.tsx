@@ -13,7 +13,7 @@ import { AppShell } from '@/features/ledger/dashboard/shell/app-shell'
  */
 export function LedgerDashboardPage() {
   return (
-    <div data-ledger className="relative min-h-svh">
+    <div data-ledger className="ledger-canvas relative min-h-svh">
       <CaseChrome />
       <div className="relative z-10">
         <AppShell>

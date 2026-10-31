@@ -38,29 +38,23 @@ import { LedgerMark } from "@/features/ledger/brand/ledger-mark";
 import { ThemeToggle } from "@/features/ledger/dashboard/shell/theme-toggle";
 import { CanvasBackdrop } from "@/features/ledger/dashboard/shell/canvas-backdrop";
 import { CaseChrome } from "@/features/ledger/case/case-chrome";
+import {
+  HARBOR_RAMP,
+  ROLES,
+  SIGNAL_ERROR,
+  SIGNAL_REMAINDER,
+  SIGNAL_STEPS,
+  SIGNAL_WATER,
+} from "@/features/ledger/palette";
 
 const sections = [
   ["overview", "Overview"],
-  ["context", "In context"],
   ["foundation", "Foundation"],
   ["surfaces", "Surfaces"],
   ["forms", "Form kit"],
   ["data", "Data display"],
   ["motion", "Motion"],
   ["audit", "Audit"],
-] as const;
-
-const ramp = [
-  ["--zinc-050", "0.977", "App background (light)"],
-  ["--zinc-100", "0.962", "Canvas"],
-  ["--zinc-150", "0.944", "Muted / accent fill"],
-  ["--zinc-200", "0.885", "Border"],
-  ["--zinc-300", "0.812", "Disabled ink"],
-  ["--zinc-400", "0.705", "Ring"],
-  ["--zinc-500", "0.552", "Muted ink"],
-  ["--zinc-700", "0.372", "Body ink"],
-  ["--zinc-900", "0.205", "Primary ink"],
-  ["--zinc-950", "0.145", "Deep surface"],
 ] as const;
 
 const typeScale = [
@@ -83,7 +77,7 @@ const states = [
 
 export function LedgerCase() {
   return (
-    <div data-ledger className="relative min-h-svh">
+    <div data-ledger className="ledger-canvas relative min-h-svh">
       <CaseChrome />
       <CanvasBackdrop mode="page" />
 
@@ -91,13 +85,13 @@ export function LedgerCase() {
       <header className="sticky top-0 z-30 border-border/50 border-b bg-background/70 backdrop-blur-md">
         <div className="mx-auto flex h-14 w-full max-w-[1320px] items-center justify-between gap-4 px-5 md:px-8">
           <div className="flex items-center gap-3">
-            <span className="flex size-7 items-center justify-center rounded-md bg-foreground text-background">
+            <span className="flex size-7 items-center justify-center rounded-md bg-[var(--deep)] text-white">
               <LedgerMark size={15} />
             </span>
             <span className="font-medium tracking-tight">Ledger</span>
             <Separator className="h-4 bg-border/70" orientation="vertical" />
             <span className="hidden font-mono text-[10px] text-muted-foreground uppercase tracking-[0.14em] sm:inline">
-              Tactile · v1.0
+              Indigo Harbor · v1.1
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -154,107 +148,101 @@ export function LedgerCase() {
 
         {/* ── Body ────────────────────────────────────────────── */}
         <main className="min-w-0 flex-1 pb-24">
-          {/* Overview */}
-          <section className="scroll-mt-20 pt-12" id="overview">
-            <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
-              Design system · shadcn/ui base
-            </p>
-            <h1 className="mt-3 max-w-3xl text-balance text-[38px] font-semibold leading-[1.02] tracking-[-0.03em] md:text-[52px]">
-              Tactile Glass
-              <span className="text-muted-foreground"> &amp; </span>
-              Crisp Grid
-            </h1>
-            <p className="mt-5 max-w-xl text-pretty text-[15px] leading-relaxed text-muted-foreground">
-              A dashboard system where the surface is the only decoration. One
-              frosted plane, one hairline grid, one signal colour — and every
-              number set in tabular figures so columns of money line up.
-            </p>
-
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {[
-                ["One surface", "Cards are 65% card + 24px blur. There is no second card style."],
-                ["One grid", "12 columns, 16px gutters, 1px rules at 50% border."],
-                ["One signal", "Blue is state only: live, pending, focus. Never decoration."],
-              ].map(([title, body]) => (
-                <div className="rounded-xl border border-border/50 p-4" key={title}>
-                  <p className="text-[13px] font-medium tracking-tight">{title}</p>
-                  <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">
-                    {body}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center gap-2">
-              <Badge className="border-border/60 bg-background/50" variant="outline">
-                Tailwind v4
-              </Badge>
-              <Badge className="border-border/60 bg-background/50" variant="outline">
-                shadcn/ui · radix
-              </Badge>
-              <Badge className="border-border/60 bg-background/50" variant="outline">
-                Geist Sans / Mono
-              </Badge>
-              <Badge className="border-border/60 bg-background/50" variant="outline">
-                radius 0.75rem
-              </Badge>
-            </div>
-          </section>
-
-          <Divider />
-
-          {/* In context */}
-          <section className="scroll-mt-20" id="context">
-            <SectionHead
-              index="01"
-              kicker="In context"
-              title="The system, assembled"
-              description="Commerce overview at 1440. The rail, the 56px line, four glass KPIs, one chart, one table. The plate follows the page theme — switch to dark and the screenshot switches with it."
-            />
-
-            <figure className="mt-8 overflow-hidden rounded-xl border border-border/60 bg-card/40">
-              <Image
-                alt="The Ledger dashboard in light theme: a 255px rail with the Ledger mark, a 56px top bar, four glass KPI cards, a revenue area chart, a category donut, a recent-orders table and a return-rate card."
-                className="block w-full dark:hidden"
-                height={1800}
-                priority={false}
-                sizes="(max-width: 1024px) 100vw, 1096px"
-                src="/ledger/dashboard-light.png"
-                width={1524}
-              />
-              <Image
-                alt="The same dashboard in dark theme: the mesh-drift field reads through the top-right cards as a deep blue glow."
-                className="hidden w-full dark:block"
-                height={1800}
-                priority={false}
-                sizes="(max-width: 1024px) 100vw, 1096px"
-                src="/ledger/dashboard-dark.png"
-                width={1524}
-              />
-              <figcaption className="flex flex-wrap items-center justify-between gap-3 border-border/50 border-t px-4 py-3">
-                <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.12em]">
-                  fig. 01 · commerce overview · 1440 × 1701
+          {/* Overview — the hero, and the one loud field on the page */}
+          <section className="scroll-mt-20 pt-14" id="overview">
+            <div className="mx-auto max-w-2xl text-center">
+              <a
+                className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 py-1 pr-3.5 pl-1 text-[12px] text-muted-foreground transition-colors duration-200 hover:border-border hover:text-foreground"
+                href="#foundation"
+              >
+                <span className="rounded-full bg-signal px-2 py-0.5 font-mono text-[9px] text-primary-foreground uppercase tracking-[0.12em]">
+                  New
                 </span>
-                <div className="flex items-center gap-2">
-                  <span className="mr-1 font-mono text-[10px] text-muted-foreground/70">
-                    light / dark
-                  </span>
-                  <Button
-                    asChild
-                    className="h-7 gap-1 text-muted-foreground transition-colors duration-200 hover:text-foreground"
-                    size="xs"
-                    variant="ghost"
-                  >
-                    <Link href="/design-system/ledger/dashboard">
-                      Open the dashboard
-                      <ArrowUpRight className="size-3.5" />
-                    </Link>
-                  </Button>
-                </div>
-              </figcaption>
-            </figure>
+                Indigo Harbor, remeasured
+                <ArrowUpRight className="size-3.5 opacity-50 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:opacity-100" />
+              </a>
 
-            <div className="mt-6 grid gap-5 sm:grid-cols-3">
+              <h1 className="mt-6 text-balance text-[36px] font-semibold leading-[0.95] tracking-[-0.04em] sm:text-[40px] md:text-[64px]">
+                The surface is
+                <br />
+                the only decoration.
+              </h1>
+
+              <p className="mx-auto mt-5 max-w-[52ch] text-pretty text-[15px] leading-relaxed text-muted-foreground md:text-[16px]">
+                A commerce dashboard built on shadcn/ui: one frosted plane, one
+                hairline grid, one harbor-indigo signal, and every number set in
+                tabular figures so columns of money line up.
+              </p>
+
+              <div className="mt-7 flex flex-wrap items-center justify-center gap-2">
+                <Button asChild className="h-10 gap-1.5 px-4">
+                  <Link href="/design-system/ledger/dashboard">
+                    Open the dashboard
+                    <ArrowUpRight className="size-4" />
+                  </Link>
+                </Button>
+                <Button asChild className="h-10 px-4" variant="outline">
+                  <Link href="#foundation">See the tokens</Link>
+                </Button>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                {[
+                  "Tailwind v4",
+                  "shadcn/ui · radix",
+                  "Geist Sans / Mono",
+                  "radius 0.75rem",
+                ].map((tag) => (
+                  <Badge
+                    className="border-border/60 bg-background/40 text-muted-foreground"
+                    key={tag}
+                    variant="outline"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* The loud field. One per page: it carries the plate and nothing else. */}
+            <div className="hero-field mt-12 rounded-[26px] p-2.5 md:p-4">
+              <div className="overflow-hidden rounded-[18px] border border-white/50 bg-card shadow-[0_24px_60px_-40px_rgba(0,27,60,0.55)] dark:border-white/10">
+                <div className="flex h-9 items-center gap-2 border-border/60 border-b bg-card px-3">
+                  <span className="flex gap-1.5">
+                    <span className="size-2 rounded-full bg-border" />
+                    <span className="size-2 rounded-full bg-border" />
+                    <span className="size-2 rounded-full bg-border" />
+                  </span>
+                  <span className="mx-auto flex h-5 items-center rounded-full bg-muted px-3 font-mono text-[9px] text-muted-foreground tracking-[0.06em]">
+                    ledger.local / dashboard
+                  </span>
+                  <span className="w-8" />
+                </div>
+
+                <div className="relative h-[320px] overflow-hidden sm:h-[420px] lg:h-[520px]">
+                  <Image
+                    alt="The Ledger dashboard: a 255px rail with the Ledger mark, a 56px top bar, four glass KPI cards, a revenue area chart, a category donut and a recent-orders table."
+                    className="block h-full w-full object-cover object-top dark:hidden"
+                    height={1701}
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 1096px"
+                    src="/ledger/dashboard-light.png"
+                    width={1440}
+                  />
+                  <Image
+                    alt="The same dashboard in dark theme: the mesh-drift field reads through the top-right cards as a deep indigo glow."
+                    className="hidden h-full w-full object-cover object-top dark:block"
+                    height={1701}
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 1096px"
+                    src="/ledger/dashboard-dark.png"
+                    width={1440}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-5 sm:grid-cols-3">
               {[
                 [
                   "The 56px line",
@@ -285,12 +273,14 @@ export function LedgerCase() {
               ))}
             </div>
 
-            <p className="mt-5 max-w-2xl text-[11px] leading-relaxed text-muted-foreground">
+            <p className="mt-5 text-[11px] leading-relaxed text-muted-foreground">
               <span className="font-mono text-foreground/50 uppercase tracking-[0.12em]">
                 Capture
               </span>{" "}
-              — full page at 1440, 2× device pixels, taken from this build. No
-              mockup, no retouching; the only thing removed is the browser.
+              — commerce overview at 1440, 2× device pixels, taken from this
+              build. The plate follows the page theme; switch to dark and the
+              screenshot switches with it. No mockup, no retouching; the only
+              thing removed is the browser.
             </p>
           </section>
 
@@ -299,31 +289,94 @@ export function LedgerCase() {
           {/* Foundation */}
           <section className="scroll-mt-20" id="foundation">
             <SectionHead
-              index="02"
+              index="01"
               kicker="Foundation"
-              title="A cool zinc ramp, nothing else"
-              description="Primitives name the material once. The semantic layer names the job. A theme flip swaps only the second."
+              title="An indigo harbor ramp, nothing else"
+              description="The material is harbor water: every neutral carries a little chroma toward hue 267 at the lightness a zinc step would have had. That is why the paper reads cool instead of grey, and why the indigo signal does not look pasted on."
             />
 
             <div className="mt-8 grid grid-cols-5 gap-2 md:grid-cols-10">
-              {ramp.map(([token, l, use]) => (
+              {HARBOR_RAMP.map(({ token, hex, l, role }) => (
                 <div key={token}>
                   <div
                     className="h-14 rounded-lg border border-border/70"
-                    style={{ backgroundColor: `var(${token})` }}
+                    style={{ backgroundColor: hex }}
                   />
                   <p className="mt-2 font-mono text-[10px] text-foreground">
-                    {token.replace("--zinc-", "")}
+                    {token.replace("--lg-harbor-", "")}
                   </p>
                   <p className="font-mono text-[9px] text-muted-foreground">
                     L {l}
                   </p>
+                  <p className="font-mono text-[9px] text-muted-foreground/70">
+                    {hex}
+                  </p>
                   <p className="mt-1 text-[10px] leading-tight text-muted-foreground">
-                    {use}
+                    {role}
                   </p>
                 </div>
               ))}
             </div>
+
+            {/* The signal, at full strength. Seven steps is the whole colour. */}
+            <div className="mt-10 overflow-hidden rounded-xl border border-border/50">
+              <div className="flex items-baseline justify-between gap-4 border-border/50 border-b px-5 py-3">
+                <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
+                  Signal · harbor indigo
+                </p>
+                <p className="font-mono text-[10px] text-muted-foreground/70">
+                  7 steps · one hue
+                </p>
+              </div>
+
+              <div className="flex">
+                {SIGNAL_STEPS.map(({ token, hex, role }) => (
+                  <div className="flex-1" key={token} title={`${token} · ${hex}`}>
+                    <div className="h-16" style={{ backgroundColor: hex }} />
+                    <p className="px-2 pt-2 font-mono text-[9px] text-muted-foreground">
+                      {token.replace("--lg-indigo-", "")}
+                    </p>
+                    <p className="px-2 pb-2.5 text-[10px] leading-tight text-muted-foreground">
+                      {role}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-px border-border/50 border-t bg-border/50 sm:grid-cols-3">
+                {[
+                  { swatch: SIGNAL_WATER, label: "the water", note: "mark plate, float shadow" },
+                  { swatch: SIGNAL_REMAINDER, label: "the remainder", note: "chart 5 only, never a category" },
+                  { swatch: SIGNAL_ERROR, label: "the error", note: "destructive only, never a delta" },
+                ].map(({ swatch, label, note }) => (
+                  <div
+                    className="flex items-center gap-3 bg-card px-4 py-3"
+                    key={swatch.token}
+                  >
+                    <span
+                      className="size-7 shrink-0 rounded-md border border-border/60"
+                      style={{ backgroundColor: swatch.hex }}
+                    />
+                    <div className="min-w-0">
+                      <p className="font-mono text-[10px] text-foreground">
+                        {label} · {swatch.hex}
+                      </p>
+                      <p className="truncate text-[10px] text-muted-foreground">
+                        {note}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <p className="mt-3 max-w-2xl text-[11px] leading-relaxed text-muted-foreground">
+              The indigo does three jobs and no others: it fills the primary
+              action, it marks state, and it orders the charts. Everything else
+              in the interface is harbor neutral. A second hue appears exactly
+              once, as the remainder slice of a donut — a remainder is not a
+              category, so it should not compete for the same hue.
+            </p>
 
             <div className="mt-10 grid gap-4 md:grid-cols-2">
               <div className="rounded-xl border border-border/50 p-5">
@@ -331,20 +384,19 @@ export function LedgerCase() {
                   Semantic roles
                 </p>
                 <dl className="mt-3 divide-y divide-border/50">
-                  {[
-                    ["--background", "the canvas", "var(--zinc-100)"],
-                    ["--card", "the glass", "var(--zinc-000)"],
-                    ["--foreground", "the ink", "var(--zinc-900)"],
-                    ["--muted-foreground", "second ink", "var(--zinc-500)"],
-                    ["--border", "the hairline", "var(--zinc-200)"],
-                    ["--signal", "state only", "oklch(0.548 0.216 262)"],
-                  ].map(([token, job, value]) => (
+                  {ROLES.map(({ token, job, hex }) => (
                     <div className="flex items-baseline justify-between gap-4 py-2" key={token}>
-                      <dt className="font-mono text-[11px]">{token}</dt>
+                      <dt className="flex items-center gap-2 font-mono text-[11px]">
+                        <span
+                          className="size-2.5 shrink-0 rounded-[3px] border border-border/70"
+                          style={{ backgroundColor: hex }}
+                        />
+                        {token}
+                      </dt>
                       <dd className="text-right text-[11px] text-muted-foreground">
                         {job}
                         <span className="ml-2 font-mono text-[10px] opacity-60">
-                          {value}
+                          {hex}
                         </span>
                       </dd>
                     </div>
@@ -414,7 +466,7 @@ export function LedgerCase() {
           {/* Surfaces */}
           <section className="scroll-mt-20" id="surfaces">
             <SectionHead
-              index="03"
+              index="02"
               kicker="Surfaces"
               title="Two panes and a float"
               description="A panel sits on the canvas. A float sits on a panel. Nothing sits on three levels — that is how glass turns into mud."
@@ -476,7 +528,7 @@ box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.15);`}
           {/* Forms */}
           <section className="scroll-mt-20" id="forms">
             <SectionHead
-              index="04"
+              index="03"
               kicker="Form kit"
               title="Fields are recesses, not panes"
               description="A field is the one place the glass goes in instead of up: a 2% ink fill, a 1px border, and a 2px inner shadow. Focus lifts the border to 60% ink and adds a 3px ring at 15% — no colour, no glow."
@@ -701,7 +753,7 @@ box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.15);`}
           {/* Data */}
           <section className="scroll-mt-20" id="data">
             <SectionHead
-              index="05"
+              index="04"
               kicker="Data display"
               title="Figures line up or they are wrong"
               description="Every number uses tabular figures and −0.01em tracking. Every table cell is right-aligned on the decimal, and the header is a mono eyebrow, not bold body text."
@@ -810,7 +862,7 @@ box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.15);`}
           {/* Motion */}
           <section className="scroll-mt-20" id="motion">
             <SectionHead
-              index="06"
+              index="05"
               kicker="Motion"
               title="200ms, and only what you touched"
               description="Hover and focus move colour, never geometry. Nothing in the shell animates on load, so the first paint is already the design."
@@ -850,7 +902,7 @@ box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.15);`}
           {/* Audit */}
           <section className="scroll-mt-20" id="audit">
             <SectionHead
-              index="07"
+              index="06"
               kicker="Audit"
               title="What is checked, and what is not"
               description="A system that only lists its passes is a moodboard. These are the measurements behind the claims on this page."
@@ -868,13 +920,15 @@ box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.15);`}
                   {[
                     ["No horizontal overflow", "documentElement.scrollWidth at 1440 / 1024 / 390", "0 / 0 / 0"],
                     ["Rail meets top bar", "both 56px; borders meet at x=255", "pass"],
-                    ["Body ink on canvas", "oklch → sRGB → WCAG, light / dark", "16.05 / 17.51"],
-                    ["Muted ink on canvas", "same method, light / dark", "4.69 / 7.37"],
-                    ["Muted ink on glass", "composited 65% card, light / dark", "5.04 / 6.90"],
-                    ["Signal ink on glass", "pending badge, light / dark", "6.79 / 7.74"],
+                    ["Body ink on canvas", "oklch → sRGB → WCAG, light / dark", "17.29 / 17.26"],
+                    ["Muted ink on canvas", "same method, light / dark", "4.93 / 8.71"],
+                    ["Muted ink on glass", "composited 65% card, light / dark", "5.22 / 8.42"],
+                    ["Signal ink on its wash", "pending badge, light / dark", "10.56 / 7.01"],
+                    ["Primary ink on card", "the action, light / dark", "10.44 / 5.70"],
+                    ["Palette is one source", "scripts/check-palette.mjs, 26 primitives", "pass"],
                     ["Field focus visible", "3px ring + border shift, no colour", "pass"],
                     ["Reduced motion", "still frame drawn, loop skipped", "pass"],
-                    ["Chart axis ink", "10px mono, muted on glass", "5.04"],
+                    ["Chart axis ink", "10px mono, muted on glass", "5.22"],
                   ].map(([claim, how, result]) => (
                     <TableRow key={claim}>
                       <TableCell className="pl-4 font-medium">{claim}</TableCell>
@@ -888,9 +942,20 @@ box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.15);`}
               </Table>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-destructive/25 bg-destructive/[0.04] p-4">
                 <p className="font-mono text-[10px] text-destructive uppercase tracking-[0.14em]">
+                  Fails · 1.93:1
+                </p>
+                <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+                  <span className="font-mono text-foreground">chart-4</span>{" "}
+                  #b9c8ee on glass measures 1.93:1. It is a fill, not ink: it is
+                  only legible as the fourth step of an ordered ramp, never as a
+                  standalone colour, and never behind a number.
+                </p>
+              </div>
+              <div className="rounded-xl border border-border/50 p-4">
+                <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
                   Not verified
                 </p>
                 <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">

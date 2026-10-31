@@ -19,7 +19,7 @@ export const metadata: Metadata = {
         url: '/brand/ledger/ledger-brandkit.png',
         width: 1500,
         height: 1125,
-        alt: 'The Ledger brand board: the grid mark with one lifted tile, the cool zinc ramp, the glass recipe and a dashboard specimen.',
+        alt: 'The Ledger brand board: the grid mark with one lifted tile, the indigo harbor ramp, the glass recipe and a dashboard specimen.',
       },
     ],
   },

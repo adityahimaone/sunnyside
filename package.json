@@ -10,6 +10,8 @@
     "generate-covers": "node scripts/generate-project-covers.mjs",
     "check:critical-css": "node scripts/check-critical-css.mjs",
     "check:opennext-css": "node scripts/check-opennext-css.mjs",
+    "check:palette": "node scripts/check-palette.mjs",
+    "shot:ledger": "node scripts/shot-ledger-plate.mjs",
     "build": "node scripts/generate-blog-content.mjs && next build && node scripts/inline-critical-css.mjs && node scripts/check-critical-css.mjs",
     "build:standalone": "CF_DEPLOY=1 node scripts/generate-blog-content.mjs && next build && node scripts/inline-critical-css.mjs && node scripts/check-critical-css.mjs && node scripts/prepare-standalone.mjs",
     "start": "next start",
@@ -20,7 +22,8 @@
     "lint": "eslint .",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "brandkit:ledger": "node scripts/render-ledger-brandkit.mjs"
   },
   "browserslist": [
     "chrome >= 109",

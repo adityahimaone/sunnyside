@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "@/features/ledger/ui/button";
 import { IconPlaceholder } from "@/features/ledger/ui/icon-placeholder";
+import { useSidebar } from "@/features/ledger/ui/sidebar";
 
 const latestChange = {
 	badge: "UPDATE",
@@ -14,8 +15,11 @@ const latestChange = {
 
 export function LatestChange() {
 	const [isOpen, setIsOpen] = useState(true);
+	const { state } = useSidebar();
 
-	if (!isOpen) {
+	// The card is 100px of prose. Fading it to zero opacity still leaves the box
+	// in the 48px rail, so it is removed from the tree instead.
+	if (!isOpen || state === "collapsed") {
 		return null;
 	}
 
