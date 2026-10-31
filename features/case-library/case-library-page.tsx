@@ -37,7 +37,7 @@ export function CaseLibraryPage() {
               <Sparkle className="size-2.5" />
               Design engineering / Case library
             </span>
-            <span className={layout.kickerText}>Ten systems, one method</span>
+            <span className={layout.kickerText}>Eleven systems, one method</span>
             <span className={layout.kickerText}>
               <span className={layout.num}>{DESIGN_CASES.length}</span> cases
             </span>
@@ -49,7 +49,7 @@ export function CaseLibraryPage() {
             label="Case files"
           />
 
-          <h1 className={layout.title}>Ten systems, one paper trail.</h1>
+          <h1 className={layout.title}>Eleven systems, one paper trail.</h1>
           <p className={layout.intro}>
             A case is not a moodboard. It is a brief, a mark, a system, a proof
             and a written decision. Sunnyside is paper and cobalt; Vitrine is
@@ -59,8 +59,10 @@ export function CaseLibraryPage() {
             Strand is quartz sand and a coastal vista; Clearing is painted
             emerald light behind one pane of glass; Ledger is indigo harbor, one
             pane of frosted glass and a single signal colour; Porphyry is
-            porphyry stone, marble and one dark stage. Each case is documented
-            with its files and gaps left on the table.
+            porphyry stone, marble and one dark stage; Jakarta is one stroke that
+            turns a corner, nine district ramps and six contrast failures left
+            published. Each case is documented with its files and gaps left on the
+            table.
           </p>
 
           <div className={styles.heroActions}>

@@ -23,6 +23,7 @@ export type DesignCase = {
     | 'clearing'
     | 'ledger'
     | 'porphyry'
+    | 'jakarta'
 }
 
 /**
@@ -190,5 +191,21 @@ export const DESIGN_CASES: readonly DesignCase[] = [
       'The Porphyry brand board: the stone block with its gold threshold, the porphyry and marble palette, the outlined Cinzel wordmark, the keyed statue and the stage tokens.',
     tags: ['Porphyry', 'Marble', 'Gold Leaf', 'Stage'],
     tone: 'porphyry',
+  },
+  {
+    number: '11',
+    name: 'Jakarta',
+    href: '/design-system/jakarta',
+    tagline: 'Bergerak Menuju Era Baru Jakarta.',
+    description:
+      'One stroke that turns a corner and one stop where it turns, drawn from a single unit S. Nine district ramps named after Jakarta places, a palette that is a map rather than a mood, and the six contrast pairs that fail published instead of fixed. Enamel, vinyl, a transit card and a bus.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · wayfinding · docs',
+    material: 'Enamel + vinyl + one orange',
+    cover: '/brand/jakarta/jakarta-brandkit.webp',
+    coverAlt:
+      'The Jakarta brand board: the junction mark on paper, ink and Senja, nine district ramps in four steps, the outlined wordmark and the night scope.',
+    tags: ['City', 'Transit', 'Nine Ramps', 'Wayfinding'],
+    tone: 'jakarta',
   },
 ]

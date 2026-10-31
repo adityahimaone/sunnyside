@@ -1,0 +1,1602 @@
+From aada9e6534b029b1b3ae9f3959c027b411814a64 Mon Sep 17 00:00:00 2001
+From: Adit <adit@example.com>
+Date: Sat, 31 Oct 2026 14:22:36 +0000
+Subject: [PATCH 1/2] brand-system: fix detach blind spots; add brand-ref,
+ assets, gates, design-md scripts
+
+---
+ .../sunnyside-brand-system/scripts/assets.mjs | 273 ++++++++++++++++++
+ .../scripts/brand-ref.mjs                     | 262 +++++++++++++++++
+ .../scripts/design-md.mjs                     | 176 +++++++++++
+ .../scripts/detach-check.mjs                  |  26 +-
+ .../sunnyside-brand-system/scripts/gates.mjs  | 187 ++++++++++++
+ 5 files changed, 917 insertions(+), 7 deletions(-)
+ create mode 100644 skills/sunnyside-brand-system/scripts/assets.mjs
+ create mode 100644 skills/sunnyside-brand-system/scripts/brand-ref.mjs
+ create mode 100644 skills/sunnyside-brand-system/scripts/design-md.mjs
+ create mode 100644 skills/sunnyside-brand-system/scripts/gates.mjs
+
+diff --git a/skills/sunnyside-brand-system/scripts/assets.mjs b/skills/sunnyside-brand-system/scripts/assets.mjs
+new file mode 100644
+index 0000000..47f8ecb
+--- /dev/null
++++ b/skills/sunnyside-brand-system/scripts/assets.mjs
+@@ -0,0 +1,273 @@
++#!/usr/bin/env node
++/**
++ * Free assets, with the paperwork — photographs and UI icons for a proof page.
++ *
++ *   node scripts/assets.mjs search "dune at dawn" [--source openverse] [--orientation landscape] [--n 6]
++ *   node scripts/assets.mjs get openverse:<id>   --out public/brand/<slug>/assets [--name hero]
++ *   node scripts/assets.mjs get pexels:<id>      --out …  [--size large]
++ *   node scripts/assets.mjs get unsplash:<id>    --out …
++ *   node scripts/assets.mjs search "arrow" --source iconify
++ *   node scripts/assets.mjs get iconify:lucide:arrow-right --out …
++ *   node scripts/assets.mjs credits --dir public/brand/<slug>/assets     # verify every file has a record
++ *
++ * Sources
++ *   openverse  no key.  Default filter cc0 + pdm: nothing to attribute. Widen with --license by,by-sa.
++ *   pexels     PEXELS_API_KEY.     Free key, instant. Credit the photographer and Pexels.
++ *   unsplash   UNSPLASH_ACCESS_KEY. Free key. Hotlink + download tracking + utm credit are rules,
++ *              and the API is meant for human-chosen images, so search is capped at 8 results.
++ *   iconify    no key.  Licence varies per icon set; it is read and recorded, never assumed.
++ *
++ * Not for marks. A logo is drawn (brand-forge / cast-forge); a stock image is imagery — a hero
++ * plate, a dither source, a texture. Never trace, recolour or ship one as the identity.
++ *
++ * Every `get` appends to <out>/credits.json. A file in assets/ with no entry fails `gates.mjs`.
++ *
++ * Zero dependencies. *_BASE env vars override each host, which is how the tests run offline.
++ */
++import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
++import { extname, join, resolve } from 'node:path'
++
++const HOSTS = {
++  openverse: process.env.ASSETS_OPENVERSE_BASE ?? 'https://api.openverse.org/v1',
++  pexels: process.env.ASSETS_PEXELS_BASE ?? 'https://api.pexels.com/v1',
++  unsplash: process.env.ASSETS_UNSPLASH_BASE ?? 'https://api.unsplash.com',
++  iconify: process.env.ASSETS_ICONIFY_BASE ?? 'https://api.iconify.design',
++}
++const UTM = 'utm_source=sunnyside_brand_system&utm_medium=referral'
++const MAX_BYTES = 20 * 1024 * 1024
++const UA = 'sunnyside-brand-system/3.3 (+https://github.com/adityahimaone/sunnyside)'
++
++const [cmd, ...rest] = process.argv.slice(2)
++const flags = {}
++const pos = []
++for (let i = 0; i < rest.length; i += 1) {
++  if (rest[i].startsWith('--')) flags[rest[i].slice(2)] = rest[i + 1] === undefined || rest[i + 1].startsWith('--') ? true : rest[(i += 1)]
++  else pos.push(rest[i])
++}
++const die = (m) => {
++  console.error(m)
++  process.exit(1)
++}
++
++/* ── http ────────────────────────────────────────────────────────────────── */
++
++async function getJson(url, headers = {}) {
++  let res
++  try {
++    res = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/json', ...headers } })
++  } catch (e) {
++    die(`Cannot reach ${new URL(url).host} (${e.cause?.code ?? e.message}). If the host is blocked, allow it in the network settings.`)
++  }
++  if (res.status === 401 || res.status === 403) die(`${new URL(url).host} refused the key (${res.status}).`)
++  if (res.status === 429) die(`${new URL(url).host} is rate-limiting this client (429). Wait, and ask for fewer results.`)
++  if (!res.ok) die(`${res.status} from ${new URL(url).host}${new URL(url).pathname}`)
++  return res.json()
++}
++
++async function getBytes(url) {
++  let res
++  try {
++    res = await fetch(url, { headers: { 'User-Agent': UA } })
++  } catch (e) {
++    die(`Download failed (${e.cause?.code ?? e.message}): ${url}`)
++  }
++  if (!res.ok) die(`${res.status} downloading ${url}`)
++  const buf = Buffer.from(await res.arrayBuffer())
++  if (buf.length > MAX_BYTES) die(`${(buf.length / 1048576).toFixed(1)} MB is over the ${MAX_BYTES / 1048576} MB cap — pick a smaller size.`)
++  return { buf, type: res.headers.get('content-type') ?? '' }
++}
++
++const key = (name, where) => {
++  const v = process.env[name]
++  if (!v) die(`${name} is not set. Free key: ${where}. (openverse and iconify need none.)`)
++  return v
++}
++const q = (o) => new URLSearchParams(Object.entries(o).filter(([, v]) => v !== undefined && v !== '')).toString()
++const extOf = (url, type) => {
++  const fromType = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/svg+xml': '.svg', 'image/gif': '.gif' }[type.split(';')[0].trim()]
++  return fromType ?? (extname(new URL(url).pathname) || '.jpg')
++}
++
++/* ── each source speaks the same two verbs: find() → candidates, one() → a record ── */
++
++const sources = {
++  openverse: {
++    async find(text, o) {
++      const data = await getJson(`${HOSTS.openverse}/images/?${q({ q: text, license: o.license ?? 'cc0,pdm', page_size: o.n, aspect_ratio: { landscape: 'wide', portrait: 'tall', square: 'square' }[o.orientation] })}`)
++      return (data.results ?? []).map(normOpenverse)
++    },
++    one: async (id) => normOpenverse(await getJson(`${HOSTS.openverse}/images/${id}/`)),
++  },
++  pexels: {
++    async find(text, o) {
++      const data = await getJson(`${HOSTS.pexels}/search?${q({ query: text, per_page: o.n, orientation: o.orientation })}`, { Authorization: key('PEXELS_API_KEY', 'pexels.com/api') })
++      return (data.photos ?? []).map(normPexels)
++    },
++    one: async (id, o) => normPexels(await getJson(`${HOSTS.pexels}/photos/${id}`, { Authorization: key('PEXELS_API_KEY', 'pexels.com/api') }), o.size),
++  },
++  unsplash: {
++    async find(text, o) {
++      const data = await getJson(`${HOSTS.unsplash}/search/photos?${q({ query: text, per_page: Math.min(o.n, 8), orientation: o.orientation })}`, { Authorization: `Client-ID ${key('UNSPLASH_ACCESS_KEY', 'unsplash.com/developers')}`, 'Accept-Version': 'v1' })
++      return (data.results ?? []).map(normUnsplash)
++    },
++    one: async (id) => normUnsplash(await getJson(`${HOSTS.unsplash}/photos/${id}`, { Authorization: `Client-ID ${key('UNSPLASH_ACCESS_KEY', 'unsplash.com/developers')}`, 'Accept-Version': 'v1' })),
++    // The API requires a call to download_location when an image is chosen for use.
++    async track(rec) {
++      if (!rec._track) return
++      await getJson(rec._track, { Authorization: `Client-ID ${key('UNSPLASH_ACCESS_KEY', 'unsplash.com/developers')}`, 'Accept-Version': 'v1' })
++    },
++  },
++  iconify: {
++    async find(text, o) {
++      const data = await getJson(`${HOSTS.iconify}/search?${q({ query: text, limit: o.n })}`)
++      return (data.icons ?? []).map((name) => {
++        const [prefix] = name.split(':')
++        return normIconify(name, data.collections?.[prefix])
++      })
++    },
++    async one(name) {
++      const [prefix] = name.split(':')
++      const all = await getJson(`${HOSTS.iconify}/collections?${q({ prefixes: prefix })}`)
++      return normIconify(name, all?.[prefix])
++    },
++  },
++}
++
++/* ── normalisers: one record shape, so credits.json never varies by source ── */
++
++function normOpenverse(r) {
++  const lic = [r.license, r.license_version].filter(Boolean).join(' ').toUpperCase()
++  return {
++    source: 'openverse', id: r.id, title: r.title || 'untitled', creator: r.creator ?? null, creator_url: r.creator_url ?? null,
++    license: lic || 'unknown', license_url: r.license_url ?? null, page: r.foreign_landing_url ?? null,
++    download: r.url, thumb: r.thumbnail ?? null, width: r.width ?? null, height: r.height ?? null,
++    attribution: r.attribution ?? null, // Openverse writes the exact sentence the licence needs
++    attributionRequired: !/^(CC0|PDM)/.test(lic),
++    note: r.provider ? `via ${r.provider}` : '',
++  }
++}
++function normPexels(r, size = 'large') {
++  return {
++    source: 'pexels', id: String(r.id), title: r.alt || `Pexels ${r.id}`, creator: r.photographer, creator_url: r.photographer_url,
++    license: 'Pexels License', license_url: 'https://www.pexels.com/license/', page: r.url,
++    download: r.src?.[size] ?? r.src?.large, thumb: r.src?.medium ?? null, width: r.width, height: r.height,
++    attribution: `Photo by ${r.photographer} on Pexels`, attributionRequired: true, note: r.avg_color ? `avg ${r.avg_color}` : '',
++  }
++}
++function normUnsplash(r) {
++  const who = r.user?.name ?? 'Unknown'
++  const profile = `${r.user?.links?.html ?? 'https://unsplash.com'}?${UTM}`
++  return {
++    source: 'unsplash', id: r.id, title: r.alt_description || r.description || `Unsplash ${r.id}`, creator: who, creator_url: profile,
++    license: 'Unsplash License', license_url: 'https://unsplash.com/license', page: `${r.links?.html ?? 'https://unsplash.com'}?${UTM}`,
++    download: r.urls?.regular ?? r.urls?.full, hotlink: r.urls?.regular, thumb: r.urls?.small ?? null, width: r.width, height: r.height,
++    attribution: `Photo by ${who} on Unsplash`, attributionRequired: true,
++    attributionHtml: `Photo by <a href="${profile}">${who}</a> on <a href="https://unsplash.com/?${UTM}">Unsplash</a>`,
++    note: 'hotlink urls.regular if the page is published; download_location is pinged on get', _track: r.links?.download_location,
++  }
++}
++function normIconify(name, set) {
++  const lic = set?.license
++  return {
++    source: 'iconify', id: name, title: name, creator: set?.author?.name ?? null, creator_url: set?.author?.url ?? null,
++    license: lic?.spdx ?? lic?.title ?? 'unknown — check the icon set', license_url: lic?.url ?? null, page: `https://icon-sets.iconify.design/${name.replace(':', '/')}/`,
++    download: `${HOSTS.iconify}/${name.replace(':', '/')}.svg`, thumb: null, width: null, height: null,
++    attribution: set?.author?.name ? `${name} by ${set.author.name} (${lic?.title ?? 'licence unknown'})` : null,
++    attributionRequired: !/^(MIT|ISC|Apache-2\.0|CC0|0BSD|Unlicense)/i.test(lic?.spdx ?? ''), note: set?.name ?? '',
++  }
++}
++
++/* ── commands ────────────────────────────────────────────────────────────── */
++
++const clip = (s, n) => (s.length > n ? `${s.slice(0, n - 1)}…` : s)
++
++async function main() {
++  if (!cmd || cmd === 'help' || flags.help) {
++    console.log(`Usage:
++  assets.mjs search "<words>" [--source openverse|pexels|unsplash|iconify] [--orientation landscape|portrait|square] [--n 6] [--license cc0,pdm]
++  assets.mjs get <source>:<id> --out <dir> [--name <file-stem>] [--size large]
++  assets.mjs credits --dir <dir>`)
++    return
++  }
++
++  if (cmd === 'search') {
++    const text = pos.join(' ')
++    if (!text) die('search needs words')
++    const name = String(flags.source ?? 'openverse')
++    const src = sources[name] ?? die(`Unknown source "${name}". Use: ${Object.keys(sources).join(', ')}`)
++    const rows = await src.find(text, { n: Number(flags.n ?? 6), orientation: flags.orientation, license: flags.license })
++    if (!rows.length) return console.log('no results — try fewer, plainer words')
++    for (const r of rows) {
++      console.log(`${r.source}:${r.id}`)
++      console.log(`   ${clip(r.title, 70)} — ${r.creator ?? 'unknown creator'} · ${r.license}${r.width ? ` · ${r.width}×${r.height}` : ''}`)
++      if (r.thumb) console.log(`   preview ${r.thumb}`)
++    }
++    console.log(`\n${rows.length} result(s). Pick by eye, then: assets.mjs get <id above> --out public/brand/<slug>/assets`)
++    return
++  }
++
++  if (cmd === 'get') {
++    const [spec] = pos
++    const m = /^(openverse|pexels|unsplash|iconify):(.+)$/.exec(spec ?? '')
++    if (!m) die('get needs <source>:<id>, e.g. openverse:3f2a… or iconify:lucide:sun')
++    if (!flags.out) die('get needs --out <dir>')
++    const [, name, id] = m
++    const rec = await sources[name].one(id, { size: flags.size })
++    if (!rec.download) die('the source returned no downloadable url')
++    if (rec.attributionRequired && !rec.attribution && !/^unknown/.test(rec.license)) console.error(`warning: ${rec.license} requires attribution but the source supplied none — write one before shipping.`)
++    if (/^unknown/.test(rec.license)) console.error('warning: licence unknown — do not ship until you have read the set page: ' + rec.page)
++
++    const { buf, type } = await getBytes(rec.download)
++    const out = resolve(String(flags.out))
++    await mkdir(out, { recursive: true })
++    const stem = String(flags.name ?? `${rec.source}-${rec.id.replace(/[^a-z0-9]+/gi, '-')}`).replace(/[^a-z0-9._-]/gi, '-')
++    const file = `${stem}${extOf(rec.download, type)}`
++    await writeFile(join(out, file), buf)
++    await sources[name].track?.(rec)
++
++    const credits = await readCredits(out)
++    const { _track, ...clean } = rec
++    credits.push({ file, ...clean, retrieved: new Date().toISOString().slice(0, 10) })
++    await writeFile(join(out, 'credits.json'), `${JSON.stringify(credits.filter((c, i, a) => a.findLastIndex((x) => x.file === c.file) === i), null, 2)}\n`)
++
++    console.log(`${join(flags.out, file)}  (${(buf.length / 1024).toFixed(0)} KB)`)
++    console.log(`credit: ${rec.attribution ?? '(none supplied)'}  [${rec.license}]`)
++    if (rec.source === 'unsplash') console.log('note: Unsplash asks apps to hotlink urls.regular and to credit with the utm links in credits.json (attributionHtml).')
++    if (rec.source !== 'iconify') console.log('next: python3 scripts/downscale.py <file> <out> <w> <h>   # a hero rarely needs more than 1600px')
++    return
++  }
++
++  if (cmd === 'credits') {
++    const dir = resolve(String(flags.dir ?? die('credits needs --dir <dir>')))
++    const credits = await readCredits(dir)
++    const files = (await readdir(dir).catch(() => die(`no such directory: ${dir}`))).filter((f) => f !== 'credits.json' && !f.startsWith('.'))
++    const known = new Set(credits.map((c) => c.file))
++    const orphans = files.filter((f) => !known.has(f))
++    const gone = credits.filter((c) => !files.includes(c.file)).map((c) => c.file)
++    // A record is not enough: an unknown licence, or a licence that demands credit with none written,
++    // is a file we cannot lawfully ship.
++    const unsafe = (c) => /^unknown/.test(c.license) || (c.attributionRequired && !c.attribution)
++    let failed = orphans.length
++    credits.forEach((c) => {
++      if (unsafe(c)) {
++        failed += 1
++        console.log(`FAIL ${c.file.padEnd(34)} ${c.license} — ${/^unknown/.test(c.license) ? 'read the set page and edit credits.json' : 'attribution required, none written'}`)
++      } else console.log(`ok   ${c.file.padEnd(34)} ${c.license.padEnd(18)} ${c.attribution ?? ''}`)
++    })
++    orphans.forEach((f) => console.log(`FAIL ${f.padEnd(34)} no credits.json entry — source and licence unknown`))
++    gone.forEach((f) => console.log(`warn ${f.padEnd(34)} recorded but not on disk`))
++    process.exit(failed ? 1 : 0)
++  }
++
++  die(`Unknown command "${cmd}". Try: search, get, credits`)
++}
++
++async function readCredits(dir) {
++  try {
++    return JSON.parse(await readFile(join(dir, 'credits.json'), 'utf8'))
++  } catch {
++    return []
++  }
++}
++
++await main()
+diff --git a/skills/sunnyside-brand-system/scripts/brand-ref.mjs b/skills/sunnyside-brand-system/scripts/brand-ref.mjs
+new file mode 100644
+index 0000000..50f3204
+--- /dev/null
++++ b/skills/sunnyside-brand-system/scripts/brand-ref.mjs
+@@ -0,0 +1,262 @@
++#!/usr/bin/env node
++/**
++ * Brand reference library — study what a category already looks like, then leave it.
++ *
++ *   node scripts/brand-ref.mjs list   [--category fintech] [--tag minimal]
++ *   node scripts/brand-ref.mjs search <words…>
++ *   node scripts/brand-ref.mjs near   --hue 28 [--within 25]     # who already owns this hue
++ *   node scripts/brand-ref.mjs show   <id>                       # summary + DESIGN.md head
++ *   node scripts/brand-ref.mjs pull   <id…> [--out dir]          # DESIGN.md + tokens.json
++ *   node scripts/brand-ref.mjs ref    <id…> --out refs/          # detach-check input
++ *
++ * Source: github.com/ricocc/brands-design-md (the collection behind
++ * design.ricoui.com/brands). 69 unofficial, "inspired by" analyses, one folder per brand.
++ *
++ * Why it fetches instead of shipping a copy: that repository carries no LICENSE file and
++ * calls itself an unaffiliated reference. Redistributing it inside this repo would be a
++ * licence we do not hold. Files go to the OS temp directory, never into the project.
++ *
++ * Why it exists: the detach gate measures a new system against its *siblings*. A
++ * stranger's brand is a sibling too — an accent within 25° of Stripe's indigo is a
++ * resemblance a client will name in the first meeting. `ref` turns a brand into a file the
++ * existing gate can score, so "different from the category" becomes a number.
++ *
++ * Zero dependencies. Needs network (raw.githubusercontent.com); BRAND_REFS_BASE overrides
++ * the source, which is how the tests run offline.
++ */
++import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
++import { tmpdir } from 'node:os'
++import { join, resolve } from 'node:path'
++
++const BASE = (process.env.BRAND_REFS_BASE ?? 'https://raw.githubusercontent.com/ricocc/brands-design-md/master').replace(/\/$/, '')
++const CACHE = join(tmpdir(), 'sunnyside-brand-refs')
++const TTL_MS = 24 * 60 * 60 * 1000
++
++/* ── args ────────────────────────────────────────────────────────────────── */
++
++const [cmd, ...rest] = process.argv.slice(2)
++const flags = {}
++const pos = []
++for (let i = 0; i < rest.length; i += 1) {
++  if (rest[i].startsWith('--')) flags[rest[i].slice(2)] = rest[i + 1]?.startsWith('--') || rest[i + 1] === undefined ? true : rest[(i += 1)]
++  else pos.push(rest[i])
++}
++
++const die = (message) => {
++  console.error(message)
++  process.exit(1)
++}
++
++/* ── network, with a cache that expires ──────────────────────────────────── */
++
++async function fetchText(path, { fresh = false } = {}) {
++  const file = join(CACHE, path.replace(/[^a-z0-9._-]/gi, '_'))
++  if (!fresh) {
++    try {
++      const info = await stat(file)
++      if (Date.now() - info.mtimeMs < TTL_MS) return await readFile(file, 'utf8')
++    } catch {
++      /* miss */
++    }
++  }
++  let res
++  try {
++    res = await fetch(`${BASE}/${path}`)
++  } catch (error) {
++    die(`Cannot reach ${BASE} (${error.cause?.code ?? error.message}). If this host is blocked, allow raw.githubusercontent.com or set BRAND_REFS_BASE.`)
++  }
++  if (!res.ok) die(`${res.status} for ${path}`)
++  const text = await res.text()
++  await mkdir(CACHE, { recursive: true })
++  await writeFile(file, text)
++  return text
++}
++
++const registry = async () => JSON.parse(await fetchText('registry.json'))
++
++function findBrand(list, id) {
++  const wanted = String(id).toLowerCase()
++  const hit = list.find((b) => b.id.toLowerCase() === wanted || b.folder.toLowerCase() === wanted)
++  if (hit) return hit
++  const near = list.filter((b) => b.id.includes(wanted) || b.name.toLowerCase().includes(wanted)).map((b) => b.id)
++  die(`No brand "${id}".${near.length ? ` Did you mean: ${near.slice(0, 6).join(', ')}?` : ' Run `list`.'}`)
++}
++
++/* ── colour: hex → OKLCH hue (kept local; detach-check is a CLI, not a module) ── */
++
++function hueOf(hex) {
++  const raw = String(hex).trim().replace('#', '')
++  const full = raw.length === 3 ? [...raw].map((c) => c + c).join('') : raw
++  if (!/^[0-9a-f]{6}$/i.test(full)) return null
++  const lin = (i) => {
++    const c = parseInt(full.slice(i, i + 2), 16) / 255
++    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
++  }
++  const [r, g, b] = [0, 2, 4].map(lin)
++  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
++  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
++  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
++  const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s
++  const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s
++  const C = Math.hypot(A, B)
++  let H = (Math.atan2(B, A) * 180) / Math.PI
++  if (H < 0) H += 360
++  return { H, C }
++}
++const arc = (a, b) => {
++  const d = Math.abs(a - b) % 360
++  return d > 180 ? 360 - d : d
++}
++
++/* ── DTCG tokens → the flat shape detach-check already normalises ─────────── */
++
++function collectColors(node, trail, out) {
++  if (!node || typeof node !== 'object') return
++  if (typeof node.$value === 'string') {
++    if (/^#[0-9a-f]{3,8}$/i.test(node.$value)) out[trail.join('-')] = node.$value.slice(0, 7)
++    return
++  }
++  for (const [key, child] of Object.entries(node)) if (!key.startsWith('$')) collectColors(child, [...trail, key], out)
++}
++
++function firstFamily(value) {
++  const family = typeof value === 'string' ? value : value?.fontFamily
++  if (!family) return ''
++  return (
++    String(family)
++      .split(',')
++      .map((p) => p.replace(/['"]/g, '').trim())
++      .find((p) => p && !/^(sans-serif|serif|monospace|system-ui|var\()/i.test(p)) ?? ''
++  )
++}
++
++function toDetachShape(brand, tokens) {
++  const color = {}
++  collectColors(tokens.color, [], color)
++
++  // Display = the first typography entry that reads as a headline; otherwise the first entry.
++  const entries = Object.entries(tokens.typography ?? {})
++  const pick = entries.find(([k]) => /display|hero|h1|heading|headline/i.test(k)) ?? entries[0]
++  const display = pick ? firstFamily(pick[1].$value) : ''
++  const radiusValues = Object.values(tokens.radius ?? {}).map((r) => r.$value).filter((v) => /px$/.test(v))
++
++  return {
++    _external: true, // tells detach-check to score hue, value and type only
++    meta: { name: brand.name, namespace: `ref-${brand.id}`, oneSentence: brand.description },
++    // detach-check only scores what it can read; a reference has no DNA, so those keys stay absent
++    // and are reported as "not scored" instead of earning points for differing.
++    color,
++    type: display ? { display } : {},
++    radius: radiusValues[1] ?? radiusValues[0],
++    _source: `${BASE}/brands/${brand.folder}/tokens.json`,
++  }
++}
++
++/* ── commands ────────────────────────────────────────────────────────────── */
++
++const line = (b) => `${b.id.padEnd(16)} ${b.name.padEnd(18)} ${b.category.padEnd(28)} ${(b.previewColors ?? []).slice(0, 3).join(' ')}`
++
++async function main() {
++  if (!cmd || cmd === 'help' || flags.help) {
++    console.log(`Usage:
++  brand-ref.mjs list   [--category <text>] [--tag <text>]
++  brand-ref.mjs search <words…>
++  brand-ref.mjs near   --hue <0-360> [--within 25]
++  brand-ref.mjs show   <id>
++  brand-ref.mjs pull   <id…> [--out <dir>]
++  brand-ref.mjs ref    <id…> --out <dir>`)
++    return
++  }
++  const list = await registry()
++
++  if (cmd === 'list') {
++    const cat = flags.category && String(flags.category).toLowerCase()
++    const tag = flags.tag && String(flags.tag).toLowerCase()
++    const rows = list.filter(
++      (b) => (!cat || b.category.toLowerCase().includes(cat)) && (!tag || b.tags.some((t) => t.toLowerCase().includes(tag))),
++    )
++    rows.forEach((b) => console.log(line(b)))
++    console.log(`\n${rows.length} of ${list.length} brands`)
++    return
++  }
++
++  if (cmd === 'search') {
++    if (!pos.length) die('search needs at least one word')
++    const words = pos.map((w) => w.toLowerCase())
++    const scored = list
++      .map((b) => {
++        const hay = `${b.name} ${b.category} ${b.tags.join(' ')} ${b.description}`.toLowerCase()
++        return { b, n: words.filter((w) => hay.includes(w)).length }
++      })
++      .filter((x) => x.n)
++      .sort((a, c) => c.n - a.n)
++    scored.slice(0, 12).forEach(({ b }) => console.log(line(b)))
++    if (!scored.length) console.log('no match')
++    return
++  }
++
++  if (cmd === 'near') {
++    const hue = Number(flags.hue)
++    if (!Number.isFinite(hue)) die('near needs --hue <0-360>')
++    const within = Number(flags.within ?? 25)
++    const hits = []
++    for (const b of list) {
++      for (const hex of b.previewColors ?? []) {
++        const o = hueOf(hex)
++        if (!o || o.C < 0.06) continue // greys do not own a hue
++        const d = arc(o.H, hue)
++        if (d <= within) hits.push({ b, hex, d })
++      }
++    }
++    const seen = new Set()
++    const rows = hits.sort((a, c) => a.d - c.d).filter((h) => !seen.has(h.b.id) && seen.add(h.b.id))
++    rows.forEach((h) => console.log(`${h.b.name.padEnd(18)} ${h.hex}  ${h.d.toFixed(0)}° away   (${h.b.category})`))
++    console.log(`\n${rows.length} brand(s) with a chromatic colour within ${within}° of hue ${hue}. These are the resemblances a client will name.`)
++    return
++  }
++
++  if (cmd === 'show') {
++    const b = findBrand(list, pos[0])
++    console.log(`${b.name} — ${b.category}\n${b.website}\n${b.description}\nTags: ${b.tags.join(', ')}\nColours: ${b.previewColors.join(' ')}\n`)
++    const md = await fetchText(`brands/${b.folder}/DESIGN.md`)
++    console.log(md.split('\n').slice(0, 40).join('\n'))
++    console.log(`\n… (${md.split('\n').length} lines) — \`pull ${b.id}\` to keep it.`)
++    return
++  }
++
++  if (cmd === 'pull' || cmd === 'ref') {
++    if (!pos.length) die(`${cmd} needs at least one brand id`)
++    const out = resolve(String(flags.out ?? (cmd === 'ref' ? 'refs' : join(CACHE, 'pulled'))))
++    await mkdir(out, { recursive: true })
++    for (const id of pos) {
++      const b = findBrand(list, id)
++      if (cmd === 'pull') {
++        for (const f of ['DESIGN.md', 'tokens.json']) {
++          if (!b.files.includes(f)) continue
++          await writeFile(join(out, `${b.id}.${f}`), await fetchText(`brands/${b.folder}/${f}`))
++        }
++        console.log(`pulled ${b.id} → ${out}`)
++      } else {
++        if (!b.files.includes('tokens.json')) {
++          console.error(`skip ${b.id}: no tokens.json`)
++          continue
++        }
++        const shaped = toDetachShape(b, JSON.parse(await fetchText(`brands/${b.folder}/tokens.json`)))
++        const n = Object.keys(shaped.color).length
++        if (!n) {
++          console.error(`skip ${b.id}: no hex colours in tokens.json`)
++          continue
++        }
++        await writeFile(join(out, `${b.id}.json`), JSON.stringify(shaped, null, 2))
++        console.log(`ref ${b.id} → ${join(out, `${b.id}.json`)}  (${n} colours, display "${shaped.type.display ?? '—'}")`)
++      }
++    }
++    if (cmd === 'ref')
++      console.log(`\nScore against them:\n  node scripts/detach-check.mjs --new features/<slug>/tokens.json ${pos.map((i) => `--ref ${join(String(flags.out ?? 'refs'), `${i}.json`)}`).join(' ')}\nHue, value and display face are scored; DNA, structure and copy are not (a reference has none).`)
++    return
++  }
++
++  die(`Unknown command "${cmd}". Try: list, search, near, show, pull, ref`)
++}
++
++await main()
+diff --git a/skills/sunnyside-brand-system/scripts/design-md.mjs b/skills/sunnyside-brand-system/scripts/design-md.mjs
+new file mode 100644
+index 0000000..9d5a4f6
+--- /dev/null
++++ b/skills/sunnyside-brand-system/scripts/design-md.mjs
+@@ -0,0 +1,176 @@
++#!/usr/bin/env node
++/**
++ * tokens.json → DESIGN.md (the Google Labs spec, version alpha).
++ *
++ *   node scripts/design-md.mjs --slug <slug> [--root .] [--out public/brand/<slug>/DESIGN.md] [--lint]
++ *
++ * Why: DESIGN.md is becoming the file other agents and tools (Stitch, the ricoui workspace,
++ * `npx @google/design.md export`) read to learn a system. A case that ships HTML, Figma and an
++ * llms.txt but not this is invisible to them. This writes it from the same tokens.json, so it
++ * cannot drift into a second source of truth.
++ *
++ * It emits only what the tokens contain. No Do's and Don'ts, no components, no invented
++ * rationale — a section with nothing real in it is listed under `omitted` instead, which is the
++ * spec's own way to say "left out on purpose". Prose comes from each primitive's `role`.
++ *
++ * Colour mapping to the spec's roles (primary / secondary / tertiary / neutral):
++ *   primary   the darkest primitive           secondary the quietest mid-tone
++ *   tertiary  the accent (name hint, else the most chromatic)    neutral the lightest
++ * These are *aliases added beside* the real names, never replacements.
++ *
++ * `--lint` runs `npx @google/design.md lint` on the result and prints its findings.
++ * Zero dependencies of its own.
++ */
++import { execFile } from 'node:child_process'
++import { existsSync } from 'node:fs'
++import { mkdir, readFile, writeFile } from 'node:fs/promises'
++import { dirname, join, resolve } from 'node:path'
++import { promisify } from 'node:util'
++
++const run = promisify(execFile)
++const args = process.argv.slice(2)
++const flag = (n, d) => (args.includes(`--${n}`) ? (args[args.indexOf(`--${n}`) + 1]?.startsWith('--') ? true : args[args.indexOf(`--${n}`) + 1]) : d)
++const slug = flag('slug')
++if (!slug || slug === true) {
++  console.error('Usage: node scripts/design-md.mjs --slug <slug> [--root .] [--out <file>] [--lint]')
++  process.exit(1)
++}
++const root = resolve(flag('root', '.'))
++const src = join(root, 'features', slug, 'tokens.json')
++if (!existsSync(src)) {
++  console.error(`No ${src}`)
++  process.exit(1)
++}
++const tokens = JSON.parse(await readFile(src, 'utf8'))
++
++/* ── helpers ─────────────────────────────────────────────────────────────── */
++
++const kebab = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
++const hex6 = (v) => (/^#[0-9a-f]{6}$/i.test(v) ? v.toUpperCase() : /^#[0-9a-f]{3}$/i.test(v) ? `#${[...v.slice(1)].map((c) => c + c).join('')}`.toUpperCase() : null)
++const q = (s) => JSON.stringify(String(s)) // YAML-safe double-quoted scalar
++
++function oklch(hex) {
++  const f = hex.slice(1)
++  const lin = (i) => {
++    const c = parseInt(f.slice(i, i + 2), 16) / 255
++    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
++  }
++  const [r, g, b] = [0, 2, 4].map(lin)
++  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
++  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
++  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
++  const L = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s
++  const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s
++  const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s
++  return { L, C: Math.hypot(A, B) }
++}
++
++const dimension = (v) => (/^-?\d*\.?\d+(px|rem|em)$/.test(String(v).trim()) ? String(v).trim() : null)
++const generic = /^(sans-serif|serif|monospace|system-ui|ui-[a-z-]+|-apple-system|var\(.*)$/i
++const family = (stack) =>
++  String(stack ?? '')
++    .split(',')
++    .map((p) => p.replace(/['"]/g, '').trim())
++    .find((p) => p && !generic.test(p)) ?? null
++
++/* ── colours ─────────────────────────────────────────────────────────────── */
++
++const prims = (tokens.primitives ?? [])
++  .map((p) => ({ name: kebab(p.name), hex: hex6(p.value), role: p.role ?? '' }))
++  .filter((p) => p.hex && p.name)
++if (!prims.length) {
++  console.error('tokens.json has no hex primitives — nothing to export')
++  process.exit(1)
++}
++const scored = prims.map((p) => ({ ...p, ...oklch(p.hex) }))
++const byL = [...scored].sort((a, b) => a.L - b.L)
++const accent = scored.find((p) => /signal|accent|brand|loud|focal|glint/i.test(`${p.name} ${p.role}`)) ?? [...scored].sort((a, b) => b.C - a.C)[0]
++const mids = scored.filter((p) => p.L > 0.35 && p.L < 0.8 && p.C < 0.06)
++const roleOf = {
++  primary: byL[0],
++  neutral: byL[byL.length - 1],
++  tertiary: accent,
++  secondary: mids[0] ?? byL[1],
++}
++const colors = Object.fromEntries(prims.map((p) => [p.name, p.hex]))
++for (const [role, p] of Object.entries(roleOf)) if (p && !(role in colors)) colors[role] = p.hex
++
++/* ── typography, rounded, spacing — only where a real value exists ───────── */
++
++const typography = {}
++let skippedFaces = 0
++for (const t of Array.isArray(tokens.type) ? tokens.type : []) {
++  const name = kebab(t.name ?? t.role ?? '')
++  const fam = family(t.value ?? t.face)
++  // a bare alias such as "mono" is a CSS variable name, not a typeface — do not publish it as one
++  if (!name || !fam || /^(mono|sans|serif|display|body|reading)$/i.test(fam)) {
++    if (name) skippedFaces += 1
++    continue
++  }
++  typography[name] = { fontFamily: fam, ...(t.size && dimension(t.size) ? { fontSize: dimension(t.size) } : {}), ...(Number(t.weight) ? { fontWeight: Number(t.weight) } : {}) }
++}
++const scale = (list) =>
++  Object.fromEntries((Array.isArray(list) ? list : []).map((r) => [kebab(String(r.name).replace(/^(radius|space)-/, '')), dimension(r.value)]).filter(([k, v]) => k && v))
++const rounded = scale(tokens.radius)
++const spacing = scale(tokens.space)
++
++const omitted = [
++  ...(Object.keys(typography).length ? [] : [{ section: 'typography', reason: 'faces are CSS aliases in tokens.json, not resolvable family names' }]),
++  ...(Object.keys(rounded).length ? [] : [{ section: 'rounded', reason: 'tokens.json defines no radius scale' }]),
++  ...(Object.keys(spacing).length ? [] : [{ section: 'spacing', reason: 'tokens.json defines no spacing scale' }]),
++  { section: 'components', reason: 'component tokens live in the case CSS module, not tokens.json' },
++]
++
++/* ── emit ────────────────────────────────────────────────────────────────── */
++
++const name = tokens.name ?? tokens.meta?.name ?? slug
++const idea = tokens.idea ?? tokens.meta?.essence ?? tokens.meta?.oneSentence ?? ''
++const y = []
++y.push('---', 'version: alpha', `name: ${q(name)}`)
++if (idea) y.push(`description: ${q(idea)}`)
++y.push('colors:', ...Object.entries(colors).map(([k, v]) => `  ${k}: ${q(v)}`))
++if (Object.keys(typography).length) {
++  y.push('typography:')
++  for (const [k, t] of Object.entries(typography)) y.push(`  ${k}:`, ...Object.entries(t).map(([a, b]) => `    ${a}: ${typeof b === 'number' ? b : q(b)}`))
++}
++for (const [label, map] of [['rounded', rounded], ['spacing', spacing]])
++  if (Object.keys(map).length) y.push(`${label}:`, ...Object.entries(map).map(([k, v]) => `  ${k}: ${q(v)}`))
++y.push('omitted:', ...omitted.flatMap((o) => [`  - section: ${o.section}`, `    reason: ${q(o.reason)}`]), '---')
++
++const body = []
++body.push(`# ${name}`, '', '## Overview', '', idea || `${name} design system.`, '', 'Generated from `features/' + slug + '/tokens.json`; edit the tokens, not this file.', '')
++body.push('## Colors', '')
++for (const p of prims) body.push(`- **${p.name} (${p.hex}):** ${p.role || 'no role written in tokens.json'}`)
++body.push('', `Role aliases added for tooling: ${Object.entries(roleOf).filter(([r, p]) => p && !prims.some((x) => x.name === r)).map(([r, p]) => `\`${r}\` = ${p.name}`).join(', ') || 'none'}.`, '')
++if (Object.keys(typography).length) {
++  body.push('## Typography', '')
++  for (const [k, t] of Object.entries(typography)) body.push(`- **${k}:** ${t.fontFamily}${t.fontSize ? ` at ${t.fontSize}` : ''}.`)
++  body.push('')
++}
++
++const out = resolve(flag('out', join(root, 'public', 'brand', slug, 'DESIGN.md')))
++await mkdir(dirname(out), { recursive: true })
++await writeFile(out, `${y.join('\n')}\n\n${body.join('\n')}\n`)
++console.log(`${out}\n  ${Object.keys(colors).length} colours (${Object.keys(roleOf).length} role aliases) · ${Object.keys(typography).length} type · ${Object.keys(rounded).length} rounded · ${Object.keys(spacing).length} spacing${skippedFaces ? ` · ${skippedFaces} face(s) skipped (alias, not a family)` : ''}`)
++
++if (args.includes('--lint')) {
++  try {
++    const { stdout } = await run('npx', ['--yes', '@google/design.md', 'lint', '--format', 'json', out], { maxBuffer: 1 << 24, timeout: 120000 })
++    report(stdout)
++  } catch (e) {
++    if (e.stdout) report(e.stdout)
++    else {
++      console.error(`lint did not run: ${String(e.stderr ?? e.message).split('\n')[0]} (needs npm registry access)`)
++      process.exit(1)
++    }
++  }
++}
++
++function report(json) {
++  const data = JSON.parse(json)
++  const f = data.findings ?? []
++  const s = data.summary ?? {}
++  console.log(`\n  lint: ${s.errors ?? 0} error(s), ${s.warnings ?? 0} warning(s), ${s.info ?? 0} info`)
++  f.forEach((x) => console.log(`  ${String(x.severity).padEnd(7)} ${x.path ?? ''} ${x.message}`))
++  if ((s.errors ?? 0) > 0) process.exitCode = 1
++}
+diff --git a/skills/sunnyside-brand-system/scripts/detach-check.mjs b/skills/sunnyside-brand-system/scripts/detach-check.mjs
+index 105a5e5..319ac6d 100755
+--- a/skills/sunnyside-brand-system/scripts/detach-check.mjs
++++ b/skills/sunnyside-brand-system/scripts/detach-check.mjs
+@@ -111,7 +111,12 @@ function normalize(tokens) {
+     : Object.entries(tokens.color ?? {}).map(([name, value]) => ({ name, value, role: '' }))
+ 
+   const typeEntries = Array.isArray(tokens.type)
+-    ? tokens.type.map((t) => ({ name: String(t.name ?? ''), value: String(t.value ?? '') }))
++    ? tokens.type.map((t) => ({
++        // `name/value` (Cove, Strand, Vitrine) or `role/face` (Hachure). Reading only
++        // the first shape made the display-face hard fail blind for the second.
++        name: String(t.name ?? t.role ?? ''),
++        value: String(t.value ?? t.face ?? ''),
++      }))
+     : Object.entries(tokens.type ?? {}).map(([name, value]) => ({
+         name,
+         value: typeof value === 'string' ? value : '',
+@@ -350,13 +355,20 @@ function compare(newRaw, refRaw, refName) {
+   const copyScore = isPlaceholder(claim) ? 0 : Math.max(0, 10 - sentOverlap * 10 * 1.6)
+   if (isPlaceholder(claim)) soft.push('one sentence is a placeholder — 0/10')
+ 
+-  const score = Math.round(
+-    Math.max(0, hueScore) + valueScore + materialScore + geometryScore + typeScore + structureScore + copyScore,
+-  )
+-
++  // An external reference (brand-ref.mjs) has no DNA, sections or one-sentence claim, so
++  // material, geometry, structure and copy would all award points for differing from nothing.
++  // Score only what can be measured — hue, value, type — and scale that 50 to 100.
++  const external = refRaw._external === true
++  if (external) soft.push('external reference: hue, value and type only, scaled to 100 (DNA, structure and copy are not measurable)')
++  const measured = Math.max(0, hueScore) + valueScore + typeScore
++  const score = external
++    ? Math.round((measured / 50) * 100)
++    : Math.round(Math.max(0, hueScore) + valueScore + materialScore + geometryScore + typeScore + structureScore + copyScore)
++
++  const zero = external ? () => 0 : (n) => n
+   return { ref: refName, score, hard, soft, evidence, parts: {
+-    hue: Math.round(hueScore), value: Math.round(valueScore), material: Math.round(materialScore),
+-    geometry: Math.round(geometryScore), type: typeScore, structure: Math.round(structureScore), copy: Math.round(copyScore),
++    hue: Math.round(hueScore), value: Math.round(valueScore), material: zero(Math.round(materialScore)),
++    geometry: zero(Math.round(geometryScore)), type: typeScore, structure: zero(Math.round(structureScore)), copy: zero(Math.round(copyScore)),
+   } }
+ }
+ 
+diff --git a/skills/sunnyside-brand-system/scripts/gates.mjs b/skills/sunnyside-brand-system/scripts/gates.mjs
+new file mode 100644
+index 0000000..4e9f54a
+--- /dev/null
++++ b/skills/sunnyside-brand-system/scripts/gates.mjs
+@@ -0,0 +1,187 @@
++#!/usr/bin/env node
++/**
++ * The static gates, in one command. Run it after the tokens exist — not at the end.
++ *
++ *   node scripts/gates.mjs --slug <slug> [--refs refs/] [--min 70] [--json]
++ *
++ * Before this existed, "run the gates" meant five commands read in five formats, and the
++ * cheap ones (a font that is never loaded, a contrast pair nobody computed) were found
++ * after the board, the page and the Figma export had already been built on top of them.
++ *
++ *   detach        weakest score against every sibling in features/*, plus --refs/*.json
++ *   display face  H3 from the detach run: the same display face is a hard fail
++ *   font          every var(--font-*) in <slug>-tokens.css is declared in a layout
++ *   contrast      pairs recomputed from hex, the stated ratio must match, one failure published
++ *   assets        every file in public/brand/<slug>/assets has a licence record
++ *   export        figma-smoke on design/figma/<slug>/code.js, when it exists
++ *
++ * Not here, because they need a rendered page: mark at 16px and reduced motion — qa.mjs.
++ *
++ * Paths follow the output contract in SKILL.md. Exit 1 on any FAIL; SKIP is not a pass,
++ * it is a gate that could not run, and it says why. Zero dependencies.
++ */
++import { execFile } from 'node:child_process'
++import { existsSync } from 'node:fs'
++import { readFile, readdir } from 'node:fs/promises'
++import { dirname, join, resolve } from 'node:path'
++import { fileURLToPath } from 'node:url'
++import { promisify } from 'node:util'
++
++const run = promisify(execFile)
++const here = dirname(fileURLToPath(import.meta.url))
++const args = process.argv.slice(2)
++const flag = (n, d) => (args.includes(`--${n}`) ? (args[args.indexOf(`--${n}`) + 1]?.startsWith('--') ? true : args[args.indexOf(`--${n}`) + 1]) : d)
++
++const slug = flag('slug')
++if (!slug || slug === true) {
++  console.error('Usage: node scripts/gates.mjs --slug <slug> [--root .] [--refs refs/] [--min 70] [--json]')
++  process.exit(1)
++}
++const root = resolve(flag('root', '.'))
++const min = Number(flag('min', 70))
++const at = (...p) => join(root, ...p)
++const rows = []
++const gate = (name, status, detail) => rows.push({ name, status, detail })
++
++const readJson = async (p) => JSON.parse(await readFile(p, 'utf8'))
++
++/* ── colour ──────────────────────────────────────────────────────────────── */
++
++const lum = (hex) => {
++  const h = hex.replace('#', '')
++  const f = h.length === 3 ? [...h].map((c) => c + c).join('') : h.slice(0, 6)
++  const [r, g, b] = [0, 2, 4].map((i) => {
++    const c = parseInt(f.slice(i, i + 2), 16) / 255
++    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
++  })
++  return 0.2126 * r + 0.7152 * g + 0.0722 * b
++}
++const ratio = (a, b) => {
++  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x)
++  return (hi + 0.05) / (lo + 0.05)
++}
++const isHex = (v) => typeof v === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})/i.test(v)
++
++/* ── 1 + 2 · detach and display face ─────────────────────────────────────── */
++
++async function detach() {
++  const own = at('features', slug, 'tokens.json')
++  if (!existsSync(own)) return gate('detach', 'SKIP', `no ${own.replace(`${root}/`, '')}`) && gate('display face', 'SKIP', 'needs detach')
++
++  const refs = []
++  const featuresDir = at('features')
++  if (existsSync(featuresDir))
++    for (const d of await readdir(featuresDir)) {
++      const f = join(featuresDir, d, 'tokens.json')
++      if (d !== slug && existsSync(f)) refs.push(f)
++    }
++  const extra = flag('refs')
++  if (extra && extra !== true && existsSync(resolve(extra)))
++    for (const f of await readdir(resolve(extra))) if (f.endsWith('.json')) refs.push(join(resolve(extra), f))
++
++  if (!refs.length) return gate('detach', 'SKIP', 'no sibling tokens.json and no --refs: nothing to measure against') && gate('display face', 'SKIP', 'needs detach')
++
++  let out
++  try {
++    out = (await run('node', [join(here, 'detach-check.mjs'), '--new', own, ...refs.flatMap((r) => ['--ref', r]), '--json', '--min', String(min)], { maxBuffer: 1 << 24 })).stdout
++  } catch (e) {
++    out = e.stdout // exit 1 is a verdict, not a crash
++    if (!out) return gate('detach', 'FAIL', `detach-check crashed: ${String(e.stderr ?? e.message).split('\n')[0]}`) && gate('display face', 'SKIP', 'needs detach')
++  }
++  const data = JSON.parse(out)
++  const hard = data.results.flatMap((r) => r.hard.map((h) => `${h} (vs ${r.ref})`))
++  const weakest = data.results.reduce((a, r) => (r.score < a.score ? r : a), data.results[0])
++  const faceFails = hard.filter((h) => h.startsWith('H3'))
++  const otherHard = hard.filter((h) => !h.startsWith('H3'))
++
++  // A low score from an empty DNA object is a missing file section, not a collision: moving the hue
++  // would not fix it. Say which it is, so the next edit goes to the right place.
++  const incomplete = weakest.soft.find((x) => /placeholder|incomplete/i.test(x))
++  const hint = weakest.score < min && incomplete ? ` · likely incomplete tokens, not a collision: ${incomplete}` : ''
++  gate('detach', otherHard.length || weakest.score < min ? 'FAIL' : 'PASS', `weakest ${weakest.score}/100 vs ${weakest.ref} (min ${min}, ${data.results.length} compared)${otherHard.length ? ` · ${otherHard.join(' · ')}` : ''}${hint}`)
++  gate('display face', faceFails.length ? 'FAIL' : 'PASS', faceFails.length ? faceFails.join(' · ') : 'differs from every compared system')
++}
++
++/* ── 3 · font registered ─────────────────────────────────────────────────── */
++
++async function fonts() {
++  const css = [at('features', slug, `${slug}-tokens.css`), at('public', 'brand', slug, `${slug}-tokens.css`)].find(existsSync)
++  if (!css) return gate('font', 'SKIP', `no ${slug}-tokens.css`)
++  const used = [...new Set([...(await readFile(css, 'utf8')).matchAll(/var\((--font-[a-z0-9-]+)/gi)].map((m) => m[1]))]
++  if (!used.length) return gate('font', 'PASS', 'no --font-* aliases in the token file')
++
++  // A case may register its own face at the route; the root layout is not the only place.
++  const layouts = [at('app', 'layout.tsx'), at('app', 'design-system', slug, 'layout.tsx'), at('app', 'design-system', slug, 'page.tsx')].filter(existsSync)
++  if (!layouts.length) return gate('font', 'SKIP', 'no app/layout.tsx to check against')
++  const text = (await Promise.all(layouts.map((l) => readFile(l, 'utf8')))).join('\n')
++  const missing = used.filter((u) => !text.includes(`'${u}'`) && !text.includes(`"${u}"`))
++  gate('font', missing.length ? 'FAIL' : 'PASS', missing.length ? `${missing.join(', ')} used in tokens, never declared as a font variable — silent fallback` : `${used.length} alias(es) declared (${used.join(', ')})`)
++}
++
++/* ── 4 · contrast ────────────────────────────────────────────────────────── */
++
++async function contrast() {
++  const file = at('features', slug, 'tokens.json')
++  if (!existsSync(file)) return gate('contrast', 'SKIP', 'no tokens.json')
++  const pairs = (await readJson(file)).contrast
++  if (!Array.isArray(pairs) || !pairs.length) return gate('contrast', 'FAIL', 'tokens.json publishes no contrast pairs')
++
++  const bad = []
++  let failing = 0
++  let checked = 0
++  for (const p of pairs) {
++    const fg = p.fg ?? p.a
++    const bg = p.bg ?? p.b
++    if (!isHex(fg) || !isHex(bg)) continue // gradients and alphas cannot be computed; they are not passed either
++    checked += 1
++    const got = ratio(fg, bg)
++    if (got < 4.5) failing += 1
++    if (typeof p.ratio === 'number' && Math.abs(got - p.ratio) > 0.1) bad.push(`${p.label ?? `${fg}/${bg}`}: stated ${p.ratio}, computed ${got.toFixed(2)}`)
++  }
++  if (!checked) return gate('contrast', 'FAIL', 'no pair has two hex values to compute')
++  const problems = [...bad.map((b) => `estimated, not computed — ${b}`), ...(failing ? [] : ['no failing pair published (a palette that only publishes passes is a brochure)'])]
++  gate('contrast', problems.length ? 'FAIL' : 'PASS', problems.length ? problems.join(' · ') : `${checked} pairs recomputed, all stated ratios match, ${failing} failing pair(s) published`)
++}
++
++/* ── 5 · assets ──────────────────────────────────────────────────────────── */
++
++async function assets() {
++  const dir = at('public', 'brand', slug, 'assets')
++  if (!existsSync(dir)) return gate('assets', 'SKIP', 'no stock assets (nothing to license)')
++  try {
++    const { stdout } = await run('node', [join(here, 'assets.mjs'), 'credits', '--dir', dir])
++    gate('assets', 'PASS', `${stdout.trim().split('\n').length} file(s), every one recorded`)
++  } catch (e) {
++    gate('assets', 'FAIL', String(e.stdout ?? '').split('\n').filter((l) => l.startsWith('FAIL')).map((l) => l.replace(/\s+/g, ' ')).join(' · ') || 'credits check failed')
++  }
++}
++
++/* ── 6 · export ──────────────────────────────────────────────────────────── */
++
++async function exported() {
++  const code = at('design', 'figma', slug, 'code.js')
++  if (!existsSync(code)) return gate('export', 'SKIP', 'not exported yet')
++  try {
++    await run('node', [join(here, 'figma-smoke.mjs'), code], { maxBuffer: 1 << 24 })
++    gate('export', 'PASS', 'figma-smoke exit 0')
++  } catch (e) {
++    gate('export', 'FAIL', String(e.stdout ?? e.stderr ?? e.message).trim().split('\n').slice(-2).join(' · '))
++  }
++}
++
++await detach()
++await fonts()
++await contrast()
++await assets()
++await exported()
++
++if (args.includes('--json')) console.log(JSON.stringify({ slug, rows }, null, 2))
++else {
++  console.log(`\n  Gates — ${slug}\n`)
++  for (const r of rows) console.log(`  ${r.status.padEnd(4)}  ${r.name.padEnd(13)} ${r.detail}`)
++  console.log('\n  not run here (need a rendered page): mark at 16px, reduced motion → node scripts/qa.mjs\n')
++}
++// Nothing ran (a typo'd slug skips every gate) is not a pass.
++const ran = rows.some((r) => r.status !== 'SKIP')
++if (!ran) console.error(`nothing ran for "${slug}" — check the slug and --root`)
++process.exit(rows.some((r) => r.status === 'FAIL') || !ran ? 1 : 0)
+-- 
+2.43.0
+
+
+From a82fa2d5387c2f7264453374e05e11ccd17870d6 Mon Sep 17 00:00:00 2001
+From: Adit <adit@example.com>
+Date: Sat, 31 Oct 2026 14:23:31 +0000
+Subject: [PATCH 2/2] brand-system: rewrite SKILL.md (no loops, gate table, new
+ steps), add research.md, update README and gates, remove stale content
+
+---
+ skills/sunnyside-brand-system/README.md       |  62 +++--
+ skills/sunnyside-brand-system/SKILL.md        | 224 ++++++++----------
+ .../brainstorm-huginn-riso-hachure.md         |  51 ----
+ .../references/craft-bar.md                   |  14 --
+ .../references/gates.md                       |  13 +-
+ .../references/logo-system.md                 |   6 +-
+ .../references/research.md                    |  66 ++++++
+ 7 files changed, 214 insertions(+), 222 deletions(-)
+ delete mode 100644 skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md
+ create mode 100644 skills/sunnyside-brand-system/references/research.md
+
+diff --git a/skills/sunnyside-brand-system/README.md b/skills/sunnyside-brand-system/README.md
+index 17ad880..c991871 100644
+--- a/skills/sunnyside-brand-system/README.md
++++ b/skills/sunnyside-brand-system/README.md
+@@ -1,42 +1,48 @@
+ # sunnyside-brand-system
+ 
+ An installable agent skill for shipping **brand kits** and **design systems** from a brief:
+-one idea, a mark family, a board, tokens, an immersive proof page, and an audit that names what
+-it could not verify.
+-
+-Built from eight shipped cases — Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand
+-and Clearing. The method travels; the marks do not.
+-
+-## v3.1 — written from the evidence
+-
+-The first version written from shipped work rather than from a survey.
+-
+-- **Faster.** The whole method is `SKILL.md`: a ten-step fast path, six gates, seven immersive
+-  recipes. Twenty-two references became seven, and only four of them are part of the normal
+-  read.
+-- **Gates that failed something.** Detach (Strand vs Clearing measured 59/100), display face
+-  (Vitrine and Riso both set Space Grotesk), font registration (Cove shipped `--font-sora`
+-  with no Sora in the layout), contrast, 16px mark, reduced motion. Each is a command.
+-- **Immersive, not decorated.** Full-bleed field, clip-path edge, computed dither, register
+-  ghost, field + plate, and a surface that *is* the mark — with the numbers that make them
+-  read as printed.
+-- **Lighter.** Eighteen references retired. The method they carried is folded into `SKILL.md`,
+-  `references/gates.md` and `references/case-evidence.md`.
++one idea, a mark family, tokens, a board, an immersive proof page, Figma and DESIGN.md exports,
++and an audit that names what it could not verify.
++
++Built from eight shipped cases: Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand and
++Clearing. The method travels; the marks do not.
++
++## v3.3: straighter, with outside eyes
++
++- **No loops.** The fast path is eleven steps after a pre-flight, and each gate names the one
++  step to return to. `gates.mjs` runs the six static gates in a single command right after the
++  tokens exist, instead of five commands at the end, after the board, page and export were built.
++- **Look outward.** `brand-ref.mjs` searches the 69 brands behind design.ricoui.com/brands,
++  shows who already owns your hue, and feeds them to the detach gate. Fetched at runtime, never
++  vendored (the source repo has no licence file).
++- **Free assets, with the paperwork.** `assets.mjs` fetches photos and icons from Openverse,
++  Pexels, Unsplash and Iconify and records each licence; the assets gate fails an unrecorded file.
++- **DESIGN.md out.** `design-md.mjs` writes Google's open format from the tokens and lints it.
++- **Bugs the audit found.** The display-face hard fail was blind to Hachure's `role`/`face`
++  token shape; outside references earned free points for differing from nothing; a typo'd slug
++  could pass. `gates.mjs` also fails a palette that publishes no failing contrast pair, which
++  Cove and Strand do not yet (their lowest ratio is 5.06:1).
++- **Cleaned.** Dropped the `build-lockup.mjs` reference (no such script), the repeated "how to
++  use this well" section, a stale Vitrine to-do, a superseded brainstorm example, and the
++  mismatched counts. The `.agents/skills/` mirror was regenerated.
+ 
+ ## What is in the box
+ 
+ ```
+ SKILL.md                      the whole method in one read
++references/research.md        studying a category, DESIGN.md, free-asset licences
+ references/case-evidence.md   the eight cases, their numbers, the recurring decisions
+-references/immersive.md       the six recipes with code
+-references/gates.md           detach, fonts, contrast, 16px, motion, QA
++references/gates.md           the eight checks and the QA checklist
++references/immersive.md       the seven recipes with code
+ references/tokens-and-docs.md token layers and the llms twin
++references/figma-export.md    tokens to Figma, the emitters, the traps
+ references/logo-system.md     grid, family, favicon
+ references/form-theming.md    the form kit every case ships
+ references/craft-bar.md       the drawn-track bar and the marks composition
+-scripts/                      init, detach, forge, cast, score, audit, qa, board, icons
+-templates/                    specimen, board, marks composition, case page, audit manifest
+-examples/                     Sunnyside and Vitrine, with the Case 02 audit
++scripts/                      init, detach, gates, brand-ref, assets, design-md, forge, cast,
++                              score, audit, qa, board, icons, figma, sync-skill.sh
++templates/                    design system page, single page, case page, guidelines, audit
++examples/                     Sunnyside and Vitrine, plus brand-forge configs
+ ```
+ 
+ ## Install
+@@ -45,5 +51,9 @@ examples/                     Sunnyside and Vitrine, with the Case 02 audit
+ npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth
+ ```
+ 
++Network use (all optional): `brand-ref.mjs` needs raw.githubusercontent.com; `assets.mjs` needs
++its source host, plus `PEXELS_API_KEY` or `UNSPLASH_ACCESS_KEY` for those two; `design-md.mjs
++--lint` needs the npm registry.
++
+ Companion: **`implement-brand-system`** turns an approved kit into an HTML/TSX proof without
+ redesigning it.
+diff --git a/skills/sunnyside-brand-system/SKILL.md b/skills/sunnyside-brand-system/SKILL.md
+index 18b4273..595f3a4 100644
+--- a/skills/sunnyside-brand-system/SKILL.md
++++ b/skills/sunnyside-brand-system/SKILL.md
+@@ -1,113 +1,93 @@
+ ---
+ name: sunnyside-brand-system
+-description: 'Design and ship a brand kit or design system from a brief — one idea, a mark family, a board, tokens, an immersive proof page, a Figma export, and an audit that names what it could not verify. v3.2 adds the export: one script turns the tokens into a Figma plugin (variables with light and dark modes, text and paint styles, components with variants) and a real .fig, without re-authoring anything by hand. Use when creating, initialising, auditing or exporting an identity, a design-system page, or a single-page proof.'
++description: 'Design and ship a brand kit or design system from a brief: one idea, a mark family, tokens, a board, an immersive proof page, Figma and DESIGN.md exports, and a measured audit. Use when creating, initialising, auditing or exporting an identity, a design-system page, or a single-page proof.'
+ metadata:
+   author: adityahimaone
+   source: https://github.com/adityahimaone/sunnyside
+-  version: '3.2'
++  version: '3.3'
+ ---
+ 
+ # Sunnyside brand system
+ 
+ **One idea → one mark → one system → one proof → one audit.**
+ 
+-Eight systems were built with this method: Sunnyside, Vitrine, Huginn, Riso Co., Hachure,
+-Cove, Strand and Clearing. Every rule below is here because it survived one of them, and
+-every gate is here because it caught something in one of them. Nothing is here because it
+-sounded good.
+-
+-v3.2 adds one step and one gate: the system is exported to Figma by script, not by hand.
+-The whole method is this file; five references hold the evidence and the code. If you read
+-only this page you can still ship a case.
++Eight systems were built with this method: Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove,
++Strand and Clearing. Every rule is here because it survived one of them and every gate because
++it caught something in one. This file is the whole method; the references hold evidence and code.
+ 
+ ## The fast path
+ 
+-Ten steps. A case that follows them takes one sitting, not one week.
++Eleven steps after a pre-flight. **Each step has one exit and nothing loops back:** when a gate
++fails, go to the step the gate table names, fix only that, and re-run only that gate.
+ 
+ ```bash
+-# 0 · where does it sit? (skip on an empty repo)
++# 0 · pre-flight, once
+ node scripts/init-system.mjs --slug <slug> --name "<Name>" --hue <n> --peek
+-node scripts/init-system.mjs --slug <slug> --name "<Name>" --hue <n> --mode light
+-node scripts/detach-check.mjs --new features/<slug>/tokens.json --ref features/<ref>/tokens.json
++node scripts/brand-ref.mjs near --hue <n>            # who already owns this hue (needs network)
+ ```
+ 
+-1. **Brief, in six lines.** Name, category, audience, promise, enemy, one sentence the work
+-   can be rejected against. If the sentence needs a comma splice, the idea is not ready.
+-2. **Pick the track.** Constructed (geometry, systems, infrastructure) or drawn (editorial,
+-   warm, object-led). One per brand, never mixed. See *Two tracks*.
+-3. **Draw six, keep one.** Six marks in one file, one render. Score them, keep one, write why
+-   the other five lost — that paragraph becomes the guide.
+-4. **Generate the family.** `brand-forge.mjs` for constructed, hand-cut SVGs for drawn.
+-   Primary + compact + glyph, then a lockup. The compact is a *separate drawing*.
+-5. **Write the tokens.** One source, three layers, two surfaces. Never a mode-prefixed
+-   primitive.
+-6. **Build the board.** 1500 × 1125, local fonts, rendered at 2×. It is the thumbnail.
+-7. **Build the proof page.** Hero, contents, the six sections the system actually needs,
+-   tokens, audit. This is the deliverable that gets linked.
+-8. **Compose the marks section.** Logo card, wordmark scale, cast drawer, one usage rule. A
+-   row of equal logo tiles is not a mark system.
+-9. **Export to Figma.** `figma-forge.mjs` reads the tokens and writes a plugin plus a
+-   `.fig`. The plugin is regenerated, never edited. See *Figma is a build target*.
+-10. **Run the gates.** One command each. Fix only what fails.
++1. **Brief, in six lines.** Name, category, audience, promise, enemy, one sentence the work can
++   be rejected against. If it needs a comma splice, the idea is not ready.
++2. **Pick the track.** Constructed or drawn, one per brand. See *Two tracks*.
++3. **Study the neighbours** (skip with no category). `brand-ref.mjs search <category>`, `pull`
++   two or three, note their accent hue, display face and what they refuse; `ref` them for the
++   gate. Study, never copy: `references/research.md`.
++4. **Draw six, keep one.** Six marks in one file, one render, scored. Write why the other five
++   lost; that paragraph becomes the guide.
++5. **Generate the family.** `brand-forge.mjs` (constructed) or hand-cut SVGs (drawn): primary,
++   compact, glyph, lockup. The compact is a separate drawing.
++6. **Write the tokens, then run the gates.** One source, three layers, two surfaces, never a
++   mode-prefixed primitive. Then `node scripts/gates.mjs --slug <slug> --refs refs/`. The cheap
++   failures (a font never loaded, a contrast pair never computed) surface here, before the board,
++   page and export are built on top of them.
++7. **Build the board.** 1500 × 1125, local fonts, rendered at 2×. It is the thumbnail.
++8. **Build the proof page, with its marks section.** Hero, contents, the sections the system
++   needs, tokens, audit; a logo card, wordmark scale, cast drawer and one usage rule. A row of
++   equal logo tiles is not a mark system. Need a photograph? `assets.mjs`, imagery only.
++9. **Export.** `figma-forge.mjs` (plugin + `.fig`) and `design-md.mjs` (`DESIGN.md`), both from
++   the tokens, both regenerated, never edited.
++10. **Final gates.** `gates.mjs` again, then `qa.mjs` for the two that need a rendered page.
+ 11. **Name the gaps.** A guide that hides its gaps is a brochure.
+ 
+-## The seven gates
+-
+-Each of these failed a shipped case. Run them; do not reason about them.
++## The gates
+ 
+-| Gate | Pass | Evidence |
+-| --- | --- | --- |
+-| **Detach** | ≥ 70/100 against *every* sibling, no hard fails | Strand vs Clearing measured **59** — published, not averaged |
+-| **Display face** | different from every sibling | Vitrine and Riso Co. both set Space Grotesk; the gate calls that a hard fail |
+-| **Font registered** | the family named in the token is declared in the layout | Cove shipped `var(--font-sora)` with no Sora in `app/layout.tsx` — a silent fallback |
+-| **Contrast** | every pair computed from the semantic layer | Riso publishes two failures (2.96:1, 2.03:1) on purpose |
+-| **Mark at 16px** | the compact is a different drawing | Riso's pin closes up; Huginn's 3-unit gap vanishes |
+-| **Reduced motion** | the still frame is the design | the Wild Hunt footer keeps a finished frame, not a frozen one |
+-| **Export builds** | `figma-smoke.mjs` exits 0, and the variable count equals primitives + spacing + radius + motion | a plugin that binds a paint to a variable the collection never got throws at the last section, after eleven pages look finished |
++Each failed a shipped case. Run them; do not reason about them.
+ 
+-Full thresholds, the 100-point breakdown and the QA checklist: `references/gates.md`.
+-The export gate, with the stub it runs against: `references/figma-export.md`.
++| Gate | Pass | Run by | If it fails, go to |
++| --- | --- | --- | --- |
++| **Detach** | ≥ 70/100 against every sibling and `--refs`, no hard fails | `gates.mjs` | 6, hue or material (an "incomplete tokens" note means fix the file, not the hue) |
++| **Display face** | differs from every sibling | `gates.mjs` | 6, type roles |
++| **Font registered** | every `--font-*` in the token CSS is declared in a layout | `gates.mjs` | 6, layout |
++| **Contrast** | pairs recomputed from hex, stated ratios match, at least one failure published | `gates.mjs` | 6, semantic layer |
++| **Assets licensed** | every stock file has a `credits.json` entry with licence and credit | `gates.mjs` | 8, `assets.mjs get` |
++| **Export builds** | `figma-smoke.mjs` exits 0 | `gates.mjs` | 9, regenerate |
++| **Mark at 16px** | the compact is a different drawing | `qa.mjs` | 5 |
++| **Reduced motion** | the still frame is the design | `qa.mjs` | 8 |
+ 
+-**The fourth matters most.** A palette that only publishes its passes is a brochure. Every
+-case prints the pair that fails and the job it is therefore not allowed to do.
++Evidence per gate, thresholds and the 100-point breakdown: `references/gates.md`. **Contrast
++matters most:** a palette that only publishes its passes is a brochure, so a case prints the
++pair that fails and the job it may therefore not do.
+ 
+ ## Figma is a build target, not a handoff
+ 
+-A system that only exists as HTML is a website. The export is what lets someone
+-bind a variable instead of typing a hex.
+-
+ ```bash
+ node scripts/figma-forge.mjs --tokens features/<slug>/tokens.json \
+   --css public/brand/<slug>/<slug>-tokens.css --brand public/brand/<slug> \
+-  --html app/design-system/<slug>/page.html \
+-  --slug <slug> --name "<Name>" --out design/figma/<slug> --target both
++  --html app/design-system/<slug>/page.html --slug <slug> --name "<Name>" \
++  --out design/figma/<slug> --target both
+ node scripts/figma-smoke.mjs design/figma/<slug>/code.js
++node scripts/design-md.mjs --slug <slug> --lint       # → public/brand/<slug>/DESIGN.md
+ ```
+ 
+-Two emitters, one source. `figma` writes `manifest.json` + `code.js`: variables
+-in a `Colour` collection with Light and Dark modes, semantic values aliased to
+-primitives, paint styles bound to those variables, text styles from the type
+-roles, spacing/radius/motion as numbers, components with variants, one page per
+-section. `openpencil` writes a `.fig` headlessly, for the machine with no Figma
+-on it — geometry only, because the headless runtime has no variable or style API.
++`figma` writes a plugin (variables with Light/Dark, paint and text styles, components, a page per
++section); `openpencil` writes a `.fig` headlessly (geometry only). `DESIGN.md` is the same tokens
++in Google's open format, so other agents can read the system.
+ 
+-Three rules:
++- **Regenerate, do not edit.** A hand edit does not survive the next token change.
++- **The primitive does not flip modes.** Only the semantic layer differs.
++- **A `.fig` cannot carry a font.** Ship the `.ttf` files and outline the display voice.
+ 
+-- **Regenerate, do not edit.** The plugin is output. A hand edit survives until
+-  the next token change, which is to say it does not survive.
+-- **The primitive does not flip modes.** One value in both modes. Only the
+-  semantic layer differs; that is what makes the night scope a scope.
+-- **A `.fig` cannot carry a font.** It stores family names. The export names the
+-  real faces, ships the `.ttf` files in `fonts/`, and outlines the display voice —
+-  the one face the rasterizer refuses to substitute — so the cover never loses its
+-  typeface.
+-
+-Proven on two token shapes: Huginn (DTCG `$value`, `color.primitive` + `color.light/dark`)
+-and Clearing (flat `color`, one `semantic` group, `--cl-` namespace, night values in the
+-CSS only). The six failures Clearing caused on the first run are in the reference — read
+-them before exporting a third shape.
+-
+-Full mapping, gates and traps: `references/figma-export.md`.
++Mapping, traps and the six Clearing failures: `references/figma-export.md`.
+ 
+ ## Immersive, not decorated
+ 
+@@ -146,9 +126,9 @@ the subject, not the taste. Do not mix tracks in one brand.
+ Outlined from the font file (`extract-wordmark.py`), or cut in cells. Never live text: a font
+ failure must not change the name. Below 40px the reading face carries the name.
+ 
+-If a mark ships as an SVG used with `<img>`, **bake the ink in**. `currentColor` resolves to
+-black inside that document; every lockup in the eight cases is generated with
+-`scripts/build-lockup.mjs --ink <hex>` for exactly this reason.
++An SVG used with `<img>` must **bake the ink in**, because `currentColor` resolves to black in
++that document. `brand-forge.mjs --wordmark` does this for constructed lockups; drawn lockups
++must do it by hand.
+ 
+ ## Story: five beats and four cards
+ 
+@@ -188,10 +168,11 @@ why none of them drift.
+ features/<slug>/        tokens.json, <slug>-tokens.css, <slug>.module.css,
+                         <slug>-data.ts, components/brand.tsx, theme-toggle.tsx
+ app/design-system/<slug>/  page.tsx, layout.tsx, llms.txt/route.ts, icon.svg
+-public/brand/<slug>/    mark, compact, glyph, mono, reverse, wordmark, lockups,
+-                        favicons, <slug>-tokens.css/json, <slug>-brandkit.png
+-design/figma/<slug>/    manifest.json, code.js, tokens.figma.json,
+-                        openpencil-board.js, assets/, fonts/, README.md
++public/brand/<slug>/    mark, compact, glyph, mono, reverse, wordmark, lockups, favicons,
++                        <slug>-tokens.css/json, DESIGN.md, <slug>-brandkit.png,
++                        assets/ (+ credits.json, only if stock images are used)
++design/figma/<slug>/    manifest.json, code.js, tokens.figma.json, openpencil-board.js,
++                        assets/, fonts/, README.md
+ docs/                   <slug>-design-system-audit.md, <slug>-qa.md
+ ```
+ 
+@@ -200,64 +181,55 @@ without a board is a logo; a case without an audit is a brochure.
+ 
+ ## Failure modes
+ 
+-- A ninth case that is the eighth renamed: same section ids, same material, same display face.
+-  The detach gate exists for this and it is the first thing to run.
+-- An accent within 8° of a neighbour, explained as "different because the material is
+-  different". It is not different.
++- A ninth case that is the eighth renamed: same sections, material and display face. Run detach
++  first, and against outside brands too (`brand-ref.mjs ref`).
++- An accent within 8° of a neighbour "because the material differs". It does not.
+ - A namespace collision (`--st-` twice) that silently merges two token sets.
+-- Mode-prefixed primitives (`--night-ground`), so the semantic layer points at names that do
+-  not exist after a theme flip.
+-- A `TODO` in the DNA object. The next agent fills it with the neighbour's material.
+-- A detach score reported as an average instead of the weakest pair.
++- Mode-prefixed primitives (`--night-ground`) that vanish after a theme flip.
++- A `TODO` in the DNA object; the next agent fills it with the neighbour's material.
++- A detach score averaged instead of reported as the weakest pair.
+ - A component museum with no form kit, or a form kit with no error state.
+ - "Looks good" with no computed values or file paths.
+-- A Figma export that was hand-built once and never regenerated. It is already a fork of
+-  the tokens; the first palette change makes it a wrong fork.
+-- An export reported as done because the script printed `ok`. The proof is
+-  `figma-smoke.mjs` plus `openpencil info`, not the summary.
++- A hand-built Figma file, or an export reported done because a script printed `ok`. The proof is
++  `figma-smoke.mjs`.
++- A stock photo used as, traced into, or recoloured as the mark; or shipped with no credit.
++- An outside brand copied instead of studied.
+ 
+ ## References
+ 
+-Read only what the task needs. Five files, not twenty.
++Read only what the task needs.
+ 
+ | File | Read when | Holds |
+ | --- | --- | --- |
+-| `references/case-evidence.md` | you need a precedent, a number, or a decision already made | the eight cases, their facts, the detach data, the recurring decisions |
+-| `references/immersive.md` | the page is correct but flat | the seven recipes with code, and the numbers behind them |
+-| `references/gates.md` | before shipping, and when a gate fails | detach thresholds, the 100-point breakdown, type gate, contrast, QA checklist |
+-| `references/tokens-and-docs.md` | you are writing the token layer or the llms twin | layers, ramps, the agent-readable doc shape |
+-| `references/figma-export.md` | the system has to leave HTML | the token → Figma mapping, the two emitters, the export gates and traps |
+-
+-Kept from v3.0 because the cases used them: `references/logo-system.md` (grid, family,
+-favicon), `references/form-theming.md` (the form kit every case ships),
+-`references/craft-bar.md` (the drawn-track bar and the marks composition).
++| `references/case-evidence.md` | you need a precedent, a number or a decision | the eight cases, detach data, recurring decisions |
++| `references/research.md` | studying a category, or you need a photo or icon | brand library rules, DESIGN.md, asset licences |
++| `references/gates.md` | before shipping, and when a gate fails | thresholds, 100-point breakdown, QA checklist |
++| `references/immersive.md` | the page is correct but flat | the seven recipes with code |
++| `references/tokens-and-docs.md` | writing the token layer or the llms twin | layers, ramps, agent-readable doc shape |
++| `references/figma-export.md` | the system has to leave HTML | token → Figma mapping, emitters, traps |
++| `references/logo-system.md` | drawing the family | grid, family, favicon |
++| `references/form-theming.md` | building the form kit | the kit every case ships |
++| `references/craft-bar.md` | the drawn track, or composing marks | the drawn-track bar, marks composition |
++
++Templates: `templates/design-system.html` (full page), `single-page.html` (single-page proof),
++`case-page.tsx`, `guidelines.md` (brand guide), `audit.json` (audit manifest),
++`figma-plugin.js`. Worked examples: `examples/sunnyside.md`, `examples/vitrine.md`,
++`examples/configs/` (`brand-forge` inputs).
+ 
+ ## Scripts
+ 
+ | Script | Does |
+ | --- | --- |
+ | `init-system.mjs` | scaffold a case: namespace, hue-seeded palette, DNA, tokens, CSS, data, page |
+-| `detach-check.mjs` | OKLCH separation scorecard, `--scan` for the whole portfolio |
+-| `brand-forge.mjs` | the constructed mark family, `--bakeoff` for five families |
+-| `cast-forge.mjs` | a 4–6 drawn cast |
++| `brand-ref.mjs` | search 69 outside brands, `near` a hue, `pull` their DESIGN.md, `ref` them into detach |
++| `detach-check.mjs` | OKLCH separation scorecard; `--scan` the portfolio |
++| `gates.mjs` | the six static gates in one command |
++| `brand-forge.mjs` / `cast-forge.mjs` | the constructed family (`--bakeoff`) / a 4–6 drawn cast |
+ | `score-mark.py` | circles, strokes, primitives, 16px |
+-| `audit.mjs` | static audit of the manifest |
+-| `qa.mjs` | one command: audit + score + browser pass |
+-| `render-board.mjs`, `render-icons.mjs`, `favicons.py` | the board and the icon set |
++| `assets.mjs` | search and fetch free photos and icons with licence records |
++| `audit.mjs`, `qa.mjs` | static audit; audit + score + browser pass |
++| `render-board.mjs`, `render-icons.mjs`, `favicons.py`, `downscale.py` | board, icon set, favicons, image shrink |
+ | `extract-wordmark.py` | outlines a wordmark from a font file |
+-| `figma-forge.mjs` | tokens → Figma plugin + `.fig`, `--check` to resolve only |
+-| `board.mjs` | the eight-section board as drawing ops, from tokens |
+-| `glyphs.mjs` | font resolution and text → outline, `--list` to see what resolves |
+-| `figma-smoke.mjs` | runs the generated plugin against a stub of the Figma API |
+-
+-## How to use this well
+-
+-1. **Run the detach check before drawing.** A duplicated palette cannot be rescued by a better
+-   mark.
+-2. **Write the sentence before the mark.** If it needs two clauses, cut one.
+-3. **Draw six, keep one, and write the rejection.** The rejection is the guide.
+-4. **Build the board and the page in the same pass.** They drift apart in a week otherwise.
+-5. **Publish one failing pair.** It is the difference between a system and a moodboard.
+-6. **Export last, from the tokens.** A Figma file built before the tokens settle is a
+-   second source of truth you will have to maintain.
+-7. **Stop at the acceptance test.** Extra sections are not "more complete".
++| `figma-forge.mjs`, `board.mjs`, `glyphs.mjs`, `figma-smoke.mjs` | Figma export and its check |
++| `design-md.mjs` | tokens → `DESIGN.md`, `--lint` with Google's linter |
++| `sync-skill.sh` | mirror this folder into `.agents/skills/` after any edit |
+diff --git a/skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md b/skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md
+deleted file mode 100644
+index a9fd609..0000000
+--- a/skills/sunnyside-brand-system/examples/brainstorm-huginn-riso-hachure.md
++++ /dev/null
+@@ -1,51 +0,0 @@
+-# Worked v2.3 brainstorm: Huginn, Riso Co., Hachure
+-
+-The v2.2 sheet failed the gate: all three marks were overlapping circles,
+-discs with ring outlines, or a striped disc. Three brands, one silhouette. The
+-v2.3 five-family bake-off gives each a different outer geometry and removes
+-every stroke.
+-
+-```bash
+-node scripts/brand-forge.mjs --bakeoff examples/configs/huginn.json  --out out/huginn
+-node scripts/brand-forge.mjs --bakeoff examples/configs/riso-co.json --out out/riso-co
+-node scripts/brand-forge.mjs --bakeoff examples/configs/hachure.json --out out/hachure
+-python3 scripts/score-mark.py --dir out
+-```
+-
+-## Huginn — architectural monogram
+-
+-- **Kept:** two solid L-brackets facing each other; the H bridge is a vermilion
+-  diamond keystone. Charcoal `#141413`, keystone `#E03C1F`.
+-- **Why:** the name is a relationship (thought + memory), and the letter finally
+-  has a structural job. No circle, no detached accent.
+-- **Lost:** planes (a print diagram, not a mind), louvers (a chart, not a name),
+-  ribbon (one beam, no bridge), horizon (too quiet).
+-- **Compact:** wider channels, no thin strokes; the keystone is the only accent.
+-
+-## Riso Co. — offset geometric planes
+-
+-- **Kept:** two sheared, unstroked sheets — orange `#F2542D`, blue `#1D63FF` —
+-  shifted diagonally. The overlap is a solid overprint polygon `#2B192E`.
+-- **Why:** two print passes are planar, not circular; the overprint is the
+-  shape, not an offset applied to a silhouette.
+-- **Lost:** bracket (a letter, not print), louvers (a chart), ribbon (one beam,
+-  no two passes), horizon (no overprint corner).
+-- **Compact:** the overprint polygon alone; the mono is the union.
+-
+-## Hachure — brutalist louvers
+-
+-- **Kept:** four solid wedge-bars that rise and thicken left to right; a lichen
+-  diamond `#B8CC3B` caps the summit.
+-- **Why:** the name means hachure; the mark draws slope as density, using solid
+-  bar weight instead of thin lines. No enclosing circle.
+-- **Lost:** bracket (a letter), planes (an overprint, not terrain), ribbon (one
+-  beam, no range), horizon (a line, not relief).
+-- **Compact:** three bars, wider channels; the apex stays.
+-
+-## What changed in the pipeline
+-
+-- Five different families, one per brand, enforced by the v2.3 gate.
+-- `score-mark.py` fails circles, fill+stroke and >4 primitives; all three final
+-  marks pass with no FAIL or WARN.
+-- The generator's default `--bakeoff` now runs the five families; the old
+-  circle/line concepts remain as legacy only.
+diff --git a/skills/sunnyside-brand-system/references/craft-bar.md b/skills/sunnyside-brand-system/references/craft-bar.md
+index 497956a..1144e50 100644
+--- a/skills/sunnyside-brand-system/references/craft-bar.md
++++ b/skills/sunnyside-brand-system/references/craft-bar.md
+@@ -193,20 +193,6 @@ wordmark is where the hand becomes ownable.
+ The numbers are not the style. They are the evidence that the drawing was
+ constructed, not eyeballed.
+ 
+-## 7. What Vitrine still misses
+-
+-Vitrine's v2.3 folded V is a strong constructed mark. Its marks section is still
+-a construction card plus a gate, not a mark system. It has no drawn wordmark, no
+-cast, and no logo card / wordmark scale / drawer / rule. The next pass should
+-add:
+-
+-- a cast derived from glass and dither — a lens arc, a dot, a signal burst, a
+-  bracket, a glare, a registration mark — each with a job;
+-- a drawn or custom-cut wordmark that belongs to the folded V;
+-- the four-movement composition in §3.
+-
+-That is the gap between “a good mark” and “the Case 01 bar.”
+-
+ ## 8. Tools
+ 
+ - `templates/marks-section.html` — the four-movement composition, copyable into
+diff --git a/skills/sunnyside-brand-system/references/gates.md b/skills/sunnyside-brand-system/references/gates.md
+index 0609fa8..3571a48 100644
+--- a/skills/sunnyside-brand-system/references/gates.md
++++ b/skills/sunnyside-brand-system/references/gates.md
+@@ -1,7 +1,16 @@
+ # The gates
+ 
+-Six checks. Each one failed a shipped case, so each one is a command, not a discussion. Run
+-them in this order — the first two can invalidate the work that follows.
++Eight checks. Each one failed a shipped case, so each one is a command, not a discussion.
++**`node scripts/gates.mjs --slug <slug>` runs the six static ones at once** (detach, display
++face, font registered, contrast, assets, export); `qa.mjs` runs the two that need a rendered
++page (mark at 16px, reduced motion). Run `gates.mjs` as soon as the tokens exist, not after
++the page: the first two can invalidate everything that follows. Display face is hard fail H3
++of the detach run; assets applies only when stock images are used (`references/research.md`).
++
++Two behaviours worth knowing: an **incomplete** `tokens.json` (empty DNA) scores low because it
++is unscorable, and `gates.mjs` says so rather than blaming the hue; and an **outside brand**
++passed with `--refs` (made by `brand-ref.mjs ref`) is scored on hue, value and type only, scaled
++to 100, because a reference has no DNA or sections to compare.
+ 
+ ## 1 · Detach — 100 points, five hard fails
+ 
+diff --git a/skills/sunnyside-brand-system/references/logo-system.md b/skills/sunnyside-brand-system/references/logo-system.md
+index 243133f..c0e167c 100644
+--- a/skills/sunnyside-brand-system/references/logo-system.md
++++ b/skills/sunnyside-brand-system/references/logo-system.md
+@@ -1,6 +1,6 @@
+ # The logo system
+ 
+-## v2.3 hard gate (read first)
++## Hard gate (read first)
+ 
+ 1. **Zero-circle / zero-Venn.** No overlapping circle Venns, concentric rings,
+    orbit badges, or circular containers. Across a showcase, no two logos share
+@@ -12,9 +12,9 @@
+    earns its place as an architectural monogram (cut / joined / lit), never as
+    a typed initial with an ornament.
+ 
+-The older sections below are the v2.2 tests; use the v2.3 gate above them.
++Sections 1–9 below are the working method; where one disagrees with the gate above, the gate wins.
+ 
+-## The mark system (v2.4)
++## The mark system
+ 
+ A logo is half the identity. The full system is primary + compact + glyph +
+ wordmark + cast + composition. Read `references/craft-bar.md` before choosing a
+diff --git a/skills/sunnyside-brand-system/references/research.md b/skills/sunnyside-brand-system/references/research.md
+new file mode 100644
+index 0000000..ad82520
+--- /dev/null
++++ b/skills/sunnyside-brand-system/references/research.md
+@@ -0,0 +1,66 @@
++# Research: neighbours, DESIGN.md, free assets
++
++Used at step 3 (study the category) and step 8 (a photograph or icon). Skip both for a case
++with no category and no imagery.
++
++## Studying the category
++
++```bash
++node scripts/brand-ref.mjs search fintech payments     # find brands
++node scripts/brand-ref.mjs near --hue 275 --within 25  # who already owns this hue
++node scripts/brand-ref.mjs pull stripe linear.app      # read their DESIGN.md
++node scripts/brand-ref.mjs ref stripe linear.app --out refs/
++node scripts/gates.mjs --slug <slug> --refs refs/      # detach now includes them
++```
++
++Source: `ricocc/brands-design-md`, the collection behind design.ricoui.com/brands: 69 brands, each
++a `DESIGN.md` plus a DTCG `tokens.json`, plus `registry.json`.
++
++**Three rules.**
++
++1. **Study, never copy.** These are unofficial, "inspired by" analyses of other companies' brands.
++   Read one for the accent hue, the display face, the radius, the density and what the brand
++   refuses; then leave. The detach gate is how "different from the category" becomes a number.
++2. **Fetch, do not vendor.** The repository has no LICENSE file, so this skill does not
++   redistribute it. Files go to the OS temp directory (`BRAND_REFS_BASE` overrides the source).
++3. **A reference is half-measurable.** It has no DNA or sections, so it is scored on hue, value
++   and type only. A pass against Stripe says the palette differs, not that the system does.
++
++Other catalogs exist (`awesome-design-md`, getdesign.md, designmd.app). They are not wired in;
++the same rules apply, and check each licence before copying anything into a repo.
++
++## DESIGN.md
++
++Google Labs' open format (`google-labs-code/design.md`, version alpha): YAML front matter of
++tokens (colors, typography, rounded, spacing, components) plus prose sections in a fixed order.
++`design-md.mjs --slug <slug> --lint` writes it from `tokens.json` and runs the official linter.
++
++- Colours keep their own names; `primary` (darkest), `secondary` (quiet mid-tone), `tertiary`
++  (the accent) and `neutral` (lightest) are added beside them as aliases.
++- A face that is only a CSS alias (`mono`) is skipped, never published as a typeface.
++- No Do's and Don'ts and no components are invented; sections with nothing real are listed
++  under `omitted`. Edit the tokens, not the file.
++
++## Free assets
++
++```bash
++node scripts/assets.mjs search "dune at dawn" --orientation landscape     # openverse, no key
++node scripts/assets.mjs get openverse:<id> --out public/brand/<slug>/assets --name hero
++node scripts/assets.mjs credits --dir public/brand/<slug>/assets          # also run by gates.mjs
++```
++
++| Source | Key | Licence and duty | Use for |
++| --- | --- | --- | --- |
++| Openverse | none | default filter CC0 + public domain: nothing to credit; `--license by` widens it and a credit is then required | the default |
++| Pexels | `PEXELS_API_KEY` | Pexels licence; credit photographer and Pexels | photographs |
++| Unsplash | `UNSPLASH_ACCESS_KEY` | Unsplash licence; the API wants hotlinked URLs, a download ping on use, a utm-linked credit, and human-chosen images, so search is capped at 8 and the ping is sent | photographs, by eye |
++| Iconify | none | per icon set; read and recorded, never assumed | UI icons |
++
++**Rules.** Assets are imagery (a hero plate, a dither source, a texture), never the mark: a stock
++image is not an identity, so do not trace, recolour or ship one as the logo. Every file in
++`assets/` needs a `credits.json` entry; an unknown licence, or one that needs credit with none
++written, fails the assets gate. Shrink first (`downscale.py`), then dither (`immersive.md` §3).
++If the page is published and uses Unsplash, hotlink the `hotlink` URL in `credits.json`.
++
++Status: written from each service's documentation and tested against a local mock of the
++documented response shapes; not run against the live hosts when it was built.
+-- 
+2.43.0
+
