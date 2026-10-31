@@ -4,16 +4,17 @@ description: 'Design and ship a brand kit or design system from a brief: one ide
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '3.3'
+  version: '3.5'
 ---
 
 # Sunnyside brand system
 
 **One idea → one mark → one system → one proof → one audit.**
 
-Eight systems were built with this method: Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove,
-Strand and Clearing. Every rule is here because it survived one of them and every gate because
-it caught something in one. This file is the whole method; the references hold evidence and code.
+Every shipped case is listed in `references/case-evidence.md`. Every rule is here because it
+survived one of them and every gate because it caught something in one. This file is the whole
+method; the references hold evidence and code. (No case counts in prose: they go stale as cases are
+added, so the evidence file is the only place that keeps one.)
 
 ## The fast path
 
@@ -27,7 +28,9 @@ node scripts/brand-ref.mjs near --hue <n>            # who already owns this hue
 ```
 
 1. **Brief, in six lines.** Name, category, audience, promise, enemy, one sentence the work can
-   be rejected against. If it needs a comma splice, the idea is not ready.
+   be rejected against. If it needs a comma splice, the idea is not ready. Ask **at most one
+   question, and only when the request names no subject at all**; otherwise write the
+   assumptions in one line and build.
 2. **Pick the track.** Constructed or drawn, one per brand. See *Two tracks*.
 3. **Study the neighbours** (skip with no category). `brand-ref.mjs search <category>`, `pull`
    two or three, note their accent hue, display face and what they refuse; `ref` them for the
@@ -43,7 +46,8 @@ node scripts/brand-ref.mjs near --hue <n>            # who already owns this hue
 7. **Build the board.** 1500 × 1125, local fonts, rendered at 2×. It is the thumbnail.
 8. **Build the proof page, with its marks section.** Hero, contents, the sections the system
    needs, tokens, audit; a logo card, wordmark scale, cast drawer and one usage rule. A row of
-   equal logo tiles is not a mark system. Need a photograph? `assets.mjs`, imagery only.
+   equal logo tiles is not a mark system. Need a photograph? `assets.mjs`, imagery only. The page
+   must prove five jobs (see *What the page proves*); the ids and order are the case's own.
 9. **Export.** `figma-forge.mjs` (plugin + `.fig`) and `design-md.mjs` (`DESIGN.md`), both from
    the tokens, both regenerated, never edited.
 10. **Final gates.** `gates.mjs` again, then `qa.mjs` for the two that need a rendered page.
@@ -53,10 +57,17 @@ node scripts/brand-ref.mjs near --hue <n>            # who already owns this hue
 
 Each failed a shipped case. Run them; do not reason about them.
 
+**One retry, then publish.** Compute each value once. A colour pair under 4.5:1 is *assigned a
+job* (ground, graphic or large type only) and printed as a failure, never nudged until it passes.
+A gate that still fails after one fix is recorded in the audit as *Fails* or *Known gap*, not
+iterated on. Marks are built from stated grid units in one write and redrawn at most once. A
+passing number reached by tuning is evidence of the tuning, not of the design.
+
 | Gate | Pass | Run by | If it fails, go to |
 | --- | --- | --- | --- |
 | **Detach** | ≥ 70/100 against every sibling and `--refs`, no hard fails | `gates.mjs` | 6, hue or material (an "incomplete tokens" note means fix the file, not the hue) |
 | **Display face** | differs from every sibling | `gates.mjs` | 6, type roles |
+| **Palette is one source** | every primitive in `tokens.json` is declared in the token CSS at the same value | `gates.mjs` | 6, whichever file is wrong |
 | **Font registered** | every `--font-*` in the token CSS is declared in a layout | `gates.mjs` | 6, layout |
 | **Contrast** | pairs recomputed from hex, stated ratios match, at least one failure published | `gates.mjs` | 6, semantic layer |
 | **Assets licensed** | every stock file has a `credits.json` entry with licence and credit | `gates.mjs` | 8, `assets.mjs get` |
@@ -64,9 +75,27 @@ Each failed a shipped case. Run them; do not reason about them.
 | **Mark at 16px** | the compact is a different drawing | `qa.mjs` | 5 |
 | **Reduced motion** | the still frame is the design | `qa.mjs` | 8 |
 
-Evidence per gate, thresholds and the 100-point breakdown: `references/gates.md`. **Contrast
+A case folder with no `features/<slug>/tokens.json` **fails**, it is not skipped: the output
+contract requires it and nothing else can be measured without it. Evidence per gate, thresholds
+and the 100-point breakdown: `references/gates.md`. **Contrast
 matters most:** a palette that only publishes its passes is a brochure, so a case prints the
 pair that fails and the job it may therefore not do.
+
+## What the page proves
+
+Five jobs, not five ids. Name and order them as the case needs: the detach gate scores shared
+section ids against every sibling, so a universal spine would make every new case less separate
+from the last (Cove nearly failed on nine of twelve shared ids).
+
+1. **Idea** — belief, enemy, material, and four decisions as *Decision / Because / Not when /
+   Breaks next*.
+2. **Mark** — primary, compact (a separate drawing) and glyph, the wordmark, and how it breaks.
+3. **Colour** — every pair computed, each with its allowed job, and the one that fails.
+4. **Type** — the scale *and* three specimens at real copy, never lorem: the display face at its
+   real size with the tracking stated; one reading paragraph at 60–68ch with the leading stated;
+   and, if the system carries numbers, tabular figures right-aligned on the decimal. A missing
+   specimen is a *Known gap* in the audit.
+5. **Tokens and audit** — copyable tokens in both scopes, then *Fails*, *Not verified*, *Known gap*.
 
 ## Figma is a build target, not a handoff
 
@@ -118,8 +147,8 @@ Code for all seven, with the numbers: `references/immersive.md`.
 | **Constructed** | The brand is a system: cells, planes, ridges, louvers, grids. | Mark + compact + glyph + lockup. Fill only, 2–4 primitives, one accent, zero circles. |
 | **Drawn** | The brand is an object: a sun, a stag, a face, a tool. | Mark + compact + glyph + **drawn wordmark** + a 4–6 mark cast. One subject, one cut line, one flat fill, one hard offset. |
 
-Six of the eight cases are constructed; Sunnyside and Clearing are drawn. The difference is
-the subject, not the taste. Do not mix tracks in one brand.
+Cove and Strand are constructed; Sunnyside and Clearing are drawn. The difference is the
+subject, not the taste. Do not mix tracks in one brand.
 
 ## The wordmark is a drawing
 
@@ -162,10 +191,26 @@ A night surface is a **scope**, never a second palette: swap the semantic layer 
 `html[data-<slug>]` and keep the primitives. Every case with a dark surface does this, which is
 why none of them drift.
 
+## Side effects
+
+Scripts read and write inside the repo. The exceptions are optional, and the agent says which
+host and why **once, before the first network call** (and skips the step if the user declines or
+the host is blocked; steps 3 and 8 and `--lint` are optional by design):
+
+| Script | Network | Writes outside the case |
+| --- | --- | --- |
+| `brand-ref.mjs` | `raw.githubusercontent.com` (read) | cache in the OS temp directory |
+| `assets.mjs` | the chosen source only | none; files go to `--out` |
+| `design-md.mjs --lint` | npm registry, one pinned package (`@google/design.md@0.4.0`) | none |
+
+API keys (`PEXELS_API_KEY`, `UNSPLASH_ACCESS_KEY`) are read from the environment and never
+written to a file or printed. Nothing installs globally and no project file is uploaded anywhere.
+
 ## Output contract
 
 ```
-features/<slug>/        tokens.json, <slug>-tokens.css, <slug>.module.css,
+features/<slug>/        tokens.json (gates also find public/brand/<slug>/<slug>-tokens.json),
+                        <slug>-tokens.css, <slug>.module.css,
                         <slug>-data.ts, components/brand.tsx, theme-toggle.tsx
 app/design-system/<slug>/  page.tsx, layout.tsx, llms.txt/route.ts, icon.svg
 public/brand/<slug>/    mark, compact, glyph, mono, reverse, wordmark, lockups, favicons,
@@ -181,7 +226,7 @@ without a board is a logo; a case without an audit is a brochure.
 
 ## Failure modes
 
-- A ninth case that is the eighth renamed: same sections, material and display face. Run detach
+- A new case that is an earlier one renamed: same sections, material and display face. Run detach
   first, and against outside brands too (`brand-ref.mjs ref`).
 - An accent within 8° of a neighbour "because the material differs". It does not.
 - A namespace collision (`--st-` twice) that silently merges two token sets.
@@ -194,6 +239,9 @@ without a board is a logo; a case without an audit is a brochure.
   `figma-smoke.mjs`.
 - A stock photo used as, traced into, or recoloured as the mark; or shipped with no credit.
 - An outside brand copied instead of studied.
+- A colour nudged until it passes, or a gate iterated past one retry: the number is then evidence
+  of the tuning. Assign the job, print the failure.
+- A universal section spine copied from the last case: it scores as shared structure.
 
 ## References
 
@@ -201,7 +249,7 @@ Read only what the task needs.
 
 | File | Read when | Holds |
 | --- | --- | --- |
-| `references/case-evidence.md` | you need a precedent, a number or a decision | the eight cases, detach data, recurring decisions |
+| `references/case-evidence.md` | you need a precedent, a number or a decision | every case, detach data, recurring decisions |
 | `references/research.md` | studying a category, or you need a photo or icon | brand library rules, DESIGN.md, asset licences |
 | `references/gates.md` | before shipping, and when a gate fails | thresholds, 100-point breakdown, QA checklist |
 | `references/immersive.md` | the page is correct but flat | the seven recipes with code |
@@ -223,7 +271,9 @@ Templates: `templates/design-system.html` (full page), `single-page.html` (singl
 | `init-system.mjs` | scaffold a case: namespace, hue-seeded palette, DNA, tokens, CSS, data, page |
 | `brand-ref.mjs` | search 69 outside brands, `near` a hue, `pull` their DESIGN.md, `ref` them into detach |
 | `detach-check.mjs` | OKLCH separation scorecard; `--scan` the portfolio |
-| `gates.mjs` | the six static gates in one command |
+| `gates.mjs` | every static gate in one command |
+| `lib/tokens.mjs` | the one reader for every `tokens.json` shape and location; scripts import it |
+| `test/` | unit tests: `node --test "scripts/test/*.test.mjs"` (CI runs them) |
 | `brand-forge.mjs` / `cast-forge.mjs` | the constructed family (`--bakeoff`) / a 4–6 drawn cast |
 | `score-mark.py` | circles, strokes, primitives, 16px |
 | `assets.mjs` | search and fetch free photos and icons with licence records |

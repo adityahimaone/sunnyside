@@ -156,3 +156,21 @@ Keep it in sync with the page from one data source, not by hand.
 - `design/manifest.json` — the design-source map
 
 The page is the product. The PDF is a snapshot of the page.
+
+## 8. Accepted `tokens.json` shapes
+
+`scripts/lib/tokens.mjs` reads every shape below (by key, never by case name) and finds the file at
+`features/<slug>/tokens.json` or `public/brand/<slug>/<slug>-tokens.json`. New cases should use the
+first. A shape the loader cannot read returns `unknown` and the gates say so.
+
+| Shape | Keys | Seen in |
+| --- | --- | --- |
+| **Preferred** | `meta`, `theme` (DNA), `primitives[]` of `{name, value, role}`, `semantic`, `contrast[]` of `{label, fg, bg, ratio}`, `type[]`, `radius[]`, `space[]` | Cove, Strand, Porphyry |
+| `a`/`b` contrast, `$meta` | as above, with `$meta`, and `contrast[]` using `a`/`b` | Huginn |
+| Role/face type | `type[]` entries are `{role, face}`; `face` may be a CSS alias | Hachure |
+| Flat colour | `color{name: hex}`, `type{display: "Family"}`, `radius{}`, `space[]` of numbers | Clearing |
+| Object-keyed | `primitive{name: {value, hex}}`, `ramp`, `signal`, `semantic{light,dark}`; no DNA, no `contrast` | Ledger |
+
+A contrast entry must carry hex values and the ratio computed from them. Gradients and alpha
+colours cannot be computed and are not counted as passes. detach-check still reads its own subset
+(`theme` DNA, `primitives`, `type`); moving it onto the loader is the remaining step.

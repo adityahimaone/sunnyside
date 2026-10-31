@@ -1,6 +1,6 @@
 # Case evidence
 
-Eight systems, built with this method. This file is the precedent shelf: what each one argued,
+The first eight systems are tabled below; the cases added since follow them. This file is the precedent shelf: what each one argued,
 what it shipped, and the numbers that were measured. When a decision is unclear, find the case
 that already made it.
 
@@ -94,3 +94,31 @@ The two most useful to read first:
   wordmark with a disc tittle, a five-mark cast, a glass recipe with a fallback.
 - **`features/riso/`** — the constructed track with two inks: a pinned sheet torn from the pin,
   a 2.2px register ghost, a clip-path tear, and two contrast pairs published as failures.
+
+## Added since the eight (measured 2026-11-01)
+
+Facts only, from `gates.mjs` and the repo on that day; rerun it before quoting any of this.
+
+| Case | `tokens.json` | Detach, weakest | Failing pairs published | Palette | Page sections |
+| --- | --- | --- | --- | --- | --- |
+| Jakarta | **missing**: nothing can be measured | not scorable | not scorable | not scorable | 6 ids: idea, mark, palette, type, apps, tokens |
+| Ledger | object shape (`primitive{}`, `ramp`, `signal`), no DNA, no `contrast` | 38 vs Hachure, an incomplete file, not a collision | none in `tokens.json` | pass, 26 primitives | not counted (UI case) |
+| Porphyry | `primitives[]`, full DNA | **73** vs Hachure | 2 | pass | 9 |
+
+What they teach, in order of cost:
+
+- **A case without `tokens.json` is invisible to every gate.** Jakarta is the first one to ship that
+  way; `gates.mjs` now fails it instead of skipping.
+- **Three token shapes now exist.** Gates and exporters read two of them (see `tokens-and-docs.md`);
+  a shared loader would remove the drift.
+- **Porphyry is the model for the newer cases:** it clears detach, publishes failures, and its
+  palette matches its CSS.
+
+### A collision the old scan could not see
+
+Cove and Clearing: Cove's `lumen` (178°) and Clearing's `emerald` (173°) are **5° apart**, "same
+family" by the detach rule, and Cove scores 65/100 against Clearing. It went unreported because
+Clearing keeps its tokens in `public/brand/clearing/` and the scan only looked in `features/`.
+Clearing's tokens carry colour and type but no DNA, so this score rests on hue, value and type;
+treat it as a flag to look at, not a final verdict. Huginn was missed for the same reason.
+

@@ -26,8 +26,11 @@ import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { promisify } from 'node:util'
+import { findTokens, readTokens } from './lib/tokens.mjs'
 
 const run = promisify(execFile)
+// Pinned: --lint downloads and executes a package, so it must not float to whatever is newest.
+const LINTER = '0.4.0'
 const args = process.argv.slice(2)
 const flag = (n, d) => (args.includes(`--${n}`) ? (args[args.indexOf(`--${n}`) + 1]?.startsWith('--') ? true : args[args.indexOf(`--${n}`) + 1]) : d)
 const slug = flag('slug')
@@ -36,12 +39,12 @@ if (!slug || slug === true) {
   process.exit(1)
 }
 const root = resolve(flag('root', '.'))
-const src = join(root, 'features', slug, 'tokens.json')
-if (!existsSync(src)) {
-  console.error(`No ${src}`)
+const src = findTokens(root, slug)
+if (!src) {
+  console.error(`No tokens.json for "${slug}" (looked in features/${slug}/ and public/brand/${slug}/)`)
   process.exit(1)
 }
-const tokens = JSON.parse(await readFile(src, 'utf8'))
+const tk = readTokens(src)
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 
@@ -66,20 +69,14 @@ function oklch(hex) {
 }
 
 const dimension = (v) => (/^-?\d*\.?\d+(px|rem|em)$/.test(String(v).trim()) ? String(v).trim() : null)
-const generic = /^(sans-serif|serif|monospace|system-ui|ui-[a-z-]+|-apple-system|var\(.*)$/i
-const family = (stack) =>
-  String(stack ?? '')
-    .split(',')
-    .map((p) => p.replace(/['"]/g, '').trim())
-    .find((p) => p && !generic.test(p)) ?? null
 
 /* ── colours ─────────────────────────────────────────────────────────────── */
 
-const prims = (tokens.primitives ?? [])
-  .map((p) => ({ name: kebab(p.name), hex: hex6(p.value), role: p.role ?? '' }))
+const prims = tk.primitives
+  .map((p) => ({ name: kebab(p.name), hex: hex6(p.hex ?? ''), role: p.role }))
   .filter((p) => p.hex && p.name)
 if (!prims.length) {
-  console.error('tokens.json has no hex primitives — nothing to export')
+  console.error(`no hex primitives in ${tk.shape} tokens.json — nothing to export`)
   process.exit(1)
 }
 const scored = prims.map((p) => ({ ...p, ...oklch(p.hex) }))
@@ -99,9 +96,9 @@ for (const [role, p] of Object.entries(roleOf)) if (p && !(role in colors)) colo
 
 const typography = {}
 let skippedFaces = 0
-for (const t of Array.isArray(tokens.type) ? tokens.type : []) {
-  const name = kebab(t.name ?? t.role ?? '')
-  const fam = family(t.value ?? t.face)
+for (const t of tk.type) {
+  const name = kebab(t.name)
+  const fam = t.family || null
   // a bare alias such as "mono" is a CSS variable name, not a typeface — do not publish it as one
   if (!name || !fam || /^(mono|sans|serif|display|body|reading)$/i.test(fam)) {
     if (name) skippedFaces += 1
@@ -109,10 +106,9 @@ for (const t of Array.isArray(tokens.type) ? tokens.type : []) {
   }
   typography[name] = { fontFamily: fam, ...(t.size && dimension(t.size) ? { fontSize: dimension(t.size) } : {}), ...(Number(t.weight) ? { fontWeight: Number(t.weight) } : {}) }
 }
-const scale = (list) =>
-  Object.fromEntries((Array.isArray(list) ? list : []).map((r) => [kebab(String(r.name).replace(/^(radius|space)-/, '')), dimension(r.value)]).filter(([k, v]) => k && v))
-const rounded = scale(tokens.radius)
-const spacing = scale(tokens.space)
+const scale = (list) => Object.fromEntries(list.map((r) => [kebab(r.name), dimension(r.value)]).filter(([k, v]) => k && v))
+const rounded = scale(tk.radius)
+const spacing = scale(tk.space)
 
 const omitted = [
   ...(Object.keys(typography).length ? [] : [{ section: 'typography', reason: 'faces are CSS aliases in tokens.json, not resolvable family names' }]),
@@ -123,8 +119,8 @@ const omitted = [
 
 /* ── emit ────────────────────────────────────────────────────────────────── */
 
-const name = tokens.name ?? tokens.meta?.name ?? slug
-const idea = tokens.idea ?? tokens.meta?.essence ?? tokens.meta?.oneSentence ?? ''
+const name = tk.name || slug
+const idea = tk.idea
 const y = []
 y.push('---', 'version: alpha', `name: ${q(name)}`)
 if (idea) y.push(`description: ${q(idea)}`)
@@ -155,7 +151,7 @@ console.log(`${out}\n  ${Object.keys(colors).length} colours (${Object.keys(role
 
 if (args.includes('--lint')) {
   try {
-    const { stdout } = await run('npx', ['--yes', '@google/design.md', 'lint', '--format', 'json', out], { maxBuffer: 1 << 24, timeout: 120000 })
+    const { stdout } = await run('npx', ['--yes', `@google/design.md@${LINTER}`, 'lint', '--format', 'json', out], { maxBuffer: 1 << 24, timeout: 120000 })
     report(stdout)
   } catch (e) {
     if (e.stdout) report(e.stdout)
