@@ -419,9 +419,12 @@
   --sun-x: 73%;
   --ground: clamp(5rem, 13vh, 8.5rem);
   /* How far the sun's centre sits above the ground line, in sun-diameters.
-     0.28 buried two thirds of the disc under the paper; 0.47 leaves it cut by a
-     few pixels, so it reads as rising and still sits level with the copy. */
-  --sun-lift: 0.47;
+     0.28 buried two thirds of the disc; 0.8 lifts the whole face and rays
+     clear of the paper. */
+  --sun-lift: 0.8;
+  /* Where the sticker cluster sits. The items are frozen at this lift, so
+     raising the sun does not drag the stickers off the headline. */
+  --items-lift: 0.47;
   /* Distance from the hero's bottom edge to the top of the disc. */
   --sun-top: calc(var(--sun-lift) + 0.5);
 
@@ -704,6 +707,8 @@
   .hero {
     --sun-size: min(78vw, 21rem);
     --sun-x: 50%;
+    /* Under the desktop split the cluster should ride with the sun. */
+    --items-lift: var(--sun-lift);
     padding-bottom: calc(
       var(--ground) + var(--sun-size) * var(--sun-top) + 1.5rem
     );

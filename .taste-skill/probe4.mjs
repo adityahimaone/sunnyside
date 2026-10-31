@@ -1,0 +1,13 @@
+import { chromium } from '@playwright/test'
+const b = await chromium.launch()
+const p = await b.newPage({ viewport: { width: 1440, height: 900 } })
+await p.goto('http://localhost:3111/', { waitUntil: 'networkidle' })
+await p.waitForTimeout(2000)
+const before = await p.evaluate(() => getComputedStyle(document.querySelector('#home')).getPropertyValue('--desk-accent'))
+const btn = p.locator('#home button[aria-pressed]').nth(1)
+console.log('count', await p.locator('#home button[aria-pressed]').count())
+await btn.click({ timeout: 3000 }).catch(e => console.log('clickfail', e.message.slice(0,80)))
+await p.waitForTimeout(400)
+const after = await p.evaluate(() => getComputedStyle(document.querySelector('#home')).getPropertyValue('--desk-accent'))
+console.log({ before, after })
+await b.close()

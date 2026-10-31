@@ -8,10 +8,12 @@
   initial-value: 7px;
 }
 
+/* No z-index here: the clouds and stickers carry their own positive z-index
+   and join the hero's stacking context, so they pass in front of the copy
+   while the sky, sun and ground stay behind it. */
 .scene {
   position: absolute;
   inset: 0;
-  z-index: 0;
   overflow: hidden;
   pointer-events: none;
 }
@@ -187,8 +189,35 @@
 .item {
   position: absolute;
   left: calc(var(--sun-size) * var(--ox));
-  top: calc(var(--sun-size) * var(--oy) * var(--ky, 1));
+  /* The cluster is offset by the difference between the sun's current lift and
+     the lift it was composed at, so it keeps its place over the copy. */
+  top: calc(
+    var(--sun-size) *
+      (var(--oy) * var(--ky, 1) + var(--sun-lift) - var(--items-lift, 0.47))
+  );
+  z-index: 3;
   will-change: translate;
+}
+
+/* Clouds hang from the top of the scene on desktop, so a change in viewport
+   height cannot walk one onto the headline or under the bar. Under the
+   desktop split they go back around the sun with the other marks. */
+.cloudSlot {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  z-index: 3;
+  will-change: translate;
+}
+
+@media (max-width: 1023px) {
+  .cloudSlot {
+    left: calc(var(--sun-x) + var(--sun-size) * var(--ox));
+    top: calc(
+      100% - var(--ground) - var(--sun-size) * var(--sun-lift) +
+        var(--sun-size) * var(--oy) * var(--ky, 1)
+    );
+  }
 }
 
 .cloud {

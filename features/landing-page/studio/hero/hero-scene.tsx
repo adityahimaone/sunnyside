@@ -102,9 +102,27 @@ const at = ({ x, y }: Placed, extra?: CSSProperties) =>
   ({ '--ox': x, '--oy': y, ...extra }) as CSSProperties
 
 const CLOUDS = [
-  { place: { x: -0.58, y: -0.82 }, depth: 0.7, scale: 0.8, delay: 0.55 },
-  { place: { x: 0.34, y: -0.98 }, depth: 1.1, scale: 1, delay: 0.7 },
-  { place: { x: 0.74, y: -0.5 }, depth: 1.5, scale: 0.7, delay: 0.85 },
+  {
+    place: { x: -0.58, y: -0.82 },
+    sky: { x: '38%', y: '11vh' },
+    depth: 0.7,
+    scale: 0.8,
+    delay: 0.55,
+  },
+  {
+    place: { x: 0.34, y: -0.98 },
+    sky: { x: '80%', y: '12vh' },
+    depth: 1.1,
+    scale: 1,
+    delay: 0.7,
+  },
+  {
+    place: { x: 0.74, y: -0.5 },
+    sky: { x: '86%', y: '32vh' },
+    depth: 1.5,
+    scale: 0.7,
+    delay: 0.85,
+  },
 ] as const
 
 const SPARKLES = [
@@ -139,6 +157,34 @@ export function HeroScene() {
         <div className={styles.dots} />
       </div>
 
+      {CLOUDS.map((cloud, i) => (
+        <div
+          key={i}
+          className={styles.cloudSlot}
+          data-depth={cloud.depth}
+          style={
+            {
+              '--ox': cloud.place.x,
+              '--oy': cloud.place.y,
+              '--cx': cloud.sky.x,
+              '--cy': cloud.sky.y,
+            } as CSSProperties
+          }
+        >
+          <div
+            className={styles.cloud}
+            style={
+              {
+                '--s': cloud.scale,
+                '--delay': `${cloud.delay}s`,
+              } as CSSProperties
+            }
+          >
+            <Cloud />
+          </div>
+        </div>
+      ))}
+
       <div className={styles.farHill} data-depth="0.35">
         <Hills />
       </div>
@@ -169,27 +215,6 @@ export function HeroScene() {
           </div>
         </div>
 
-        {CLOUDS.map((cloud, i) => (
-          <div
-            key={i}
-            className={styles.item}
-            data-depth={cloud.depth}
-            style={at(cloud.place)}
-          >
-            <div
-              className={styles.cloud}
-              style={
-                {
-                  '--s': cloud.scale,
-                  '--delay': `${cloud.delay}s`,
-                } as CSSProperties
-              }
-            >
-              <Cloud />
-            </div>
-          </div>
-        ))}
-
         {SPARKLES.map((spark, i) => (
           <div
             key={i}
@@ -205,7 +230,7 @@ export function HeroScene() {
 
         <StickerSlot
           id="smiley"
-          place={{ x: -0.44, y: -0.68 }}
+          place={{ x: -0.44, y: -0.55 }}
           depth={1.9}
           delay={1.0}
         >
@@ -237,7 +262,7 @@ export function HeroScene() {
         </StickerSlot>
       </div>
 
-      <div className={styles.ground} data-depth="1">
+      <div className={styles.ground}>
         <Ground />
       </div>
     </div>

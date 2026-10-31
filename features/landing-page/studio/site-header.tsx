@@ -127,7 +127,13 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
           className={archive.progress}
           style={{ scaleX: scrollYProgress }}
         />
-        <div className={cn(archive.bar, scrolled && archive.barScrolled)}>
+        <div
+          className={cn(
+            archive.bar,
+            scrolled && archive.barScrolled,
+            active === 'home' && archive.barHero,
+          )}
+        >
           <div className={archive.inner}>
             <a
               href="#home"

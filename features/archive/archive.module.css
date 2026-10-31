@@ -167,8 +167,12 @@
 .bar::after {
   content: '';
   position: absolute;
-  inset: 0;
+  /* The map is overscanned and clipped back to the bar's rectangle: without
+     the bleed the displaced pixels spill past the edge and the bar reads as a
+     torn, abstract shape instead of a straight sheet of glass. */
+  inset: -40px;
   z-index: 0;
+  clip-path: inset(40px);
   pointer-events: none;
   background: linear-gradient(
     180deg,
@@ -179,10 +183,6 @@
   -webkit-backdrop-filter: blur(18px) saturate(2.1) brightness(1.05);
   backdrop-filter: blur(18px) saturate(2.1) brightness(1.05);
   filter: url(#liquid-glass-bar);
-  box-shadow:
-    inset 0 1px 0 0 color-mix(in srgb, #fff 68%, transparent),
-    inset 2px 2px 1px 0 rgb(255 255 255 / 0.42),
-    inset -1px -1px 1px 1px rgb(255 255 255 / 0.28);
   transition:
     background-color var(--ss-ui) var(--ss-ease),
     box-shadow var(--ss-ui) var(--ss-ease),
@@ -209,23 +209,33 @@
   }
 }
 
+/* The sheen sits above the glass and below the controls, so the specular rim
+   keeps the straight rectangle the displacement map is clipped to. */
 .bar::before {
   content: '';
   position: absolute;
-  z-index: -1;
+  z-index: 1;
   inset: 0;
   background:
     radial-gradient(
       130% 180% at 8% -60%,
-      color-mix(in srgb, #fff 62%, transparent),
+      color-mix(in srgb, #fff 42%, transparent),
       transparent 62%
     ),
     radial-gradient(
       90% 150% at 92% 170%,
-      color-mix(in srgb, var(--ss-butter) 26%, transparent),
+      color-mix(in srgb, var(--ss-butter) 16%, transparent),
       transparent 72%
     );
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, #fff 68%, transparent),
+    inset 2px 2px 1px 0 rgb(255 255 255 / 0.42),
+    inset -1px -1px 1px 1px rgb(255 255 255 / 0.28);
   pointer-events: none;
+}
+
+.barScrolled {
+  box-shadow: 0 18px 40px -30px var(--ss-ink);
 }
 
 .barScrolled::after {
@@ -236,11 +246,76 @@
   );
   -webkit-backdrop-filter: blur(26px) saturate(2) brightness(1.06);
   backdrop-filter: blur(26px) saturate(2) brightness(1.06);
+}
+
+.barScrolled::before {
   box-shadow:
     inset 0 1px 0 0 color-mix(in srgb, #fff 78%, transparent),
     inset 2px 2px 1px 0 rgb(255 255 255 / 0.5),
-    inset -1px -1px 1px 1px rgb(255 255 255 / 0.34),
-    0 18px 40px -30px var(--ss-ink);
+    inset -1px -1px 1px 1px rgb(255 255 255 / 0.34);
+}
+
+/* Over the sunrise the bar is cut from the same cobalt as the sky: a light
+   cobalt tint instead of paper, and no bright bottom rim, so it reads as a
+   fuller edge of the hero rather than a white strip laid over it. It is
+   placed after `barScrolled` so the hero keeps this tint once the reader has
+   scrolled a few pixels. */
+.barHero::after {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, #4a5fe0 10%, transparent) 0%,
+    color-mix(in srgb, #4358da 8%, transparent) 100%
+  );
+  /* The hero's own bands are the tint; a high saturation pushed the bar to a
+     brighter blue than the sky behind it. */
+  -webkit-backdrop-filter: blur(22px) saturate(1.05) brightness(1);
+  backdrop-filter: blur(22px) saturate(1.05) brightness(1);
+}
+
+.barHero::before {
+  background:
+    radial-gradient(
+      130% 180% at 8% -60%,
+      color-mix(in srgb, #fff 20%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      90% 150% at 92% 170%,
+      color-mix(in srgb, var(--ss-butter) 12%, transparent),
+      transparent 72%
+    );
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.2);
+}
+
+/* Cobalt glass needs paper type: the ink chrome would sink into the field. */
+.barHero .brand,
+.barHero .brandWord,
+.barHero .navLink,
+.barHero .navLink[aria-current='page'],
+.barHero .navLink[aria-current='location'] {
+  color: var(--ss-paper-hi);
+}
+
+.barHero .brandRole {
+  color: color-mix(in srgb, var(--ss-paper-hi) 72%, var(--ss-cobalt));
+}
+
+.barHero .navLink:hover {
+  background: color-mix(in srgb, var(--ss-paper-hi) 12%, transparent);
+  color: var(--ss-paper-hi);
+}
+
+/* The fallbacks below have to come after `barHero`, or its tint would win. */
+@supports not (backdrop-filter: blur(1px)) {
+  .barHero::after {
+    background: var(--ss-cobalt);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .barHero::after {
+    background: var(--ss-cobalt);
+  }
 }
 
 .inner {

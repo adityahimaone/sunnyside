@@ -1,0 +1,212 @@
+From deaa5d3969eb75f1eecbe076e237c82a886c0934 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 28 Oct 2026 12:00:56 +0000
+Subject: [PATCH] feat(brand-system): lean mode, Symbools fallback and craft
+ gate; v2.5
+
+The v2.3 scorer only checked negative bans, so a plain <rect> passed.
+
+- scripts/score-mark.py: check_geometric_craft rejects marks with no <path>,
+  under 8 path commands, or a flat silhouette (no curve, evenodd cut or second
+  subpath). Primary FAILs; a flat compact is a WARN so the existing Cove and
+  Vitrine compacts still pass.
+- references/lean-and-symbools.md: opt-in lean budget, 5+1 colour law,
+  Symbools/Kuwayama chapter map, Archetype 1 (scored), lean audit table.
+  Archetypes 2-4 listed as undrawn; the source note gave no geometry.
+- SKILL.md: v2.5 note, version bump, reference entry.
+---
+ skills/sunnyside-brand-system/SKILL.md        |  8 +-
+ .../references/lean-and-symbools.md           | 89 +++++++++++++++++++
+ .../scripts/score-mark.py                     | 33 +++++++
+ 3 files changed, 129 insertions(+), 1 deletion(-)
+ create mode 100644 skills/sunnyside-brand-system/references/lean-and-symbools.md
+
+diff --git a/skills/sunnyside-brand-system/SKILL.md b/skills/sunnyside-brand-system/SKILL.md
+index 4741673..e189149 100644
+--- a/skills/sunnyside-brand-system/SKILL.md
++++ b/skills/sunnyside-brand-system/SKILL.md
+@@ -4,7 +4,7 @@ description: Design and ship a brand kit or design system from a brief — strat
+ metadata:
+   author: adityahimaone
+   source: https://github.com/adityahimaone/sunnyside
+-  version: '2.3'
++  version: '2.5'
+ ---
+ 
+ # Sunnyside brand system
+@@ -17,6 +17,11 @@ exports. Sunnyside and Vitrine are evidence, not templates.
+ 
+ **v2.3:** refactors the engine around the **v2.3 hard gate** (zero-circle / fill-only / 2–4 primitives) and five allowed families: architectural monogram, offset planes, louvers, ribbon, horizon. Fuses [adityahimaone.space/design-system](https://adityahimaone.space/design-system) (warm editorial minimalism, architectural grid, solid fills), [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (anti-slop, subject-derived metaphors, no repetitive tropes) and [MengTo/Skills company-logos](https://github.com/MengTo/Skills) (64×64, fill-only, monochrome-first).
+ 
++**v2.5:** adds an opt-in **lean mode** (5 sections, 28 tokens, one winning SVG,
++4 controls), a **Symbools/Kuwayama fallback** archetype for marks that come out
++as stiff block letters, and a **craft gate** in `scripts/score-mark.py`
++(`check_geometric_craft`). Read `references/lean-and-symbools.md`.
++
+ **v2.4:** adds the Case 01 **mark system**. The v2.3 gate becomes the
+ **constructed track**; a new **drawn track** covers warm, editorial and
+ object-led brands. Both tracks ship a primary + compact + glyph, a **drawn or
+@@ -514,6 +519,7 @@ and runs the QA gate.
+ - `brief.md` — brief and review gates.
+ - `craft-bar.md` — the Case 01 mark system: two tracks, drawn gate, wordmark, cast, four-movement composition, anti-slop.
+ - `logo-system.md` — concepts, grid, family, favicon.
++- `lean-and-symbools.md` — opt-in lean budget, 5+1 colour law, Symbools fallback archetype, craft gate.
+ - `logo-brainstorm.md` — v2.3 hard gate, five families, scoring, why marks come out ugly.
+ - `board-and-images.md` — board, render pipeline, image QA.
+ - `image-direction.md` — prompts and provenance.
+diff --git a/skills/sunnyside-brand-system/references/lean-and-symbools.md b/skills/sunnyside-brand-system/references/lean-and-symbools.md
+new file mode 100644
+index 0000000..e6b53a0
+--- /dev/null
++++ b/skills/sunnyside-brand-system/references/lean-and-symbools.md
+@@ -0,0 +1,89 @@
++# Lean mode and the Symbools fallback
++
++An opt-in, token-cheap way to run the skill, plus a fallback for marks the model
++cannot draw from scratch. Use it when the ask is "a quick identity" or a first
++pass; the full kit (board, cast, story) stays the default for a finished brand.
++
++## 1. Lean budget (strict, when lean mode is requested)
++
++- **Sections (5 max):** `01 Thesis & Hot Takes`, `02 Material & Colour`,
++  `03 The Mark`, `04 Type & Controls`, `05 Honest Audit`.
++- **CSS tokens (28 max):** flat semantic `--sys-*` variables. No
++  primitive → semantic → component trees unless asked.
++- **SVG:** write code for the one winning mark only (`mark.svg`,
++  `mark-compact.svg`, `lockup.svg`). Rejected directions get one sentence.
++- **Controls (4 max):** input, primary action, toggle/pill, surface card.
++
++## 2. Three hot takes (opens every lean case)
++
++1. **Material thesis:** what physical or optical material governs the surface.
++2. **Anti-slop enemy:** the cliché that gets the PR rejected.
++3. **Unbreakable rule:** one measurable constraint (e.g. body copy ≥ 15:1 on a
++   solid plate; the mark reads in one colour at 16×16).
++
++## 3. The 5 + 1 colour law
++
++`--sys-ground` (canvas), `--sys-plate` (solid reading surface, ≥ 12:1 with ink),
++`--sys-ink` (type and mono mark), `--sys-muted` (metadata, ≥ 4.5:1 on plate),
++`--sys-signal` (the single accent, ≤ 10% of the viewport). No shade ramps.
++Material recipe: one class, at most 1 fill + 1 cut edge (1px) + 1 highlight or
++texture; never stack `backdrop-filter` layers.
++
++## 4. Typography
++
++Two faces, four roles. Display (`--font-display`) only for hero, H2 and
++wordmark, `font-synthesis: none`. Workhorse (`--font-sans` / `--font-mono`) for
++everything else. Scale: display `clamp(2.5rem, 5vw, 4.25rem)` / 0.96 / -0.03em;
++heading `clamp(1.5rem, 2.5vw, 2.25rem)` / 1.1; body 1rem / 1.6 / 62ch on
++`--sys-plate`; micro 0.75rem uppercase, 0.08em, tabular-nums.
++
++## 5. Symbools fallback (constructed track)
++
++Before writing Bezier coordinates, map the metaphor to a chapter of Yasaburo
++Kuwayama's *Trademarks & Symbols Vol. 2* (symbools.com). Chapter mapping as
++recorded in the source note; verify against the book before citing it publicly.
++
++| Chapters | Vocabulary |
++| --- | --- |
++| 11, 19 | stepped monoliths, portals, vaults, negative-space frames |
++| 20, 21 | cantilevered wedges, isometric facets, split prisms |
++| 22 | interlocking S-ribbons, parabolic counters, wave-cuts in sharp bounds |
++| 23, 25 | directional notches, keystone brackets, overprint joints |
++
++**Trigger:** `score-mark.py` fails a `craft:` check (no `<path>`, under 8 path
++commands, or a flat silhouette with no curve, evenodd cut or second subpath), or
++the drawing reads as a block letter. Adapt an archetype instead of redrawing.
++
++### Archetype 1: carved vault / negative-space monogram (Ch. 19 / 22)
++
++For spatial, glass, shelter or editorial brands. 64×64, fill-only, passes the
++v2.3 gate and the craft gate (checked in this repo's scorer).
++
++```xml
++<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
++  <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8 8H44L56 20V24H34C25.163 24 18 31.163 18 40H8V8ZM8 46H56V56H20L8 46Z"/>
++  <path fill="var(--sys-signal, #7DD3FC)" d="M26 36H56V42H26C24.343 42 23 40.657 23 39C23 37.343 24.343 36 26 36Z"/>
++</svg>
++```
++
++### Archetypes 2 to 4: not yet drawn
++
++The source note names them (interlocking shear / split prism, Ch. 21, for dev
++tools; keystone aperture / framing brackets, Ch. 19, for studios and print;
++stepped horizon / optical rhythm, Ch. 22, for audio, data and signal brands) but
++supplied no geometry. Draw and score them before listing them as verified.
++
++## 6. Craft gate in `score-mark.py`
++
++`check_geometric_craft` rejects marks that pass the negative bans but are stiff:
++no `<path>`; fewer than 8 path commands; or no curve, `evenodd` counter-form or
++second subpath. Primary: FAIL. Compact: a flat silhouette is a WARN, because the
++compact is deliberately one plain path with gaps ≥ 4 units.
++
++## 7. Lean audit table (ends every lean case)
++
++| Gate | Target |
++| --- | --- |
++| SVG | zero `<circle>`, zero stroke, ≤ 3 paths, gaps ≥ 4 units, 16px pass, archetype cited if used |
++| Contrast | `--sys-ink` on `--sys-plate` ≥ 12:1; `--sys-muted` on plate ≥ 4.5:1 (print measured values) |
++| Known gaps | one bullet naming any unshipped asset or CSS approximation |
+diff --git a/skills/sunnyside-brand-system/scripts/score-mark.py b/skills/sunnyside-brand-system/scripts/score-mark.py
+index 6b7aa05..f11fbbe 100644
+--- a/skills/sunnyside-brand-system/scripts/score-mark.py
++++ b/skills/sunnyside-brand-system/scripts/score-mark.py
+@@ -13,6 +13,8 @@ Checks (FAIL stops the mark, WARN needs a written reason, NOTE is information):
+   FAIL  v2.3: circles, fill+stroke, more than 4 primitives
+   FAIL  compact has a stroke thinner than 2.4 units or a dot under 4 units wide
+         (on the 64 grid that is 0.6px / 1px at 16px)
++  FAIL  craft: no <path>, under 8 path commands, or a flat silhouette with no
++        curve, evenodd counter-form or second subpath (stiff block letter)
+   FAIL  glyph silhouette at 32px covers < 10% or > 88% of the box
+   FAIL  compact mark has no contrast at 16px (luminance spread < 0.10)
+   WARN  detached speck: a component under 15% of the median component area
+@@ -75,6 +77,28 @@ def mirror_similarity(img):
+     return (h_same / tot if tot else 0), (v_same / tot if tot else 0)
+ 
+ 
++def check_geometric_craft(svg_content):
++    """Anti-blockiness gate: the negative bans above would pass a plain <rect>.
++    Rejects marks with no path, a trivial command count, or a flat silhouette.
++    A failure points at references/lean-and-symbools.md (fallback archetypes)."""
++    errors = []
++    paths = re.findall(r'<path[^>]*\sd=[\"\']([^\"\']+)[\"\']', svg_content)
++    if not paths:
++        return ['craft: no <path> found; use a compound <path>, not <rect>/<polygon>']
++    d = ' '.join(paths)
++    commands = re.findall(r'[MLHVCSQTAZmlhvcsqtaz]', d)
++    if len(commands) < 8:
++        errors.append(f'craft: path too simple ({len(commands)} commands); use figure-ground '
++                      'cuts, chamfers or curves (Symbools fallback archetype)')
++    has_curves = bool(re.search(r'[CSQTAcsqta]', d))
++    subpaths = len(re.findall(r'[Mm]', d))
++    has_evenodd = 'fill-rule="evenodd"' in svg_content
++    if not (has_curves or has_evenodd or subpaths >= 2):
++        errors.append('craft: flat silhouette with no counter-form or curve; add an evenodd '
++                      'cut or a Bezier, or fall back to a Symbools archetype')
++    return errors
++
++
+ def score(folder):
+     fails, warns, notes = [], [], []
+     mark, compact, glyph = folder / 'mark.svg', folder / 'mark-compact.svg', folder / 'glyph.svg'
+@@ -93,6 +117,15 @@ def score(folder):
+     if shapes > 4:
+         fails.append(f'v2.3: {shapes} primitives in the primary (max 2–4); simplify the idea')
+ 
++    for label, src in (('primary', msrc), ('compact', csrc)):
++        for e in check_geometric_craft(src):
++            # A compact is one deliberately plain path (gaps >= 4 units at 16px), so
++            # a flat silhouette there is a WARN; the primary must carry the craft.
++            if label == 'compact' and 'flat silhouette' in e:
++                warns.append(f'{e} [{label}]')
++            else:
++                fails.append(f'{e} [{label}]')
++
+     strokes = [float(v) for v in re.findall(r'stroke-width="([\d.]+)"', csrc) if float(v) > 0]
+     if strokes and min(strokes) < 2.4:
+         fails.append(f'compact stroke {min(strokes)} < 2.4 units; it dies at 16px')
+-- 
+2.43.0
+

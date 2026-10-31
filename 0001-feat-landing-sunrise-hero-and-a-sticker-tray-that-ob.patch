@@ -1,0 +1,3372 @@
+From d42790d7658141bc6bb1e249721b95fe261f067f Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 31 Oct 2026 03:44:59 +0000
+Subject: [PATCH] feat(landing): sunrise hero and a sticker tray that obeys
+ gravity
+
+The hero is now a full-bleed cobalt sky with a die-cut sun rising from
+behind the paper the rest of the page is printed on. The About section
+gets a release-liner tray the stickers drop into under real gravity.
+
+Hero
+- studio/hero/: a paper-cut scene built from real CSS depth. Flat cobalt
+  bands, a ring of rays, a far hill, the sun as six ink cut-outs under its
+  painted face (so it shows an edge when it tilts), clouds, four stickers
+  and the paper ground. No WebGL, no images, no new dependencies.
+- use-hero-scene: one rAF loop for pointer parallax and scroll, running
+  only while the hero is on screen. Touch gets scroll only.
+- The title takes a stepped ink edge, the primary action turns butter, and
+  the entrance waits for the Sticker Boot to lift.
+- Nothing loops forever: the sun rises, three rings leave it, sparkles
+  twinkle and stickers drift a few times, then the hero is still.
+
+Gravity
+- studio/gravity/physics.ts: a small rigid-circle world (spin, contact
+  friction, walls, floor, sleep), pure and unit-tested.
+- pit-runtime.ts: releases the stickers when the tray scrolls into view,
+  lets you pick one up and fling it, shake the tray, and sleeps at rest.
+- sticker-pit.tsx: the tray, two new round stamps, and a real "Shake the
+  tray" button. Reduced motion shows each sticker in its own outline.
+- The hero's stickers fall into the tray and leave dashed outlines.
+
+Cleanup
+- The journey now flies only the sun and the heart; the hero-to-About
+  flyers, their docks and the old hero-art scroll block are removed along
+  with the dead hero CSS.
+- docs/HERO_SUNRISE_GRAVITY.md records the directions weighed.
+
+Tests: 7 new physics tests; the journey runtime test now asserts the
+sun and heart are the only flyers.
+---
+ docs/HERO_SUNRISE_GRAVITY.md                  |  61 +++
+ features/landing-page/studio/about.tsx        |  13 +-
+ .../landing-page/studio/gravity/physics.ts    | 240 ++++++++++
+ .../landing-page/studio/gravity/pit-config.ts |  44 ++
+ .../studio/gravity/pit-runtime.ts             | 257 +++++++++++
+ .../landing-page/studio/gravity/stamps.tsx    |  63 +++
+ .../studio/gravity/sticker-pit.module.css     | 151 ++++++
+ .../studio/gravity/sticker-pit.tsx            | 123 +++++
+ features/landing-page/studio/hero.tsx         | 259 -----------
+ .../studio/hero/hero-scene.module.css         | 370 +++++++++++++++
+ .../landing-page/studio/hero/hero-scene.tsx   | 272 +++++++++++
+ features/landing-page/studio/hero/hero.tsx    | 135 ++++++
+ features/landing-page/studio/hero/index.ts    |   1 +
+ .../studio/hero/use-hero-scene.ts             | 150 ++++++
+ .../studio/journey/journey-config.ts          |  82 +---
+ .../studio/journey/journey-runtime.ts         |  20 +-
+ .../studio/journey/sticker-journey.tsx        |  10 +-
+ .../landing-page/studio/studio.module.css     | 434 ++++--------------
+ .../landing-page/studio/use-landing-motion.ts |  61 +--
+ tests/sticker-gravity-physics.test.ts         | 103 +++++
+ tests/sticker-journey-runtime.test.tsx        |  35 +-
+ 21 files changed, 2076 insertions(+), 808 deletions(-)
+ create mode 100644 docs/HERO_SUNRISE_GRAVITY.md
+ create mode 100644 features/landing-page/studio/gravity/physics.ts
+ create mode 100644 features/landing-page/studio/gravity/pit-config.ts
+ create mode 100644 features/landing-page/studio/gravity/pit-runtime.ts
+ create mode 100644 features/landing-page/studio/gravity/stamps.tsx
+ create mode 100644 features/landing-page/studio/gravity/sticker-pit.module.css
+ create mode 100644 features/landing-page/studio/gravity/sticker-pit.tsx
+ delete mode 100644 features/landing-page/studio/hero.tsx
+ create mode 100644 features/landing-page/studio/hero/hero-scene.module.css
+ create mode 100644 features/landing-page/studio/hero/hero-scene.tsx
+ create mode 100644 features/landing-page/studio/hero/hero.tsx
+ create mode 100644 features/landing-page/studio/hero/index.ts
+ create mode 100644 features/landing-page/studio/hero/use-hero-scene.ts
+ create mode 100644 tests/sticker-gravity-physics.test.ts
+
+diff --git a/docs/HERO_SUNRISE_GRAVITY.md b/docs/HERO_SUNRISE_GRAVITY.md
+new file mode 100644
+index 0000000..34283d2
+--- /dev/null
++++ b/docs/HERO_SUNRISE_GRAVITY.md
+@@ -0,0 +1,61 @@
++# Hero "Sunrise" and the About sticker tray
++
++The brief: an immersive, stunning, animated (ideally 3D) hero that stays
++lightweight, then stickers that obey gravity when the page reaches About.
++
++## Directions weighed
++
++| #   | Direction                                                                                                     | Why it lost or won                                                                                                                                                                             |
++| --- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
++| 1   | **Real 3D sun in WebGL** (`three` is already a dependency): an extruded sun, toon-lit, with orbiting stickers | Most literal "3D", but it ships a renderer for one object, adds a canvas the page then has to keep alive, and the system draws every mark flat. Rejected on weight.                            |
++| 2   | **Sticker-sheet peel**: the hero is a sheet of stickers that peels away on scroll                             | Strong story, but it is the old hero's paper-card idea again, and a peel needs a lot of bespoke geometry for one moment. Kept only as an echo: the hero stickers leave dashed outlines behind. |
++| 3   | **Paper-theatre diorama**: cardboard planes in real CSS 3D, tilting with the pointer                          | Fits the brand (die-cut, hard shadows), costs no dependency, and the depth is genuine. **Chosen as the base.**                                                                                 |
++| 4   | **Orbit / planetarium** of stickers around a central sun                                                      | Perpetual motion by design, which `design.md` rules out, and it fights the copy for space.                                                                                                     |
++| 5   | **Sunrise over the paper**: the sun rises from behind the paper the rest of the site is printed on            | Gives the hero a place in the page (sky over paper ground) and a reason for the cobalt field. **Chosen as the composition**, on top of 3.                                                      |
++
++For gravity: matter-js was weighed and dropped. The stickers are close to
++round, so a ~200 line circle world with spin, friction and sleep covers
++stacking, rolling, walls and being flung, with no dependency.
++
++## What shipped
++
++- `studio/hero/` is the scene: a flat-banded cobalt sky, a ring of rays, a far
++  hill, the sun (six ink cut-outs under the painted face, so it shows an edge
++  when it tilts), clouds, four stickers and the paper ground. Wrappers move with
++  the individual `translate` / `rotate` / `scale` properties; the elements
++  inside run the entrance with `transform`, so the two never fight.
++- `use-hero-scene.ts` is one rAF loop for pointer parallax and scroll, running
++  only while the hero is on screen. Touch gets scroll only.
++- `studio/gravity/` is the tray: `physics.ts` (pure, tested), `pit-runtime.ts`
++  (release on view, drag and fling, shake, resize, sleep), `sticker-pit.tsx`.
++- The hero's four stickers fall into the tray and leave dashed outlines. The
++  journey now flies only the sun and the heart.
++
++## Weight and motion
++
++- No new dependencies, no WebGL, no images. The runtime is ~11 KB unminified.
++- Nothing loops forever. After the entrance (sun rise, three pulse rings, a few
++  sparkle twinkles, four slow sticker drifts) the hero is still, and pointer
++  parallax is the only thing that moves it. Early builds looped the rings,
++  twinkle and bob; with them running, an idle hero cost a frame budget in a
++  software renderer, and `design.md` asks for no perpetual decoration.
++- The sticker drop-shadow is a filter on the drawing, not on the element that
++  moves, so it is rasterised once instead of every frame.
++- The tray simulates only while on screen and something is moving; at rest it
++  costs nothing.
++
++## Accessibility
++
++- The scene and the stickers are `aria-hidden`; the tray's one control, "Shake
++  the tray", is a real button.
++- Reduced motion builds no loops: the hero is the finished picture, and the
++  tray shows each sticker sitting in its own outline.
++- Only the stickers capture touch (`touch-action: none`), so the tray never
++  traps scrolling.
++
++## Known limits
++
++- The tray is wide and shallow, so seven flat discs settle as a row, not a
++  heap. A bowl-shaped floor would heap them; it was left out as a bigger change.
++- Checked in headless Chrome under software rendering at small viewports. Not
++  yet profiled on real devices.
+diff --git a/features/landing-page/studio/about.tsx b/features/landing-page/studio/about.tsx
+index 1abd5ef..8e27aca 100644
+--- a/features/landing-page/studio/about.tsx
++++ b/features/landing-page/studio/about.tsx
+@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
+ import { Squiggle } from './doodles'
+ import { Reveal } from './reveal'
+ import { Tilt } from './tilt'
++import { StickerPit } from './gravity/sticker-pit'
+ import { SectionHead, SectionNext } from './section-head'
+ import { ABOUT_FACTS, PRINCIPLES } from './studio-data'
+ import styles from './studio.module.css'
+@@ -35,6 +36,8 @@ export function About() {
+           intro="Four years of product work, one habit: decide in the browser, then leave enough structure that the next person can disagree with me."
+         />
+ 
++        <StickerPit />
++
+         <div className={styles.aboutGrid}>
+           <div>
+             <Reveal>
+@@ -72,18 +75,8 @@ export function About() {
+           </div>
+ 
+           <div className={styles.aboutSide}>
+-            <span
+-              className={styles.journeyDock}
+-              data-journey-dock="about-flower"
+-              aria-hidden
+-            />
+             <Reveal delay={0.06} y={32}>
+               <div className={styles.photoStage} data-about-photo>
+-                <span
+-                  className={styles.photoBoltDock}
+-                  data-journey-dock="about-bolt"
+-                  aria-hidden
+-                />
+                 <Tilt className={styles.photoTilt} max={3.5} lift={4}>
+                   <div className={styles.photoCard} data-journey="photo">
+                     <span
+diff --git a/features/landing-page/studio/gravity/physics.ts b/features/landing-page/studio/gravity/physics.ts
+new file mode 100644
+index 0000000..be3c29a
+--- /dev/null
++++ b/features/landing-page/studio/gravity/physics.ts
+@@ -0,0 +1,240 @@
++/**
++ * A deliberately small rigid-circle world for the About sticker tray.
++ *
++ * Stickers are die-cut and close to round, so each one is a circle with a
++ * spin. That is enough for stacking, rolling, bouncing off the tray walls and
++ * being flung by hand, in about two hundred lines and no dependency. The
++ * world is plain data stepped by `stepWorld`, so it runs (and is tested)
++ * without a DOM.
++ *
++ * Units are CSS px and seconds. +y is down. There is no ceiling: stickers
++ * start above the tray and fall in.
++ */
++
++export type Body = {
++  id: string
++  x: number
++  y: number
++  vx: number
++  vy: number
++  /** Collision radius. */
++  r: number
++  /** Heavier bodies shove lighter ones. */
++  mass: number
++  /** Rotation in radians, and angular velocity in rad/s. */
++  a: number
++  w: number
++  /** Seconds spent nearly still; a body this settled stops being simulated. */
++  calm: number
++  /** Held by the pointer: driven toward `target`, ignores gravity. */
++  held: boolean
++  tx: number
++  ty: number
++}
++
++export type World = {
++  width: number
++  height: number
++  gravity: number
++  bounce: number
++  bodies: Body[]
++  /** True while anything can still move. The render loop sleeps when false. */
++  awake: boolean
++  /** Fixed-step remainder. */
++  carry: number
++}
++
++export const STEP = 1 / 120
++const MAX_STEPS = 6
++const AIR = 0.12
++const FLOOR_FRICTION = 0.9
++const SLEEP_SPEED = 10
++const SLEEP_SPIN = 0.35
++const SLEEP_AFTER = 0.6
++const MAX_SPEED = 3200
++
++export function createBody(
++  init: Pick<Body, 'id' | 'x' | 'y' | 'r'> & Partial<Body>,
++): Body {
++  return {
++    vx: 0,
++    vy: 0,
++    mass: init.r * init.r * 0.01,
++    a: 0,
++    w: 0,
++    calm: 0,
++    held: false,
++    tx: init.x,
++    ty: init.y,
++    ...init,
++  }
++}
++
++export function createWorld(
++  width: number,
++  height: number,
++  bodies: Body[] = [],
++): World {
++  return {
++    width,
++    height,
++    gravity: 2600,
++    bounce: 0.42,
++    bodies,
++    awake: bodies.length > 0,
++    carry: 0,
++  }
++}
++
++export function wake(world: World) {
++  world.awake = true
++  for (const body of world.bodies) body.calm = 0
++}
++
++const clamp = (v: number, lo: number, hi: number) =>
++  Math.min(hi, Math.max(lo, v))
++
++function collideBounds(world: World, body: Body) {
++  const { width, height, bounce } = world
++  if (body.x < body.r) {
++    body.x = body.r
++    if (body.vx < 0) body.vx *= -bounce
++  } else if (body.x > width - body.r) {
++    body.x = width - body.r
++    if (body.vx > 0) body.vx *= -bounce
++  }
++  const floor = height - body.r
++  if (body.y > floor) {
++    body.y = floor
++    if (body.vy > 0) body.vy = body.vy > 140 ? -body.vy * bounce * 0.7 : 0
++    // Rolling: friction nudges spin toward the speed it is travelling at.
++    body.vx *= FLOOR_FRICTION ** (STEP * 60)
++    body.w += (body.vx / body.r - body.w) * 0.25
++  }
++}
++
++function collidePair(world: World, p: Body, q: Body) {
++  const dx = q.x - p.x
++  const dy = q.y - p.y
++  const min = p.r + q.r
++  const d2 = dx * dx + dy * dy
++  if (d2 >= min * min) return
++  const d = Math.sqrt(d2) || 0.0001
++  const nx = d2 === 0 ? 0 : dx / d
++  const ny = d2 === 0 ? -1 : dy / d
++  const overlap = min - d
++
++  const pInv = p.held ? 0 : 1 / p.mass
++  const qInv = q.held ? 0 : 1 / q.mass
++  const total = pInv + qInv
++  if (total === 0) return
++
++  // Push apart in proportion to how easily each one moves.
++  p.x -= nx * overlap * (pInv / total)
++  p.y -= ny * overlap * (pInv / total)
++  q.x += nx * overlap * (qInv / total)
++  q.y += ny * overlap * (qInv / total)
++
++  const rvx = q.vx - p.vx
++  const rvy = q.vy - p.vy
++  const along = rvx * nx + rvy * ny
++  if (along > 0) return
++  // Paper on paper does not bounce much: soak up most of the impact so a
++  // dropped handful lands as a heap rather than skittering apart.
++  const j = (-(1 + world.bounce * 0.35) * along) / total
++  p.vx -= j * nx * pInv
++  p.vy -= j * ny * pInv
++  q.vx += j * nx * qInv
++  q.vy += j * ny * qInv
++
++  // Grip: friction along the contact tangent, capped at a share of the normal
++  // impulse. This is what lets circles rest on each other instead of sliding
++  // off, and it turns glancing hits into spin.
++  const tx = -ny
++  const ty = nx
++  const slip = rvx * tx + rvy * ty
++  const grip = Math.max(-0.55 * j, Math.min(0.55 * j, -slip / total))
++  p.vx -= grip * tx * pInv
++  p.vy -= grip * ty * pInv
++  q.vx += grip * tx * qInv
++  q.vy += grip * ty * qInv
++  p.w -= (grip * pInv) / p.r
++  q.w -= (grip * qInv) / q.r
++}
++
++function substep(world: World, dt: number) {
++  const { bodies } = world
++  for (const body of bodies) {
++    if (body.held) {
++      // A spring to the pointer: stiff enough to feel held, loose enough to swing.
++      body.vx = clamp((body.tx - body.x) * 28, -MAX_SPEED, MAX_SPEED)
++      body.vy = clamp((body.ty - body.y) * 28, -MAX_SPEED, MAX_SPEED)
++      body.w *= 0.96
++    } else {
++      body.vy += world.gravity * dt
++      const drag = 1 - AIR * dt
++      body.vx *= drag
++      body.vy *= drag
++      body.w *= 1 - 0.4 * dt
++    }
++    body.x += body.vx * dt
++    body.y += body.vy * dt
++    body.a += body.w * dt
++  }
++
++  // Two relaxation passes keep small piles from sinking into each other.
++  for (let pass = 0; pass < 2; pass += 1) {
++    for (let i = 0; i < bodies.length; i += 1) {
++      for (let k = i + 1; k < bodies.length; k += 1) {
++        collidePair(world, bodies[i], bodies[k])
++      }
++    }
++    for (const body of bodies) collideBounds(world, body)
++  }
++}
++
++/** Advance by `dt` seconds of real time using fixed internal steps. */
++export function stepWorld(world: World, dt: number) {
++  if (!world.awake) return
++  world.carry += Math.min(dt, STEP * MAX_STEPS)
++  while (world.carry >= STEP) {
++    substep(world, STEP)
++    world.carry -= STEP
++  }
++
++  let moving = false
++  for (const body of world.bodies) {
++    const calm =
++      !body.held &&
++      Math.hypot(body.vx, body.vy) < SLEEP_SPEED &&
++      Math.abs(body.w) < SLEEP_SPIN
++    body.calm = calm ? body.calm + dt : 0
++    if (body.calm < SLEEP_AFTER) moving = true
++  }
++  if (!moving) {
++    world.awake = false
++    for (const body of world.bodies) {
++      body.vx = body.vy = body.w = 0
++    }
++  }
++}
++
++/** Give everything a kick, for the "shake the tray" button. */
++export function shake(world: World, strength = 1) {
++  for (const body of world.bodies) {
++    if (body.held) continue
++    body.vy -= (900 + body.r * 8) * strength * (0.7 + ((body.r * 7) % 5) / 10)
++    body.vx += (((body.r * 13) % 11) - 5) * 90 * strength
++    body.w += (((body.r * 17) % 7) - 3) * 1.4 * strength
++  }
++  wake(world)
++}
++
++/** The body under a point, front-most (last drawn) first. */
++export function pick(world: World, x: number, y: number, slop = 6) {
++  for (let i = world.bodies.length - 1; i >= 0; i -= 1) {
++    const body = world.bodies[i]
++    if (Math.hypot(x - body.x, y - body.y) <= body.r + slop) return body
++  }
++  return null
++}
+diff --git a/features/landing-page/studio/gravity/pit-config.ts b/features/landing-page/studio/gravity/pit-config.ts
+new file mode 100644
+index 0000000..13947de
+--- /dev/null
++++ b/features/landing-page/studio/gravity/pit-config.ts
+@@ -0,0 +1,44 @@
++/**
++ * The cast of the About tray.
++ *
++ * `size` is the sticker's drawn diameter at the full-width tray; the runtime
++ * scales it down on narrow screens. `rest` is where the sticker sits in the
++ * tray's ghost outline: it is the whole layout for reduced motion, and the
++ * silhouettes printed on the liner, so the live pile reads as having been
++ * peeled from exactly these places. `x` is a share of the tray width and `y`
++ * is the share of the tray height the sticker's centre sits at.
++ */
++export type PitKind =
++  | 'smiley'
++  | 'burst'
++  | 'daisy'
++  | 'bolt'
++  | 'atom'
++  | 'stampCity'
++  | 'stampRole'
++
++export type PitSpec = {
++  id: PitKind
++  size: number
++  /** Hero sticker this one peels off, by `data-hero-sticker`. */
++  from?: 'smiley' | 'burst' | 'daisy' | 'bolt'
++  rest: { x: number; y: number; rot: number }
++}
++
++export const PIT_STICKERS: readonly PitSpec[] = [
++  { id: 'stampRole', size: 104, rest: { x: 0.1, y: 0.58, rot: -8 } },
++  {
++    id: 'smiley',
++    size: 80,
++    from: 'smiley',
++    rest: { x: 0.24, y: 0.62, rot: 9 },
++  },
++  { id: 'daisy', size: 84, from: 'daisy', rest: { x: 0.37, y: 0.6, rot: -6 } },
++  { id: 'burst', size: 88, from: 'burst', rest: { x: 0.5, y: 0.6, rot: 12 } },
++  { id: 'atom', size: 78, rest: { x: 0.63, y: 0.64, rot: -10 } },
++  { id: 'bolt', size: 70, from: 'bolt', rest: { x: 0.75, y: 0.62, rot: 14 } },
++  { id: 'stampCity', size: 100, rest: { x: 0.89, y: 0.58, rot: 6 } },
++] as const
++
++/** Share of a sticker's drawn size that collides. Rims and rays are soft. */
++export const HIT = 0.44
+diff --git a/features/landing-page/studio/gravity/pit-runtime.ts b/features/landing-page/studio/gravity/pit-runtime.ts
+new file mode 100644
+index 0000000..93a60f3
+--- /dev/null
++++ b/features/landing-page/studio/gravity/pit-runtime.ts
+@@ -0,0 +1,257 @@
++import { HIT, PIT_STICKERS, type PitSpec } from './pit-config'
++import {
++  createBody,
++  createWorld,
++  pick,
++  shake,
++  stepWorld,
++  wake,
++  type Body,
++  type World,
++} from './physics'
++
++type Item = {
++  spec: PitSpec
++  el: HTMLElement
++  body: Body
++  size: number
++}
++
++export type PitRuntime = { stop: () => void; shake: () => void }
++
++/** A stable shuffle, so the drop order is the same on every visit. */
++const ORDER = [3, 0, 5, 2, 6, 1, 4]
++
++/**
++ * Drives the sticker tray.
++ *
++ * Nothing is simulated until the tray is on screen; then the stickers are
++ * released above it and fall in under gravity. The loop runs only while
++ * something is moving, sleeps once the pile settles, and wakes again when
++ * someone picks a sticker up, shakes the tray, or resizes the page. Every
++ * frame is arithmetic written straight to `transform`: no React state.
++ *
++ * Plain function rather than a hook so mutating DOM it owns is not mistaken
++ * for mutating render data.
++ */
++export function runPit(pit: HTMLElement): PitRuntime {
++  const world: World = createWorld(pit.clientWidth, pit.clientHeight)
++  const items: Item[] = []
++  for (const el of Array.from(
++    pit.querySelectorAll<HTMLElement>('[data-pit-sticker]'),
++  )) {
++    const spec = PIT_STICKERS.find((s) => s.id === el.dataset.pitSticker)
++    if (!spec) continue
++    const body = createBody({ id: spec.id, x: 0, y: -999, r: 24 })
++    world.bodies.push(body)
++    items.push({ spec, el, body, size: 0 })
++  }
++
++  let released = false
++  let visible = false
++  let frame = 0
++  let last = 0
++  let disposed = false
++  let z = 10
++  let drag: {
++    item: Item
++    pointerId: number
++    dx: number
++    dy: number
++    trail: Array<{ x: number; y: number; t: number }>
++  } | null = null
++
++  const fit = () => {
++    world.width = pit.clientWidth
++    world.height = pit.clientHeight
++    const scale = Math.min(1, Math.max(0.58, world.width / 880))
++    for (const item of items) {
++      item.size = item.spec.size * scale
++      item.body.r = item.size * HIT
++      item.body.mass = item.body.r * item.body.r * 0.01
++      item.el.style.width = `${item.size}px`
++      item.el.style.height = `${item.size}px`
++    }
++  }
++
++  const draw = () => {
++    for (const { el, body, size } of items) {
++      el.style.transform = `translate3d(${body.x - size / 2}px, ${body.y - size / 2}px, 0) rotate(${body.a}rad)`
++    }
++  }
++
++  const tick = (now: number) => {
++    frame = 0
++    if (disposed) return
++    const dt = Math.min(0.05, (now - last) / 1000 || 1 / 60)
++    last = now
++    stepWorld(world, dt)
++    draw()
++    if (world.awake && visible && !document.hidden) schedule()
++  }
++
++  function schedule() {
++    if (frame || disposed) return
++    last = performance.now()
++    frame = requestAnimationFrame(tick)
++  }
++
++  /** The hero's own copies stay behind as outlines: they have been peeled. */
++  const peelHero = (on: boolean) => {
++    document
++      .querySelectorAll<HTMLElement>('[data-hero-sticker]')
++      .forEach((el) => {
++        if (on) el.dataset.peeled = 'true'
++        else delete el.dataset.peeled
++      })
++  }
++
++  const release = () => {
++    if (released || disposed) return
++    released = true
++    fit()
++    const lift = Math.max(window.innerHeight * 0.5, 260)
++    items.forEach((item, i) => {
++      const slot = ORDER[i % ORDER.length]
++      const b = item.body
++      // Dropped over the middle so they land on each other and heap up,
++      // rather than spreading into a single row on the floor.
++      b.x = world.width * (0.32 + (0.36 * (slot + 0.5)) / items.length)
++      b.y = -lift - i * 84
++      b.vx = (slot - 3) * 34
++      b.vy = 120
++      b.w = ((i % 2 ? 1 : -1) * (1.2 + (slot % 3))) / 1.6
++      b.a = ((slot * 53) % 360) * (Math.PI / 180)
++      item.el.style.visibility = 'visible'
++    })
++    wake(world)
++    draw()
++    peelHero(true)
++    schedule()
++  }
++
++  // ── Pointer: pick up, carry, fling ────────────────────────────────────────
++  const local = (event: PointerEvent) => {
++    const rect = pit.getBoundingClientRect()
++    return { x: event.clientX - rect.left, y: event.clientY - rect.top }
++  }
++
++  const onDown = (event: PointerEvent) => {
++    if (!released || event.button > 0) return
++    const p = local(event)
++    const body = pick(world, p.x, p.y)
++    const item = body && items.find((it) => it.body === body)
++    if (!item || !body) return
++    event.preventDefault()
++    item.el.setPointerCapture(event.pointerId)
++    item.el.style.zIndex = String(++z)
++    item.el.dataset.held = 'true'
++    body.held = true
++    body.tx = p.x
++    body.ty = p.y
++    drag = {
++      item,
++      pointerId: event.pointerId,
++      dx: body.x - p.x,
++      dy: body.y - p.y,
++      trail: [{ ...p, t: event.timeStamp }],
++    }
++    wake(world)
++    schedule()
++  }
++
++  const onMove = (event: PointerEvent) => {
++    if (!drag || event.pointerId !== drag.pointerId) return
++    const p = local(event)
++    const { body } = drag.item
++    const r = body.r
++    body.tx = Math.min(world.width - r, Math.max(r, p.x + drag.dx))
++    body.ty = Math.min(world.height - r, Math.max(-world.height, p.y + drag.dy))
++    drag.trail.push({ ...p, t: event.timeStamp })
++    if (drag.trail.length > 6) drag.trail.shift()
++  }
++
++  const onUp = (event: PointerEvent) => {
++    if (!drag || event.pointerId !== drag.pointerId) return
++    const { item, trail } = drag
++    const { body } = item
++    drag = null
++    delete item.el.dataset.held
++    body.held = false
++    const first = trail[0]
++    const lastPoint = trail[trail.length - 1]
++    const span = Math.max(16, lastPoint.t - first.t)
++    const cap = 2400
++    body.vx = Math.max(
++      -cap,
++      Math.min(cap, ((lastPoint.x - first.x) / span) * 1000),
++    )
++    body.vy = Math.max(
++      -cap,
++      Math.min(cap, ((lastPoint.y - first.y) / span) * 1000),
++    )
++    body.w += body.vx / 260
++    wake(world)
++    schedule()
++  }
++
++  pit.addEventListener('pointerdown', onDown)
++  pit.addEventListener('pointermove', onMove)
++  pit.addEventListener('pointerup', onUp)
++  pit.addEventListener('pointercancel', onUp)
++
++  // ── Visibility and size ──────────────────────────────────────────────────
++  const observer =
++    typeof IntersectionObserver === 'undefined'
++      ? null
++      : new IntersectionObserver(
++          (entries) => {
++            visible = entries.some((e) => e.isIntersecting)
++            if (visible && !released) release()
++            else if (visible && world.awake) schedule()
++          },
++          { threshold: 0.3 },
++        )
++  observer?.observe(pit)
++  if (!observer) {
++    visible = true
++    release()
++  }
++
++  const resize = new ResizeObserver(() => {
++    if (!released) return
++    fit()
++    for (const { body } of items) {
++      body.x = Math.min(world.width - body.r, Math.max(body.r, body.x))
++      body.y = Math.min(world.height - body.r, body.y)
++    }
++    wake(world)
++    schedule()
++  })
++  resize.observe(pit)
++
++  const onVisibility = () => {
++    if (!document.hidden && world.awake) schedule()
++  }
++  document.addEventListener('visibilitychange', onVisibility)
++
++  return {
++    shake: () => {
++      if (!released) return
++      shake(world)
++      schedule()
++    },
++    stop: () => {
++      disposed = true
++      if (frame) cancelAnimationFrame(frame)
++      observer?.disconnect()
++      resize.disconnect()
++      pit.removeEventListener('pointerdown', onDown)
++      pit.removeEventListener('pointermove', onMove)
++      pit.removeEventListener('pointerup', onUp)
++      pit.removeEventListener('pointercancel', onUp)
++      document.removeEventListener('visibilitychange', onVisibility)
++      peelHero(false)
++    },
++  }
++}
+diff --git a/features/landing-page/studio/gravity/stamps.tsx b/features/landing-page/studio/gravity/stamps.tsx
+new file mode 100644
+index 0000000..b42b94e
+--- /dev/null
++++ b/features/landing-page/studio/gravity/stamps.tsx
+@@ -0,0 +1,63 @@
++import { useId } from 'react'
++
++type StampProps = {
++  /** Printed round the rim; repeated to fill the circle. */
++  text: string
++  fill: string
++  className?: string
++}
++
++/**
++ * A round die-cut stamp with its words set on a circle. Drawn like the other
++ * stickers: a paper rim, an ink face, one flat colour, no gradient.
++ */
++export function Stamp({ text, fill, className }: StampProps) {
++  const id = useId()
++  const ring = `${text} · ${text} · `
++  return (
++    <svg
++      viewBox="0 0 120 120"
++      className={className}
++      aria-hidden
++      focusable="false"
++    >
++      <defs>
++        <path id={id} d="M60 60m-37 0a37 37 0 1 1 74 0a37 37 0 1 1 -74 0" />
++      </defs>
++      <circle
++        cx="60"
++        cy="60"
++        r="52"
++        fill={fill}
++        stroke="var(--paper-hi, #fffaf1)"
++        strokeWidth="8"
++      />
++      <circle
++        cx="60"
++        cy="60"
++        r="46"
++        fill="none"
++        stroke="var(--ink, #191a2e)"
++        strokeWidth="1.6"
++        strokeDasharray="2 4"
++        strokeLinecap="round"
++      />
++      <text
++        fontFamily="var(--font-geist-mono), ui-monospace, monospace"
++        fontWeight="700"
++        fontSize="10.4"
++        letterSpacing="2.4"
++        fill="var(--ink, #191a2e)"
++      >
++        <textPath href={`#${id}`} startOffset="0" textLength="226">
++          {ring.toUpperCase()}
++        </textPath>
++      </text>
++      <path
++        transform="translate(45 45) scale(0.75)"
++        d="M20 2C21 14 26 19 38 20C26 21 21 26 20 38C19 26 14 21 2 20C14 19 19 14 20 2Z"
++        fill="var(--ink, #191a2e)"
++      />
++    </svg>
++  )
++}
+diff --git a/features/landing-page/studio/gravity/sticker-pit.module.css b/features/landing-page/studio/gravity/sticker-pit.module.css
+new file mode 100644
+index 0000000..6b254c4
+--- /dev/null
++++ b/features/landing-page/studio/gravity/sticker-pit.module.css
+@@ -0,0 +1,151 @@
++/* The About tray: a release liner the stickers fall onto. Paper Lo ground, ink
++   edge, one hard offset shadow, like every other Sunnyside surface. */
++
++.wrap {
++  position: relative;
++  z-index: 2;
++  margin-top: clamp(2.2rem, 5vw, 3.4rem);
++}
++
++.pit {
++  position: relative;
++  height: clamp(13.5rem, 25vw, 17.5rem);
++  border: 2px solid var(--ink);
++  border-radius: 20px;
++  background-color: var(--paper-lo);
++  background-image: radial-gradient(rgb(25 26 46 / 0.16) 1px, transparent 1px);
++  background-size: 16px 16px;
++  box-shadow: 7px 8px 0 rgb(25 26 46 / 0.14);
++  /* Stickers fall in from above the tray, so it must not clip them. */
++  overflow: visible;
++}
++
++.label {
++  position: absolute;
++  top: 0.8rem;
++  left: 1rem;
++  font-family: var(--font-geist-mono), monospace;
++  font-size: 9px;
++  letter-spacing: 0.16em;
++  text-transform: uppercase;
++  color: var(--muted);
++}
++
++.ghosts i {
++  position: absolute;
++  left: var(--x);
++  top: var(--y);
++  width: calc(var(--size) * 0.92);
++  aspect-ratio: 1;
++  border: 1.5px dashed rgb(25 26 46 / 0.28);
++  border-radius: 50%;
++  transform: translate(-50%, -50%) rotate(var(--rot));
++}
++
++/* At rest and in reduced motion: the sticker sits in its own outline. The
++   runtime switches the tray to `data-live`, which hands position to the
++   physics and hides each sticker until it is released. */
++.sticker {
++  position: absolute;
++  z-index: 3;
++  left: var(--x);
++  top: var(--y);
++  width: var(--size);
++  height: var(--size);
++  transform: translate(-50%, -50%) rotate(var(--rot));
++  /* The same low sun lights every sticker: a warm rim upper-left and a hard
++     ink shadow lower-right, both offsets rather than blurs. */
++  filter: drop-shadow(3px 5px 0 rgb(25 26 46 / 0.2))
++    drop-shadow(-1.5px -1.5px 0 rgb(255 210 63 / 0.34));
++  user-select: none;
++  -webkit-user-select: none;
++}
++
++.sticker svg {
++  display: block;
++  width: 100%;
++  height: 100%;
++}
++
++.pit[data-live='true'] .sticker {
++  left: 0;
++  top: 0;
++  visibility: hidden;
++  cursor: grab;
++  /* Only the stickers take the touch, so the rest of the tray still scrolls. */
++  touch-action: none;
++  will-change: transform;
++}
++
++.pit[data-live='true'] .sticker[data-held='true'] {
++  cursor: grabbing;
++  filter: drop-shadow(6px 10px 0 rgb(25 26 46 / 0.22))
++    drop-shadow(-1.5px -1.5px 0 rgb(255 210 63 / 0.34));
++}
++
++.atomDisc {
++  display: grid;
++  place-items: center;
++  width: 100%;
++  height: 100%;
++  border: 8px solid var(--paper-hi);
++  border-radius: 50%;
++  background: var(--cobalt);
++  color: var(--paper-hi);
++}
++
++.atomDisc svg {
++  width: 82%;
++  height: 82%;
++}
++
++.foot {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 1rem;
++  margin-top: 1.1rem;
++}
++
++.hint {
++  font-family: var(--font-geist-mono), monospace;
++  font-size: 10px;
++  letter-spacing: 0.16em;
++  text-transform: uppercase;
++  color: var(--muted);
++}
++
++.shake {
++  min-height: 2.5rem;
++  padding: 0.5rem 1rem;
++  border: 1.5px solid var(--ink);
++  border-radius: 999px;
++  background: var(--butter);
++  color: var(--ink);
++  font-size: 0.82rem;
++  font-weight: 600;
++  box-shadow: 3px 3px 0 var(--ink);
++  transition:
++    transform 0.18s var(--ease-out),
++    box-shadow 0.18s var(--ease-out);
++}
++
++.shake:hover {
++  transform: translate(-1px, -1px);
++  box-shadow: 4px 4px 0 var(--ink);
++}
++
++.shake:active {
++  transform: translate(2px, 2px);
++  box-shadow: 1px 1px 0 var(--ink);
++}
++
++@media (max-width: 640px) {
++  .hint {
++    display: none;
++  }
++
++  .foot {
++    justify-content: flex-end;
++  }
++}
+diff --git a/features/landing-page/studio/gravity/sticker-pit.tsx b/features/landing-page/studio/gravity/sticker-pit.tsx
+new file mode 100644
+index 0000000..bfa3209
+--- /dev/null
++++ b/features/landing-page/studio/gravity/sticker-pit.tsx
+@@ -0,0 +1,123 @@
++'use client'
++
++import { useReducedMotion } from 'motion/react'
++import { useEffect, useRef, type CSSProperties } from 'react'
++
++import { Bolt, Burst, Daisy, Atom, Smiley } from '../doodles'
++import { PIT_STICKERS, type PitSpec } from './pit-config'
++import { runPit, type PitRuntime } from './pit-runtime'
++import { Stamp } from './stamps'
++import styles from './sticker-pit.module.css'
++
++function Art({ spec }: { spec: PitSpec }) {
++  switch (spec.id) {
++    case 'smiley':
++      return <Smiley />
++    case 'burst':
++      return <Burst text="wow!" />
++    case 'daisy':
++      return <Daisy />
++    case 'bolt':
++      return <Bolt />
++    case 'atom':
++      return (
++        <span className={styles.atomDisc}>
++          <Atom />
++        </span>
++      )
++    case 'stampCity':
++      return <Stamp text="Jakarta · GMT+7" fill="var(--mint)" />
++    case 'stampRole':
++      return <Stamp text="Design engineer" fill="var(--butter)" />
++  }
++}
++
++/**
++ * The release liner: the backing sheet the stickers were peeled from.
++ *
++ * When it scrolls into view the stickers drop in from above under gravity,
++ * pile up, and can be picked up and flung. The faint dashed outlines are the
++ * shapes they left behind, and they are also where the stickers sit when
++ * motion is reduced, so the tray is complete without the physics.
++ *
++ * Everything inside is decoration. The one control, "Shake the tray", is a
++ * real button so the toy has a keyboard and screen-reader path, and the
++ * stickers themselves are hidden from assistive tech.
++ */
++export function StickerPit() {
++  const reduced = useReducedMotion() ?? false
++  const pitRef = useRef<HTMLDivElement>(null)
++  const runtime = useRef<PitRuntime | null>(null)
++
++  useEffect(() => {
++    if (reduced || !pitRef.current) return
++    const pit = pitRef.current
++    pit.dataset.live = 'true'
++    runtime.current = runPit(pit)
++    return () => {
++      runtime.current?.stop()
++      runtime.current = null
++      delete pit.dataset.live
++    }
++  }, [reduced])
++
++  return (
++    <div className={styles.wrap}>
++      <div ref={pitRef} className={styles.pit} data-gravity-pit>
++        <div className={styles.ghosts} aria-hidden>
++          {PIT_STICKERS.map((spec) => (
++            <i
++              key={spec.id}
++              style={
++                {
++                  '--x': `${spec.rest.x * 100}%`,
++                  '--y': `${spec.rest.y * 100}%`,
++                  '--size': `${spec.size}px`,
++                  '--rot': `${spec.rest.rot}deg`,
++                } as CSSProperties
++              }
++            />
++          ))}
++        </div>
++
++        <span className={styles.label} aria-hidden>
++          release liner · {PIT_STICKERS.length} stickers
++        </span>
++
++        {PIT_STICKERS.map((spec) => (
++          <div
++            key={spec.id}
++            className={styles.sticker}
++            data-pit-sticker={spec.id}
++            aria-hidden
++            style={
++              {
++                '--x': `${spec.rest.x * 100}%`,
++                '--y': `${spec.rest.y * 100}%`,
++                '--size': `${spec.size}px`,
++                '--rot': `${spec.rest.rot}deg`,
++              } as CSSProperties
++            }
++          >
++            <Art spec={spec} />
++          </div>
++        ))}
++      </div>
++
++      <div className={styles.foot}>
++        <span className={styles.hint} aria-hidden>
++          pick one up, throw it
++        </span>
++        {reduced ? null : (
++          <button
++            type="button"
++            className={styles.shake}
++            onClick={() => runtime.current?.shake()}
++          >
++            Shake the tray
++          </button>
++        )}
++      </div>
++    </div>
++  )
++}
+diff --git a/features/landing-page/studio/hero.tsx b/features/landing-page/studio/hero.tsx
+deleted file mode 100644
+index 8eac62b..0000000
+--- a/features/landing-page/studio/hero.tsx
++++ /dev/null
+@@ -1,259 +0,0 @@
+-'use client'
+-
+-import {
+-  motion,
+-  useMotionValue,
+-  useReducedMotion,
+-  useSpring,
+-  useTransform,
+-} from 'motion/react'
+-import { ArrowRight, ArrowUpRight } from 'lucide-react'
+-import { useRef } from 'react'
+-
+-import { cn } from '@/lib/utils'
+-
+-import { Bolt, Burst, Daisy, Smiley, Sun } from './doodles'
+-import { Reveal } from './reveal'
+-import { Tilt } from './tilt'
+-import { HERO_FACTS, CHAPTERS, scrollToSection } from './studio-data'
+-import styles from './studio.module.css'
+-
+-const NEXT = CHAPTERS[1]
+-
+-export function Hero() {
+-  const sectionRef = useRef<HTMLElement>(null)
+-  const artRef = useRef<HTMLDivElement>(null)
+-  const reduced = useReducedMotion() ?? false
+-
+-  const mx = useMotionValue(0)
+-  const my = useMotionValue(0)
+-  const sx = useSpring(mx, { stiffness: 90, damping: 18, mass: 0.6 })
+-  const sy = useSpring(my, { stiffness: 90, damping: 18, mass: 0.6 })
+-
+-  const smileX = useTransform(sx, [-0.5, 0.5], [-10, 10])
+-  const smileY = useTransform(sy, [-0.5, 0.5], [-8, 8])
+-  const burstX = useTransform(sx, [-0.5, 0.5], [11, -11])
+-  const burstY = useTransform(sy, [-0.5, 0.5], [7, -7])
+-  const daisyX = useTransform(sx, [-0.5, 0.5], [7, -7])
+-  const daisyY = useTransform(sy, [-0.5, 0.5], [-11, 11])
+-  const noteX = useTransform(sx, [-0.5, 0.5], [-4, 4])
+-  const noteY = useTransform(sy, [-0.5, 0.5], [3, -3])
+-
+-  const onMove = (event: React.PointerEvent<HTMLDivElement>) => {
+-    if (reduced || event.pointerType !== 'mouse') return
+-    const rect = artRef.current?.getBoundingClientRect()
+-    if (!rect) return
+-    mx.set((event.clientX - rect.left) / rect.width - 0.5)
+-    my.set((event.clientY - rect.top) / rect.height - 0.5)
+-  }
+-
+-  const reset = () => {
+-    mx.set(0)
+-    my.set(0)
+-  }
+-
+-  return (
+-    <section
+-      id="home"
+-      ref={sectionRef}
+-      className={styles.hero}
+-      aria-labelledby="hero-title"
+-    >
+-      <div className={styles.heroHalo} aria-hidden data-hero-halo />
+-      <div className={styles.heroDots} aria-hidden data-hero-dots />
+-
+-      <div className={cn(styles.shell, styles.heroGrid)}>
+-        <div>
+-          <Reveal>
+-            <span className={styles.nameTag} data-hero-name-clip>
+-              <span aria-hidden>✳</span>
+-              Aditya Himawan
+-            </span>
+-          </Reveal>
+-
+-          <Reveal delay={0.06}>
+-            <div className={cn(styles.heroEyebrow, 'mt-5')}>
+-              <span>Design engineer</span>
+-              <span aria-hidden>·</span>
+-              <span>Jakarta, GMT+7</span>
+-              <span aria-hidden>·</span>
+-              <span>open to good problems</span>
+-            </div>
+-          </Reveal>
+-
+-          <Reveal delay={0.1}>
+-            <h1 id="hero-title" className={styles.heroTitle}>
+-              Interfaces
+-              <br />
+-              with a <span className={styles.pulseWord}>pulse</span>.
+-            </h1>
+-          </Reveal>
+-
+-          <Reveal delay={0.18}>
+-            <p className={styles.heroLede}>
+-              I&apos;m Aditya, a design engineer who builds product interfaces
+-              in React and TypeScript, then sweats the{' '}
+-              <strong>motion, type and tiny moments</strong> that make them feel
+-              alive. Four years in, still convinced the details are the product.
+-            </p>
+-          </Reveal>
+-
+-          <Reveal delay={0.24}>
+-            <div className={styles.heroActions}>
+-              <button
+-                type="button"
+-                className={styles.primaryBtn}
+-                onClick={() => scrollToSection('work', reduced)}
+-              >
+-                See the work
+-                <ArrowRight size={16} aria-hidden />
+-              </button>
+-              <button
+-                type="button"
+-                className={styles.ghostLink}
+-                onClick={() => scrollToSection('contact', reduced)}
+-              >
+-                Say hello
+-                <ArrowUpRight size={15} aria-hidden />
+-              </button>
+-            </div>
+-          </Reveal>
+-
+-          <Reveal delay={0.3}>
+-            <dl className={styles.heroStats}>
+-              {HERO_FACTS.map((fact) => (
+-                <div key={fact.label} className={styles.heroStat}>
+-                  <dt className="sr-only">{fact.label}</dt>
+-                  <dd>
+-                    <b>{fact.value}</b>
+-                    <span aria-hidden>{fact.label}</span>
+-                  </dd>
+-                </div>
+-              ))}
+-            </dl>
+-          </Reveal>
+-
+-          <Reveal delay={0.36}>
+-            <button
+-              type="button"
+-              className={styles.heroScroll}
+-              onClick={() => scrollToSection(NEXT.id, reduced)}
+-            >
+-              <span>
+-                {NEXT.number} · {NEXT.label}
+-              </span>
+-              <svg
+-                viewBox="0 0 24 34"
+-                aria-hidden
+-                fill="none"
+-                stroke="currentColor"
+-                strokeWidth="1.7"
+-                strokeLinecap="round"
+-              >
+-                <path d="M12 2v25" />
+-                <path d="M5 21l7 8 7-8" />
+-              </svg>
+-            </button>
+-          </Reveal>
+-        </div>
+-
+-        <Reveal delay={0.14} y={34}>
+-          <div
+-            ref={artRef}
+-            className={styles.heroArt}
+-            data-hero-art
+-            onPointerMove={onMove}
+-            onPointerLeave={reset}
+-          >
+-            <Tilt
+-              className={styles.artStage}
+-              data-journey="hero-art"
+-              max={3.5}
+-              perspective={1000}
+-              lift={2}
+-            >
+-              <motion.div
+-                style={{ x: noteX, y: noteY, rotate: -5 }}
+-                className={cn(styles.sheetNote, 'z-[7]')}
+-              >
+-                <b>currently</b>
+-                Building a habit tracker that refuses to guilt you. Drawing
+-                stickers in code when it gets quiet.
+-              </motion.div>
+-
+-              <div className={styles.sheet}>
+-                <span className={cn(styles.tape, styles.tapeTop)} aria-hidden />
+-                <div className={styles.sheetTop}>
+-                  <span>Side A / design engineer</span>
+-                  <span className={styles.sheetBadge}>
+-                    <span
+-                      className="size-1.5 rounded-full bg-[var(--ink)]"
+-                      aria-hidden
+-                    />
+-                    open for work
+-                  </span>
+-                </div>
+-
+-                <Sun className={styles.sheetSun} title="A smiling sun" />
+-
+-                <p className={styles.sheetLine}>
+-                  Good interfaces are a small act of hospitality.
+-                </p>
+-
+-                <div className={styles.sheetFoot}>
+-                  <span>Jakarta · GMT+7</span>
+-                  <span className={styles.sheetSwatches} aria-hidden>
+-                    <i style={{ background: 'var(--cobalt)' }} />
+-                    <i style={{ background: 'var(--tangerine)' }} />
+-                    <i style={{ background: 'var(--butter)' }} />
+-                    <i style={{ background: 'var(--pink)' }} />
+-                  </span>
+-                  <span>Est. 2021</span>
+-                </div>
+-              </div>
+-
+-              <motion.div
+-                data-journey-from="smiley"
+-                style={{ x: smileX, y: smileY }}
+-                className={cn(styles.heroSticker, styles.heroStickerSmiley)}
+-              >
+-                <span className={styles.heroFloat}>
+-                  <Smiley className="w-full" title="Smiley sticker" />
+-                </span>
+-              </motion.div>
+-
+-              <motion.div
+-                data-journey-from="burst"
+-                style={{ x: burstX, y: burstY }}
+-                className={cn(styles.heroSticker, styles.heroStickerBurst)}
+-              >
+-                <span className={styles.heroFloat}>
+-                  <Burst text="hi!" className="w-full" title="Hi sticker" />
+-                </span>
+-              </motion.div>
+-
+-              <motion.div
+-                data-journey-from="daisy"
+-                style={{ x: daisyX, y: daisyY }}
+-                className={cn(styles.heroSticker, styles.heroStickerDaisy)}
+-              >
+-                <span className={styles.heroFloat}>
+-                  <Daisy className="w-full" title="Daisy sticker" />
+-                </span>
+-              </motion.div>
+-
+-              <div
+-                data-journey-from="bolt"
+-                className={cn(styles.heroSticker, styles.heroStickerBolt)}
+-              >
+-                <span className={styles.heroFloat}>
+-                  <Bolt className="w-full" title="Lightning bolt sticker" />
+-                </span>
+-              </div>
+-            </Tilt>
+-          </div>
+-        </Reveal>
+-      </div>
+-    </section>
+-  )
+-}
+diff --git a/features/landing-page/studio/hero/hero-scene.module.css b/features/landing-page/studio/hero/hero-scene.module.css
+new file mode 100644
+index 0000000..467dd8c
+--- /dev/null
++++ b/features/landing-page/studio/hero/hero-scene.module.css
+@@ -0,0 +1,370 @@
++/* The hero's paper-cut sunrise. Geometry comes from three variables the hero
++   declares (--sun-size, --sun-x, --ground); everything here is positioned from
++   the sun's centre, so one number rescales the whole picture. */
++
++@property --gap {
++  syntax: '<length>';
++  inherits: true;
++  initial-value: 7px;
++}
++
++.scene {
++  position: absolute;
++  inset: 0;
++  z-index: 0;
++  overflow: hidden;
++  pointer-events: none;
++}
++
++/* Flat bands, hard-edged like a screen print. The lightest sit behind the sun. */
++.sky {
++  position: absolute;
++  inset: 0;
++  background: radial-gradient(
++    circle at var(--sun-x) calc(100% - var(--ground) - var(--sun-size) * 0.28),
++    #5266e4 0 calc(var(--sun-size) * 0.5),
++    #4a5fe0 calc(var(--sun-size) * 0.5) calc(var(--sun-size) * 0.68),
++    #4358da calc(var(--sun-size) * 0.68) calc(var(--sun-size) * 0.92),
++    var(--cobalt) calc(var(--sun-size) * 0.92)
++  );
++}
++
++/* A zero-size anchor on the sun's centre. */
++.anchor {
++  position: absolute;
++  left: var(--sun-x);
++  top: calc(100% - var(--ground) - var(--sun-size) * 0.28);
++  width: 0;
++  height: 0;
++}
++
++.rays {
++  position: absolute;
++  --ray: min(150vmax, 1900px);
++  left: calc(var(--ray) / -2);
++  top: calc(var(--ray) / -2);
++  width: var(--ray);
++  height: var(--ray);
++  background: repeating-conic-gradient(
++    from 0deg,
++    rgb(255 250 241 / 0.085) 0 6deg,
++    transparent 6deg 12deg
++  );
++  -webkit-mask-image: radial-gradient(circle, #000 0 20%, transparent 56%);
++  mask-image: radial-gradient(circle, #000 0 20%, transparent 56%);
++  will-change: rotate;
++}
++
++.dots {
++  position: absolute;
++  left: calc(var(--sun-size) * -0.92);
++  top: calc(var(--sun-size) * -0.92);
++  width: calc(var(--sun-size) * 1.84);
++  height: calc(var(--sun-size) * 1.84);
++  background: radial-gradient(rgb(255 250 241 / 0.55) 1.1px, transparent 1.5px)
++    0 0 / 16px 16px;
++  -webkit-mask-image: radial-gradient(
++    circle,
++    transparent 36%,
++    #000 38% 52%,
++    transparent 56%
++  );
++  mask-image: radial-gradient(
++    circle,
++    transparent 36%,
++    #000 38% 52%,
++    transparent 56%
++  );
++  opacity: 0.5;
++}
++
++.farHill {
++  position: absolute;
++  inset-inline: -3%;
++  bottom: calc(var(--ground) - 8px);
++  height: calc(var(--ground) * 1.9);
++}
++
++.ground {
++  position: absolute;
++  inset-inline: -3%;
++  bottom: -2px;
++  height: calc(var(--ground) + 2px);
++}
++
++.farHill svg,
++.ground svg {
++  display: block;
++  width: 100%;
++  height: 100%;
++}
++
++/* ── The sun ───────────────────────────────────────────────────────────── */
++
++.sunLift {
++  position: absolute;
++  left: calc(var(--sun-size) / -2);
++  top: calc(var(--sun-size) / -2);
++  width: var(--sun-size);
++  height: var(--sun-size);
++  will-change: translate, scale;
++}
++
++/* Fills the lift wrapper; only the lift is offset from the anchor. */
++.sunRise {
++  position: absolute;
++  inset: 0;
++  animation: sun-rise 1.5s cubic-bezier(0.34, 1.32, 0.5, 1) 0.15s both;
++}
++
++.sunBody {
++  position: absolute;
++  inset: 0;
++  transform-style: preserve-3d;
++  transform: perspective(1100px);
++  animation: slices-open 1.1s var(--ease-out) 0.7s both;
++  will-change: transform;
++}
++
++.layer {
++  position: absolute;
++  inset: 0;
++}
++
++.layer svg {
++  display: block;
++  width: 100%;
++  height: 100%;
++}
++
++.slice {
++  color: var(--ink);
++  transform: translateZ(calc(var(--i) * var(--gap) * -1));
++}
++
++/* The shadow the cut-out throws on the sky, set well behind it. */
++.plate {
++  color: rgb(25 26 46 / 0.3);
++  transform: translate3d(
++    calc(var(--sun-size) * 0.035),
++    calc(var(--sun-size) * 0.05),
++    calc(var(--gap) * -8)
++  );
++}
++
++.face {
++  transform: translateZ(0);
++}
++
++/* Rings leave the sun on the beat of the headline's word, three times. */
++.pulse {
++  position: absolute;
++  inset: 8%;
++  border: 2.5px solid var(--butter);
++  border-radius: 50%;
++  opacity: 0;
++  transform: translateZ(calc(var(--gap) * -9));
++  /* Three rings leave the sun after it has risen, then it is still. */
++  animation: pulse-out 2.6s cubic-bezier(0.2, 0.7, 0.3, 1) 2.1s 1 both;
++}
++
++.pulse:nth-of-type(2) {
++  animation-delay: 2.7s;
++}
++
++.pulse:nth-of-type(3) {
++  animation-delay: 3.3s;
++}
++
++/* The drift also holds while the hero is off screen. */
++[data-scene-idle='true'] .float {
++  animation-play-state: paused;
++}
++
++/* ── Items placed from the sun's centre ───────────────────────────────── */
++
++.item {
++  position: absolute;
++  left: calc(var(--sun-size) * var(--ox));
++  top: calc(var(--sun-size) * var(--oy) * var(--ky, 1));
++  will-change: translate;
++}
++
++.cloud {
++  width: calc(clamp(6.2rem, 12vw, 10.5rem) * var(--s, 1));
++  margin: -0.4em 0 0 -3em;
++  filter: drop-shadow(5px 6px 0 rgb(25 26 46 / 0.28));
++  animation: drift-in 1.4s var(--ease-out) var(--delay, 0.6s) both;
++}
++
++.cloud svg {
++  display: block;
++  width: 100%;
++}
++
++.sticker {
++  position: relative;
++  width: clamp(3.1rem, 6.2vw, 5.4rem);
++  margin: -1.9rem 0 0 -1.9rem;
++  animation: sticker-pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 1s)
++    both;
++}
++
++.float {
++  display: block;
++  /* A few slow drifts after the entrance, then it rests: nothing here runs
++     forever, so an idle hero costs no frames. */
++  animation: bob 6s ease-in-out 2.4s 4 alternate both;
++}
++
++.sticker[data-slot='smiley'] .float {
++  animation-delay: -1.6s;
++}
++.sticker[data-slot='burst'] .float {
++  animation-delay: -2.4s;
++}
++.sticker[data-slot='daisy'] .float {
++  animation-delay: -3.2s;
++}
++.sticker[data-slot='bolt'] .float {
++  animation-delay: -4.1s;
++}
++
++/* The filter lives on the drawing, not on the element that moves: a filter on
++   a parent of something animating is re-run every frame, on the drawing it is
++   rasterised once. Warm rim upper-left, hard ink shadow lower-right. */
++.float svg {
++  display: block;
++  width: 100%;
++  filter: drop-shadow(3px 5px 0 rgb(25 26 46 / 0.3))
++    drop-shadow(-1.5px -1.5px 0 rgb(255 210 63 / 0.3));
++}
++
++/* Once the stickers have fallen into the About tray, the hero keeps the
++   outline they left, so scrolling back up reads as a peeled sheet. */
++.sticker::before {
++  content: '';
++  position: absolute;
++  inset: 8%;
++  border: 2px dashed rgb(255 250 241 / 0.7);
++  border-radius: 50%;
++  opacity: 0;
++  transition: opacity 0.4s ease 0.2s;
++}
++
++.sticker[data-peeled='true']::before {
++  opacity: 1;
++}
++
++.sticker[data-peeled='true'] .float {
++  opacity: 0;
++  animation: none;
++}
++
++.sparkle {
++  display: block;
++  width: 0.95rem;
++  margin: -0.5rem 0 0 -0.5rem;
++  color: var(--butter);
++  animation: twinkle 3s ease-in-out 2.4s 3;
++}
++
++.sparkPaper {
++  color: var(--paper-hi);
++  width: 0.7rem;
++}
++
++.item:nth-of-type(2n) .sparkle {
++  animation-delay: 3.1s;
++}
++
++/* ── Keyframes ────────────────────────────────────────────────────────── */
++
++@keyframes sun-rise {
++  from {
++    transform: translateY(58%) scale(0.88);
++  }
++}
++
++@keyframes slices-open {
++  from {
++    --gap: 0px;
++  }
++}
++
++@keyframes pulse-out {
++  0% {
++    transform: translateZ(calc(var(--gap) * -9)) scale(0.8);
++    opacity: 0.6;
++  }
++  70%,
++  100% {
++    transform: translateZ(calc(var(--gap) * -9)) scale(1.95);
++    opacity: 0;
++  }
++}
++
++@keyframes drift-in {
++  from {
++    transform: translateX(-46px);
++    opacity: 0;
++  }
++}
++
++@keyframes sticker-pop {
++  from {
++    transform: scale(0.2) rotate(-24deg);
++    opacity: 0;
++  }
++}
++
++@keyframes bob {
++  to {
++    transform: translateY(-9px) rotate(2.5deg);
++  }
++}
++
++@keyframes twinkle {
++  0%,
++  100% {
++    transform: scale(0.75) rotate(0deg);
++    opacity: 0.55;
++  }
++  50% {
++    transform: scale(1.15) rotate(18deg);
++    opacity: 1;
++  }
++}
++
++/* The Sticker Boot covers the page on a first visit. Hold every entrance until
++   it has peeled away, or it would play unseen underneath. */
++:global(html[data-boot='on']) .scene *,
++:global(html[data-boot='on']) .scene *::before {
++  animation-play-state: paused;
++}
++
++/* Below the desktop split the sun sits under the copy, so the cluster around
++   it is squashed toward the sun rather than reaching up into the text. */
++@media (max-width: 1023px) {
++  .scene {
++    --ky: 0.42;
++  }
++}
++
++@media (max-width: 639px) {
++  .sparkle,
++  .sparkPaper {
++    display: none;
++  }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .scene *,
++  .scene *::before {
++    animation: none !important;
++  }
++
++  .sunBody {
++    transform: none;
++  }
++}
+diff --git a/features/landing-page/studio/hero/hero-scene.tsx b/features/landing-page/studio/hero/hero-scene.tsx
+new file mode 100644
+index 0000000..6265875
+--- /dev/null
++++ b/features/landing-page/studio/hero/hero-scene.tsx
+@@ -0,0 +1,272 @@
++import type { CSSProperties } from 'react'
++
++import { Bolt, Burst, Daisy, Smiley, Sparkle, Sun } from '../doodles'
++import styles from './hero-scene.module.css'
++
++/** Layers of cardboard behind the sun's face. Six reads as a thick cut-out. */
++const SLICES = 6
++
++const RAYS = Array.from({ length: 12 }, (_, i) => {
++  const a = (i / 12) * Math.PI * 2
++  const r = (n: number) => Math.round(n * 1e6) / 1e6
++  return {
++    x1: r(100 + Math.cos(a) * 74),
++    y1: r(100 + Math.sin(a) * 74),
++    x2: r(100 + Math.cos(a) * 93),
++    y2: r(100 + Math.sin(a) * 93),
++  }
++})
++
++/** The sun's outline as one flat colour: the edge of a die-cut. */
++function Silhouette() {
++  return (
++    <svg viewBox="0 0 200 200" aria-hidden focusable="false">
++      <g stroke="currentColor" strokeWidth="9.5" strokeLinecap="round">
++        {RAYS.map((ray) => (
++          <line key={`${ray.x1}-${ray.y1}`} {...ray} />
++        ))}
++      </g>
++      <circle cx="100" cy="100" r="68.5" fill="currentColor" />
++    </svg>
++  )
++}
++
++function Cloud() {
++  return (
++    <svg viewBox="0 0 136 80" aria-hidden focusable="false">
++      <path
++        d="M22 71C8 71 6 54 20 49C18 33 36 26 47 34C52 14 79 10 89 27C104 17 124 29 118 45C132 48 131 71 113 71Z"
++        fill="var(--paper-hi)"
++        stroke="var(--ink)"
++        strokeWidth="3"
++        strokeLinejoin="round"
++      />
++      <path
++        d="M34 58C40 56 44 56 50 58"
++        fill="none"
++        stroke="var(--ink)"
++        strokeWidth="2.4"
++        strokeLinecap="round"
++        opacity=".3"
++      />
++    </svg>
++  )
++}
++
++/** Wavy edges that stretch to any width; strokes stay a constant 3px. */
++function Hills() {
++  return (
++    <svg
++      viewBox="0 0 1440 200"
++      preserveAspectRatio="none"
++      aria-hidden
++      focusable="false"
++    >
++      <path
++        d="M0 70C140 18 300 24 470 62C640 100 760 14 960 30C1160 46 1300 96 1440 52V200H0Z"
++        fill="var(--cobalt-ink)"
++        stroke="var(--ink)"
++        strokeWidth="3"
++        vectorEffect="non-scaling-stroke"
++      />
++    </svg>
++  )
++}
++
++function Ground() {
++  return (
++    <svg
++      viewBox="0 0 1440 200"
++      preserveAspectRatio="none"
++      aria-hidden
++      focusable="false"
++    >
++      <path
++        d="M0 34C160 6 300 46 520 24C720 4 900 40 1100 20C1260 4 1360 26 1440 18V200H0Z"
++        fill="var(--paper)"
++        stroke="var(--ink)"
++        strokeWidth="3"
++        vectorEffect="non-scaling-stroke"
++      />
++    </svg>
++  )
++}
++
++type Placed = {
++  /** Offset from the sun's centre, in sun-diameters. */
++  x: number
++  y: number
++}
++
++const at = ({ x, y }: Placed, extra?: CSSProperties) =>
++  ({ '--ox': x, '--oy': y, ...extra }) as CSSProperties
++
++const CLOUDS = [
++  { place: { x: -0.58, y: -0.82 }, depth: 0.7, scale: 0.8, delay: 0.55 },
++  { place: { x: 0.34, y: -0.98 }, depth: 1.1, scale: 1, delay: 0.7 },
++  { place: { x: 0.74, y: -0.5 }, depth: 1.5, scale: 0.7, delay: 0.85 },
++] as const
++
++const SPARKLES = [
++  { place: { x: -0.2, y: -0.62 }, tone: 'butter', delay: 0 },
++  { place: { x: 0.62, y: -0.82 }, tone: 'paper', delay: 1.1 },
++  { place: { x: 0.78, y: 0.1 }, tone: 'butter', delay: 2.1 },
++  { place: { x: -0.74, y: -0.1 }, tone: 'paper', delay: 0.6 },
++  { place: { x: 0.12, y: -1.08 }, tone: 'paper', delay: 1.7 },
++] as const
++
++/**
++ * The hero's sky: a paper-cut sunrise built from real depth.
++ *
++ * Planes, back to front: flat cobalt bands and halftone dots, a ring of rays,
++ * a far hill, the sun (a stack of ink cut-outs under its painted face, so it
++ * has an edge when it tilts), clouds and the four stickers that sit in front,
++ * then the paper ground the sun is rising from. A parallax hook moves each
++ * `data-depth` wrapper with the pointer and the scroll. Wrappers move with the
++ * individual `translate` / `rotate` properties and the elements inside run the
++ * entrance with `transform`, so the two never fight over one property.
++ *
++ * Everything is decoration: the scene is hidden from assistive tech, and a
++ * reduced-motion visitor gets the finished picture.
++ */
++export function HeroScene() {
++  return (
++    <div className={styles.scene} aria-hidden data-hero-scene>
++      <div className={styles.sky} />
++
++      <div className={styles.anchor}>
++        <div className={styles.rays} data-rays />
++        <div className={styles.dots} />
++      </div>
++
++      <div className={styles.farHill} data-depth="0.35">
++        <Hills />
++      </div>
++
++      <div className={styles.anchor}>
++        <div className={styles.sunLift} data-sun-lift>
++          <div className={styles.sunRise}>
++            <div className={styles.sunBody} data-sun-body>
++              <i className={styles.pulse} />
++              <i className={styles.pulse} />
++              <i className={styles.pulse} />
++              <div className={`${styles.layer} ${styles.plate}`}>
++                <Silhouette />
++              </div>
++              {Array.from({ length: SLICES }, (_, i) => (
++                <div
++                  key={i}
++                  className={`${styles.layer} ${styles.slice}`}
++                  style={{ '--i': i + 1 } as CSSProperties}
++                >
++                  <Silhouette />
++                </div>
++              ))}
++              <div className={`${styles.layer} ${styles.face}`}>
++                <Sun />
++              </div>
++            </div>
++          </div>
++        </div>
++
++        {CLOUDS.map((cloud, i) => (
++          <div
++            key={i}
++            className={styles.item}
++            data-depth={cloud.depth}
++            style={at(cloud.place)}
++          >
++            <div
++              className={styles.cloud}
++              style={
++                {
++                  '--s': cloud.scale,
++                  '--delay': `${cloud.delay}s`,
++                } as CSSProperties
++              }
++            >
++              <Cloud />
++            </div>
++          </div>
++        ))}
++
++        {SPARKLES.map((spark, i) => (
++          <div
++            key={i}
++            className={styles.item}
++            data-depth="1.2"
++            style={at(spark.place)}
++          >
++            <Sparkle
++              className={`${styles.sparkle} ${spark.tone === 'paper' ? styles.sparkPaper : ''}`}
++            />
++          </div>
++        ))}
++
++        <StickerSlot
++          id="smiley"
++          place={{ x: -0.44, y: -0.68 }}
++          depth={1.9}
++          delay={1.0}
++        >
++          <Smiley />
++        </StickerSlot>
++        <StickerSlot
++          id="burst"
++          place={{ x: 0.52, y: -0.6 }}
++          depth={2.3}
++          delay={1.12}
++        >
++          <Burst text="hi!" />
++        </StickerSlot>
++        <StickerSlot
++          id="daisy"
++          place={{ x: 0.66, y: 0.06 }}
++          depth={2.0}
++          delay={1.24}
++        >
++          <Daisy />
++        </StickerSlot>
++        <StickerSlot
++          id="bolt"
++          place={{ x: -0.5, y: 0.14 }}
++          depth={2.6}
++          delay={1.36}
++        >
++          <Bolt />
++        </StickerSlot>
++      </div>
++
++      <div className={styles.ground} data-depth="1">
++        <Ground />
++      </div>
++    </div>
++  )
++}
++
++function StickerSlot({
++  id,
++  place,
++  depth,
++  delay,
++  children,
++}: {
++  id: string
++  place: Placed
++  depth: number
++  delay: number
++  children: React.ReactNode
++}) {
++  return (
++    <div className={styles.item} data-depth={depth} style={at(place)}>
++      <div
++        className={styles.sticker}
++        data-hero-sticker={id}
++        data-slot={id}
++        style={{ '--delay': `${delay}s` } as CSSProperties}
++      >
++        <span className={styles.float}>{children}</span>
++      </div>
++    </div>
++  )
++}
+diff --git a/features/landing-page/studio/hero/hero.tsx b/features/landing-page/studio/hero/hero.tsx
+new file mode 100644
+index 0000000..b7dc0aa
+--- /dev/null
++++ b/features/landing-page/studio/hero/hero.tsx
+@@ -0,0 +1,135 @@
++'use client'
++
++import { useReducedMotion } from 'motion/react'
++import { ArrowRight, ArrowUpRight } from 'lucide-react'
++import { useRef } from 'react'
++
++import { cn } from '@/lib/utils'
++
++import { Reveal } from '../reveal'
++import { CHAPTERS, HERO_FACTS, scrollToSection } from '../studio-data'
++import styles from '../studio.module.css'
++import { HeroScene } from './hero-scene'
++import { useHeroScene } from './use-hero-scene'
++
++const NEXT = CHAPTERS[1]
++
++/**
++ * Sunrise. A full-bleed cobalt sky, the page's one loud field, with a die-cut
++ * sun rising from behind the paper the rest of the site is printed on. The
++ * copy sits on the sky at the left; the scene is decoration and lives in
++ * `HeroScene`. The four stickers on the sky are the same ones that drop into
++ * the About tray further down.
++ */
++export function Hero() {
++  const sectionRef = useRef<HTMLElement>(null)
++  const reduced = useReducedMotion() ?? false
++  useHeroScene(sectionRef)
++
++  return (
++    <section
++      id="home"
++      ref={sectionRef}
++      className={styles.hero}
++      aria-labelledby="hero-title"
++    >
++      <HeroScene />
++
++      <div className={cn(styles.shell, styles.heroGrid)}>
++        <div className={styles.heroCopy} data-hero-copy>
++          <Reveal>
++            <span className={styles.nameTag}>
++              <span aria-hidden>✳</span>
++              Aditya Himawan
++            </span>
++          </Reveal>
++
++          <Reveal delay={0.06}>
++            <div className={cn(styles.heroEyebrow, 'mt-5')}>
++              <span>Design engineer</span>
++              <span aria-hidden>·</span>
++              <span>Jakarta, GMT+7</span>
++              <span aria-hidden>·</span>
++              <span>open to good problems</span>
++            </div>
++          </Reveal>
++
++          <Reveal delay={0.1}>
++            <h1 id="hero-title" className={styles.heroTitle}>
++              Interfaces
++              <br />
++              with a <span className={styles.pulseWord}>pulse</span>.
++            </h1>
++          </Reveal>
++
++          <Reveal delay={0.18}>
++            <p className={styles.heroLede}>
++              I&apos;m Aditya, a design engineer who builds product interfaces
++              in React and TypeScript, then sweats the{' '}
++              <strong>motion, type and tiny moments</strong> that make them feel
++              alive. Four years in, still convinced the details are the product.
++            </p>
++          </Reveal>
++
++          <Reveal delay={0.24}>
++            <div className={styles.heroActions}>
++              <button
++                type="button"
++                className={styles.primaryBtn}
++                onClick={() => scrollToSection('work', reduced)}
++              >
++                See the work
++                <ArrowRight size={16} aria-hidden />
++              </button>
++              <button
++                type="button"
++                className={styles.ghostLink}
++                onClick={() => scrollToSection('contact', reduced)}
++              >
++                Say hello
++                <ArrowUpRight size={15} aria-hidden />
++              </button>
++            </div>
++          </Reveal>
++
++          <Reveal delay={0.3}>
++            <dl className={styles.heroStats}>
++              {HERO_FACTS.map((fact) => (
++                <div key={fact.label} className={styles.heroStat}>
++                  <dt className="sr-only">{fact.label}</dt>
++                  <dd>
++                    <b>{fact.value}</b>
++                    <span aria-hidden>{fact.label}</span>
++                  </dd>
++                </div>
++              ))}
++            </dl>
++          </Reveal>
++
++          <Reveal delay={0.36}>
++            <button
++              type="button"
++              className={styles.heroScroll}
++              onClick={() => scrollToSection(NEXT.id, reduced)}
++            >
++              <span>
++                {NEXT.number} · {NEXT.label}
++              </span>
++              <svg
++                viewBox="0 0 24 34"
++                aria-hidden
++                fill="none"
++                stroke="currentColor"
++                strokeWidth="1.7"
++                strokeLinecap="round"
++              >
++                <path d="M12 2v25" />
++                <path d="M5 21l7 8 7-8" />
++              </svg>
++            </button>
++          </Reveal>
++        </div>
++      </div>
++    </section>
++  )
++}
+diff --git a/features/landing-page/studio/hero/index.ts b/features/landing-page/studio/hero/index.ts
+new file mode 100644
+index 0000000..0b02ce1
+--- /dev/null
++++ b/features/landing-page/studio/hero/index.ts
+@@ -0,0 +1 @@
++export { Hero } from './hero'
+diff --git a/features/landing-page/studio/hero/use-hero-scene.ts b/features/landing-page/studio/hero/use-hero-scene.ts
+new file mode 100644
+index 0000000..09c2354
+--- /dev/null
++++ b/features/landing-page/studio/hero/use-hero-scene.ts
+@@ -0,0 +1,150 @@
++'use client'
++
++import { useEffect, type RefObject } from 'react'
++
++const clamp = (v: number, lo: number, hi: number) =>
++  Math.min(hi, Math.max(lo, v))
++
++/**
++ * Pointer and scroll for the hero's sunrise.
++ *
++ * One rAF loop that runs only while the hero is on screen and something is
++ * still moving. It writes the individual `translate` / `rotate` / `scale`
++ * properties (never `transform`, which the entrance owns), so a frame is a
++ * handful of composited changes and no layout.
++ *
++ *  - The pointer is a gentle lamp: each `data-depth` layer slides against it in
++ *    proportion to its depth, and the sun's cut-out tilts toward it, which is
++ *    what makes the stacked slices show an edge.
++ *  - Scroll lifts the sun, turns its rays and lets the layers separate, so
++ *    leaving the hero feels like the sun is climbing.
++ *
++ * Touch screens have no hover, so they get the scroll half only. Reduced
++ * motion builds nothing and keeps the finished picture.
++ */
++export function useHeroScene(ref: RefObject<HTMLElement | null>) {
++  useEffect(() => {
++    const root = ref.current
++    if (!root) return
++    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
++
++    const layers = Array.from(
++      root.querySelectorAll<HTMLElement>('[data-depth]'),
++    ).map((el) => ({ el, depth: Number(el.dataset.depth) || 0 }))
++    const rays = root.querySelector<HTMLElement>('[data-rays]')
++    const sunBody = root.querySelector<HTMLElement>('[data-sun-body]')
++    const sunLift = root.querySelector<HTMLElement>('[data-sun-lift]')
++    const copy = root.querySelector<HTMLElement>('[data-hero-copy]')
++    const scene = root.querySelector<HTMLElement>('[data-hero-scene]')
++
++    let tx = 0
++    let ty = 0
++    let px = 0
++    let py = 0
++    let progress = 0
++    let height = root.offsetHeight || window.innerHeight
++    let onScreen = true
++    let frame = 0
++    let dirty = true
++    let disposed = false
++
++    const readScroll = () => {
++      progress = clamp(window.scrollY / Math.max(1, height), 0, 1)
++      dirty = true
++    }
++
++    const draw = () => {
++      frame = 0
++      if (disposed || !onScreen) return
++
++      px += (tx - px) * 0.075
++      py += (ty - py) * 0.075
++      const settled = Math.abs(tx - px) < 0.002 && Math.abs(ty - py) < 0.002
++      if (settled) {
++        px = tx
++        py = ty
++      }
++
++      for (const { el, depth } of layers) {
++        const x = -px * depth * 20
++        const y = -py * depth * 12 + (1 - depth) * progress * 110
++        el.style.translate = `${x.toFixed(2)}px ${y.toFixed(2)}px`
++      }
++      if (sunBody) {
++        sunBody.style.transform = `perspective(1100px) rotateX(${(-py * 9).toFixed(2)}deg) rotateY(${(px * 14).toFixed(2)}deg)`
++      }
++      if (sunLift) {
++        sunLift.style.translate = `0 ${(-progress * 84).toFixed(2)}px`
++        sunLift.style.scale = `${(1 + progress * 0.07).toFixed(4)}`
++      }
++      if (rays) rays.style.rotate = `${(progress * 55 + px * 5).toFixed(2)}deg`
++      if (copy) copy.style.translate = `0 ${(progress * 56).toFixed(2)}px`
++
++      dirty = false
++      if (!settled || dirty) schedule()
++    }
++
++    function schedule() {
++      if (!frame && !disposed) frame = requestAnimationFrame(draw)
++    }
++
++    const onMove = (event: PointerEvent) => {
++      if (event.pointerType !== 'mouse') return
++      const rect = root.getBoundingClientRect()
++      tx = clamp(((event.clientX - rect.left) / rect.width) * 2 - 1, -1, 1)
++      ty = clamp(((event.clientY - rect.top) / rect.height) * 2 - 1, -1, 1)
++      schedule()
++    }
++    const onLeave = () => {
++      tx = 0
++      ty = 0
++      schedule()
++    }
++    const onScroll = () => {
++      readScroll()
++      schedule()
++    }
++    const onResize = () => {
++      height = root.offsetHeight || window.innerHeight
++      onScroll()
++    }
++
++    const observer =
++      typeof IntersectionObserver === 'undefined'
++        ? null
++        : new IntersectionObserver(([entry]) => {
++            onScreen = entry.isIntersecting
++            if (scene) scene.dataset.sceneIdle = String(!onScreen)
++            if (onScreen) {
++              readScroll()
++              schedule()
++            }
++          })
++    observer?.observe(root)
++
++    root.addEventListener('pointermove', onMove)
++    root.addEventListener('pointerleave', onLeave)
++    window.addEventListener('scroll', onScroll, { passive: true })
++    window.addEventListener('resize', onResize)
++    readScroll()
++    schedule()
++
++    return () => {
++      disposed = true
++      if (frame) cancelAnimationFrame(frame)
++      observer?.disconnect()
++      root.removeEventListener('pointermove', onMove)
++      root.removeEventListener('pointerleave', onLeave)
++      window.removeEventListener('scroll', onScroll)
++      window.removeEventListener('resize', onResize)
++      for (const { el } of layers) el.style.translate = ''
++      for (const el of [sunBody, sunLift, rays, copy]) {
++        if (!el) continue
++        el.style.transform = ''
++        el.style.translate = ''
++        el.style.scale = ''
++        el.style.rotate = ''
++      }
++    }
++  }, [ref])
++}
+diff --git a/features/landing-page/studio/journey/journey-config.ts b/features/landing-page/studio/journey/journey-config.ts
+index e4f33f1..56d2ee5 100644
+--- a/features/landing-page/studio/journey/journey-config.ts
++++ b/features/landing-page/studio/journey/journey-config.ts
+@@ -3,18 +3,16 @@ import type { FlightParams } from './journey-math'
+ /**
+  * Who flies where.
+  *
++ * The hero's four stickers no longer fly: they drop into the About tray under
++ * real gravity (see `../gravity`). What still travels is the sun, from Show &
++ * tell onward, and the heart that follows it to the end of the page.
++ *
+  * A dock lives in the empty padding band at the top (or bottom) edge of a
+  * section, or on an explicit side marker beside a photo, never in the middle of
+  * copy. `x` is a share of the section's width, `oy` is px in from the chosen
+  * edge, and `tint` is the colour of the shockwave the sun throws when it lands.
+  */
+-export type StickerKind =
+-  | 'smiley'
+-  | 'burst'
+-  | 'daisy'
+-  | 'bolt'
+-  | 'sun'
+-  | 'heart'
++export type StickerKind = 'sun' | 'heart'
+ 
+ export type DockSpec = {
+   /** CSS selector of the section, or a marker element inside it. */
+@@ -64,76 +62,6 @@ export const SPARK_COLOURS = [
+ ] as const
+ 
+ export const FLYERS: readonly FlyerSpec[] = [
+-  {
+-    id: 'smiley',
+-    kind: 'smiley',
+-    from: 'smiley',
+-    mobile: true,
+-    params: { lane: -0.1, arc: 0.1, hop: 0.12, spin: 1, wobble: 7, delay: 0 },
+-    docks: [{ at: '#about', x: 0.92, oy: 44, rot: 10, size: 70 }],
+-  },
+-  {
+-    id: 'burst',
+-    kind: 'burst',
+-    text: 'wow!',
+-    from: 'burst',
+-    mobile: true,
+-    params: {
+-      lane: 0.12,
+-      arc: -0.12,
+-      hop: 0.06,
+-      spin: -2,
+-      wobble: 5,
+-      delay: 0.1,
+-    },
+-    docks: [{ at: '#about', x: 0.06, oy: 56, rot: -12, size: 74 }],
+-  },
+-  {
+-    id: 'daisy',
+-    kind: 'daisy',
+-    from: 'daisy',
+-    mobile: true,
+-    params: {
+-      lane: -0.16,
+-      arc: 0.14,
+-      hop: 0.04,
+-      spin: 1.5,
+-      wobble: 4,
+-      delay: 0.18,
+-    },
+-    docks: [
+-      {
+-        at: '[data-journey-dock="about-flower"]',
+-        x: 0.5,
+-        oy: 0,
+-        rot: 8,
+-        size: 72,
+-      },
+-    ],
+-  },
+-  {
+-    id: 'bolt',
+-    kind: 'bolt',
+-    from: 'bolt',
+-    mobile: true,
+-    params: {
+-      lane: 0.06,
+-      arc: 0.2,
+-      hop: 0.16,
+-      spin: 0,
+-      wobble: 16,
+-      delay: 0.26,
+-    },
+-    docks: [
+-      {
+-        at: '[data-journey-dock="about-bolt"]',
+-        x: 0.5,
+-        oy: 0,
+-        rot: -14,
+-        size: 60,
+-      },
+-    ],
+-  },
+   {
+     id: 'sun',
+     kind: 'sun',
+diff --git a/features/landing-page/studio/journey/journey-runtime.ts b/features/landing-page/studio/journey/journey-runtime.ts
+index a916991..5b3843e 100644
+--- a/features/landing-page/studio/journey/journey-runtime.ts
++++ b/features/landing-page/studio/journey/journey-runtime.ts
+@@ -49,11 +49,12 @@ const animate = (
+  * not mistaken for mutating render data.
+  *
+  * What it does:
+- *  - stickers peel off the hero's artwork and fly dock to dock down the page,
+- *    landing with a squash and a puff of sparks;
++ *  - stickers fly dock to dock down the page, landing with a squash and a
++ *    puff of sparks (the hero's own stickers fall into the About tray instead,
++ *    under real gravity: see `../gravity`);
+  *  - the sun throws a tinted shockwave each time it lands, which is the
+  *    transition between sections;
+- *  - the hero card lifts away, the About photo tilts as it passes, and the
++ *  - the About photo tilts as it passes, and the
+  *    marquee swings and speeds up with scroll velocity.
+  */
+ export function runJourney(layer: HTMLElement): () => void {
+@@ -90,7 +91,6 @@ export function runJourney(layer: HTMLElement): () => void {
+     ]
+   })
+ 
+-  const heroArt = root.querySelector<HTMLElement>('[data-journey="hero-art"]')
+   const photo = root.querySelector<HTMLElement>('[data-journey="photo"]')
+   const marquee = root.querySelector<HTMLElement>('[data-journey="marquee"]')
+ 
+@@ -249,13 +249,7 @@ export function runJourney(layer: HTMLElement): () => void {
+     )
+   }
+ 
+-  const scenes = (scrollY: number) => {
+-    if (heroArt) {
+-      const p = clamp01(scrollY / (vh * 0.95))
+-      heroArt.style.translate = `0 ${-p * 70}px`
+-      heroArt.style.rotate = `${-p * 7}deg`
+-      heroArt.style.scale = `${1 - p * 0.12}`
+-    }
++  const scenes = () => {
+     if (photo) {
+       const rect = photo.getBoundingClientRect()
+       const q = clamp01((vh - rect.top) / (vh + rect.height))
+@@ -335,7 +329,7 @@ export function runJourney(layer: HTMLElement): () => void {
+       item.dock = p.dock
+     }
+ 
+-    scenes(scrollY)
++    scenes()
+     // Keep ticking until velocity has decayed, or the swing would freeze mid-tilt.
+     if (Math.abs(velocity) > 6 || Math.abs(swing) > 0.02) schedule()
+   }
+@@ -372,7 +366,7 @@ export function runJourney(layer: HTMLElement): () => void {
+     window.removeEventListener('load', queueMeasure)
+     mobileQuery.removeEventListener('change', queueMeasure)
+     for (const item of items) if (item.orig) item.orig.style.visibility = ''
+-    for (const el of [heroArt, photo, marquee]) {
++    for (const el of [photo, marquee]) {
+       if (!el) continue
+       el.style.translate = ''
+       el.style.rotate = ''
+diff --git a/features/landing-page/studio/journey/sticker-journey.tsx b/features/landing-page/studio/journey/sticker-journey.tsx
+index b61564a..d21a2a0 100644
+--- a/features/landing-page/studio/journey/sticker-journey.tsx
++++ b/features/landing-page/studio/journey/sticker-journey.tsx
+@@ -3,7 +3,7 @@
+ import { useReducedMotion } from 'motion/react'
+ import { useEffect, useRef } from 'react'
+ 
+-import { Bolt, Burst, Daisy, Heart, Smiley, Sun } from '../doodles'
++import { Heart, Sun } from '../doodles'
+ import { FLYERS, type FlyerSpec } from './journey-config'
+ import { runJourney } from './journey-runtime'
+ import styles from './sticker-journey.module.css'
+@@ -12,14 +12,6 @@ const SPARKS = 10
+ 
+ function Art({ spec }: { spec: FlyerSpec }) {
+   switch (spec.kind) {
+-    case 'smiley':
+-      return <Smiley />
+-    case 'burst':
+-      return <Burst text={spec.text ?? 'hi!'} />
+-    case 'daisy':
+-      return <Daisy />
+-    case 'bolt':
+-      return <Bolt />
+     case 'sun':
+       return <Sun />
+     case 'heart':
+diff --git a/features/landing-page/studio/studio.module.css b/features/landing-page/studio/studio.module.css
+index 56a7685..6b3cb69 100644
+--- a/features/landing-page/studio/studio.module.css
++++ b/features/landing-page/studio/studio.module.css
+@@ -319,7 +319,6 @@
+   padding-top: 0.75rem;
+ }
+ 
+-
+ /* ── Chapter rail ───────────────────────────────────────────────────────── */
+ 
+ .rail {
+@@ -413,65 +412,35 @@
+ 
+ /* ── Hero ───────────────────────────────────────────────────────────────── */
+ 
++/* Sunrise: the cobalt sky is the page's one loud field. The three variables
++   below place the sun, and the paper ground it rises from, for the scene. */
+ .hero {
++  --sun-size: clamp(15rem, min(44vw, 68vh), 38rem);
++  --sun-x: 73%;
++  --ground: clamp(5rem, 13vh, 8.5rem);
++
+   position: relative;
+   display: flex;
+-  min-height: 100svh;
++  min-height: max(100svh, 40rem);
+   flex-direction: column;
+   justify-content: center;
+-  padding-block: clamp(7rem, 12vw, 10rem) clamp(3rem, 6vw, 5rem);
++  padding-block: clamp(6.5rem, 9vw, 8rem) calc(var(--ground) + 2rem);
+   isolation: isolate;
++  background: var(--cobalt);
++  color: var(--paper);
+ }
+ 
+-.heroHalo {
+-  position: absolute;
+-  z-index: -2;
+-  right: clamp(-18rem, -12vw, -6rem);
+-  top: clamp(-16rem, -10vw, -4rem);
+-  width: clamp(28rem, 52vw, 52rem);
+-  aspect-ratio: 1;
+-  border-radius: 50%;
+-  background: radial-gradient(
+-    circle at 50% 50%,
+-    rgb(255 210 63 / 0.55) 0 34%,
+-    rgb(255 210 63 / 0.16) 35% 52%,
+-    transparent 53%
+-  );
+-  filter: blur(1px);
+-}
+-
+-.heroDots {
+-  position: absolute;
+-  z-index: -1;
+-  right: 0;
+-  top: 0;
+-  width: 46vw;
+-  height: 56svh;
+-  background-image: radial-gradient(var(--ink) 1.2px, transparent 1.2px);
+-  background-size: 18px 18px;
+-  opacity: 0.16;
+-  -webkit-mask-image: radial-gradient(
+-    ellipse at 72% 28%,
+-    #000 0 30%,
+-    transparent 72%
+-  );
+-  mask-image: radial-gradient(ellipse at 72% 28%, #000 0 30%, transparent 72%);
++.hero :focus-visible {
++  outline-color: var(--butter);
+ }
+ 
+ .heroGrid {
+-  display: grid;
+-  align-items: center;
+-  gap: clamp(2rem, 5vw, 4rem);
+-}
+-
+-.heroGrid > * {
+-  min-width: 0;
++  position: relative;
++  z-index: 2;
+ }
+ 
+-@media (min-width: 1024px) {
+-  .heroGrid {
+-    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+-  }
++.heroCopy {
++  max-width: min(100%, 44rem);
+ }
+ 
+ .nameTag {
+@@ -494,36 +463,51 @@
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+-  justify-content: flex-start;
+   gap: 0.6rem;
+   font-family: var(--font-geist-mono), monospace;
+   font-size: 10px;
+   letter-spacing: 0.18em;
+   text-transform: uppercase;
+-  color: var(--muted);
++  color: var(--paper);
+ }
+ 
++/* The title is cut from the same cardboard as the sun: paper face, a stepped
++   ink edge to the lower right, the way every sticker here is lit. */
+ .heroTitle {
+   margin-top: 1.15rem;
+   max-width: 100%;
+   font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+-  font-size: clamp(2.55rem, 10vw, 4rem);
++  font-size: clamp(2.8rem, 10.5vw, 4.4rem);
+   font-weight: 800;
+-  line-height: 0.88;
++  line-height: 0.9;
+   letter-spacing: -0.058em;
+-  text-wrap: balance;
++  color: var(--paper-hi);
++  text-shadow:
++    1px 1px 0 var(--ink),
++    2px 2px 0 var(--ink),
++    3px 3px 0 var(--ink),
++    4px 4px 0 var(--ink),
++    5px 5px 0 var(--ink);
+ }
+ 
+ @media (min-width: 1024px) {
+   .heroTitle {
+-    font-size: clamp(3.2rem, 5.4vw, 4.9rem);
++    font-size: clamp(4rem, 6.4vw, 6.6rem);
++    text-shadow:
++      1px 1px 0 var(--ink),
++      2px 2px 0 var(--ink),
++      3px 3px 0 var(--ink),
++      4px 4px 0 var(--ink),
++      5px 5px 0 var(--ink),
++      6px 6px 0 var(--ink),
++      7px 7px 0 var(--ink);
+   }
+ }
+ 
+ .pulseWord {
+   position: relative;
+   display: inline-block;
+-  color: var(--cobalt);
++  color: var(--butter);
+ }
+ 
+ .pulseWord::after {
+@@ -550,17 +534,17 @@
+ }
+ 
+ .heroLede {
+-  margin-top: 1.35rem;
++  margin-top: 1.5rem;
+   max-width: 47ch;
+   font-size: clamp(0.98rem, 1.2vw, 1.08rem);
+   line-height: 1.7;
+-  color: var(--muted);
++  color: var(--paper);
+   text-wrap: pretty;
+ }
+ 
+ .heroLede strong {
+-  color: var(--ink);
+-  font-weight: 600;
++  color: var(--paper-hi);
++  font-weight: 650;
+ }
+ 
+ .heroActions {
+@@ -609,6 +593,16 @@
+   transform: translate(2px, -2px);
+ }
+ 
++/* On the sky the primary action is the butter tape, not another cobalt. */
++.hero .primaryBtn {
++  background: var(--butter);
++  color: var(--ink);
++}
++
++.hero .primaryBtn:hover {
++  background: var(--paper-hi);
++}
++
+ .ghostLink {
+   position: relative;
+   display: inline-flex;
+@@ -620,6 +614,10 @@
+   color: var(--ink);
+ }
+ 
++.hero .ghostLink {
++  color: var(--paper-hi);
++}
++
+ .ghostLink::after {
+   content: '';
+   position: absolute;
+@@ -641,9 +639,9 @@
+   grid-template-columns: repeat(3, minmax(0, 1fr));
+   gap: 0.9rem;
+   max-width: 28rem;
+-  margin-top: 2.6rem;
++  margin-top: 2.4rem;
+   padding-top: 1.2rem;
+-  border-top: 1px solid var(--line);
++  border-top: 1.5px solid rgb(255 250 241 / 0.4);
+ }
+ 
+ .heroStat b {
+@@ -652,6 +650,7 @@
+   font-size: clamp(1.5rem, 2.3vw, 2rem);
+   line-height: 1;
+   letter-spacing: -0.04em;
++  color: var(--paper-hi);
+ }
+ 
+ .heroStat span {
+@@ -662,131 +661,25 @@
+   line-height: 1.35;
+   letter-spacing: 0.12em;
+   text-transform: uppercase;
+-  color: var(--muted);
+-}
+-
+-.heroArt {
+-  position: relative;
+-  min-height: clamp(27rem, 45vw, 37rem);
+-  display: grid;
+-  place-items: center;
+-}
+-
+-.artStage {
+-  position: relative;
+-  width: min(100%, 29rem);
+-  aspect-ratio: 0.9;
+-  transform-style: preserve-3d;
+-}
+-
+-.sheet {
+-  position: absolute;
+-  inset: 6% 7%;
+-  display: flex;
+-  flex-direction: column;
+-  padding: clamp(1rem, 2.2vw, 1.55rem);
+-  border: 2px solid var(--ink);
+-  border-radius: 24px;
+-  background: var(--paper-hi);
+-  box-shadow: 13px 15px 0 rgb(25 26 46 / 0.12);
+-  transform: rotate(2.2deg);
+-  transform-origin: 50% 60%;
+-}
+-
+-.sheetTop {
+-  display: flex;
+-  align-items: center;
+-  justify-content: space-between;
+-  gap: 1rem;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 8.5px;
+-  letter-spacing: 0.16em;
+-  text-transform: uppercase;
+-  color: var(--muted);
++  color: var(--paper);
+ }
+ 
+-.sheetBadge {
++.heroScroll {
+   display: inline-flex;
+   align-items: center;
+-  gap: 0.3rem;
+-  padding: 0.22rem 0.5rem;
+-  border: 1px solid var(--ink);
+-  border-radius: 999px;
+-  background: var(--mint);
+-  color: var(--ink);
+-  font-size: 8px;
+-}
+-
+-.sheetSun {
+-  width: 57%;
+-  margin: 0.55rem auto 0;
+-  filter: drop-shadow(3px 4px 0 rgb(25 26 46 / 0.12));
+-  animation: sway 9s ease-in-out infinite alternate;
+-}
+-
+-.sheetLine {
+-  margin-top: auto;
+-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+-  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+-  font-weight: 750;
+-  line-height: 1.02;
+-  letter-spacing: -0.04em;
+-  text-wrap: balance;
+-}
+-
+-.sheetFoot {
+-  display: flex;
+-  align-items: center;
+-  justify-content: space-between;
+-  gap: 1rem;
+-  margin-top: 0.9rem;
+-  padding-top: 0.75rem;
+-  border-top: 1px dashed var(--line);
++  gap: 0.65rem;
++  margin-top: clamp(1.6rem, 4vw, 2.6rem);
+   font-family: var(--font-geist-mono), monospace;
+-  font-size: 8px;
+-  letter-spacing: 0.14em;
++  font-size: 9px;
++  letter-spacing: 0.2em;
+   text-transform: uppercase;
+-  color: var(--muted);
+-}
+-
+-.sheetSwatches {
+-  display: flex;
+-  gap: 0.28rem;
+-}
+-
+-.sheetSwatches i {
+-  display: block;
+-  width: 0.7rem;
+-  height: 0.7rem;
+-  border: 1px solid var(--ink);
+-  border-radius: 50%;
+-}
+-
+-.sheetNote {
+-  position: absolute;
+-  z-index: 7;
+-  left: 2%;
+-  top: -11%;
+-  width: min(46%, 11.5rem);
+-  padding: 0.75rem 0.8rem 0.7rem;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 4px;
+-  background: var(--butter);
+-  color: var(--ink);
+-  box-shadow: 5px 6px 0 rgb(25 26 46 / 0.16);
+-  transform: rotate(-5deg);
+-  font-size: 0.72rem;
+-  line-height: 1.4;
++  color: var(--paper);
+ }
+ 
+-.sheetNote b {
+-  display: block;
+-  margin-bottom: 0.25rem;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 8px;
+-  letter-spacing: 0.18em;
+-  text-transform: uppercase;
+-  opacity: 0.6;
++.heroScroll svg {
++  width: 1.1rem;
++  color: var(--butter);
++  animation: nudge 2.4s ease-in-out infinite;
+ }
+ 
+ .tape {
+@@ -799,82 +692,18 @@
+   clip-path: polygon(2% 0, 100% 4%, 98% 100%, 0 94%);
+ }
+ 
+-.tapeTop {
+-  top: -0.55rem;
+-  left: 50%;
+-  transform: translateX(-50%) rotate(-4deg);
+-}
+-
+-.heroSticker {
+-  position: absolute;
+-  z-index: 5;
+-  /* Match the journey flyers: warm rim upper-left, ink shadow lower-right. */
+-  filter:
+-    drop-shadow(3px 4px 0 rgb(25 26 46 / 0.14))
+-    drop-shadow(-1.5px -1.5px 0 rgb(255 210 63 / 0.3));
+-}
+-
+-.heroFloat {
+-  display: block;
+-  animation: bob 7s ease-in-out infinite alternate;
+-}
+-
+-.heroStickerSmiley {
+-  left: -7%;
+-  top: 21%;
+-  width: clamp(3.2rem, 6vw, 5rem);
+-}
+-
+-.heroStickerSmiley .heroFloat {
+-  animation-delay: -1.6s;
+-}
+-
+-.heroStickerDaisy {
+-  right: 1%;
+-  bottom: 4%;
+-  width: clamp(3.8rem, 7vw, 5.8rem);
+-}
+-
+-.heroStickerDaisy .heroFloat {
+-  animation-delay: -3.2s;
+-}
+-
+-.heroStickerBurst {
+-  right: -1%;
+-  top: 2%;
+-  width: clamp(3.4rem, 6.4vw, 5.1rem);
+-}
+-
+-.heroStickerBurst .heroFloat {
+-  animation-delay: -2.4s;
+-}
+-
+-.heroStickerBolt {
+-  left: 2%;
+-  bottom: 8%;
+-  width: clamp(2.8rem, 5vw, 4.2rem);
+-}
+-
+-.heroStickerBolt .heroFloat {
+-  animation-delay: -4.1s;
+-}
+-
+-.heroScroll {
+-  display: inline-flex;
+-  align-items: center;
+-  gap: 0.65rem;
+-  margin-top: clamp(2rem, 5vw, 3.4rem);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 9px;
+-  letter-spacing: 0.2em;
+-  text-transform: uppercase;
+-  color: var(--muted);
+-}
++/* Below the desktop split the sun sits under the copy, centred on the ground,
++   and the section reserves room for it. */
++@media (max-width: 1023px) {
++  .hero {
++    --sun-size: min(78vw, 21rem);
++    --sun-x: 50%;
++    padding-bottom: calc(var(--ground) + var(--sun-size) * 0.76 + 1.5rem);
++  }
+ 
+-.heroScroll svg {
+-  width: 1.1rem;
+-  color: var(--tangerine);
+-  animation: nudge 2.4s ease-in-out infinite;
++  .heroScroll {
++    display: none;
++  }
+ }
+ 
+ /* ── Marquee ────────────────────────────────────────────────────────────── */
+@@ -999,30 +828,6 @@
+   padding-top: 0.5rem;
+ }
+ 
+-/* The flower's landing spot, measured by the sticker journey. A zero-size
+-   marker in the side column follows the photo on every breakpoint instead of
+-   hard-coding a page coordinate. */
+-.journeyDock {
+-  position: absolute;
+-  top: 42%;
+-  right: 2.5rem;
+-  width: 1px;
+-  height: 1px;
+-  pointer-events: none;
+-}
+-
+-@media (max-width: 1100px) {
+-  .journeyDock {
+-    right: 1.25rem;
+-  }
+-}
+-
+-@media (max-width: 767px) {
+-  .journeyDock {
+-    top: 38%;
+-  }
+-}
+-
+ .photoCard {
+   position: relative;
+   width: min(100%, 22rem);
+@@ -2575,24 +2380,6 @@
+ 
+ /* ── Motion ─────────────────────────────────────────────────────────────── */
+ 
+-@keyframes sway {
+-  from {
+-    transform: rotate(-5deg);
+-  }
+-  to {
+-    transform: rotate(4deg);
+-  }
+-}
+-
+-@keyframes bob {
+-  from {
+-    transform: translateY(-5px) rotate(-2deg);
+-  }
+-  to {
+-    transform: translateY(6px) rotate(2deg);
+-  }
+-}
+-
+ @keyframes nudge {
+   0%,
+   100% {
+@@ -2632,43 +2419,6 @@
+ }
+ 
+ @media (max-width: 639px) {
+-  .heroArt {
+-    min-height: 24rem;
+-  }
+-
+-  .artStage {
+-    width: min(100%, 21rem);
+-  }
+-
+-  .heroStickerSmiley {
+-    left: 0;
+-    top: 17%;
+-    width: 2.8rem;
+-  }
+-
+-  .heroStickerBurst {
+-    right: 0;
+-    top: 1%;
+-    width: 3rem;
+-  }
+-
+-  .heroStickerDaisy {
+-    right: 0;
+-    bottom: 3%;
+-    width: 3.2rem;
+-  }
+-
+-  .heroStickerBolt {
+-    display: none;
+-  }
+-
+-  .sheetNote {
+-    left: 1%;
+-    top: -9%;
+-    width: min(54%, 11rem);
+-    font-size: 0.68rem;
+-  }
+-
+   .aboutFact {
+     grid-template-columns: 5.6rem minmax(0, 1fr);
+   }
+@@ -2687,8 +2437,6 @@
+ }
+ 
+ @media (prefers-reduced-motion: reduce) {
+-  .sheetSun,
+-  .heroFloat,
+   .heroScroll svg,
+   .marquee,
+   .skillAtom {
+@@ -2700,7 +2448,6 @@
+     transform: translateX(calc(100cqw - 1.1rem));
+   }
+ 
+-  .sheet,
+   .photoCard,
+   .postcard,
+   .skillCard,
+@@ -2743,25 +2490,6 @@
+   z-index: 1;
+ }
+ 
+-/* The thunder sticker lands on the photo's upper-left, in front of the frame.
+-   The zero-size marker keeps it anchored to the photo at every breakpoint. */
+-.photoBoltDock {
+-  position: absolute;
+-  z-index: 2;
+-  top: 28%;
+-  left: 2rem;
+-  width: 1px;
+-  height: 1px;
+-  pointer-events: none;
+-}
+-
+-@media (max-width: 767px) {
+-  .photoBoltDock {
+-    top: 24%;
+-    left: 1.5rem;
+-  }
+-}
+-
+ @media (prefers-reduced-motion: reduce) {
+   .pulseWord::after {
+     animation: none;
+diff --git a/features/landing-page/studio/use-landing-motion.ts b/features/landing-page/studio/use-landing-motion.ts
+index b728813..b4ad54d 100644
+--- a/features/landing-page/studio/use-landing-motion.ts
++++ b/features/landing-page/studio/use-landing-motion.ts
+@@ -6,11 +6,11 @@ import { useEffect, type RefObject } from 'react'
+  * Side A's scroll choreography.
+  *
+  * Everything here is transform/opacity only and lives in one GSAP context:
+- * the hero's paper stage lifts away in 3D, the tape band tilts as it crosses
+- * the viewport, section numbers and rules draw, the study prints fan in, the
+- * release covers drift inside their frames, and the postcard floats. The
+- * reduced-motion query never builds the timelines; it returns the finished
+- * page exactly as CSS has it.
++ * the tape band tilts as it crosses the viewport, section numbers and rules
++ * draw, the study prints fan in, the release covers drift inside their frames,
++ * and the postcard floats. The hero has its own pointer and scroll loop
++ * (`hero/use-hero-scene`). The reduced-motion query never builds the
++ * timelines; it returns the finished page exactly as CSS has it.
+  */
+ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
+   useEffect(() => {
+@@ -33,60 +33,9 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
+       mm.add(
+         {
+           reduce: '(prefers-reduced-motion: reduce)',
+-          desktop: '(min-width: 900px)',
+         },
+         (context) => {
+           if (context.conditions?.reduce) return
+-          const desktop = Boolean(context.conditions?.desktop)
+-
+-          // Hero background drifts slower than the sheet.
+-          const halo = q('[data-hero-halo]')
+-          const dots = q('[data-hero-dots]')
+-          if (halo.length) {
+-            gsap.to(halo, {
+-              yPercent: 16,
+-              rotate: 6,
+-              ease: 'none',
+-              scrollTrigger: {
+-                trigger: '#home',
+-                start: 'top top',
+-                end: 'bottom top',
+-                scrub: 1,
+-              },
+-            })
+-          }
+-          if (dots.length) {
+-            gsap.to(dots, {
+-              yPercent: 11,
+-              ease: 'none',
+-              scrollTrigger: {
+-                trigger: '#home',
+-                start: 'top top',
+-                end: 'bottom top',
+-                scrub: 1,
+-              },
+-            })
+-          }
+-
+-          // The paper stage leaves the hero by tipping back into the wall.
+-          const heroArt = q('[data-hero-art]')
+-          if (desktop && heroArt.length) {
+-            gsap.to(heroArt, {
+-              y: 72,
+-              rotationX: 8,
+-              scale: 0.97,
+-              opacity: 0.5,
+-              transformPerspective: 1100,
+-              transformOrigin: 'center center',
+-              ease: 'none',
+-              scrollTrigger: {
+-                trigger: '#home',
+-                start: 'top top',
+-                end: 'bottom top',
+-                scrub: 1,
+-              },
+-            })
+-          }
+ 
+           // The tape band turns a little as it crosses the viewport.
+           const marquee = q('[data-marquee]')
+diff --git a/tests/sticker-gravity-physics.test.ts b/tests/sticker-gravity-physics.test.ts
+new file mode 100644
+index 0000000..95cd6f3
+--- /dev/null
++++ b/tests/sticker-gravity-physics.test.ts
+@@ -0,0 +1,103 @@
++import {
++  createBody,
++  createWorld,
++  pick,
++  shake,
++  stepWorld,
++  wake,
++} from '@/features/landing-page/studio/gravity/physics'
++
++const run = (world: ReturnType<typeof createWorld>, seconds: number) => {
++  for (let t = 0; t < seconds; t += 1 / 60) stepWorld(world, 1 / 60)
++}
++
++describe('sticker gravity world', () => {
++  it('drops a body onto the floor and puts it to sleep', () => {
++    const body = createBody({ id: 'a', x: 200, y: -300, r: 30 })
++    const world = createWorld(400, 240, [body])
++    run(world, 4)
++    expect(body.y).toBeCloseTo(240 - 30, 0)
++    expect(world.awake).toBe(false)
++    expect(body.vy).toBe(0)
++  })
++
++  it('keeps every body inside the walls', () => {
++    const bodies = [-50, 100, 500].map((x, i) =>
++      createBody({
++        id: `b${i}`,
++        x,
++        y: -100 - i * 80,
++        r: 26,
++        vx: x < 0 ? -900 : 900,
++      }),
++    )
++    const world = createWorld(360, 220, bodies)
++    run(world, 4)
++    for (const b of bodies) {
++      expect(b.x).toBeGreaterThanOrEqual(b.r - 0.01)
++      expect(b.x).toBeLessThanOrEqual(360 - b.r + 0.01)
++      expect(Number.isFinite(b.y)).toBe(true)
++    }
++  })
++
++  it('stacks bodies without overlapping them once settled', () => {
++    const bodies = Array.from({ length: 6 }, (_, i) =>
++      createBody({ id: `s${i}`, x: 180 + (i % 2) * 6, y: -60 * i, r: 28 }),
++    )
++    const world = createWorld(360, 260, bodies)
++    run(world, 6)
++    for (let i = 0; i < bodies.length; i += 1) {
++      for (let k = i + 1; k < bodies.length; k += 1) {
++        const d = Math.hypot(
++          bodies[i].x - bodies[k].x,
++          bodies[i].y - bodies[k].y,
++        )
++        expect(d).toBeGreaterThan(56 * 0.9)
++      }
++    }
++    expect(world.awake).toBe(false)
++  })
++
++  it('stays stable when two bodies spawn on the same point', () => {
++    const a = createBody({ id: 'a', x: 100, y: 100, r: 20 })
++    const b = createBody({ id: 'b', x: 100, y: 100, r: 20 })
++    const world = createWorld(300, 300, [a, b])
++    run(world, 2)
++    for (const body of [a, b]) {
++      expect(Number.isFinite(body.x) && Number.isFinite(body.y)).toBe(true)
++    }
++  })
++
++  it('wakes on shake and settles again', () => {
++    const body = createBody({ id: 'a', x: 100, y: 180, r: 30 })
++    const world = createWorld(300, 240, [body])
++    run(world, 3)
++    expect(world.awake).toBe(false)
++    shake(world)
++    expect(world.awake).toBe(true)
++    stepWorld(world, 1 / 60)
++    expect(body.vy).toBeLessThan(0)
++    run(world, 5)
++    expect(world.awake).toBe(false)
++  })
++
++  it('carries a held body to its target and ignores gravity meanwhile', () => {
++    const body = createBody({ id: 'a', x: 50, y: 50, r: 20 })
++    const world = createWorld(400, 400, [body])
++    body.held = true
++    body.tx = 300
++    body.ty = 120
++    wake(world)
++    run(world, 1)
++    expect(body.x).toBeCloseTo(300, 0)
++    expect(body.y).toBeCloseTo(120, 0)
++  })
++
++  it('picks the front-most body under a point', () => {
++    const back = createBody({ id: 'back', x: 100, y: 100, r: 30 })
++    const front = createBody({ id: 'front', x: 110, y: 100, r: 30 })
++    const world = createWorld(300, 300, [back, front])
++    expect(pick(world, 105, 100)?.id).toBe('front')
++    expect(pick(world, 290, 290)).toBeNull()
++  })
++})
+diff --git a/tests/sticker-journey-runtime.test.tsx b/tests/sticker-journey-runtime.test.tsx
+index 28152be..b68901f 100644
+--- a/tests/sticker-journey-runtime.test.tsx
++++ b/tests/sticker-journey-runtime.test.tsx
+@@ -28,15 +28,6 @@ function buildPage() {
+     root.appendChild(el)
+   })
+ 
+-  const origs = ['smiley', 'burst', 'daisy', 'bolt'].map((name, i) => {
+-    const el = document.createElement('div')
+-    el.dataset.journeyFrom = name
+-    el.getBoundingClientRect = () =>
+-      rect(200 + i * 40 - window.scrollY, 600, 60, 60)
+-    root.appendChild(el)
+-    return el
+-  })
+-
+   const layer = document.createElement('div')
+   FLYERS.forEach((spec) => {
+     const f = document.createElement('div')
+@@ -56,7 +47,7 @@ function buildPage() {
+   layer.appendChild(ring)
+   root.appendChild(layer)
+   root.getBoundingClientRect = () => rect(-window.scrollY, 0, 1280, 8000)
+-  return { root, layer, origs }
++  return { root, layer }
+ }
+ 
+ const scrollTo = (y: number) => {
+@@ -92,27 +83,9 @@ describe('runJourney', () => {
+   })
+   afterEach(() => jest.useRealTimers())
+ 
+-  it('keeps hero stickers home at the top, and peels them off once the page moves', () => {
+-    const { layer, origs } = buildPage()
+-    const stop = runJourney(
+-      layer.firstElementChild?.parentElement as HTMLElement,
+-    )
+-    jest.advanceTimersByTime(900)
+-
+-    const smileyFlyer = layer.querySelector<HTMLElement>(
+-      '[data-flyer="smiley"]',
+-    )!
+-    expect(smileyFlyer.style.visibility).toBe('hidden')
+-    expect(origs[0].style.visibility).toBe('')
+-
+-    scrollTo(500)
+-    jest.advanceTimersByTime(100)
+-    expect(smileyFlyer.style.visibility).toBe('visible')
+-    expect(origs[0].style.visibility).toBe('hidden')
+-    expect(smileyFlyer.style.transform).toMatch(/translate3d\(/)
+-
+-    stop()
+-    expect(origs[0].style.visibility).toBe('')
++  it('flies only the sun and the heart: the hero stickers fall in the About tray', () => {
++    expect(FLYERS.map((f) => f.id)).toEqual(['sun', 'heart'])
++    expect(FLYERS.some((f) => f.from)).toBe(false)
+   })
+ 
+   it('spawns the sun only when its first section is near, and not before', () => {
+-- 
+2.43.0
+
