@@ -1,13 +1,45 @@
 # Design system → OpenPencil frames
 
-The mapping `brand_to_pen.py` implements. Extend this table, not the script, when
-a brand ships something new.
+The mapping the canvas implements. Extend this table, not the script, when a
+brand ships something new.
 
-## Section order
+## Two sources, two section maps
 
-Read like a spec, not like the JSON. A section with no tokens is skipped, so the
-numbers are stable ids with gaps (huginn ships no space/radius/components →
-`01 02 03 04 08 10 11`).
+A design system reaches the canvas one of two ways. They do not share a section
+list, and mixing them produces a board that is half a page and half a spec.
+
+### A · The page, imported (default)
+
+`scripts/canvas.mjs build --html …` imports the real page and keeps its sections,
+in its order. The names come from `<section id="…">` in the HTML, so the canvas
+cannot drift from the page:
+
+| # | Frame | Built from |
+| --- | --- | --- |
+| 01 | foundation | the page's own `#foundation` |
+| 02 | material | the physical thing: paper, dither, tear |
+| 03 | marks | logo card, wordmark scale, cast drawer, one usage rule |
+| 04 | colour | primitive → semantic light → semantic dark |
+| 05 | type | the roles at real size |
+| 06 | parts | buttons, fields, states |
+| 07 | motion | durations and easing |
+| 08 | voice | the copy rules |
+| 09 | tokens | the layer diagram |
+| 10 | audit | the measured pairs, including the failing one |
+| 11 | surface | the page ends in the object the identity is made of |
+
+Plus, added by the build pass: `00 · Cover` (name, essence, palette strip, mark)
+and `90 · Marks` (every brand SVG as a vector, in a framed cell).
+
+A section with no page content is not skipped — the page decides. If the page
+grew a twelfth section, the canvas gets twelve and `--expect 12` is the check.
+
+### B · The tokens, drawn (no page)
+
+`scripts/brand_to_pen.py` builds a brand board straight from a token file. Use it
+when there is no page — a kit, not a product. Read like a spec, not like the JSON.
+A section with no tokens is skipped, so the numbers are stable ids with gaps
+(huginn ships no space/radius/components → `01 02 03 04 08 10 11`).
 
 | # | Frame | Built from |
 | --- | --- | --- |
@@ -138,6 +170,13 @@ brands. Default keeps the brand's own colours.
 ## What the .fig is not
 
 - Not the token source of truth. `*-tokens.json` is; regenerate the canvas.
+- Not a variable set. The headless runtime has no `figma.variables`, no
+  `createTextStyle`, no `createPaintStyle` (verified on 0.16.0). Tokens as
+  variables and roles as styles are the Figma plugin's job —
+  `figma-forge.mjs` in `sunnyside-brand-system`.
+- Not a colour proof when it came from `import`. The import can drop a fill; the
+  resulting `color-contrast` finding is about the import, not the brand. Check
+  the HTML first.
 - Not a single-document file. `save_file` writes a bundle (zip: `canvas.fig` +
   `images/` + `meta.json` + `thumbnail.png`); `.fig` is writable, `.pen` read-only.
 - Not the deliverable for a site. It is a review surface; the build reads tokens.
