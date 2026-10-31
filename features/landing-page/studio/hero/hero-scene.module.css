@@ -21,7 +21,8 @@
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    circle at var(--sun-x) calc(100% - var(--ground) - var(--sun-size) * 0.28),
+    circle at var(--sun-x)
+      calc(100% - var(--ground) - var(--sun-size) * var(--sun-lift)),
     #5266e4 0 calc(var(--sun-size) * 0.5),
     #4a5fe0 calc(var(--sun-size) * 0.5) calc(var(--sun-size) * 0.68),
     #4358da calc(var(--sun-size) * 0.68) calc(var(--sun-size) * 0.92),
@@ -33,7 +34,7 @@
 .anchor {
   position: absolute;
   left: var(--sun-x);
-  top: calc(100% - var(--ground) - var(--sun-size) * 0.28);
+  top: calc(100% - var(--ground) - var(--sun-size) * var(--sun-lift));
   width: 0;
   height: 0;
 }

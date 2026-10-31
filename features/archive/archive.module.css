@@ -151,21 +151,62 @@
   position: relative;
   isolation: isolate;
   border-bottom: 0;
+  background: transparent;
+  transition:
+    box-shadow var(--ss-ui) var(--ss-ease),
+    -webkit-backdrop-filter var(--ss-ui) var(--ss-ease),
+    backdrop-filter var(--ss-ui) var(--ss-ease);
+}
+
+/* The pane itself.
+   One backdrop pass, then the displacement map bends it. The `filter` has to
+   live on the same element as the `backdrop-filter`: that is what makes the
+   blurred backdrop ripple instead of the type. `filter: url()` is the expensive
+   part, so this layer carries no content and no animation — it re-rasterises
+   only when the backdrop behind it changes. */
+.bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--ss-paper-hi) 74%, transparent) 0%,
     color-mix(in srgb, var(--ss-paper) 52%, transparent) 62%,
     color-mix(in srgb, var(--ss-paper) 68%, transparent) 100%
   );
-  -webkit-backdrop-filter: blur(20px) saturate(1.85) brightness(1.04);
-  backdrop-filter: blur(20px) saturate(1.85) brightness(1.04);
-  box-shadow: inset 0 1px 0 0 color-mix(in srgb, #fff 68%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(2.1) brightness(1.05);
+  backdrop-filter: blur(18px) saturate(2.1) brightness(1.05);
+  filter: url(#liquid-glass-bar);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, #fff 68%, transparent),
+    inset 2px 2px 1px 0 rgb(255 255 255 / 0.42),
+    inset -1px -1px 1px 1px rgb(255 255 255 / 0.28);
   transition:
     background-color var(--ss-ui) var(--ss-ease),
-    border-color var(--ss-ui) var(--ss-ease),
     box-shadow var(--ss-ui) var(--ss-ease),
     -webkit-backdrop-filter var(--ss-ui) var(--ss-ease),
     backdrop-filter var(--ss-ui) var(--ss-ease);
+}
+
+/* A sheet of glass with no glass behind it is a white bar: if the browser
+   cannot run the filter, fall back to the plain frosted treatment. */
+@supports not (backdrop-filter: blur(1px)) {
+  .bar::after {
+    filter: none;
+    background: color-mix(in srgb, var(--ss-paper) 92%, transparent);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .bar::after {
+    filter: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--ss-paper);
+    box-shadow: inset 0 1px 0 0 color-mix(in srgb, #fff 68%, transparent);
+  }
 }
 
 .bar::before {
@@ -187,7 +228,7 @@
   pointer-events: none;
 }
 
-.barScrolled {
+.barScrolled::after {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--ss-paper-hi) 88%, transparent) 0%,
@@ -197,10 +238,14 @@
   backdrop-filter: blur(26px) saturate(2) brightness(1.06);
   box-shadow:
     inset 0 1px 0 0 color-mix(in srgb, #fff 78%, transparent),
+    inset 2px 2px 1px 0 rgb(255 255 255 / 0.5),
+    inset -1px -1px 1px 1px rgb(255 255 255 / 0.34),
     0 18px 40px -30px var(--ss-ink);
 }
 
 .inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   width: 100%;
   max-width: var(--ss-shell);

@@ -12,6 +12,7 @@ import {
 } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from 'next-themes'
+import { GlassFilter } from '@/components/ui/liquid-glass'
 import { AudioProvider } from '@/features/landing-page/spotify/audio-context'
 import { MusicPlayer } from '@/features/landing-page/spotify/music-player'
 import Script from 'next/script'
@@ -180,6 +181,15 @@ export default function RootLayout({
           themes={['light', 'dark']}
         >
           <AudioProvider>
+            {/* One displacement map for the whole site. The top bar's glass
+                layer references it; a filter that is missing from the document
+                makes the referencing element render as nothing at all, so it
+                lives here rather than inside a header that some routes skip. */}
+            <GlassFilter
+              id="liquid-glass-bar"
+              scale={22}
+              baseFrequency="0.005 0.014"
+            />
             <div className="flex min-h-screen w-full flex-col font-[family-name:var(--font-geist)]">
               <div className="relative flex-1">{children}</div>
               <MusicPlayer />
