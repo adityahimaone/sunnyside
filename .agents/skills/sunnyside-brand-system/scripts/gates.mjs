@@ -70,8 +70,8 @@ const isHex = (v) => typeof v === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})/i.tes
 // exists without it, that is a defect to report, not a gate to skip: a green font check beside
 // four silent skips reads as "passed" to anyone skimming the table.
 function missingTokens(name) {
-  const exists = existsSync(at('features', slug))
-  gate(name, exists ? 'FAIL' : 'SKIP', exists ? `no tokens.json (looked in features/${slug}/ and public/brand/${slug}/) — the output contract requires one, and without it nothing here can be measured` : `no features/${slug}`)
+  const exists = existsSync(at('features', slug)) || existsSync(at('public', 'brand', slug))
+  gate(name, exists ? 'FAIL' : 'SKIP', exists ? `no tokens.json (looked in features/${slug}/ and public/brand/${slug}/) — the output contract requires one, and without it nothing here can be measured` : `no features/${slug} or public/brand/${slug}`)
   return true
 }
 
@@ -120,9 +120,16 @@ async function detach() {
 // The page draws swatches from tokens.json; the product draws colour from the CSS. If they
 // disagree the page lies, and a name in one that the other never declares renders as nothing.
 // (This is what shipped once in Ledger: var(--zinc-050) against a sheet that declared --lg-zinc-050.)
+// `oklch(62% …)` and `oklch(0.62 …)` are the same colour, and an alpha channel is part of the
+// value: `/ 0.5` never matches an opaque token. Normalize both sides before comparing.
 const norm = (v) => {
-  const m = String(v).match(/oklch\(\s*([\d.]+)%?\s+([\d.]+)\s+([\d.]+)/i)
-  if (m) return `oklch(${[m[1], m[2], m[3]].map((n) => Number(n).toFixed(3)).join(' ')})`
+  const m = String(v).match(/oklch\(\s*([\d.]+)(%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+)(%?))?\s*\)/i)
+  if (m) {
+    const f = (n) => Number(n).toFixed(3)
+    const l = Number(m[1]) / (m[2] === '%' ? 100 : 1)
+    const a = m[5] === undefined ? null : Number(m[5]) / (m[6] === '%' ? 100 : 1)
+    return `oklch(${f(l)} ${f(m[3])} ${f(m[4])}${a === null || a === 1 ? '' : ` / ${f(a)}`})`
+  }
   const h = String(v).trim().toLowerCase()
   return /^#[0-9a-f]{3}$/.test(h) ? `#${[...h.slice(1)].map((c) => c + c).join('')}` : h.replace(/\s+/g, ' ')
 }
@@ -131,7 +138,8 @@ const comparable = (v) => /^#[0-9a-f]{3,8}$/i.test(String(v).trim()) || /^oklch\
 async function palette() {
   const file = findTokens(root, slug)
   const css = [at('features', slug, `${slug}-tokens.css`), at('public', 'brand', slug, `${slug}-tokens.css`)].find(existsSync)
-  if (!file || !css) return gate('palette', 'SKIP', !file ? 'no tokens.json' : `no ${slug}-tokens.css`)
+  if (!file) return missingTokens('palette')
+  if (!css) return gate('palette', 'SKIP', `no ${slug}-tokens.css`)
   const t = readTokens(file)
   if (!t.primitives.length) return gate('palette', 'SKIP', `${t.shape} tokens.json has no primitives this gate can read (see lib/tokens.mjs)`)
 

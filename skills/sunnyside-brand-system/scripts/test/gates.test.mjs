@@ -39,11 +39,26 @@ test('palette: oklch values compare by number, and drift fails (primitive{} shap
   assert.equal(gates(bad, 'x').status('palette'), 'FAIL')
 })
 
+test('palette: percentage and decimal lightness are the same colour', () => {
+  const r = tmp()
+  put(r, 'features/x/tokens.json', { meta: { name: 'X', namespace: 'xx' }, primitives: [{ name: 'paper', value: 'oklch(62% 0.19 260)' }] })
+  put(r, 'features/x/x-tokens.css', ':root{--xx-paper: oklch(0.62 0.19 260);}')
+  assert.equal(gates(r, 'x').status('palette'), 'PASS')
+})
+
+test('palette: an alpha channel in the CSS is not the same as an opaque token', () => {
+  const r = tmp()
+  put(r, 'features/x/tokens.json', { meta: { name: 'X', namespace: 'xx' }, primitives: [{ name: 'ink', value: 'oklch(0.62 0.19 260)' }] })
+  put(r, 'features/x/x-tokens.css', ':root{--xx-ink: oklch(0.62 0.19 260 / 0.5);}')
+  assert.equal(gates(r, 'x').status('palette'), 'FAIL')
+})
+
 test('a case folder without tokens.json fails; it is not skipped', () => {
   const r = tmp()
   put(r, 'features/x/x-tokens.css', ':root{}')
   const g = gates(r, 'x')
   assert.equal(g.status('detach'), 'FAIL')
+  assert.equal(g.status('palette'), 'FAIL')
   assert.equal(g.status('contrast'), 'FAIL')
   assert.equal(g.code, 1)
 })

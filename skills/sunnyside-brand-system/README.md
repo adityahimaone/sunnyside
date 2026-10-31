@@ -15,9 +15,10 @@ Clearing. The method travels; the marks do not.
   collision: Cove and Clearing accents are 5° apart (65/100).
 - **CI.** `.github/workflows/skill-check.yml` fails on a stale `.agents/` mirror, failing tests,
   or a regression on the known-good case (Porphyry).
-- **Tests.** 25 unit tests (`node --test "scripts/test/*.test.mjs"`) cover the loader, the gates
-  (including mutation cases for each failure kind), the detach display-face fix, external
-  references, and the asset licence check. All use temp fixtures; none touch the network.
+- **Tests.** 27 unit tests (`node --test "scripts/test/*.test.mjs"`) cover the loader, the gates
+  (including mutation cases for palette drift, contrast, fonts, detach and credits), the detach
+  display-face fix, external references, and the asset licence check. All use temp fixtures;
+  none touch the network.
 - **Not done:** `detach-check.mjs` still reads its own subset of the token shapes.
 
 ## v3.4: audited against the cases that came after it
@@ -34,7 +35,7 @@ repo. Adopted what held up, rejected what would have cost more than it saved.
   stub Figma exporter (`figma-forge.mjs` already exists and is smoke-tested); generic Tailwind
   blueprints (they duplicate `immersive.md`); a promise that scanner warnings will clear.
 - **New gate, from a shipped bug:** *palette is one source* (tokens.json against the token CSS,
-  hex and oklch, with a mutation test). It is the portable form of Ledger's `check-palette.mjs`.
+  hex and oklch, with mutation tests). It is the portable form of Ledger's `check-palette.mjs`.
 - **Fixed in the gates:** a case folder with no `tokens.json` (Jakarta) used to pass its font
   check and skip the rest; it now fails.
 - **Hardened:** `design-md.mjs --lint` pins `@google/design.md@0.4.0` instead of floating.
@@ -46,8 +47,8 @@ repo. Adopted what held up, rejected what would have cost more than it saved.
 ```
 SKILL.md                      the whole method in one read
 references/research.md        studying a category, DESIGN.md, free-asset licences
-references/case-evidence.md   the eight cases, their numbers, the recurring decisions
-references/gates.md           the eight checks and the QA checklist
+references/case-evidence.md   every case, their numbers, the recurring decisions
+references/gates.md           the gate checks and the QA checklist
 references/immersive.md       the seven recipes with code
 references/tokens-and-docs.md token layers and the llms twin
 references/figma-export.md    tokens to Figma, the emitters, the traps

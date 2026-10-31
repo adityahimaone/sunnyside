@@ -10,12 +10,14 @@ on:
       - 'skills/sunnyside-brand-system/**'
       - '.agents/skills/sunnyside-brand-system/**'
       - 'features/**'
+      - 'public/brand/**'
       - '.github/workflows/skill-check.yml'
   pull_request:
     paths:
       - 'skills/sunnyside-brand-system/**'
       - '.agents/skills/sunnyside-brand-system/**'
       - 'features/**'
+      - 'public/brand/**'
       - '.github/workflows/skill-check.yml'
 
 jobs:
@@ -26,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Mirror is in sync (fix with scripts/sync-skill.sh)
+      - name: Mirror is in sync (fix with skills/sunnyside-brand-system/scripts/sync-skill.sh)
         run: diff -rq skills/sunnyside-brand-system .agents/skills/sunnyside-brand-system
       - name: Unit tests
         run: node --test "skills/sunnyside-brand-system/scripts/test/*.test.mjs"

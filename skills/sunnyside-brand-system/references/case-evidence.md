@@ -107,10 +107,10 @@ Facts only, from `gates.mjs` and the repo on that day; rerun it before quoting a
 
 What they teach, in order of cost:
 
-- **A case without `tokens.json` is invisible to every gate.** Jakarta is the first one to ship that
-  way; `gates.mjs` now fails it instead of skipping.
-- **Three token shapes now exist.** Gates and exporters read two of them (see `tokens-and-docs.md`);
-  a shared loader would remove the drift.
+- **A case without `tokens.json` fails the gates that need tokens.** Jakarta is the first one to
+  ship that way; detach, palette and contrast now report FAIL instead of skipping.
+- **Every token shape now has one reader.** `scripts/lib/tokens.mjs` reads all five shapes in
+  `tokens-and-docs.md`; gates and design-md import it.
 - **Porphyry is the model for the newer cases:** it clears detach, publishes failures, and its
   palette matches its CSS.
 

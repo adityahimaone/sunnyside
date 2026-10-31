@@ -16,7 +16,8 @@ could not run and is never a pass; a run where every gate skipped exits 1.
 the same value (hex or oklch, namespace-aware). It exists because Ledger once shipped swatches
 for `var(--zinc-050)` against a sheet that declared `--lg-zinc-050`: the page rendered nothing.
 `<repo root>/scripts/check-palette.mjs` is Ledger's stricter, hard-wired version (it also
-checks light/dark scopes and hex round-trips); the gate here is the portable subset.
+checks light/dark scopes and hex round-trips); the gate here is the portable subset. oklch
+lightness may be written `0.62` or `62%`, and alpha is part of the value: `/ 0.5` is not opaque.
 
 Two behaviours worth knowing: an **incomplete** `tokens.json` (empty DNA) scores low because it
 is unscorable, and `gates.mjs` says so rather than blaming the hue; and an **outside brand**
@@ -191,5 +192,6 @@ and a worse palette.
 
 `.github/workflows/skill-check.yml` (repo root) fails a push or pull request when the `.agents/`
 mirror differs from `skills/`, when `scripts/test/` fails, or when Porphyry, the known-good case,
-stops clearing `gates.mjs`. Fix a mirror failure with `scripts/sync-skill.sh`.
+stops clearing `gates.mjs`. Fix a mirror failure with
+`skills/sunnyside-brand-system/scripts/sync-skill.sh`.
 
