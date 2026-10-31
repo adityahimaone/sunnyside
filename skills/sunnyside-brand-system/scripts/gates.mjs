@@ -27,6 +27,7 @@ import { readFile, readdir } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
+import { findTokens, readTokens } from './lib/tokens.mjs'
 
 const run = promisify(execFile)
 const here = dirname(fileURLToPath(import.meta.url))
@@ -70,22 +71,22 @@ const isHex = (v) => typeof v === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})/i.tes
 // four silent skips reads as "passed" to anyone skimming the table.
 function missingTokens(name) {
   const exists = existsSync(at('features', slug))
-  gate(name, exists ? 'FAIL' : 'SKIP', exists ? `features/${slug}/tokens.json is missing — the output contract requires it, and without it nothing here can be measured` : `no features/${slug}`)
+  gate(name, exists ? 'FAIL' : 'SKIP', exists ? `no tokens.json (looked in features/${slug}/ and public/brand/${slug}/) — the output contract requires one, and without it nothing here can be measured` : `no features/${slug}`)
   return true
 }
 
 /* ── 1 + 2 · detach and display face ─────────────────────────────────────── */
 
 async function detach() {
-  const own = at('features', slug, 'tokens.json')
-  if (!existsSync(own)) return missingTokens('detach') && gate('display face', 'SKIP', 'needs detach')
+  const own = findTokens(root, slug)
+  if (!own) return missingTokens('detach') && gate('display face', 'SKIP', 'needs detach')
 
   const refs = []
   const featuresDir = at('features')
   if (existsSync(featuresDir))
     for (const d of await readdir(featuresDir)) {
-      const f = join(featuresDir, d, 'tokens.json')
-      if (d !== slug && existsSync(f)) refs.push(f)
+      const f = d === slug ? null : findTokens(root, d)
+      if (f) refs.push(f)
     }
   const extra = flag('refs')
   if (extra && extra !== true && existsSync(resolve(extra)))
@@ -127,34 +128,26 @@ const norm = (v) => {
 }
 const comparable = (v) => /^#[0-9a-f]{3,8}$/i.test(String(v).trim()) || /^oklch\(/i.test(String(v).trim())
 
-function primitivesOf(t) {
-  if (Array.isArray(t.primitives)) return t.primitives.map((p) => [p.name, p.value])
-  if (t.primitive && typeof t.primitive === 'object') return Object.entries(t.primitive).map(([k, v]) => [k, typeof v === 'string' ? v : v?.value])
-  return []
-}
-
 async function palette() {
-  const file = at('features', slug, 'tokens.json')
+  const file = findTokens(root, slug)
   const css = [at('features', slug, `${slug}-tokens.css`), at('public', 'brand', slug, `${slug}-tokens.css`)].find(existsSync)
-  if (!existsSync(file) || !css) return gate('palette', 'SKIP', !existsSync(file) ? 'no tokens.json' : `no ${slug}-tokens.css`)
-  const t = await readJson(file)
-  const list = primitivesOf(t)
-  if (!list.length) return gate('palette', 'SKIP', 'tokens.json has no primitives in a shape this gate reads (primitives[] or primitive{})')
+  if (!file || !css) return gate('palette', 'SKIP', !file ? 'no tokens.json' : `no ${slug}-tokens.css`)
+  const t = readTokens(file)
+  if (!t.primitives.length) return gate('palette', 'SKIP', `${t.shape} tokens.json has no primitives this gate can read (see lib/tokens.mjs)`)
 
   const decl = new Map()
   const source = (await readFile(css, 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '')
   for (const m of source.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;{}]+);/gi)) decl.set(m[1], [...(decl.get(m[1]) ?? []), norm(m[2])])
 
-  const ns = t.meta?.namespace ? String(t.meta.namespace).replace(/^-+|-+$/g, '') : ''
   const bad = []
   let checked = 0
   let skipped = 0
-  for (const [name, value] of list) {
+  for (const { name, value } of t.primitives) {
     if (!comparable(value)) {
       skipped += 1
       continue
     }
-    const exact = [ns && `--${ns}-${name}`, `--${name}`].filter(Boolean).find((n) => decl.has(n))
+    const exact = [t.namespace && `--${t.namespace}-${name}`, `--${name}`].filter(Boolean).find((n) => decl.has(n))
     const names = exact ? [exact] : [...decl.keys()].filter((n) => n.endsWith(`-${name}`))
     if (!names.length) {
       bad.push(`${name} is in tokens.json but not declared in the CSS`)
@@ -186,22 +179,20 @@ async function fonts() {
 /* ── 5 · contrast ────────────────────────────────────────────────────────── */
 
 async function contrast() {
-  const file = at('features', slug, 'tokens.json')
-  if (!existsSync(file)) return missingTokens('contrast')
-  const pairs = (await readJson(file)).contrast
-  if (!Array.isArray(pairs) || !pairs.length) return gate('contrast', 'FAIL', 'tokens.json publishes no contrast pairs')
+  const file = findTokens(root, slug)
+  if (!file) return missingTokens('contrast')
+  const pairs = readTokens(file).contrast
+  if (!pairs.length) return gate('contrast', 'FAIL', 'tokens.json publishes no contrast pairs')
 
   const bad = []
   let failing = 0
   let checked = 0
   for (const p of pairs) {
-    const fg = p.fg ?? p.a
-    const bg = p.bg ?? p.b
-    if (!isHex(fg) || !isHex(bg)) continue // gradients and alphas cannot be computed; they are not passed either
+    if (!isHex(p.fg) || !isHex(p.bg)) continue // gradients and alphas cannot be computed; they are not passed either
     checked += 1
-    const got = ratio(fg, bg)
+    const got = ratio(p.fg, p.bg)
     if (got < 4.5) failing += 1
-    if (typeof p.ratio === 'number' && Math.abs(got - p.ratio) > 0.1) bad.push(`${p.label ?? `${fg}/${bg}`}: stated ${p.ratio}, computed ${got.toFixed(2)}`)
+    if (typeof p.ratio === 'number' && Math.abs(got - p.ratio) > 0.1) bad.push(`${p.label || `${p.fg}/${p.bg}`}: stated ${p.ratio}, computed ${got.toFixed(2)}`)
   }
   if (!checked) return gate('contrast', 'FAIL', 'no pair has two hex values to compute')
   const problems = [...bad.map((b) => `estimated, not computed — ${b}`), ...(failing ? [] : ['no failing pair published (a palette that only publishes passes is a brochure)'])]

@@ -159,15 +159,18 @@ The page is the product. The PDF is a snapshot of the page.
 
 ## 8. Accepted `tokens.json` shapes
 
-The output contract requires `features/<slug>/tokens.json`. Three shapes exist in the repo today;
-new cases should use the first.
+`scripts/lib/tokens.mjs` reads every shape below (by key, never by case name) and finds the file at
+`features/<slug>/tokens.json` or `public/brand/<slug>/<slug>-tokens.json`. New cases should use the
+first. A shape the loader cannot read returns `unknown` and the gates say so.
 
-| Shape | Keys | Read by |
+| Shape | Keys | Seen in |
 | --- | --- | --- |
-| **Preferred** | `meta`, `theme` (DNA), `primitives[]` of `{name, value, role}`, `semantic`, `contrast[]` of `{fg\|a, bg\|b, ratio, label}`, `type[]`, `radius[]`, `space[]` | detach, gates, design-md, figma-forge |
-| Role/face type | as above, but `type[]` entries are `{role, face, …}` and `face` may be a CSS alias | detach, gates; design-md skips alias faces |
-| Object-keyed (Ledger) | `primitive{name: {value, hex}}`, `ramp`, `signal`, `roles`, `semantic{light,dark}` | gates (palette only); detach sees no DNA; design-md does not read it |
+| **Preferred** | `meta`, `theme` (DNA), `primitives[]` of `{name, value, role}`, `semantic`, `contrast[]` of `{label, fg, bg, ratio}`, `type[]`, `radius[]`, `space[]` | Cove, Strand, Porphyry |
+| `a`/`b` contrast, `$meta` | as above, with `$meta`, and `contrast[]` using `a`/`b` | Huginn |
+| Role/face type | `type[]` entries are `{role, face}`; `face` may be a CSS alias | Hachure |
+| Flat colour | `color{name: hex}`, `type{display: "Family"}`, `radius{}`, `space[]` of numbers | Clearing |
+| Object-keyed | `primitive{name: {value, hex}}`, `ramp`, `signal`, `semantic{light,dark}`; no DNA, no `contrast` | Ledger |
 
 A contrast entry must carry hex values and the ratio computed from them. Gradients and alpha
-colours cannot be computed and are not counted as passes.
-
+colours cannot be computed and are not counted as passes. detach-check still reads its own subset
+(`theme` DNA, `primitives`, `type`); moving it onto the loader is the remaining step.

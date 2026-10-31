@@ -7,6 +7,19 @@ and an audit that names what it could not verify.
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand and
 Clearing. The method travels; the marks do not.
 
+## v3.5: one token reader, a CI guard, and tests
+
+- **One loader.** `scripts/lib/tokens.mjs` reads every `tokens.json` shape in the repo and finds
+  it in `features/` or `public/brand/`. `gates.mjs` and `design-md.mjs` use it. Huginn and
+  Clearing, previously invisible to the gates, now run them, and the loader exposed a real
+  collision: Cove and Clearing accents are 5° apart (65/100).
+- **CI.** `.github/workflows/skill-check.yml` fails on a stale `.agents/` mirror, failing tests,
+  or a regression on the known-good case (Porphyry).
+- **Tests.** 25 unit tests (`node --test "scripts/test/*.test.mjs"`) cover the loader, the gates
+  (including mutation cases for each failure kind), the detach display-face fix, external
+  references, and the asset licence check. All use temp fixtures; none touch the network.
+- **Not done:** `detach-check.mjs` still reads its own subset of the token shapes.
+
 ## v3.4: audited against the cases that came after it
 
 Written after checking an outside review (Gemini's audit of the published page) against the

@@ -113,3 +113,12 @@ What they teach, in order of cost:
   a shared loader would remove the drift.
 - **Porphyry is the model for the newer cases:** it clears detach, publishes failures, and its
   palette matches its CSS.
+
+### A collision the old scan could not see
+
+Cove and Clearing: Cove's `lumen` (178°) and Clearing's `emerald` (173°) are **5° apart**, "same
+family" by the detach rule, and Cove scores 65/100 against Clearing. It went unreported because
+Clearing keeps its tokens in `public/brand/clearing/` and the scan only looked in `features/`.
+Clearing's tokens carry colour and type but no DNA, so this score rests on hue, value and type;
+treat it as a flag to look at, not a final verdict. Huginn was missed for the same reason.
+

@@ -4,7 +4,7 @@ description: 'Design and ship a brand kit or design system from a brief: one ide
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '3.4'
+  version: '3.5'
 ---
 
 # Sunnyside brand system
@@ -209,7 +209,8 @@ written to a file or printed. Nothing installs globally and no project file is u
 ## Output contract
 
 ```
-features/<slug>/        tokens.json, <slug>-tokens.css, <slug>.module.css,
+features/<slug>/        tokens.json (gates also find public/brand/<slug>/<slug>-tokens.json),
+                        <slug>-tokens.css, <slug>.module.css,
                         <slug>-data.ts, components/brand.tsx, theme-toggle.tsx
 app/design-system/<slug>/  page.tsx, layout.tsx, llms.txt/route.ts, icon.svg
 public/brand/<slug>/    mark, compact, glyph, mono, reverse, wordmark, lockups, favicons,
@@ -271,6 +272,8 @@ Templates: `templates/design-system.html` (full page), `single-page.html` (singl
 | `brand-ref.mjs` | search 69 outside brands, `near` a hue, `pull` their DESIGN.md, `ref` them into detach |
 | `detach-check.mjs` | OKLCH separation scorecard; `--scan` the portfolio |
 | `gates.mjs` | every static gate in one command |
+| `lib/tokens.mjs` | the one reader for every `tokens.json` shape and location; scripts import it |
+| `test/` | unit tests: `node --test "scripts/test/*.test.mjs"` (CI runs them) |
 | `brand-forge.mjs` / `cast-forge.mjs` | the constructed family (`--bakeoff`) / a 4–6 drawn cast |
 | `score-mark.py` | circles, strokes, primitives, 16px |
 | `assets.mjs` | search and fetch free photos and icons with licence records |

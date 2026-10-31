@@ -7,7 +7,9 @@ page (mark at 16px, reduced motion). Run `gates.mjs` as soon as the tokens exist
 page: the first two can invalidate everything that follows. Display face is hard fail H3 of the
 detach run; assets applies only when stock images are used (`references/research.md`).
 
-A case folder with no `tokens.json` **fails** rather than skips. A `SKIP` always names why a gate
+Siblings are every case whose tokens the loader finds, in `features/` or `public/brand/`, so a
+case can no longer escape the detach scan by keeping its tokens somewhere else. A case folder with
+no `tokens.json` **fails** rather than skips. A `SKIP` always names why a gate
 could not run and is never a pass; a run where every gate skipped exits 1.
 
 **Palette is one source.** Every primitive in `tokens.json` must be declared in the token CSS at
@@ -184,3 +186,10 @@ job (ground, graphic or large type only) and is printed as a failure. A gate sti
 one fix goes into the audit as *Fails* or *Known gap*. Marks are built from stated grid units in
 one write and redrawn at most once. Tuning a hex until the ratio clears produces a passing number
 and a worse palette.
+
+## CI
+
+`.github/workflows/skill-check.yml` (repo root) fails a push or pull request when the `.agents/`
+mirror differs from `skills/`, when `scripts/test/` fails, or when Porphyry, the known-good case,
+stops clearing `gates.mjs`. Fix a mirror failure with `scripts/sync-skill.sh`.
+

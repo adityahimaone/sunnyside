@@ -1,0 +1,34 @@
+name: skill-check
+
+# Guards the sunnyside-brand-system skill: the .agents/ mirror must match, the scripts' tests must
+# pass, and one known-good case must still clear every gate (so a change to a gate that silently
+# breaks it is caught on real data, not just on fixtures).
+
+on:
+  push:
+    paths:
+      - 'skills/sunnyside-brand-system/**'
+      - '.agents/skills/sunnyside-brand-system/**'
+      - 'features/**'
+      - '.github/workflows/skill-check.yml'
+  pull_request:
+    paths:
+      - 'skills/sunnyside-brand-system/**'
+      - '.agents/skills/sunnyside-brand-system/**'
+      - 'features/**'
+      - '.github/workflows/skill-check.yml'
+
+jobs:
+  skill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Mirror is in sync (fix with scripts/sync-skill.sh)
+        run: diff -rq skills/sunnyside-brand-system .agents/skills/sunnyside-brand-system
+      - name: Unit tests
+        run: node --test "skills/sunnyside-brand-system/scripts/test/*.test.mjs"
+      - name: Known-good case still clears every gate
+        run: node skills/sunnyside-brand-system/scripts/gates.mjs --slug porphyry
