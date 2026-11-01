@@ -122,6 +122,7 @@
   --case-accent: var(--ss-ink);
 }
 
+
 .tone_huginn {
   --case-accent: #b82117;
 }
@@ -162,6 +163,12 @@
    it is the rule and the number, and the ink stays ink. */
 .tone_jakarta {
   --case-accent: #f7481b;
+}
+
+/* Bluewater's daylight signal. The night wake (#8FB6D6) is a graphic, never
+   text, so the card takes the darkened value the system actually ships. */
+.tone_bluewater {
+  --case-accent: #17608c;
 }
 
 .cardTop {

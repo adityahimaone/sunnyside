@@ -24,6 +24,7 @@ export type DesignCase = {
     | 'ledger'
     | 'porphyry'
     | 'jakarta'
+    | 'bluewater'
 }
 
 /**
@@ -53,6 +54,22 @@ export const DESIGN_CASES: readonly DesignCase[] = [
       'The Sunnyside brand kit: paper and ink identity board with the sun mark, palette, type specimens and favicon sizes.',
     tags: ['Paper', 'Cobalt', 'Marker', 'Stickers'],
     tone: 'sunnyside',
+  },
+{
+    number: '12',
+    name: 'Bluewater Freight',
+    href: '/design-system/bluewater',
+    tagline: 'The wake is the only bright thing.',
+    description:
+      'A passage system for maritime operators: a near-black sea, one silver wake that marks only what is moving, 1px chart rules, zero radius, and mono tabular numbers. A fullwidth crossing, a hull-and-waterline mark in two drawings, and an audit that publishes the one contrast pair it refuses to hide.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · marks · docs',
+    material: 'Deep water + silver wake + chart rule',
+    cover: '/brand/bluewater/bluewater-brandkit.webp',
+    coverAlt:
+      'The Bluewater Freight hero: last light over open water with a container ship small on the horizon.',
+    tags: ['Maritime', 'Chart', 'Zero radius', 'Mono'],
+    tone: 'bluewater',
   },
   {
     number: '11',
@@ -213,5 +230,5 @@ export const DESIGN_CASES: readonly DesignCase[] = [
       'The Vitrine brand board: the half-light V mark, one glass arm and one Signal arm, Case and Frost palette, Signal field, type specimens, favicon and form specimen.',
     tags: ['Glass', 'Dither', 'Case', 'Forms'],
     tone: 'vitrine',
-  },
+  }
 ]

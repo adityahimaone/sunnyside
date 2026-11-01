@@ -57,7 +57,7 @@ export function CaseLibraryPage() {
               A case is not a moodboard.
             </span>{' '}
             It is a brief, a mark, a system, a proof and a written decision.
-            Eleven materials and one method — paper and cobalt, glass and
+            Twelve materials and one method — paper and cobalt, glass and
             dither, stone and gold leaf, a city in a single stroke. Every case
             ships with its files, its measurements, and its gaps left on the
             table.

@@ -1,0 +1,250 @@
+{
+  "url": "http://localhost:3000/design-system/bluewater",
+  "slug": "bluewater",
+  "startedAt": "2026-11-01T08:21:37.701Z",
+  "finishedAt": "2026-11-01T08:21:51.916Z",
+  "verdict": "PASS",
+  "checks": [
+    {
+      "status": "skip",
+      "check": "Theme toggle",
+      "evidence": "No Dark/Light button found; theme forced for screenshots."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 1440-light",
+      "evidence": "16px"
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 1440-light",
+      "evidence": "16px at 1440px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 1440-light",
+      "evidence": "0px"
+    },
+    {
+      "status": "skip",
+      "check": "Shader 1440-light",
+      "evidence": "No dither data-state on the page."
+    },
+    {
+      "status": "pass",
+      "check": "Console 1440-light",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "skip",
+      "check": "Form states",
+      "evidence": "No <form> found."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 1440-dark",
+      "evidence": "16px"
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 1440-dark",
+      "evidence": "16px at 1440px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 1440-dark",
+      "evidence": "0px"
+    },
+    {
+      "status": "skip",
+      "check": "Shader 1440-dark",
+      "evidence": "No dither data-state on the page."
+    },
+    {
+      "status": "pass",
+      "check": "Console 1440-dark",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 390-light",
+      "evidence": "16px"
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 390-light",
+      "evidence": "16px at 390px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 390-light",
+      "evidence": "0px"
+    },
+    {
+      "status": "skip",
+      "check": "Shader 390-light",
+      "evidence": "No dither data-state on the page."
+    },
+    {
+      "status": "pass",
+      "check": "Console 390-light",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 390-dark",
+      "evidence": "16px"
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 390-dark",
+      "evidence": "16px at 390px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 390-dark",
+      "evidence": "0px"
+    },
+    {
+      "status": "skip",
+      "check": "Shader 390-dark",
+      "evidence": "No dither data-state on the page."
+    },
+    {
+      "status": "pass",
+      "check": "Console 390-dark",
+      "evidence": "No page errors; no non-shader console errors."
+    },
+    {
+      "status": "pass",
+      "check": "Typography body 1440-light-reduced",
+      "evidence": "16px"
+    },
+    {
+      "status": "pass",
+      "check": "Typography input 1440-light-reduced",
+      "evidence": "16px at 1440px"
+    },
+    {
+      "status": "pass",
+      "check": "Overflow 1440-light-reduced",
+      "evidence": "0px"
+    },
+    {
+      "status": "skip",
+      "check": "Shader 1440-light-reduced",
+      "evidence": "No dither data-state on the page."
+    },
+    {
+      "status": "pass",
+      "check": "Console 1440-light-reduced",
+      "evidence": "No page errors; no non-shader console errors."
+    }
+  ],
+  "runs": [
+    {
+      "key": "1440-light",
+      "width": 1440,
+      "height": 14240,
+      "theme": "light",
+      "reduced": false,
+      "title": "Bluewater Freight — Case 12 | Design System | Aditya Himawan",
+      "h1": "The wake is the only bright thing.",
+      "overflow": 0,
+      "shader": null,
+      "typography": {
+        "body": 16,
+        "input": 16,
+        "headingWeight": 640
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "1440-dark",
+      "width": 1440,
+      "height": 14240,
+      "theme": "dark",
+      "reduced": false,
+      "title": "Bluewater Freight — Case 12 | Design System | Aditya Himawan",
+      "h1": "The wake is the only bright thing.",
+      "overflow": 0,
+      "shader": null,
+      "typography": {
+        "body": 16,
+        "input": 16,
+        "headingWeight": 640
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "390-light",
+      "width": 390,
+      "height": 25601,
+      "theme": "light",
+      "reduced": false,
+      "title": "Bluewater Freight — Case 12 | Design System | Aditya Himawan",
+      "h1": "The wake is the only bright thing.",
+      "overflow": 0,
+      "shader": null,
+      "typography": {
+        "body": 16,
+        "input": 16,
+        "headingWeight": 640
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "390-dark",
+      "width": 390,
+      "height": 25601,
+      "theme": "dark",
+      "reduced": false,
+      "title": "Bluewater Freight — Case 12 | Design System | Aditya Himawan",
+      "h1": "The wake is the only bright thing.",
+      "overflow": 0,
+      "shader": null,
+      "typography": {
+        "body": 16,
+        "input": 16,
+        "headingWeight": 640
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "1440-light-reduced",
+      "width": 1440,
+      "height": 14240,
+      "theme": "light",
+      "reduced": true,
+      "title": "Bluewater Freight — Case 12 | Design System | Aditya Himawan",
+      "h1": "The wake is the only bright thing.",
+      "overflow": 0,
+      "shader": null,
+      "typography": {
+        "body": 16,
+        "input": 16,
+        "headingWeight": 640
+      },
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "statics": {
+    "audit": null,
+    "score": null
+  },
+  "notes": [],
+  "screenshots": [
+    "bluewater-1440-light.jpg",
+    "bluewater-hero-light.png",
+    "bluewater-1440-dark.jpg",
+    "bluewater-hero-dark.png",
+    "bluewater-390-light.jpg",
+    "bluewater-390-dark.jpg",
+    "bluewater-reduced-motion.png"
+  ]
+}
