@@ -1,0 +1,18 @@
+/* Shared die-cut art. The atom sticker is the only shape that paints its own
+   disc, so its rim scales with the sticker instead of a fixed 8px border. */
+
+.atomDisc {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border: 0.34rem solid var(--paper-hi, #fffaf1);
+  border-radius: 50%;
+  background: var(--cobalt, #3d53d6);
+  color: var(--paper-hi, #fffaf1);
+}
+
+.atomDisc svg {
+  width: 82%;
+  height: 82%;
+}

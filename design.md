@@ -73,6 +73,8 @@ Use the palette by role, not as a checklist. Tangerine, butter, pink, mint, and 
 
 The homepage is one continuous studio wall composed of six chapters: Intro, About, Show & tell, Work, Skills, and Contact. Its hero poster, sun, smiley, bursts, flowers, and marker lettering are drawn in the interface from CSS and SVG rather than assembled as one background image. The visual rhythm comes from chapter navigation, layered paper, restrained cobalt and butter fields, and playful marks.
 
+Chapter 03 (Work) is a **papercraft moodboard**, and the board is one object rather than a bar above a mat: a dark bezel frames a cork surface, the toolbar is printed on that cork, and twelve taped pieces — the six latest releases and the six latest documented systems — sit on it at their own angle, stamped with a rose "Approved / craft" mark, and linked to the archive (`/projects`, `/design-system`) from washi-tape labels. An `Everything / Releases / Systems` switch re-lays the mat with a layout animation, and seven small die-cut shapes — the same stickers the About release liner is peeled from — sit on the cork's edge band: draggable, decorative, never over a piece's copy. Hovering or keyboard-focusing a piece lifts a print of the same cover (`.peek`, ~44% of the mat wide, capped at 30rem) in front of the piece: it is aligned over that card's own artwork, hanging ~18px past its lower edge, kept below the toolbar and inside the mat, pointer-transparent, and never opened by a tap. Filtering re-lays the board with `layout="position"`; each piece carries its own vertical offset (`--cell-drop`), so a filter change glides cards instead of re-dealing their heights. The gamification is paper, not chrome — stamping a piece or peeling a scrap fills a mono counter, `Lucky dip` rings a random piece, `Paper party` throws paper confetti and re-tilts the board. Reduced motion drops the tilt, the confetti, and the re-toss while keeping the counters and the dip usable. `features/landing-page/studio/work-gallery/` owns that board; the chapter around it stays in `projects.tsx`.
+
 Treat this as the current landing-page direction. The former rack, DAW, device-wall, and LCD concepts are historical and are not the visual source for new landing-page work.
 
 ## Archive wing
@@ -177,6 +179,7 @@ palette index chosen by an 8×8 Bayer threshold; there are no gradients, no
 | Design-engineering docs, Markdown twins and notes      | `features/design-engineering/`, `app/(booth)/design-engineering/llms.txt/route.ts`, `docs/design-engineering.md` |
 | Brand-system skill                                     | `skills/sunnyside-brand-system/`                                  |
 | Landing chapters and composition                       | `features/landing-page/studio/studio.tsx`                         |
+| Work chapter moodboard (pieces, stamps, stickers)       | `features/landing-page/studio/work-gallery/`                      |
 | Landing palette, chapters, and principles              | `features/landing-page/studio/studio-data.ts`                     |
 | Landing layout and scoped tokens                       | `features/landing-page/studio/studio.module.css`                  |
 | Sunnyside palette, contrast, type, motion, and exports | `features/design-system/sunnyside-data.ts`                        |

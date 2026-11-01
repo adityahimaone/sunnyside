@@ -1,11 +1,9 @@
 import { WORK_PROJECTS, type WorkProject } from '@/data/projects'
 import { DESIGN_CASES } from '@/features/case-library/cases'
 
-export type GalleryFilter = 'all' | 'project' | 'design-system'
-
 type BaseGalleryItem = {
   id: string
-  /** The catalogue number shown on the card's bottom bar. */
+  /** The catalogue number printed on the piece's corner stamp. */
   index: string
   title: string
   /** The sleeve label. Project genres and the system share this field. */
@@ -22,7 +20,7 @@ type BaseGalleryItem = {
 export type ProjectGalleryItem = BaseGalleryItem & {
   kind: 'project'
   project: WorkProject
-  /** Switchyard leads the shelf; its yellow tape distinguishes it. */
+  /** Switchyard leads the board; its yellow tape distinguishes it. */
   featured: boolean
 }
 
@@ -30,20 +28,17 @@ export type SystemGalleryItem = BaseGalleryItem & {
   kind: 'design-system'
   cover: string
   coverAlt: string
+  /** Four paint chips lifted from the system's own token file. */
+  swatches: readonly string[]
 }
 
 export type GalleryItem = ProjectGalleryItem | SystemGalleryItem
 
-export const GALLERY_FILTERS = [
-  { id: 'all', label: 'All' },
-  { id: 'project', label: 'Project' },
-  { id: 'design-system', label: 'Design System' },
-] as const satisfies readonly { id: GalleryFilter; label: string }[]
-
 /**
- * The shelf order is curated, not derived from the year. Switchyard leads
- * because it is the strongest release; the design systems follow the six
- * releases so the filter reads as "work, then the systems behind it".
+ * The board is curated, not derived from the year. Switchyard leads because it
+ * is the strongest release; the six systems that follow are the six most
+ * recent documented cases, so the moodboard is "what I made lately" rather
+ * than the whole catalogue — `/projects` and `/design-system` hold the rest.
  */
 const PROJECT_ORDER = [
   'switchyard',
@@ -53,6 +48,8 @@ const PROJECT_ORDER = [
   'seaphantom',
   'labgrownbeasts',
 ] as const
+
+const MOODBOARD_LIMIT = 6
 
 /**
  * Each image gets its own focal point inside the native 16:10 project frame,
@@ -68,6 +65,28 @@ const PROJECT_POSITION: Record<string, string> = {
   labgrownbeasts: 'center',
 }
 
+/**
+ * The paint chips are each system's own token values, four per deck. A deck
+ * that is missing here simply prints no chips rather than inventing a palette.
+ */
+const SYSTEM_SWATCHES: Record<string, readonly string[]> = {
+  sunnyside: ['#f3ecdf', '#191a2e', '#3d53d6', '#ffd23f'],
+  'wildflower-wind': ['#e7e3ee', '#2a1e33', '#8f2a90', '#f4d9e8'],
+  bluewater: ['#040b14', '#0d1d2c', '#8fb6d6', '#f4f9fd'],
+  jakarta: ['#f7f4ee', '#1b2126', '#2830d0', '#dad4c9'],
+  porphyry: ['#160a0f', '#7a1f3d', '#c9a45c', '#e3c98e'],
+  ledger: ['#f3f5fb', '#0a1024', '#6a8dd8', '#dce2f0'],
+  clearing: ['#0e211c', '#2f7a5e', '#cbdd82', '#f3edde'],
+  strand: ['#f3f0e8', '#13232a', '#a85a22', '#2f5f6b'],
+  cove: ['#060b18', '#111d36', '#3fe3c6', '#e9f0ff'],
+}
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+
 export const PROJECT_GALLERY_ITEMS: readonly ProjectGalleryItem[] =
   PROJECT_ORDER.map((slug, order) => {
     const project = WORK_PROJECTS.find((candidate) => candidate.slug === slug)
@@ -81,7 +100,7 @@ export const PROJECT_GALLERY_ITEMS: readonly ProjectGalleryItem[] =
     return {
       id: project.slug,
       kind: 'project',
-      index: String(order + 1).padStart(2, '0'),
+      index: `P${String(order + 1).padStart(2, '0')}`,
       title: project.title,
       categoryLabel: project.genre,
       year: String(project.year),
@@ -97,41 +116,69 @@ export const PROJECT_GALLERY_ITEMS: readonly ProjectGalleryItem[] =
   })
 
 /**
- * The design-system shelf is the same documented cases as `/design-system`,
- * in the same order and with the same covers. This is the single source of
- * truth for the case names, paths and brand-kit thumbnails.
+ * The six most recent documented systems, in `DESIGN_CASES` order — the same
+ * source of truth `/design-system` renders, so a case can never appear on the
+ * board with a name, path or cover the case page does not have.
  */
 export const SYSTEM_GALLERY_ITEMS: readonly SystemGalleryItem[] =
-  DESIGN_CASES.map((item, order) => ({
-    id: item.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, ''),
-    kind: 'design-system',
-    index: `S${order + 1}`,
-    title: item.name,
-    categoryLabel: 'Design system',
-    year: item.status.match(/\d{4}/)?.[0] ?? '2026',
-    description: item.description,
-    tags: item.tags,
-    href: item.href,
-    cta: 'Open the case',
-    cover: item.cover,
-    coverAlt: item.coverAlt,
-    position: 'top center',
-  }))
+  DESIGN_CASES.slice(0, MOODBOARD_LIMIT).map((item, order) => {
+    const id = slugify(item.name)
+
+    return {
+      id,
+      kind: 'design-system',
+      index: `S${String(order + 1).padStart(2, '0')}`,
+      title: item.name,
+      categoryLabel: 'Design system',
+      year: item.status.match(/\d{4}/)?.[0] ?? '2026',
+      description: item.description,
+      tags: item.tags,
+      href: item.href,
+      cta: 'Open the case',
+      cover: item.cover,
+      coverAlt: item.coverAlt,
+      position: 'top center',
+      swatches: SYSTEM_SWATCHES[id] ?? [],
+    }
+  })
 
 export const GALLERY_ITEMS: readonly GalleryItem[] = [
   ...PROJECT_GALLERY_ITEMS,
   ...SYSTEM_GALLERY_ITEMS,
 ]
 
-export function galleryCount(filter: GalleryFilter) {
-  if (filter === 'all') return GALLERY_ITEMS.length
-  return GALLERY_ITEMS.filter((item) => item.kind === filter).length
-}
+/** Where the archive links lead, and what the toolbar calls them. */
+export const ARCHIVE_LINKS = [
+  {
+    href: '/projects',
+    label: 'All projects',
+    count: WORK_PROJECTS.length,
+    note: 'the catalogue',
+  },
+  {
+    href: '/design-system',
+    label: 'All systems',
+    count: DESIGN_CASES.length,
+    note: 'every case',
+  },
+] as const
 
-export function visibleGalleryItems(filter: GalleryFilter): GalleryItem[] {
-  if (filter === 'all') return [...GALLERY_ITEMS]
-  return GALLERY_ITEMS.filter((item) => item.kind === filter)
-}
+/**
+ * Tape and tilt are assigned by position, not stored per item: the board has
+ * to look hand-assembled while staying deterministic, so the same piece never
+ * jumps tape colour between renders.
+ */
+export const PIECE_TAPE = [
+  'amber',
+  'pink',
+  'sky',
+  'mint',
+  'butter',
+  'rose',
+] as const
+
+export type PieceTape = (typeof PIECE_TAPE)[number]
+
+export const PIECE_TILT = [
+  -2.6, 1.9, -1.2, 2.8, -3.1, 1.4, 2.2, -1.8, 3.2, -2.2, 1.1, -2.9,
+] as const

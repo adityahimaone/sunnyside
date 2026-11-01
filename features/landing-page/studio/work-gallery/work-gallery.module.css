@@ -1,18 +1,31 @@
-/* The selected-work shelf.
+/* The selected-work cutting mat.
 
-   A cobalt room holding a bento of cream paper. The local variables are the
-   only values this shelf owns; everything else comes from the landing page's
-   palette so the section still reads as the same studio wall. */
+   Twelve paper pieces — six releases, six systems — taped to a dot-grid mat
+   inside the cobalt room. The local variables are the only values this board
+   owns; everything else comes from the landing page's palette so the chapter
+   still reads as the same studio wall.
 
-.gallery {
+   Layers: mat (dots + grain) → piece (cardstock + tape + stamp) → toolbar and
+   sticker tray (the only chrome on the page). Pieces are rotated by `--tilt`,
+   never by a transform inside the card, so the hover lift can straighten them
+   without fighting the layout. */
+
+.moodboard {
   --card: #faf4e8;
   --card-ink: #18181b;
-  --tape-yellow: #facc15;
+  --mat: #fbf8f1;
+  --mat-dot: rgb(24 24 27 / 0.14);
+  --tape-amber: #facc15;
   --tape-pink: #f4a8d4;
+  --tape-sky: #a9c8ff;
+  --tape-mint: #b7e4c7;
+  --tape-butter: #ffd23f;
+  --tape-rose: #ffb6e1;
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 
   display: flex;
   flex-direction: column;
+  gap: clamp(1.1rem, 2.4vw, 1.7rem);
   margin-top: clamp(2.1rem, 4.5vw, 3.4rem);
 }
 
@@ -28,493 +41,873 @@
   border: 0;
 }
 
-/* ── Filter switch ─────────────────────────────────────────────────────── */
+/* ── Toolbar: HUD, desk controls, archive tape ─────────────────────────── */
 
-.filters {
-  display: flex;
-  width: fit-content;
+.toolbar {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-areas:
+    'hud controls'
+    'filters archives';
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  align-self: flex-start;
-  gap: 0.15rem;
-  max-width: 100%;
-  padding: 0.32rem;
+  gap: 0.8rem clamp(1rem, 2vw, 1.6rem);
+  padding: 0.9rem 1.1rem;
   border: 2px solid var(--card-ink);
-  border-radius: 999px;
+  border-radius: 18px;
   background: var(--card);
-  box-shadow: 4px 4px 0 var(--card-ink);
+  box-shadow: 5px 5px 0 var(--card-ink);
 }
 
-.filterButton {
-  position: relative;
+.hud {
+  grid-area: hud;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.hudCount {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: 3.4rem;
+  height: 2.4rem;
+  padding-inline: 0.5rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 10px;
+  background: var(--tape-butter);
+  color: var(--card-ink);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  box-shadow: 2px 2px 0 var(--card-ink);
+  transform: rotate(-1.6deg);
+}
+
+.hudStack {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.hudTitle {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--card-ink);
+}
+
+.hudNote {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.controls {
+  grid-area: controls;
+  display: flex;
+  justify-self: end;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chunky,
+.plainer {
+  border-radius: 10px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform 0.16s var(--ease-spring),
+    box-shadow 0.16s var(--ease-spring),
+    background-color 0.16s ease;
+}
+
+.chunky {
+  padding: 0.62rem 0.8rem;
+  border: 2px solid var(--card-ink);
+  background: var(--tape-amber);
+  color: var(--card-ink);
+  box-shadow: 2px 2px 0 var(--card-ink);
+}
+
+.plainer {
+  padding: 0.55rem 0.7rem;
+  border: 1.5px solid rgb(24 24 27 / 0.4);
+  background: var(--mat);
+  color: var(--card-ink);
+}
+
+.chunky:hover,
+.plainer:hover {
+  background: var(--tape-butter);
+}
+
+.chunky:active,
+.plainer:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.chunky:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.chunky:focus-visible,
+.plainer:focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+}
+
+.archiveLinks {
+  grid-area: archives;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-self: end;
+  gap: 0.6rem;
+}
+
+/* The archive links are tape labels, not buttons: a strip of paper with a
+   handwritten-feel note above the label and the total in a mono chip. */
+.archive {
+  display: flex;
+  min-width: 0;
+  white-space: nowrap;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.45rem 0.75rem 0.5rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tape-sky) 42%, white);
+  color: var(--card-ink);
+  text-decoration: none;
+  transform: rotate(-1.1deg);
+  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.18);
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.archive:nth-child(2) {
+  background: color-mix(in srgb, var(--tape-pink) 40%, white);
+  transform: rotate(1.2deg);
+}
+
+.archive:hover {
+  transform: rotate(0deg) translateY(-2px);
+}
+
+.archive:focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+}
+
+.archiveNote {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+
+.archiveLabel {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.62rem 0.9rem;
+  gap: 0.36rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.archiveCount {
+  padding: 0.12rem 0.3rem;
+  border: 1px solid rgb(24 24 27 / 0.3);
+  border-radius: 999px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.04em;
+}
+
+.archiveArrow {
+  width: 0.8rem;
+  height: 0.8rem;
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.archive:hover .archiveArrow {
+  transform: translate(2px, -2px);
+}
+
+.filters {
+  grid-area: filters;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  justify-self: start;
+  padding: 0.28rem;
+  border: 1.5px solid rgb(24 24 27 / 0.35);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mat) 80%, white);
+}
+
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+  padding: 0.36rem 0.62rem;
   border: 0;
   border-radius: 999px;
   background: transparent;
   color: var(--card-ink);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  line-height: 1;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.2s var(--ease-spring);
-}
-
-.filterButton:hover:not([data-active='true']) {
-  background: rgb(24 24 27 / 0.06);
-}
-
-.filterButton:focus-visible {
-  outline: 3px solid var(--card-ink);
-  outline-offset: 2px;
-}
-
-.filterPill {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border: 1.5px solid var(--card-ink);
-  border-radius: 999px;
-  background: var(--tape-yellow);
-}
-
-.filterLabel,
-.filterCount {
-  position: relative;
-  z-index: 1;
-}
-
-.filterCount {
-  display: inline-grid;
-  place-items: center;
-  min-width: 1.2rem;
-  height: 1.15rem;
-  padding-inline: 0.28rem;
-  border: 1px solid rgb(24 24 27 / 0.22);
-  border-radius: 999px;
-  font-size: 8px;
-  letter-spacing: 0.02em;
-  line-height: 1;
-}
-
-.filterButton[data-active='true'] .filterCount {
-  border-color: rgb(24 24 27 / 0.36);
-}
-
-/* ── Bento grid ────────────────────────────────────────────────────────── */
-
-.grid {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: stretch;
-  gap: clamp(1rem, 1.8vw, 1.5rem);
-  margin-top: clamp(1.7rem, 3.2vw, 2.5rem);
-}
-
-.cell {
-  position: relative;
-  min-width: 0;
-}
-
-.cell:hover,
-.cell:focus-within {
-  z-index: 2;
-}
-
-.cellReveal {
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
-
-/* ── Card ──────────────────────────────────────────────────────────────── */
-
-.card {
-  position: relative;
-  display: flex;
-  width: 100%;
-  height: 100%;
-  flex-direction: column;
-  padding: 0.65rem;
-  border: 2px solid var(--card-ink);
-  border-radius: 18px;
-  background: var(--card);
-  color: var(--ink);
-  box-shadow: 4px 4px 0 var(--card-ink);
-  container-type: inline-size;
   transition:
-    transform 0.38s var(--ease-spring),
-    box-shadow 0.38s var(--ease-spring);
+    background-color 0.18s ease,
+    box-shadow 0.18s var(--ease-spring);
 }
 
-.cardLink {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  flex-direction: column;
-  border-radius: 14px;
-  color: inherit;
-  text-decoration: none;
+.filter:hover {
+  background: color-mix(in srgb, var(--tape-butter) 46%, transparent);
 }
 
-.cardLink:focus-visible {
+.filter[aria-pressed='true'] {
+  background: var(--card-ink);
+  color: var(--tape-butter);
+  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.25);
+}
+
+.filter:focus-visible {
   outline: 3px solid var(--cobalt);
   outline-offset: 2px;
 }
 
+.filterCount {
+  padding: 0.06rem 0.26rem;
+  border-radius: 999px;
+  background: rgb(24 24 27 / 0.12);
+  font-size: 7.5px;
+  letter-spacing: 0.04em;
+}
+
+.filter[aria-pressed='true'] .filterCount {
+  background: rgb(255 250 241 / 0.24);
+}
+
+/* ── The board is one surface ──────────────────────────────────────────── */
+
+/* Reveal wraps the whole desk, not the toolbar: the grain, the bezel and the
+   paper arrive together as one object instead of a bar dropping onto a mat. */
+.deskReveal {
+  display: block;
+  min-width: 0;
+}
+
+/* Dark bezel, the way a real moodboard sits in a frame or a tablet shell. The
+   gradient runs corner to corner so the surface reads as lit from top-left. */
+.desk {
+  position: relative;
+  padding: clamp(0.5rem, 1.1vw, 0.95rem);
+  border-radius: clamp(26px, 3.2vw, 44px);
+  background: linear-gradient(
+    158deg,
+    #5c5147 0%,
+    #352e28 32%,
+    #241f1b 64%,
+    #4a4038 100%
+  );
+  box-shadow:
+    0 44px 70px -36px rgb(6 8 26 / 0.85),
+    0 16px 28px -20px rgb(6 8 26 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    inset 0 -2px 4px rgb(0 0 0 / 0.55);
+}
+
+/* A hairline inside the bezel, so the frame has an edge instead of a blob. */
+.desk::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+  pointer-events: none;
+}
+
+/* Cork. Warmer and darker than the paper palette on purpose: cream cards need a
+   surface that is not also cream, or the board reads as one flat sheet. */
+.mat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.85rem, 1.8vw, 1.5rem);
+  padding: clamp(0.85rem, 1.9vw, 1.5rem);
+  overflow: hidden;
+  border-radius: clamp(18px, 2.4vw, 32px);
+  background-color: #c89b6a;
+  background-image: radial-gradient(
+      rgb(64 36 12 / 0.18) 1.1px,
+      transparent 1.2px
+    ),
+    radial-gradient(rgb(255 240 214 / 0.26) 1.3px, transparent 1.4px),
+    radial-gradient(
+      120% 92% at 50% -10%,
+      rgb(255 233 200 / 0.55),
+      transparent 62%
+    ),
+    linear-gradient(180deg, #cfa575 0%, #c09363 52%, #b1855a 100%);
+  background-size:
+    28px 28px,
+    28px 28px,
+    100% 100%,
+    100% 100%;
+  background-position:
+    0 0,
+    14px 14px,
+    0 0,
+    0 0;
+  box-shadow:
+    inset 0 0 0 1px rgb(64 38 16 / 0.42),
+    inset 0 4px 12px rgb(46 26 8 / 0.4),
+    inset 0 -4px 14px rgb(46 26 8 / 0.3);
+}
+
+/* Cork fleck and paper grain. Above the mat, below everything printed on it,
+   and inert: it never takes a pointer event or announces itself. */
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.26;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* The grid the pieces sit in. Same twelve columns as before; the surface moved
+   out to `.mat`, so this layer is only placement. */
+.pieceGrid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  gap: clamp(0.9rem, 1.7vw, 1.4rem);
+}
+
+.pieceCell {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  grid-column: span 3;
+  /* Hand-placed, not gridded: the offset rides on the piece, so filtering never
+     re-deals the heights and surviving cards do not jump. */
+  margin-top: var(--cell-drop, 0);
+}
+
+/* ── Piece ─────────────────────────────────────────────────────────────── */
+
+.piece {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 0.6rem 0.6rem 0.7rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow:
+    0 0 0 5px #fffaf1,
+    5px 7px 0 rgb(24 24 27 / 0.16);
+  rotate: var(--tilt, 0deg);
+  transition:
+    rotate 0.4s var(--ease-spring),
+    box-shadow 0.35s var(--ease-spring),
+    translate 0.35s var(--ease-spring);
+}
+
+.piece:hover,
+.piece:focus-within {
+  box-shadow:
+    0 0 0 5px #fffaf1,
+    9px 11px 0 rgb(24 24 27 / 0.22);
+}
+
+.piece:focus-within {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 3px;
+}
+
+/* Lucky dip: a butter marker ring, no motion, so it works everywhere. */
+.piece[data-picked='true'] {
+  box-shadow:
+    0 0 0 5px #fffaf1,
+    0 0 0 11px color-mix(in srgb, var(--tape-butter) 72%, transparent),
+    5px 7px 0 rgb(24 24 27 / 0.16);
+}
+
+/* Washi tape. Torn edges come from the clip path, the slight sheen from the
+   border; both are decoration only. */
 .tape {
   position: absolute;
-  z-index: 4;
-  top: -0.72rem;
-  left: 1.45rem;
-  width: 5.4rem;
-  height: 1.32rem;
-  border: 1px solid rgb(24 24 27 / 0.12);
-  background: var(--tape-pink);
-  transform: rotate(-4.5deg);
-  transform-origin: left center;
-  clip-path: polygon(1% 0, 100% 4%, 98% 100%, 0 96%);
-  box-shadow: 0 1px 1px rgb(24 24 27 / 0.12);
+  z-index: 5;
+  top: -0.75rem;
+  left: 50%;
+  width: 5.2rem;
+  height: 1.45rem;
+  translate: -50% 0;
+  rotate: -2.4deg;
+  border-block: 1px solid rgb(24 24 27 / 0.08);
+  background: var(--tape-amber);
+  clip-path: polygon(2% 0, 100% 3%, 98% 100%, 0 96%);
+  box-shadow: 0 1px 2px rgb(24 24 27 / 0.16);
   pointer-events: none;
-  transition: transform 0.32s var(--ease-spring);
 }
 
-.tapeButter {
-  width: 6rem;
-  background: var(--tape-yellow);
-}
-
-.tapePink {
+.piece[data-tape='pink'] .tape {
   background: var(--tape-pink);
+  rotate: 2deg;
 }
 
-.mediaShell {
+.piece[data-tape='sky'] .tape {
+  background: var(--tape-sky);
+  rotate: -3.4deg;
+}
+
+.piece[data-tape='mint'] .tape {
+  background: var(--tape-mint);
+  rotate: 1.4deg;
+}
+
+.piece[data-tape='butter'] .tape {
+  background: var(--tape-butter);
+  rotate: 2.8deg;
+}
+
+.piece[data-tape='rose'] .tape {
+  background: var(--tape-rose);
+  rotate: -1.8deg;
+}
+
+.pieceLink {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
+.pieceLink:focus-visible {
+  outline: none;
+}
+
+.pieceIndex {
+  position: absolute;
+  z-index: 4;
+  top: 1.05rem;
+  left: 1.05rem;
+  padding: 0.16rem 0.3rem;
+  border: 1.5px solid var(--card-ink);
+  border-radius: 4px;
+  background: var(--mat);
+  color: var(--card-ink);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.frame {
   position: relative;
   display: block;
-  width: 100%;
-  flex: none;
   overflow: hidden;
-  border-radius: 12px;
+  border: 1.5px solid rgb(24 24 27 / 0.55);
+  border-radius: 8px;
   background: var(--paper-lo);
+  aspect-ratio: 16 / 10;
   isolation: isolate;
 }
 
-/* Projects keep their native 16:10 frame; the design-system brand kits keep
-   the 4:3 frame used by /design-system. Each category is consistent, and no
-   screenshot is forced into the other category's crop. */
-.media {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  height: auto;
-  overflow: hidden;
-  border-radius: 12px;
-  background: var(--paper-lo);
-  container-type: inline-size;
-}
-
-.card[data-kind='design-system'] .media {
+.piece[data-kind='design-system'] .frame {
   aspect-ratio: 4 / 3;
 }
 
-.mediaInner {
+.panTarget {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px)) scale(1);
+  display: block;
+  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px));
   transition: transform 0.5s var(--ease-spring);
   will-change: transform;
 }
 
-.coverImage {
+.cover {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top left;
 }
 
-.systemBadge {
+.kindTag {
   position: absolute;
-  z-index: 5;
-  top: -0.72rem;
-  right: 1.35rem;
-  padding: 0.3rem 0.48rem;
-  border: 1.5px solid var(--card-ink);
+  z-index: 3;
+  right: 0.4rem;
+  bottom: 0.4rem;
+  padding: 0.16rem 0.36rem;
   border-radius: 999px;
   background: var(--card-ink);
-  color: var(--tape-yellow);
+  color: var(--tape-butter);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 7.5px;
+  font-size: 7px;
   font-weight: 600;
   letter-spacing: 0.12em;
   line-height: 1;
   text-transform: uppercase;
-  transform: rotate(1.5deg);
-  transform-origin: right center;
-  pointer-events: none;
 }
 
-/* ── Bottom bar ────────────────────────────────────────────────────────── */
+.piece[data-kind='design-system'] .kindTag {
+  background: var(--cobalt);
+  color: var(--paper-hi);
+}
 
-.foot {
+.body {
   display: flex;
+  min-width: 0;
   flex: 1;
   flex-direction: column;
-  padding: 0.85rem 0.35rem 0.25rem;
+  gap: 0.34rem;
+  padding: 0.62rem 0.2rem 0;
 }
 
-.metaRow {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
+.meta {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 8.5px;
+  font-size: 8px;
   letter-spacing: 0.14em;
   line-height: 1;
   text-transform: uppercase;
   color: var(--muted);
 }
 
-.cardIndex {
-  color: var(--cobalt);
-  font-weight: 700;
-}
-
-.cardCategory::before {
-  content: '·';
-  margin-right: 0.45rem;
-  color: rgb(24 24 27 / 0.35);
-}
-
-.cardYear {
-  margin-left: auto;
-}
-
-.titleRow {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.6rem;
-  margin-top: 0.4rem;
-}
-
-.cardTitle {
-  display: -webkit-box;
-  min-width: 0;
-  margin: 0;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  font-family: var(--font-syne), var(--font-space-grotesk), system-ui, sans-serif;
-  font-size: clamp(1.4rem, 6.5cqw, 2.6rem);
+.title {
+  font-family: var(--font-syne), var(--font-space-grotesk), system-ui,
+    sans-serif;
+  font-size: clamp(1.05rem, 1.35vw, 1.35rem);
   font-weight: 800;
-  letter-spacing: -0.045em;
-  line-height: 0.98;
-  color: var(--ink);
+  letter-spacing: -0.035em;
+  line-height: 1.02;
   text-wrap: balance;
 }
 
-.cardArrow {
-  display: grid;
-  flex: none;
-  width: 1.8rem;
-  height: 1.8rem;
-  margin-top: 0.08rem;
-  place-items: center;
-  border: 1.5px solid rgb(24 24 27 / 0.25);
-  border-radius: 50%;
-  color: var(--ink);
-  transition:
-    transform 0.25s var(--ease-spring),
-    background-color 0.25s var(--ease-spring),
-    border-color 0.25s var(--ease-spring);
-}
-
-.cardArrowIcon {
-  width: 0.85rem;
-  height: 0.85rem;
-}
-
-/* ── Hover detail drawer ───────────────────────────────────────────────── */
-
-.drawer {
-  position: absolute;
-  z-index: 2;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  padding: 0.9rem 0.95rem 1rem;
-  border-top: 2px solid var(--card-ink);
-  border-radius: 12px 12px 0 0;
-  background: var(--paper-hi);
-  color: var(--ink);
-  opacity: 0;
-  transform: translateY(calc(100% + 3px));
-  transition:
-    transform 0.48s var(--ease-spring),
-    opacity 0.25s ease;
-  will-change: transform;
-}
-
-.drawer > * {
-  opacity: 0;
-  transform: translateY(8px);
-  transition:
-    opacity 0.24s ease,
-    transform 0.36s var(--ease-spring);
-}
-
-.drawerDescription {
-  max-width: 46ch;
-  margin: 0;
-  font-size: 0.8rem;
-  line-height: 1.5;
+.note {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.76rem;
+  line-height: 1.45;
   color: var(--muted);
 }
 
-.tagList {
+.tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 0.26rem;
+  margin-top: 0.1rem;
 }
 
-.tagList li {
-  padding: 0.23rem 0.5rem;
+.tags > span {
+  padding: 0.2rem 0.42rem;
   border: 1px solid rgb(24 24 27 / 0.22);
   border-radius: 999px;
-  background: var(--card);
-  color: var(--ink);
+  background: var(--mat);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 7.5px;
+  font-size: 7px;
   letter-spacing: 0.08em;
   line-height: 1.1;
   text-transform: uppercase;
+}
+
+/* Paint chips, printed on the piece like a pantone fan deck. */
+.deck {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.22rem;
+  margin-top: 0.16rem;
+}
+
+.chip {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  border: 1px solid rgb(24 24 27 / 0.25);
+  border-radius: 3px;
+  background: var(--mat);
+  overflow: hidden;
+}
+
+.chipFill {
+  height: 0.85rem;
+}
+
+.chipHex {
+  padding: 0.14rem 0.1rem 0.16rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 6px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .cta {
   display: inline-flex;
   align-items: center;
   align-self: flex-start;
-  gap: 0.38rem;
+  gap: 0.3rem;
   margin-top: auto;
-  font-size: 0.8rem;
-  font-weight: 650;
+  /* The stamp button is pinned bottom-right; the CTA keeps clear of it. */
+  padding: 0.5rem 4.4rem 0 0;
+  font-size: 0.76rem;
+  font-weight: 700;
   color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--tangerine);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  text-decoration-style: wavy;
 }
 
 .ctaArrow {
-  width: 0.95rem;
-  height: 0.95rem;
+  width: 0.8rem;
+  height: 0.8rem;
   transition: transform 0.2s var(--ease-spring);
 }
 
-/* Keyboard focus reveals the same drawer as hover. It lives outside the
-   pointer media query so a keyboard reader never depends on having a mouse. */
-.card:focus-within {
-  transform: translateY(-6px);
-  box-shadow: 8px 8px 0 var(--card-ink);
-}
-
-.card:focus-within .tape {
-  transform: rotate(1.8deg) translateY(-2px);
-}
-
-.card:focus-within .mediaInner {
-  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px)) scale(1.04);
-}
-
-.card:focus-within .drawer {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.card:focus-within .drawer > * {
-  opacity: 1;
-  transform: none;
-}
-
-.card:focus-within .drawerDescription {
-  transition-delay: 0.04s;
-}
-
-.card:focus-within .tagList {
-  transition-delay: 0.08s;
-}
-
-.card:focus-within .cta {
-  transition-delay: 0.12s;
-}
-
-.card:focus-within .cardArrow {
-  border-color: var(--card-ink);
-  background: var(--tape-yellow);
+.piece:hover .ctaArrow,
+.piece:focus-within .ctaArrow {
   transform: translate(2px, -2px);
 }
 
-.card:focus-within .ctaArrow {
-  transform: translate(3px, -3px);
+/* ── Stamp ─────────────────────────────────────────────────────────────── */
+
+.stampButton {
+  position: absolute;
+  z-index: 6;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  padding: 0.3rem 0.45rem;
+  border: 1.5px solid rgb(24 24 27 / 0.55);
+  border-radius: 5px;
+  background: var(--mat);
+  color: var(--card-ink);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    transform 0.16s var(--ease-spring);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .card:hover {
-    transform: translateY(-6px);
-    box-shadow: 8px 8px 0 var(--card-ink);
-  }
+.stampButton:hover {
+  background: var(--tape-butter);
+}
 
-  .card:hover .tape {
-    transform: rotate(1.8deg) translateY(-2px);
-  }
+.stampButton:active {
+  transform: translateY(1px);
+}
 
-  .card:hover .mediaInner {
-    transform: translate(var(--pan-x, 0px), var(--pan-y, 0px)) scale(1.04);
-  }
+.stampButton:focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+}
 
-  .card:hover .drawer {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.piece[data-stamped='true'] .stampButton {
+  border-color: var(--card-ink);
+  background: var(--card-ink);
+  color: var(--tape-butter);
+}
 
-  .card:hover .drawer > * {
-    opacity: 1;
-    transform: none;
-  }
+.stamp {
+  position: absolute;
+  z-index: 7;
+  right: 0.45rem;
+  bottom: 2.4rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.22rem;
+  padding: 0.18rem 0.4rem;
+  border: 2px solid #d13a5a;
+  border-radius: 4px;
+  color: #d13a5a;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+  opacity: 0.85;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
 
-  .card:hover .drawerDescription {
-    transition-delay: 0.04s;
-  }
+.stampSmall {
+  font-size: 6px;
+  letter-spacing: 0.2em;
+  opacity: 0.75;
+}
 
-  .card:hover .tagList {
-    transition-delay: 0.08s;
-  }
+/* ── Vinyl scraps on the mat ───────────────────────────────────────────── */
 
-  .card:hover .cta {
-    transition-delay: 0.12s;
-  }
+/* The seven shapes are the same die-cut art peeled off the About release
+   liner: white rim, ink edges, no background of their own. The button is only
+   a handle — size comes from the sticker spec, and 2.4rem keeps one on the
+   mat's edge band rather than on a piece's copy. */
+.stickerZone {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
 
-  .card:hover .cardArrow {
-    border-color: var(--card-ink);
-    background: var(--tape-yellow);
-    transform: translate(2px, -2px);
-  }
+.sticker {
+  position: absolute;
+  z-index: 5;
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--card-ink);
+  cursor: grab;
+  touch-action: none;
+  filter: drop-shadow(0 2px 0 rgb(24 24 27 / 0.22));
+  transition:
+    filter 0.18s var(--ease-spring),
+    opacity 0.18s ease;
+}
 
-  .card:hover .ctaArrow {
-    transform: translate(3px, -3px);
-  }
+.sticker svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
+.sticker:hover {
+  filter: drop-shadow(0 4px 0 rgb(24 24 27 / 0.26));
+}
+
+.sticker[aria-pressed='true'] {
+  opacity: 0.72;
+}
+
+.sticker[aria-pressed='true'] svg {
+  filter: saturate(0.55);
+}
+
+/* The peel is recorded with a tiny butter dot, not by moving the shape. */
+.stickerTick {
+  position: absolute;
+  right: -0.1rem;
+  bottom: -0.1rem;
+  display: grid;
+  place-items: center;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1.5px solid var(--card-ink);
+  border-radius: 999px;
+  background: var(--tape-butter);
+  color: var(--card-ink);
+}
+
+.stickerTick svg {
+  width: 0.55rem;
+  height: 0.55rem;
+}
+
+.sticker:focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+/* ── Paper confetti ────────────────────────────────────────────────────── */
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.scrap {
+  position: absolute;
+  top: 0;
+  border-radius: 1px;
+  background: var(--tape-amber);
+  box-shadow: 0 1px 0 rgb(24 24 27 / 0.14);
+}
+
+.scrap[data-tone='pink'] {
+  background: var(--tape-pink);
+}
+
+.scrap[data-tone='sky'] {
+  background: var(--tape-sky);
+}
+
+.scrap[data-tone='mint'] {
+  background: var(--tape-mint);
+}
+
+.scrap[data-tone='butter'] {
+  background: var(--tape-butter);
+}
+
+.scrap[data-tone='rose'] {
+  background: var(--tape-rose);
+}
+
+.masterNote {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.4rem 0.7rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 999px;
+  background: var(--tape-butter);
+  color: var(--card-ink);
+  font-size: 0.78rem;
+  font-weight: 650;
+  rotate: 0.8deg;
+}
+
+.masterMark {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: none;
 }
 
 /* ── Generated sleeves for the two releases without artwork ────────────── */
@@ -525,7 +918,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(0.9rem, 1.8vw, 1.25rem);
+  padding: clamp(0.7rem, 1.6vw, 1.05rem);
   overflow: hidden;
   background: var(--cobalt);
   color: var(--paper-hi);
@@ -552,7 +945,7 @@
   position: relative;
   z-index: 2;
   font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 7.5px;
+  font-size: 7px;
   letter-spacing: 0.16em;
   line-height: 1;
   text-transform: uppercase;
@@ -567,8 +960,9 @@
   position: relative;
   z-index: 2;
   margin-top: auto;
-  font-family: var(--font-syne), var(--font-space-grotesk), system-ui, sans-serif;
-  font-size: clamp(3rem, 22cqw, 7rem);
+  font-family: var(--font-syne), var(--font-space-grotesk), system-ui,
+    sans-serif;
+  font-size: clamp(2.2rem, 18cqw, 5rem);
   font-weight: 800;
   letter-spacing: -0.085em;
   line-height: 0.7;
@@ -645,149 +1039,243 @@
   aspect-ratio: 1;
 }
 
-/* The six cases come from /design-system, so the DS view uses the same
-   2-up composition as that page; All and Project keep the 3-up bento. */
-@media (min-width: 1024px) {
-  .grid[data-filter='design-system'] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+/* ── Hover peep ────────────────────────────────────────────────────────── */
+
+/* The same cover, printed big enough to read. It is a print, not a dialog: no
+   backdrop, no focus trap, no pointer events, and it never covers the toolbar
+   because `Peek` clamps it inside the mat. */
+.peek {
+  position: absolute;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow:
+    0 0 0 4px #fffaf1,
+    0 8px 0 rgb(24 24 27 / 0.18),
+    0 34px 54px -22px rgb(18 10 2 / 0.85),
+    0 2px 10px rgb(18 10 2 / 0.3);
+  transform-origin: 50% 110%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.peekFrame {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1.5px solid rgb(24 24 27 / 0.55);
+  border-radius: 9px;
+  background: var(--paper-lo);
+  aspect-ratio: 16 / 10;
+}
+
+.peekBar {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.45rem 0.2rem 0.1rem;
+}
+
+.peekIndex {
+  font-family: var(--font-geist-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
+  color: rgb(24 24 27 / 0.45);
+}
+
+.peekTitle {
+  font-family: var(--font-syne);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--card-ink);
+}
+
+.peekKind {
+  margin-left: auto;
+  font-family: var(--font-geist-mono);
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgb(24 24 27 / 0.42);
 }
 
 /* ── Tablet ────────────────────────────────────────────────────────────── */
 
-@media (max-width: 1023px) {
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (min-width: 1024px) {
+  .toolbar {
+    grid-template-columns: minmax(0, 1.25fr) auto auto;
+  }
+
+  .archiveLinks {
+    grid-column: auto;
+    justify-content: flex-end;
   }
 }
 
-/* ── Phone, and any touch device without a hover ───────────────────────── */
+@media (max-width: 1200px) {
+  .pieceCell {
+    grid-column: span 4;
+  }
+}
 
-@media (max-width: 767px), (hover: none) {
-  .grid {
+@media (max-width: 1023px) {
+  .toolbar {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .cell {
-    grid-column: span 1;
-    grid-row: span 1;
-  }
-
-  .card {
-    height: auto;
-  }
-
-  .card:focus-within {
-    transform: none;
-    box-shadow: 4px 4px 0 var(--card-ink);
-  }
-
-  .card:focus-within .mediaInner {
-    transform: none;
-  }
-
-  .cardLink {
-    height: auto;
-  }
-
-  .mediaShell {
-    display: contents;
-  }
-
-  .media {
-    order: 1;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 10;
-    flex: none;
-  }
-
-  .foot {
+  .controls {
     order: 2;
   }
 
-  .drawer {
-    position: static;
-    order: 3;
-    margin-top: 0.85rem;
-    padding: 0.85rem 0.35rem 0.2rem;
-    border-top: 2px solid var(--card-ink);
-    border-radius: 0;
-    background: transparent;
-    opacity: 1;
-    transform: none;
+  .pieceCell {
+    grid-column: span 6;
   }
 
-  .drawer > * {
-    opacity: 1;
-    transform: none;
-  }
-
-  .drawerDescription {
-    font-size: 0.82rem;
-  }
-
-  .cardTitle {
-    -webkit-line-clamp: unset;
-    overflow: visible;
-    font-size: clamp(1.55rem, 6vw, 2.1rem);
-  }
-
-  .filters {
-    width: 100%;
-  }
-
-  .filterButton {
-    flex: 1;
-    justify-content: center;
-    padding: 0.58rem 0.5rem;
-    font-size: 8.5px;
-    letter-spacing: 0.1em;
-  }
-
-  .filterCount {
-    min-width: 1.1rem;
-    height: 1.05rem;
-    font-size: 7.5px;
+  .pieceCell {
+    margin-top: calc(var(--cell-drop, 0rem) * 0.6);
   }
 }
 
-@media (max-width: 380px) {
-  .filterButton {
-    gap: 0.3rem;
-    padding-inline: 0.34rem;
-    font-size: 7.8px;
-    letter-spacing: 0.07em;
+/* ── Phone and touch ───────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  .desk {
+    padding: 0.4rem;
+    border-radius: 22px;
   }
 
-  .filterLabel {
-    max-width: 5.2rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .mat {
+    border-radius: 16px;
+    gap: 1.35rem 0.85rem;
+  }
+
+  .pieceGrid {
+    gap: 1.35rem 0.85rem;
+  }
+
+  .pieceCell {
+    grid-column: span 12;
+    margin-top: 0;
+  }
+
+  .piece {
+    rotate: 0deg;
+    box-shadow:
+      0 0 0 4px #fffaf1,
+      4px 5px 0 rgb(24 24 27 / 0.14);
+  }
+
+  .tape {
+    width: 5.2rem;
+  }
+
+  .note {
+    -webkit-line-clamp: 2;
+  }
+
+  .stampButton {
+    padding: 0.36rem 0.5rem;
+    font-size: 8px;
+  }
+
+  /* One column: scraps stop floating over the copy and sit in their own row. */
+  .stickerZone {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.9rem;
+    padding-block: 0.1rem 0.5rem;
+  }
+
+  .sticker {
+    position: static;
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  .toolbar {
+    grid-template-areas:
+      'hud'
+      'controls'
+      'filters'
+      'archives';
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .controls,
+  .archiveLinks {
+    justify-self: stretch;
+  }
+
+  .filters {
+    flex-wrap: wrap;
+    justify-self: stretch;
+  }
+
+  .filter {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .archiveLinks {
+    justify-self: stretch;
+  }
+
+  .hudCount {
+    min-width: 3rem;
+    height: 2.2rem;
+    font-size: 10px;
+  }
+
+  .controls {
+    flex-wrap: wrap;
+  }
+
+  .chunky,
+  .plainer {
+    flex: 1;
+    min-height: 2.4rem;
   }
 }
 
 /* ── Reduced motion ────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .card,
-  .cardArrow,
-  .ctaArrow,
+  .piece,
   .tape,
-  .mediaInner,
-  .drawer,
-  .drawer > * {
+  .panTarget,
+  .ctaArrow,
+  .archive,
+  .archiveArrow,
+  .sticker,
+  .stampButton,
+  .chunky,
+  .plainer {
     transition-duration: 0.01ms !important;
   }
 
-  .card:hover,
-  .card:focus-within {
-    transform: none;
+  .piece {
+    rotate: 0deg;
   }
 
-  .card:hover .mediaInner,
-  .card:focus-within .mediaInner {
+  .piece:hover,
+  .piece:focus-within {
+    box-shadow:
+      0 0 0 5px #fffaf1,
+      5px 7px 0 rgb(24 24 27 / 0.16);
+    translate: none;
+  }
+
+  .panTarget {
     transform: none !important;
   }
 
+  .filter,
+  .filterCount {
+    transition-duration: 0.01ms !important;
+  }
 }

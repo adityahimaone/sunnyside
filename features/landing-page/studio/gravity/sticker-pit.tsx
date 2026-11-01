@@ -3,33 +3,13 @@
 import { useReducedMotion } from 'motion/react'
 import { useEffect, useRef, type CSSProperties } from 'react'
 
-import { Bolt, Burst, Daisy, Atom, Smiley } from '../doodles'
 import { PIT_STICKERS, type PitSpec } from './pit-config'
 import { runPit, type PitRuntime } from './pit-runtime'
-import { Stamp } from './stamps'
+import { StickerArt } from './sticker-art'
 import styles from './sticker-pit.module.css'
 
 function Art({ spec }: { spec: PitSpec }) {
-  switch (spec.id) {
-    case 'smiley':
-      return <Smiley />
-    case 'burst':
-      return <Burst text="wow!" />
-    case 'daisy':
-      return <Daisy />
-    case 'bolt':
-      return <Bolt />
-    case 'atom':
-      return (
-        <span className={styles.atomDisc}>
-          <Atom />
-        </span>
-      )
-    case 'stampCity':
-      return <Stamp text="Jakarta · GMT+7" fill="var(--mint)" />
-    case 'stampRole':
-      return <Stamp text="Design engineer" fill="var(--butter)" />
-  }
+  return <StickerArt id={spec.id} />
 }
 
 /**
