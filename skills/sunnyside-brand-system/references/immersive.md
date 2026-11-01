@@ -151,6 +151,21 @@ Three rules that keep it right:
 - **Re-do it at every breakpoint.** In a two-column layout the cell that starts a row needs its
   left padding removed again — this is the half everyone forgets.
 
+## 8. Procedural Hero Fields & Duotone Photography (`field-forge.mjs`)
+
+When a system needs a hero background, gradient mesh, stepped colour field, paper grain, ordered Bayer dither, glass pane or architectural grid, generate token-locked SVGs and CSS recipes directly from `tokens.json` in `<100ms` (zero network or API tokens):
+
+```bash
+node scripts/field-forge.mjs --slug <slug> --recipe <mesh|bands|grain|dither|glass|grid|all>
+```
+
+This writes `public/brand/<slug>/field-<recipe>.svg` (`1600 × 1000`, `preserveAspectRatio="xMidYMid slice"`) plus `public/brand/<slug>/<slug>-field.css` with four composable surface classes:
+
+- **`.fieldStage`** — full-bleed hero stage backed by `field-<recipe>.svg` and `var(--xx-surface-page)` fallback.
+- **`.fieldScrim`** — measured `oklab` gradient scrim (`32% → 86% → 100%` page ground) so display copy over a busy field or photograph never drops below `4.5:1`.
+- **`.readingPlate`** — solid `var(--xx-surface-plate)` card with a `12%` ink hairline for paragraphs ≥ 3 lines.
+- **`.photoDuotone`** — locks any licensed stock photograph from `assets.mjs` to the system's ink and signal tokens (`grayscale(1) contrast(1.12)` + `mix-blend-mode: multiply` over a `surface-page → accent` gradient).
+
 ## Motion, briefly
 
 - Two durations are enough: `110–180ms` for a decision, `320–420ms` for an arrival.

@@ -35,9 +35,16 @@ const flag = (name, fallback) => {
 }
 const has = (name) => args.includes(`--${name}`)
 
-const CONCEPTS = ['sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet', 'dotmatrix', 'lines', 'overprint', 'nodes', 'monogram', 'bracket', 'planes', 'louvers', 'ribbon', 'horizon']
-// Six families for a bake-off (geometry, dots, lines, dots+geometry, lines+geometry, network)
-const BAKEOFF = ['bracket', 'planes', 'louvers', 'ribbon', 'horizon']
+const CONCEPTS = [
+  // Constructed (fill-only, zero circle, zero stroke, 2–4 solid primitives, passes v2.3 constructed gate)
+  'bracket', 'planes', 'louvers', 'ribbon', 'horizon', 'junction', 'carved', 'cells', 'tear', 'portal', 'archmono',
+  // Drawn (subject-led, cut-line stroke, hard offset, tactile tile, passes drawn gate)
+  'sunburst', 'aperture', 'orbit', 'hatch', 'stack', 'facet', 'dotmatrix', 'lines', 'overprint', 'nodes', 'monogram', 'crest',
+]
+const CONSTRUCTED_CONCEPTS = new Set(['bracket', 'planes', 'louvers', 'ribbon', 'horizon', 'junction', 'carved', 'cells', 'tear', 'portal', 'archmono'])
+// Default 6-concept bake-off across distinct families
+const BAKEOFF = ['bracket', 'planes', 'louvers', 'ribbon', 'horizon', 'junction']
+const DRAWN_BAKEOFF = ['sunburst', 'aperture', 'overprint', 'hatch', 'stack', 'crest']
 
 const STARTER = {
   name: 'Sunnyside',
@@ -85,7 +92,7 @@ if (has('init')) {
   if (!CONCEPTS.includes(concept)) fail(`unknown concept: ${concept}`)
   const cfg = structuredClone(STARTER)
   cfg.concept = concept
-  if (['bracket', 'planes', 'louvers', 'ribbon', 'horizon'].includes(concept)) {
+  if (CONSTRUCTED_CONCEPTS.has(concept)) {
     cfg.dna.offset = 0
     cfg.dna.edge = 'none'
     cfg.dna.tile = 'none'
@@ -97,38 +104,133 @@ if (has('init')) {
     cfg.dna.radius = 6
   }
   if (concept === 'orbit') cfg.dna.tile = 'circle'
-  if (concept === 'monogram') cfg.params.letter = cfg.name[0]
+  if (concept === 'monogram' || concept === 'archmono') cfg.params.letter = cfg.name[0]
   console.log(JSON.stringify(cfg, null, 2))
   process.exit(0)
 }
 
+/**
+ * Convert a universal tokens.json into a brand-forge config object so callers
+ * can run `node scripts/brand-forge.mjs --tokens features/<slug>/tokens.json --concept <concept> --out public/brand/<slug>`
+ * without authoring a separate brand.json.
+ */
+function configFromTokens(tokensObj, sourcePath = 'tokens.json') {
+  const meta = tokensObj.meta ?? {}
+  const theme = tokensObj.theme ?? tokensObj.dna ?? {}
+  const primList = Array.isArray(tokensObj.primitives)
+    ? tokensObj.primitives
+    : Object.entries(tokensObj.color ?? {}).map(([k, v]) => ({ name: k, value: v }))
+  const byKey = {}
+  for (const p of primList) {
+    const clean = String(p.name || '').replace(/^--[a-z0-9]+-/, '').toLowerCase()
+    if (/^#[0-9a-f]{6}$/i.test(p.value)) byKey[clean] = p.value
+  }
+  const pick = (...keys) => {
+    for (const k of keys) if (byKey[k]) return byKey[k]
+    return null
+  }
+  const allHex = Object.values(byKey)
+  const slugGuess =
+    meta.slug ||
+    (meta.name ? String(meta.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '') ||
+    sourcePath.split('/').slice(-2, -1)[0] ||
+    'brand'
+  const nameGuess = meta.name || tokensObj.name || slugGuess
+  const conceptGuess = flag('concept') || tokensObj.concept || (meta.track === 'drawn' ? 'sunburst' : 'bracket')
+  const isConstructed = CONSTRUCTED_CONCEPTS.has(conceptGuess)
+  const paper = pick('ground', 'paper', 'cream', 'parchment', 'chalk', 'sand', 'stone', 'canvas', 'porcelain', 'bone', 'vellum') || allHex[0] || STARTER.palette.paper
+  const paperHi = pick('plate', 'paper-hi', 'paperhi', 'white', 'ivory', 'card', 'surface', 'linen', 'alabaster') || allHex[1] || paper
+  const ink = pick('ink', 'charcoal', 'obsidian', 'void', 'slate', 'graphite', 'espresso', 'basalt', 'night', 'pine') || allHex[2] || STARTER.palette.ink
+  const muted = pick('muted', 'ash', 'dust', 'slate-muted', 'pewter', 'umber', 'secondary') || allHex[3] || STARTER.palette.muted
+  const signal = pick('signal', 'accent', 'cobalt', 'vermilion', 'amber', 'gold', 'emerald', 'terracotta', 'crimson', 'rust', 'copper', 'cyan', 'lime') || allHex[allHex.length - 1] || STARTER.palette.field
+  const wash = pick('wash', 'tint', 'mist', 'sage', 'foam', 'blush') || signal
+
+  return {
+    name: nameGuess,
+    slug: slugGuess,
+    concept: conceptGuess,
+    palette: {
+      paper,
+      paperHi,
+      ink,
+      field: signal,
+      core: signal,
+      spark: signal,
+      muted,
+      danger: pick('danger', 'error', 'crimson') || STARTER.palette.danger,
+      success: pick('success', 'ok', 'emerald', 'moss') || STARTER.palette.success,
+    },
+    dna: {
+      edge: isConstructed ? 'none' : (['hard', 'soft', 'none'].includes(theme.edge) ? theme.edge : 'hard'),
+      offset: isConstructed ? 0 : (Number.isFinite(Number(theme.offset)) ? Number(theme.offset) : 2.5),
+      stroke: isConstructed ? 0 : (Number.isFinite(Number(theme.stroke)) ? Number(theme.stroke) : 2.6),
+      radius: isConstructed ? 0 : (Number.isFinite(Number(theme.radius)) ? Number(theme.radius) : 14),
+      tile: isConstructed ? 'none' : (['rounded', 'circle', 'square', 'none'].includes(theme.tile) ? theme.tile : 'rounded'),
+      face: Boolean(theme.face),
+      density: ['compact', 'cosy', 'roomy'].includes(theme.density) ? theme.density : 'cosy',
+      label: ['sentence', 'mono-caps', 'small-caps'].includes(theme.label) ? theme.label : 'sentence',
+      ring: ['offset', 'solid', 'glow'].includes(theme.ring) ? theme.ring : 'offset',
+      font: { display: 'Syne', ui: 'Geist', mono: 'Geist Mono' },
+    },
+    params: {
+      letter: flag('letter', String(nameGuess)[0] || 'A'),
+      lens: wash !== signal ? wash : ink,
+    },
+    story: {
+      belief: meta.essence || STARTER.story.belief,
+      enemy: STARTER.story.enemy,
+      promise: meta.promise || meta.oneSentence || STARTER.story.promise,
+      proof: STARTER.story.proof,
+    },
+  }
+}
 
 // ───────────────────────── bake-off ─────────────────────────
 // Six concepts from six different families, same palette and material (theme DNA),
 // so the only variable is the idea. Pick one; write down why five lost.
 if (has('bakeoff')) {
-  const cfgFile = resolve(process.cwd(), flag('bakeoff'))
+  const bakeArg = flag('bakeoff')
   const outRoot = resolve(process.cwd(), flag('out', 'bakeoff'))
-  const base0 = JSON.parse(await readFile(cfgFile, 'utf8'))
+  const rawInput = JSON.parse(await readFile(resolve(process.cwd(), bakeArg), 'utf8'))
+  const base0 = rawInput.primitives || rawInput.meta ? configFromTokens(rawInput, bakeArg) : rawInput
+  const trackFlag = flag('track', base0.dna?.edge === 'none' ? 'constructed' : 'constructed')
   const families = {
-    aperture: 'pure geometry',
+    aperture: 'pure geometry (drawn)',
     dotmatrix: 'dot matrix',
     lines: 'line system',
     overprint: 'dots + geometry (two inks)',
-    hatch: 'lines + geometry',
+    hatch: 'lines + geometry (hachure)',
     nodes: 'node network',
-    bracket: 'architectural monogram',
-    planes: 'offset geometric planes',
-    louvers: 'brutalist louvers',
-    ribbon: 'continuous ribbon',
-    horizon: 'horizon & counter-form',
+    sunburst: 'cut-ray emblem (drawn)',
+    stack: 'stepped offset plates (drawn)',
+    crest: 'emblem & horizon silhouette (drawn)',
+    bracket: 'architectural monogram (constructed)',
+    planes: 'offset sheared planes (constructed)',
+    louvers: 'stepped brutalist louvers (constructed)',
+    ribbon: 'folded beam & counter-cut (constructed)',
+    horizon: 'grounded bar & keystone (constructed)',
+    junction: 'single-stroke turn & stop (constructed)',
+    carved: 'carved block & nested plate (constructed)',
+    cells: 'ordered cell matrix & escape (constructed)',
+    tear: 'pinned sheet & 5-tooth seam (constructed)',
+    portal: 'architectural threshold arch (constructed)',
+    archmono: 'solid architectural initial (constructed)',
   }
-  const picks = (base0.bakeoff ?? BAKEOFF).filter((c) => CONCEPTS.includes(c))
-  if (base0.params?.letter || base0.letter) picks.splice(picks.length > 5 ? 5 : picks.length, picks.length > 5 ? 1 : 0, 'monogram')
+  const defaultPicks = trackFlag === 'drawn' ? DRAWN_BAKEOFF : BAKEOFF
+  const picks = (base0.bakeoff ?? defaultPicks).filter((c) => CONCEPTS.includes(c))
+  if (base0.params?.letter || base0.letter) {
+    const monoConcept = trackFlag === 'drawn' ? 'monogram' : 'archmono'
+    if (!picks.includes(monoConcept)) picks.splice(picks.length > 5 ? 5 : picks.length, picks.length > 5 ? 1 : 0, monoConcept)
+  }
   await mkdir(outRoot, { recursive: true })
   for (const c of picks) {
     const tmp = join(outRoot, `.${c}.json`)
-    await writeFile(tmp, JSON.stringify({ ...base0, concept: c }))
+    const itemCfg = structuredClone(base0)
+    itemCfg.concept = c
+    if (CONSTRUCTED_CONCEPTS.has(c)) {
+      itemCfg.dna = { ...itemCfg.dna, edge: 'none', offset: 0, stroke: 0, tile: 'none', radius: 0 }
+    }
+    await writeFile(tmp, JSON.stringify(itemCfg))
     try {
       execFileSync(process.execPath, [process.argv[1], '--config', tmp, '--out', join(outRoot, c)], { stdio: 'pipe' })
     } catch (error) {
@@ -144,20 +246,21 @@ if (has('bakeoff')) {
     return `<article style="background:#fff;border:1px solid #0002;border-radius:12px;padding:18px;display:grid;gap:12px">
 <header style="display:flex;justify-content:space-between;font:600 13px ui-monospace,monospace"><span>${String(i + 1).padStart(2, '0')} · ${c}</span><span style="opacity:.6">${families[c] ?? 'monogram'}</span></header>
 <img src="${c}/mark.svg" width="180" height="180" alt="${c} mark" style="justify-self:center">
+<img src="${c}/lockup.svg" height="36" alt="${c} lockup" style="justify-self:center;max-width:100%">
 ${row('#f6f1e7', '#111')}${row('#14141f', '#fff')}
 <p style="font:12px/1.4 system-ui;margin:0;color:#444">One sentence this mark argues (no shape names): <br><strong>________________</strong></p>
 <p style="font:12px/1.4 system-ui;margin:0;color:#444">Keep / lost because: <strong>________________</strong></p></article>`
   }
   await writeFile(
     join(outRoot, 'bakeoff.html'),
-    `<!doctype html><meta charset="utf-8"><title>${base0.name ?? 'brand'} — v2.3 bake-off</title>
+    `<!doctype html><meta charset="utf-8"><title>${base0.name ?? 'brand'} — v3.7 bake-off</title>
 <body style="margin:0;padding:28px;background:#e9e4d8;font-family:system-ui"><h1 style="font:700 20px system-ui;margin:0 0 6px">${base0.name ?? 'brand'} — ${picks.length} ideas, one material</h1>
 <p style="margin:0 0 20px;max-width:70ch;color:#444;font-size:14px">Same palette and theme DNA; only the idea changes. Judge at 16px first. Keep one. Write why the rest lost: that note becomes the guide.</p>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">${picks.map(card).join('')}</div></body>
 `,
   )
   console.log(`bake-off · ${picks.join(', ')} → ${outRoot}/bakeoff.html`)
-  console.log('Next: python scripts/score-mark.py --dir ' + outRoot + ' (objective checks), then choose and refine.')
+  console.log('Next: python3 scripts/score-mark.py --dir ' + outRoot + ' (objective checks), then choose and refine.')
   process.exit(0)
 }
 
@@ -167,9 +270,13 @@ function fail(message) {
 }
 
 const configPath = flag('config')
-if (!configPath) fail('--config <brand.json> is required (try --init sunburst)')
+const tokensPath = flag('tokens')
+if (!configPath && !tokensPath) fail('--config <brand.json> or --tokens <tokens.json> is required (try --init sunburst)')
 const outDir = resolve(process.cwd(), flag('out', 'brand-out'))
-const cfg = JSON.parse(await readFile(resolve(process.cwd(), configPath), 'utf8'))
+const rawCfg = JSON.parse(await readFile(resolve(process.cwd(), configPath || tokensPath), 'utf8'))
+const cfg = rawCfg.primitives || rawCfg.meta ? configFromTokens(rawCfg, configPath || tokensPath) : rawCfg
+if (flag('concept')) cfg.concept = flag('concept')
+if (flag('letter')) cfg.params = { ...cfg.params, letter: flag('letter') }
 const merged = {
   ...STARTER,
   ...cfg,
@@ -177,6 +284,12 @@ const merged = {
   dna: { ...STARTER.dna, ...cfg.dna, font: { ...STARTER.dna.font, ...cfg.dna?.font } },
   params: { ...STARTER.params, ...cfg.params },
   story: { ...STARTER.story, ...cfg.story },
+}
+if (CONSTRUCTED_CONCEPTS.has(merged.concept) && !rawCfg.dna?.tile) {
+  merged.dna.tile = 'none'
+  merged.dna.edge = 'none'
+  merged.dna.offset = 0
+  merged.dna.stroke = 0
 }
 let { concept } = merged
 const { name, slug, palette: P, dna, params, story } = merged
@@ -211,12 +324,79 @@ function tileShape(extra = '', inset = 0) {
   const x = T.x + inset
   const y = T.y + inset
   const s = T.s - inset * 2
-  if (dna.tile === 'none') return `<circle cx="32" cy="32" r="${r(28 - inset)}" ${extra}/>`
+  if (dna.tile === 'none') return `<rect x="${r(x)}" y="${r(y)}" width="${r(s)}" height="${r(s)}" rx="4" ${extra}/>`
   if (dna.tile === 'circle') return `<circle cx="${r(x + s / 2)}" cy="${r(y + s / 2)}" r="${r(s / 2)}" ${extra}/>`
   const rx = dna.tile === 'square' ? Math.min(dna.radius, 4) : Math.max(dna.radius - inset, 2)
   return `<rect x="${r(x)}" y="${r(y)}" width="${r(s)}" height="${r(s)}" rx="${r(rx)}" ${extra}/>`
 }
 const clipId = `${slug}-tile`
+
+// Solid filled geometric capitals on a 0..18 × 0..24 box (for built-in outlined wordmark + archmono)
+const FILLED_GLYPHS = {
+  A: { w: 18, d: 'M7 0H11L18 24H13.5L12.1 19H5.9L4.5 24H0L7 0ZM7.1 15H10.9L9 7.8L7.1 15Z' },
+  B: { w: 17, d: 'M0 0H10.5C14.2 0 16.5 2.1 16.5 5.8C16.5 8.4 15.1 10.3 12.8 11.2C15.6 12 17 14.2 17 17.4C17 21.6 14.4 24 10.2 24H0V0ZM4.5 4V9.6H9.8C11.3 9.6 12.2 8.7 12.2 6.8C12.2 4.9 11.3 4 9.8 4H4.5ZM4.5 13.4V20H10C11.7 20 12.6 19 12.6 16.7C12.6 14.4 11.7 13.4 10 13.4H4.5Z' },
+  C: { w: 17, d: 'M17 7.5H12.4C11.9 5.1 10.5 4 8.6 4C5.9 4 4.5 6.4 4.5 12C4.5 17.6 5.9 20 8.6 20C10.5 20 11.9 18.9 12.4 16.5H17C16.3 21.3 13.3 24 8.5 24C3.1 24 0 19.6 0 12C0 4.4 3.1 0 8.5 0C13.3 0 16.3 2.7 17 7.5Z' },
+  D: { w: 18, d: 'M0 0H8.8C14.6 0 18 4.2 18 12C18 19.8 14.6 24 8.8 24H0V0ZM4.5 4V20H8.5C11.8 20 13.5 17.3 13.5 12C13.5 6.7 11.8 4 8.5 4H4.5Z' },
+  E: { w: 16, d: 'M0 0H15.5V4H4.5V9.8H14V13.8H4.5V20H16V24H0V0Z' },
+  F: { w: 15, d: 'M0 0H15V4H4.5V10.2H13.5V14.2H4.5V24H0V0Z' },
+  G: { w: 18, d: 'M17.6 7.5H13C12.4 5.1 11 4 8.9 4C6 4 4.5 6.4 4.5 12C4.5 17.6 6 20 9.1 20C11.6 20 13.3 18.5 13.5 15.2H9.2V11.4H18V24H14.6L14.1 21.1C12.7 23.1 10.7 24 8.2 24C2.9 24 0 19.6 0 12C0 4.4 3.1 0 8.8 0C13.8 0 16.9 2.7 17.6 7.5Z' },
+  H: { w: 18, d: 'M0 0H4.5V9.8H13.5V0H18V24H13.5V13.8H4.5V24H0V0Z' },
+  I: { w: 10, d: 'M0 0H10V4H7.25V20H10V24H0V20H2.75V4H0V0Z' },
+  J: { w: 15, d: 'M10.5 0H15V16.2C15 21.3 12.2 24 7.4 24C2.7 24 0 21.5 0 16.5V15H4.4V16.4C4.4 18.8 5.4 20 7.4 20C9.5 20 10.5 18.8 10.5 16.2V0Z' },
+  K: { w: 18, d: 'M0 0H4.5V10.2L13.2 0H18.4L10.3 9.4L18.8 24H13.6L7.2 12.8L4.5 15.9V24H0V0Z' },
+  L: { w: 15, d: 'M0 0H4.5V20H15V24H0V0Z' },
+  M: { w: 21, d: 'M0 0H5.2L10.5 14.8L15.8 0H21V24H16.6V8.2L11.9 21.2H9.1L4.4 8.2V24H0V0Z' },
+  N: { w: 18, d: 'M0 0H4.8L13.5 15.8V0H18V24H13.2L4.5 8.2V24H0V0Z' },
+  O: { w: 18, d: 'M9 0C14.7 0 18 4.4 18 12C18 19.6 14.7 24 9 24C3.3 24 0 19.6 0 12C0 4.4 3.3 0 9 0ZM9 4C6.1 4 4.5 6.4 4.5 12C4.5 17.6 6.1 20 9 20C11.9 20 13.5 17.6 13.5 12C13.5 6.4 11.9 4 9 4Z' },
+  P: { w: 17, d: 'M0 0H10.2C14.6 0 17 2.7 17 7.6C17 12.5 14.6 15.2 10.2 15.2H4.5V24H0V0ZM4.5 4V11.2H9.6C11.5 11.2 12.5 10 12.5 7.6C12.5 5.2 11.5 4 9.6 4H4.5Z' },
+  Q: { w: 19, d: 'M9 0C14.7 0 18 4.4 18 12C18 15.6 17 18.6 15.2 20.6L18.6 24H13.2L11.6 22.4C10.8 22.8 9.9 23 9 23C3.3 23 0 18.8 0 11.5C0 4.2 3.3 0 9 0ZM9 4C6.1 4 4.5 6.4 4.5 11.5C4.5 16.6 6.1 19 9 19C11.9 19 13.5 16.6 13.5 11.5C13.5 6.4 11.9 4 9 4Z' },
+  R: { w: 18, d: 'M0 0H10.2C14.6 0 17 2.5 17 7.2C17 10.6 15.5 13 12.8 14L18 24H13L8.4 14.6H4.5V24H0V0ZM4.5 4V10.8H9.6C11.5 10.8 12.5 9.6 12.5 7.4C12.5 5.2 11.5 4 9.6 4H4.5Z' },
+  S: { w: 17, d: 'M16.5 6.8H12C11.8 4.8 10.5 3.8 8.4 3.8C6.3 3.8 5 4.7 5 6.3C5 7.9 6.3 8.6 9.8 9.6C14.2 10.8 17 12.5 17 16.9C17 21.5 13.7 24 8.5 24C3.1 24 0 21.3 0 16.5H4.5C4.7 19 6.2 20.2 8.7 20.2C11.1 20.2 12.5 19.1 12.5 17.3C12.5 15.5 11.2 14.7 7.6 13.7C3.2 12.5 0.5 10.8 0.5 6.6C0.5 2.4 3.7 0 8.5 0C13.5 0 16.3 2.5 16.5 6.8Z' },
+  T: { w: 17, d: 'M0 0H17V4H10.75V24H6.25V4H0V0Z' },
+  U: { w: 18, d: 'M0 0H4.5V15.2C4.5 18.4 6.1 20 9 20C11.9 20 13.5 18.4 13.5 15.2V0H18V15.4C18 21 14.6 24 9 24C3.4 24 0 21 0 15.4V0Z' },
+  V: { w: 18, d: 'M0 0H4.8L9 17.6L13.2 0H18L11.4 24H6.6L0 0Z' },
+  W: { w: 23, d: 'M0 0H4.5L7.1 16.4L10.1 0H13.9L16.9 16.4L19.5 0H24L19.2 24H14.8L12 9.4L9.2 24H4.8L0 0Z' },
+  X: { w: 18, d: 'M0 0H5.1L9 7.8L12.9 0H18L11.6 11.8L18.4 24H13.3L9 15.8L4.7 24H-0.4L6.4 11.8L0 0Z' },
+  Y: { w: 18, d: 'M0 0H5L9 9.6L13 0H18L11.25 14.6V24H6.75V14.6L0 0Z' },
+  Z: { w: 17, d: 'M0 0H17V3.8L5.4 20H17V24H0V20.2L11.6 4H0V0Z' },
+  0: { w: 17, d: 'M8.5 0C13.9 0 17 4.2 17 12C17 19.8 13.9 24 8.5 24C3.1 24 0 19.8 0 12C0 4.2 3.1 0 8.5 0ZM8.5 4C5.8 4 4.4 6.5 4.4 12C4.4 17.5 5.8 20 8.5 20C11.2 20 12.6 17.5 12.6 12C12.6 6.5 11.2 4 8.5 4Z' },
+  1: { w: 12, d: 'M0 4.2L5.2 0H9.5V20H12.5V24H0.5V20H5V5.2L0 8.8V4.2Z' },
+  2: { w: 16, d: 'M0.4 7.6C0.6 2.8 3.6 0 8.3 0C13 0 16 2.6 16 6.8C16 10.1 14.3 12.4 10.2 15.6L5.6 19.8H16V24H0V20.2L7.6 13.2C10.5 10.5 11.5 9 11.5 6.9C11.5 4.9 10.2 3.8 8.2 3.8C6 3.8 4.7 5.1 4.6 7.6H0.4Z' },
+  3: { w: 16, d: 'M0.5 6.4C0.9 2.4 3.8 0 8.3 0C12.9 0 15.8 2.4 15.8 6.3C15.8 9.1 14.3 10.9 11.8 11.6C14.7 12.3 16.4 14.3 16.4 17.4C16.4 21.6 13.2 24 8.3 24C3.4 24 0.3 21.4 0 17.2H4.4C4.6 19.2 6 20.2 8.3 20.2C10.6 20.2 12 19 12 17C12 14.9 10.5 13.8 7.6 13.8H5.8V10.1H7.6C10.2 10.1 11.4 9 11.4 6.9C11.4 4.9 10.2 3.8 8.2 3.8C6.1 3.8 4.8 4.8 4.6 6.4H0.5Z' },
+  4: { w: 17, d: 'M9.8 0H14.2V15H17V18.8H14.2V24H9.8V18.8H0V15.2L9.8 0ZM9.8 6.2L4.2 15H9.8V6.2Z' },
+  5: { w: 16, d: 'M1.2 0H15.2V4H5L4.5 9.6C5.6 8.6 7.2 8 9.2 8C13.6 8 16.4 10.9 16.4 15.8C16.4 21 13.1 24 8.1 24C3.3 24 0.3 21.3 0 17H4.4C4.6 19.1 6 20.2 8.2 20.2C10.6 20.2 12 18.6 12 15.8C12 13.1 10.6 11.6 8.2 11.6C6.4 11.6 5.1 12.3 4.5 13.6L0.4 12.8L1.2 0Z' },
+  6: { w: 17, d: 'M16.2 6.2H11.8C11.4 4.5 10.3 3.8 8.7 3.8C5.9 3.8 4.4 6.4 4.4 11.2C5.6 9.6 7.4 8.8 9.6 8.8C14 8.8 17 11.7 17 16.3C17 21.1 13.7 24 8.7 24C3.2 24 0 19.9 0 12.4C0 4.3 3.3 0 8.8 0C13.2 0 15.8 2.3 16.2 6.2ZM8.6 12.4C6.2 12.4 4.7 13.9 4.7 16.3C4.7 18.8 6.2 20.3 8.6 20.3C11 20.3 12.5 18.8 12.5 16.3C12.5 13.9 11 12.4 8.6 12.4Z' },
+  7: { w: 16, d: 'M0 0H16V3.8L7.4 24H2.6L11.2 4H0V0Z' },
+  8: { w: 17, d: 'M8.5 0C13.2 0 16.2 2.4 16.2 6.2C16.2 8.8 14.8 10.7 12.4 11.5C15.2 12.4 16.8 14.5 16.8 17.5C16.8 21.6 13.5 24 8.5 24C3.5 24 0.2 21.6 0.2 17.5C0.2 14.5 1.8 12.4 4.6 11.5C2.2 10.7 0.8 8.8 0.8 6.2C0.8 2.4 3.8 0 8.5 0ZM8.5 3.6C6.4 3.6 5.1 4.7 5.1 6.6C5.1 8.5 6.4 9.7 8.5 9.7C10.6 9.7 11.9 8.5 11.9 6.6C11.9 4.7 10.6 3.6 8.5 3.6ZM8.5 13.4C6.1 13.4 4.6 14.8 4.6 17.1C4.6 19.3 6.1 20.4 8.5 20.4C10.9 20.4 12.4 19.3 12.4 17.1C12.4 14.8 10.9 13.4 8.5 13.4Z' },
+  9: { w: 17, d: 'M0.8 17.8H5.2C5.6 19.5 6.7 20.2 8.3 20.2C11.1 20.2 12.6 17.6 12.6 12.8C11.4 14.4 9.6 15.2 7.4 15.2C3 15.2 0 12.3 0 7.7C0 2.9 3.3 0 8.3 0C13.8 0 17 4.1 17 11.6C17 19.7 13.7 24 8.2 24C3.8 24 1.2 21.7 0.8 17.8ZM8.4 3.7C6 3.7 4.5 5.2 4.5 7.7C4.5 10.1 6 11.6 8.4 11.6C10.8 11.6 12.3 10.1 12.3 7.7C12.3 5.2 10.8 3.7 8.4 3.7Z' },
+  '-': { w: 10, d: 'M0 10H10V14H0V10Z' },
+  '.': { w: 6, d: 'M0.5 18.5H5.5V24H0.5V18.5Z' },
+  '&': { w: 19, d: 'M14.2 24L12.3 21.8C10.7 23.3 8.7 24 6.4 24C2.4 24 0 21.5 0 17.6C0 14.5 1.8 12.4 4.8 11C3.3 9.1 2.6 7.5 2.6 5.6C2.6 2.2 5.2 0 9.1 0C12.9 0 15.4 2.2 15.4 5.5C15.4 8.4 13.5 10.4 10.1 11.9L13.2 15.6C13.9 14.2 14.3 12.5 14.5 10.6H18.4C18.1 13.9 17.2 16.6 15.7 18.7L19.4 24H14.2ZM6.8 14C4.9 14.9 4.1 16 4.1 17.5C4.1 19.3 5.2 20.4 7 20.4C8.4 20.4 9.6 19.8 10.6 18.7L6.8 14ZM9.1 3.4C7.5 3.4 6.5 4.3 6.5 5.7C6.5 7 7.2 8.1 8.5 9.5C10.5 8.5 11.5 7.3 11.5 5.7C11.5 4.3 10.5 3.4 9.1 3.4Z' },
+}
+
+/**
+ * Synthesize a pure-<path> outlined wordmark SVG (zero <text> elements) from
+ * any brand name when --wordmark is not supplied.
+ */
+function buildOutlinedWordmark(text, fill = P.ink) {
+  const clean = String(text || 'BRAND').toUpperCase()
+  const tracking = 2.8
+  let x = 0
+  const groups = []
+  for (const ch of clean) {
+    if (ch === ' ') {
+      x += 8
+      continue
+    }
+    const g = FILLED_GLYPHS[ch]
+    if (!g) continue
+    groups.push(`<path transform="translate(${r(x)} 0)" d="${g.d}"/>`)
+    x += g.w + tracking
+  }
+  const totalW = Math.max(24, r(x - tracking))
+  const totalH = 24
+  return `${svgOpen(totalW, totalH, text)}<g fill="${fill}" fill-rule="evenodd">${groups.join('')}</g></svg>\n`
+}
 
 
 // Geometric monoline capitals on a 40 × 48 box (stroke is applied by the concept).
@@ -389,41 +569,130 @@ const concepts = {
     return edges + nodes
   },
   bracket(c, compact) {
-    // v2.3 family 1: two solid L-brackets, one keystone; no strokes.
+    // Constructed family 1: two solid L-brackets on the 64 grid, one keystone; no strokes.
+    // Compact widens the inner channel and thickens the arms so it reads cleanly at 16px.
     const v = compact
-      ? { box: 32, l: 'M4 4H10V13H15V19H10V28H4Z', r: 'M28 4H22V13H17V19H22V28H28Z', k: 'M16 11L19 16L16 21L13 16Z' }
-      : { box: 64, l: 'M8 8H20V28H30V36H20V56H8Z', r: 'M56 8H44V28H34V36H44V56H56Z', k: 'M32 22L38 32L32 42L26 32Z' }
+      ? { l: 'M6 6H22V24H28V40H22V58H6Z', r: 'M58 6H42V24H36V40H42V58H58Z', k: 'M32 18L40 32L32 46L24 32Z' }
+      : { l: 'M8 8H20V28H30V36H20V56H8Z', r: 'M56 8H44V28H34V36H44V56H56Z', k: 'M32 22L38 32L32 42L26 32Z' }
     return `<path d="${v.l}" fill="${c.lead}"/><path d="${v.r}" fill="${c.lead}"/><path d="${v.k}" fill="${c.spark}"/>`
   },
   planes(c, compact) {
-    // v2.3 family 2: two sheared sheets, one clipped overprint.
+    // Constructed family 2: two sheared sheets on the 64 grid, one clipped overprint (Strand).
     const v = compact
-      ? { box: 32, a: 'M12 5H26L18 27H4Z', b: 'M17 2H31L23 24H9Z' }
-      : { box: 64, a: 'M24 10H52L36 54H8Z', b: 'M34 4H62L46 48H18Z' }
+      ? { a: 'M20 8H50L34 56H6Z', b: 'M30 4H58L42 52H14Z' }
+      : { a: 'M24 10H52L36 54H8Z', b: 'M34 4H62L46 48H18Z' }
     const id = `${slug}-planes-${compact ? 'c' : 'f'}`
     const over = params.lens || c.ink
     return `<defs><clipPath id="${id}"><path d="${v.a}"/></clipPath></defs><path d="${v.a}" fill="${c.core}"/><path d="${v.b}" fill="${c.spark}"/><path d="${v.b}" fill="${over}" clip-path="url(#${id})"/>`
   },
   louvers(c, compact) {
-    // v2.3 family 3: solid wedge bars, one apex.
+    // Constructed family 3: solid wedge bars on the 64 grid, one apex (Ledger).
+    // Compact drops from 4 bars to 3 wider bars so the channels never clog at 16px.
     const v = compact
-      ? { box: 32, bars: 'M2 30V20L8 24V30Z M11 30V14L19 18V30Z M22 30V8L31 12V30Z', apex: 'M26.5 1L31 8L26.5 15L22 8Z' }
-      : { box: 64, bars: 'M2 56V36L10 42V56Z M15.3 56V26L25.3 32V56Z M30.6 56V16L42.6 22V56Z M47.9 56V8L61.9 14V56Z', apex: 'M54.9 2L61.9 8L54.9 14L47.9 8Z' }
+      ? { bars: 'M4 58V36L16 44V58Z M22 58V22L36 30V58Z M42 58V12L58 20V58Z', apex: 'M50 2L60 12L50 22L40 12Z' }
+      : { bars: 'M2 56V36L10 42V56Z M15.3 56V26L25.3 32V56Z M30.6 56V16L42.6 22V56Z M47.9 56V8L61.9 14V56Z', apex: 'M54.9 2L61.9 8L54.9 14L47.9 8Z' }
     return `<path d="${v.bars}" fill="${c.lead}"/><path d="${v.apex}" fill="${c.core}"/>`
   },
   ribbon(c, compact) {
-    // v2.3 family 4: one thick folded beam.
-    const d = compact
-      ? 'M4 8H12L20 16H28V24H20L12 16H4Z'
-      : 'M8 14H24L40 30H56V48H40L24 32H8Z'
-    return `<path d="${d}" fill="${c.lead}"/>`
+    // Constructed family 4: two interlocked folded beams + accent corner lock.
+    const v = compact
+      ? {
+          beams: 'M6 10H28L44 26H58V40H38L22 24H6Z M6 32H22L38 48H58V56H32L16 40H6Z',
+          lock: 'M46 10H58V22L46 10Z',
+        }
+      : {
+          beams: 'M8 12H28L44 28H56V40H38L22 24H8Z M8 32H24L40 48H56V56H34L18 40H8Z',
+          lock: 'M44 12H56V24L44 12Z',
+        }
+    return `<path d="${v.beams}" fill="${c.lead}"/><path d="${v.lock}" fill="${c.spark}"/>`
   },
   horizon(c, compact) {
-    // v2.3 family 5: a grounded bar and one floating keystone.
+    // Constructed family 5: grounded architectural plinth with notch + floating keystone.
     const v = compact
-      ? { bar: 'M4 21H28V27H4Z', key: 'M16 5L22 13L16 21L10 13Z' }
-      : { bar: 'M8 42H56V52H8Z', key: 'M32 10L42 24L32 38L22 24Z' }
+      ? { bar: 'M6 40H24L32 48L40 40H58V56H6Z', key: 'M32 8L46 24L32 40L18 24Z' }
+      : { bar: 'M8 40H25L32 47L39 40H56V54H8Z', key: 'M32 8L44 23L32 38L20 23Z' }
     return `<path d="${v.bar}" fill="${c.lead}"/><path d="${v.key}" fill="${c.spark}"/>`
+  },
+  junction(c, compact) {
+    // Constructed family 6 (Jakarta): single-stroke 90° turn with 2S outer / 1S inner chamfer + signal stop block.
+    const v = compact
+      ? { turn: 'M8 8H26V28L36 38H56V56H28L8 36V8Z', stop: 'M36 8H56V28H36Z' }
+      : { turn: 'M8 8H24V28L36 40H56V56H28L8 36V8Z', stop: 'M38 8H56V26H38Z' }
+    return `<path d="${v.turn}" fill="${c.lead}"/><path d="${v.stop}" fill="${c.spark}"/>`
+  },
+  carved(c, compact) {
+    // Constructed family 7 (Cove): 48×48 stone block with upper-right quadrant carved out + nested signal reading block.
+    const v = compact
+      ? { block: 'M6 6H58V28H28V58H6Z', inner: 'M36 36H58V58H36Z' }
+      : { block: 'M8 8H56V30H30V56H8Z', inner: 'M36 36H56V56H36Z' }
+    return `<path d="${v.block}" fill="${c.lead}"/><path d="${v.inner}" fill="${c.spark}"/>`
+  },
+  cells(c, compact) {
+    // Constructed family 8 (Huginn): ordered matrix cells + one escaping cell [+6, -6].
+    const v = compact
+      ? {
+          grid: 'M8 12H26V30H8Z M8 36H26V54H8Z M32 36H50V54H32Z',
+          escape: 'M38 6H58V26H38Z',
+        }
+      : {
+          grid: 'M8 10H21V23H8Z M25 10H38V23H25Z M8 27H21V40H8Z M25 27H38V40H25Z M8 44H21V57H8Z M25 44H38V57H25Z M42 27H55V40H42Z M42 44H55V57H42Z',
+          escape: 'M45 4H59V18H45Z',
+        }
+    return `<path d="${v.grid}" fill="${c.lead}"/><path d="${v.escape}" fill="${c.spark}"/>`
+  },
+  tear(c, compact) {
+    // Constructed family 9 (Riso): pinned sheet with irregular tooth seam + diamond registration pin.
+    const v = compact
+      ? {
+          sheet: 'M8 6H56V36L44 44L32 34L18 46L8 38Z',
+          drum: 'M12 44L22 52L34 42L46 52L56 44V58H12Z',
+          pin: 'M32 14L39 21L32 28L25 21Z',
+        }
+      : {
+          sheet: 'M8 6H56V34L48 42L38 33L28 43L18 35L8 42Z',
+          drum: 'M11 45L20 39L30 47L40 37L50 46L56 40V58H11Z',
+          pin: 'M32 14L38 20L32 26L26 20Z',
+        }
+    return `<path d="${v.drum}" fill="${c.spark}"/><path d="${v.sheet} ${v.pin}" fill="${c.lead}" fill-rule="evenodd"/>`
+  },
+  portal(c, compact) {
+    // Constructed family 10 (Porphyry): monumental stone block with stepped architectural portal + gold threshold bar.
+    const v = compact
+      ? {
+          monolith: 'M8 6H56V50H42V22H22V50H8Z',
+          threshold: 'M8 54H56V60H8Z',
+        }
+      : {
+          monolith: 'M8 6H56V48H42V24L32 16L22 24V48H8Z',
+          threshold: 'M8 52H56V58H8Z',
+        }
+    return `<path d="${v.monolith}" fill="${c.lead}"/><path d="${v.threshold}" fill="${c.spark}"/>`
+  },
+  archmono(c, compact) {
+    // Constructed family 11: solid fill-only architectural monogram for any letter A–Z + signal keystone cut.
+    const ch = String(params.letter || name[0] || 'A').toUpperCase()
+    const g = FILLED_GLYPHS[ch] || FILLED_GLYPHS.A
+    const scale = compact ? 1.95 : 1.85
+    const gw = g.w * scale
+    const gh = 24 * scale
+    const tx = r((64 - gw) / 2 - 2)
+    const ty = r((64 - gh) / 2)
+    const badge = compact
+      ? 'M48 8H58V18H48Z'
+      : 'M48 8L58 8L58 18L48 18Z'
+    return (
+      `<g transform="translate(${tx} ${ty}) scale(${scale})" fill="${c.lead}" fill-rule="evenodd"><path d="${g.d}"/></g>` +
+      `<path d="${badge}" fill="${c.spark}"/>`
+    )
+  },
+  crest(c, compact) {
+    // Drawn family 12 (Clearing): horizon valley crest + rising sun disc + cut-line frame.
+    const sw = compact ? 3 : 2.4
+    const sunR = compact ? 9 : 8
+    return (
+      `<circle cx="32" cy="22" r="${sunR}" fill="${c.core}" stroke="${c.ink}" stroke-width="${sw}"/>` +
+      `<path d="M6 48L20 30L32 42L44 28L58 48V56H6Z" fill="${c.spark}" stroke="${c.ink}" stroke-width="${sw}" stroke-linejoin="round"/>`
+    )
   },
   monogram(c, compact) {
     const ch = String(params.letter || name[0] || 'A').toUpperCase()
@@ -486,13 +755,15 @@ function buildMark({ colors, compact = false, tile = true, shadow = true, field 
   return `${svgOpen()}${parts.join('')}</svg>\n`
 }
 const base = { field: P.field, core: P.core, spark: P.spark, ink: P.ink, paper: P.paperHi, lead: dna.tile === 'none' ? P.ink : P.paperHi }
+const reverseColors = { field: P.ink, core: P.core, spark: P.spark, ink: P.paperHi, paper: P.ink, lead: P.paperHi }
 const outputs = {}
 outputs['mark.svg'] = buildMark({ colors: base })
 outputs['mark-compact.svg'] = buildMark({ colors: base, compact: true })
+outputs['mark-compact-reverse.svg'] = buildMark({ colors: reverseColors, compact: true, shadow: false })
 outputs['glyph.svg'] = buildMark({ colors: base, tile: false, shadow: false })
 // Reversed: tile in ink, drawing lines in paper so it holds on a dark ground.
 outputs['mark-reverse.svg'] = buildMark({
-  colors: { field: P.ink, core: P.core, spark: P.spark, ink: P.paperHi, paper: P.ink, lead: P.paperHi },
+  colors: reverseColors,
   shadow: false,
 })
 // One-colour stamp is DRAWN: all fills collapse to ink/paper with the same geometry.
@@ -505,16 +776,21 @@ outputs['mark-mono.svg'] = buildMark({
 // Favicon field: the compact mark, with an opaque ground so it never vanishes on chrome.
 outputs['icon.svg'] = buildMark({ colors: base, compact: true, forceTile: true })
 
-// Lockups (need an outlined wordmark)
+// Lockups (use --wordmark if passed, otherwise synthesize outlined vector wordmark automatically)
 const wordPath = flag('wordmark')
-let reportLockup = 'skipped (pass --wordmark from extract-wordmark.py)'
-if (wordPath) {
-  const raw = await readFile(resolve(process.cwd(), wordPath), 'utf8')
+let reportLockup = 'built with built-in vector wordmark outlines'
+{
+  const raw = wordPath
+    ? await readFile(resolve(process.cwd(), wordPath), 'utf8')
+    : buildOutlinedWordmark(name, P.ink)
   const vb = raw.match(/viewBox\s*=\s*["']([\d.\s-]+)["']/)
   if (!vb) fail('wordmark.svg has no viewBox')
   if (/<text[\s>]/.test(raw)) fail('wordmark.svg contains live <text>; outline it first')
   const [, , ww, wh] = vb[1].trim().split(/\s+/).map(Number)
-  const inner = raw.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '')
+  const inner = raw
+    .replace(/^[\s\S]*?<svg[^>]*>/, '')
+    .replace(/<\/svg>\s*$/, '')
+    .replace(/\bfill="[^"]*"/g, '')
   const markH = 64
   const targetH = 20 // wordmark cap height on the 64 grid
   const scale = targetH / wh
@@ -531,8 +807,12 @@ if (wordPath) {
   outputs['lockup.svg'] = place(P.ink, outputs['mark.svg'], false)
   outputs['lockup-reverse.svg'] = place(P.paperHi, outputs['mark-reverse.svg'], false)
   outputs['lockup-stacked.svg'] = place(P.ink, outputs['mark.svg'], true)
-  outputs['wordmark.svg'] = raw
-  reportLockup = `built from ${wordPath}`
+  outputs['lockup-stacked-reverse.svg'] = place(P.paperHi, outputs['mark-reverse.svg'], true)
+  outputs['wordmark.svg'] = wordPath ? raw : buildOutlinedWordmark(name, P.ink)
+  outputs['wordmark-reverse.svg'] = wordPath
+    ? `${svgOpen(ww, wh, name)}<g fill="${P.paperHi}" color="${P.paperHi}">${inner}</g></svg>\n`
+    : buildOutlinedWordmark(name, P.paperHi)
+  if (wordPath) reportLockup = `built from ${wordPath}`
 }
 
 // ───────────────────────── tokens ─────────────────────────
@@ -751,6 +1031,7 @@ await mkdir(outDir, { recursive: true })
 for (const [file, content] of Object.entries(outputs)) await writeFile(join(outDir, file), content)
 
 const problems = []
+const isConstructedMark = CONSTRUCTED_CONCEPTS.has(concept)
 for (const [file, content] of Object.entries(outputs)) {
   if (!file.endsWith('.svg')) continue
   if (/<text[\s>]/.test(content)) problems.push(`${file}: live <text>`)
@@ -759,6 +1040,10 @@ for (const [file, content] of Object.entries(outputs)) {
   const open = (content.match(/<(g|defs|clipPath|svg)[\s>]/g) || []).length
   const close = (content.match(/<\/(g|defs|clipPath|svg)>/g) || []).length
   if (open !== close) problems.push(`${file}: unbalanced tags (${open}/${close})`)
+  if (isConstructedMark && (file === 'mark.svg' || file === 'mark-compact.svg' || file === 'glyph.svg')) {
+    if (/<(circle|ellipse)[\s>]/.test(content)) problems.push(`${file}: constructed mark contains <circle>/<ellipse>`)
+    if (/\bstroke=/.test(content)) problems.push(`${file}: constructed mark contains stroke=`)
+  }
 }
 const weak = contrastPairs.filter((p) => p.ratio + 0.005 < p.min)
 

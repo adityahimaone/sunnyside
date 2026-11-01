@@ -31,6 +31,8 @@ from PIL import Image
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--dir', required=True)
+ap.add_argument('--track', choices=['auto', 'constructed', 'drawn'], default='auto',
+                help='Scoring track: constructed (zero circle, fill-only), drawn (cut-line stroke, subject allowed), or auto')
 args = ap.parse_args()
 
 
@@ -77,14 +79,19 @@ def mirror_similarity(img):
     return (h_same / tot if tot else 0), (v_same / tot if tot else 0)
 
 
-def check_geometric_craft(svg_content):
+def check_geometric_craft(svg_content, track='constructed'):
     """Anti-blockiness gate: the negative bans above would pass a plain <rect>.
     Rejects marks with no path, a trivial command count, or a flat silhouette.
     A failure points at references/lean-and-symbools.md (fallback archetypes)."""
     errors = []
     paths = re.findall(r'<path[^>]*\sd=[\"\']([^\"\']+)[\"\']', svg_content)
-    if not paths:
+    shapes = re.findall(r'<(path|circle|rect|ellipse|polygon|line)[\s>]', re.sub(r'<defs>[\s\S]*?</defs>', '', svg_content))
+    if not paths and track == 'constructed':
         return ['craft: no <path> found; use a compound <path>, not <rect>/<polygon>']
+    if track == 'drawn':
+        if len(shapes) < 2:
+            errors.append('craft [drawn]: fewer than 2 shapes; a drawn mark needs a tile/subject and cut-line geometry')
+        return errors
     d = ' '.join(paths)
     commands = re.findall(r'[MLHVCSQTAZmlhvcsqtaz]', d)
     if len(commands) < 8:
@@ -93,10 +100,32 @@ def check_geometric_craft(svg_content):
     has_curves = bool(re.search(r'[CSQTAcsqta]', d))
     subpaths = len(re.findall(r'[Mm]', d))
     has_evenodd = 'fill-rule="evenodd"' in svg_content
-    if not (has_curves or has_evenodd or subpaths >= 2):
+    if not (has_curves or has_evenodd or subpaths >= 2 or len(paths) >= 2):
         errors.append('craft: flat silhouette with no counter-form or curve; add an evenodd '
                       'cut or a Bezier, or fall back to a Symbools archetype')
     return errors
+
+
+def detect_track(folder, msrc):
+    if args.track in ('constructed', 'drawn'):
+        return args.track
+    for tf in folder.glob('*-tokens.json'):
+        try:
+            import json
+            data = json.loads(tf.read_text())
+            edge = (data.get('dna') or data.get('theme') or {}).get('edge')
+            track = (data.get('meta') or {}).get('track')
+            if track in ('constructed', 'drawn'):
+                return track
+            if edge in ('hard', 'soft'):
+                return 'drawn'
+            if edge == 'none':
+                return 'constructed'
+        except Exception:
+            pass
+    if re.search(r'stroke="(?!none)[^"]*"', msrc):
+        return 'drawn'
+    return 'constructed'
 
 
 def score(folder):
@@ -106,21 +135,27 @@ def score(folder):
         if not f.exists():
             return [f'missing {f.name}'], [], []
     msrc, csrc = mark.read_text(), compact.read_text()
+    track = detect_track(folder, msrc)
+    notes.append(f'track={track}')
 
-    # v2.3 hard gate: zero circles, fill-only, 2–4 solid primitives.
-    if re.search(r'<circle[\s>]', msrc) or re.search(r'<circle[\s>]', csrc):
-        fails.append('v2.3: <circle> banned; use a non-circular path/polygon silhouette')
-    if re.search(r'stroke="(?!none)[^"]*"', msrc) or re.search(r'stroke="(?!none)[^"]*"', csrc):
-        fails.append('v2.3: fill + stroke banned; build solid fills separated by negative space')
     visual = re.sub(r'<defs>[\s\S]*?</defs>', '', msrc)
     shapes = len(re.findall(r'<(path|circle|rect|ellipse|polygon|line)[\s>]', visual))
-    if shapes > 4:
-        fails.append(f'v2.3: {shapes} primitives in the primary (max 2–4); simplify the idea')
+
+    if track == 'constructed':
+        # Constructed hard gate: zero circles, fill-only, 2–4 solid primitives.
+        if re.search(r'<circle[\s>]', msrc) or re.search(r'<circle[\s>]', csrc):
+            fails.append('v2.3 [constructed]: <circle> banned; use a non-circular path/polygon silhouette')
+        if re.search(r'stroke="(?!none)[^"]*"', msrc) or re.search(r'stroke="(?!none)[^"]*"', csrc):
+            fails.append('v2.3 [constructed]: fill + stroke banned; build solid fills separated by negative space')
+        if shapes > 4:
+            fails.append(f'v2.3 [constructed]: {shapes} primitives in the primary (max 2–4); simplify the idea')
+    else:
+        # Drawn gate: allows subject circles & cut-line strokes, caps total shapes at 24
+        if shapes > 24:
+            warns.append(f'drawn: {shapes} primitives in primary (keep <= 24 for 16px survival)')
 
     for label, src in (('primary', msrc), ('compact', csrc)):
-        for e in check_geometric_craft(src):
-            # A compact is one deliberately plain path (gaps >= 4 units at 16px), so
-            # a flat silhouette there is a WARN; the primary must carry the craft.
+        for e in check_geometric_craft(src, track):
             if label == 'compact' and 'flat silhouette' in e:
                 warns.append(f'{e} [{label}]')
             else:

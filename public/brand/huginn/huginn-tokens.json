@@ -10,6 +10,31 @@
     "namespace": "--hg-",
     "note": "Mirrors features/huginn/huginn-tokens.css. The mark geometry lives in features/huginn/brand-paths.ts and public/brand/huginn/*.svg; both are hand-placed on the 64 grid."
   },
+  "theme": {
+    "family": "cell-matrix",
+    "material": "vermilion field + ordered cells",
+    "edge": "1px bone-deep rule",
+    "offset": "6,-6 escape cell",
+    "stroke": "1px hairline",
+    "tile": "bayer-4x4 cell 14",
+    "radius": "0px",
+    "ring": "2px cobalt offset 2px",
+    "density": "ordered",
+    "label": "mono-caps",
+    "field-recipe": "vermilion-cell-dissolve",
+    "mark-form": "5 cells + 1 escaping cell"
+  },
+  "sections": [
+    "cell",
+    "dissolve",
+    "marks",
+    "field",
+    "type",
+    "parts",
+    "tokens",
+    "audit",
+    "surface"
+  ],
   "primitives": [
     { "name": "field", "value": "#e2281b", "role": "The one loud field per page" },
     { "name": "field-deep", "value": "#c11d12", "role": "Pressed field" },

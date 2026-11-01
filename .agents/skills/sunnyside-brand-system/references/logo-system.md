@@ -157,26 +157,45 @@ palette is the system, not a mood.
 - [ ] no clipart, no copied mark, no live text
 - [ ] the guide explains why this mark, not just what it is
 
-## 9. Generating the family (vector, text-free)
+## 9. Generating the family (vector, text-free, 22 concepts)
 
 `scripts/brand-forge.mjs` implements the build above as code so every run starts
-with a complete, tested family instead of a blank file.
+with a complete, tested 12-SVG family (`mark`, `mark-compact`, `mark-compact-reverse`, `glyph`, `mark-reverse`, `mark-mono`, `icon`, `wordmark`, `wordmark-reverse`, `lockup`, `lockup-reverse`, `lockup-stacked`, `lockup-stacked-reverse`) instead of a blank file. You can pass `--tokens features/<slug>/tokens.json` directly without writing a separate `brand.json`.
 
-| Concept | Construction | Reads as | Watch for |
+### Constructed Track (fill-only, zero circle, zero stroke, 2–4 primitives)
+
+| Concept | Construction | Reads as | Precedent / Watch for |
 | --- | --- | --- | --- |
-| `sunburst` | n rays clipped by the tile, one disc | day, warmth, output | the stock sun; fix with material (offset, crop, stroke) |
+| `bracket` | two solid L-brackets on the 64 grid + one keystone | enclosure, structure, vault | compact widens inner channel to ≥ 14 units |
+| `planes` | two sheared sheets + clipped overprint | refraction, glass, layers | Strand; overprint must be a real third hex |
+| `louvers` | stepped wedge bars + one apex diamond | ledger, ascent, rhythm | Ledger; compact drops from 4 bars to 3 wider bars |
+| `ribbon` | two interlocked folded beams + corner lock | flow, handoff, continuity | counter-channel ≥ 8 units |
+| `horizon` | grounded notched plinth + floating keystone | threshold, survey, landmark | balance plinth mass against keystone |
+| `junction` | single-stroke 90° turn (`2S` outer, `1S` inner) + stop block | transit, routing, civic | Jakarta |
+| `carved` | 48×48 block with upper-right carved out + nested reading block | shelter, room, archive | Cove |
+| `cells` | ordered grid matrix + one escaping cell `[+6, -6]` | autonomy, agent, compute | Huginn; compact uses 2×2 matrix so cells stay > 4px at 16px |
+| `tear` | pinned sheet + irregular tooth seam + second-drum offset | print, zine, physical paper | Riso Co. |
+| `portal` | monumental stone block + stepped opening + threshold bar | architecture, permanence | Porphyry |
+| `archmono` | solid filled architectural capital (`A–Z`) + signal keystone | initial, authority | works for any letter `A–Z` with `--letter <X>` |
+
+### Drawn Track (subject-led, cut-line stroke, hard offset, tactile tile)
+
+| Concept | Construction | Reads as | Precedent / Watch for |
+| --- | --- | --- | --- |
+| `sunburst` | n rays clipped by the tile, one disc | day, warmth, output | Sunnyside; compact drops ray count and thickens stroke |
 | `aperture` | n blades around a hole | focus, capture, decision | blade count above 6 turns to mud at 16px |
 | `orbit` | concentric rings + one dot | system, cycle, signal | compact needs a single ring |
-| `hatch` | diagonal lines + a disc | drawing, shading, craft | line gap must grow in the compact |
+| `hatch` | diagonal lines + a disc | drawing, shading, craft | Hachure; line gap must grow in the compact |
 | `stack` | offset plates | layers, versions, depth | keep ≤ 3 plates, 2 in compact |
 | `facet` | circle cut by a diagonal | decision, split, light | thin cut disappears at 16px |
-| `dotmatrix` | aligned rings of dots, empty centre, one gap | data, signal, texture | dots under 4 units wide vanish at 16px; keep two rings in compact |
+| `dotmatrix` | aligned rings of dots, empty centre, one gap | data, signal, texture | dots under 4 units wide vanish at 16px |
 | `lines` | disc hatched with weight-swelling lines | flow, shading, signal | reads as a striped planet unless the story is shading |
-| `overprint` | two flat discs, clipped lens | merge, agreement, two inks | lens colour must be a real third colour, not a blend mode |
+| `overprint` | two flat discs, clipped lens | merge, agreement, two inks | lens colour must be a real third colour |
 | `nodes` | asymmetric nodes + thick edges | agents, links, route | no orphan satellites; every dot attached |
-| `monogram` | geometric monoline letter + printed offset | initial | a letter alone is not an idea: add a cut, join or light |
+| `monogram` | geometric monoline letter + printed offset | drawn initial | compact drops the offset so it stays crisp at 16px |
+| `crest` | horizon valley crest + rising disc + cut-line frame | landscape, reserve, field | Clearing |
 
-Process: `--bakeoff brand.json` (six families, one material) → `score-mark.py` →
+Process: `--bakeoff features/<slug>/tokens.json` (six families, one material) → `python3 scripts/score-mark.py --dir bakeoff --track constructed|drawn` →
 compare at 16px → keep one → write why the rest lost → hand-refine points on
 the grid → re-run. Vary **theme DNA** before geometry; material is what makes the
 mark yours.

@@ -23,7 +23,11 @@
  */
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { execFileSync } from 'node:child_process'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /* ── args ────────────────────────────────────────────────────────────────── */
 
@@ -40,6 +44,11 @@ const caseNo = one('case', '')
 const hue = Number(one('hue', NaN))
 const essence = one('essence', '')
 const mode = one('mode', 'light')
+const archetype = one('archetype', 'minimal')
+const conceptOpt = one('concept', '')
+const fieldOpt = one('field', '')
+const modulesRaw = one('modules', 'forms,tokens,audit')
+const modules = new Set(modulesRaw.split(',').map((m) => m.trim().toLowerCase()).filter(Boolean))
 const root = resolve(one('root', '.'))
 const dry = has('dry-run')
 const peek = has('peek')
@@ -52,11 +61,15 @@ const die = (message) => {
 if (!slug || !name || Number.isNaN(hue)) {
   console.error(`Usage:
   node scripts/init-system.mjs --slug <kebab-slug> --name "<Display Name>" --hue <0-360>
-    [--case 09] [--essence "..."] [--mode light|dark] [--root .] [--dry-run] [--peek]`)
+    [--case 09] [--essence "..."] [--mode light|dark] [--archetype minimal|multi-ramp|ui-ramp]
+    [--concept bracket|planes|louvers|ribbon|horizon|junction|carved|cells|tear|portal|archmono|sunburst|...]
+    [--field mesh|bands|grain|dither|glass|grid|all]
+    [--modules forms,cast,apps,figma,design-md,qa] [--root .] [--dry-run] [--peek]`)
   process.exit(1)
 }
 if (!/^[a-z][a-z0-9-]{1,23}$/.test(slug)) die(`slug "${slug}" must be kebab-case, 2–24 chars, starting with a letter`)
 if (!/^\d{2}$/.test(caseNo) && caseNo !== '') die(`--case must be two digits, e.g. 09`)
+if (!['minimal', 'multi-ramp', 'ui-ramp'].includes(archetype)) die(`--archetype must be minimal, multi-ramp, or ui-ramp`)
 
 /* ── colour: OKLCH → sRGB hex ────────────────────────────────────────────── */
 
@@ -334,7 +347,18 @@ const S = slug
 const N = name
 const NS = ns
 const TITLE = caseNo ? `Case ${caseNo}` : 'Case'
-const sections = ['hero', 'foundation', 'material', 'marks', 'type', 'forms', 'tokens', 'audit']
+const sections = [
+  'hero',
+  'foundation',
+  'material',
+  'marks',
+  ...(modules.has('cast') ? ['cast'] : []),
+  'type',
+  ...(modules.has('forms') ? ['forms'] : []),
+  ...(modules.has('apps') ? ['applications'] : []),
+  'tokens',
+  'audit',
+]
 const oneSentence =
   essence || `${N} is a design system: [one material], [one ink], [one signal], and [the signature that only this brand has].`
 
@@ -346,11 +370,13 @@ const tokensJson = {
     author: 'TODO',
     case: TITLE,
     namespace: prefix,
+    archetype,
+    primaryAccent: 'signal',
     essence: essence || 'TODO — one line, ≤ 8 words',
     promise: 'TODO — what the interface promises the reader',
     family: 'TODO — constructed family or drawn subject',
     track: 'TODO — constructed | drawn',
-    gate: 'v3.0',
+    gate: 'v3.6',
     oneSentence,
     fieldImage: `/brand/${S}/${S}-field.webp`,
   },
@@ -388,7 +414,8 @@ const tokensJson = {
     { label: 'ink on plate', fg: ink.value, bg: pal.plate.value },
     { label: 'ink on ground', fg: ink.value, bg: ground.value },
     { label: 'signal on plate', fg: signal.value, bg: pal.plate.value },
-  ].map((c) => ({ ...c, ratio: Number(contrast(c.fg, c.bg).toFixed(1)) })),
+    { label: 'wash on ground (surface tint only — never text)', fg: pal.wash.value, bg: ground.value },
+  ].map((c) => ({ ...c, ratio: Number(contrast(c.fg, c.bg).toFixed(2)) })),
   radius: { xs: 4, sm: 8, md: 12, lg: 20, pill: 999 },
 }
 
@@ -589,6 +616,40 @@ const moduleCss = `/* ${N} — layout only. Colour and type come from ${prefix} 
 .onlyLight { display: block; }
 .onlyDark { display: block; }
 
+.motionTrack {
+  position: relative;
+  height: 24px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(${prefix}text-primary) 8%, transparent);
+  padding: 4px;
+  cursor: pointer;
+}
+
+.motionPuck {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(${prefix}accent);
+  transform: translateX(0);
+}
+
+.motionTrack:hover .motionPuck,
+.motionTrack:focus-visible .motionPuck {
+  transform: translateX(120px);
+}
+
+.codeBlock {
+  margin: 0.75rem 0 0;
+  padding: 1rem;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(${prefix}text-primary) 5%, transparent);
+  font-family: var(${prefix}font-mono);
+  font-size: 0.75rem;
+  line-height: 1.55;
+  overflow-x: auto;
+}
+
 /* One rule hides the asset that does not belong to the current theme. Anchor the
    test on <html> only — a scope-local :not() always matches somewhere. */
 :global(html:not([data-${S}='${defaultMode === 'dark' ? 'light' : 'dark'}'])) .only${defaultMode === 'dark' ? 'Light' : 'Dark'} {
@@ -645,6 +706,56 @@ export const TYPE_GATE = [
   { rule: 'Unitless line-height', note: 'TODO' },
   { rule: 'Contrast 4.5:1 body', note: 'TODO' },
 ]
+
+export const TYPE_SCALE = [
+  { role: 'Display', size: 'clamp(2.5rem, 5.5vw, 4.25rem)', lh: '0.96', ls: '-0.035em', weight: 800, sample: '${N} — live display specimen' },
+  { role: 'H2 / Section', size: 'clamp(1.625rem, 3vw, 2.375rem)', lh: '1.06', ls: '-0.025em', weight: 700, sample: 'Optical weight, measure & rhythm' },
+  { role: 'H3 / Card', size: '1.25rem', lh: '1.2', ls: '-0.015em', weight: 600, sample: 'Material & surface contrast' },
+  { role: 'Body', size: '1.0625rem', lh: '1.6', ls: '0', weight: 400, sample: 'Long-form reading sits between 60 and 68 characters with unitless leading.' },
+  { role: 'Caption / Tabular', size: '0.75rem', lh: '1.4', ls: '0.08em', weight: 600, sample: '01 · CASE SPECIMEN · 14.52:1 AAA' },
+] as const
+
+export const SPACE_SCALE = [
+  { token: '${prefix}space-1', px: 4, role: 'Hairline gap' },
+  { token: '${prefix}space-2', px: 8, role: 'Badge & chip inset' },
+  { token: '${prefix}space-3', px: 12, role: 'Control padding' },
+  { token: '${prefix}space-4', px: 16, role: 'Card inner padding' },
+  { token: '${prefix}space-6', px: 24, role: 'Grid gutter' },
+  { token: '${prefix}space-8', px: 32, role: 'Section stack' },
+] as const
+
+export const RADIUS_SCALE = [
+  { token: '${prefix}radius-xs', px: 4, role: 'Tag / kbd' },
+  { token: '${prefix}radius-sm', px: 8, role: 'Input / button' },
+  { token: '${prefix}radius-md', px: 12, role: 'Card plate' },
+  { token: '${prefix}radius-lg', px: 20, role: 'Stage panel' },
+  { token: '${prefix}radius-pill', px: 999, role: 'Status pill' },
+] as const
+
+export const SHADOW_SCALE = [
+  { token: '${prefix}shadow-plate', value: '0 1px 2px color-mix(in oklab, var(${prefix}ink) 8%, transparent)', role: 'Resting reading plate' },
+  { token: '${prefix}shadow-lift', value: '0 10px 28px -8px color-mix(in oklab, var(${prefix}ink) 16%, transparent)', role: 'Interactive card hover' },
+] as const
+
+export const MOTION_SCALE = [
+  { token: '${prefix}motion-snap', duration: '140ms', easing: 'cubic-bezier(0.22, 1, 0.36, 1)', role: 'Focus ring & toggle' },
+  { token: '${prefix}motion-settle', duration: '260ms', easing: 'cubic-bezier(0.16, 1, 0.3, 1)', role: 'Drawer & plate reveal' },
+] as const
+
+export const TOKEN_EXPORTS = [
+  {
+    format: 'CSS Custom Properties',
+    code: \`:root {\\n${primKeys.map((k) => `  ${prefix}${k}: ${pal[k].value};`).join('\\n')}\\n}\`,
+  },
+  {
+    format: 'Tailwind v4 @theme',
+    code: \`@theme {\\n${primKeys.map((k) => `  --color-${S}-${k}: var(${prefix}${k});`).join('\\n')}\\n}\`,
+  },
+  {
+    format: 'shadcn / Radix CSS Bridge',
+    code: \`.${ns}-scope {\\n  --background: var(${prefix}surface-page);\\n  --foreground: var(${prefix}text-primary);\\n  --card: var(${prefix}surface-plate);\\n  --primary: var(${prefix}accent);\\n  --muted-foreground: var(${prefix}text-secondary);\\n}\`,
+  },
+] as const
 
 export const GAPS = ['TODO — name what is missing; a guide that hides its gaps is a brochure.']
 
@@ -713,7 +824,7 @@ import Link from 'next/link'
 
 import '@/features/${S}/${S}-tokens.css'
 
-import { DECISIONS, GAPS, MARK_GATE, NAV, OUTPUT_CONTRACT, STORY_BEATS, TYPE_GATE } from '@/features/${S}/${S}-data'
+import { DECISIONS, GAPS, MARK_GATE, MOTION_SCALE, NAV, OUTPUT_CONTRACT, RADIUS_SCALE, SHADOW_SCALE, SPACE_SCALE, STORY_BEATS, TOKEN_EXPORTS, TYPE_GATE, TYPE_SCALE } from '@/features/${S}/${S}-data'
 import { ${N.replace(/[^A-Za-z]/g, '')}Lockup, ${N.replace(/[^A-Za-z]/g, '')}Mark, ${N.replace(/[^A-Za-z]/g, '')}Wordmark } from '@/features/${S}/components/brand'
 import tokens from '@/features/${S}/tokens.json'
 import styles from '@/features/${S}/${S}.module.css'
@@ -810,8 +921,72 @@ export default function ${N.replace(/[^A-Za-z]/g, '')}Page() {
 
         <section id="type" className={styles.section}>
           <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>04 / Typography</span>
-            <h2 className={styles.sectionTitle}>Type</h2>
+            <span className={styles.sectionLabel}>04 / Typography &amp; Foundations</span>
+            <h2 className={styles.sectionTitle}>Type scale, specimens &amp; physical foundations</h2>
+            <p className={styles.sectionDesc}>Every role renders live at its actual size, leading, tracking and weight alongside spatial, radius, elevation and motion scales.</p>
+          </div>
+          <div style={{ display: 'grid', gap: '0.75rem', marginBottom: '2rem' }}>
+            {TYPE_SCALE.map((row) => (
+              <div key={row.role} className={styles.card} style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: '1rem', alignItems: 'baseline' }}>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '0.8125rem' }}>{row.role}</strong>
+                  <span style={{ fontFamily: 'var(${prefix}font-mono)', fontSize: '0.6875rem', color: 'var(${prefix}text-secondary)' }}>
+                    {row.size} · lh {row.lh} · {row.ls} · w{row.weight}
+                  </span>
+                </div>
+                <div style={{ fontFamily: 'var(${prefix}font-display)', fontSize: row.size, lineHeight: row.lh, letterSpacing: row.ls, fontWeight: row.weight, fontVariantNumeric: 'tabular-nums' }}>
+                  {row.sample}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className={styles.cardGrid} style={{ marginBottom: '1.5rem' }}>
+            <div className={styles.card}>
+              <span className={styles.sectionLabel}>Spacing scale</span>
+              <div style={{ display: 'grid', gap: '0.5rem', marginTop: '0.75rem' }}>
+                {SPACE_SCALE.map((s) => (
+                  <div key={s.token} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.75rem' }}>
+                    <code style={{ minWidth: '7rem' }}>{s.token}</code>
+                    <span style={{ height: 8, width: s.px * 2, background: 'var(${prefix}accent)', borderRadius: 2 }} />
+                    <span style={{ fontFamily: 'var(${prefix}font-mono)', fontVariantNumeric: 'tabular-nums' }}>{s.px}px</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className={styles.card}>
+              <span className={styles.sectionLabel}>Radius &amp; elevation</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>
+                {RADIUS_SCALE.map((r) => (
+                  <div key={r.token} style={{ padding: '0.5rem 0.75rem', border: '1px solid var(${prefix}line-strong)', borderRadius: r.px, fontSize: '0.75rem' }}>
+                    <code>{r.token}</code> · {r.px}px
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gap: '0.5rem', marginTop: '0.75rem' }}>
+                {SHADOW_SCALE.map((sh) => (
+                  <div key={sh.token} style={{ padding: '0.5rem 0.75rem', borderRadius: 8, boxShadow: sh.value, fontSize: '0.75rem' }}>
+                    <code>{sh.token}</code> — {sh.role}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className={styles.card}>
+              <span className={styles.sectionLabel}>Motion tokens (hover or focus track)</span>
+              <div style={{ display: 'grid', gap: '0.75rem', marginTop: '0.75rem' }}>
+                {MOTION_SCALE.map((m) => (
+                  <div key={m.token} style={{ fontSize: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                      <code>{m.token}</code>
+                      <strong>{m.duration}</strong>
+                    </div>
+                    <div className={styles.motionTrack} tabIndex={0} role="button" aria-label={\`Preview \${m.token}\`}>
+                      <span className={styles.motionPuck} style={{ transition: \`transform \${m.duration} \${m.easing}\` }} />
+                    </div>
+                    <div style={{ color: 'var(${prefix}text-secondary)', fontFamily: 'var(${prefix}font-mono)', fontSize: '0.6875rem', marginTop: '0.25rem' }}>{m.easing} — {m.role}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <table className={styles.table}>
             <thead><tr><th>Rule</th><th>Note</th></tr></thead>
@@ -823,9 +998,25 @@ export default function ${N.replace(/[^A-Za-z]/g, '')}Page() {
           </table>
         </section>
 
+        <section id="tokens" className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionLabel}>05 / Multi-Format Tokens</span>
+            <h2 className={styles.sectionTitle}>Copyable token exports</h2>
+            <p className={styles.sectionDesc}>Ready-to-paste CSS custom properties, Tailwind v4 @theme bindings, and shadcn/Radix semantic bridges.</p>
+          </div>
+          <div className={styles.cardGrid}>
+            {TOKEN_EXPORTS.map((exp) => (
+              <div key={exp.format} className={styles.card}>
+                <span className={styles.sectionLabel}>{exp.format}</span>
+                <pre className={styles.codeBlock}><code>{exp.code}</code></pre>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section id="audit" className={styles.section}>
           <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>05 / Audit</span>
+            <span className={styles.sectionLabel}>06 / Audit</span>
             <h2 className={styles.sectionTitle}>Verification</h2>
           </div>
           <table className={styles.table}>
@@ -995,6 +1186,38 @@ if (!dry) {
     await writeFile(full, body, 'utf8')
   }
   await mkdir(join(root, 'public', 'brand', S), { recursive: true })
+
+  if (conceptOpt) {
+    execFileSync(
+      process.execPath,
+      [
+        join(__dirname, 'brand-forge.mjs'),
+        '--tokens',
+        join(root, 'features', S, 'tokens.json'),
+        '--concept',
+        conceptOpt,
+        '--out',
+        join(root, 'public', 'brand', S),
+      ],
+      { stdio: 'inherit' },
+    )
+  }
+
+  if (fieldOpt && fieldOpt !== 'none') {
+    execFileSync(
+      process.execPath,
+      [
+        join(__dirname, 'field-forge.mjs'),
+        '--tokens',
+        join(root, 'features', S, 'tokens.json'),
+        '--recipe',
+        fieldOpt,
+        '--out',
+        join(root, 'public', 'brand', S),
+      ],
+      { stdio: 'inherit' },
+    )
+  }
 }
 
 /* ── report ──────────────────────────────────────────────────────────────── */

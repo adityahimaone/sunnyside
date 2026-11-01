@@ -1,0 +1,20 @@
+/* Sunnyside — Case 01 token sheet (namespaced --ss-* and local aliases) */
+:root {
+  --ss-paper: #f3ecdf;
+  --ss-paper-hi: #fffaf1;
+  --ss-paper-lo: #e9dfcf;
+  --ss-ink: #191a2e;
+  --ss-muted: #5f5b6e;
+  --ss-cobalt: #3d53d6;
+  --ss-cobalt-ink: #2c3cae;
+  --ss-cobalt-wash: #e8ebff;
+  --ss-tangerine: #ff6a2b;
+  --ss-butter: #ffd23f;
+  --ss-pink: #ffb6e1;
+  --ss-mint: #b7e4c7;
+  --ss-sky: #a9c8ff;
+
+  --ss-font-display: var(--font-syne), system-ui, sans-serif;
+  --ss-font-reading: var(--font-geist), system-ui, sans-serif;
+  --ss-font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}

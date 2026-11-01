@@ -26,6 +26,7 @@
  */
 import { readFile, readdir } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
+import { readTokens } from './lib/tokens.mjs'
 
 /* ── colour maths: hex → OKLCH ───────────────────────────────────────────── */
 
@@ -82,18 +83,20 @@ const ACCENT_HINT = /signal|accent|brand|mark|loud|focal|glint/i
  * only differences in file layout.
  */
 function normalize(tokens) {
-  const meta = tokens.meta ?? {}
+  const meta = tokens.meta ?? tokens.$meta ?? {}
   const rawRadius = tokens.radius
   const radius =
     rawRadius == null
       ? undefined
-      : typeof rawRadius === 'object'
-        ? `${rawRadius.md ?? rawRadius.sm ?? Object.values(rawRadius)[0]}px`
-        : String(rawRadius)
+      : Array.isArray(rawRadius)
+        ? String(rawRadius[Math.floor(rawRadius.length / 2)]?.value ?? rawRadius[0]?.value ?? '')
+        : typeof rawRadius === 'object'
+          ? `${rawRadius.md ?? rawRadius.sm ?? rawRadius.base ?? Object.values(rawRadius)[0]}`.replace(/^(?!.*(?:px|rem|em)$)(.+)$/, '$1px')
+          : String(rawRadius)
 
   const theme = {
-    family: tokens.theme?.family ?? meta.family ?? tokens.track,
-    material: tokens.theme?.material ?? meta.material ?? tokens.material,
+    family: tokens.theme?.family ?? meta.family ?? tokens.track ?? meta.track,
+    material: tokens.theme?.material ?? meta.material ?? (typeof tokens.material === 'string' ? tokens.material : tokens.material?.idea),
     edge: tokens.theme?.edge,
     offset: tokens.theme?.offset,
     stroke: tokens.theme?.stroke,
@@ -106,18 +109,26 @@ function normalize(tokens) {
     'mark-form': tokens.theme?.['mark-form'] ?? tokens.theme?.markForm ?? meta.markForm,
   }
 
-  const primitives = Array.isArray(tokens.primitives)
-    ? tokens.primitives
-    : Object.entries(tokens.color ?? {}).map(([name, value]) => ({ name, value, role: '' }))
+  let primitives = []
+  if (Array.isArray(tokens.primitives)) {
+    primitives = tokens.primitives.map((p) => ({ name: p.name, value: p.hex ?? p.value, role: p.role ?? '' }))
+  } else if (tokens.primitive && typeof tokens.primitive === 'object') {
+    primitives = Object.entries(tokens.primitive).map(([name, v]) => ({
+      name,
+      value: typeof v === 'string' ? v : (v?.hex ?? v?.value ?? ''),
+      role: v?.role ?? '',
+    }))
+  } else if (tokens.color && typeof tokens.color === 'object') {
+    primitives = Object.entries(tokens.color).map(([name, value]) => ({ name, value, role: '' }))
+  }
 
-  const typeEntries = Array.isArray(tokens.type)
-    ? tokens.type.map((t) => ({
-        // `name/value` (Cove, Strand, Vitrine) or `role/face` (Hachure). Reading only
-        // the first shape made the display-face hard fail blind for the second.
+  const rawType = tokens.type?.family && typeof tokens.type.family === 'object' ? tokens.type.family : tokens.type
+  const typeEntries = Array.isArray(rawType)
+    ? rawType.map((t) => ({
         name: String(t.name ?? t.role ?? ''),
         value: String(t.value ?? t.face ?? ''),
       }))
-    : Object.entries(tokens.type ?? {}).map(([name, value]) => ({
+    : Object.entries(rawType ?? {}).map(([name, value]) => ({
         name,
         value: typeof value === 'string' ? value : '',
       }))
@@ -125,27 +136,28 @@ function normalize(tokens) {
   const pick = (pattern) => {
     const hit = typeEntries.find((t) => pattern.test(t.name) && t.value)
     if (!hit) return ''
-    // "var(--font-syne), 'Syne', sans-serif" → "Syne": the CSS var is a host
-    // alias, not a face, so it must never be the compared identity.
     const parts = hit.value
       .split(',')
-      .map((p) => p.replace(/['"]/g, '').trim())
+      .map((p) => p.replace(/['"]/g, '').replace(/\s+\d{3}(?:\/\d{3})*$/, '').trim())
       .filter((p) => p && !p.startsWith('var(') && !/^(sans-serif|serif|monospace|system-ui)$/i.test(p))
     return (parts[0] ?? '').toLowerCase()
   }
 
+  const rawNs = meta.namespace ?? tokens.namespace ?? ''
   return {
     meta: {
       name: meta.name ?? tokens.name,
-      namespace: meta.namespace ?? tokens.namespace,
-      essence: meta.essence,
+      namespace: rawNs ? String(rawNs).replace(/^-+|-+$/g, '') : '',
+      essence: meta.essence ?? meta.idea ?? tokens.idea,
       promise: meta.promise,
-      oneSentence: meta.oneSentence ?? tokens.oneSentence,
+      oneSentence: meta.oneSentence ?? tokens.oneSentence ?? meta.idea ?? tokens.idea ?? tokens.claim ?? tokens.description,
+      archetype: meta.archetype ?? tokens.archetype ?? (Array.isArray(tokens.ramps) && tokens.ramps.length > 2 ? 'multi-ramp' : tokens.ramp ? 'ui-ramp' : 'minimal'),
+      primaryAccent: meta.primaryAccent ?? tokens.primaryAccent ?? tokens.accent,
     },
     theme,
     primitives,
     type: {
-      display: pick(/display/i),
+      display: pick(/display|sans/i),
       body: pick(/reading|body|sans|workhorse/i),
     },
     sections: tokens.sections ?? meta.sections ?? [],
@@ -165,7 +177,11 @@ function primitivesOf(tokens) {
     .filter(Boolean)
 }
 
-const accentsOf = (prims) => {
+const accentsOf = (prims, meta = {}) => {
+  if (meta.primaryAccent) {
+    const exact = prims.filter((p) => p.name === meta.primaryAccent || p.hex.toLowerCase() === String(meta.primaryAccent).toLowerCase())
+    if (exact.length) return exact
+  }
   const hinted = prims.filter((p) => ACCENT_HINT.test(p.name) || ACCENT_HINT.test(p.role))
   return hinted.length ? hinted : prims.filter((p) => p.C > 0.05)
 }
@@ -246,8 +262,8 @@ function compare(newRaw, refRaw, refName) {
   if (nFace && nFace === rFace && !isPlaceholder(nFace)) hard.push(`H3 same display face: "${nFace}"`)
 
   /* H4 accent hex */
-  const nAcc = accentsOf(nPrims)
-  const rAcc = accentsOf(rPrims)
+  const nAcc = accentsOf(nPrims, nMeta)
+  const rAcc = accentsOf(rPrims, rMeta)
   for (const a of nAcc) {
     for (const b of rAcc) {
       if (a.hex === b.hex) hard.push(`H4 accent hex shared: ${a.name} = ${b.name} = ${a.hex}`)
@@ -407,14 +423,16 @@ async function sectionsFromDataFile(tokensPath, tokens) {
   if (Array.isArray(direct) && direct.length) return tokens
 
   const dir = resolve(tokensPath, '..')
-  const slug = basename(dir)
-  for (const candidate of [`${slug}-data.ts`, `${slug}-data.tsx`, 'data.ts']) {
+  const slug = basename(dir) === 'design-system' ? 'sunnyside' : basename(dir)
+  for (const candidate of [`${slug}-data.ts`, `${slug}-data.tsx`, 'data.ts', `${slug}-case.tsx`]) {
     try {
       const source = await readFile(join(dir, candidate), 'utf8')
-      // Tolerates `export const NAV = [` and `export const NAV: readonly NavItem[] = [`.
-      const navBlock = source.match(/export\s+const\s+NAV\b[^=]*=\s*\[([\s\S]*?)\]\s*(?:as\s+const|\n|$)/)
+      // Tolerates `export const NAV = [`, `export const SECTIONS = [`, object `{ id: '...' }`, and tuple `['id', 'Label']`.
+      const navBlock = source.match(/(?:export\s+)?const\s+(?:NAV|SECTIONS)\b[^=]*=\s*\[([\s\S]*?)\]\s*(?:as\s+const|\n|$)/)
       if (!navBlock) continue
-      const ids = [...navBlock[1].matchAll(/id:\s*['"`]([a-z0-9-]+)['"`]/gi)].map((m) => m[1])
+      const objIds = [...navBlock[1].matchAll(/id:\s*['"`]([a-z0-9-]+)['"`]/gi)].map((m) => m[1])
+      const tupleIds = [...navBlock[1].matchAll(/\[\s*['"`]([a-z0-9-]+)['"`]\s*,/gi)].map((m) => m[1])
+      const ids = objIds.length ? objIds : tupleIds
       if (ids.length) return { ...tokens, sections: ids }
     } catch {
       /* no data file — fine */

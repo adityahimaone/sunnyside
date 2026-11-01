@@ -4,6 +4,43 @@
   "date": "2026-10-28",
   "track": "drawn",
   "material": "painted glass",
+  "meta": {
+    "name": "Clearing",
+    "version": "1.0.0",
+    "case": "Case 08",
+    "namespace": "--cl-",
+    "track": "drawn",
+    "family": "drawn-stag",
+    "material": "painted glass",
+    "oneSentence": "A sighting, not a sticker: painted emerald light seen through one pane of glass, a drawn stag on a tapered horizon, and an outlined wordmark."
+  },
+  "theme": {
+    "family": "drawn-stag",
+    "material": "painted glass",
+    "edge": "1px glass rim",
+    "offset": "0",
+    "stroke": "2.7px antler cut",
+    "tile": "none",
+    "radius": "16px",
+    "ring": "2px emerald",
+    "density": "editorial-clearing",
+    "label": "mono-caps",
+    "field-recipe": "emerald-painted-glass",
+    "mark-form": "drawn stag on tapered horizon"
+  },
+  "sections": [
+    "foundation",
+    "material",
+    "marks",
+    "colour",
+    "type",
+    "parts",
+    "motion",
+    "voice",
+    "applications",
+    "tokens",
+    "audit"
+  ],
   "color": {
     "bark": "#0E211C",
     "emerald": "#0F4A3C",

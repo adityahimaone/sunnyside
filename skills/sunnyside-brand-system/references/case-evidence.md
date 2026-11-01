@@ -95,30 +95,31 @@ The two most useful to read first:
 - **`features/riso/`** — the constructed track with two inks: a pinned sheet torn from the pin,
   a 2.2px register ghost, a clip-path tear, and two contrast pairs published as failures.
 
-## Added since the eight (measured 2026-11-01)
+## The eleven (measured 2026-11-01)
 
-Facts only, from `gates.mjs` and the repo on that day; rerun it before quoting any of this.
+Facts only, from `gates.mjs` and the repo on that day; rerun `node scripts/gates.mjs --slug <slug>` before quoting any of this.
 
-| Case | `tokens.json` | Detach, weakest | Failing pairs published | Palette | Page sections |
-| --- | --- | --- | --- | --- | --- |
-| Jakarta | **missing**: nothing can be measured | not scorable | not scorable | not scorable | 6 ids: idea, mark, palette, type, apps, tokens |
-| Ledger | object shape (`primitive{}`, `ramp`, `signal`), no DNA, no `contrast` | 38 vs Hachure, an incomplete file, not a collision | none in `tokens.json` | pass, 26 primitives | not counted (UI case) |
-| Porphyry | `primitives[]`, full DNA | **73** vs Hachure | 2 | pass | 9 |
+| # | Case | Track | Archetype | Material | Display | Signal | Weakest Detach | Palette & Contrast |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 01 | **Sunnyside** (`/sunnyside`) | drawn | `minimal` | paper + ink + hard offset | Syne | cobalt `#3d53d6` | **69** vs Vitrine | 13 prims PASS · 8 pairs (2 fail) PASS |
+| 02 | **Vitrine** (`/design-system/vitrine`) | constructed | `minimal` | liquid-glass + dither | Space Grotesk (H3 vs Riso) | signal `#d9ff43` | **60** vs Hachure | 16 prims PASS · 10 pairs (1 fail) PASS |
+| 03 | **Huginn** (`/design-system/huginn`) | constructed | `minimal` | vermilion field + ordered cells | Bodoni Moda | vermilion `#e2281b` | **59** vs Riso Co. | 13 prims PASS · 11 pairs (2 fail) PASS |
+| 04 | **Riso Co.** (`/design-system/riso`) | constructed | `minimal` | uncoated vellum + two drums | Space Grotesk (H3 vs Vitrine) | drum A `#f2542d` | **59** vs Huginn | 9 prims PASS · 13 pairs (3 fail) PASS |
+| 05 | **Hachure** (`/design-system/hachure`) | constructed | `minimal` | survey stock + Bayer hachure | Geist Mono | lichen `#c9d94e` | **60** vs Clearing | 9 prims PASS · 18 pairs (2 fail) PASS |
+| 06 | **Cove** (`/design-system/cove`) | constructed | `minimal` | ink-and-lumen | Sora | lumen `#3fe3c6` | **61** vs Clearing | 14 prims PASS · 12 pairs (1 fail) PASS |
+| 07 | **Strand** (`/design-system/strand`) | constructed | `minimal` | sea-glass | Instrument Sans | sun `#a85a22` | **53** vs Clearing | 13 prims PASS · 12 pairs (1 fail) PASS |
+| 08 | **Clearing** (`/design-system/clearing`) | drawn | `minimal` | painted glass | Iowan Old Style | emerald `#0f4a3c` | **53** vs Strand | 6 prims PASS · 8 pairs (1 fail) PASS · Figma PASS |
+| 09 | **Ledger** (`/design-system/ledger`) | constructed | `ui-ramp` | tactile glass + harbor grid | Geist Sans | indigo `#19398d` | **67** vs Riso Co. | 26 prims PASS · 13 pairs (1 fail) PASS |
+| 10 | **Porphyry** (`/design-system/porphyry`) | constructed | `minimal` | porphyry + marble + gold leaf | Cinzel | gold `#c9a45c` | **81** vs Clearing (PASS) | 18 prims PASS · 11 pairs (2 fail) PASS |
+| 11 | **Jakarta** (`/design-system/jakarta`) | constructed | `multi-ramp` | enamel + vinyl + one orange | Plus Jakarta Sans | senja `#f7481b` | **67** vs Riso Co. | 46 prims PASS · 14 pairs (8 fail) PASS |
 
-What they teach, in order of cost:
+What the full 11-case shelf teaches:
 
-- **A case without `tokens.json` fails the gates that need tokens.** Jakarta is the first one to
-  ship that way; detach, palette and contrast now report FAIL instead of skipping.
-- **Every token shape now has one reader.** `scripts/lib/tokens.mjs` reads all five shapes in
-  `tokens-and-docs.md`; gates and design-md import it.
-- **Porphyry is the model for the newer cases:** it clears detach, publishes failures, and its
-  palette matches its CSS.
-
-### A collision the old scan could not see
-
-Cove and Clearing: Cove's `lumen` (178°) and Clearing's `emerald` (173°) are **5° apart**, "same
-family" by the detach rule, and Cove scores 65/100 against Clearing. It went unreported because
-Clearing keeps its tokens in `public/brand/clearing/` and the scan only looked in `features/`.
-Clearing's tokens carry colour and type but no DNA, so this score rests on hue, value and type;
-treat it as a flag to look at, not a final verdict. Huginn was missed for the same reason.
+- **Every case now ships a unified, scorable `tokens.json` and `*-tokens.css`.** All 11 cases pass `palette`, `font`, and `contrast` in `gates.mjs`, and every case publishes at least one failing contrast pair with the job it is forbidden to do.
+- **Porphyry (81/100 weakest) is the detach model** and is guarded in CI (`.github/workflows/skill-check.yml`).
+- **Jakarta is the Type & Foundations and Multi-Ramp model:** 9 place-named district ramps (46 primitives), `primaryAccent: "senja-100"` for detach comparison, live visual `TYPE_SCALE` rows rendered at each role's actual size/leading/tracking, and visual `SPACE_SCALE`, `RADIUS_SCALE`, `SHADOW_SCALE`, and `MOTION_SCALE` cards.
+- **Historical hue clusters are honest, not hidden:**
+  - *Warm Orange-Red cluster (30°–35° OKLCH):* Huginn (`#e2281b`, 30°), Jakarta (`#f7481b`, 34°), and Riso Co. (`#f2542d`, 35°) sit within 5° of each other, so their pairwise hue score is 0–5/25 even though their materials, tracks, and typography earn 67–72/100.
+  - *Teal/Emerald & Sand/Amber cluster:* Cove (`#3fe3c6`, 178°) vs Clearing (`#0f4a3c`, 173°) are 5° apart; Strand (`#a85a22`, 52°) vs Clearing (`#a9713f`, 61°) are 9° apart.
+  - *Historical H3 display face:* Vitrine and Riso Co. both set `Space Grotesk` (shipped before the detach gate existed).
 

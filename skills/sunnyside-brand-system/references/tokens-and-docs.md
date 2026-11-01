@@ -169,8 +169,9 @@ first. A shape the loader cannot read returns `unknown` and the gates say so.
 | `a`/`b` contrast, `$meta` | as above, with `$meta`, and `contrast[]` using `a`/`b` | Huginn |
 | Role/face type | `type[]` entries are `{role, face}`; `face` may be a CSS alias | Hachure |
 | Flat colour | `color{name: hex}`, `type{display: "Family"}`, `radius{}`, `space[]` of numbers | Clearing |
-| Object-keyed | `primitive{name: {value, hex}}`, `ramp`, `signal`, `semantic{light,dark}`; no DNA, no `contrast` | Ledger |
+| Object-keyed | `primitive{name: {value, hex}}`, `ramp`, `signal`, `semantic{light,dark}`, `contrast{light,dark,failing}` | Ledger |
 
 A contrast entry must carry hex values and the ratio computed from them. Gradients and alpha
-colours cannot be computed and are not counted as passes. detach-check still reads its own subset
-(`theme` DNA, `primitives`, `type`); moving it onto the loader is the remaining step.
+colours cannot be computed and are not counted as passes. `detach-check.mjs`, `gates.mjs`, and
+`design-md.mjs` all normalize every shape above, including `meta.archetype` (`minimal`,
+`multi-ramp`, `ui-ramp`) and `meta.primaryAccent`.

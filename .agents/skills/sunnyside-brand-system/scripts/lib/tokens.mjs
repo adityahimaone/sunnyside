@@ -21,7 +21,12 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 export function findTokens(root, slug) {
-  return [join(root, 'features', slug, 'tokens.json'), join(root, 'public', 'brand', slug, `${slug}-tokens.json`)].find(existsSync) ?? null
+  const candidates = [
+    join(root, 'features', slug, 'tokens.json'),
+    join(root, 'public', 'brand', slug, `${slug}-tokens.json`),
+    ...(slug === 'sunnyside' ? [join(root, 'features', 'design-system', 'tokens.json')] : []),
+  ]
+  return candidates.find(existsSync) ?? null
 }
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i
@@ -46,6 +51,44 @@ function scale(x) {
   return []
 }
 
+function parseContrast(c, primitives) {
+  if (Array.isArray(c)) {
+    return c.map((p) => ({
+      label: p.label ?? p.pair ?? p.text ?? '',
+      fg: p.fg ?? p.a,
+      bg: p.bg ?? p.b,
+      ratio: typeof p.ratio === 'number' ? p.ratio : p.ratio ? Number(String(p.ratio).replace(',', '.').replace(/:1$/, '')) : null,
+    }))
+  }
+  if (c && typeof c === 'object') {
+    const out = []
+    const byName = new Map(primitives.map((p) => [p.name.toLowerCase(), p.hex]))
+    const resolveHex = (str) => {
+      const m = String(str ?? '').match(/#[0-9a-f]{3,6}/i)
+      if (m) return m[0]
+      for (const [k, hex] of byName) if (hex && String(str).toLowerCase().includes(k)) return hex
+      return null
+    }
+    for (const scope of ['light', 'dark']) {
+      if (c[scope] && typeof c[scope] === 'object') {
+        for (const [label, r] of Object.entries(c[scope])) {
+          const ratio = Number(String(r).replace(/:1$/, ''))
+          out.push({ label: `${label} (${scope})`, fg: null, bg: null, ratio: Number.isNaN(ratio) ? null : ratio })
+        }
+      }
+    }
+    if (c.failing && typeof c.failing === 'object') {
+      const f = c.failing
+      const fg = f.fg ?? f.a ?? resolveHex(f.pair)
+      const bg = f.bg ?? f.b ?? (fg ? '#ffffff' : null)
+      const ratio = typeof f.ratio === 'number' ? f.ratio : Number(String(f.ratio ?? '').replace(/:1$/, ''))
+      out.push({ label: f.pair ?? f.label ?? 'failing', fg, bg, ratio: Number.isNaN(ratio) ? null : ratio })
+    }
+    return out
+  }
+  return []
+}
+
 export function readTokens(path) {
   const t = JSON.parse(readFileSync(path, 'utf8'))
   const meta = t.meta ?? t.$meta ?? {}
@@ -54,7 +97,7 @@ export function readTokens(path) {
   let primitives = []
   if (Array.isArray(t.primitives)) {
     shape = 'primitives[]'
-    primitives = t.primitives.map((p) => ({ name: String(p.name), value: p.value, hex: hexOf(p.value), role: p.role ?? '' }))
+    primitives = t.primitives.map((p) => ({ name: String(p.name), value: p.value, hex: hexOf(p.hex) ?? hexOf(p.value), role: p.role ?? '' }))
   } else if (t.primitive && typeof t.primitive === 'object') {
     shape = 'primitive{}'
     primitives = Object.entries(t.primitive).map(([name, v]) => {
@@ -68,27 +111,54 @@ export function readTokens(path) {
       .map(([name, value]) => ({ name, value, hex: hexOf(value), role: '' }))
   }
 
-  const contrast = (Array.isArray(t.contrast) ? t.contrast : []).map((p) => ({
-    label: p.label ?? p.pair ?? '',
-    fg: p.fg ?? p.a,
-    bg: p.bg ?? p.b,
-    ratio: typeof p.ratio === 'number' ? p.ratio : null,
-  }))
+  const contrast = parseContrast(t.contrast, primitives)
 
   let type = []
   if (Array.isArray(t.type))
-    type = t.type.map((e) => ({ name: String(e.name ?? e.role ?? ''), value: String(e.value ?? e.face ?? ''), family: familyOf(e.value ?? e.face), size: e.size, weight: e.weight }))
-  else if (t.type && typeof t.type === 'object')
-    type = Object.entries(t.type)
+    type = t.type.map((e) => ({ name: String(e.name ?? e.role ?? ''), value: String(e.value ?? e.face ?? ''), family: familyOf(e.value ?? e.face), size: e.size, leading: e.leading ?? e.line, tracking: e.tracking, weight: e.weight, use: e.use ?? e.role }))
+  else if (t.type && typeof t.type === 'object') {
+    const entries = t.type.family && typeof t.type.family === 'object' ? Object.entries(t.type.family) : Object.entries(t.type)
+    type = entries
       .filter(([, v]) => typeof v === 'string')
       .map(([name, value]) => ({ name, value, family: familyOf(value) }))
+  }
 
+  const rawRadius = t.radius
+  const radiusStr =
+    rawRadius == null
+      ? undefined
+      : Array.isArray(rawRadius)
+        ? String(rawRadius[Math.floor(rawRadius.length / 2)]?.value ?? rawRadius[0]?.value ?? '')
+        : typeof rawRadius === 'object'
+          ? `${rawRadius.md ?? rawRadius.sm ?? rawRadius.base ?? Object.values(rawRadius)[0]}`.replace(/^(?!.*(?:px|rem|em)$)(.+)$/, '$1px')
+          : String(rawRadius)
+
+  const theme = {
+    family: t.theme?.family ?? meta.family ?? t.track ?? meta.track,
+    material: t.theme?.material ?? meta.material ?? (typeof t.material === 'string' ? t.material : t.material?.idea),
+    edge: t.theme?.edge,
+    offset: t.theme?.offset,
+    stroke: t.theme?.stroke,
+    tile: t.theme?.tile,
+    radius: t.theme?.radius ?? radiusStr,
+    ring: t.theme?.ring,
+    density: t.theme?.density,
+    label: t.theme?.label,
+    'field-recipe': t.theme?.['field-recipe'] ?? t.theme?.fieldRecipe,
+    'mark-form': t.theme?.['mark-form'] ?? t.theme?.markForm ?? meta.markForm,
+  }
+
+  const rawNs = meta.namespace ?? t.namespace ?? ''
   return {
     path,
     shape,
     name: meta.name ?? t.name ?? '',
-    namespace: meta.namespace ? String(meta.namespace).replace(/^-+|-+$/g, '') : '',
-    idea: meta.idea ?? meta.essence ?? meta.oneSentence ?? t.idea ?? '',
+    namespace: rawNs ? String(rawNs).replace(/^-+|-+$/g, '') : '',
+    idea: meta.idea ?? meta.essence ?? meta.oneSentence ?? t.idea ?? t.claim ?? t.description ?? '',
+    oneSentence: meta.oneSentence ?? t.oneSentence ?? meta.promise ?? meta.essence ?? meta.idea ?? t.idea ?? t.claim ?? t.description ?? '',
+    archetype: meta.archetype ?? t.archetype ?? (Array.isArray(t.ramps) && t.ramps.length > 2 ? 'multi-ramp' : t.ramp ? 'ui-ramp' : 'minimal'),
+    theme,
+    sections: t.sections ?? meta.sections ?? [],
     primitives,
     contrast,
     type,

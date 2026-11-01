@@ -4,7 +4,7 @@ description: 'Design and ship a brand kit or design system from a brief: one ide
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '3.5'
+  version: '3.7'
 ---
 
 # Sunnyside brand system
@@ -23,34 +23,53 @@ fails, go to the step the gate table names, fix only that, and re-run only that 
 
 ```bash
 # 0 · pre-flight, once
-node scripts/init-system.mjs --slug <slug> --name "<Name>" --hue <n> --peek
+node scripts/init-system.mjs --slug <slug> --name "<Name>" --hue <n> \
+  [--archetype minimal|multi-ramp|ui-ramp] [--concept <concept>] \
+  [--field mesh|bands|grain|dither|glass|grid|all] \
+  [--modules forms,cast,apps,figma,design-md,qa] --peek
 node scripts/brand-ref.mjs near --hue <n>            # who already owns this hue (needs network)
 ```
 
-1. **Brief, in six lines.** Name, category, audience, promise, enemy, one sentence the work can
-   be rejected against. If it needs a comma splice, the idea is not ready. Ask **at most one
-   question, and only when the request names no subject at all**; otherwise write the
-   assumptions in one line and build.
-2. **Pick the track.** Constructed or drawn, one per brand. See *Two tracks*.
+1. **Brief + Interactive Scope Gate.** Write the brief in six lines: name, category, audience,
+   promise, enemy, and one sentence the work can be rejected against (if it needs a comma splice,
+   the idea is not ready). Unless the user says `"all"` or `"quick"`, ask **one upfront
+   multi-select question** so the user picks which optional deliverables to generate beyond the
+   core proof (`Hero + Idea + Marks + Palette + Type & Foundations + Multi-Format Tokens + Static Audit`):
+   - **Hero Field / Background Assets** — procedural SVG gradient mesh, stepped bands, paper grain, Bayer dither, glass pane, or survey grid (`--field mesh|bands|grain|dither|glass|grid|all` via `field-forge.mjs`), or licensed stock photo + duotone scrim (`assets.mjs`)
+   - **6-Concept Logo Bake-Off** — generate and score 6 distinct mark families side-by-side (`brand-forge.mjs --bakeoff`) before locking the winner
+   - **Form Kit** — interactive inputs, error summary, focus & disabled states (`--modules forms`)
+   - **Mark Cast / Illustrations** — 4–6 drawn or constructed companion marks (`--modules cast` / `cast-forge.mjs`)
+   - **Applications Wall** — 12-column bento of real-world artifacts (`--modules apps`)
+   - **Figma Export** — `figma-forge.mjs` + `figma-smoke.mjs` (`--modules figma`)
+   - **DESIGN.md Export** — `design-md.mjs` agent-readable spec (`--modules design-md`)
+   - **Browser QA** — `qa.mjs --quick` headless check (`--modules qa`)
+2. **Pick the track and archetype.** Constructed or drawn (*Two tracks*), and `minimal` (5+1
+   palette), `multi-ramp` (civic/place ramps like Jakarta), or `ui-ramp` (10–14 step neutral +
+   signal ramp like Ledger). See *Three archetypes*.
 3. **Study the neighbours** (skip with no category). `brand-ref.mjs search <category>`, `pull`
    two or three, note their accent hue, display face and what they refuse; `ref` them for the
    gate. Study, never copy: `references/research.md`.
-4. **Draw six, keep one.** Six marks in one file, one render, scored. Write why the other five
-   lost; that paragraph becomes the guide.
-5. **Generate the family.** `brand-forge.mjs` (constructed) or hand-cut SVGs (drawn): primary,
-   compact, glyph, lockup. The compact is a separate drawing.
+4. **Draw six, keep one.** Run `node scripts/brand-forge.mjs --bakeoff features/<slug>/tokens.json --out public/brand/<slug>/bakeoff` (or hand-draw six concepts in one file), score with `python3 scripts/score-mark.py --dir public/brand/<slug>/bakeoff --track constructed|drawn`, and write why the other five lost; that paragraph becomes the guide.
+5. **Generate the family.** `node scripts/brand-forge.mjs --tokens features/<slug>/tokens.json --concept <winner> --out public/brand/<slug>` generates the full 12-file text-free SVG family (`mark.svg`, `mark-compact.svg`, `mark-compact-reverse.svg`, `glyph.svg`, `mark-reverse.svg`, `mark-mono.svg`, `icon.svg`, outlined `wordmark.svg` + `wordmark-reverse.svg`, `lockup.svg`, `lockup-reverse.svg`, `lockup-stacked.svg`, `lockup-stacked-reverse.svg`) plus `sheet.html` and `forms.html` in one pass. Across 22 built-in archetypes:
+   - **Constructed (11):** `bracket`, `planes`, `louvers`, `ribbon`, `horizon`, `junction`, `carved`, `cells`, `tear`, `portal`, `archmono` (solid filled A–Z monogram).
+   - **Drawn (11):** `sunburst`, `aperture`, `orbit`, `hatch`, `stack`, `facet`, `dotmatrix`, `lines`, `overprint`, `nodes`, `monogram`, `crest`.
+   Pass `--wordmark <custom.svg>` if outlined from a specific `.ttf` via `extract-wordmark.py`; otherwise `brand-forge.mjs` synthesizes a pure-`<path>` geometric outlined wordmark automatically (never `<text>`).
 6. **Write the tokens, then run the gates.** One source, three layers, two surfaces, never a
    mode-prefixed primitive. Then `node scripts/gates.mjs --slug <slug> --refs refs/`. The cheap
    failures (a font never loaded, a contrast pair never computed) surface here, before the board,
    page and export are built on top of them.
-7. **Build the board.** 1500 × 1125, local fonts, rendered at 2×. It is the thumbnail.
+7. **Build the board & optional background fields.** 1500 × 1125 board, local fonts, rendered at 2×. If the page needs a hero field, gradient mesh, stepped bands, grain, Bayer dither, glass pane or grid, run `node scripts/field-forge.mjs --slug <slug> --recipe <mesh|bands|grain|dither|glass|grid|all>` to generate token-locked SVGs and `<slug>-field.css` (with `.fieldScrim`, `.readingPlate`, and `.photoDuotone`).
 8. **Build the proof page, with its marks section.** Hero, contents, the sections the system
    needs, tokens, audit; a logo card, wordmark scale, cast drawer and one usage rule. A row of
    equal logo tiles is not a mark system. Need a photograph? `assets.mjs`, imagery only. The page
    must prove five jobs (see *What the page proves*); the ids and order are the case's own.
-9. **Export.** `figma-forge.mjs` (plugin + `.fig`) and `design-md.mjs` (`DESIGN.md`), both from
-   the tokens, both regenerated, never edited.
-10. **Final gates.** `gates.mjs` again, then `qa.mjs` for the two that need a rendered page.
+9. **Export (when selected in Step 1).** `figma-forge.mjs` (plugin + `.fig`) and `design-md.mjs`
+   (`DESIGN.md`), both from the tokens, both regenerated, never edited.
+10. **Tiered audit pipeline.**
+    - **Tier 1 (Mandatory, <2s, 0 browser tokens):** `node scripts/gates.mjs --slug <slug>`.
+    - **Tier 2 (Optional, when `Browser QA` is selected):** `node scripts/qa.mjs --quick` for
+      1440/390 overflow, mark at 16px, and reduced motion without full-page screenshot bloat.
+    - **Tier 3 (On explicit request only):** full `qa.mjs --sections` with full-page captures.
 11. **Name the gaps.** A guide that hides its gaps is a brochure.
 
 ## The gates
@@ -91,11 +110,24 @@ from the last (Cove nearly failed on nine of twelve shared ids).
    Breaks next*.
 2. **Mark** — primary, compact (a separate drawing) and glyph, the wordmark, and how it breaks.
 3. **Colour** — every pair computed, each with its allowed job, and the one that fails.
-4. **Type** — the scale *and* three specimens at real copy, never lorem: the display face at its
-   real size with the tracking stated; one reading paragraph at 60–68ch with the leading stated;
-   and, if the system carries numbers, tabular figures right-aligned on the decimal. A missing
-   specimen is a *Known gap* in the audit.
+4. **Type & Foundations (Jakarta + Porphyry standard)** — three domain specimens at real copy
+   (never lorem): the display face at its real size with tracking stated, one reading paragraph at
+   60–68ch with leading stated, and right-aligned tabular figures; **plus** a live visual type
+   scale (every role rendered at its actual `--s`, `--lh`, `--ls`, `--w`, never just a static text
+   table) and visual foundations (proportional spacing bars, radius chips, shadow/elevation cards,
+   and motion easing tokens). A missing specimen is a *Known gap* in the audit.
 5. **Tokens and audit** — copyable tokens in both scopes, then *Fails*, *Not verified*, *Known gap*.
+
+## Three archetypes (universal theme & variant support)
+
+Not every prompt is a 6-colour studio site. Pass `--archetype` to `init-system.mjs` and record
+`meta.archetype` + `meta.primaryAccent` in `tokens.json`:
+
+| Archetype | Use when | Palette & contrast rule | Precedent |
+| --- | --- | --- | --- |
+| **`minimal`** (default) | Brand identity, editorial specimen, focused product | 5+1 (`ground`, `plate`, `ink`, `muted`, `wash` + 1 `signal`), 1+ failing pair published | Sunnyside, Vitrine, Cove, Strand, Porphyry |
+| **`multi-ramp`** | City, festival, institution, multi-district or multi-line wayfinding | Named 4-step ramps (places, lines or domains), semantic job table, `primaryAccent` declared so detach compares the primary civic action rather than every ramp | Jakarta (9 district ramps, 46 primitives, 7 failing pairs published) |
+| **`ui-ramp`** | Dense dashboard, financial ledger, shadcn/Radix workbench | 10–14 step neutral ramp biased toward one hue + 5–7 step signal ramp + tabular figure scale | Ledger (14 harbor steps + 7 indigo steps, OKLCH + hex) |
 
 ## Figma is a build target, not a handoff
 
@@ -274,8 +306,9 @@ Templates: `templates/design-system.html` (full page), `single-page.html` (singl
 | `gates.mjs` | every static gate in one command |
 | `lib/tokens.mjs` | the one reader for every `tokens.json` shape and location; scripts import it |
 | `test/` | unit tests: `node --test "scripts/test/*.test.mjs"` (CI runs them) |
-| `brand-forge.mjs` / `cast-forge.mjs` | the constructed family (`--bakeoff`) / a 4–6 drawn cast |
-| `score-mark.py` | circles, strokes, primitives, 16px |
+| `brand-forge.mjs` / `cast-forge.mjs` | 22-concept universal mark & outlined wordmark generator (`--tokens`, `--bakeoff`) / a 4–6 drawn cast |
+| `field-forge.mjs` | optional procedural SVG hero backgrounds (`mesh`, `bands`, `grain`, `dither`, `glass`, `grid`) + scrim & duotone CSS from `tokens.json` |
+| `score-mark.py` | track-aware (`--track constructed|drawn|auto`) craft, circle, stroke, primitive & 16px scorer |
 | `assets.mjs` | search and fetch free photos and icons with licence records |
 | `audit.mjs`, `qa.mjs` | static audit; audit + score + browser pass |
 | `render-board.mjs`, `render-icons.mjs`, `favicons.py`, `downscale.py` | board, icon set, favicons, image shrink |

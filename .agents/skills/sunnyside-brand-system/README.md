@@ -7,6 +7,36 @@ and an audit that names what it could not verify.
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand and
 Clearing. The method travels; the marks do not.
 
+## v3.7: universal 22-concept logo forge, built-in outlined wordmark, track-aware scoring, and optional background field generator
+
+- **Universal 22-Concept Logo Forge (`brand-forge.mjs`).** Expanded with 6 new battle-tested archetypes from shipped cases (`junction`, `carved`, `cells`, `tear`, `portal`, `archmono`, plus drawn `crest`), fixed `mark-compact.svg` so all compact marks sit natively on the `64 × 64` viewBox (never scaled into a `32 × 32` top-left corner), and added `--tokens features/<slug>/tokens.json` so a full brand kit can be forged directly from `tokens.json` without a separate `brand.json`.
+- **Zero-Dependency Built-In Outlined Wordmark.** When `--wordmark` is omitted, `brand-forge.mjs` now synthesizes pure-`<path>` geometric outlined `wordmark.svg` and `wordmark-reverse.svg` (zero `<text>` tags) and builds all 4 lockups (`lockup.svg`, `lockup-reverse.svg`, `lockup-stacked.svg`, `lockup-stacked-reverse.svg`) plus `mark-compact-reverse.svg` out of the box.
+- **Track-Aware Mark Scorer (`score-mark.py --track constructed|drawn|auto`).** Auto-detects track from `tokens.json` (`meta.track` / `dna.edge`) so constructed marks enforce zero-circle / fill-only / 2–4 primitives while drawn marks allow subject circles and cut-line strokes (`>= 2.4` in compact) while still enforcing 16px contrast and silhouette coverage.
+- **Optional Hero Background & Field Generator (`field-forge.mjs` + `init-system.mjs --field`).** Generates token-locked `1600 × 1000` SVG hero fields (`mesh`, `bands`, `grain`, `dither`, `glass`, `grid`) and `<slug>-field.css` (`.fieldStage`, `.fieldScrim`, `.readingPlate`, `.photoDuotone`) in `<100ms` with zero API tokens.
+- **Multi-Format Token Exports & Interactive Motion Track.** `init-system.mjs` now scaffolds copyable `CSS Custom Properties`, `Tailwind v4 @theme`, and `shadcn / Radix CSS Bridge` blocks plus an interactive hover/focus motion track previewing easing tokens.
+
+## v3.6: interactive scope gate, Jakarta + Porphyry type standard, adaptive archetypes, and 11-case audit
+
+- **Interactive Scope Gate (Step 1).** Replaces the rigid "ask nothing" rule with one upfront
+  multi-select question so the user picks optional deliverables (`Form Kit`, `Cast/Illustrations`,
+  `Applications Wall`, `Figma Export`, `DESIGN.md`, `Browser QA`) while always shipping the core
+  proof (`Hero + Idea + Marks + Palette + Type & Foundations + Tokens + Static Audit`).
+- **Jakarta + Porphyry Type & Foundations Standard.** `init-system.mjs` and `SKILL.md` now require
+  and scaffold live rendered `TYPE_SCALE` rows (each role rendered at its actual size, leading,
+  tracking and weight) plus visual foundation cards (`SPACE_SCALE` bars, `RADIUS_SCALE` chips,
+  `SHADOW_SCALE` plates, and `MOTION_SCALE` tokens) alongside the three domain specimens.
+- **Adaptive Archetypes (`--archetype minimal|multi-ramp|ui-ramp`).** Supports 5+1 minimal brand
+  systems, multi-ramp civic/wayfinding systems (like Jakarta's 9 district ramps with
+  `primaryAccent`), and 14-step UI/dashboard ramps (like Ledger).
+- **Tiered Audit Pipeline.** Tier 1 (`gates.mjs`, <2s, 0 browser tokens) is mandatory; Tier 2
+  (`qa.mjs --quick`) runs only when `Browser QA` is selected; Tier 3 (full screenshot `qa.mjs`)
+  runs only on explicit request.
+- **All 11 systems backfilled and measured.** Added `features/jakarta/tokens.json`,
+  `features/design-system/tokens.json` + `sunnyside-tokens.css`, full `theme` DNA across Huginn,
+  Riso Co., Hachure, Clearing, and Ledger, and published failing contrast pairs across Vitrine,
+  Cove, and Strand. Every one of the 11 systems now passes `palette`, `font`, and `contrast` in
+  `gates.mjs`.
+
 ## v3.5: one token reader, a CI guard, and tests
 
 - **One loader.** `scripts/lib/tokens.mjs` reads every `tokens.json` shape in the repo and finds

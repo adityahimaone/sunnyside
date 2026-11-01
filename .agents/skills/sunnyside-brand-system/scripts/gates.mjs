@@ -66,11 +66,22 @@ const isHex = (v) => typeof v === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})/i.tes
 
 /* ── a case without tokens.json cannot be measured ───────────────────────── */
 
+function findCss(slugName) {
+  return [
+    at('features', slugName, `${slugName}-tokens.css`),
+    at('public', 'brand', slugName, `${slugName}-tokens.css`),
+    ...(slugName === 'sunnyside' ? [at('features', 'design-system', 'sunnyside-tokens.css')] : []),
+  ].find(existsSync)
+}
+
 // The output contract says every case ships features/<slug>/tokens.json. When the case folder
 // exists without it, that is a defect to report, not a gate to skip: a green font check beside
 // four silent skips reads as "passed" to anyone skimming the table.
 function missingTokens(name) {
-  const exists = existsSync(at('features', slug)) || existsSync(at('public', 'brand', slug))
+  const exists =
+    existsSync(at('features', slug)) ||
+    existsSync(at('public', 'brand', slug)) ||
+    (slug === 'sunnyside' && existsSync(at('features', 'design-system')))
   gate(name, exists ? 'FAIL' : 'SKIP', exists ? `no tokens.json (looked in features/${slug}/ and public/brand/${slug}/) — the output contract requires one, and without it nothing here can be measured` : `no features/${slug} or public/brand/${slug}`)
   return true
 }
@@ -85,8 +96,9 @@ async function detach() {
   const featuresDir = at('features')
   if (existsSync(featuresDir))
     for (const d of await readdir(featuresDir)) {
-      const f = d === slug ? null : findTokens(root, d)
-      if (f) refs.push(f)
+      const candidateSlug = d === 'design-system' ? 'sunnyside' : d
+      const f = candidateSlug === slug ? null : findTokens(root, candidateSlug)
+      if (f && !refs.includes(f)) refs.push(f)
     }
   const extra = flag('refs')
   if (extra && extra !== true && existsSync(resolve(extra)))
@@ -137,7 +149,7 @@ const comparable = (v) => /^#[0-9a-f]{3,8}$/i.test(String(v).trim()) || /^oklch\
 
 async function palette() {
   const file = findTokens(root, slug)
-  const css = [at('features', slug, `${slug}-tokens.css`), at('public', 'brand', slug, `${slug}-tokens.css`)].find(existsSync)
+  const css = findCss(slug)
   if (!file) return missingTokens('palette')
   if (!css) return gate('palette', 'SKIP', `no ${slug}-tokens.css`)
   const t = readTokens(file)
@@ -171,13 +183,18 @@ async function palette() {
 /* ── 4 · font registered ─────────────────────────────────────────────────── */
 
 async function fonts() {
-  const css = [at('features', slug, `${slug}-tokens.css`), at('public', 'brand', slug, `${slug}-tokens.css`)].find(existsSync)
+  const css = findCss(slug)
   if (!css) return gate('font', 'SKIP', `no ${slug}-tokens.css`)
   const used = [...new Set([...(await readFile(css, 'utf8')).matchAll(/var\((--font-[a-z0-9-]+)/gi)].map((m) => m[1]))]
   if (!used.length) return gate('font', 'PASS', 'no --font-* aliases in the token file')
 
   // A case may register its own face at the route; the root layout is not the only place.
-  const layouts = [at('app', 'layout.tsx'), at('app', 'design-system', slug, 'layout.tsx'), at('app', 'design-system', slug, 'page.tsx')].filter(existsSync)
+  const layouts = [
+    at('app', 'layout.tsx'),
+    at('app', 'design-system', slug, 'layout.tsx'),
+    at('app', 'design-system', slug, 'page.tsx'),
+    ...(slug === 'sunnyside' ? [at('app', 'sunnyside', 'page.tsx')] : []),
+  ].filter(existsSync)
   if (!layouts.length) return gate('font', 'SKIP', 'no app/layout.tsx to check against')
   const text = (await Promise.all(layouts.map((l) => readFile(l, 'utf8')))).join('\n')
   const missing = used.filter((u) => !text.includes(`'${u}'`) && !text.includes(`"${u}"`))
