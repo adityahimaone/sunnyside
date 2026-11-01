@@ -18,11 +18,64 @@ added, so the evidence file is the only place that keeps one.)
 
 ## The fast path
 
-Eleven steps after a pre-flight. **Each step has one exit and nothing loops back:** when a gate
+Eleven steps after the interactive scope gate. **Each step has one exit and nothing loops back:** when a gate
 fails, go to the step the gate table names, fix only that, and re-run only that gate.
 
+### Step 0 · Interactive Scope Gate (`ask_question` — Mandatory First Action)
+
+> [!IMPORTANT]
+> **MANDATORY FIRST TOOL CALL (Before running any script or writing any file):**
+> Unless the user's prompt explicitly says `"skip questions"` or `"all defaults"`, you **MUST** call the **`ask_question` tool** (or `AskUserQuestion` in environments that name it that) on your **very first turn** and **STOP** to wait for the user's selection.
+> - **Never** ask these questions in plain markdown text—always use the `ask_question` tool so the interactive `/grill-me`-style selector UI renders.
+> - **Never** run `init-system.mjs` or create files before the user submits their answers.
+
+Call `ask_question` with these structured questions (skipping any question the user already answered explicitly in their prompt, and adding a domain/concept question if the brief is underspecified):
+
+```json
+{
+  "questions": [
+    {
+      "question": "Which track and palette archetype fits this system?",
+      "is_multi_select": false,
+      "options": [
+        "(Recommended) Constructed + Minimal (5+1 palette, fill-only geometric mark)",
+        "Drawn + Minimal (5+1 palette, tactile cut-line mark & companion cast)",
+        "Multi-Ramp Civic / Wayfinding (named district or product-line ramps, like Jakarta)",
+        "UI Workbench Ramp (10–14 step neutral + signal ramp for dense apps, like Ledger)"
+      ]
+    },
+    {
+      "question": "Which hero background or surface field should we generate?",
+      "is_multi_select": false,
+      "options": [
+        "(Recommended) Procedural SVG Field — Gradient Mesh or Stepped Bands (field-forge.mjs)",
+        "Procedural SVG Field — Paper Grain, Halftone or 4x4 Bayer Dither (field-forge.mjs)",
+        "Procedural SVG Field — Frosted Glass Pane or Survey Grid (field-forge.mjs)",
+        "Licensed Stock Photo + Token-Locked Duotone Scrim (assets.mjs + field-forge.mjs)",
+        "Solid Material Surface Only (no background asset)"
+      ]
+    },
+    {
+      "question": "Which optional deliverables and exports should we include beyond the core proof (Hero + Idea + Marks + Palette + Type & Foundations + Tokens + Static Audit)?",
+      "is_multi_select": true,
+      "options": [
+        "(Recommended) 6-Concept Logo Bake-Off (compare 6 mark families before locking)",
+        "(Recommended) Interactive Form Kit (inputs, error summary, focus & disabled states)",
+        "Mark Cast / Companion Illustrations (4–6 secondary marks via cast-forge.mjs)",
+        "Applications Wall (12-column bento of real-world artifacts)",
+        "Figma Plugin & .fig Export (figma-forge.mjs + figma-smoke.mjs)",
+        "DESIGN.md Export (agent-readable specification via design-md.mjs)",
+        "Browser QA Pass (headless 1440/390 overflow & 16px mark check via qa.mjs --quick)"
+      ]
+    }
+  ]
+}
+```
+
+### Step 1–11 · Execution Pipeline (Run after `ask_question` is answered)
+
 ```bash
-# 0 · pre-flight, once
+# 1 · pre-flight & scaffold using the user's selected flags from Step 0
 node scripts/init-system.mjs --slug <slug> --name "<Name>" --hue <n> \
   [--archetype minimal|multi-ramp|ui-ramp] [--concept <concept>] \
   [--field mesh|bands|grain|dither|glass|grid|all] \
@@ -30,22 +83,12 @@ node scripts/init-system.mjs --slug <slug> --name "<Name>" --hue <n> \
 node scripts/brand-ref.mjs near --hue <n>            # who already owns this hue (needs network)
 ```
 
-1. **Brief + Interactive Scope Gate.** Write the brief in six lines: name, category, audience,
-   promise, enemy, and one sentence the work can be rejected against (if it needs a comma splice,
-   the idea is not ready). Unless the user says `"all"` or `"quick"`, ask **one upfront
-   multi-select question** so the user picks which optional deliverables to generate beyond the
-   core proof (`Hero + Idea + Marks + Palette + Type & Foundations + Multi-Format Tokens + Static Audit`):
-   - **Hero Field / Background Assets** — procedural SVG gradient mesh, stepped bands, paper grain, Bayer dither, glass pane, or survey grid (`--field mesh|bands|grain|dither|glass|grid|all` via `field-forge.mjs`), or licensed stock photo + duotone scrim (`assets.mjs`)
-   - **6-Concept Logo Bake-Off** — generate and score 6 distinct mark families side-by-side (`brand-forge.mjs --bakeoff`) before locking the winner
-   - **Form Kit** — interactive inputs, error summary, focus & disabled states (`--modules forms`)
-   - **Mark Cast / Illustrations** — 4–6 drawn or constructed companion marks (`--modules cast` / `cast-forge.mjs`)
-   - **Applications Wall** — 12-column bento of real-world artifacts (`--modules apps`)
-   - **Figma Export** — `figma-forge.mjs` + `figma-smoke.mjs` (`--modules figma`)
-   - **DESIGN.md Export** — `design-md.mjs` agent-readable spec (`--modules design-md`)
-   - **Browser QA** — `qa.mjs --quick` headless check (`--modules qa`)
-2. **Pick the track and archetype.** Constructed or drawn (*Two tracks*), and `minimal` (5+1
-   palette), `multi-ramp` (civic/place ramps like Jakarta), or `ui-ramp` (10–14 step neutral +
-   signal ramp like Ledger). See *Three archetypes*.
+1. **Lock the brief.** Write the brief in six lines (`brand/<slug>/brief.md`): name, category,
+   audience, promise, enemy, and one sentence the work can be rejected against (if it needs a
+   comma splice, the idea is not ready).
+2. **Apply the selected track and archetype.** Constructed or drawn (*Two tracks*), and `minimal`
+   (5+1 palette), `multi-ramp` (civic/place ramps like Jakarta), or `ui-ramp` (10–14 step neutral +
+   signal ramp like Ledger) from the user's Step 0 selection. See *Three archetypes*.
 3. **Study the neighbours** (skip with no category). `brand-ref.mjs search <category>`, `pull`
    two or three, note their accent hue, display face and what they refuse; `ref` them for the
    gate. Study, never copy: `references/research.md`.

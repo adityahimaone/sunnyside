@@ -68,7 +68,22 @@ Report the gap list in one table:
 Do not turn a gap into a redesign. A missing hover state is a gap; a different
 palette is a different brand.
 
-## Choose the target
+## Choose the target (`ask_question` — Mandatory when not specified)
+
+> [!IMPORTANT]
+> If the target format or optional page sections are not explicitly specified in the user's prompt, call the **`ask_question` tool** (never plain text) before writing code and wait for the user's answer:
+> - **Question 1 (`is_multi_select: false`)**: `"Which implementation target should we build?"`
+>   - `"(Recommended) Product Route (TSX — Next.js server page + small client islands)"`
+>   - `"System Specimen (HTML — standalone design-system.html)"`
+>   - `"Simple Mockup (HTML — single-page.html rendered at 2x)"`
+>   - `"Pen Canvas (.pen source + code tokens)"`
+> - **Question 2 (`is_multi_select: true`)**: `"Which interactive modules should we include on the page?"`
+>   - `"(Recommended) Live Type Scale & Physical Foundations (spacing, radius, elevation, motion track)"`
+>   - `"(Recommended) Multi-Format Token Exports (CSS Variables, Tailwind v4 @theme, shadcn/Radix)"`
+>   - `"(Recommended) Interactive Form Kit (inputs, validation, error summary, focus & disabled states)"`
+>   - `"Hero Background Field / Scrim (procedural SVG field or duotone photo plate)"`
+>   - `"Applications Wall (12-column bento of real-world artifacts)"`
+>   - `"Mark Cast Drawer (companion illustrations & usage rules)"`
 
 | Target | Use when | Rules |
 | --- | --- | --- |
