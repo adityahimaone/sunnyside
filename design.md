@@ -73,7 +73,9 @@ Use the palette by role, not as a checklist. Tangerine, butter, pink, mint, and 
 
 The homepage is one continuous studio wall composed of six chapters: Intro, About, Show & tell, Work, Skills, and Contact. Its hero poster, sun, smiley, bursts, flowers, and marker lettering are drawn in the interface from CSS and SVG rather than assembled as one background image. The visual rhythm comes from chapter navigation, layered paper, restrained cobalt and butter fields, and playful marks.
 
-Chapter 03 (Work) is a **papercraft moodboard**, and the board is one object rather than a bar above a mat: a dark bezel frames a cork surface, the toolbar is printed on that cork, and twelve taped pieces — the six latest releases and the six latest documented systems — sit on it at their own angle, stamped with a rose "Approved / craft" mark, and linked to the archive (`/projects`, `/design-system`) from washi-tape labels. An `Everything / Releases / Systems` switch re-lays the mat with a layout animation, and seven small die-cut shapes — the same stickers the About release liner is peeled from — sit on the cork's edge band: draggable, decorative, never over a piece's copy. Hovering or keyboard-focusing a piece lifts a print of the same cover (`.peek`, ~44% of the mat wide, capped at 30rem) in front of the piece: it is aligned over that card's own artwork, hanging ~18px past its lower edge, kept below the toolbar and inside the mat, pointer-transparent, and never opened by a tap. Filtering re-lays the board with `layout="position"`; each piece carries its own vertical offset (`--cell-drop`), so a filter change glides cards instead of re-dealing their heights. The gamification is paper, not chrome — stamping a piece or peeling a scrap fills a mono counter, `Lucky dip` rings a random piece, `Paper party` throws paper confetti and re-tilts the board. Reduced motion drops the tilt, the confetti, and the re-toss while keeping the counters and the dip usable. `features/landing-page/studio/work-gallery/` owns that board; the chapter around it stays in `projects.tsx`.
+Chapter 03 (Work) is a **papercraft moodboard**, and the board is one object rather than a bar above a mat: a dark bezel frames a cork surface, the toolbar is printed on that cork, and twelve taped pieces — the six latest releases and the six latest documented systems — sit on it at their own angle, stamped with a rose "Approved / craft" mark, and linked to the archive (`/projects`, `/design-system`) from washi-tape labels. An `Everything / Releases / Systems` switch re-deals the mat (the set remounts and settles in reading order — never a position animation, so no card can fly), and seven small die-cut shapes — the same stickers the About release liner is peeled from — sit on the cork's edge band: draggable, decorative, never over a piece's copy. Hovering or keyboard-focusing a piece lifts a print of the same cover (`.peek`, ~44% of the mat wide, capped at 30rem) in front of the piece: it is aligned over that card's own artwork, hanging ~18px past its lower edge, kept below the toolbar and inside the mat, pointer-transparent, and never opened by a tap. Filtering keys the grid on the active filter: the new hand mounts at 45% opacity, 14px low, and rises with a 30ms stagger. Each piece's vertical offset (`--cell-drop`) is bound to the piece, not its slot, so the hand-placed heights survive a filter change. The gamification is paper, not chrome — stamping a piece or peeling a scrap fills a mono counter, `Lucky dip` rings a random piece, `Paper party` throws paper confetti and re-tilts the board. Reduced motion drops the tilt, the confetti, and the re-toss while keeping the counters and the dip usable. `features/landing-page/studio/work-gallery/` owns that board; the chapter around it stays in `projects.tsx`.
+
+Chapter 04 (Skills) is a **papercraft shadowbox diorama**. A cream cardstock `Automation controller` — kinetic switch plus `All machinery / 01–04` pills — overlaps the top edge of a mitred walnut frame; inside sits a dark cardboard cavity holding four die-cut paper panels that share one flat inked outline, a hard offset shadow, and an extruded title. `Build` is cobalt blueprint paper with a ribbed observatory dome (lens, slit, `DOME-01` base), a scaffold tower on an X-braced frame with the spring-mounted atom seated on its deck, a girder between them, and drifting atmosphere tags; `Motion` is butter with the smiling sun automaton, a cardboard gear, and a `Measuring & current` card of real range sliders whose curves keep their stiffness and damping (`Play the curves` re-deals the presets); `Systems` is pink with two paper gauges, a gatehouse console carrying the spring-loaded hover/press buttons, a hatched conveyor, and ribbon-flag bookmarks listing the skills; `The rest` is cream as a cardboard drawer with folder tabs and a cobalt Figma chip. Picking a station spans it across all twelve columns and reduces the other floors to their title plates; below 1024px the frame becomes a vertical tower with brass linkages, and the pills isolate one floor at a time. Ships in `features/landing-page/studio/skills.tsx`; reduced motion stops the dome spin, the sun, the gears, the drifting tags, and every transition while leaving the sliders and the pills usable.
 
 Treat this as the current landing-page direction. The former rack, DAW, device-wall, and LCD concepts are historical and are not the visual source for new landing-page work.
 
@@ -89,7 +91,6 @@ system, not a second visual language; the docs notes live in
 `docs/design-engineering.md`.
 
 Glass, audio, and hardware motifs may exist in other feature-specific experiments, but they are not the default Sunnyside surface language and should not be applied to archive content or the studio without a clear, information-bearing reason.
-
 
 ## Vitrine — Case 02
 
@@ -144,48 +145,49 @@ palette index chosen by an 8×8 Bayer threshold; there are no gradients, no
 
 ### Hachure implementation map
 
-| Concern | Source |
-| --- | --- |
-| Case library | `app/design-system/page.tsx`, `features/case-library/` (case 05) |
-| Route and token scope | `app/design-system/hachure/page.tsx` (`data-hachure-root` + `data-theme`) |
-| Tokens | `features/hachure/tokens.json` → `hachure-tokens.css` + public CSS/JSON |
+| Concern                       | Source                                                                                        |
+| ----------------------------- | --------------------------------------------------------------------------------------------- |
+| Case library                  | `app/design-system/page.tsx`, `features/case-library/` (case 05)                              |
+| Route and token scope         | `app/design-system/hachure/page.tsx` (`data-hachure-root` + `data-theme`)                     |
+| Tokens                        | `features/hachure/tokens.json` → `hachure-tokens.css` + public CSS/JSON                       |
 | Dither engine for the studies | `features/hachure/dither-field.ts` (imports the footer's own noise, Bayer and dither helpers) |
-| Component | `components/ui/ridgeline-dither-footer.tsx`, fed an explicit palette |
-| Form kit | `features/hachure/components/form-demo.tsx` |
-| Brand kit | `design/brand/hachure/` (brief, directions, board, assets) |
-| Logo and icons | `public/brand/hachure/` |
-| Markdown twin | `app/design-system/hachure/llms.txt/route.ts` |
-| Audit | `docs/hachure-design-system-audit.md` |
+| Component                     | `components/ui/ridgeline-dither-footer.tsx`, fed an explicit palette                          |
+| Form kit                      | `features/hachure/components/form-demo.tsx`                                                   |
+| Brand kit                     | `design/brand/hachure/` (brief, directions, board, assets)                                    |
+| Logo and icons                | `public/brand/hachure/`                                                                       |
+| Markdown twin                 | `app/design-system/hachure/llms.txt/route.ts`                                                 |
+| Audit                         | `docs/hachure-design-system-audit.md`                                                         |
 
 ### Vitrine implementation map
 
-| Concern | Source |
-| --- | --- |
-| Case library | `app/design-system/page.tsx`, `features/case-library/` |
-| Route and token scope | `app/design-system/vitrine/page.tsx` (imports the token CSS; `.vt-scope` on the page root) |
-| Tokens | `features/vitrine/tokens.json` → `vitrine-tokens.css` + public JSON |
-| Form controls | `features/vitrine/components/form-demo.tsx` |
-| Signature dither | `features/vitrine/components/dither-lens.tsx` |
-| Brand kit | `design/brand/vitrine/` |
-| Logo and icons | `public/brand/vitrine/` |
-| Design-engineering case | `features/design-engineering/` (`#case-vitrine`) |
-| Audit | `docs/vitrine-design-system-audit.md` |
+| Concern                 | Source                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------ |
+| Case library            | `app/design-system/page.tsx`, `features/case-library/`                                     |
+| Route and token scope   | `app/design-system/vitrine/page.tsx` (imports the token CSS; `.vt-scope` on the page root) |
+| Tokens                  | `features/vitrine/tokens.json` → `vitrine-tokens.css` + public JSON                        |
+| Form controls           | `features/vitrine/components/form-demo.tsx`                                                |
+| Signature dither        | `features/vitrine/components/dither-lens.tsx`                                              |
+| Brand kit               | `design/brand/vitrine/`                                                                    |
+| Logo and icons          | `public/brand/vitrine/`                                                                    |
+| Design-engineering case | `features/design-engineering/` (`#case-vitrine`)                                           |
+| Audit                   | `docs/vitrine-design-system-audit.md`                                                      |
 
 ## Implementation map
 
-| Concern                                                | Current source                                                    |
-| ------------------------------------------------------ | ----------------------------------------------------------------- |
-| Logo mark, wordmark, lockups, favicon                  | `components/ui/sunnyside-logo.tsx`, `public/brand/`, `design/brand/README.md` |
-| Design-engineering docs, Markdown twins and notes      | `features/design-engineering/`, `app/(booth)/design-engineering/llms.txt/route.ts`, `docs/design-engineering.md` |
-| Brand-system skill                                     | `skills/sunnyside-brand-system/`                                  |
-| Landing chapters and composition                       | `features/landing-page/studio/studio.tsx`                         |
-| Work chapter moodboard (pieces, stamps, stickers)       | `features/landing-page/studio/work-gallery/`                      |
-| Landing palette, chapters, and principles              | `features/landing-page/studio/studio-data.ts`                     |
-| Landing layout and scoped tokens                       | `features/landing-page/studio/studio.module.css`                  |
-| Sunnyside palette, contrast, type, motion, and exports | `features/design-system/sunnyside-data.ts`                        |
-| Interactive design-system specimen                     | `features/design-system/sunnyside.tsx` and `sunnyside.module.css` |
-| Archive tokens and shell                               | `features/archive/archive-tokens.css` and `archive.module.css`    |
-| Cross-feature primitives                               | `components/ui/`                                                  |
+| Concern                                                        | Current source                                                                                                   |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Logo mark, wordmark, lockups, favicon                          | `components/ui/sunnyside-logo.tsx`, `public/brand/`, `design/brand/README.md`                                    |
+| Design-engineering docs, Markdown twins and notes              | `features/design-engineering/`, `app/(booth)/design-engineering/llms.txt/route.ts`, `docs/design-engineering.md` |
+| Brand-system skill                                             | `skills/sunnyside-brand-system/`                                                                                 |
+| Landing chapters and composition                               | `features/landing-page/studio/studio.tsx`                                                                        |
+| Work chapter moodboard (pieces, stamps, stickers)              | `features/landing-page/studio/work-gallery/`                                                                     |
+| Skills chapter shadowbox diorama (stations, controller, tower) | `features/landing-page/studio/skills.tsx`                                                                        |
+| Landing palette, chapters, and principles                      | `features/landing-page/studio/studio-data.ts`                                                                    |
+| Landing layout and scoped tokens                               | `features/landing-page/studio/studio.module.css`                                                                 |
+| Sunnyside palette, contrast, type, motion, and exports         | `features/design-system/sunnyside-data.ts`                                                                       |
+| Interactive design-system specimen                             | `features/design-system/sunnyside.tsx` and `sunnyside.module.css`                                                |
+| Archive tokens and shell                                       | `features/archive/archive-tokens.css` and `archive.module.css`                                                   |
+| Cross-feature primitives                                       | `components/ui/`                                                                                                 |
 
 The brand-kit board is authored as HTML/CSS and rendered with Playwright, then
 downscaled with Lanczos; the mark is SVG and the favicon/app icons are assembled

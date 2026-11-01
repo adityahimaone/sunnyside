@@ -1,11 +1,8 @@
 'use client'
 
-import Link from 'next/link'
-
 import { DESIGN_CASES } from '@/features/case-library/cases'
 
-import { ArrowUpRight, Sun } from './doodles'
-import { Reveal } from './reveal'
+import { Sun } from './doodles'
 import { SectionHead, SectionNext } from './section-head'
 import { WorkGallery } from './work-gallery'
 import styles from './studio.module.css'
@@ -14,10 +11,10 @@ import styles from './studio.module.css'
  * 03 — Selected work.
  *
  * The section is still the cobalt room and the same chapter opener. What
- * changed is the shelf itself: the releases and the documented design systems
- * share one filterable bento, with the details living in a drawer instead of
- * under every cover. `WorkGallery` owns the data, the filter state and the
- * drawings; this file only owns the chapter around it.
+ * changed is the shelf itself: the six latest releases and the six latest
+ * systems are taped to a papercraft cutting mat instead of sitting in a
+ * filterable bento. `WorkGallery` owns the mat, the stamps and the stickers;
+ * this file only owns the chapter around it.
  *
  * The counts in the copy are read from `DESIGN_CASES` rather than typed, so
  * adding a case never leaves a stale "six systems" line behind.
@@ -42,25 +39,15 @@ export function Projects() {
           script="the good stuff"
           title={
             <span id="work-title">
-              Work that
+              Pinned to
               <br />
-              shipped.
+              the board.
             </span>
           }
-          intro={`Six releases from the catalogue and the ${systems} documented systems behind them. Filter the wall, then open a card for the notes.`}
+          intro={`The six latest releases and the six latest systems, taped to a cutting mat. Stamp what you like, peel a sticker, then open a piece — the ${systems} cases behind them live in the archive.`}
         />
 
         <WorkGallery />
-
-        <Reveal delay={0.1}>
-          <div className={styles.archiveBand}>
-            <p>Six releases · {systems} systems · 2022–26</p>
-            <Link className={styles.archiveLink} href="/projects">
-              The full discography
-              <ArrowUpRight className="size-5" />
-            </Link>
-          </div>
-        </Reveal>
 
         <SectionNext onDark href="skills" label="Skills" note="the toolbox" />
       </div>

@@ -47,9 +47,14 @@
 }
 
 .work :focus-visible,
-.menuPanel :focus-visible,
-.skillBuild :focus-visible {
+.menuPanel :focus-visible {
   outline-color: var(--butter);
+}
+
+/* Inside the observatory the station's own ink is the only reliable contrast:
+   the floors alternate cobalt, butter, pink, and cream. */
+.observatory :focus-visible {
+  outline-color: currentColor;
 }
 
 /* A fixed, non-interactive paper tooth. Static paint, never inside a scroller. */
@@ -1650,346 +1655,1310 @@
   transform: translate(3px, -3px);
 }
 
-/* ── Skills ─────────────────────────────────────────────────────────────── */
+/* ── Skills ────────────────────────────────────────────────────────────── */
 
 .skills {
   position: relative;
   padding-block: clamp(5.5rem, 11vw, 9rem);
-  overflow: clip;
   background: var(--paper-hi);
+}
+
+/* The wash carries the clipping so the sticky controller can stick. */
+.skillsWash {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
 }
 
 .skillsGlow {
   position: absolute;
-  z-index: 0;
   left: -12rem;
   top: 18%;
   width: 30rem;
   aspect-ratio: 1;
   border-radius: 50%;
   background: radial-gradient(circle, rgb(255 210 63 / 0.32), transparent 68%);
-  pointer-events: none;
 }
 
-.skillsGrid {
-  position: relative;
-  z-index: 1;
+/* Automation controller: a cardstock tab that hangs over the shadowbox. */
+.controller {
+  position: sticky;
+  top: 4.6rem;
+  z-index: 30;
   display: grid;
-  gap: 1.1rem;
-  margin-top: clamp(2.8rem, 6vw, 4.4rem);
-}
-
-@media (min-width: 1024px) {
-  .skillsGrid {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
-
-  .cellBuild {
-    grid-column: span 7;
-  }
-
-  .cellMotion {
-    grid-column: span 5;
-  }
-
-  .cellSystems {
-    grid-column: span 5;
-  }
-
-  .cellAlso {
-    grid-column: span 7;
-  }
-}
-
-.skillCard {
-  position: relative;
-  display: flex;
-  height: 100%;
-  min-height: 20rem;
-  flex-direction: column;
-  padding: clamp(1.3rem, 2.6vw, 2rem);
-  overflow: hidden;
+  gap: 0.5rem;
+  margin-top: clamp(2.2rem, 4.6vw, 3rem);
+  padding: 0.55rem 0.7rem 0.5rem;
   border: 2px solid var(--ink);
-  border-radius: 24px;
-  box-shadow: 7px 8px 0 rgb(25 26 46 / 0.1);
-  transition:
-    transform 0.35s var(--ease-out),
-    box-shadow 0.35s var(--ease-out);
+  border-radius: 12px 12px 4px 4px;
+  background: var(--paper-hi);
+  box-shadow:
+    0 12px 26px -16px rgb(25 26 46 / 0.6),
+    4px 5px 0 var(--ink);
 }
 
-.skillCard:hover {
-  transform: perspective(1200px) rotateX(1.2deg) rotateY(-2deg) translateY(-5px);
-  box-shadow: 10px 13px 0 rgb(25 26 46 / 0.13);
-}
-
-.skillBuild {
-  background: var(--cobalt);
-  color: var(--paper);
-}
-
-.skillMotion {
-  background: var(--butter);
-  color: var(--ink);
-}
-
-.skillSystems {
-  background: var(--pink);
-  color: var(--ink);
-}
-
-.skillAlso {
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.skillTop {
+.controllerTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1.5px solid rgb(25 26 46 / 0.18);
   font-family: var(--font-geist-mono), monospace;
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.skillTop span:last-child {
-  opacity: 0.85;
+.kinetic {
+  display: inline-flex;
+  align-items: center;
+  width: 2.5rem;
+  height: 1.3rem;
+  padding: 0.14rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper-lo);
+  box-shadow: inset 0 1px 2px rgb(25 26 46 / 0.3);
+  transition: background 0.2s var(--ease-out);
 }
 
-.skillTitle {
-  margin-top: 1rem;
-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(1.9rem, 3.2vw, 2.8rem);
-  font-weight: 800;
-  line-height: 0.94;
-  letter-spacing: -0.05em;
+.kinetic[aria-pressed='true'] {
+  background: #2b2b33;
 }
 
-.skillLine {
-  position: relative;
-  z-index: 1;
-  max-width: 44ch;
-  margin-top: 0.7rem;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  opacity: 0.78;
+.knob {
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-left: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper-hi);
+  transition:
+    translate 0.22s var(--ease-out),
+    background 0.22s var(--ease-out);
 }
 
-.skillChips {
-  position: relative;
-  z-index: 1;
+.kinetic[aria-pressed='true'] .knob {
+  translate: 1.15rem 0;
+  background: var(--butter);
+}
+
+.pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: auto;
-  padding-top: 1.2rem;
+  gap: 0.3rem;
 }
 
-.chip {
-  padding: 0.3rem 0.6rem;
-  border: 1px solid currentColor;
+.pill {
+  padding: 0.24rem 0.6rem;
+  border: 1.5px solid var(--ink);
   border-radius: 999px;
+  background: var(--paper);
   font-family: var(--font-geist-mono), monospace;
   font-size: 9px;
-  letter-spacing: 0.05em;
-  opacity: 0.72;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  box-shadow: 1.5px 2px 0 rgb(25 26 46 / 0.35);
   transition:
-    opacity 0.18s ease,
-    transform 0.2s var(--ease-out);
+    translate 0.16s var(--ease-out),
+    box-shadow 0.16s var(--ease-out),
+    background 0.16s var(--ease-out);
 }
 
-.chip:hover {
-  opacity: 1;
-  transform: translateY(-2px);
+.pill:hover {
+  background: rgb(255 210 63 / 0.45);
 }
 
-.skillAtom {
+.pill[aria-pressed='true'] {
+  translate: 0 -1px;
+  background: var(--ink);
+  color: var(--paper-hi);
+  box-shadow: 2px 3px 0 rgb(25 26 46 / 0.45);
+}
+
+/* ── The shadowbox ────────────────────────────────────────────────────── */
+
+.observatory {
+  position: relative;
+  margin-top: 1rem;
+  padding: clamp(0.55rem, 1.2vw, 1rem);
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: linear-gradient(
+    158deg,
+    #a57b4f,
+    #7f5c39 40%,
+    #6b4a2c 74%,
+    #8f6c45
+  );
+  box-shadow:
+    0 30px 54px -24px rgb(18 10 2 / 0.75),
+    0 6px 0 #3a2818,
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 -3px 8px rgb(0 0 0 / 0.35);
+}
+
+/* Mitered corner joints of the wooden frame. */
+.observatory::before,
+.observatory::after {
+  content: '';
   position: absolute;
-  right: -2.5rem;
-  top: 2.5rem;
-  width: 15rem;
-  color: var(--paper);
-  opacity: 0.14;
-  animation: spinSlow 48s linear infinite;
+  top: 0.2rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-bottom: 2px solid rgb(0 0 0 / 0.32);
+  border-right: 2px solid rgb(0 0 0 / 0.32);
   pointer-events: none;
 }
 
-.skillMotion .skillLine,
-.skillSystems .skillLine,
-.skillAlso .skillLine {
-  opacity: 0.72;
+.observatory::before {
+  left: 0.2rem;
+  transform: rotate(45deg);
 }
 
-.skillBuild .skillLine {
+.observatory::after {
+  right: 0.2rem;
+  transform: rotate(-45deg);
+}
+
+.cavity {
+  border: 3px solid var(--ink);
+  border-radius: 9px;
+  padding: clamp(0.45rem, 1vw, 0.75rem);
+  background: #2a211a;
+  box-shadow:
+    inset 0 18px 36px rgb(0 0 0 / 0.82),
+    inset 0 -2px 0 rgb(255 255 255 / 0.07);
+  overflow: hidden;
+}
+
+.stations {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(0.45rem, 0.8vw, 0.7rem);
+  align-items: stretch;
+}
+
+.station {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem 0.8rem 0.85rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper-hi);
+  color: var(--ink);
+  box-shadow: 5px 6px 0 rgb(16 14 12 / 0.6);
+  overflow: hidden;
+}
+
+.stationBuild {
+  grid-column: span 7;
+  rotate: -0.35deg;
+  color: #eef3ff;
+  background-color: #3a4fd0;
+  background-image: linear-gradient(
+      to right,
+      rgb(255 255 255 / 0.12) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.12) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.stationMotion {
+  grid-column: span 5;
+  rotate: 0.45deg;
+  background-color: var(--butter);
+}
+
+.stationSystems {
+  grid-column: span 7;
+  z-index: 3;
+  margin-top: -1.3rem;
+  rotate: -0.3deg;
+  background-color: #f7b0d4;
+}
+
+.stationAlso {
+  grid-column: span 5;
+  z-index: 3;
+  margin-top: 0.4rem;
+  rotate: 0.5deg;
+  background-color: #ddd3c2;
+}
+
+.stationTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.78;
+}
+
+.stationBody {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.stationTitle {
+  font-family: var(--font-syne), sans-serif;
+  font-size: clamp(1.65rem, 3vw, 2.5rem);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-shadow:
+    1.5px 1.5px 0 #fff,
+    3px 3px 0 rgb(25 26 46 / 0.9);
+}
+
+.stationBuild .stationTitle {
+  color: var(--paper-hi);
+  text-shadow:
+    2px 2px 0 var(--ink),
+    5px 5px 0 rgb(0 0 0 / 0.35);
+}
+
+.stationLine {
+  max-width: 36ch;
+  font-size: 11px;
+  line-height: 1.5;
   opacity: 0.92;
 }
 
-.skillBuild .chip {
-  opacity: 0.9;
+.stationBuild .stationLine {
+  color: #d8e2ff;
 }
 
-.springDemo {
-  position: relative;
+/* ── Chips: paper badges pinned on the floor ──────────────────────────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+  margin-top: 0.55rem;
+  list-style: none;
+}
+
+.stationChip {
+  padding: 0.14rem 0.48rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper-hi);
+  color: var(--ink);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 1.5px 2px 0 rgb(0 0 0 / 0.35);
+}
+
+.stationChip:nth-child(3n + 2) {
+  rotate: -1.4deg;
+}
+
+.stationChip:nth-child(3n) {
+  rotate: 1.2deg;
+}
+
+/* ── 01 Build: cobalt stratosphere observatory ────────────────────────── */
+
+.cloudTag {
+  position: absolute;
+  z-index: 2;
+  padding: 0.12rem 0.42rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: #6698ec;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f2f6ff;
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.45);
+}
+
+.girder {
+  position: absolute;
+  left: 44%;
+  bottom: 36%;
   z-index: 1;
-  margin-top: 1.15rem;
-  padding: 0.8rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 14px;
-  background: rgb(255 250 241 / 0.5);
+  width: 16%;
+  height: 0.5rem;
+  border: 2px solid var(--ink);
+  background: repeating-linear-gradient(-45deg, #2f45b4 0 4px, #22337f 4px 8px);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.45);
 }
 
-.springRow {
-  display: grid;
-  grid-template-columns: 3.2rem minmax(0, 1fr);
-  align-items: center;
+.cloudTag[data-side='left'] {
+  top: 0.1rem;
+  left: 0;
+  rotate: -2deg;
+  animation: skillsDrift 9s ease-in-out infinite;
+}
+
+.cloudTag[data-side='right'] {
+  top: 0.9rem;
+  right: 0;
+  rotate: 2deg;
+  border-radius: 9px;
+  background: #4f7fe0;
+  animation: skillsDrift 11s ease-in-out infinite reverse;
+}
+
+.buildScene {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: stretch;
+  justify-content: space-between;
   gap: 0.6rem;
-}
-
-.springRow + .springRow {
+  min-height: 8.6rem;
   margin-top: 0.55rem;
 }
 
-.springLabel {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 8px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0.6;
+.domeUnit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  width: 56%;
 }
 
-.springTrack {
+.dome {
   position: relative;
-  height: 1.3rem;
-  border-bottom: 1px solid rgb(25 26 46 / 0.22);
-  container-type: inline-size;
+  display: flex;
+  justify-content: center;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 5.2rem;
+  border: 2.5px solid var(--ink);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+  background: linear-gradient(180deg, #6079ee, #3348c4);
+  box-shadow: inset 0 -7px 0 rgb(0 0 0 / 0.18);
+  overflow: hidden;
 }
 
-.springBall {
+.domeRibs {
   position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 1.1rem;
-  height: 1.1rem;
+  inset: 0 auto 0 50%;
+  width: 62%;
+  translate: -50% 0;
+  border-inline: 2px solid rgb(25 26 46 / 0.5);
+  border-radius: 999px 999px 0 0;
+}
+
+.domeSlit {
+  position: absolute;
+  top: 0.35rem;
+  width: 1rem;
+  height: 76%;
+  border: 2px solid var(--ink);
+  border-radius: 999px 999px 0 0;
+  background: #16204a;
+}
+
+.domeTicks {
+  position: absolute;
+  right: 0.4rem;
+  top: 0.6rem;
+  display: grid;
+  gap: 0.28rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 5px;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  color: #cfe0ff;
+}
+
+.domeBase {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.16rem 0.4rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 3px;
+  background: #1e3a8a;
+  box-shadow: 3px 3px 0 rgb(0 0 0 / 0.4);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #cfe0ff;
+}
+
+.domeBase i {
+  width: 0.34rem;
+  height: 0.34rem;
   border: 1.5px solid var(--ink);
   border-radius: 50%;
-  background: var(--card-color, var(--cobalt));
-  transform: translateX(0);
+  background: #5ce1a0;
 }
 
-.run .springBall {
-  animation: springRun var(--dur) var(--curve) both;
-}
-
-.springReplay {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-top: 0.75rem;
-  padding: 0.3rem 0.65rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 999px;
-  background: transparent;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 8px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink);
-  transition:
-    background-color 0.18s ease,
-    transform 0.18s var(--ease-out);
-}
-
-.springReplay:hover {
-  background: var(--paper-hi);
-}
-
-.springReplay:active {
-  transform: scale(0.96);
-}
-
-.systemDemo {
-  position: relative;
-  z-index: 1;
+.towerUnit {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  gap: 0.55rem;
-  margin-top: 1.2rem;
-  padding: 0.75rem;
-  border: 1.5px dashed rgb(25 26 46 / 0.35);
-  border-radius: 14px;
+  justify-content: flex-end;
+  align-self: stretch;
+  width: 40%;
 }
 
-.stateButton {
-  min-height: 2.4rem;
-  padding: 0.45rem 0.9rem;
+.atomRig {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.atomArt {
+  width: 3.3rem;
+  height: 3.3rem;
+  color: #9ae6ff;
+  animation: skillsSpin 18s linear infinite;
+}
+
+.springRow {
+  display: flex;
+  gap: 1.9rem;
+  margin-top: -0.1rem;
+  color: #fdf8ea;
+  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.45));
+}
+
+.coil {
+  width: 0.62rem;
+  height: 1.35rem;
+}
+
+.towerUnit::after {
+  content: '';
+  display: block;
+  width: 92%;
+  height: 0.3rem;
+  margin-top: 0.1rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 2px;
+  background: #1e3a8a;
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.4);
+}
+
+.towerDeck {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.14rem;
+  width: 100%;
+  margin-top: -0.05rem;
+  padding: 0.16rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 3px 3px 0 0;
+  background: #3a59cf;
+}
+
+.towerDeck i {
+  height: 0.34rem;
   border: 1.5px solid var(--ink);
+  border-radius: 1px;
+  background: #16204a;
+}
+
+.towerLegs {
+  position: relative;
+  display: block;
+  flex: 1 1 auto;
+  width: 82%;
+  min-height: 2.2rem;
+  background: rgb(30 58 138 / 0.45);
+}
+
+/* Two separate posts, not a table: the legs stand off the deck edges. */
+.towerLegs i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0.28rem;
+  border: 2px solid var(--ink);
+  background: #1e3a8a;
+}
+
+.towerLegs i:nth-child(1) {
+  left: 0;
+}
+
+.towerLegs i:nth-child(2) {
+  right: 0;
+}
+
+.towerLegs svg {
+  position: absolute;
+  inset: 0.15rem 0.2rem;
+  width: calc(100% - 0.4rem);
+  height: calc(100% - 0.3rem);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+/* Paper conveyor that ties the instruments together. */
+.belt {
+  position: absolute;
+  inset: 62% 0 auto 0;
+  height: 0.55rem;
+  border-block: 2px solid var(--ink);
+  background: repeating-linear-gradient(
+    -55deg,
+    #f7d3e6 0 5px,
+    #e8a8c9 5px 10px
+  );
+}
+
+.belt::before,
+.belt::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  translate: 0 -50%;
+  border: 2px solid var(--ink);
   border-radius: 999px;
+  background: #c88b4a;
+}
+
+.belt::before {
+  left: -0.2rem;
+}
+
+.belt::after {
+  right: -0.2rem;
+}
+
+/* A lens in the dome, so it reads as an observatory and not a bubble. */
+.domeSlit::after {
+  content: '';
+  position: absolute;
+  inset: 12% 18% auto;
+  height: 0.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: #8fd8ff;
+}
+
+/* ── 02 Motion: butter solar engine ───────────────────────────────────── */
+
+.motionScene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 7.6rem;
+  margin-top: 0.4rem;
+}
+
+.sunRig {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 7.6rem;
+  height: 7.6rem;
+}
+
+.sunPulley {
+  position: absolute;
+  inset: 0;
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  background: #dfc38d;
+  box-shadow:
+    inset 0 -7px 0 rgb(0 0 0 / 0.12),
+    3px 4px 0 rgb(0 0 0 / 0.35);
+}
+
+.sunArt {
+  position: relative;
+  width: 5.1rem;
+  height: 5.1rem;
+  color: var(--tangerine);
+  animation: skillsSpin 24s linear infinite reverse;
+}
+
+.gearTop {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.6rem;
+  rotate: -8deg;
+  animation: skillsSpin 14s linear infinite;
+}
+
+.gearSide {
+  position: absolute;
+  bottom: -0.55rem;
+  left: -0.75rem;
+  rotate: 12deg;
+  animation: skillsSpin 18s linear infinite reverse;
+}
+
+.curveBox {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.55rem 0.55rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 8px;
   background: var(--paper-hi);
-  color: var(--ink);
-  font-size: 0.78rem;
-  font-weight: 600;
-  transition:
-    transform 0.16s var(--ease-out),
-    background-color 0.16s ease,
-    box-shadow 0.16s ease;
+  box-shadow: 3px 3px 0 rgb(0 0 0 / 0.3);
 }
 
-.stateButton:hover {
-  background: var(--butter);
-  box-shadow: 2px 2px 0 var(--ink);
-}
-
-.stateButton:active {
-  transform: scale(0.96);
-  box-shadow: none;
-}
-
-.stateCode {
+.curveHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   font-family: var(--font-geist-mono), monospace;
-  font-size: 8px;
-  letter-spacing: 0.08em;
+  font-size: 7px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 
-.alsoCloud {
+.curveRow {
+  display: grid;
+  grid-template-columns: 2.3rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 8px;
+}
+
+.curveLabel {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.curveInput {
+  appearance: none;
+  width: 100%;
+  height: 0.42rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--mint) var(--pct),
+    #e6e1d4 var(--pct)
+  );
+}
+
+.curveInput::-webkit-slider-thumb {
+  appearance: none;
+  width: 0.78rem;
+  height: 0.78rem;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--tangerine);
+  box-shadow: 1.5px 1.5px 0 var(--ink);
+}
+
+.curveInput::-moz-range-thumb {
+  width: 0.78rem;
+  height: 0.78rem;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--tangerine);
+  box-shadow: 1.5px 1.5px 0 var(--ink);
+}
+
+.curveValue {
+  color: var(--muted);
+}
+
+.curvePedestal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.15rem;
+}
+
+.curvePedestal i {
+  width: 2.6rem;
+  height: 0.34rem;
+  border-inline: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  background: #c89d66;
+}
+
+.curvePlay {
+  padding: 0.2rem 0.7rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--butter);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition:
+    translate 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out),
+    background 0.15s var(--ease-out);
+}
+
+.curvePlay:hover {
+  background: var(--paper-hi);
+}
+
+.curvePlay:active {
+  translate: 0 2px;
+  box-shadow: 0 0 0 var(--ink);
+}
+
+/* ── 03 Systems: pink barometric deck ─────────────────────────────────── */
+
+.crenel {
+  display: flex;
+  gap: 0.16rem;
+  margin-bottom: 0.1rem;
+}
+
+.crenel i {
+  width: 1.1rem;
+  height: 0.4rem;
+  border: 2px solid var(--ink);
+  border-radius: 1px;
+  background: #f9c6e0;
+  box-shadow: 1px 1px 0 rgb(0 0 0 / 0.5);
+}
+
+.systemsScene {
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  padding-bottom: 0.55rem;
+}
+
+/* The paper shelf every instrument stands on. */
+.deckShelf {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 0.42rem;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #bfa37c 0 5px, #9a7d55 5px 10px);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
+}
+
+.gauges {
   position: relative;
   z-index: 1;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-top: 1.2rem;
-  align-content: flex-start;
+  gap: 0.28rem;
+  align-self: end;
 }
 
-.alsoChip {
-  padding: 0.36rem 0.7rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 3px;
+.gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.14rem;
+  width: 3.4rem;
+  padding: 0.18rem;
+  border: 2px solid var(--ink);
+  border-radius: 8px 8px 12px 12px;
+  background: var(--paper-hi);
+  box-shadow: 2px 2.5px 0 rgb(0 0 0 / 0.35);
+}
+
+.dial {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 1.5rem;
+  border: 2px solid var(--ink);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+  background: conic-gradient(
+    from 180deg at 50% 100%,
+    var(--butter),
+    var(--mint),
+    var(--sky)
+  );
+  overflow: hidden;
+}
+
+.dial b {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  height: 72%;
+  translate: -50% 0;
+  background: var(--ink);
+  transform-origin: bottom center;
+}
+
+[data-tilt='left'] .dial b {
+  rotate: -22deg;
+}
+
+[data-tilt='right'] .dial b {
+  rotate: 18deg;
+}
+
+.gauge em {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 5px;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.console {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.3rem;
+  justify-items: center;
+  align-self: stretch;
+  justify-self: center;
+  width: min(100%, 15rem);
+  padding: 0.45rem 0.45rem 0.4rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 10px 10px 5px 5px;
+  background: #f7b7d8;
+  box-shadow: 3px 3px 0 rgb(0 0 0 / 0.3);
+}
+
+.plungerRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.plunger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.plungerCoil {
+  width: 0.45rem;
+  height: 0.7rem;
+  color: #f5f2eb;
+}
+
+.consoleBtn {
+  width: auto;
+  min-width: 4.6rem;
+  padding: 0.18rem 0.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
   background: var(--paper-hi);
   font-family: var(--font-geist-mono), monospace;
-  font-size: 10px;
-  line-height: 1.2;
-  box-shadow: 2px 2px 0 rgb(25 26 46 / 0.12);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  box-shadow: 0 3px 0 var(--ink);
   transition:
-    transform 0.18s var(--ease-out),
-    background-color 0.18s ease;
+    translate 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out),
+    background 0.15s var(--ease-out);
 }
 
-.alsoChip:nth-child(2n) {
+.consoleBtn:hover {
   background: var(--butter);
-  transform: rotate(-1.5deg);
 }
 
-.alsoChip:nth-child(3n) {
+.consoleBtn:active,
+.consoleBtn[aria-pressed='true'] {
+  translate: 0 3px;
+  box-shadow: 0 0 0 var(--ink);
+  background: var(--sky);
+}
+
+.arch {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: flex-end;
+  justify-content: center;
+  width: 2.6rem;
+  min-height: 1.4rem;
+  border: 2px solid var(--ink);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+  background: #f9c6e0;
+}
+
+.arch i {
+  display: block;
+  width: 1rem;
+  height: 0.8rem;
+  border: 2px solid var(--ink);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+  background: #9c7340;
+}
+
+.consoleNote {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 6px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(25 26 46 / 0.6);
+}
+
+.ribbons {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.2rem;
+  align-self: end;
+  list-style: none;
+}
+
+.ribbon {
+  padding: 0.14rem 0.4rem;
+  border: 2px solid var(--ink);
+  border-radius: 0 5px 5px 0;
   background: var(--paper-hi);
-  transform: rotate(1.2deg);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--ink);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
+  transition:
+    translate 0.15s var(--ease-out),
+    background 0.15s var(--ease-out),
+    color 0.15s var(--ease-out);
 }
 
-.alsoChip:hover {
-  transform: rotate(0) translateY(-2px);
-  background: var(--pink);
+.ribbon[aria-pressed='true'] {
+  translate: 0.3rem 0;
+  background: var(--tangerine);
+  color: var(--paper-hi);
+}
+
+/* ── 04 The rest: cardboard bedrock drawer ────────────────────────────── */
+
+.corrugate {
+  display: block;
+  height: 0.4rem;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #b99362 0 5px, #785937 5px 10px);
+}
+
+.drawerWrap {
+  margin-top: 0.5rem;
+}
+
+.drawerTabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.24rem;
+  padding-inline: 0.45rem;
+}
+
+.drawerTabs i {
+  display: block;
+  padding: 0.1rem 0.4rem;
+  border: 2px solid var(--ink);
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+  background: #3b82f6;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 5px;
+  font-style: normal;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.drawerTabs i:nth-child(2) {
+  background: var(--butter);
+  color: var(--ink);
+}
+
+.drawerTabs i:nth-child(3) {
+  background: #f472b6;
+  color: var(--ink);
+}
+
+.drawerTabs i:nth-child(4) {
+  background: #a88149;
+  color: var(--paper-hi);
+}
+
+.drawer {
+  padding: 0.4rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 5px 9px 9px 9px;
+  background: #bfa37c;
+  box-shadow: 4px 4px 0 rgb(0 0 0 / 0.35);
+}
+
+.drawerHead {
+  display: block;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 6px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #4b3620;
+}
+
+.drawerSlot {
+  margin-top: 0.28rem;
+  padding: 0.4rem;
+  border: 2px solid var(--ink);
+  border-radius: 5px;
+  background: #523d28;
+  box-shadow: inset 0 8px 14px rgb(0 0 0 / 0.55);
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.24rem;
+}
+
+.tool {
+  padding: 0.14rem 0.42rem;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--paper-hi);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 7px;
+  font-weight: 600;
+  color: var(--ink);
+  box-shadow: 1.5px 2px 0 rgb(0 0 0 / 0.4);
+}
+
+.tool[data-figma] {
+  background: var(--cobalt);
+  color: var(--paper-hi);
+  rotate: -1.5deg;
+}
+
+.status {
+  align-self: flex-end;
+  margin-top: 0.55rem;
+  padding: 0.28rem 0.5rem;
+  rotate: -2deg;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--paper-hi);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  box-shadow: 3px 4px 0 rgb(0 0 0 / 0.35);
+}
+
+.status span {
+  text-decoration: underline wavy var(--butter) 1.5px;
+  text-underline-offset: 2px;
+}
+
+/* ── Station isolation ────────────────────────────────────────────────── */
+
+@media (min-width: 1024px) {
+  .observatory:not([data-station='all']) .stations > .station {
+    grid-column: span 4;
+    margin-top: 0;
+    rotate: none;
+  }
+
+  .observatory[data-station='build'] .stations > .stationBuild,
+  .observatory[data-station='motion'] .stations > .stationMotion,
+  .observatory[data-station='systems'] .stations > .stationSystems,
+  .observatory[data-station='rest'] .stations > .stationAlso {
+    grid-column: 1 / -1;
+  }
+
+  /* Floors you did not open keep only their plate and their scenery. */
+  .observatory[data-station='build']
+    .stations
+    > .station:not(.stationBuild)
+    :is(
+      .stationLine,
+      .curveBox,
+      .systemsScene,
+      .chips,
+      .drawerWrap,
+      .status,
+      .motionScene
+    ),
+  .observatory[data-station='motion']
+    .stations
+    > .station:not(.stationMotion)
+    :is(
+      .stationLine,
+      .buildScene,
+      .systemsScene,
+      .chips,
+      .drawerWrap,
+      .status,
+      .crenel
+    ),
+  .observatory[data-station='systems']
+    .stations
+    > .station:not(.stationSystems)
+    :is(
+      .stationLine,
+      .buildScene,
+      .motionScene,
+      .curveBox,
+      .chips,
+      .drawerWrap,
+      .status
+    ),
+  .observatory[data-station='rest']
+    .stations
+    > .station:not(.stationAlso)
+    :is(
+      .stationLine,
+      .buildScene,
+      .motionScene,
+      .curveBox,
+      .systemsScene,
+      .chips,
+      .corrugate
+    ) {
+    display: none;
+  }
+}
+
+/* ── The tower on narrow screens ──────────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  .stations {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stationBuild,
+  .stationMotion,
+  .stationSystems,
+  .stationAlso {
+    grid-column: 1 / -1;
+    margin-top: 0;
+    rotate: none;
+  }
+
+  /* Brass pipes bolting one floor to the next. */
+  .stations > .station + .station::before {
+    content: '';
+    position: absolute;
+    top: -0.62rem;
+    left: 50%;
+    width: 0.3rem;
+    height: 0.62rem;
+    translate: -50% 0;
+    border: 2px solid var(--ink);
+    border-radius: 2px;
+    background: linear-gradient(180deg, #e0b463, #a9813d);
+  }
+
+  .observatory:not([data-station='all']) .stations > .station {
+    display: none;
+  }
+
+  .observatory[data-station='build'] .stations > .stationBuild,
+  .observatory[data-station='motion'] .stations > .stationMotion,
+  .observatory[data-station='systems'] .stations > .stationSystems,
+  .observatory[data-station='rest'] .stations > .stationAlso {
+    display: flex;
+  }
+
+  .stationTitle {
+    font-size: clamp(1.9rem, 9vw, 2.6rem);
+  }
+
+  .systemsScene {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ribbons {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .systemsScene {
+    grid-template-columns: 1fr;
+  }
+
+  .gauges {
+    justify-content: flex-start;
+  }
+
+  .buildScene {
+    min-height: 7.2rem;
+  }
+}
+
+/* ── Machinery: the only looping motion here ──────────────────────────── */
+
+@keyframes skillsSpin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes skillsDrift {
+  50% {
+    translate: 0.35rem -0.15rem;
+  }
+}
+
+.observatory[data-running='false'] .atomArt,
+.observatory[data-running='false'] .sunArt,
+.observatory[data-running='false'] .gearTop,
+.observatory[data-running='false'] .gearSide,
+.observatory[data-running='false'] .cloudTag {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atomArt,
+  .sunArt,
+  .gearTop,
+  .gearSide,
+  .cloudTag[data-side] {
+    animation: none;
+  }
+
+  .station,
+  .stationChip,
+  .pill,
+  .knob,
+  .consoleBtn,
+  .ribbon,
+  .curvePlay {
+    transition: none;
+  }
 }
 
 .skillNote {
@@ -2452,18 +3421,14 @@
 @media (prefers-reduced-motion: reduce) {
   .heroScroll svg,
   .marquee,
-  .skillAtom {
+  .atomArt,
+  .sunArt {
     animation: none !important;
-  }
-
-  .run .springBall {
-    animation: none !important;
-    transform: translateX(calc(100cqw - 1.1rem));
   }
 
   .photoCard,
   .postcard,
-  .skillCard,
+  .station,
   .studyPrint {
     transition: none !important;
   }
@@ -2508,7 +3473,11 @@
     animation: none;
   }
 
-  .skillCard:hover {
-    transform: none;
+  .knob,
+  .pill,
+  .tool,
+  .curvePlay,
+  .consoleBtn {
+    transition: none !important;
   }
 }
