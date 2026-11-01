@@ -182,10 +182,11 @@ export function Applications() {
             <span className={styles.appKicker}>Card</span>
           </div>
           <p>
-            Drawn from scratch, not traced. A Laut field cut on the hero’s
-            diagonal, a Senja edge, a right-angle route and the outlined Jakarta
-            lockup — mark and wordmark as paths, never type. The operator’s name
-            shares the field; the city’s logo owns the paper.
+            Drawn from scratch, not traced, at card proportions: the ten-colour
+            issuer ribbon along the top edge, the outlined lockup at 2,9mm — mark
+            and wordmark as paths, never type — a chip, a contactless mark, the
+            number in tabular mono and a foil disc. The operator’s name sits on
+            the Laut panel; the city’s logo owns the paper.
           </p>
           <TokenRow tokens={TOKENS.card} />
         </figcaption>

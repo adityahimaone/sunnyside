@@ -9,6 +9,22 @@
   padding-bottom: clamp(2.5rem, 6vw, 4.5rem);
 }
 
+/* The case-file lede. Shorter than the old catalogue, so it can afford to be
+   a touch larger and lead with the one line that frames the whole shelf. */
+.heroIntro {
+  max-width: 49ch;
+  margin: 0.25rem 0 0;
+  color: var(--ss-muted);
+  font-size: clamp(1.0625rem, 1.5vw, 1.1875rem);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.heroIntroLead {
+  color: var(--ss-ink);
+  font-weight: 650;
+}
+
 .hand {
   color: var(--ss-cobalt);
 }

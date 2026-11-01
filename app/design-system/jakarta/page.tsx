@@ -20,10 +20,13 @@ import {
   RADIUS_SCALE,
   RAMPS,
   SEMANTIC,
+  SECTION_ACCENTS,
+  type SectionAccentKey,
   SHADOW_SCALE,
   SPACE_SCALE,
   SHIP_CONDITIONS,
   STATS,
+  STAT_ACCENTS,
   STORY_BEATS,
   TOKENS_CSS,
   TOKENS_JSON,
@@ -100,6 +103,22 @@ const FIELD_BANDS = `linear-gradient(112deg, ${HERO_FIELD.map((stop, index) => {
   return `${stop.hex} ${from.toFixed(2)}% ${to.toFixed(2)}%`
 }).join(', ')})`
 
+/* The field's colours by token, for the one place they are spent as a section
+   accent rather than as the field itself. */
+const FIELD_HEX = Object.fromEntries(
+  HERO_FIELD.map((stop) => [stop.token, stop.hex]),
+) as Record<string, string>
+
+/* A section spends its district colour as decoration. The values come from
+   SECTION_ACCENTS, where each chip ink is a printed contrast pair. */
+function accentStyle(key: SectionAccentKey): CSSProperties {
+  const accent = SECTION_ACCENTS[key]
+  return {
+    '--jk-sec': accent.hex,
+    '--jk-sec-ink': accent.ink,
+  } as CSSProperties
+}
+
 export default function JakartaCasePage() {
   return (
     <div className={`${styles.root} jk-scope`}>
@@ -169,6 +188,7 @@ export default function JakartaCasePage() {
                   field is the colour; the plate is only what the words need
                   to stay legible. */}
               <div className={styles.heroPanel}>
+                <p className={styles.heroEyebrow}>{CAMPAIGN.eyebrow}</p>
                 <h1 id="hero-title" className={styles.heroTitle}>
                   <span>{CAMPAIGN.headline[0]}</span>
                   <span>{CAMPAIGN.headline[1]}</span>
@@ -191,36 +211,40 @@ export default function JakartaCasePage() {
             </div>
           </div>
 
-          {/* The palette as one continuous printed line: ten solid segments,
-              edge to edge, no gaps and no separators, leaning at the field's
-              angle. */}
-          <div className={styles.heroPalette} aria-hidden>
-            <div className={styles.heroPaletteStrip}>
-              {HERO_FIELD.map((stop) => (
-                <i key={stop.token} style={{ background: stop.hex }} />
-              ))}
-            </div>
-          </div>
-
-          {/* The tear is the page's material: paper, cut by a polygon, not a
-              texture. Irregular teeth read as stock; a constant amplitude would
-              read as a sawtooth border. */}
-          <div className={styles.heroTear} aria-hidden />
+          {/* The field is torn off, not stopped. The photograph dissolves as
+              the field reaches the floor, so the last stretch of hero is flat
+              palette — then the hero's own bottom edge is cut with an irregular
+              tooth line and the page's paper shows through. One surface, one
+              edge: there is nothing under the field to line up with. */}
+          <div className={styles.heroFloor} aria-hidden />
         </section>
 
         <div className={styles.shell}>
           <dl className={styles.stats}>
-            {STATS.map((stat) => (
-              <div key={stat.label} className={styles.stat}>
-                <dt>{stat.label}</dt>
-                <dd>{stat.value}</dd>
-              </div>
-            ))}
+            {STATS.map((stat, index) => {
+              const accent = STAT_ACCENTS[index % STAT_ACCENTS.length]
+              return (
+                <div
+                  key={stat.label}
+                  className={styles.stat}
+                  style={{ '--jk-sec': FIELD_HEX[accent] } as CSSProperties}
+                  data-accent={accent}
+                >
+                  <dt>{stat.label}</dt>
+                  <dd>{stat.value}</dd>
+                </div>
+              )
+            })}
           </dl>
         </div>
 
         {/* ── 01 idea ──────────────────────────────────────────────────── */}
-        <section id="idea" className={styles.sec} aria-labelledby="idea-title">
+        <section
+          id="idea"
+          className={styles.sec}
+          style={accentStyle('idea')}
+          aria-labelledby="idea-title"
+        >
           <div className={styles.shell}>
             <div className={styles.secHead}>
               <p className={styles.secNum}>
@@ -290,6 +314,7 @@ export default function JakartaCasePage() {
         <section
           id="mark"
           className={`${styles.sec} ${styles.secInk}`}
+          style={accentStyle('mark')}
           aria-labelledby="mark-title"
         >
           <div className={styles.shell}>
@@ -426,6 +451,7 @@ export default function JakartaCasePage() {
         <section
           id="palette"
           className={styles.sec}
+          style={accentStyle('palette')}
           aria-labelledby="palette-title"
         >
           <div className={styles.shell}>
@@ -579,7 +605,12 @@ export default function JakartaCasePage() {
         </section>
 
         {/* ── 04 type ──────────────────────────────────────────────────── */}
-        <section id="type" className={styles.sec} aria-labelledby="type-title">
+        <section
+          id="type"
+          className={styles.sec}
+          style={accentStyle('type')}
+          aria-labelledby="type-title"
+        >
           <div className={styles.shell}>
             <div className={styles.secHead}>
               <p className={styles.secNum}>
@@ -739,6 +770,7 @@ export default function JakartaCasePage() {
         <section
           id="apps"
           className={`${styles.sec} ${styles.secApps}`}
+          style={accentStyle('apps')}
           aria-labelledby="apps-title"
         >
           <div className={styles.sectionRule} aria-hidden>
@@ -772,6 +804,7 @@ export default function JakartaCasePage() {
         <section
           id="tokens"
           className={styles.sec}
+          style={accentStyle('tokens')}
           aria-labelledby="tokens-title"
         >
           <div className={styles.shell}>
@@ -851,6 +884,7 @@ export default function JakartaCasePage() {
         <section
           id="audit"
           className={styles.sec}
+          style={accentStyle('audit')}
           aria-labelledby="audit-title"
         >
           <div className={styles.shell}>

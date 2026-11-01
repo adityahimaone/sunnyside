@@ -27,9 +27,15 @@ export type DesignCase = {
 }
 
 /**
- * The documented design-system cases. This list is deliberately short: it is the
- * design-engineering shelf, not every project. Add a case only when it has a
- * brief, a mark, a system and a proof page to link to.
+ * The documented design-system cases. Sunnyside anchors the shelf at index 0;
+ * everything after it runs newest first.
+ *
+ * The array order is the display order for both `/design-system` and the
+ * landing-page shelf. `number` is the case's permanent identity (its own brand
+ * docs and tokens quote it), so the shelf reads 01, then 11 → 02 as the newest
+ * release leads. This list is deliberately short: it is the design-engineering
+ * shelf, not every project. Add a case only when it has a brief, a mark, a
+ * system and a proof page to link to.
  */
 export const DESIGN_CASES: readonly DesignCase[] = [
   {
@@ -49,36 +55,115 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     tone: 'sunnyside',
   },
   {
-    number: '02',
-    name: 'Vitrine',
-    href: '/design-system/vitrine',
-    tagline: 'A glass case for a low-resolution light.',
+    number: '11',
+    name: 'Jakarta',
+    href: '/design-system/jakarta',
+    tagline: 'Bergerak Menuju Era Baru Jakarta.',
     description:
-      'Glass containers, a dithered information layer, a half-light V mark, ten native form controls and an honest audit. Case 02 asks whether depth can stay legible.',
+      'One stroke that turns a corner and one stop where it turns, drawn from a single unit S. Nine district ramps named after Jakarta places, a palette that is a map rather than a mood, and the six contrast pairs that fail published instead of fixed. Enamel, vinyl, a transit card and a bus.',
     status: 'Shipped · 2026',
-    role: 'Identity · design system · forms · dither',
-    material: 'Glass + dither + Signal',
-    cover: '/brand/vitrine/vitrine-brandkit.png',
+    role: 'Identity · design system · wayfinding · docs',
+    material: 'Enamel + vinyl + one orange',
+    cover: '/brand/jakarta/jakarta-brandkit.webp',
     coverAlt:
-      'The Vitrine brand board: the half-light V mark, one glass arm and one Signal arm, Case and Frost palette, Signal field, type specimens, favicon and form specimen.',
-    tags: ['Glass', 'Dither', 'Case', 'Forms'],
-    tone: 'vitrine',
+      'The Jakarta brand board: the junction mark on paper, ink and Senja, nine district ramps in four steps, the outlined wordmark and the night scope.',
+    tags: ['City', 'Transit', 'Nine Ramps', 'Wayfinding'],
+    tone: 'jakarta',
   },
   {
-    number: '03',
-    name: 'Huginn Studio',
-    href: '/design-system/huginn',
-    tagline: 'A picture becomes cells. A name becomes cells.',
+    number: '10',
+    name: 'Porphyry',
+    href: '/design-system/porphyry',
+    tagline: 'A page composed like a stage: one stone, one light, one cast.',
     description:
-      'One 14-unit cell draws Arbo’s Åsgårdsreien through an ordered dither, draws the wordmark in 22 rows, and draws the mark — five cells hold the picture and the sixth has left the grid. No font in the logo, no rounded corners, and an audit that names what it could not verify.',
+      'A classical diorama as an interface system. A stage opening cut into a block of stone, with a gold threshold, a loader that fills the wordmark with marble from the floor, three photographs keyed off their own black ground by luminance, a real vellum theme, a ten-part form kit and a detach score against every sibling.',
     status: 'Shipped · 2026',
-    role: 'Identity · design system · marks · dither',
-    material: 'Vermilion field + ink + bone',
-    cover: '/brand/huginn/huginn-brandkit.png',
+    role: 'Identity · design system · stage · form kit',
+    material: 'Porphyry + marble + gold leaf + one dark stage',
+    cover: '/brand/porphyry/porphyry-brandkit.png',
     coverAlt:
-      'The Huginn brand board: the vermilion field with the cell-drawn wordmark, the cell mark with one cell off the grid, and the painting dissolving into the field through an ordered dither.',
-    tags: ['Cells', 'Dither', 'Vermilion', 'Print'],
-    tone: 'huginn',
+      'The Porphyry brand board: the stone block with its gold threshold, the porphyry and marble palette, the outlined Cinzel wordmark, the keyed statue and the stage tokens.',
+    tags: ['Porphyry', 'Marble', 'Gold Leaf', 'Stage'],
+    tone: 'porphyry',
+  },
+  {
+    number: '09',
+    name: LEDGER.name,
+    href: LEDGER.href,
+    tagline: LEDGER.tagline,
+    description: LEDGER.description,
+    status: LEDGER.status,
+    role: LEDGER.role,
+    material: LEDGER.material,
+    cover: '/brand/ledger/ledger-brandkit.png',
+    coverAlt:
+      'The Ledger brand board: the grid mark with one lifted tile, the indigo harbor ramp, the glass recipe, the type scale and a dashboard specimen.',
+    tags: LEDGER.tags,
+    tone: 'ledger',
+  },
+  {
+    number: '08',
+    name: 'Clearing',
+    href: '/design-system/clearing',
+    tagline: 'A sighting, not a sticker.',
+    description:
+      'Painted emerald light seen through one pane of glass. A drawn stag on a tapered horizon, an outlined wordmark whose i-tittle is a light disc, five cast marks on one cut line, and an audit that names what it could not verify. No form kit, by request.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · marks · docs',
+    material: 'Painted emerald + cream + glass',
+    cover: '/brand/clearing/clearing-brandkit.png',
+    coverAlt:
+      'The Clearing brand board: the stag on a tapered horizon, the outlined clearing wordmark with a disc tittle, six inks sampled from the painting, and the glass recipe.',
+    tags: ['Painted', 'Emerald', 'Glass', 'Wildlife'],
+    tone: 'clearing',
+  },
+  {
+    number: '07',
+    name: 'Strand',
+    href: '/design-system/strand',
+    tagline: 'Where the dunes meet the tide.',
+    description:
+      'A quiet coastal interface system: flat white quartz reading plates, marine basalt ink, one shallow-tide green signal, a Dune Crest S monogram, ten native controls and a panoramic vista framing hero and footer.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · marks · form kit',
+    material: 'Quartz sand + marine basalt + shallow tide',
+    cover: '/brand/strand/strand-brandkit.png',
+    coverAlt:
+      'The Strand brand board: the architectural S mark, coastal shoreline palette, quartz reading plates and form kit.',
+    tags: ['Coastal', 'Minimalist', 'Monogram', 'Forms'],
+    tone: 'strand',
+  },
+  {
+    number: '06',
+    name: 'Cove',
+    href: '/design-system/cove',
+    tagline: 'A calmer kind of depth.',
+    description:
+      'One glass layer over one blue field, a solid reading plate, a squared C with an ice waterline, ten native controls and a measured audit. Case 06 asks what happens when glass is minimal instead of everywhere.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · forms · liquid glass',
+    material: 'Blue glass + ice',
+    cover: '/brand/cove/cove-brandkit.png',
+    coverAlt:
+      'The Cove brand board: the squared C mark with an ice inlay, the Abyss and Foam palette, Instrument Serif and Sans, the glass recipe and the form kit.',
+    tags: ['Liquid Glass', 'Blue', 'Instrument Serif', 'Forms'],
+    tone: 'cove',
+  },
+  {
+    number: '05',
+    name: 'Hachure',
+    href: '/design-system/hachure',
+    tagline: 'Relief drawn by density, never by shadow.',
+    description:
+      'A cartographic interface system built from the supplied ridgeline footer: six ridges from one seed, seven tones from one paper, a lichen-capped ridge of solid bars, and a footer you can read an altitude off. Every contrast pair is measured in the build.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · dither engine · form kit',
+    material: 'Survey paper + lichen + ordered dither',
+    cover: '/brand/hachure/hachure-brandkit.png',
+    coverAlt:
+      'The Hachure brand board: a 3 × 3 identity deck on a night table — the solid ridge mark, the outlined mono wordmark, the dither plate, the seven-tone ramp, the field sheet and the form kit.',
+    tags: ['Hachure', 'Bayer Dither', 'Survey', 'Altimeter'],
+    tone: 'hachure',
   },
   {
     number: '04',
@@ -98,114 +183,35 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     tone: 'riso',
   },
   {
-    number: '05',
-    name: 'Hachure',
-    href: '/design-system/hachure',
-    tagline: 'Relief drawn by density, never by shadow.',
+    number: '03',
+    name: 'Huginn Studio',
+    href: '/design-system/huginn',
+    tagline: 'A picture becomes cells. A name becomes cells.',
     description:
-      'A cartographic interface system built from the supplied ridgeline footer: six ridges from one seed, seven tones from one paper, a lichen-capped ridge of solid bars, and a footer you can read an altitude off. Every contrast pair is measured in the build.',
+      'One 14-unit cell draws Arbo’s Åsgårdsreien through an ordered dither, draws the wordmark in 22 rows, and draws the mark — five cells hold the picture and the sixth has left the grid. No font in the logo, no rounded corners, and an audit that names what it could not verify.',
     status: 'Shipped · 2026',
-    role: 'Identity · design system · dither engine · form kit',
-    material: 'Survey paper + lichen + ordered dither',
-    cover: '/brand/hachure/hachure-brandkit.png',
+    role: 'Identity · design system · marks · dither',
+    material: 'Vermilion field + ink + bone',
+    cover: '/brand/huginn/huginn-brandkit.png',
     coverAlt:
-      'The Hachure brand board: a 3 × 3 identity deck on a night table — the solid ridge mark, the outlined mono wordmark, the dither plate, the seven-tone ramp, the field sheet and the form kit.',
-    tags: ['Hachure', 'Bayer Dither', 'Survey', 'Altimeter'],
-    tone: 'hachure',
+      'The Huginn brand board: the vermilion field with the cell-drawn wordmark, the cell mark with one cell off the grid, and the painting dissolving into the field through an ordered dither.',
+    tags: ['Cells', 'Dither', 'Vermilion', 'Print'],
+    tone: 'huginn',
   },
   {
-    number: '06',
-    name: 'Cove',
-    href: '/design-system/cove',
-    tagline: 'A calmer kind of depth.',
+    number: '02',
+    name: 'Vitrine',
+    href: '/design-system/vitrine',
+    tagline: 'A glass case for a low-resolution light.',
     description:
-      'One glass layer over one blue field, a solid reading plate, a squared C with an ice waterline, ten native controls and a measured audit. Case 06 asks what happens when glass is minimal instead of everywhere.',
+      'Glass containers, a dithered information layer, a half-light V mark, ten native form controls and an honest audit. Case 02 asks whether depth can stay legible.',
     status: 'Shipped · 2026',
-    role: 'Identity · design system · forms · liquid glass',
-    material: 'Blue glass + ice',
-    cover: '/brand/cove/cove-brandkit.png',
+    role: 'Identity · design system · forms · dither',
+    material: 'Glass + dither + Signal',
+    cover: '/brand/vitrine/vitrine-brandkit.png',
     coverAlt:
-      'The Cove brand board: the squared C mark with an ice inlay, the Abyss and Foam palette, Instrument Serif and Sans, the glass recipe and the form kit.',
-    tags: ['Liquid Glass', 'Blue', 'Instrument Serif', 'Forms'],
-    tone: 'cove',
-  },
-  {
-    number: '07',
-    name: 'Strand',
-    href: '/design-system/strand',
-    tagline: 'Where the dunes meet the tide.',
-    description:
-      'A quiet coastal interface system: flat white quartz reading plates, marine basalt ink, one shallow-tide green signal, a Dune Crest S monogram, ten native controls and a panoramic vista framing hero and footer.',
-    status: 'Shipped · 2026',
-    role: 'Identity · design system · marks · form kit',
-    material: 'Quartz sand + marine basalt + shallow tide',
-    cover: '/brand/strand/strand-brandkit.png',
-    coverAlt:
-      'The Strand brand board: the architectural S mark, coastal shoreline palette, quartz reading plates and form kit.',
-    tags: ['Coastal', 'Minimalist', 'Monogram', 'Forms'],
-    tone: 'strand',
-  },
-  {
-    number: '08',
-    name: 'Clearing',
-    href: '/design-system/clearing',
-    tagline: 'A sighting, not a sticker.',
-    description:
-      'Painted emerald light seen through one pane of glass. A drawn stag on a tapered horizon, an outlined wordmark whose i-tittle is a light disc, five cast marks on one cut line, and an audit that names what it could not verify. No form kit, by request.',
-    status: 'Shipped · 2026',
-    role: 'Identity · design system · marks · docs',
-    material: 'Painted emerald + cream + glass',
-    cover: '/brand/clearing/clearing-brandkit.png',
-    coverAlt:
-      'The Clearing brand board: the stag on a tapered horizon, the outlined clearing wordmark with a disc tittle, six inks sampled from the painting, and the glass recipe.',
-    tags: ['Painted', 'Emerald', 'Glass', 'Wildlife'],
-    tone: 'clearing',
-  },
-  {
-    number: '09',
-    name: LEDGER.name,
-    href: LEDGER.href,
-    tagline: LEDGER.tagline,
-    description: LEDGER.description,
-    status: LEDGER.status,
-    role: LEDGER.role,
-    material: LEDGER.material,
-    cover: '/brand/ledger/ledger-brandkit.png',
-    coverAlt:
-      'The Ledger brand board: the grid mark with one lifted tile, the indigo harbor ramp, the glass recipe, the type scale and a dashboard specimen.',
-    tags: LEDGER.tags,
-    tone: 'ledger',
-  },
-  {
-    number: '10',
-    name: 'Porphyry',
-    href: '/design-system/porphyry',
-    tagline: 'A page composed like a stage: one stone, one light, one cast.',
-    description:
-      'A classical diorama as an interface system. A stage opening cut into a block of stone, with a gold threshold, a loader that fills the wordmark with marble from the floor, three photographs keyed off their own black ground by luminance, a real vellum theme, a ten-part form kit and a detach score against every sibling.',
-    status: 'Shipped · 2026',
-    role: 'Identity · design system · stage · form kit',
-    material: 'Porphyry + marble + gold leaf + one dark stage',
-    cover: '/brand/porphyry/porphyry-brandkit.png',
-    coverAlt:
-      'The Porphyry brand board: the stone block with its gold threshold, the porphyry and marble palette, the outlined Cinzel wordmark, the keyed statue and the stage tokens.',
-    tags: ['Porphyry', 'Marble', 'Gold Leaf', 'Stage'],
-    tone: 'porphyry',
-  },
-  {
-    number: '11',
-    name: 'Jakarta',
-    href: '/design-system/jakarta',
-    tagline: 'Bergerak Menuju Era Baru Jakarta.',
-    description:
-      'One stroke that turns a corner and one stop where it turns, drawn from a single unit S. Nine district ramps named after Jakarta places, a palette that is a map rather than a mood, and the six contrast pairs that fail published instead of fixed. Enamel, vinyl, a transit card and a bus.',
-    status: 'Shipped · 2026',
-    role: 'Identity · design system · wayfinding · docs',
-    material: 'Enamel + vinyl + one orange',
-    cover: '/brand/jakarta/jakarta-brandkit.webp',
-    coverAlt:
-      'The Jakarta brand board: the junction mark on paper, ink and Senja, nine district ramps in four steps, the outlined wordmark and the night scope.',
-    tags: ['City', 'Transit', 'Nine Ramps', 'Wayfinding'],
-    tone: 'jakarta',
+      'The Vitrine brand board: the half-light V mark, one glass arm and one Signal arm, Case and Frost palette, Signal field, type specimens, favicon and form specimen.',
+    tags: ['Glass', 'Dither', 'Case', 'Forms'],
+    tone: 'vitrine',
   },
 ]

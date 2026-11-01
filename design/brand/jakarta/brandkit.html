@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Jakarta — brand board v1.1</title>
+    <!--
+      The board is the 4:3 thumbnail on /design-system, authored at 1500 × 1125
+      and rendered at 2× before being downscaled to the shipped size.
+
+        CHROME_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+          node scripts/render-board.mjs --html design/brand/jakarta/brandkit.html \
+            --out public/brand/jakarta/jakarta-brandkit.png --width 1500 --height 1125 --scale 2
+
+      The only type files are local: the site's Plus Jakarta Sans variable face
+      and the system mono. Nothing here is fetched at render time. The card is
+      the real component, captured from the case page — not a redrawing.
+    -->
+    <style>
+      @font-face {
+        font-family: 'Plus Jakarta Sans';
+        src: url('../../../public/fonts/plus-jakarta-sans-var.woff2') format('woff2-variations');
+        font-weight: 200 800;
+        font-style: normal;
+        font-display: block;
+      }
+
+      :root {
+        --paper: #f7f4ee;
+        --kapur: #ffffff;
+        --tinta: #1b2126;
+        --hitam: #000000;
+        --garis: #dad4c9;
+        --kabut: #ede8de;
+        --muted: #515b67;
+        --faint: #6e7884;
+        --langit: #2830d0;
+        --laut: #148bcd;
+        --menteng: #f53d3f;
+        --senja: #f7481b;
+        --aspal: #323941;
+        --kebayoran: #fcd260;
+        --daun: #00a062;
+        --ancol: #9378f9;
+        --doger: #f194af;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body {
+        width: 1500px;
+        height: 1125px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      .board {
+        position: relative;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 20px;
+        width: 1500px;
+        height: 1125px;
+        padding: 42px 48px 34px;
+        background: var(--paper);
+        color: var(--tinta);
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .board::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at center, rgba(27, 33, 38, 0.55) 0.55px, transparent 0.65px);
+        background-size: 4px 4px;
+        opacity: 0.075;
+        pointer-events: none;
+      }
+
+      .mono {
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        font-size: 9.5px;
+        line-height: 1.4;
+        letter-spacing: 0.17em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .crop { position: absolute; width: 20px; height: 20px; opacity: 0.7; }
+      .crop::before, .crop::after { content: ''; position: absolute; background: var(--tinta); }
+      .crop::before { width: 100%; height: 1px; }
+      .crop::after { width: 1px; height: 100%; }
+      .crop.tl { top: 14px; left: 14px; }
+      .crop.tr { top: 14px; right: 14px; }
+      .crop.tr::before { right: 0; } .crop.tr::after { right: 0; }
+      .crop.bl { bottom: 14px; left: 14px; }
+      .crop.bl::before { bottom: 0; } .crop.bl::after { bottom: 0; }
+      .crop.br { bottom: 14px; right: 14px; }
+      .crop.br::before { bottom: 0; right: 0; } .crop.br::after { bottom: 0; right: 0; }
+
+      /* ---------- header ---------- */
+      header {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding-bottom: 11px;
+        border-bottom: 1.5px solid var(--tinta);
+      }
+      header img { display: block; height: 33px; }
+      .headMeta { display: flex; gap: 30px; align-items: flex-end; }
+      .headMeta b { display: block; font-weight: 600; letter-spacing: 0; color: var(--tinta); }
+
+      /* ---------- main ---------- */
+      main {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: 900px 480px;
+        gap: 24px;
+        min-height: 0;
+      }
+      .col { display: grid; min-height: 0; }
+      .colL { grid-template-rows: 372px 1fr auto; gap: 18px; }
+      .colR { grid-template-rows: auto auto 1fr; gap: 18px; }
+
+      /* ---------- the field ---------- */
+      .field { position: relative; overflow: hidden; background: var(--paper); }
+      .fieldBands {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(
+          112deg,
+          var(--langit) 0 10%,
+          var(--laut) 10% 20%,
+          var(--ancol) 20% 30%,
+          var(--doger) 30% 40%,
+          var(--menteng) 40% 50%,
+          var(--senja) 50% 60%,
+          var(--kebayoran) 60% 70%,
+          var(--daun) 70% 80%,
+          var(--aspal) 80% 90%,
+          var(--tinta) 90% 100%
+        );
+        clip-path: polygon(
+          0 0,
+          100% 0,
+          100% calc(100% - 4px),
+          calc(100% - 69px) calc(100% - 26px),
+          calc(100% - 138px) calc(100% - 9px),
+          calc(100% - 208px) calc(100% - 31px),
+          calc(100% - 277px) calc(100% - 12px),
+          calc(100% - 346px) calc(100% - 34px),
+          calc(100% - 415px) calc(100% - 7px),
+          calc(100% - 485px) calc(100% - 22px),
+          calc(100% - 554px) calc(100% - 30px),
+          calc(100% - 623px) calc(100% - 10px),
+          calc(100% - 692px) calc(100% - 27px),
+          calc(100% - 762px) calc(100% - 6px),
+          calc(100% - 831px) calc(100% - 33px),
+          0 calc(100% - 14px)
+        );
+      }
+      .fieldMark {
+        position: absolute;
+        left: 34px;
+        top: 26px;
+        height: 262px;
+        opacity: 0.24;
+      }
+      .fieldTag {
+        /* under the plate, not above it: the plate now starts at the mark's top */
+        position: absolute;
+        top: 275px;
+        right: 24px;
+        text-align: right;
+        color: rgba(247, 244, 238, 0.72);
+      }
+      .fieldTag b { display: block; font-weight: 600; letter-spacing: 0; color: var(--paper); }
+
+      .plate {
+        position: absolute;
+        /* right of the mark, not under it: the J owns the left of the field */
+        right: 40px;
+        /* pushed up to align with the mark's top */
+        bottom: 218px;
+        width: 418px;
+        padding: 18px 20px 20px;
+        /* paper, not smoked glass: the field's right end is Aspal and Tinta, so a
+           dark plate would have no edge on it. The Senja rule is the section device. */
+        background: rgba(247, 244, 238, 0.96);
+        border-top: 3px solid var(--senja);
+      }
+      .plateEyebrow {
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        font-size: 9.5px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .plateTitle {
+        margin-top: 9px;
+        font-size: 30px;
+        line-height: 1.12;
+        font-weight: 600;
+        letter-spacing: -0.028em;
+        color: var(--tinta);
+        text-wrap: balance;
+      }
+
+      /* ---------- ramps ---------- */
+      .block { display: flex; flex-direction: column; min-height: 0; }
+      .blockHead {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--tinta);
+      }
+      .blockHead .t { display: flex; align-items: center; gap: 8px; }
+      .blockHead .t::before { content: ''; width: 7px; height: 7px; background: var(--accent, var(--senja)); }
+      .blockHead h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.012em; }
+
+      .ramps { display: grid; grid-template-rows: repeat(9, 1fr); flex: 1; }
+      .ramp {
+        display: grid;
+        grid-template-columns: 214px 158px 1fr 52px;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid var(--garis);
+      }
+      .ramp:last-child { border-bottom: 0; }
+      .rampName { font-size: 12.5px; font-weight: 600; letter-spacing: -0.008em; }
+      .rampName em {
+        display: block;
+        margin-top: 1px;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 9.5px;
+        letter-spacing: 0.04em;
+        color: var(--faint);
+      }
+      .rampChips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+      .rampChips i { display: block; height: 15px; }
+      .rampJob { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+      .rampRatio {
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.04em;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .rampRatio em { display: block; font-style: normal; font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+
+      /* ---------- stats ---------- */
+      .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1.5px solid var(--tinta); }
+      .stat { position: relative; min-width: 0; padding: 15px 16px 2px 0; }
+      .stat + .stat { padding-left: 16px; border-left: 1px solid var(--garis); }
+      .stat::before { content: ''; position: absolute; left: 0; right: 16px; top: -1.5px; height: 3px; background: var(--accent); }
+      .stat + .stat::before { left: 16px; }
+      .stat dt { display: flex; align-items: center; gap: 6px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+      .stat dt::before { content: ''; width: 6px; height: 6px; background: var(--accent); flex: 0 0 auto; }
+      .stat dd { margin-top: 5px; font-size: 24px; font-weight: 800; line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
+
+      /* ---------- card ---------- */
+      .cardPlate { position: relative; }
+      .cardPlate img { display: block; width: 100%; height: auto; box-shadow: 0 18px 28px -14px rgba(8, 12, 16, 0.45); }
+      .cardCap { display: flex; justify-content: space-between; gap: 16px; margin-top: 9px; }
+
+      /* ---------- accents ---------- */
+      .accents { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 12px; margin-top: 10px; }
+      .acc { display: grid; gap: 6px; }
+      .acc i { display: block; height: 30px; }
+      .acc span { display: block; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+      .acc span b { display: block; font-weight: 600; letter-spacing: 0.06em; color: var(--tinta); }
+
+      /* ---------- type + marks ---------- */
+      .spec { display: grid; grid-template-columns: 150px 1fr; gap: 18px; align-items: end; flex: 1; }
+      .specAa { font-size: 122px; line-height: 0.82; font-weight: 800; letter-spacing: -0.05em; }
+      .specRows { display: grid; gap: 4px; padding-bottom: 4px; }
+      .specRow { display: flex; justify-content: space-between; gap: 10px; border-top: 1px solid var(--garis); padding-top: 3px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+      .specRow b { color: var(--tinta); font-weight: 600; }
+
+      .marks { display: flex; align-items: flex-end; gap: 20px; border-top: 1px solid var(--garis); padding-top: 10px; }
+      .mark { display: grid; justify-items: center; gap: 6px; }
+      .mark img { display: block; }
+      .mark .m24 { height: 24px; }
+      .mark .m48 { height: 48px; }
+      .mark .m112 { height: 112px; }
+
+      /* ---------- footer ---------- */
+      footer {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 24px;
+        padding-top: 10px;
+        border-top: 1.5px solid var(--tinta);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board" id="board">
+      <span class="crop tl"></span><span class="crop tr"></span>
+      <span class="crop bl"></span><span class="crop br"></span>
+
+      <header>
+        <img src="../../../public/brand/jakarta/lockup.svg" alt="Jakarta" />
+        <div class="headMeta">
+          <div class="mono">Case 11 · multi-ramp<b>Nine districts, one stroke</b></div>
+          <div class="mono">Board v1.1 · gate v3.7<b>2026</b></div>
+        </div>
+      </header>
+
+      <main>
+        <div class="col colL">
+          <!-- the field, on the hero's own 112°, torn at the floor -->
+          <div class="field">
+            <div class="fieldBands"></div>
+            <img class="fieldMark" src="../../../public/brand/jakarta/mark-reverse.svg" alt="" />
+            <div class="fieldTag mono">Ten districts · 112° · torn at the floor<b>Field, not background</b></div>
+            <div class="plate">
+              <p class="plateEyebrow">HUT ke–499 Kota Jakarta</p>
+              <p class="plateTitle">Bergerak Menuju Era Baru Jakarta</p>
+            </div>
+          </div>
+
+          <!-- ramps -->
+          <div class="block">
+            <div class="blockHead">
+              <div class="t"><h2>Nine ramps, no gradient</h2></div>
+              <div class="mono">4 steps each · ratio on paper</div>
+            </div>
+            <div class="ramps">
+              <div class="ramp">
+                <div class="rampName">Langit Senayan<em>Senayan sky</em></div>
+                <div class="rampChips"><i style="background:#2830D0"></i><i style="background:#454CE3"></i><i style="background:#656CF2"></i><i style="background:#858BF9"></i></div>
+                <div class="rampJob">Night, links, focus</div>
+                <div class="rampRatio">7,89<em>body</em></div>
+              </div>
+              <div class="ramp">
+                <div class="rampName">Laut Sunda<em>Sunda sea</em></div>
+                <div class="rampChips"><i style="background:#148BCD"></i><i style="background:#46A8DB"></i><i style="background:#7AC5EA"></i><i style="background:#A6DEF7"></i></div>
+                <div class="rampJob">Transit, information</div>
+                <div class="rampRatio">3,41<em>large</em></div>
+              </div>
+              <div class="ramp">
+                <div class="rampName">Merah Menteng<em>Menteng red</em></div>
+                <div class="rampChips"><i style="background:#F53D3F"></i><i style="background:#FF6162"></i><i style="background:#FF9192"></i><i style="background:#FEA8A9"></i></div>
+                <div class="rampJob">Alert, closure, emergency</div>
+                <div class="rampRatio">3,40<em>large</em></div>
+              </div>
+              <div class="ramp">
+                <div class="rampName">Senja Palmerah<em>Palmerah dusk</em></div>
+                <div class="rampChips"><i style="background:#F7481B"></i><i style="background:#FF663E"></i><i style="background:#FF9275"></i><i style="background:#FFB19D"></i></div>
+                <div class="rampJob">Primary accent, civic action</div>
+                <div class="rampRatio">3,24<em>large</em></div>
+              </div>
+              <div class="ramp">
+                <div class="rampName">Aspal Sudirman<em>Sudirman asphalt</em></div>
+                <div class="rampChips"><i style="background:#323941"></i><i style="background:#515B67"></i><i style="background:#6E7884"></i><i style="background:#8995A3"></i></div>
+                <div class="rampJob">Ink, secondary text</div>
+                <div class="rampRatio">10,64<em>body</em></div>
+              </div>
+              <div class="ramp">
+                <div class="rampName">Terang Kebayoran<em>Kebayoran light</em></div>
+                <div class="rampChips"><i style="background:#FCD260"></i><i style="background:#FDDE8B"></i><i style="background:#FDE9B2"></i><i style="background:#FFF2D2"></i></div>
+                <div class="rampJob">Heritage, festival, highlight</div>
+                <div class="rampRatio">1,32<em>ground</em></div>
+              </div>
+              <div class="ramp">
+                <div class="rampName">Menteng Daun<em>Menteng leaf</em></div>
+                <div class="rampChips"><i style="background:#00A062"></i><i style="background:#2DB26C"></i><i style="background:#6BCB7A"></i><i style="background:#A1E086"></i></div>
+                <div class="rampJob">Park, sustainability, open data</div>
+                <div class="rampRatio">3,08<em>large</em></div>
+              </div>
+              <div class="ramp">
+                <div class="rampName">Sinar Ancol<em>Ancol light</em></div>
+                <div class="rampChips"><i style="background:#9378F9"></i><i style="background:#AE9BFA"></i><i style="background:#C8BDFB"></i><i style="background:#DAD4FC"></i></div>
+                <div class="rampJob">Leisure, events, digital</div>
+                <div class="rampRatio">3,04<em>large</em></div>
+              </div>
+              <div class="ramp">
+                <div class="rampName">Doger Mayestik<em>Mayestik doger</em></div>
+                <div class="rampChips"><i style="background:#F194AF"></i><i style="background:#F4ADC2"></i><i style="background:#F7C3D3"></i><i style="background:#F9D7E3"></i></div>
+                <div class="rampJob">Youth, culture, campaign</div>
+                <div class="rampRatio">1,99<em>ground</em></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- stats -->
+          <div class="stats">
+            <div class="stat" style="--accent:#FCD260">
+              <dt>IoU against the supplied mark</dt>
+              <dd>0,989</dd>
+            </div>
+            <div class="stat" style="--accent:#F194AF">
+              <dt>Primitives, nine ramps</dt>
+              <dd>46</dd>
+            </div>
+            <div class="stat" style="--accent:#9378F9">
+              <dt>Contrast pairs passing on paper</dt>
+              <dd>8/14</dd>
+            </div>
+            <div class="stat" style="--accent:#148BCD">
+              <dt>Smallest primary mark</dt>
+              <dd>24px</dd>
+            </div>
+          </div>
+        </div>
+
+        <div class="col colR">
+          <!-- the card, captured from the real component -->
+          <div class="block">
+            <div class="blockHead">
+              <div class="t" style="--accent:#148BCD"><h2>JakLingko · ID-1</h2></div>
+              <div class="mono">85,60 × 53,98 mm</div>
+            </div>
+            <div class="cardPlate" style="margin-top:10px">
+              <img src="../../../public/brand/jakarta/jaklingko-card.png" alt="JakLingko card" />
+            </div>
+            <div class="cardCap mono">
+              <span>Ribbon 14 · lockup 2,9 mm<br />Chip, contactless, tabular number</span>
+              <span style="text-align:right">Cream on Laut 3,41<br />large text only</span>
+            </div>
+          </div>
+
+          <!-- accents -->
+          <div class="block">
+            <div class="blockHead">
+              <div class="t" style="--accent:#F53D3F"><h2>One colour per section</h2></div>
+              <div class="mono">Decoration only</div>
+            </div>
+            <div class="accents">
+              <div class="acc"><i style="background:#2830D0"></i><span><b>The idea</b>7,89</span></div>
+              <div class="acc"><i style="background:#F7481B"></i><span><b>The mark</b>4,56</span></div>
+              <div class="acc"><i style="background:#148BCD"></i><span><b>Palette</b>5,57</span></div>
+              <div class="acc"><i style="background:#9378F9"></i><span><b>Type</b>4,87</span></div>
+              <div class="acc"><i style="background:#00A062"></i><span><b>Applications</b>4,80</span></div>
+              <div class="acc"><i style="background:#323941"></i><span><b>Tokens</b>10,64</span></div>
+              <div class="acc"><i style="background:#F53D3F"></i><span><b>Audit</b>5,68</span></div>
+              <div class="acc" style="visibility:hidden"><i></i><span><b>—</b>0,00</span></div>
+            </div>
+          </div>
+
+          <!-- type + mark sizes -->
+          <div class="block" style="justify-content:space-between">
+            <div class="blockHead">
+              <div class="t" style="--accent:#9378F9"><h2>Plus Jakarta Sans · 200–800</h2></div>
+              <div class="mono">Outlined wordmark</div>
+            </div>
+            <div class="spec">
+              <div class="specAa">Aa</div>
+              <div class="specRows">
+                <div class="specRow"><span>display-1</span><b>104 / 0,90 / −0,045em</b></div>
+                <div class="specRow"><span>h1</span><b>48 / 1,02 / −0,032em</b></div>
+                <div class="specRow"><span>body</span><b>16,5 / 1,62</b></div>
+                <div class="specRow"><span>caption</span><b>11,5 / 0,16em</b></div>
+              </div>
+            </div>
+            <div class="marks">
+              <div class="mark"><img class="m24" src="../../../public/brand/jakarta/mark.svg" alt="" /><span class="mono">24</span></div>
+              <div class="mark"><img class="m48" src="../../../public/brand/jakarta/mark.svg" alt="" /><span class="mono">48</span></div>
+              <div class="mark"><img class="m112" src="../../../public/brand/jakarta/mark.svg" alt="" /><span class="mono">112</span></div>
+              <div class="mark" style="margin-left:auto"><img class="m48" src="../../../public/brand/jakarta/mark-compact.svg" alt="" /><span class="mono">compact</span></div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        <div class="mono">Enamel + vinyl + one orange · nine ramps, no gradient · night is a scope, not a palette</div>
+        <div class="mono" style="text-align:right">Eight of fourteen pairs fail on paper and are published as failing</div>
+      </footer>
+    </div>
+  </body>
+</html>

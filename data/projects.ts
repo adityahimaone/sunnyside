@@ -69,7 +69,7 @@ const SEEDS: Seed[] = [
     url: 'https://kanban.adityahimaone.space/board/default',
     genre: 'Developer tools',
     problem: 'Internal tools',
-    year: 2024,
+    year: 2026,
     role: 'Design and build',
     stack: ['Go', 'SQLite', 'React', 'Vite', 'gRPC'],
     highlights: [

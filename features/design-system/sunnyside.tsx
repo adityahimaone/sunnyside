@@ -996,7 +996,7 @@ function Parts() {
               </div>
               <div className={styles.miniReleaseBody}>
                 <span className={styles.monoTiny}>
-                  01 · developer tools · 2024
+                  01 · developer tools · 2026
                 </span>
                 <b>Switchyard</b>
                 <p>A control plane for coding agents.</p>

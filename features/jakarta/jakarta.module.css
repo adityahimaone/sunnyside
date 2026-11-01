@@ -166,6 +166,20 @@
   overflow: clip;
   background: #2830d0;
   color: #fff;
+  /* The tear lives on the hero, not on a block under it: the field is cut off
+     mid-colour and the page's paper is what you see through the teeth. Unequal
+     widths and depths, because an even amplitude reads as a sawtooth border and
+     a printed sheet never tears evenly. */
+  clip-path: polygon(
+    0 0, 100% 0, 100% 100%, 95.5% calc(100% - 44px), 91% calc(100% - 9px),
+    86.5% calc(100% - 34px), 82% calc(100% - 6px), 77% calc(100% - 49px),
+    72.5% calc(100% - 18px), 68% calc(100% - 38px), 63.5% calc(100% - 4px),
+    59% calc(100% - 30px), 54% calc(100% - 52px), 49.5% calc(100% - 12px),
+    45% calc(100% - 36px), 40% calc(100% - 7px), 35.5% calc(100% - 46px),
+    31% calc(100% - 20px), 26% calc(100% - 40px), 21.5% calc(100% - 5px),
+    17% calc(100% - 33px), 12% calc(100% - 15px), 7% calc(100% - 47px),
+    3% calc(100% - 10px), 0% calc(100% - 28px)
+  );
 }
 
 .heroMedia {
@@ -192,8 +206,16 @@
   object-fit: cover;
   mix-blend-mode: luminosity;
   transition: opacity var(--jk-dur-slow) var(--jk-ease);
-  -webkit-mask-image: linear-gradient(90deg, transparent 4%, #000 46%);
-  mask-image: linear-gradient(90deg, transparent 4%, #000 46%);
+  /* Two directions: the plate steps back from the reading edge, and it is gone
+     by the floor so the field can be flat colour where it tears. */
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 4%, #000 46%),
+    linear-gradient(180deg, #000 0 62%, transparent 94%);
+  mask-image:
+    linear-gradient(90deg, transparent 4%, #000 46%),
+    linear-gradient(180deg, #000 0 62%, transparent 94%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
 
 .heroDay {
@@ -229,10 +251,15 @@
       180deg,
       rgb(8 12 16 / 0.2) 0%,
       rgb(8 12 16 / 0) 32%,
-      rgb(8 12 16 / 0.2) 66%,
-      rgb(8 12 16 / 0.58) 100%
+      rgb(8 12 16 / 0.16) 66%,
+      rgb(8 12 16 / 0.34) 100%
     ),
     linear-gradient(90deg, rgb(8 12 16 / 0.26) 0%, rgb(8 12 16 / 0) 52%);
+  /* The scrim is there for the copy. It gets out of the way of the floor, so
+     the colours that get torn are the colours in the palette, not the colours
+     in shadow. */
+  -webkit-mask-image: linear-gradient(180deg, #000 0 84%, rgb(0 0 0 / 0) 100%);
+  mask-image: linear-gradient(180deg, #000 0 84%, rgb(0 0 0 / 0) 100%);
 }
 
 /* The mark at page scale — geometry, not a logo tile. */
@@ -261,9 +288,9 @@
    plate is only what the words need to stay legible. */
 .heroPanel {
   position: relative;
-  width: min(100%, 760px);
-  padding: clamp(20px, 2.4vw, 32px) clamp(20px, 2.6vw, 40px)
-    clamp(18px, 2.2vw, 28px);
+  width: min(100%, 620px);
+  padding: clamp(22px, 2.2vw, 30px) clamp(22px, 2.3vw, 32px)
+    clamp(18px, 1.9vw, 24px);
   background: rgb(8 12 16 / 0.72);
   color: var(--jk-kertas);
   border: 1px solid rgb(247 244 238 / 0.14);
@@ -279,17 +306,30 @@
   }
 }
 
+/* The headline is a caption now, not a hoarding. One weight, one size, one
+   colour: 600 at 40px with a normal leading. Everything the display used to
+   shout is carried by the eyebrow above it and by the field behind it. */
+.heroEyebrow {
+  margin: 0 0 clamp(10px, 1vw, 14px);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgb(247 244 238 / 0.66);
+}
+
 .heroTitle {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   margin: 0;
   font-family: var(--jk-font-display);
-  font-size: clamp(36px, 6vw, 88px);
-  font-weight: 800;
-  line-height: 0.98;
-  letter-spacing: -0.045em;
+  font-size: clamp(26px, 2.9vw, 40px);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.028em;
   color: var(--jk-kertas);
+  text-wrap: balance;
 }
 
 .heroTitle span {
@@ -297,24 +337,24 @@
 }
 
 .heroTitle span + span {
-  margin-top: 0.06em;
+  margin-top: 0.04em;
 }
 
 .heroPanelFoot {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: clamp(16px, 1.8vw, 22px);
-  padding-top: clamp(14px, 1.6vw, 18px);
-  border-top: 1px solid rgb(247 244 238 / 0.18);
+  gap: 12px;
+  margin-top: clamp(14px, 1.5vw, 18px);
+  padding-top: clamp(12px, 1.3vw, 16px);
+  border-top: 1px solid rgb(247 244 238 / 0.16);
 }
 
 .heroSub {
   margin: 0;
-  font-size: clamp(14px, 1.15vw, 16.5px);
-  font-weight: 600;
-  letter-spacing: -0.006em;
-  color: var(--jk-kertas);
+  font-size: clamp(13.5px, 1.05vw, 15px);
+  font-weight: 500;
+  letter-spacing: -0.004em;
+  color: rgb(247 244 238 / 0.88);
 }
 
 .heroActions {
@@ -328,12 +368,12 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 40px;
-  padding: 0 16px;
+  height: 36px;
+  padding: 0 14px;
   border-radius: var(--jk-radius-1);
   background: var(--jk-accent);
   color: var(--jk-accent-ink);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.01em;
   text-decoration: none;
@@ -376,87 +416,92 @@
   transform: translateX(3px);
 }
 
-/* The field in one line: ten solid segments, edge to edge, no gaps and no
-   separators. The whole line leans 6° — the filter's angle at stripe scale —
-   while every colour stays contiguous and in the field's order. */
-.heroPalette {
-  position: relative;
-  z-index: 2;
-  margin-top: auto;
-  padding: 12px 0 66px;
-  overflow: clip;
-  background: var(--jk-tinta);
+/* The field is torn off, not stopped.
+   The old floor was a second, separate object: ten chips on an ink slab, skewed,
+   with a paper tear across the bottom — three devices arguing at once, none of
+   them the field's own angle. Now there is no object at all. The photograph
+   dissolves to nothing as the field reaches the floor, the last stretch of hero
+   is flat palette, and the hero's own bottom edge is cut with the tooth line
+   declared on .hero — so the page's paper is what shows through the tears. One
+   surface, one edge, one idea: nothing under the field to line up with. */
+
+/* Floor room: the panel must not be the thing that gets torn, so the field keeps
+   a strip of itself below the copy — empty, no background, just height. */
+.heroFloor {
+  height: clamp(64px, 6.4vw, 104px);
+  flex: 0 0 auto;
 }
 
-.heroPaletteStrip {
-  display: flex;
-  width: 100%;
-  height: clamp(26px, 3vw, 42px);
-  transform: skewX(-6deg);
-  border-block: 1px solid rgb(247 244 238 / 0.16);
-}
-
-.heroPaletteStrip i {
-  display: block;
-  flex: 1;
-}
-
-/* The torn edge is a polygon, not a texture. Irregular teeth read as stock;
-   a constant amplitude would read as a sawtooth border. */
-.heroTear {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 3;
-  height: clamp(36px, 4vw, 58px);
-  background: var(--jk-surface);
-  clip-path: polygon(
-    0 62%, 4% 38%, 8% 64%, 12% 44%, 16% 58%, 20% 36%, 24% 60%,
-    28% 46%, 32% 66%, 36% 40%, 40% 60%, 44% 48%, 48% 34%,
-    52% 62%, 56% 44%, 60% 58%, 64% 38%, 68% 64%, 72% 46%,
-    76% 60%, 80% 36%, 84% 62%, 88% 44%, 92% 58%, 96% 40%,
-    100% 62%, 100% 100%, 0 100%
-  );
-}
-
-/* ── stats ──────────────────────────────────────────────────────────────── */
-
+/* Four numbers on one band, each with the district colour it spends printed as
+   the column's own top rule. The ink rule that used to run the whole width is
+   gone: the four colours are the rule now, and they are the only thing on the
+   band that is not type. */
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: clamp(36px, 5vw, 64px) 0 0;
   border-top: 1.5px solid var(--jk-text);
 }
 
 .stat {
-  padding: 16px 18px 0 0;
+  position: relative;
+  min-width: 0;
+  padding: clamp(18px, 2vw, 26px) clamp(14px, 1.8vw, 24px)
+    clamp(10px, 1.2vw, 14px) 0;
+}
+
+.stat::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px clamp(14px, 1.8vw, 24px) auto 0;
+  height: 3px;
+  background: var(--jk-sec, var(--jk-accent));
 }
 
 .stat + .stat {
-  padding-left: 18px;
+  padding-left: clamp(14px, 1.8vw, 24px);
   border-left: 1px solid var(--jk-rule);
 }
 
+/* Each stat keeps one district colour as a tick above the label — the same
+   device the section labels use, at the same 7px. Decoration only: no colour
+   here ever sets the number. */
 .stat dt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   font-size: 11px;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--jk-text-muted);
 }
 
+.stat dt::before {
+  content: '';
+  flex: none;
+  width: 7px;
+  height: 7px;
+  background: var(--jk-sec, var(--jk-accent));
+}
+
 .stat dd {
-  margin: 6px 0 0;
-  font-size: clamp(24px, 2.6vw, 34px);
+  margin: 7px 0 0;
+  font-size: clamp(22px, 2.4vw, 32px);
   font-weight: 800;
   letter-spacing: -0.035em;
-  line-height: 1;
+  line-height: 1.02;
+  font-variant-numeric: tabular-nums;
+  /* the number is allowed to wrap inside its column: a stat that runs past the
+     band's last line is a bug, not a display size */
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 /* ── section frame ──────────────────────────────────────────────────────── */
 
 .sec {
+  --jk-sec: var(--jk-accent);
+  --jk-sec-ink: var(--jk-accent-ink);
   padding-block: clamp(52px, 7vw, 104px);
   border-top: 1px solid var(--jk-rule);
 }
@@ -468,8 +513,22 @@
   margin-bottom: clamp(28px, 4vw, 52px);
 }
 
+/* The registration rule: 88 units of the section's district colour printed
+   above the head, the way a printer marks a sheet. One per section, always the
+   same width, so eight colours read as one system rather than eight moods. */
+.secHead::before {
+  content: '';
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 88px;
+  height: 3px;
+  margin-bottom: 2px;
+  background: var(--jk-sec);
+}
+
 .secNum {
   grid-column: 1 / -1;
+  grid-row: 2;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -488,15 +547,15 @@
   height: 22px;
   padding: 0 6px;
   border-radius: var(--jk-radius-full);
-  background: var(--jk-accent);
-  color: var(--jk-accent-ink);
+  background: var(--jk-sec);
+  color: var(--jk-sec-ink);
   font-size: 11px;
   letter-spacing: 0.06em;
 }
 
 .secMeta {
   grid-column: 2;
-  grid-row: 1;
+  grid-row: 2;
   align-self: center;
   font-size: 11.5px;
   letter-spacing: 0.1em;
@@ -522,13 +581,27 @@
   color: var(--jk-text-muted);
 }
 
+/* Every block label carries the section's district colour as a 7px tick — the
+   smallest unit of the same decoration, repeated down the page, which is what
+   turns eight hues into one drumbeat instead of eight moods. */
 .blockLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0 0 14px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--jk-text-muted);
+}
+
+.blockLabel::before {
+  content: '';
+  flex: none;
+  width: 7px;
+  height: 7px;
+  background: var(--jk-sec, var(--jk-accent));
 }
 
 .blockLabel[data-tight='true'] {
@@ -1939,44 +2012,57 @@
 
 .cardSvg {
   display: block;
-  width: min(100%, 640px);
+  width: min(100%, 660px);
   height: auto;
-  filter: drop-shadow(0 24px 36px rgb(8 12 16 / 0.48));
+  filter: drop-shadow(0 26px 40px rgb(8 12 16 / 0.5));
 }
 
 /* SVG text cannot take a `var()` in a presentation attribute, so the card's
-   type is set here, in the same tokens as the page. The Jakarta logo above is
-   outlined paths, not type. */
+   type is set here, in the same tokens as the page. Every size is read off a
+   real card: 9,5 units of a 1000-unit card is 0,8mm, which is what a label
+   prints at — the old card set its label at poster size and that is why it read
+   as a diagram. */
 .cardLabel {
   font-family: var(--jk-font-display);
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 600;
-  letter-spacing: 2.1px;
+  letter-spacing: 2px;
   fill: var(--jk-aspal-200);
 }
 
 .cardMeta {
   font-family: var(--jk-font-display);
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 600;
-  letter-spacing: 1.8px;
+  letter-spacing: 1.7px;
+  fill: var(--jk-aspal-200);
+}
+
+.cardMicro {
+  font-family: var(--jk-font-display);
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
   fill: var(--jk-aspal-200);
 }
 
 .cardNumber {
   font-family: var(--jk-font-code);
-  font-size: 21px;
-  letter-spacing: 2.8px;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 3px;
   fill: var(--jk-tinta);
+  font-variant-numeric: tabular-nums;
 }
 
 .cardOperator {
   font-family: var(--jk-font-display);
-  font-size: 24px;
+  font-size: 21px;
   font-weight: 800;
-  letter-spacing: 3.2px;
+  letter-spacing: 3.6px;
   fill: var(--jk-kertas);
 }
+
 
 /* ── the panel ──────────────────────────────────────────────────────────── */
 
@@ -2612,25 +2698,65 @@
     grid-template-columns: 1fr;
   }
 
-  .secNum {
+  .secHead::before {
     grid-column: 1;
     grid-row: 1;
   }
 
-  .secTitle {
+  .secNum {
     grid-column: 1;
     grid-row: 2;
   }
 
-  .secMeta {
+  .secTitle {
     grid-column: 1;
     grid-row: 3;
+  }
+
+  .secMeta {
+    grid-column: 1;
+    grid-row: 4;
     margin-top: 8px;
   }
 
   .hero {
     min-height: 86svh;
     padding-block: 84px 0;
+    /* shallower teeth on a narrow sheet: 6–28px, still uneven */
+    clip-path: polygon(
+      0 0, 100% 0, 100% 100%, 94% calc(100% - 24px), 88% calc(100% - 8px),
+      82% calc(100% - 20px), 76% calc(100% - 6px), 70% calc(100% - 26px),
+      64% calc(100% - 12px), 58% calc(100% - 22px), 52% calc(100% - 5px),
+      46% calc(100% - 18px), 40% calc(100% - 28px), 34% calc(100% - 9px),
+      28% calc(100% - 21px), 22% calc(100% - 6px), 16% calc(100% - 25px),
+      10% calc(100% - 14px), 4% calc(100% - 8px), 0% calc(100% - 19px)
+    );
+  }
+
+  .heroFloor {
+    height: 56px;
+  }
+
+  /* the plate dissolves higher up on a short hero, or it would reach the tear */
+  .heroDay,
+  .heroNight {
+    -webkit-mask-image:
+      linear-gradient(90deg, transparent 4%, #000 46%),
+      linear-gradient(180deg, #000 0 48%, transparent 86%);
+    mask-image:
+      linear-gradient(90deg, transparent 4%, #000 46%),
+      linear-gradient(180deg, #000 0 48%, transparent 86%);
+  }
+
+  .heroScrim {
+    background:
+      linear-gradient(
+        180deg,
+        rgb(8 12 16 / 0.12) 0%,
+        rgb(8 12 16 / 0) 30%,
+        rgb(8 12 16 / 0.42) 100%
+      ),
+      linear-gradient(90deg, rgb(8 12 16 / 0.18) 0%, rgb(8 12 16 / 0) 70%);
   }
 
   .heroInner {
@@ -2638,8 +2764,13 @@
   }
 
   .heroTitle {
-    font-size: clamp(30px, 8.6vw, 46px);
-    letter-spacing: -0.038em;
+    font-size: clamp(24px, 6.6vw, 32px);
+    letter-spacing: -0.024em;
+  }
+
+  .heroEyebrow {
+    font-size: 10px;
+    letter-spacing: 0.18em;
   }
 
   .heroPanel {
@@ -2654,28 +2785,7 @@
     color: rgb(247 244 238 / 0.13);
   }
 
-  .heroPalette {
-    padding: 10px 0 44px;
-  }
 
-  .heroPaletteStrip {
-    height: 28px;
-  }
-
-  .heroTear {
-    height: 34px;
-  }
-
-  .heroScrim {
-    background:
-      linear-gradient(
-        180deg,
-        rgb(8 12 16 / 0.12) 0%,
-        rgb(8 12 16 / 0) 30%,
-        rgb(8 12 16 / 0.42) 100%
-      ),
-      linear-gradient(90deg, rgb(8 12 16 / 0.18) 0%, rgb(8 12 16 / 0) 70%);
-  }
 
   /* one factor for the whole ladder, so the roles keep their order and their
      gaps instead of each row clamping to the same width */

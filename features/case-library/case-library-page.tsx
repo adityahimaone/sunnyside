@@ -37,7 +37,9 @@ export function CaseLibraryPage() {
               <Sparkle className="size-2.5" />
               Design engineering / Case library
             </span>
-            <span className={layout.kickerText}>Eleven systems, one method</span>
+            <span className={layout.kickerText}>
+              Eleven systems, one method
+            </span>
             <span className={layout.kickerText}>
               <span className={layout.num}>{DESIGN_CASES.length}</span> cases
             </span>
@@ -50,18 +52,14 @@ export function CaseLibraryPage() {
           />
 
           <h1 className={layout.title}>Eleven systems, one paper trail.</h1>
-          <p className={layout.intro}>
-            A case is not a moodboard. It is a brief, a mark, a system, a proof
-            and a written decision. Sunnyside is paper and cobalt; Vitrine is
-            glass and dither; Huginn is one cell and an ordered dither; Riso Co.
-            is a pinned sheet torn from the pin; Hachure is survey stock and
-            ordered dither; Cove is blue liquid glass and a solid reading plate;
-            Strand is quartz sand and a coastal vista; Clearing is painted
-            emerald light behind one pane of glass; Ledger is indigo harbor, one
-            pane of frosted glass and a single signal colour; Porphyry is
-            porphyry stone, marble and one dark stage; Jakarta is one stroke that
-            turns a corner, nine district ramps and six contrast failures left
-            published. Each case is documented with its files and gaps left on the
+          <p className={styles.heroIntro}>
+            <span className={styles.heroIntroLead}>
+              A case is not a moodboard.
+            </span>{' '}
+            It is a brief, a mark, a system, a proof and a written decision.
+            Eleven materials and one method — paper and cobalt, glass and
+            dither, stone and gold leaf, a city in a single stroke. Every case
+            ships with its files, its measurements, and its gaps left on the
             table.
           </p>
 
@@ -137,7 +135,7 @@ export function CaseLibraryPage() {
         <section className={styles.method} aria-labelledby="method-title">
           <div className={layout.sectionHead}>
             <h2 id="method-title" className={layout.sectionTitle}>
-              The method behind all eight
+              The method behind every case
             </h2>
             <span className={layout.sectionNote}>
               Brief → explorations → mark → board → tokens → guide → audit
@@ -157,8 +155,7 @@ export function CaseLibraryPage() {
           <p className={styles.methodFoot}>
             The method is documented as a field manual, and packaged as the{' '}
             <Link href="/design-engineering#skill">sunnyside-brand-system</Link>{' '}
-            agent skill. Vitrine, Huginn, Riso Co., Hachure, Cove, Strand and
-            Clearing prove it travels beyond one material.
+            agent skill. Ten more cases prove it travels beyond one material.
           </p>
         </section>
       </div>

@@ -52,7 +52,9 @@ try {
   process.exit(1)
 }
 
-const browser = await chromium.launch()
+// CHROME_PATH uses an already-installed Chrome instead of Playwright's bundled
+// build, which otherwise needs `npx playwright install chromium` first.
+const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || undefined })
 const page = await browser.newPage({
   viewport: { width, height },
   deviceScaleFactor: scale,

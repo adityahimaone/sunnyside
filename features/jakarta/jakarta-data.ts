@@ -10,7 +10,7 @@
 export const META = {
   number: '11',
   name: 'Jakarta',
-  version: '1.0',
+  version: '1.1',
   /** The campaign line. Until now the system had an argument but no slogan. */
   campaign: 'Bergerak Menuju Era Baru Jakarta',
   campaignYear: 'HUT ke–499 Kota Jakarta',
@@ -35,10 +35,10 @@ export const META = {
  */
 export const CAMPAIGN = {
   /**
-   * The year, kept here and no longer set in the hero: an eyebrow above a
-   * headline is a caption for the headline, and this hero does not caption
-   * itself. The anniversary still appears where it belongs — in the colophon
-   * ("built for its 499th year") and in the metadata description.
+   * The year, back in the hero — but as a settled eyebrow, not as the headline.
+   * The headline is one quiet line-set now, so the anniversary can sit above it
+   * at 10,5px with letterspacing and do the captioning the display used to
+   * shout.
    */
   eyebrow: META.campaignYear,
   headline: ['Bergerak Menuju', 'Era Baru Jakarta'],
@@ -51,8 +51,9 @@ export const CAMPAIGN = {
 /**
  * The ten colours of the hero field: the nine district ramps at their 100 step,
  * plus the ink that grounds them, in the order the sweep paints them. This list
- * is the single source for both the field and the band under it — if the
- * palette changes, both change, and neither can drift.
+ * is the single source for the field, for the flat stretch it becomes at the
+ * floor of the hero, and for the rule that opens the applications section — if
+ * the palette changes, all three change, and none can drift.
  */
 export const HERO_FIELD = [
   { token: 'langit', hex: '#2830D0' },
@@ -66,6 +67,38 @@ export const HERO_FIELD = [
   { token: 'aspal', hex: '#323941' },
   { token: 'tinta', hex: '#1B2126' },
 ] as const
+
+/**
+ * One district colour per section, spent as decoration only: the numeral chip,
+ * the rule above the head, the tick on every block label. No colour here ever
+ * carries body type.
+ *
+ * Every ink below is a computed pair, printed rather than nudged — the chip is
+ * 11px/600, so it needs 4,5:1:
+ *
+ *   langit     kertas 7,89   aspal    kertas 10,64   kebayoran tinta 11,24
+ *   senja      tinta  4,56   ancol    tinta   4,87   daun      tinta  4,80
+ *   doger      tinta  7,43   tinta    kertas 14,80
+ *   laut       hitam  5,57   menteng  hitam   5,68   ← tinta reads 4,34 / 4,35
+ *
+ * The two `hitam` entries are the honest ones: tinta on Laut Sunda and Merah
+ * Menteng misses 4,5 for small type, and pure black clears it. The pair is
+ * recorded here so the next agent does not "fix" it back to tinta.
+ */
+export const SECTION_ACCENTS = {
+  idea: { token: 'langit-100', hex: '#2830D0', ink: '#F7F4EE' },
+  mark: { token: 'senja-100', hex: '#F7481B', ink: '#1B2126' },
+  palette: { token: 'laut-100', hex: '#148BCD', ink: '#000000' },
+  type: { token: 'ancol-100', hex: '#9378F9', ink: '#1B2126' },
+  apps: { token: 'daun-100', hex: '#00A062', ink: '#1B2126' },
+  tokens: { token: 'aspal-100', hex: '#323941', ink: '#F7F4EE' },
+  audit: { token: 'menteng-100', hex: '#F53D3F', ink: '#000000' },
+} as const
+
+export type SectionAccentKey = keyof typeof SECTION_ACCENTS
+
+/** The four stats carry the colours the sections did not spend, in order. */
+export const STAT_ACCENTS = ['kebayoran', 'doger', 'ancol', 'laut'] as const
 
 export const STATS = [
   { value: '0,989', label: 'IoU against the supplied mark' },
@@ -731,13 +764,13 @@ export const AUDIT_ROWS: readonly AuditRow[] = [
     check: 'Hero field + plate',
     result: 'Pass',
     evidence:
-      'Ten hard-stop bands on a 112° axis; the Semanggi plate is masked at the reading edge and blended luminosity; the mark is repeated at hoarding scale. The copy sits on one tinted plate — cream on the worst band measures 5,20:1 at 0.55 tint, 5,64:1 at 0.58 with backdrop blur — with one type colour and no accent type. A continuous ten-segment palette line, leaning 6°, closes the surface. The plate is minimal: no cap, no offset, one hairline edge.',
+      'Ten hard-stop bands on a 112° axis; the Semanggi plate is masked at the reading edge and blended luminosity; the mark is repeated at hoarding scale. The copy sits on one 620px tinted plate — cream on the worst band measures 5,20:1 at 0.55 tint, 5,64:1 at 0.58 with backdrop blur — with one type colour, one 40px/600 headline and a 10,5px eyebrow. The field is torn off instead of stopped: the photograph dissolves before the floor, the last stretch is flat palette, and the bottom edge of the hero is cut on a sixteen-tooth line of unequal width and depth with paper showing through. No second object, no skew, no second tear.',
   },
   {
     check: 'Applications wall',
     result: 'Pass',
     evidence:
-      'A 12-column bento — 4 + 8 on both rows at 1440, 1 + 2 at 1000, one column at 700. Each artifact sits on a 28px grid plate with a numbered caption and three token chips. The JakLingko card is drawn from scratch with the outlined Jakarta lockup (mark and wordmark as paths), not a traced bitmap. Card lift is 3px with a shadow shift, removed under reduced motion; the index chips are ink on Senja at 4,56:1.',
+      'A 12-column bento — 4 + 8 on both rows at 1440, 1 + 2 at 1000, one column at 700. Each artifact sits on a 28px grid plate with a numbered caption and three token chips. The JakLingko card is drawn from scratch at ID-1 proportions: the ten-colour issuer ribbon along the top edge, the outlined lockup at issuer size (2,9mm), a chip, contactless, the number in a tabular grouping and a foil disc on the paper, with the Laut operator panel — mark knocked out, one right-angle route, one operator word at 3,41:1 large text — and no small cream type on Laut, which would fail. Card lift is 3px with a shadow shift, removed under reduced motion; the index chips are ink on Senja at 4,56:1.',
   },
   {
     check: 'Font registered',
@@ -901,7 +934,7 @@ export const TOKENS_CSS = `:root {
 
 export const TOKENS_JSON = {
   name: 'Jakarta',
-  version: '1.0',
+  version: '1.1',
   claim: 'A city of junctions, not a city of monuments.',
   primitive: 46,
   semantic: 21,

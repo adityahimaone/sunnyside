@@ -56,13 +56,20 @@ explains itself is not a hero. The client's full text lives here:
 On the page the line is applied to the field, not set on it. The field is ten
 **hard-stop bands** — flat district colour, not a gradient — with the Semanggi
 junction plate masked at the reading edge and blended \`luminosity\`. The words live
-on one **tinted plate** that lets the bands through: one cream type colour, a 1px
-hairline, no accent cap, no offset. Cream on the worst band measures 5,20:1 at 0.55
-tint and 5,64:1 at 0.58 with backdrop blur. A continuous **ten-segment palette line**
-— solid segments, no gaps, no separators, leaning 6° at the field's angle — closes the
-surface above a clip-path tear. The mark is repeated behind the composition at 760px,
-so the stroke that turns the corner is the page's architecture. There is no eyebrow,
-because an eyebrow is a caption for a headline and this hero does not caption itself.
+on one **tinted plate**, 620px wide, that lets the bands through: one cream type
+colour, a 1px hairline, no offset. Cream on the worst band measures 5,20:1 at 0.55
+tint and 5,64:1 at 0.58 with backdrop blur. The headline is a caption, not a
+hoarding: **40px/600 at -0,028em**, two lines, one colour, above it a 10,5px eyebrow
+carrying *HUT ke–499 Kota Jakarta*. The old display does the shouting the field
+already does, so it went.
+
+The field is then **torn off**, not stopped. There is no second object under the
+hero: the photograph dissolves to nothing as the field reaches the floor, the last
+stretch is flat palette, and the hero's own bottom edge is cut on a tooth line of
+unequal width and unequal depth, so the page's paper shows through the tears. One
+surface, one edge — the band, the skew and the separate zigzag are gone, and the
+scrim releases at the floor so the colours being torn are the colours in the
+palette, not colours in shadow.
 
 ## 2. The mark
 
@@ -164,9 +171,13 @@ section of photographs is a portfolio, not a system.
 Four artifacts on a 12-column bento: a phone screen (4), the JakLingko card (8), a
 wayfinding panel (4) and a bus livery (8). Each sits on a 28px grid plate with a
 numbered caption and the three token roles it spends. The JakLingko card is drawn
-from scratch: a Laut field cut on the same diagonal as the hero, a Senja edge, a
-right-angle route drawing and the **outlined Jakarta lockup** (mark and wordmark as
-paths, not type). The wall folds to 1 + 2 at 1000px and to one column at 700px. Cards
+from scratch at ID-1 proportions (1,586:1): the ten-colour issuer ribbon along the
+top edge, the **outlined Jakarta lockup** at issuer size — 34 units of a 1000-unit
+card, which is 2,9mm on the real object — a chip, a contactless mark, the number in a
+tabular mono grouping and a foil disc on the paper; on the right, a Laut operator
+panel with the mark knocked out of it and one right-angle route. The operator word
+sits at 3,41:1 as 21px/800 — large text, which clears 3:1 — and no small cream type
+is set on Laut at all, because it would read 3,41 and fail. The wall folds to 1 + 2 at 1000px and to one column at 700px. Cards
 lift 3px and move their shadow; under \`prefers-reduced-motion\` the lift is removed and
 the still frame is the design.
 
@@ -200,8 +211,10 @@ ${SHIP_CONDITIONS.map((item) => `${item.n} **${item.title}** — ${item.body}`).
 
 - \`/brand/jakarta/mark.svg\`, \`mark-compact.svg\`, \`glyph.svg\`, \`wordmark.svg\`, \`lockup.svg\`
 - \`/brand/jakarta/jakarta-brandkit.png\` — the brand board, 1500 × 1125
+- \`/brand/jakarta/jaklingko-card.png\` — the ID-1 card, 1000 × 630, captured from the component
 - \`/brand/jakarta/photos/\` — five plates, WebP
 - \`/design-system/jakarta\` — the specimen page
+- \`design/brand/jakarta/brandkit.html\` — board source, rendered by \`scripts/render-board.mjs\`
 `
 
   return new Response(brand, {
