@@ -38,7 +38,7 @@ export function CaseLibraryPage() {
               Design engineering / Case library
             </span>
             <span className={layout.kickerText}>
-              Eleven systems, one method
+              Thirteen systems, one method
             </span>
             <span className={layout.kickerText}>
               <span className={layout.num}>{DESIGN_CASES.length}</span> cases
@@ -51,7 +51,7 @@ export function CaseLibraryPage() {
             label="Case files"
           />
 
-          <h1 className={layout.title}>Eleven systems, one paper trail.</h1>
+          <h1 className={layout.title}>Thirteen systems, one paper trail.</h1>
           <p className={styles.heroIntro}>
             <span className={styles.heroIntroLead}>
               A case is not a moodboard.

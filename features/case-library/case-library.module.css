@@ -165,6 +165,12 @@
   --case-accent: #f7481b;
 }
 
+/* Wildflower Wind's one accent, dried: the petal the wind took. 7.57:1 on the
+   stock, so it can carry the number and the rule, not just a tint. */
+.tone_wildflower {
+  --case-accent: #7c2a76;
+}
+
 /* Bluewater's daylight signal. The night wake (#8FB6D6) is a graphic, never
    text, so the card takes the darkened value the system actually ships. */
 .tone_bluewater {

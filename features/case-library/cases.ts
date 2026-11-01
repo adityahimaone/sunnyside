@@ -25,6 +25,7 @@ export type DesignCase = {
     | 'porphyry'
     | 'jakarta'
     | 'bluewater'
+    | 'wildflower'
 }
 
 /**
@@ -55,8 +56,24 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     tags: ['Paper', 'Cobalt', 'Marker', 'Stickers'],
     tone: 'sunnyside',
   },
-{
-    number: '12',
+  {
+    number: '13',
+    name: 'Wildflower Wind',
+    href: '/design-system/wildflower-wind',
+    tagline: 'A meadow, seen through a pane of glass.',
+    description:
+      'A seed house under glass: five translucent petals that multiply where they cross, so the darkest thing in the mark is the crossing and not a stroke. A haze ground, panes with one lit edge and a long shadow, nested radii, and a violet that is the cosmos refracted rather than the pink in the photograph. Fifteen contrast pairs recomputed from hex, with the two that fail published instead of fixed.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · mark family · docs',
+    material: 'Frosted glass + haze + one refracted violet',
+    cover: '/brand/wildflower-wind/wildflower-wind-brandkit.png',
+    coverAlt:
+      'The Wildflower Wind board: five translucent glass petals with one taken, the wordmark in Instrument Serif, nine swatches from haze to refracted violet, and two plates of the same meadow.',
+    tags: ['Glass', 'Seed house', 'Blur', 'Computed contrast'],
+    tone: 'wildflower',
+  },
+  {
+number: '12',
     name: 'Bluewater Freight',
     href: '/design-system/bluewater',
     tagline: 'The wake is the only bright thing.',

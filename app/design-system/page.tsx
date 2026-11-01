@@ -8,12 +8,12 @@ import { breadcrumbList, itemList, JsonLd } from '@/lib/structured-data'
 export const metadata: Metadata = {
   title: 'Design Systems — Case Library',
   description:
-    'Documented design systems: Sunnyside (paper and cobalt) opens the library, followed newest first by Jakarta (one stroke, nine district ramps, six published failures), Porphyry (porphyry stone, marble, gold leaf and one dark stage), Ledger (cool zinc, glass and one signal — a dashboard on shadcn/ui), Clearing (painted emerald, one pane of glass, a drawn stag on a horizon), Strand (quartz sand plates and a coastal vista), Cove (blue liquid glass and one reading plate), Hachure (survey paper and ordered dither), Riso Co. (a pinned sheet and two drums), Huginn Studio (cells, vermilion and ordered dither), and Vitrine (glass and dither). Briefs, marks, tokens and audits.',
+    'Documented design systems: Sunnyside (paper and cobalt) opens the library, followed newest first by Wildflower Wind (a seed house, one placement table and a petal already taken), Jakarta (one stroke, nine district ramps, six published failures), Porphyry (porphyry stone, marble, gold leaf and one dark stage), Ledger (cool zinc, glass and one signal — a dashboard on shadcn/ui), Clearing (painted emerald, one pane of glass, a drawn stag on a horizon), Strand (quartz sand plates and a coastal vista), Cove (blue liquid glass and one reading plate), Hachure (survey paper and ordered dither), Riso Co. (a pinned sheet and two drums), Huginn Studio (cells, vermilion and ordered dither), and Vitrine (glass and dither). Briefs, marks, tokens and audits.',
   alternates: { canonical: '/design-system' },
   openGraph: {
     title: 'Design Systems — Case Library | Aditya Himawan',
     description:
-      'Sunnyside, Jakarta, Porphyry, Ledger, Clearing, Strand, Cove, Hachure, Riso Co., Huginn Studio and Vitrine: distinct interface systems, one design-engineering method. Open the case files.',
+      'Sunnyside, Wildflower Wind, Jakarta, Porphyry, Ledger, Clearing, Strand, Cove, Hachure, Riso Co., Huginn Studio and Vitrine: distinct interface systems, one design-engineering method. Open the case files.',
     url: `${WEBSITE_URL}/design-system`,
     type: 'website',
     images: [
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Design Systems — Case Library | Aditya Himawan',
     description:
-      'Explore documented design systems: Sunnyside, Jakarta, Porphyry, Ledger, Clearing, Strand, Cove, Hachure, Riso Co., Huginn Studio and Vitrine.',
+      'Explore documented design systems: Sunnyside, Wildflower Wind, Jakarta, Porphyry, Ledger, Clearing, Strand, Cove, Hachure, Riso Co., Huginn Studio and Vitrine.',
     images: [
       {
         url: '/brand/vitrine/vitrine-brandkit.png',
