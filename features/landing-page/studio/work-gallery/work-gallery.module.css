@@ -1,6 +1,7 @@
-/* Selected work — a cutting mat with one shelf of pinned paper on it.
-   Cards sit on a single horizontal snap track, taped at their own angle, so the
-   board reads hand-pinned rather than like a slider. */
+/* Selected work — a cutting mat with paper taped to it.
+   Above the desktop split the mat holds a hand-placed wall: four columns, each
+   card dropped a little lower than its neighbour. Below it the same list becomes
+   one horizontal snap run, because four columns on a phone is a postage stamp. */
 
 .moodboard {
   --card: #faf4e8;
@@ -696,6 +697,14 @@
   color: #2b2117;
 }
 
+.hintNarrow {
+  display: inline;
+}
+
+.hintWide {
+  display: none;
+}
+
 .shelfNote {
   margin: 0;
   font-size: 0.62rem;
@@ -1057,6 +1066,44 @@
   }
 
   .shelfHint {
+    display: none;
+  }
+}
+
+/* ── desktop: the wall, not the shelf ─────────────────────────────────── */
+
+@media (min-width: 1024px) {
+  .track {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--wg-gap);
+    margin-inline: 0;
+    padding: 0.2rem 0;
+    overflow: visible;
+    scroll-snap-type: none;
+    scroll-padding-inline: 0;
+    cursor: default;
+  }
+
+  .piece {
+    /* Four across; the drop rides on the piece so a filter never re-deals it. */
+    grid-column: span 3;
+    height: 100%;
+    margin-top: var(--cell-drop, 0);
+  }
+
+  .pager,
+  .shelfBar,
+  .shelfFoot {
+    display: none;
+  }
+
+  .hintWide {
+    display: inline;
+  }
+
+  .hintNarrow {
     display: none;
   }
 }

@@ -31,13 +31,14 @@ import {
 import styles from './work-gallery.module.css'
 
 /**
- * The selected-work chapter is a cutting mat with one shelf on it.
+ * The selected-work chapter is a cutting mat with paper taped to it.
  *
- * Twelve pieces — six releases and the six most recent systems — are taped to
- * the board at their own angle and hung in a single horizontal run: one paper
- * tile per snap point, with the mat's gutter as the track's padding so the
- * board still reads edge to edge. Filters redraw the run, the arrows step one
- * tile, and a tap lifts the notes into a drawer.
+ * Twelve pieces — six releases and the six most recent systems — hang in a
+ * hand-placed wall: four columns, each card dropped a little lower than the
+ * last so the board reads pinned rather than gridded. Below the desktop split
+ * the same DOM becomes one horizontal snap run instead, because four columns of
+ * paper on a phone is a postage stamp; there the arrows step one tile at a time.
+ * Filters redraw the wall, and a tap lifts the notes into a drawer.
  */
 
 const TOTAL = GALLERY_ITEMS.length
@@ -49,6 +50,15 @@ const FILTERS = [
 ] as const
 
 type Filter = (typeof FILTERS)[number]['id']
+
+/** Hand-placed drop per piece, keyed off the id so a filter never re-deals it. */
+const CELL_DROP = [0, 1.6, 0.5, 2.1, 0.9, 2.6]
+
+const dropFor = (id: string) =>
+  CELL_DROP[
+    [...id].reduce((sum, char) => sum + char.charCodeAt(0), 0) %
+      CELL_DROP.length
+  ]
 
 /** Hand-placed tape per piece, assigned by position so it never re-deals. */
 const PIECE_META = (item: GalleryItem) => {
@@ -145,6 +155,7 @@ type PieceProps = {
   onStamp: (id: string) => void
   onOpen: (item: GalleryItem) => void
   onPan: (event: PointerEvent<HTMLElement>, reset?: boolean) => void
+  drop: number
 }
 
 function PaperPiece({
@@ -154,6 +165,7 @@ function PaperPiece({
   onStamp,
   onOpen,
   onPan,
+  drop,
 }: PieceProps) {
   const { tilt, tape } = PIECE_META(item)
 
@@ -165,7 +177,12 @@ function PaperPiece({
       data-stamped={stamped}
       data-picked={picked}
       data-piece
-      style={{ '--tilt': `${tilt}deg` } as CSSProperties}
+      style={
+        {
+          '--tilt': `${tilt}deg`,
+          '--cell-drop': `${drop}rem`,
+        } as CSSProperties
+      }
       onPointerMove={(event) => onPan(event)}
       onPointerLeave={(event) => onPan(event, true)}
       aria-labelledby={`${item.id}-piece-title`}
@@ -180,7 +197,7 @@ function PaperPiece({
         <span className={styles.panTarget} data-pan-target>
           <PieceMedia
             item={item}
-            sizes="(min-width: 1024px) 22rem, (min-width: 640px) 60vw, 78vw"
+            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 60vw, 78vw"
           />
         </span>
         <span className={styles.kindTag}>
@@ -465,9 +482,19 @@ export function WorkGallery({
                     Moodboard / cutting mat
                   </span>
                   <span className={styles.hudNote}>
-                    {complete
-                      ? 'Master crafter. Every piece on the shelf is stamped.'
-                      : 'Swipe the shelf, or use the arrows. Tap a piece for its notes.'}
+                    {complete ? (
+                      'Master crafter. Every piece on the mat is stamped.'
+                    ) : (
+                      <>
+                        <span className={styles.hintWide}>
+                          Twelve pieces taped to the mat. Tap one for its notes.
+                        </span>
+                        <span className={styles.hintNarrow}>
+                          Swipe the shelf, or use the arrows. Tap a piece for
+                          its notes.
+                        </span>
+                      </>
+                    )}
                   </span>
                 </span>
               </div>
@@ -561,7 +588,7 @@ export function WorkGallery({
                 dragging ? styles.trackDragging : ''
               }`}
               role="region"
-              aria-label={`Selected work. ${visible.length} pieces on one shelf. Scroll horizontally or use the arrows.`}
+              aria-label={`Selected work. ${visible.length} pieces on the board.`}
               tabIndex={0}
               onKeyDown={onKeyDown}
               onPointerDown={onPointerDown}
@@ -578,6 +605,7 @@ export function WorkGallery({
                   onStamp={toggle}
                   onOpen={setActive}
                   onPan={pan}
+                  drop={dropFor(item.id)}
                 />
               ))}
             </div>
