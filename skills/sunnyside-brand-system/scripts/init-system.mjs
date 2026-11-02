@@ -47,7 +47,7 @@ const mode = one('mode', 'light')
 const archetype = one('archetype', 'minimal')
 const conceptOpt = one('concept', '')
 const fieldOpt = one('field', '')
-const modulesRaw = one('modules', 'forms,tokens,audit')
+const modulesRaw = one('modules', 'forms,tokens')
 const modules = new Set(modulesRaw.split(',').map((m) => m.trim().toLowerCase()).filter(Boolean))
 const root = resolve(one('root', '.'))
 const dry = has('dry-run')
@@ -357,7 +357,7 @@ const sections = [
   ...(modules.has('forms') ? ['forms'] : []),
   ...(modules.has('apps') ? ['applications'] : []),
   'tokens',
-  'audit',
+  ...(modules.has('audit') ? ['audit'] : []),
 ]
 const oneSentence =
   essence || `${N} is a design system: [one material], [one ink], [one signal], and [the signature that only this brand has].`
@@ -1012,7 +1012,9 @@ export default function ${N.replace(/[^A-Za-z]/g, '')}Page() {
               </div>
             ))}
           </div>
-        </section>
+        </section>${
+          modules.has('audit')
+            ? `
 
         <section id="audit" className={styles.section}>
           <div className={styles.sectionHeader}>
@@ -1039,7 +1041,9 @@ export default function ${N.replace(/[^A-Za-z]/g, '')}Page() {
               ))}
             </tbody>
           </table>
-        </section>
+        </section>`
+            : ''
+        }
       </main>
 
       <footer className={styles.footer}>

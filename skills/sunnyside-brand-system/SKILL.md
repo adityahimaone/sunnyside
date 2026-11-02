@@ -35,37 +35,46 @@ Call `ask_question` with these structured questions (skipping any question the u
 {
   "questions": [
     {
-      "question": "Which track and palette archetype fits this system?",
+      "question": "1. Visual Style & Color System — What kind of brand track and color palette should we build?",
       "is_multi_select": false,
       "options": [
-        "(Recommended) Constructed + Minimal (5+1 palette, fill-only geometric mark)",
-        "Drawn + Minimal (5+1 palette, tactile cut-line mark & companion cast)",
-        "Multi-Ramp Civic / Wayfinding (named district or product-line ramps, like Jakarta)",
-        "UI Workbench Ramp (10–14 step neutral + signal ramp for dense apps, like Ledger)"
+        "(Recommended) Clean Geometric & Minimal — 6 core colors + sharp fill-only architectural logo (like Stripe, Linear, Porphyry)",
+        "Hand-Drawn & Warm — 6 core colors + tactile sticker/emblem logo with ink outline (like Sunnyside, Clearing)",
+        "Multi-Color Civic / Wayfinding — multiple color ramps for districts, transit lines, or sub-brands (like Jakarta)",
+        "Dense UI / Dashboard Scale — 14-step neutral & accent color ramps built for data-heavy apps (like Ledger)"
       ]
     },
     {
-      "question": "Which hero background or surface field should we generate?",
+      "question": "2. Hero Background & Texture — What kind of background surface should appear behind the hero?",
       "is_multi_select": false,
       "options": [
-        "(Recommended) Procedural SVG Field — Gradient Mesh or Stepped Bands (field-forge.mjs)",
-        "Procedural SVG Field — Paper Grain, Halftone or 4x4 Bayer Dither (field-forge.mjs)",
-        "Procedural SVG Field — Frosted Glass Pane or Survey Grid (field-forge.mjs)",
-        "Licensed Stock Photo + Token-Locked Duotone Scrim (assets.mjs + field-forge.mjs)",
-        "Solid Material Surface Only (no background asset)"
+        "(Recommended) Smooth Gradient Mesh or Stepped Color Bands — fast vector background generated from your palette",
+        "Paper Grain, Halftone Dots, or Retro Pixel Dither — tactile print or 4x4 Bayer matrix texture overlay",
+        "Frosted Glass Pane or Technical Blueprint Grid — translucent sea-glass card or architectural grid lines",
+        "Photography + Brand Duotone Filter — fetches a free licensed photo tinted to your brand colors",
+        "Clean Solid Surface Only — flat paper or stone background with no extra texture or background image"
       ]
     },
     {
-      "question": "Which optional deliverables and exports should we include beyond the core proof (Hero + Idea + Marks + Palette + Type & Foundations + Tokens + Static Audit)?",
+      "question": "3. Optional Sections & Exports — Beyond the core page (Hero, Story, Logo, Palette, Live Typography & Tokens), what else should we generate?",
       "is_multi_select": true,
       "options": [
-        "(Recommended) 6-Concept Logo Bake-Off (compare 6 mark families before locking)",
-        "(Recommended) Interactive Form Kit (inputs, error summary, focus & disabled states)",
-        "Mark Cast / Companion Illustrations (4–6 secondary marks via cast-forge.mjs)",
-        "Applications Wall (12-column bento of real-world artifacts)",
-        "Figma Plugin & .fig Export (figma-forge.mjs + figma-smoke.mjs)",
-        "DESIGN.md Export (agent-readable specification via design-md.mjs)",
-        "Browser QA Pass (headless 1440/390 overflow & 16px mark check via qa.mjs --quick)"
+        "(Recommended) Interactive Form Kit — live inputs, select menus, checkboxes, focus rings, and validation states",
+        "6-Logo Concept Bake-Off — preview 6 different logo ideas side-by-side before picking the winner",
+        "Companion Illustrations (Mark Cast) — 4 to 6 matching mini-icons/badges for callouts and empty states",
+        "Real-World Mockups (Applications Wall) — 12-column bento grid showing cards, badges, tickets, or UI in use",
+        "Figma Plugin & .fig File — export ready-to-import Figma variables, styles, and board",
+        "DESIGN.md Agent Spec — export a markdown design guide so AI coding agents follow your tokens"
+      ]
+    },
+    {
+      "question": "4. Audit, Static Gates & Browser E2E Testing — Do you want to skip testing for now to save API tokens?",
+      "is_multi_select": false,
+      "options": [
+        "(Recommended) Skip Audit & E2E Tests (Test Later) — fastest build, saves API tokens; skips audit section, static gates, and browser screenshots",
+        "Lightweight Static Check Only — runs fast <2s contrast & token math check (gates.mjs), skips browser E2E",
+        "On-Page Audit Table + Static Check — adds the verification section to the page and runs gates.mjs (no browser)",
+        "Full Audit + Headless Browser E2E QA — builds audit docs and runs Playwright 1440/390 & screenshot checks (uses more tokens)"
       ]
     }
   ]
@@ -74,12 +83,20 @@ Call `ask_question` with these structured questions (skipping any question the u
 
 ### Step 1–11 · Execution Pipeline (Run after `ask_question` is answered)
 
+> [!TIP]
+> **Token-Saving Default (`Skip Audit & E2E Tests`):**
+> When the user keeps the default `"Skip Audit & E2E Tests (Test Later)"` in Question 4:
+> - **Do NOT** pass `audit` or `qa` to `--modules` (`--modules forms,tokens` is the default).
+> - **Do NOT** run `gates.mjs`, `audit.mjs`, `qa.mjs`, `score-mark.py`, or headless browser E2E checks during the build.
+> - **Do NOT** generate `docs/<slug>-design-system-audit.md` or `docs/<slug>-qa.md`.
+> - At the end of your response, print a 2-line **"Run Audit / E2E Later"** command snippet so the user can trigger it on demand whenever they want.
+
 ```bash
 # 1 · pre-flight & scaffold using the user's selected flags from Step 0
 node scripts/init-system.mjs --slug <slug> --name "<Name>" --hue <n> \
   [--archetype minimal|multi-ramp|ui-ramp] [--concept <concept>] \
   [--field mesh|bands|grain|dither|glass|grid|all] \
-  [--modules forms,cast,apps,figma,design-md,qa] --peek
+  [--modules forms,tokens] --peek
 node scripts/brand-ref.mjs near --hue <n>            # who already owns this hue (needs network)
 ```
 
@@ -92,28 +109,26 @@ node scripts/brand-ref.mjs near --hue <n>            # who already owns this hue
 3. **Study the neighbours** (skip with no category). `brand-ref.mjs search <category>`, `pull`
    two or three, note their accent hue, display face and what they refuse; `ref` them for the
    gate. Study, never copy: `references/research.md`.
-4. **Draw six, keep one.** Run `node scripts/brand-forge.mjs --bakeoff features/<slug>/tokens.json --out public/brand/<slug>/bakeoff` (or hand-draw six concepts in one file), score with `python3 scripts/score-mark.py --dir public/brand/<slug>/bakeoff --track constructed|drawn`, and write why the other five lost; that paragraph becomes the guide.
-5. **Generate the family.** `node scripts/brand-forge.mjs --tokens features/<slug>/tokens.json --concept <winner> --out public/brand/<slug>` generates the full 12-file text-free SVG family (`mark.svg`, `mark-compact.svg`, `mark-compact-reverse.svg`, `glyph.svg`, `mark-reverse.svg`, `mark-mono.svg`, `icon.svg`, outlined `wordmark.svg` + `wordmark-reverse.svg`, `lockup.svg`, `lockup-reverse.svg`, `lockup-stacked.svg`, `lockup-stacked-reverse.svg`) plus `sheet.html` and `forms.html` in one pass. Across 22 built-in archetypes:
+4. **Draw six, keep one (only if `6-Logo Concept Bake-Off` was selected).** Run `node scripts/brand-forge.mjs --bakeoff features/<slug>/tokens.json --out public/brand/<slug>/bakeoff` (or go straight to Step 5 with the winning concept if bake-off was not selected).
+5. **Generate the family.** `node scripts/brand-forge.mjs --tokens features/<slug>/tokens.json --concept <winner> --out public/brand/<slug>` generates the full 13-file text-free SVG family (`mark.svg`, `mark-compact.svg`, `mark-compact-reverse.svg`, `glyph.svg`, `mark-reverse.svg`, `mark-mono.svg`, `icon.svg`, outlined `wordmark.svg` + `wordmark-reverse.svg`, `lockup.svg`, `lockup-reverse.svg`, `lockup-stacked.svg`, `lockup-stacked-reverse.svg`) plus `sheet.html` and `forms.html` in one pass. Across 22 built-in archetypes:
    - **Constructed (11):** `bracket`, `planes`, `louvers`, `ribbon`, `horizon`, `junction`, `carved`, `cells`, `tear`, `portal`, `archmono` (solid filled A–Z monogram).
    - **Drawn (11):** `sunburst`, `aperture`, `orbit`, `hatch`, `stack`, `facet`, `dotmatrix`, `lines`, `overprint`, `nodes`, `monogram`, `crest`.
    Pass `--wordmark <custom.svg>` if outlined from a specific `.ttf` via `extract-wordmark.py`; otherwise `brand-forge.mjs` synthesizes a pure-`<path>` geometric outlined wordmark automatically (never `<text>`).
-6. **Write the tokens, then run the gates.** One source, three layers, two surfaces, never a
-   mode-prefixed primitive. Then `node scripts/gates.mjs --slug <slug> --refs refs/`. The cheap
-   failures (a font never loaded, a contrast pair never computed) surface here, before the board,
-   page and export are built on top of them.
+6. **Write the tokens.** One source, three layers, two surfaces, never a mode-prefixed primitive.
+   *(Only run `node scripts/gates.mjs --slug <slug>` here if the user opted into Static Check or Full Audit in Question 4; otherwise skip to Step 7.)*
 7. **Build the board & optional background fields.** 1500 × 1125 board, local fonts, rendered at 2×. If the page needs a hero field, gradient mesh, stepped bands, grain, Bayer dither, glass pane or grid, run `node scripts/field-forge.mjs --slug <slug> --recipe <mesh|bands|grain|dither|glass|grid|all>` to generate token-locked SVGs and `<slug>-field.css` (with `.fieldScrim`, `.readingPlate`, and `.photoDuotone`).
 8. **Build the proof page, with its marks section.** Hero, contents, the sections the system
-   needs, tokens, audit; a logo card, wordmark scale, cast drawer and one usage rule. A row of
+   needs, and multi-format tokens (plus the `audit` section **only** if opted in via Question 4); a logo card, wordmark scale, cast drawer and one usage rule. A row of
    equal logo tiles is not a mark system. Need a photograph? `assets.mjs`, imagery only. The page
-   must prove five jobs (see *What the page proves*); the ids and order are the case's own.
-9. **Export (when selected in Step 1).** `figma-forge.mjs` (plugin + `.fig`) and `design-md.mjs`
+   must prove its core jobs (see *What the page proves*); the ids and order are the case's own.
+9. **Export (only when selected in Question 3).** `figma-forge.mjs` (plugin + `.fig`) and `design-md.mjs`
    (`DESIGN.md`), both from the tokens, both regenerated, never edited.
-10. **Tiered audit pipeline.**
-    - **Tier 1 (Mandatory, <2s, 0 browser tokens):** `node scripts/gates.mjs --slug <slug>`.
-    - **Tier 2 (Optional, when `Browser QA` is selected):** `node scripts/qa.mjs --quick` for
-      1440/390 overflow, mark at 16px, and reduced motion without full-page screenshot bloat.
-    - **Tier 3 (On explicit request only):** full `qa.mjs --sections` with full-page captures.
-11. **Name the gaps.** A guide that hides its gaps is a brochure.
+10. **Optional Audit & E2E Pipeline (Skipped by default to save API tokens).**
+    - **Default (`Skip Audit & E2E Tests`):** Skip all audit scripts and browser runs. Output the command so the user can run it later:
+      `node skills/sunnyside-brand-system/scripts/gates.mjs --slug <slug>`
+    - **When `Lightweight Static Check` is selected:** Run `node scripts/gates.mjs --slug <slug>` (<2s, 0 browser tokens).
+    - **When `Full Audit + Headless Browser E2E QA` is selected:** Run `gates.mjs` + `node scripts/qa.mjs --quick` (or `--sections` on explicit request).
+11. **Name the gaps (only when Audit is enabled).** When Audit is enabled, record *Fails*, *Not verified*, and *Known gap*.
 
 ## The gates
 

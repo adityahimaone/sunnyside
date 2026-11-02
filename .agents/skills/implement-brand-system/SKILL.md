@@ -71,19 +71,23 @@ palette is a different brand.
 ## Choose the target (`ask_question` — Mandatory when not specified)
 
 > [!IMPORTANT]
-> If the target format or optional page sections are not explicitly specified in the user's prompt, call the **`ask_question` tool** (never plain text) before writing code and wait for the user's answer:
-> - **Question 1 (`is_multi_select: false`)**: `"Which implementation target should we build?"`
->   - `"(Recommended) Product Route (TSX — Next.js server page + small client islands)"`
->   - `"System Specimen (HTML — standalone design-system.html)"`
->   - `"Simple Mockup (HTML — single-page.html rendered at 2x)"`
->   - `"Pen Canvas (.pen source + code tokens)"`
-> - **Question 2 (`is_multi_select: true`)**: `"Which interactive modules should we include on the page?"`
->   - `"(Recommended) Live Type Scale & Physical Foundations (spacing, radius, elevation, motion track)"`
->   - `"(Recommended) Multi-Format Token Exports (CSS Variables, Tailwind v4 @theme, shadcn/Radix)"`
->   - `"(Recommended) Interactive Form Kit (inputs, validation, error summary, focus & disabled states)"`
->   - `"Hero Background Field / Scrim (procedural SVG field or duotone photo plate)"`
->   - `"Applications Wall (12-column bento of real-world artifacts)"`
->   - `"Mark Cast Drawer (companion illustrations & usage rules)"`
+> If the target format, optional page sections, or audit/E2E preference are not explicitly specified in the user's prompt, call the **`ask_question` tool** (never plain text) before writing code and wait for the user's answer:
+> - **Question 1 (`is_multi_select: false`)**: `"1. Implementation Target — What kind of page or surface should we build?"`
+>   - `"(Recommended) Next.js Product Route (TSX) — full design-system page inside the app with theme toggle & copyable tokens"`
+>   - `"Standalone HTML Specimen — self-contained design-system.html file with zero build step"`
+>   - `"Single-Page Mockup (HTML) — compact single-page proof rendered at 2x"`
+>   - `"Pen Canvas (.pen) — editable pen.dev design board + synced code tokens"`
+> - **Question 2 (`is_multi_select: true`)**: `"2. Page Sections & Modules — Which interactive modules should we include on the page?"`
+>   - `"(Recommended) Live Type Scale & Physical Foundations — visual font specimens, spacing bars, radius chips, shadows & motion track"`
+>   - `"(Recommended) Multi-Format Token Exports — copyable CSS Variables, Tailwind v4 @theme, and shadcn/Radix bridge"`
+>   - `"(Recommended) Interactive Form Kit — live inputs, select menus, checkboxes, focus rings, and validation states"`
+>   - `"Hero Background Field / Scrim — procedural vector mesh/bands/grain/dither background or duotone photo plate"`
+>   - `"Real-World Mockups (Applications Wall) — 12-column bento grid showing cards, badges, tickets, or UI in use"`
+>   - `"Companion Illustrations (Mark Cast) — drawer of 4 to 6 secondary brand marks and usage rules"`
+> - **Question 3 (`is_multi_select: false`)**: `"3. Audit & Browser E2E Testing — Do you want to skip audit and E2E tests for now to save API tokens?"`
+>   - `"(Recommended) Skip Audit & E2E Tests (Test Later) — fastest build, saves API tokens; skips audit section, static gates, and browser screenshots"`
+>   - `"Lightweight Static Check Only — runs fast <2s contrast & token math check (gates.mjs), skips browser E2E"`
+>   - `"Full Audit + Headless Browser E2E QA — builds audit docs and runs Playwright 1440/390 & screenshot checks (uses more tokens)"`
 
 | Target | Use when | Rules |
 | --- | --- | --- |
@@ -286,13 +290,14 @@ Routes — only if the host has a router:
 Read `sunnyside-brand-system/references/workspace-contexts.md` for the full
 context matrix.
 
-QA (run from the brand skill folder, or copy `scripts/` into the project):
+Optional QA (skipped by default when `"Skip Audit & E2E Tests (Test Later)"` is chosen to save API tokens; run only when requested, or print these commands for the user to run later):
 
 ```bash
+node <path-to-sunnyside-brand-system>/scripts/gates.mjs --slug <slug>
 node <path-to-sunnyside-brand-system>/scripts/audit.mjs --manifest audit.json
 node <path-to-sunnyside-brand-system>/scripts/qa.mjs \
   --url <the surface URL or file:// path> \
-  --out docs/screenshots --name <slug>
+  --out docs/screenshots --name <slug> --quick
 ```
 
 Review in this order: **accessibility → layout → writing → typography → colour →
