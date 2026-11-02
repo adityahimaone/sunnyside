@@ -434,16 +434,16 @@
 /* Sunrise: the cobalt sky is the page's one loud field. The three variables
    below place the sun, and the paper ground it rises from, for the scene. */
 .hero {
-  --sun-size: clamp(15rem, min(44vw, 68vh), 38rem);
-  --sun-x: 73%;
-  --ground: clamp(5rem, 13vh, 8.5rem);
-  /* How far the sun's centre sits above the ground line, in sun-diameters.
-     0.28 buried two thirds of the disc; 0.8 lifts the whole face and rays
-     clear of the paper. */
-  --sun-lift: 0.8;
-  /* Where the sticker cluster sits. The items are frozen at this lift, so
-     raising the sun does not drag the stickers off the headline. */
-  --items-lift: 0.47;
+  /* The sun is centred now and the type crosses it, so it is sized to the
+     lower half of the stage rather than to the sky. */
+  --sun-size: clamp(15rem, min(46vw, 62vh), 38rem);
+  --sun-x: 50%;
+  --ground: clamp(2.6rem, 5.2vh, 3.6rem);
+  /* The disc drops behind the cobalt hill: two thirds of it clears the crest,
+     the rest is buried, so the hill reads as being in front of it. */
+  --sun-lift: 0.62;
+  /* Where the sticker cluster sits, frozen at this lift. */
+  --items-lift: 0.62;
   /* Distance from the hero's bottom edge to the top of the disc. */
   --sun-top: calc(var(--sun-lift) + 0.5);
 
@@ -451,8 +451,7 @@
   display: flex;
   min-height: max(100svh, 40rem);
   flex-direction: column;
-  justify-content: center;
-  padding-block: clamp(6.5rem, 9vw, 8rem) calc(var(--ground) + 2rem);
+  padding-block: clamp(4.6rem, 5.4vw, 5.6rem) calc(var(--ground) + 1.5rem);
   isolation: isolate;
   background: var(--cobalt);
   color: var(--paper);
@@ -462,53 +461,75 @@
   outline-color: var(--butter);
 }
 
-.heroGrid {
+.heroStage {
   position: relative;
   z-index: 2;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(0.8rem, 1.6vw, 1.4rem);
 }
 
-.heroCopy {
-  max-width: min(100%, 44rem);
-}
-
-.nameTag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.32rem 0.62rem;
+/* Live pointer readout. Decorative but honest: it prints the last drag. */
+.heroTelemetry {
+  align-self: center;
+  margin-top: -0.35rem;
+  padding: 0.24rem 0.7rem;
   border: 1.5px solid var(--ink);
-  border-radius: 6px;
-  background: #ff5a1f;
+  border-radius: 999px;
+  background: var(--paper-hi);
   color: var(--ink);
   font-family: var(--font-geist-mono), monospace;
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.08em;
   box-shadow: 3px 3px 0 var(--ink);
 }
 
-.heroEyebrow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--paper);
+.heroCanopy {
+  position: relative;
+  margin-top: clamp(0.2rem, 1.4vw, 1.2rem);
+  text-align: center;
 }
 
-/* The title is cut from the same cardboard as the sun: paper face, a stepped
-   ink edge to the lower right, the way every sticker here is lit. */
-.heroTitle {
-  margin-top: 1.15rem;
-  max-width: 100%;
+/* The name tag is pinned to the first letter and can be peeled off. */
+.heroSticker {
+  position: absolute;
+  z-index: 4;
+  left: 2%;
+  top: -0.6em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 0.4rem;
+  background: #ff5a1f;
+  color: var(--ink);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: clamp(8px, 0.72vw, 10px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(-8deg);
+  box-shadow: 4px 4px 0 var(--ink);
+  cursor: grab;
+  touch-action: none;
+}
+
+.heroSticker:active {
+  cursor: grabbing;
+}
+
+/* Cut from the same cardboard as the sun: paper face, stepped ink edge. */
+.heroDisplay {
+  margin: 0;
   font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
   font-size: clamp(2.8rem, 10.5vw, 4.4rem);
   font-weight: 800;
   line-height: 0.9;
   letter-spacing: -0.058em;
+  text-transform: uppercase;
   color: var(--paper-hi);
   text-shadow:
     1px 1px 0 var(--ink),
@@ -519,8 +540,8 @@
 }
 
 @media (min-width: 1024px) {
-  .heroTitle {
-    font-size: clamp(4rem, 6.4vw, 6.6rem);
+  .heroDisplay {
+    font-size: clamp(4rem, 8vw, 7.2rem);
     text-shadow:
       1px 1px 0 var(--ink),
       2px 2px 0 var(--ink),
@@ -532,40 +553,45 @@
   }
 }
 
-.pulseWord {
-  position: relative;
-  display: inline-block;
-  color: var(--butter);
+/* Lower band: dock left, worked word right. */
+.heroLower {
+  display: grid;
+  grid-template-columns: minmax(0, 20.5rem) minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(1rem, 3vw, 3rem);
+  margin-top: auto;
+  padding-bottom: clamp(0.4rem, 1.6vw, 1.4rem);
 }
 
-.pulseWord::after {
-  content: '';
-  position: absolute;
-  inset: 6% -0.16em -2%;
-  border: 3px solid var(--tangerine);
-  border-radius: 50%;
-  transform: rotate(-3deg);
-  pointer-events: none;
-  animation: pulse-ring 1.15s var(--ease-out) 1.45s both;
+.heroDock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.1rem 1.2rem 1rem;
+  border: 2px solid rgb(255 250 241 / 0.38);
+  border-radius: 1.3rem;
+  background: rgb(255 250 241 / 0.12);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  backdrop-filter: blur(14px) saturate(1.25);
+  box-shadow: 0 18px 44px rgb(9 14 32 / 0.34);
 }
 
-@keyframes pulse-ring {
-  from {
-    transform: rotate(-13deg) scale(0.76);
-    opacity: 0;
-  }
-
-  to {
-    transform: rotate(-3deg) scale(1);
-    opacity: 1;
-  }
+.heroDockHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper);
 }
 
 .heroLede {
-  margin-top: 1.5rem;
-  max-width: 47ch;
-  font-size: clamp(0.98rem, 1.2vw, 1.08rem);
-  line-height: 1.7;
+  max-width: 34ch;
+  font-size: clamp(0.9rem, 1vw, 0.98rem);
+  line-height: 1.62;
   color: var(--paper);
   text-wrap: pretty;
 }
@@ -575,26 +601,60 @@
   font-weight: 650;
 }
 
+.ghostLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-bottom: 2px solid var(--tangerine);
+  background: none;
+  color: var(--paper-hi);
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    color 0.18s var(--ease-out),
+    border-color 0.18s var(--ease-out);
+}
+
+.ghostLink:hover,
+.ghostLink:focus-visible {
+  color: var(--butter);
+  border-color: var(--butter);
+}
+
+.ghostLink svg {
+  transition: transform 0.18s var(--ease-out);
+}
+
+.ghostLink:hover svg {
+  transform: translate(2px, -2px);
+}
+
 .heroActions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem 1.35rem;
-  margin-top: 1.9rem;
+  gap: 0.6rem;
+  margin-top: 0.15rem;
 }
 
 .primaryBtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  min-height: 3rem;
-  padding: 0.7rem 1.2rem;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
   border: 1.5px solid var(--ink);
   border-radius: 999px;
   background: var(--cobalt);
-  color: var(--paper-hi);
-  font-size: 0.92rem;
-  font-weight: 600;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 650;
   box-shadow: 4px 4px 0 var(--ink);
   transition:
     transform 0.18s var(--ease-out),
@@ -604,7 +664,7 @@
 
 .primaryBtn:hover {
   transform: translate(-2px, -2px);
-  background: var(--cobalt-ink);
+  background: var(--paper-hi);
   box-shadow: 6px 6px 0 var(--ink);
 }
 
@@ -621,93 +681,187 @@
   transform: translate(2px, -2px);
 }
 
-/* On the sky the primary action is the butter tape, not another cobalt. */
+/* On the sky the primary action is the butter tape. */
 .hero .primaryBtn {
   background: var(--butter);
-  color: var(--ink);
 }
 
 .hero .primaryBtn:hover {
   background: var(--paper-hi);
 }
 
-.ghostLink {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 2.75rem;
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.hero .ghostLink {
-  color: var(--paper-hi);
-}
-
-.ghostLink::after {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0.55rem;
-  height: 2px;
-  background: var(--tangerine);
-  transform: scaleX(0.35);
-  transform-origin: 0 50%;
-  transition: transform 0.28s var(--ease-out);
-}
-
-.ghostLink:hover::after {
-  transform: scaleX(1);
-}
-
-.heroStats {
+.heroFacts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-  max-width: 28rem;
-  margin-top: 2.4rem;
-  padding-top: 1.2rem;
-  border-top: 1.5px solid rgb(255 250 241 / 0.4);
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+  padding-top: 0.7rem;
+  border-top: 1.5px solid rgb(255 250 241 / 0.35);
 }
 
-.heroStat b {
+.heroFact b {
   display: block;
   font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(1.5rem, 2.3vw, 2rem);
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
   line-height: 1;
   letter-spacing: -0.04em;
   color: var(--paper-hi);
 }
 
-.heroStat span {
+.heroFact span {
   display: block;
-  margin-top: 0.35rem;
+  margin-top: 0.25rem;
   font-family: var(--font-geist-mono), monospace;
-  font-size: 9px;
-  line-height: 1.35;
-  letter-spacing: 0.12em;
+  font-size: 8px;
+  line-height: 1.3;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--paper);
 }
 
-.heroScroll {
-  display: inline-flex;
+/* Right column: the second half of the headline, framed as a selection. */
+.heroPulseBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  justify-self: end;
+}
+
+.heroWithRow {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.65rem;
-  margin-top: clamp(1.6rem, 4vw, 2.6rem);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--paper);
+  justify-content: flex-end;
+  gap: 0.55rem 0.8rem;
 }
 
-.heroScroll svg {
-  width: 1.1rem;
+.heroWithA {
+  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  font-size: clamp(1.35rem, 3.1vw, 2.9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--paper-hi);
+  text-shadow:
+    1px 1px 0 var(--ink),
+    2px 2px 0 var(--ink),
+    3px 3px 0 var(--ink),
+    4px 4px 0 var(--ink);
+}
+
+.heroChip {
+  padding: 0.24rem 0.55rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper-hi);
+  color: var(--ink);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+/* A frame you can shove: dashed rule, eight grips, one orange loop. */
+.heroPulseBox {
+  position: relative;
+  margin-top: 0.3rem;
+  padding: 0.15rem 0.5rem 0.35rem;
+  border: 1px dashed rgb(255 250 241 / 0.6);
+  cursor: grab;
+  touch-action: none;
+}
+
+.heroPulseBox:active {
+  cursor: grabbing;
+}
+
+.heroPulse {
+  position: relative;
+  z-index: 1;
+  display: block;
+  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  font-size: clamp(2.4rem, 7.2vw, 7rem);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.052em;
+  text-transform: uppercase;
   color: var(--butter);
-  animation: nudge 2.4s ease-in-out infinite;
+  text-shadow:
+    1px 1px 0 var(--ink),
+    2px 2px 0 var(--ink),
+    3px 3px 0 var(--ink),
+    4px 4px 0 var(--ink),
+    5px 5px 0 var(--ink),
+    6px 6px 0 var(--ink),
+    7px 7px 0 var(--ink);
+}
+
+.heroPulseDot {
+  color: var(--paper-hi);
+}
+
+.heroScribble {
+  position: absolute;
+  inset: -32% -12% -34% -12%;
+  z-index: 0;
+  width: 124%;
+  height: 166%;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+.heroHandle {
+  position: absolute;
+  z-index: 2;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--ink);
+  background: #fff;
+  pointer-events: none;
+}
+
+.heroHandle[data-handle='tl'] {
+  left: -5px;
+  top: -5px;
+}
+
+.heroHandle[data-handle='tc'] {
+  left: calc(50% - 4.5px);
+  top: -5px;
+}
+
+.heroHandle[data-handle='tr'] {
+  right: -5px;
+  top: -5px;
+}
+
+.heroHandle[data-handle='ml'] {
+  left: -5px;
+  top: calc(50% - 4.5px);
+}
+
+.heroHandle[data-handle='mr'] {
+  right: -5px;
+  top: calc(50% - 4.5px);
+}
+
+.heroHandle[data-handle='bl'] {
+  left: -5px;
+  bottom: -5px;
+}
+
+.heroHandle[data-handle='bc'] {
+  left: calc(50% - 4.5px);
+  bottom: -5px;
+}
+
+.heroHandle[data-handle='br'] {
+  right: -5px;
+  bottom: -5px;
 }
 
 .tape {
@@ -720,21 +874,64 @@
   clip-path: polygon(2% 0, 100% 4%, 98% 100%, 0 94%);
 }
 
-/* Below the desktop split the sun sits under the copy, centred on the ground,
-   and the section reserves room for it. */
+/* Below the desktop split there is no room to cross the type over the sun, so
+   the disc drops to the horizon and the stage stacks: canopy, dock, word. */
 @media (max-width: 1023px) {
   .hero {
-    --sun-size: min(78vw, 21rem);
-    --sun-x: 50%;
-    /* Under the desktop split the cluster should ride with the sun. */
+    --sun-size: min(70vw, 18rem);
+    /* Same horizon rule as desktop: the hill is in front of the disc, so the
+       lift clears the taller hill instead of resting on the paper line. */
+    --sun-lift: 0.72;
     --items-lift: var(--sun-lift);
     padding-bottom: calc(
-      var(--ground) + var(--sun-size) * var(--sun-top) + 1.5rem
+      var(--ground) + var(--sun-size) * var(--sun-top) + 1rem
     );
   }
 
-  .heroScroll {
+  .heroLower {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.6rem;
+  }
+
+  .heroPulseBlock {
+    align-items: flex-start;
+    justify-self: stretch;
+  }
+
+  .heroWithRow {
+    justify-content: flex-start;
+    gap: 0.5rem 0.9rem;
+  }
+
+  .heroChip {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+  }
+
+  .heroSticker {
+    left: 0;
+    top: -1.5em;
+  }
+}
+
+@media (max-width: 639px) {
+  .heroTelemetry {
     display: none;
+  }
+
+  .heroSticker {
+    position: static;
+    display: inline-flex;
+    margin-bottom: 0.7rem;
+    transform: rotate(-4deg);
+  }
+
+  .heroCanopy {
+    text-align: left;
+  }
+
+  .heroDisplay {
+    text-align: left;
   }
 }
 
@@ -2612,7 +2809,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .heroScroll svg,
   .marquee,
   .skillAtom {
     animation: none !important;
@@ -2666,10 +2862,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pulseWord::after {
-    animation: none;
-  }
-
   .skillCard:hover {
     transform: none;
   }

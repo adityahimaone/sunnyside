@@ -98,29 +98,34 @@ type Placed = {
   y: number
 }
 
+/* Custom properties are written as strings: React serialises a number to the
+   attribute on the server and keeps it a number on the client, which trips the
+   hydration check on every scene layer. */
 const at = ({ x, y }: Placed, extra?: CSSProperties) =>
-  ({ '--ox': x, '--oy': y, ...extra }) as CSSProperties
+  ({ '--ox': String(x), '--oy': String(y), ...extra }) as CSSProperties
 
+/* On desktop the clouds hold the outer margins: the display line runs nearly
+   edge to edge, so anything near the centre lands on the type. */
 const CLOUDS = [
   {
     place: { x: -0.58, y: -0.82 },
-    sky: { x: '38%', y: '11vh' },
+    sky: { x: '3%', y: '27vh' },
     depth: 0.7,
-    scale: 0.8,
+    scale: 0.72,
     delay: 0.55,
   },
   {
     place: { x: 0.34, y: -0.98 },
-    sky: { x: '80%', y: '12vh' },
+    sky: { x: '86%', y: '13vh' },
     depth: 1.1,
-    scale: 1,
+    scale: 0.86,
     delay: 0.7,
   },
   {
     place: { x: 0.74, y: -0.5 },
-    sky: { x: '86%', y: '32vh' },
+    sky: { x: '88%', y: '56vh' },
     depth: 1.5,
-    scale: 0.7,
+    scale: 0.62,
     delay: 0.85,
   },
 ] as const
@@ -164,8 +169,8 @@ export function HeroScene() {
           data-depth={cloud.depth}
           style={
             {
-              '--ox': cloud.place.x,
-              '--oy': cloud.place.y,
+              '--ox': String(cloud.place.x),
+              '--oy': String(cloud.place.y),
               '--cx': cloud.sky.x,
               '--cy': cloud.sky.y,
             } as CSSProperties
@@ -175,7 +180,7 @@ export function HeroScene() {
             className={styles.cloud}
             style={
               {
-                '--s': cloud.scale,
+                '--s': String(cloud.scale),
                 '--delay': `${cloud.delay}s`,
               } as CSSProperties
             }
@@ -184,10 +189,6 @@ export function HeroScene() {
           </div>
         </div>
       ))}
-
-      <div className={styles.farHill} data-depth="0.35">
-        <Hills />
-      </div>
 
       <div className={styles.anchor}>
         <div className={styles.sunLift} data-sun-lift>
@@ -230,7 +231,7 @@ export function HeroScene() {
 
         <StickerSlot
           id="smiley"
-          place={{ x: -0.44, y: -0.55 }}
+          place={{ x: -0.84, y: -0.25 }}
           depth={1.9}
           delay={1.0}
         >
@@ -238,7 +239,7 @@ export function HeroScene() {
         </StickerSlot>
         <StickerSlot
           id="burst"
-          place={{ x: 0.52, y: -0.6 }}
+          place={{ x: 1.08, y: -0.68 }}
           depth={2.3}
           delay={1.12}
         >
@@ -246,7 +247,7 @@ export function HeroScene() {
         </StickerSlot>
         <StickerSlot
           id="daisy"
-          place={{ x: 0.66, y: 0.06 }}
+          place={{ x: 0.9, y: -0.2 }}
           depth={2.0}
           delay={1.24}
         >
@@ -254,12 +255,16 @@ export function HeroScene() {
         </StickerSlot>
         <StickerSlot
           id="bolt"
-          place={{ x: -0.5, y: 0.14 }}
+          place={{ x: -1.15, y: 0.4 }}
           depth={2.6}
           delay={1.36}
         >
           <Bolt />
         </StickerSlot>
+      </div>
+
+      <div className={styles.farHill} data-depth="0.35">
+        <Hills />
       </div>
 
       <div className={styles.ground}>

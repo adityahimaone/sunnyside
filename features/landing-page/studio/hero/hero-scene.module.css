@@ -84,8 +84,8 @@
 .farHill {
   position: absolute;
   inset-inline: -3%;
-  bottom: calc(var(--ground) - 8px);
-  height: calc(var(--ground) * 1.9);
+  bottom: calc(var(--ground) - 6px);
+  height: clamp(6rem, 20vh, 11rem);
 }
 
 .ground {
@@ -188,7 +188,7 @@
 
 .item {
   position: absolute;
-  left: calc(var(--sun-size) * var(--ox));
+  left: calc(var(--sun-size) * var(--ox) * var(--kx, 1));
   /* The cluster is offset by the difference between the sun's current lift and
      the lift it was composed at, so it keeps its place over the copy. */
   top: calc(
@@ -212,7 +212,7 @@
 
 @media (max-width: 1023px) {
   .cloudSlot {
-    left: calc(var(--sun-x) + var(--sun-size) * var(--ox));
+    left: calc(var(--sun-x) + var(--sun-size) * var(--ox) * var(--kx, 1));
     top: calc(
       100% - var(--ground) - var(--sun-size) * var(--sun-lift) +
         var(--sun-size) * var(--oy) * var(--ky, 1)
@@ -375,15 +375,27 @@
 
 /* Below the desktop split the sun sits under the copy, so the cluster around
    it is squashed toward the sun rather than reaching up into the text. */
-@media (max-width: 1023px) {
+/* The spread is wider than a laptop, so the outer marks fold in before they
+   clip instead of at the phone breakpoint. */
+@media (max-width: 1199px) {
   .scene {
-    --ky: 0.42;
+    --kx: 0.72;
   }
 }
 
+@media (max-width: 1023px) {
+  .scene {
+    --ky: 0.42;
+    --kx: 0.5;
+  }
+}
+
+/* A centred sun with a wide word on top leaves no room right of the disc on a
+   phone, so the two furthest marks step out with the sparkles. */
 @media (max-width: 639px) {
   .sparkle,
-  .sparkPaper {
+  .sparkPaper,
+  .sticker[data-slot='daisy'] {
     display: none;
   }
 }
