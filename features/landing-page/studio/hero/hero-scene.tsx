@@ -167,6 +167,7 @@ export function HeroScene() {
           key={i}
           className={styles.cloudSlot}
           data-depth={cloud.depth}
+          data-cloud={i}
           style={
             {
               '--ox': String(cloud.place.x),

@@ -401,6 +401,55 @@
 
 /* A centred sun with a wide word on top leaves no room right of the disc on a
    phone, so the two furthest marks step out with the sparkles. */
+/* On a phone the disc, the word and the card fill the column, so the marks are
+   spread over the cobalt around them instead of sitting on the disc. `.item`
+   resolves against the zero-size anchor at the sun's centre, so these are
+   distances from that centre in rem: they keep their ring position as the phone
+   grows and never land on the card or the section below. */
+@media (max-width: 639px) {
+  /* `.item` resolves against the zero-size anchor at the sun's centre, so these
+     are distances from that centre. Two marks flank the disc on each side —
+     the only bands a phone can never fill with type, above the card and below
+     the word — so nothing lands on copy however tall the viewport gets. */
+  .item:has([data-slot='smiley']) {
+    left: -9.6rem;
+    top: -4.6rem;
+  }
+
+  .item:has([data-slot='bolt']) {
+    left: -9.6rem;
+    top: -1rem;
+  }
+
+  .item:has([data-slot='burst']) {
+    left: 9.5rem;
+    top: -4.6rem;
+  }
+
+  .item:has([data-slot='daisy']) {
+    display: block;
+    left: 9.5rem;
+    top: -1rem;
+  }
+
+  /* Clouds live on the scene box, not the sun's anchor, so they take the free
+     gutters either side of the disc and the band above the card. */
+  .cloudSlot[data-cloud='0'] {
+    left: 28%;
+    top: 21%;
+  }
+
+  .cloudSlot[data-cloud='1'] {
+    left: -6%;
+    top: 47%;
+  }
+
+  .cloudSlot[data-cloud='2'] {
+    left: 84%;
+    top: 46%;
+  }
+}
+
 @media (max-width: 639px) {
   .sparkle,
   .sparkPaper,

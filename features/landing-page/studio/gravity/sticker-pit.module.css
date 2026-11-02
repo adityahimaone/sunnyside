@@ -9,7 +9,10 @@
 
 .pit {
   position: relative;
+  /* Taller on a phone: the marks shrink with the tray, but the liner still has
+     to hold four rows without the outlines touching. */
   height: clamp(13.5rem, 25vw, 17.5rem);
+  min-height: clamp(17rem, 62vw, 21rem);
   border: 2px solid var(--ink);
   border-radius: 20px;
   background-color: var(--paper-lo);
@@ -35,7 +38,7 @@
   position: absolute;
   left: var(--x);
   top: var(--y);
-  width: calc(var(--size) * 0.92);
+  width: calc(var(--size) * 0.92 * var(--pit-scale, 1));
   aspect-ratio: 1;
   border: 1.5px dashed rgb(25 26 46 / 0.28);
   border-radius: 50%;

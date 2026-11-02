@@ -68,6 +68,10 @@ export function runPit(pit: HTMLElement): PitRuntime {
        hold the marks near full size, so they crowded each other and out-shouted
        the copy; it now tracks the hero's die-cuts, which shrink the same way. */
     const scale = Math.min(1, Math.max(0.44, world.width / 980))
+    /* The dashed outlines are drawn by CSS from the same nominal size, so they
+       have to follow the shrink or the liner fills with rings wider than the
+       stickers that land in them. */
+    pit.style.setProperty('--pit-scale', String(scale))
     for (const item of items) {
       item.size = item.spec.size * scale
       item.body.r = item.size * HIT

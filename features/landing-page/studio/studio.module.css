@@ -529,7 +529,9 @@
 .heroDisplay {
   margin: 0;
   font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(2.2rem, 8.4vw, 3.4rem);
+  /* Sized off the narrowest phone we support: INTERFACES is 10.2× its own
+     font-size in Syne 800, so 8.4vw still overran a 324px shell at 360. */
+  font-size: clamp(1.9rem, 8.2vw, 3.4rem);
   font-weight: 800;
   line-height: 0.9;
   letter-spacing: -0.058em;
@@ -892,6 +894,10 @@
     --sun-lift: 1.85;
     --items-lift: var(--sun-lift);
     --dock-space: 0rem;
+    /* A phone hero is taller than the glass: the extra band goes between the
+       word and the disc, so the crown of the sun never crowds the type and the
+       card still lands on the paper line. */
+    min-height: calc(100svh + 4.5rem);
     padding-bottom: calc(var(--ground) + var(--dock-space) + 0.75rem);
   }
 
@@ -2833,6 +2839,15 @@
 
   .contactLead {
     font-size: clamp(1.5rem, 6.2vw, 2rem);
+  }
+}
+
+/* Under 380 the disc is small enough that the fixed lift leaves its lower edge
+   behind the card, so it climbs a little more. */
+@media (max-width: 379px) {
+  .hero {
+    --sun-lift: 2.12;
+    --items-lift: var(--sun-lift);
   }
 }
 
