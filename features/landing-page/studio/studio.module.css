@@ -891,7 +891,7 @@
     /* The dock sits on the hill below the sun, so the lift is measured from a
        taller stage: the disc clears the card by a hair instead of landing on
        it, and the hill behind the card is stretched to wrap it. */
-    --sun-lift: 1.85;
+    --sun-lift: 2;
     --items-lift: var(--sun-lift);
     --dock-space: 0rem;
     /* A phone hero is taller than the glass: the extra band goes between the
@@ -2846,7 +2846,10 @@
    behind the card, so it climbs a little more. */
 @media (max-width: 379px) {
   .hero {
-    --sun-lift: 2.12;
+    /* The card wraps to more lines down here, so the disc climbs to keep clear
+       of it; the hill is stretched by the same amount in hero-scene.module.css
+       so the sun still sits *in* it rather than floating above the crest. */
+    --sun-lift: 2.07;
     --items-lift: var(--sun-lift);
   }
 }

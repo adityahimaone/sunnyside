@@ -469,7 +469,7 @@ const ICONS: Record<SocialKind, React.ReactNode> = {
 }
 
 const CSS =
-  '.ssf{position:relative;isolation:isolate;overflow:hidden;overflow:clip;container-type:inline-size;display:flex;flex-direction:column;width:100%;box-sizing:border-box;padding:0 clamp(6px,.9cqw,12px) clamp(6px,.9cqw,12px);background:var(--ssf-paper);color:var(--ssf-ink);font-family:var(--ssf-sans);font-weight:500;-webkit-font-smoothing:antialiased}' +
+  '.ssf{position:relative;isolation:isolate;overflow:hidden;overflow:clip;min-height:var(--ssf-minh,100svh);container-type:inline-size;display:flex;flex-direction:column;width:100%;box-sizing:border-box;padding:0 clamp(6px,.9cqw,12px) clamp(6px,.9cqw,12px);background:var(--ssf-paper);color:var(--ssf-ink);font-family:var(--ssf-sans);font-weight:500;-webkit-font-smoothing:antialiased}' +
   ':where(.ssf) *,:where(.ssf) *::before,:where(.ssf) *::after{box-sizing:border-box}' +
   ':where(.ssf) button{appearance:none;background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer}' +
   ':where(.ssf) a{color:inherit;text-decoration:none}' +
@@ -551,6 +551,10 @@ const CSS =
   '.ssf-pop b{font-size:11px;font-weight:600;opacity:.6;text-transform:lowercase}' +
   '.ssf-pop strong{font-weight:800;letter-spacing:-.01em}' +
   '@container (max-width: 760px){.ssf-cols{grid-template-columns:minmax(0,1fr)}.ssf-top{padding-bottom:24px}}' +
+  /* A phone does not have the spare height a desktop panel has, so the block
+     takes its own height and the wordmark follows the columns instead of being
+     pushed down by an auto margin into a void. */
+  '@media (max-width: 767px){.ssf{min-height:0;flex:0 0 auto}.ssf-panel{flex:0 0 auto}.ssf-stage{flex:0 0 auto;margin-top:clamp(20px,5vw,30px);width:min(88%,calc(var(--ssf-wmh) * var(--ssf-ar)))}}' +
   '@keyframes ssf-rewrite{0%{stroke-dashoffset:var(--l,120px)}100%{stroke-dashoffset:0}}' +
   '@keyframes ssf-popin{from{opacity:0;transform:translateY(10px) scale(.7) rotate(4deg)}}' +
   // the storyboard: everything above is the finished state; motion only adds the way in
@@ -1252,7 +1256,7 @@ export default function StickerSlapFooter({
     '--ssf-sans': fontSans,
     '--ssf-wmh': wordmarkMaxHeight,
     '--ssf-ar': String(round(vbW / cutH)),
-    minHeight: height,
+    '--ssf-minh': height,
   } as React.CSSProperties
 
   const onPointer = (e: React.PointerEvent<HTMLElement>) => {
