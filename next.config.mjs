@@ -63,7 +63,17 @@ const nextConfig = {
   // Canonical single-hop redirects for legacy routes, folded content, and missing endpoints.
   // Direct destinations prevent 308 redirect chains (e.g. trailing slash normalization).
   async redirects() {
+    const designSystemUrl =
+      process.env.NEXT_PUBLIC_DESIGN_SYSTEM_URL || 'http://localhost:4321'
+
     return [
+      // Design system cases separated to external design-system app
+      {
+        source: '/design-system/:slug+',
+        destination: `${designSystemUrl}/:slug+`,
+        permanent: false,
+      },
+
       // Media & legacy versions
       { source: '/spotify', destination: '/music', permanent: true },
       { source: '/v2', destination: '/', permanent: true },

@@ -1,11 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import {
-  Archivo,
-  Bodoni_Moda,
   Geist,
   Geist_Mono,
-  Instrument_Sans,
-  Sora,
   Space_Grotesk,
   Syne,
   Orbitron,
@@ -116,64 +112,6 @@ const inter = Inter({
   preload: false,
 })
 
-/* Strand v2.0's display face. One consumer (the Strand specimen and its
-   headings), so it is not preloaded: Geist still paints the first screen. */
-const instrumentSans = Instrument_Sans({
-  variable: '--font-instrument',
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-})
-
-/* Cove's display face. The token file has referenced --font-sora since v1.0 and
-   the family was never registered here, so the Cove specimen has been setting
-   its headings in the system sans on every machine without Sora installed. One
-   consumer, so it is not preloaded. */
-const sora = Sora({
-  variable: '--font-sora',
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  display: 'swap',
-  preload: false,
-})
-
-/* Huginn v3.0's display face. A Didone, because the system is a printed
-   poster: the cell grid sets the drawing, and the Didone sets the argument.
-   One consumer (the Huginn specimen), so it is not preloaded. */
-const bodoniModa = Bodoni_Moda({
-  variable: '--font-bodoni',
-  subsets: ['latin'],
-  weight: ['400', '500'],
-  display: 'swap',
-  preload: false,
-})
-
-/* Bluewater Freight's display face. A grotesque with a maritime-industrial
-   bearing — it sets the passage names and the promise, and nothing else. One
-   consumer (the Bluewater specimen), so it is not preloaded. */
-const archivo = Archivo({
-  variable: '--font-archivo',
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-})
-
-/* JetBrains Mono and Cormorant Garamond were removed. They were reachable only
-   through the `--font-whyte-inktrap-mono` and `--font-grandslang` aliases,
-   which no rule in the app reads, and Cormorant was additionally asking for
-   five weights in both normal and italic — ten font files, downloaded and
-   preloaded on every page load, for a family nothing rendered. If either face
-   is ever wanted, re-add it here and give it a real consumer in the same
-   change. */
-
-/**
- * `data-scroll-behavior="smooth"` on <html> opts back into overriding
- * `scroll-behavior` during route changes. globals.css sets
- * `scroll-behavior: smooth` on html, and as of Next 16 the framework no
- * longer suppresses it for navigations by default — which would animate every
- * page transition into a jump-to-top scroll. This attribute restores the
- * previous behaviour: instant navigation, smooth scrolling within a page.
- */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -182,7 +120,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
-        className={`${geist.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${syne.variable} ${orbitron.variable} ${inter.variable} ${instrumentSans.variable} ${bodoniModa.variable} ${sora.variable} ${archivo.variable} bg-background text-foreground tracking-tight antialiased`}
+        className={`${geist.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${syne.variable} ${orbitron.variable} ${inter.variable} bg-background text-foreground tracking-tight antialiased`}
       >
         <ThemeProvider
           enableSystem={false}

@@ -6,7 +6,7 @@ import layout from '@/features/archive/archive.module.css'
 import { Sparkle } from '@/features/landing-page/studio/doodles'
 import { ScriptWord } from '@/features/landing-page/studio/script-word'
 
-import { DESIGN_CASES } from './cases'
+import { DESIGN_CASES, type DesignCase } from './cases'
 import styles from './case-library.module.css'
 
 const METHOD = [
@@ -27,7 +27,11 @@ const METHOD = [
   },
 ] as const
 
-export function CaseLibraryPage() {
+export function CaseLibraryPage({
+  cases = DESIGN_CASES,
+}: {
+  cases?: readonly DesignCase[]
+}) {
   return (
     <main className={`${layout.page} ${styles.page}`} id="main-content">
       <div className={layout.container}>
@@ -38,10 +42,10 @@ export function CaseLibraryPage() {
               Design engineering / Case library
             </span>
             <span className={layout.kickerText}>
-              Thirteen systems, one method
+              Fourteen systems, one method
             </span>
             <span className={layout.kickerText}>
-              <span className={layout.num}>{DESIGN_CASES.length}</span> cases
+              <span className={layout.num}>{cases.length}</span> cases
             </span>
           </div>
 
@@ -51,16 +55,16 @@ export function CaseLibraryPage() {
             label="Case files"
           />
 
-          <h1 className={layout.title}>Thirteen systems, one paper trail.</h1>
+          <h1 className={layout.title}>Fourteen systems, one paper trail.</h1>
           <p className={styles.heroIntro}>
             <span className={styles.heroIntroLead}>
               A case is not a moodboard.
             </span>{' '}
             It is a brief, a mark, a system, a proof and a written decision.
-            Twelve materials and one method — paper and cobalt, glass and
-            dither, stone and gold leaf, a city in a single stroke. Every case
-            ships with its files, its measurements, and its gaps left on the
-            table.
+            Thirteen materials and one method — paper and cobalt, two inks on a
+            horizon, glass and dither, stone and gold leaf, a city in a single
+            stroke. Every case ships with its files, its measurements, and its
+            gaps left on the table.
           </p>
 
           <div className={styles.heroActions}>
@@ -76,12 +80,13 @@ export function CaseLibraryPage() {
         </header>
 
         <section className={styles.cases} aria-label="Design-system cases">
-          {DESIGN_CASES.map((item) => (
+          {cases.map((item) => (
             <Link
               key={item.name}
               href={item.href}
               className={`${styles.card} ${styles[`tone_${item.tone}`]}`}
               aria-label={`Open the ${item.name} case`}
+              {...(item.slug !== 'sunnyside' ? { target: '_blank', rel: 'noreferrer' } : {})}
             >
               <div className={styles.cardTop}>
                 <span className={styles.caseNumber}>Case {item.number}</span>

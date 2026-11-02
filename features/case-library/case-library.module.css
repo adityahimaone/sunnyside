@@ -171,6 +171,13 @@
   --case-accent: #7c2a76;
 }
 
+/* Vesper's only accent is its only ink that is not black: cobalt at 8.05:1 on
+   chalk, so it carries the number and the rule rather than tinting them. The
+   case has no second colour to give the card. */
+.tone_vesper {
+  --case-accent: #1b3fa2;
+}
+
 /* Bluewater's daylight signal. The night wake (#8FB6D6) is a graphic, never
    text, so the card takes the darkened value the system actually ships. */
 .tone_bluewater {

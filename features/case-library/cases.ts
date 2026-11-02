@@ -1,6 +1,5 @@
-import { LEDGER } from '@/features/ledger/data'
-
 export type DesignCase = {
+  slug: string
   number: string
   name: string
   href: string
@@ -26,21 +25,39 @@ export type DesignCase = {
     | 'jakarta'
     | 'bluewater'
     | 'wildflower'
+    | 'vesper'
+}
+
+export const DESIGN_SYSTEM_URL =
+  process.env.NEXT_PUBLIC_DESIGN_SYSTEM_URL || 'http://localhost:4321'
+
+/**
+ * Resolves URLs and image covers depending on whether a case is hosted locally
+ * (Sunnyside) or in the separate design-system app.
+ */
+export function resolveCase(item: DesignCase): DesignCase {
+  const isSunnyside = item.slug === 'sunnyside'
+  return {
+    ...item,
+    href: isSunnyside
+      ? '/sunnyside'
+      : item.href.startsWith('http')
+      ? item.href
+      : `${DESIGN_SYSTEM_URL}${item.href}`,
+    cover:
+      isSunnyside || item.cover.startsWith('http')
+        ? item.cover
+        : `${DESIGN_SYSTEM_URL}${item.cover}`,
+  }
 }
 
 /**
- * The documented design-system cases. Sunnyside anchors the shelf at index 0;
- * everything after it runs newest first.
- *
- * The array order is the display order for both `/design-system` and the
- * landing-page shelf. `number` is the case's permanent identity (its own brand
- * docs and tokens quote it), so the shelf reads 01, then 11 → 02 as the newest
- * release leads. This list is deliberately short: it is the design-engineering
- * shelf, not every project. Add a case only when it has a brief, a mark, a
- * system and a proof page to link to.
+ * Fallback static snapshot of the 14 design-system cases.
+ * Used if the design-system API is unreachable or at build time.
  */
-export const DESIGN_CASES: readonly DesignCase[] = [
+export const RAW_DESIGN_CASES: readonly DesignCase[] = [
   {
+    slug: 'sunnyside',
     number: '01',
     name: 'Sunnyside',
     href: '/sunnyside',
@@ -57,9 +74,27 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     tone: 'sunnyside',
   },
   {
+    slug: 'vesper',
+    number: '14',
+    name: 'Vesper',
+    href: '/vesper',
+    tagline: 'Two inks. One horizon.',
+    description:
+      'A two-ink print system for the evening: a cobalt sky and a cream ground, a four-point star resting on a horizon bar, and a 64-unit grid with no stem anywhere. Stipple and ordered dither are generated rather than traced, the night scope is a scope and never a second palette, and the mark is re-inked rather than redrawn. Eleven logo concepts were rasterised at 128, 40 and 16 and scored; the chosen mark ranks fourth, and the page says so.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · mark family · scorer · docs',
+    material: 'Cobalt + cream on uncoated stock, one second impression',
+    cover: '/brand/vesper/vesper-brandkit.png',
+    coverAlt:
+      'The Vesper board: the four-point star resting on a horizon bar in cobalt and cream, the eight primitives, the type specimens and six companion marks.',
+    tags: ['Two inks', 'Stipple', 'Computed contrast', 'Scored bake-off'],
+    tone: 'vesper',
+  },
+  {
+    slug: 'wildflower-wind',
     number: '13',
     name: 'Wildflower Wind',
-    href: '/design-system/wildflower-wind',
+    href: '/wildflower-wind',
     tagline: 'A meadow, seen through a pane of glass.',
     description:
       'A seed house under glass: five translucent petals that multiply where they cross, so the darkest thing in the mark is the crossing and not a stroke. A haze ground, panes with one lit edge and a long shadow, nested radii, and a violet that is the cosmos refracted rather than the pink in the photograph. Fifteen contrast pairs recomputed from hex, with the two that fail published instead of fixed.',
@@ -73,9 +108,10 @@ export const DESIGN_CASES: readonly DesignCase[] = [
     tone: 'wildflower',
   },
   {
-number: '12',
+    slug: 'bluewater',
+    number: '12',
     name: 'Bluewater Freight',
-    href: '/design-system/bluewater',
+    href: '/bluewater',
     tagline: 'The wake is the only bright thing.',
     description:
       'A passage system for maritime operators: a near-black sea, one silver wake that marks only what is moving, 1px chart rules, zero radius, and mono tabular numbers. A fullwidth crossing, a hull-and-waterline mark in two drawings, and an audit that publishes the one contrast pair it refuses to hide.',
@@ -89,9 +125,10 @@ number: '12',
     tone: 'bluewater',
   },
   {
+    slug: 'jakarta',
     number: '11',
     name: 'Jakarta',
-    href: '/design-system/jakarta',
+    href: '/jakarta',
     tagline: 'Bergerak Menuju Era Baru Jakarta.',
     description:
       'One stroke that turns a corner and one stop where it turns, drawn from a single unit S. Nine district ramps named after Jakarta places, a palette that is a map rather than a mood, and the six contrast pairs that fail published instead of fixed. Enamel, vinyl, a transit card and a bus.',
@@ -105,9 +142,10 @@ number: '12',
     tone: 'jakarta',
   },
   {
+    slug: 'porphyry',
     number: '10',
     name: 'Porphyry',
-    href: '/design-system/porphyry',
+    href: '/porphyry',
     tagline: 'A page composed like a stage: one stone, one light, one cast.',
     description:
       'A classical diorama as an interface system. A stage opening cut into a block of stone, with a gold threshold, a loader that fills the wordmark with marble from the floor, three photographs keyed off their own black ground by luminance, a real vellum theme, a ten-part form kit and a detach score against every sibling.',
@@ -121,24 +159,27 @@ number: '12',
     tone: 'porphyry',
   },
   {
+    slug: 'ledger',
     number: '09',
-    name: LEDGER.name,
-    href: LEDGER.href,
-    tagline: LEDGER.tagline,
-    description: LEDGER.description,
-    status: LEDGER.status,
-    role: LEDGER.role,
-    material: LEDGER.material,
+    name: 'Ledger',
+    href: '/ledger',
+    tagline: 'The surface is the only decoration.',
+    description:
+      'A commerce dashboard built on shadcn/ui, and the design system it comes from. One frosted panel at 65% card, one hairline grid, one indigo signal used only for state, and tabular figures wherever money appears. The shell is a single 56px line, and a WebGL mesh field sits behind the glass — a whisper in light, the surface itself in dark.',
+    status: 'Shipped · 2026',
+    role: 'Design system · dashboard · shadcn · WebGL',
+    material: 'Indigo harbor + glass + one signal',
     cover: '/brand/ledger/ledger-brandkit.png',
     coverAlt:
       'The Ledger brand board: the grid mark with one lifted tile, the indigo harbor ramp, the glass recipe, the type scale and a dashboard specimen.',
-    tags: LEDGER.tags,
+    tags: ['Glass', 'Indigo', 'shadcn', 'WebGL'],
     tone: 'ledger',
   },
   {
+    slug: 'clearing',
     number: '08',
     name: 'Clearing',
-    href: '/design-system/clearing',
+    href: '/clearing',
     tagline: 'A sighting, not a sticker.',
     description:
       'Painted emerald light seen through one pane of glass. A drawn stag on a tapered horizon, an outlined wordmark whose i-tittle is a light disc, five cast marks on one cut line, and an audit that names what it could not verify. No form kit, by request.',
@@ -152,9 +193,10 @@ number: '12',
     tone: 'clearing',
   },
   {
+    slug: 'strand',
     number: '07',
     name: 'Strand',
-    href: '/design-system/strand',
+    href: '/strand',
     tagline: 'Where the dunes meet the tide.',
     description:
       'A quiet coastal interface system: flat white quartz reading plates, marine basalt ink, one shallow-tide green signal, a Dune Crest S monogram, ten native controls and a panoramic vista framing hero and footer.',
@@ -168,9 +210,10 @@ number: '12',
     tone: 'strand',
   },
   {
+    slug: 'cove',
     number: '06',
     name: 'Cove',
-    href: '/design-system/cove',
+    href: '/cove',
     tagline: 'A calmer kind of depth.',
     description:
       'One glass layer over one blue field, a solid reading plate, a squared C with an ice waterline, ten native controls and a measured audit. Case 06 asks what happens when glass is minimal instead of everywhere.',
@@ -184,9 +227,10 @@ number: '12',
     tone: 'cove',
   },
   {
+    slug: 'hachure',
     number: '05',
     name: 'Hachure',
-    href: '/design-system/hachure',
+    href: '/hachure',
     tagline: 'Relief drawn by density, never by shadow.',
     description:
       'A cartographic interface system built from the supplied ridgeline footer: six ridges from one seed, seven tones from one paper, a lichen-capped ridge of solid bars, and a footer you can read an altitude off. Every contrast pair is measured in the build.',
@@ -200,9 +244,10 @@ number: '12',
     tone: 'hachure',
   },
   {
+    slug: 'riso',
     number: '04',
     name: 'Riso Co.',
-    href: '/design-system/riso',
+    href: '/riso',
     tagline:
       'One pin holds the sheet. The tear is what the second drum prints.',
     description:
@@ -217,9 +262,10 @@ number: '12',
     tone: 'riso',
   },
   {
+    slug: 'huginn',
     number: '03',
     name: 'Huginn Studio',
-    href: '/design-system/huginn',
+    href: '/huginn',
     tagline: 'A picture becomes cells. A name becomes cells.',
     description:
       'One 14-unit cell draws Arbo’s Åsgårdsreien through an ordered dither, draws the wordmark in 22 rows, and draws the mark — five cells hold the picture and the sixth has left the grid. No font in the logo, no rounded corners, and an audit that names what it could not verify.',
@@ -233,9 +279,10 @@ number: '12',
     tone: 'huginn',
   },
   {
+    slug: 'vitrine',
     number: '02',
     name: 'Vitrine',
-    href: '/design-system/vitrine',
+    href: '/vitrine',
     tagline: 'A glass case for a low-resolution light.',
     description:
       'Glass containers, a dithered information layer, a half-light V mark, ten native form controls and an honest audit. Case 02 asks whether depth can stay legible.',
@@ -247,5 +294,35 @@ number: '12',
       'The Vitrine brand board: the half-light V mark, one glass arm and one Signal arm, Case and Frost palette, Signal field, type specimens, favicon and form specimen.',
     tags: ['Glass', 'Dither', 'Case', 'Forms'],
     tone: 'vitrine',
-  }
+  },
 ]
+
+export const DESIGN_CASES: readonly DesignCase[] = RAW_DESIGN_CASES.map(resolveCase)
+
+/**
+ * Fetch design cases from the design-system service API.
+ * Falls back safely to local snapshot if the service is unreachable.
+ */
+export async function getDesignCases(): Promise<DesignCase[]> {
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 2000)
+
+    const res = await fetch(`${DESIGN_SYSTEM_URL}/api/cases.json`, {
+      signal: controller.signal,
+      next: { revalidate: 3600 },
+    })
+    clearTimeout(timeout)
+
+    if (res.ok) {
+      const data = (await res.json()) as DesignCase[]
+      if (Array.isArray(data) && data.length > 0) {
+        return data.map(resolveCase)
+      }
+    }
+  } catch {
+    // Graceful fallback when the external design-system app is offline or at build time
+  }
+
+  return [...DESIGN_CASES]
+}

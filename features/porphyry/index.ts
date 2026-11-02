@@ -1,6 +1,0 @@
-export { PorphyryGlyph, PorphyryMark } from './components/brand'
-export { CopyButton } from './components/copy'
-export { PorphyryParts } from './components/parts'
-export { PorphyrySpecimen } from './components/specimen'
-export { PorphyryThemeToggle } from './components/theme-toggle'
-export { default as PorphyryStage } from './components/stage'
