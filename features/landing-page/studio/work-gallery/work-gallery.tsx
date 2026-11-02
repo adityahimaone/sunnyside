@@ -72,12 +72,14 @@ const MAT_STICKERS: Record<PitKind, { label: string; x: number; y: number }> = {
   // as slapped on, and at most it laps ~14px over a card's border — never its
   // copy, which starts a gutter further in.
   smiley: { label: 'Smiley', x: 0.2, y: 2.1 },
-  burst: { label: 'Wow', x: 96.3, y: 1.7 },
+  burst: { label: 'Wow', x: 97.4, y: 1.7 },
   daisy: { label: 'Daisy', x: 0.2, y: 33 },
-  bolt: { label: 'Bolt', x: 96.3, y: 30 },
-  atom: { label: 'Atom', x: 96.3, y: 65 },
-  stampCity: { label: 'Jakarta · GMT+7', x: 0.2, y: 62 },
-  stampRole: { label: 'Design engineer', x: 96.3, y: 94 },
+  bolt: { label: 'Bolt', x: 97.4, y: 30 },
+  atom: { label: 'Atom', x: 97.4, y: 65 },
+  // The card in the first column leans into the rim, so the city stamp sits
+  // lower than the others — there it only laps the card's paper edge.
+  stampCity: { label: 'Jakarta · GMT+7', x: 0.2, y: 74 },
+  stampRole: { label: 'Design engineer', x: 97.4, y: 94 },
 }
 
 // Filtering re-deals the board, so the set remounts instead of morphing: a
@@ -212,6 +214,7 @@ function PaperPiece({
   tilt,
   drop,
 }: PieceProps) {
+  const reduced = useReducedMotion() ?? false
   const meta = PIECE_META(item)
   const tape = meta.tape
   const angle = tilt ?? meta.tilt
@@ -275,21 +278,10 @@ function PaperPiece({
           </span>
         )}
 
-        <div className={styles.foot}>
-          <span className={styles.cta}>
-            {item.cta}
-            <ArrowUpRight className={styles.ctaArrow} />
-          </span>
-          <button
-            type="button"
-            className={styles.stampButton}
-            aria-pressed={stamped}
-            aria-label={`${stamped ? 'Remove the stamp from' : 'Stamp'} ${item.title}`}
-            onClick={() => onStamp(item.id)}
-          >
-            {stamped ? 'Stamped' : 'Stamp it'}
-          </button>
-        </div>
+        <span className={styles.cta}>
+          {item.cta}
+          <ArrowUpRight className={styles.ctaArrow} />
+        </span>
       </div>
 
       <button
@@ -299,12 +291,31 @@ function PaperPiece({
         aria-label={`Open the notes for ${item.title}, ${item.categoryLabel}, ${item.year}`}
       />
 
-      {stamped ? (
-        <span className={styles.stamp} aria-hidden>
-          <span>Approved</span>
-          <span className={styles.stampSmall}>craft</span>
-        </span>
-      ) : null}
+      <button
+        type="button"
+        className={styles.stampButton}
+        aria-pressed={stamped}
+        aria-label={`${stamped ? 'Remove the stamp from' : 'Stamp'} ${item.title}`}
+        onClick={() => onStamp(item.id)}
+      >
+        {stamped ? 'Stamped' : 'Stamp it'}
+      </button>
+
+      <AnimatePresence>
+        {stamped ? (
+          <motion.span
+            initial={reduced ? false : { scale: 1.6, opacity: 0, rotate: -26 }}
+            animate={{ scale: 1, opacity: 1, rotate: -13 }}
+            exit={reduced ? undefined : { scale: 0.6, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+            className={styles.stamp}
+            aria-hidden
+          >
+            <span>Approved</span>
+            <span className={styles.stampSmall}>craft</span>
+          </motion.span>
+        ) : null}
+      </AnimatePresence>
     </article>
   )
 }
@@ -442,8 +453,8 @@ function MatStickers({
             style={{
               left: `${meta.x}%`,
               top: `${meta.y}%`,
-              width: stamp ? '3rem' : '2.4rem',
-              height: stamp ? '3rem' : '2.4rem',
+              width: stamp ? '2.4rem' : '1.9rem',
+              height: stamp ? '2.4rem' : '1.9rem',
             }}
             aria-pressed={done}
             aria-label={`${meta.label} — ${done ? 'peeled' : 'peel me'}`}

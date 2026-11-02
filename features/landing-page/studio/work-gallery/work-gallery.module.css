@@ -14,6 +14,8 @@
   --washi-mint: #b7e4c7;
   --washi-butter: #ffd23f;
   --washi-rose: #ff9d8a;
+  --mat: #fbf8f1;
+  --muted: #57534e;
   --paper-lo: #f6ecdb;
   /* Confetti + peel ticks read from the same tape stock as the washi. */
   --tape-amber: var(--washi-amber);
@@ -402,160 +404,148 @@
 .piece {
   position: relative;
   display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
   width: 100%;
-  padding: 0.7rem 0.75rem 0.8rem;
-  background: var(--card);
-  color: var(--card-ink);
+  height: 100%;
+  flex-direction: column;
+  padding: 0.6rem 0.6rem 0.7rem;
   border: 2px solid var(--card-ink);
   border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
   box-shadow:
     0 0 0 5px #fffaf1,
     5px 7px 0 rgb(24 24 27 / 0.16);
-  transform: rotate(var(--tilt, 0deg));
+  rotate: var(--tilt, 0deg);
   transition:
-    transform 0.35s var(--ease-spring),
-    box-shadow 0.35s var(--ease-spring);
+    rotate 0.4s var(--ease-spring),
+    box-shadow 0.35s var(--ease-spring),
+    translate 0.35s var(--ease-spring);
 }
 
-.piece:hover {
-  z-index: 3;
-  transform: translateY(-6px) rotate(0deg);
-  box-shadow:
-    0 0 0 5px #fffaf1,
-    7px 12px 0 rgb(24 24 27 / 0.2);
-}
-
+.piece:hover,
 .piece:focus-within {
   z-index: 3;
 }
 
 .tape {
   position: absolute;
+  z-index: 5;
   top: -0.75rem;
   left: 50%;
   width: 5.2rem;
   height: 1.45rem;
   translate: -50% 0;
-  background: var(--washi-amber);
-  clip-path: polygon(2% 0, 98% 3%, 100% 46%, 97% 100%, 3% 97%, 0 52%);
-  box-shadow: 0 1px 0 rgb(24 24 27 / 0.18);
-  opacity: 0.92;
-}
-
-.piece[data-tape='pink'] .tape {
-  background: var(--washi-pink);
-}
-.piece[data-tape='sky'] .tape {
-  background: var(--washi-sky);
-}
-.piece[data-tape='mint'] .tape {
-  background: var(--washi-mint);
-}
-.piece[data-tape='butter'] .tape {
-  background: var(--washi-butter);
-}
-.piece[data-tape='rose'] .tape {
-  background: var(--washi-rose);
+  rotate: -2.4deg;
+  border-block: 1px solid rgb(24 24 27 / 0.08);
+  background: var(--tape-amber);
+  clip-path: polygon(2% 0, 100% 3%, 98% 100%, 0 96%);
+  box-shadow: 0 1px 2px rgb(24 24 27 / 0.16);
+  pointer-events: none;
 }
 
 .pieceIndex {
   position: absolute;
-  top: -0.55rem;
-  right: 0.6rem;
   z-index: 4;
-  padding: 0.1rem 0.32rem;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.58rem;
-  letter-spacing: 0.06em;
-  color: var(--card-ink);
-  background: #fffaf1;
+  top: 1.05rem;
+  left: 1.05rem;
+  padding: 0.16rem 0.3rem;
   border: 1.5px solid var(--card-ink);
   border-radius: 4px;
-  rotate: 2deg;
+  background: var(--mat);
+  color: var(--card-ink);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
 }
 
 .frame {
   position: relative;
   display: block;
-  aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: #e9dfcf;
-  border: 2px solid var(--card-ink);
-  border-radius: 9px;
+  border: 1.5px solid rgb(24 24 27 / 0.55);
+  border-radius: 8px;
+  background: var(--paper-lo);
+  aspect-ratio: 16 / 10;
+  isolation: isolate;
 }
 
 .panTarget {
   position: absolute;
-  inset: -2%;
-  transform: translate(var(--pan-x, 0), var(--pan-y, 0));
-  transition: transform 0.35s ease-out;
+  inset: 0;
+  display: block;
+  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px));
+  transition: transform 0.5s var(--ease-spring);
+  will-change: transform;
 }
 
 .cover {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
 .kindTag {
   position: absolute;
-  bottom: 0.35rem;
-  left: 0.35rem;
-  padding: 0.08rem 0.4rem;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.56rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #fffaf1;
+  z-index: 3;
+  right: 0.4rem;
+  bottom: 0.4rem;
+  padding: 0.16rem 0.36rem;
+  border-radius: 999px;
   background: var(--card-ink);
-  border-radius: 4px;
+  color: var(--tape-butter);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .body {
   display: flex;
+  min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 0.3rem;
-  padding-top: 0.55rem;
+  gap: 0.34rem;
+  padding: 0.62rem 0.2rem 0;
 }
 
 .meta {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.1em;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  line-height: 1;
   text-transform: uppercase;
-  color: var(--card-muted);
+  color: var(--muted);
 }
 
 .title {
-  display: -webkit-box;
-  overflow: hidden;
-  margin: 0;
-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: 1.08rem;
-  font-weight: 700;
-  line-height: 1.16;
-  letter-spacing: -0.01em;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  font-family: var(--font-syne), var(--font-space-grotesk), system-ui,
+    sans-serif;
+  font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: balance;
 }
 
 .note {
   display: -webkit-box;
   overflow: hidden;
-  font-size: 0.78rem;
-  line-height: 1.42;
-  color: #3f3b46;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
-.tags,
-.deck {
+.tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.28rem;
-  margin-top: 0.15rem;
+  gap: 0.26rem;
+  margin-top: 0.1rem;
 }
 
 .tags > span {
@@ -605,39 +595,47 @@
 .cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.22rem;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.04em;
-  color: var(--card-ink);
+  align-self: flex-start;
+  gap: 0.3rem;
+  margin-top: auto;
+  /* The stamp button is pinned bottom-right; the CTA keeps clear of it. */
+  padding: 0.5rem 4.4rem 0 0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--ink);
   text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-decoration-color: var(--tangerine);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  text-decoration-style: wavy;
 }
 
 .ctaArrow {
-  width: 0.72rem;
-  height: 0.72rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  transition: transform 0.2s var(--ease-spring);
 }
 
 .stampButton {
-  position: relative;
-  z-index: 4;
-  margin-left: auto;
-  min-height: 2.4rem;
-  padding: 0.25rem 0.5rem;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  position: absolute;
+  z-index: 6;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  padding: 0.3rem 0.45rem;
+  border: 1.5px solid rgb(24 24 27 / 0.55);
+  border-radius: 5px;
+  background: var(--mat);
   color: var(--card-ink);
-  background: #fffaf1;
-  border: 2px solid var(--card-ink);
-  border-radius: 8px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
   cursor: pointer;
   transition:
-    background-color 0.18s ease,
-    color 0.18s ease;
+    background-color 0.16s ease,
+    transform 0.16s var(--ease-spring);
 }
 
 .stampButton[aria-pressed='true'] {
@@ -659,29 +657,31 @@
 
 .stamp {
   position: absolute;
-  top: 34%;
-  right: 0.9rem;
-  z-index: 4;
-  display: grid;
-  place-items: center;
-  width: 4.6rem;
-  height: 4.6rem;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.6rem;
+  z-index: 7;
+  right: 0.45rem;
+  bottom: 2.4rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.22rem;
+  padding: 0.18rem 0.4rem;
+  border: 2px solid #d13a5a;
+  border-radius: 4px;
+  color: #d13a5a;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   line-height: 1;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #c0392b;
-  border: 2px solid #c0392b;
-  border-radius: 50%;
-  rotate: -12deg;
-  opacity: 0.82;
+  opacity: 0.85;
+  mix-blend-mode: multiply;
   pointer-events: none;
 }
 
 .stampSmall {
-  font-size: 0.48rem;
-  letter-spacing: 0.16em;
+  font-size: 6px;
+  letter-spacing: 0.2em;
+  opacity: 0.75;
 }
 
 /* ── shelf progress ───────────────────────────────────────────────────── */
@@ -1221,6 +1221,78 @@
   color: rgb(24 24 27 / 0.42);
 }
 
+/* The lift is the card's own, so the cell keeps the wall's geometry. */
+.piece:hover,
+.piece:focus-within {
+  translate: 0 -6px;
+  rotate: 0deg;
+  box-shadow:
+    0 0 0 5px #fffaf1,
+    9px 11px 0 rgb(24 24 27 / 0.22);
+}
+
+.piece:focus-within {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 3px;
+}
+
+/* Lucky dip: a butter marker ring, no motion, so it works everywhere. */
+.piece[data-picked='true'] {
+  box-shadow:
+    0 0 0 5px #fffaf1,
+    0 0 0 11px color-mix(in srgb, var(--tape-butter) 72%, transparent),
+    5px 7px 0 rgb(24 24 27 / 0.16);
+}
+
+.piece[data-tape='pink'] .tape {
+  background: var(--tape-pink);
+  rotate: 2deg;
+}
+
+.piece[data-tape='sky'] .tape {
+  background: var(--tape-sky);
+  rotate: -3.4deg;
+}
+
+.piece[data-tape='mint'] .tape {
+  background: var(--tape-mint);
+  rotate: 1.4deg;
+}
+
+.piece[data-tape='butter'] .tape {
+  background: var(--tape-butter);
+  rotate: 2.8deg;
+}
+
+.piece[data-tape='rose'] .tape {
+  background: var(--tape-rose);
+  rotate: -1.8deg;
+}
+
+.piece:hover .ctaArrow,
+.piece:focus-within .ctaArrow {
+  transform: translate(2px, -2px);
+}
+
+.stampButton:hover {
+  background: var(--tape-butter);
+}
+
+.stampButton:active {
+  transform: translateY(1px);
+}
+
+.stampButton:focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+}
+
+.piece[data-stamped='true'] .stampButton {
+  border-color: var(--card-ink);
+  background: var(--card-ink);
+  color: var(--tape-butter);
+}
+
 /* ── vinyl on the mat ──────────────────────────────────────────────────── */
 
 /* The seven shapes are the same die-cut art peeled off the About liner: white
@@ -1319,4 +1391,23 @@
 
 .scrap[data-tone='rose'] {
   background: var(--tape-rose);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piece {
+    rotate: 0deg;
+    transition: none;
+  }
+
+  .piece:hover,
+  .piece:focus-within {
+    translate: none;
+    box-shadow:
+      0 0 0 5px #fffaf1,
+      5px 7px 0 rgb(24 24 27 / 0.16);
+  }
+
+  .panTarget {
+    transform: none !important;
+  }
 }
