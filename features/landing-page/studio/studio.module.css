@@ -475,6 +475,10 @@
 .heroTelemetry {
   align-self: center;
   margin-top: -0.35rem;
+  /* Offset only: a margin here would eat the stage's free space and drag the
+     canopy down with it. */
+  position: relative;
+  top: 0.95rem;
   padding: 0.24rem 0.7rem;
   border: 1.5px solid var(--ink);
   border-radius: 999px;
@@ -784,7 +788,7 @@
   z-index: 1;
   display: block;
   font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(2.4rem, 7.2vw, 7rem);
+  font-size: clamp(2.2rem, 5.8vw, 5.6rem);
   font-weight: 800;
   line-height: 0.86;
   letter-spacing: -0.052em;

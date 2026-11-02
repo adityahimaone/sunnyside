@@ -231,7 +231,7 @@ export function HeroScene() {
 
         <StickerSlot
           id="smiley"
-          place={{ x: -0.84, y: -0.25 }}
+          place={{ x: -0.66, y: -0.63 }}
           depth={1.9}
           delay={1.0}
         >
