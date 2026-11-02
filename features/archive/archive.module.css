@@ -305,6 +305,19 @@
   color: var(--ss-paper-hi);
 }
 
+/* Over the sunrise the bar's one action takes the hero's own primary colour:
+   a cobalt pill on a cobalt sky was the same shape twice. Butter matches
+   `See the work` below it, and the ink border keeps it a button, not a badge.
+   It reverts to cobalt the moment the chapter stops being the hero. */
+.barHero .cta {
+  background: var(--ss-butter);
+  color: var(--ss-ink);
+}
+
+.barHero .cta:hover {
+  background: var(--ss-paper-hi);
+}
+
 /* The fallbacks below have to come after `barHero`, or its tint would win. */
 @supports not (backdrop-filter: blur(1px)) {
   .barHero::after {

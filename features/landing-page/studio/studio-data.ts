@@ -57,11 +57,36 @@ export const HERO_FACTS = [
   { value: String(CATALOGUE_SIDES), label: 'sides in the catalogue' },
 ] as const
 
+/**
+ * The day job, opened up. The row above says what the title is; these say where
+ * it was earned. Nothing here repeats the paragraphs, so the list stays a
+ * roster and not a second résumé.
+ */
+export const JOBS = [
+  {
+    company: 'PT Fatiha Sakti',
+    role: 'Frontend SaaS Developer',
+    place: 'Jakarta',
+    period: 'Oct 2022 to now',
+  },
+  {
+    company: '80&Company',
+    role: 'Fullstack Developer',
+    place: 'Kyoto',
+    period: 'Apr to Sep 2024',
+  },
+  {
+    company: 'PT Unzyp',
+    role: 'Frontend ReactJS Developer',
+    place: 'Jakarta',
+    period: 'Jun to Sep 2022',
+  },
+] as const
+
 export const ABOUT_FACTS = [
   {
     key: 'Day job',
-    value:
-      'Frontend Engineer at Fast 8 Group. The title says frontend; the work is the product UI and the component system under it.',
+    value: 'Frontend Engineer at Fast 8 Group, working on product interfaces.',
   },
   {
     key: 'Practice',
@@ -75,7 +100,7 @@ export const ABOUT_FACTS = [
   },
   {
     key: 'Off-screen',
-    value: 'Watching movies with a coffee in reach.',
+    value: 'Watching movies, listening to music, coffee in reach.',
   },
 ] as const
 

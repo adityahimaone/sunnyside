@@ -1,7 +1,8 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import Image from 'next/image'
-
+import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 import { Squiggle } from './doodles'
@@ -9,10 +10,34 @@ import { Reveal } from './reveal'
 import { Tilt } from './tilt'
 import { StickerPit } from './gravity/sticker-pit'
 import { SectionHead, SectionNext } from './section-head'
-import { ABOUT_FACTS, PRINCIPLES } from './studio-data'
+import { ABOUT_FACTS, JOBS, PRINCIPLES } from './studio-data'
 import styles from './studio.module.css'
 
+function FactDisclosure({
+  value,
+  children,
+}: {
+  value: string
+  children: ReactNode
+}) {
+  return (
+    <details className={styles.factJob}>
+      <summary>
+        <span className={styles.factJobValue}>{value}</span>
+        <span className={styles.jobToggle} aria-hidden>
+          +
+        </span>
+      </summary>
+      {children}
+    </details>
+  )
+}
+
 export function About() {
+  const dayJob = ABOUT_FACTS[0]
+  const offScreen = ABOUT_FACTS[ABOUT_FACTS.length - 1]
+  const restFacts = ABOUT_FACTS.slice(1, -1)
+
   return (
     <section
       id="about"
@@ -57,12 +82,65 @@ export function About() {
 
             <Reveal delay={0.08}>
               <dl className={styles.aboutFacts}>
-                {ABOUT_FACTS.map((fact) => (
+                <div className={styles.aboutFact}>
+                  <dt>Day job</dt>
+                  <dd>
+                    <FactDisclosure value={dayJob.value}>
+                      <ul className={styles.jobRoster}>
+                        {JOBS.map((job) => (
+                          <li key={job.company} className={styles.jobRow}>
+                            <span className={styles.jobCompany}>
+                              {job.company}
+                            </span>
+                            <span className={styles.jobRole}>{job.role}</span>
+                            <span className={styles.jobPeriod}>
+                              {job.period} · {job.place}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </FactDisclosure>
+                  </dd>
+                </div>
+                {restFacts.map((fact) => (
                   <div key={fact.key} className={styles.aboutFact}>
                     <dt>{fact.key}</dt>
                     <dd>{fact.value}</dd>
                   </div>
                 ))}
+                <div className={styles.aboutFact}>
+                  <dt>{offScreen.key}</dt>
+                  <dd>
+                    <FactDisclosure value={offScreen.value}>
+                      <ul className={styles.jobRoster}>
+                        <li className={styles.jobRow}>
+                          <span className={styles.jobCompany}>Letterboxd</span>
+                          <a
+                            className={styles.factLink}
+                            href="https://letterboxd.com/adityahimaone/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Films I&apos;ve been through
+                            <ArrowUpRight className="size-3" aria-hidden />
+                          </a>
+                        </li>
+                        <li className={styles.jobRow}>
+                          <span className={styles.jobCompany}>Spotify</span>
+                          <a
+                            className={styles.factLink}
+                            href="https://open.spotify.com/user/212nmrqpklzmvpntgorzpavgq?si=EDxcJxPWTy63-7YI-tffuQ&utm_source=copy_link"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            What&apos;s on repeat
+                            <ArrowUpRight className="size-3" aria-hidden />
+                          </a>
+                        </li>
+                      </ul>
+                    </FactDisclosure>
+                  </dd>
+                </div>
               </dl>
             </Reveal>
 

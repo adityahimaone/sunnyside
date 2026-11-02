@@ -295,6 +295,25 @@
   opacity: 0.5;
 }
 
+.resumeNav.resumeNav {
+  display: none;
+  gap: 0.28rem;
+}
+
+.resumeNav svg {
+  transition: transform 0.18s var(--ease-out);
+}
+
+.resumeNav:hover svg {
+  transform: translate(2px, -2px);
+}
+
+@media (min-width: 640px) {
+  .resumeNav.resumeNav {
+    display: inline-flex;
+  }
+}
+
 .menuLinkCopy {
   display: flex;
   min-width: 0;
@@ -831,6 +850,138 @@
 
 .aboutFact dd {
   color: var(--ink);
+}
+
+/* the day job row doubles as a disclosure: the same row rhythm as the spec
+   table, but the roster drops out of it instead of sitting below */
+.factJob summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.9rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.factJob summary::-webkit-details-marker {
+  display: none;
+}
+
+.factJob summary:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: 3px;
+}
+
+.factJobValue {
+  text-decoration: underline dotted var(--line);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition:
+    color 0.18s ease,
+    text-decoration-color 0.18s ease;
+}
+
+.factJob summary:hover .factJobValue {
+  color: var(--cobalt);
+  text-decoration-color: var(--cobalt);
+}
+
+.jobToggle {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.12rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--muted);
+  transition:
+    transform 0.22s var(--ease-out),
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.factJob summary:hover .jobToggle {
+  border-color: var(--cobalt);
+  color: var(--cobalt);
+}
+
+.factJob[open] > summary .jobToggle {
+  transform: rotate(45deg);
+  border-color: var(--cobalt);
+  color: var(--cobalt);
+}
+
+.jobRoster {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--line);
+  list-style: none;
+}
+
+.jobRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.1rem 0.8rem;
+  align-items: baseline;
+}
+
+.jobCompany {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jobRole {
+  grid-column: 1;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.factLink {
+  grid-row: 2;
+  grid-column: 1;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--cobalt);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+  transition: color 0.18s ease;
+}
+
+.factLink:hover {
+  color: var(--ink);
+}
+
+.factLink:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.jobPeriod {
+  grid-row: 1;
+  grid-column: 2;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
 }
 
 .aboutSide {
@@ -2434,6 +2585,17 @@
 @media (max-width: 639px) {
   .aboutFact {
     grid-template-columns: 5.6rem minmax(0, 1fr);
+  }
+
+  .jobRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.12rem;
+  }
+
+  .jobPeriod,
+  .factLink {
+    grid-row: auto;
+    grid-column: 1;
   }
 
   .postcard {
