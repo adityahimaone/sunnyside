@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 import { WORK_PROJECTS } from '@/data/projects'
-import { DESIGN_CASES } from '@/features/case-library/cases'
+import { DESIGN_CASES, type DesignCase } from '@/features/case-library/cases'
 
 import { ArrowUpRight, Sun } from './doodles'
 import { Reveal } from './reveal'
@@ -23,9 +23,13 @@ import styles from './studio.module.css'
  * The counts in the copy are read from the data rather than typed, so adding a
  * release or a case never leaves a stale "six systems" line behind.
  */
-export function Projects() {
+export function Projects({
+  designCases,
+}: {
+  designCases?: readonly DesignCase[]
+} = {}) {
   const releases = WORK_PROJECTS.length
-  const systems = DESIGN_CASES.length
+  const systems = designCases?.length ?? DESIGN_CASES.length
 
   return (
     <section
@@ -52,7 +56,7 @@ export function Projects() {
           intro={`${releases} releases and ${systems} documented systems in the catalogue. The wall shows the newest of them; filter it, then open a card for the notes.`}
         />
 
-        <WorkGallery />
+        <WorkGallery designCases={designCases} />
 
         <Reveal delay={0.1}>
           <div className={styles.archiveBand}>

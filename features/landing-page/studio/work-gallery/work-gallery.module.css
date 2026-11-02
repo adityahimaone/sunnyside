@@ -1,32 +1,29 @@
-/* The selected-work cutting mat.
-
-   Twelve paper pieces — six releases, six systems — taped to a dot-grid mat
-   inside the cobalt room. The local variables are the only values this board
-   owns; everything else comes from the landing page's palette so the chapter
-   still reads as the same studio wall.
-
-   Layers: mat (dots + grain) → piece (cardstock + tape + stamp) → toolbar and
-   sticker tray (the only chrome on the page). Pieces are rotated by `--tilt`,
-   never by a transform inside the card, so the hover lift can straighten them
-   without fighting the layout. */
+/* Selected work — a cutting mat with one shelf of pinned paper on it.
+   Cards sit on a single horizontal snap track, taped at their own angle, so the
+   board reads hand-pinned rather than like a slider. */
 
 .moodboard {
   --card: #faf4e8;
   --card-ink: #18181b;
-  --mat: #fbf8f1;
-  --mat-dot: rgb(24 24 27 / 0.14);
-  --tape-amber: #facc15;
-  --tape-pink: #f4a8d4;
-  --tape-sky: #a9c8ff;
-  --tape-mint: #b7e4c7;
-  --tape-butter: #ffd23f;
-  --tape-rose: #ffb6e1;
+  --card-muted: #57534e;
+  --cork: #c89b6a;
+  --washi-amber: #f3c969;
+  --washi-pink: #ffb6e1;
+  --washi-sky: #a9c8ff;
+  --washi-mint: #b7e4c7;
+  --washi-butter: #ffd23f;
+  --washi-rose: #ff9d8a;
+  --wg-card: clamp(15rem, 78%, 22rem);
+  --wg-gap: clamp(0.9rem, 1.6vw, 1.4rem);
+  --ring: #2c3cae;
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 
-  display: flex;
-  flex-direction: column;
-  gap: clamp(1.1rem, 2.4vw, 1.7rem);
-  margin-top: clamp(2.1rem, 4.5vw, 3.4rem);
+  position: relative;
+  display: block;
+}
+
+.deskReveal {
+  display: block;
 }
 
 .srOnly {
@@ -36,1246 +33,1058 @@
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
 
-/* ── Toolbar: HUD, desk controls, archive tape ─────────────────────────── */
+/* ── bezel + cork ─────────────────────────────────────────────────────── */
+
+.desk {
+  padding: clamp(0.55rem, 1.2vw, 0.9rem);
+  background: linear-gradient(150deg, #23243c 0%, #141522 48%, #0f1019 100%);
+  border-radius: clamp(26px, 3.2vw, 44px);
+  box-shadow:
+    0 2px 0 rgb(255 255 255 / 0.14) inset,
+    0 26px 60px -28px rgb(8 8 20 / 0.7),
+    0 2px 0 rgb(0 0 0 / 0.4);
+}
+
+.mat {
+  --mat-pad: clamp(0.85rem, 1.9vw, 1.5rem);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.7rem, 1.6vw, 1.1rem);
+  padding: var(--mat-pad);
+  background-color: var(--cork);
+  background-image: radial-gradient(
+      rgb(90 60 30 / 0.22) 0.5px,
+      transparent 0.6px
+    ),
+    radial-gradient(rgb(255 245 230 / 0.16) 0.5px, transparent 0.6px);
+  background-size:
+    7px 7px,
+    9px 9px;
+  background-position:
+    0 0,
+    3px 5px;
+  border-radius: clamp(20px, 2.4vw, 34px);
+  box-shadow:
+    0 0 0 2px rgb(24 24 27 / 0.55),
+    0 10px 26px -12px rgb(0 0 0 / 0.5) inset,
+    0 -1px 0 rgb(255 255 255 / 0.28) inset;
+  overflow: hidden;
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.26;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+/* ── toolbar ──────────────────────────────────────────────────────────── */
 
 .toolbar {
   position: relative;
   z-index: 2;
   display: grid;
   grid-template-areas:
-    'hud controls'
-    'filters archives';
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.8rem clamp(1rem, 2vw, 1.6rem);
-  padding: 0.9rem 1.1rem;
-  border: 2px solid var(--card-ink);
-  border-radius: 18px;
+    'hud'
+    'controls'
+    'filters'
+    'archives';
+  gap: 0.6rem;
+  padding: 0.7rem 0.75rem;
   background: var(--card);
-  box-shadow: 5px 5px 0 var(--card-ink);
+  color: var(--card-ink);
+  border: 2px solid var(--card-ink);
+  border-radius: 16px;
+  box-shadow: 5px 5px 0 rgb(24 24 27 / 0.16);
 }
 
 .hud {
   grid-area: hud;
   display: flex;
-  min-width: 0;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.6rem;
+  min-width: 0;
 }
 
 .hudCount {
-  display: grid;
   flex: none;
-  place-items: center;
-  min-width: 3.4rem;
-  height: 2.4rem;
-  padding-inline: 0.5rem;
-  border: 2px solid var(--card-ink);
-  border-radius: 10px;
-  background: var(--tape-butter);
+  padding: 0.3rem 0.45rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
   color: var(--card-ink);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  box-shadow: 2px 2px 0 var(--card-ink);
-  transform: rotate(-1.6deg);
+  background: var(--washi-butter);
+  border: 2px solid var(--card-ink);
+  border-radius: 7px;
+  rotate: -1.6deg;
+  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.22);
 }
 
 .hudStack {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 0.18rem;
+  gap: 0.1rem;
 }
 
 .hudTitle {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  line-height: 1.2;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--card-ink);
 }
 
 .hudNote {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   line-height: 1.35;
-  color: var(--muted);
-  text-wrap: pretty;
+  color: var(--card-muted);
 }
 
 .controls {
   grid-area: controls;
   display: flex;
-  justify-self: end;
   align-items: center;
   gap: 0.5rem;
 }
 
 .chunky,
-.plainer {
+.pagerBtn,
+.filter {
+  font-family: var(--font-geist-mono), monospace;
+  color: var(--card-ink);
+  background: #fffaf1;
+  border: 2px solid var(--card-ink);
   border-radius: 10px;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  text-transform: uppercase;
   cursor: pointer;
   transition:
-    transform 0.16s var(--ease-spring),
-    box-shadow 0.16s var(--ease-spring),
-    background-color 0.16s ease;
+    translate 0.18s var(--ease-spring),
+    box-shadow 0.18s var(--ease-spring),
+    background-color 0.18s ease;
 }
 
 .chunky {
-  padding: 0.62rem 0.8rem;
-  border: 2px solid var(--card-ink);
-  background: var(--tape-amber);
-  color: var(--card-ink);
-  box-shadow: 2px 2px 0 var(--card-ink);
-}
-
-.plainer {
-  padding: 0.55rem 0.7rem;
-  border: 1.5px solid rgb(24 24 27 / 0.4);
-  background: var(--mat);
-  color: var(--card-ink);
+  flex: 1;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--washi-butter);
+  box-shadow: 3px 3px 0 var(--card-ink);
 }
 
 .chunky:hover,
-.plainer:hover {
-  background: var(--tape-butter);
+.pagerBtn:hover:not(:disabled),
+.filter:hover {
+  translate: 0 -1px;
+  box-shadow: 4px 4px 0 var(--card-ink);
 }
 
 .chunky:active,
-.plainer:active {
-  transform: translate(2px, 2px);
-  box-shadow: none;
+.pagerBtn:active:not(:disabled),
+.filter:active {
+  translate: 1px 1px;
+  box-shadow: 1px 1px 0 var(--card-ink);
 }
 
-.chunky:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-.chunky:focus-visible,
-.plainer:focus-visible {
-  outline: 3px solid var(--cobalt);
-  outline-offset: 2px;
-}
-
-.archiveLinks {
-  grid-area: archives;
+.pager {
   display: flex;
-  flex-wrap: nowrap;
-  justify-self: end;
-  gap: 0.6rem;
+  gap: 0.35rem;
 }
 
-/* The archive links are tape labels, not buttons: a strip of paper with a
-   handwritten-feel note above the label and the total in a mono chip. */
-.archive {
-  display: flex;
-  min-width: 0;
-  white-space: nowrap;
-  flex-direction: column;
-  gap: 0.1rem;
-  padding: 0.45rem 0.75rem 0.5rem;
-  border: 2px solid var(--card-ink);
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--tape-sky) 42%, white);
-  color: var(--card-ink);
-  text-decoration: none;
-  transform: rotate(-1.1deg);
-  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.18);
-  transition: transform 0.2s var(--ease-spring);
+.pagerBtn {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  box-shadow: 3px 3px 0 var(--card-ink);
 }
 
-.archive:nth-child(2) {
-  background: color-mix(in srgb, var(--tape-pink) 40%, white);
-  transform: rotate(1.2deg);
+.pagerBtn:disabled {
+  opacity: 0.34;
+  cursor: default;
+  box-shadow: 1px 1px 0 rgb(24 24 27 / 0.4);
 }
 
-.archive:hover {
-  transform: rotate(0deg) translateY(-2px);
+.pagerIcon {
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
-.archive:focus-visible {
-  outline: 3px solid var(--cobalt);
-  outline-offset: 2px;
+/* The doodle points north-east: 225deg reads as "back", 45deg as "next". */
+.pagerBtn:first-child .pagerIcon {
+  rotate: 225deg;
 }
 
-.archiveNote {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 7.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  opacity: 0.62;
+.pagerBtn:last-child .pagerIcon {
+  rotate: 45deg;
 }
 
-.archiveLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.36rem;
-  font-size: 0.86rem;
-  font-weight: 700;
-}
-
-.archiveCount {
-  padding: 0.12rem 0.3rem;
-  border: 1px solid rgb(24 24 27 / 0.3);
-  border-radius: 999px;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 7.5px;
-  letter-spacing: 0.04em;
-}
-
-.archiveArrow {
-  width: 0.8rem;
-  height: 0.8rem;
-  transition: transform 0.2s var(--ease-spring);
-}
-
-.archive:hover .archiveArrow {
-  transform: translate(2px, -2px);
-}
+/* ── filters ──────────────────────────────────────────────────────────── */
 
 .filters {
   grid-area: filters;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  justify-self: start;
-  padding: 0.28rem;
-  border: 1.5px solid rgb(24 24 27 / 0.35);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.25rem;
+  background: #efe4d2;
+  border: 2px solid rgb(24 24 27 / 0.28);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--mat) 80%, white);
 }
 
 .filter {
   display: inline-flex;
+  flex: 1 1 auto;
   align-items: center;
-  gap: 0.34rem;
-  padding: 0.36rem 0.62rem;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--card-ink);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  cursor: pointer;
-  transition:
-    background-color 0.18s ease,
-    box-shadow 0.18s var(--ease-spring);
-}
-
-.filter:hover {
-  background: color-mix(in srgb, var(--tape-butter) 46%, transparent);
+  background: transparent;
+  border-color: transparent;
+  border-radius: 999px;
+  box-shadow: none;
 }
 
 .filter[aria-pressed='true'] {
+  color: var(--washi-butter);
   background: var(--card-ink);
-  color: var(--tape-butter);
-  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.25);
-}
-
-.filter:focus-visible {
-  outline: 3px solid var(--cobalt);
-  outline-offset: 2px;
+  border-color: var(--card-ink);
+  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.28);
 }
 
 .filterCount {
-  padding: 0.06rem 0.26rem;
-  border-radius: 999px;
-  background: rgb(24 24 27 / 0.12);
-  font-size: 7.5px;
-  letter-spacing: 0.04em;
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
 }
 
-.filter[aria-pressed='true'] .filterCount {
-  background: rgb(255 250 241 / 0.24);
-}
+/* ── archive tape links ───────────────────────────────────────────────── */
 
-/* ── The board is one surface ──────────────────────────────────────────── */
-
-/* Reveal wraps the whole desk, not the toolbar: the grain, the bezel and the
-   paper arrive together as one object instead of a bar dropping onto a mat. */
-.deskReveal {
-  display: block;
-  min-width: 0;
-}
-
-/* Dark bezel, the way a real moodboard sits in a frame or a tablet shell. The
-   gradient runs corner to corner so the surface reads as lit from top-left. */
-.desk {
-  position: relative;
-  padding: clamp(0.5rem, 1.1vw, 0.95rem);
-  border-radius: clamp(26px, 3.2vw, 44px);
-  background: linear-gradient(
-    158deg,
-    #5c5147 0%,
-    #352e28 32%,
-    #241f1b 64%,
-    #4a4038 100%
-  );
-  box-shadow:
-    0 44px 70px -36px rgb(6 8 26 / 0.85),
-    0 16px 28px -20px rgb(6 8 26 / 0.6),
-    inset 0 1px 0 rgb(255 255 255 / 0.22),
-    inset 0 -2px 4px rgb(0 0 0 / 0.55);
-}
-
-/* A hairline inside the bezel, so the frame has an edge instead of a blob. */
-.desk::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
-  pointer-events: none;
-}
-
-/* Cork. Warmer and darker than the paper palette on purpose: cream cards need a
-   surface that is not also cream, or the board reads as one flat sheet. */
-.mat {
-  position: relative;
+.archiveLinks {
+  grid-area: archives;
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.archive {
+  display: flex;
+  flex: 1 1 12rem;
   flex-direction: column;
-  gap: clamp(0.85rem, 1.8vw, 1.5rem);
-  padding: clamp(0.85rem, 1.9vw, 1.5rem);
-  overflow: hidden;
-  border-radius: clamp(18px, 2.4vw, 32px);
-  background-color: #c89b6a;
-  background-image: radial-gradient(
-      rgb(64 36 12 / 0.18) 1.1px,
-      transparent 1.2px
-    ),
-    radial-gradient(rgb(255 240 214 / 0.26) 1.3px, transparent 1.4px),
-    radial-gradient(
-      120% 92% at 50% -10%,
-      rgb(255 233 200 / 0.55),
-      transparent 62%
-    ),
-    linear-gradient(180deg, #cfa575 0%, #c09363 52%, #b1855a 100%);
-  background-size:
-    28px 28px,
-    28px 28px,
-    100% 100%,
-    100% 100%;
-  background-position:
-    0 0,
-    14px 14px,
-    0 0,
-    0 0;
-  box-shadow:
-    inset 0 0 0 1px rgb(64 38 16 / 0.42),
-    inset 0 4px 12px rgb(46 26 8 / 0.4),
-    inset 0 -4px 14px rgb(46 26 8 / 0.3);
+  gap: 0.12rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.85rem;
+  color: var(--card-ink);
+  text-decoration: none;
+  background: var(--washi-amber);
+  border: 2px solid var(--card-ink);
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.2);
+  rotate: -1.1deg;
+  transition: rotate 0.2s var(--ease-spring);
 }
 
-/* Cork fleck and paper grain. Above the mat, below everything printed on it,
-   and inert: it never takes a pointer event or announces itself. */
-.grain {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  opacity: 0.26;
-  mix-blend-mode: multiply;
-  pointer-events: none;
+.archive:nth-child(2) {
+  rotate: 1.1deg;
+  background: var(--washi-sky);
 }
 
-/* The grid the pieces sit in. Same twelve columns as before; the surface moved
-   out to `.mat`, so this layer is only placement. */
-.pieceGrid {
+.archive:hover {
+  rotate: 0deg;
+}
+
+.archiveNote {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.archiveLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.archiveCount {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+}
+
+.archiveArrow {
+  width: 0.85rem;
+  height: 0.85rem;
+  margin-left: auto;
+}
+
+/* ── the shelf ────────────────────────────────────────────────────────── */
+
+.track {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  align-items: start;
-  gap: clamp(0.9rem, 1.7vw, 1.4rem);
+  display: flex;
+  align-items: stretch;
+  gap: var(--wg-gap);
+  /* Bleed through the mat's gutter, then re-add it as padding, so the first
+     piece lines up with the toolbar and the last one can clear the edge. */
+  margin-inline: calc(var(--mat-pad) * -1);
+  padding-inline: var(--mat-pad);
+  padding-block: 1.4rem 1.2rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--mat-pad);
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  cursor: grab;
 }
 
-.pieceCell {
-  position: relative;
-  z-index: 1;
-  min-width: 0;
-  grid-column: span 3;
-  /* Hand-placed, not gridded: the offset rides on the piece, so filtering never
-     re-deals the heights and surviving cards do not jump. */
-  margin-top: var(--cell-drop, 0);
+.track::-webkit-scrollbar {
+  display: none;
 }
 
-/* ── Piece ─────────────────────────────────────────────────────────────── */
+.track:focus-visible {
+  outline: 3px solid var(--card-ink);
+  outline-offset: -4px;
+  border-radius: 14px;
+}
+
+.trackDragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
+
+/* ── one paper piece ──────────────────────────────────────────────────── */
 
 .piece {
   position: relative;
   display: flex;
-  height: 100%;
+  flex: 0 0 var(--wg-card);
   flex-direction: column;
-  padding: 0.6rem 0.6rem 0.7rem;
+  scroll-snap-align: start;
+  padding: 0.7rem 0.75rem 0.8rem;
+  background: var(--card);
+  color: var(--card-ink);
   border: 2px solid var(--card-ink);
   border-radius: 14px;
-  background: var(--card);
-  color: var(--ink);
   box-shadow:
     0 0 0 5px #fffaf1,
     5px 7px 0 rgb(24 24 27 / 0.16);
-  rotate: var(--tilt, 0deg);
+  transform: rotate(var(--tilt, 0deg));
   transition:
-    rotate 0.4s var(--ease-spring),
-    box-shadow 0.35s var(--ease-spring),
-    translate 0.35s var(--ease-spring);
+    transform 0.35s var(--ease-spring),
+    box-shadow 0.35s var(--ease-spring);
 }
 
-.piece:hover,
-.piece:focus-within {
+.piece:hover {
+  z-index: 3;
+  transform: translateY(-6px) rotate(0deg);
   box-shadow:
     0 0 0 5px #fffaf1,
-    9px 11px 0 rgb(24 24 27 / 0.22);
+    7px 12px 0 rgb(24 24 27 / 0.2);
 }
 
 .piece:focus-within {
-  outline: 3px solid var(--cobalt);
-  outline-offset: 3px;
+  z-index: 3;
 }
 
-/* Lucky dip: a butter marker ring, no motion, so it works everywhere. */
-.piece[data-picked='true'] {
-  box-shadow:
-    0 0 0 5px #fffaf1,
-    0 0 0 11px color-mix(in srgb, var(--tape-butter) 72%, transparent),
-    5px 7px 0 rgb(24 24 27 / 0.16);
-}
-
-/* Washi tape. Torn edges come from the clip path, the slight sheen from the
-   border; both are decoration only. */
 .tape {
   position: absolute;
-  z-index: 5;
   top: -0.75rem;
   left: 50%;
   width: 5.2rem;
   height: 1.45rem;
   translate: -50% 0;
-  rotate: -2.4deg;
-  border-block: 1px solid rgb(24 24 27 / 0.08);
-  background: var(--tape-amber);
-  clip-path: polygon(2% 0, 100% 3%, 98% 100%, 0 96%);
-  box-shadow: 0 1px 2px rgb(24 24 27 / 0.16);
-  pointer-events: none;
+  background: var(--washi-amber);
+  clip-path: polygon(2% 0, 98% 3%, 100% 46%, 97% 100%, 3% 97%, 0 52%);
+  box-shadow: 0 1px 0 rgb(24 24 27 / 0.18);
+  opacity: 0.92;
 }
 
 .piece[data-tape='pink'] .tape {
-  background: var(--tape-pink);
-  rotate: 2deg;
+  background: var(--washi-pink);
 }
-
 .piece[data-tape='sky'] .tape {
-  background: var(--tape-sky);
-  rotate: -3.4deg;
+  background: var(--washi-sky);
 }
-
 .piece[data-tape='mint'] .tape {
-  background: var(--tape-mint);
-  rotate: 1.4deg;
+  background: var(--washi-mint);
 }
-
 .piece[data-tape='butter'] .tape {
-  background: var(--tape-butter);
-  rotate: 2.8deg;
+  background: var(--washi-butter);
 }
-
 .piece[data-tape='rose'] .tape {
-  background: var(--tape-rose);
-  rotate: -1.8deg;
-}
-
-.pieceLink {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  color: inherit;
-  text-decoration: none;
-}
-
-.pieceLink:focus-visible {
-  outline: none;
+  background: var(--washi-rose);
 }
 
 .pieceIndex {
   position: absolute;
+  top: -0.55rem;
+  right: 0.6rem;
   z-index: 4;
-  top: 1.05rem;
-  left: 1.05rem;
-  padding: 0.16rem 0.3rem;
+  padding: 0.1rem 0.32rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  color: var(--card-ink);
+  background: #fffaf1;
   border: 1.5px solid var(--card-ink);
   border-radius: 4px;
-  background: var(--mat);
-  color: var(--card-ink);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 1;
+  rotate: 2deg;
 }
 
 .frame {
   position: relative;
   display: block;
-  overflow: hidden;
-  border: 1.5px solid rgb(24 24 27 / 0.55);
-  border-radius: 8px;
-  background: var(--paper-lo);
   aspect-ratio: 16 / 10;
-  isolation: isolate;
-}
-
-.piece[data-kind='design-system'] .frame {
-  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #e9dfcf;
+  border: 2px solid var(--card-ink);
+  border-radius: 9px;
 }
 
 .panTarget {
   position: absolute;
-  inset: 0;
-  display: block;
-  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px));
-  transition: transform 0.5s var(--ease-spring);
-  will-change: transform;
+  inset: -2%;
+  transform: translate(var(--pan-x, 0), var(--pan-y, 0));
+  transition: transform 0.35s ease-out;
 }
 
 .cover {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
 }
 
 .kindTag {
   position: absolute;
-  z-index: 3;
-  right: 0.4rem;
-  bottom: 0.4rem;
-  padding: 0.16rem 0.36rem;
-  border-radius: 999px;
-  background: var(--card-ink);
-  color: var(--tape-butter);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 7px;
-  font-weight: 600;
+  bottom: 0.35rem;
+  left: 0.35rem;
+  padding: 0.08rem 0.4rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.56rem;
   letter-spacing: 0.12em;
-  line-height: 1;
   text-transform: uppercase;
-}
-
-.piece[data-kind='design-system'] .kindTag {
-  background: var(--cobalt);
-  color: var(--paper-hi);
+  color: #fffaf1;
+  background: var(--card-ink);
+  border-radius: 4px;
 }
 
 .body {
   display: flex;
-  min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 0.34rem;
-  padding: 0.62rem 0.2rem 0;
+  gap: 0.3rem;
+  padding-top: 0.55rem;
 }
 
 .meta {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 8px;
-  letter-spacing: 0.14em;
-  line-height: 1;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--card-muted);
 }
 
 .title {
-  font-family: var(--font-syne), var(--font-space-grotesk), system-ui,
-    sans-serif;
-  font-size: clamp(1.05rem, 1.35vw, 1.35rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1.02;
-  text-wrap: balance;
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.16;
+  letter-spacing: -0.01em;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .note {
   display: -webkit-box;
   overflow: hidden;
+  font-size: 0.78rem;
+  line-height: 1.42;
+  color: #3f3b46;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  font-size: 0.76rem;
-  line-height: 1.45;
-  color: var(--muted);
+  -webkit-line-clamp: 3;
 }
 
-.tags {
+.tags,
+.deck {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.26rem;
-  margin-top: 0.1rem;
+  gap: 0.28rem;
+  margin-top: 0.15rem;
 }
 
 .tags > span {
-  padding: 0.2rem 0.42rem;
-  border: 1px solid rgb(24 24 27 / 0.22);
+  padding: 0.08rem 0.36rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  color: #3f3b46;
+  background: #efe4d2;
+  border: 1px solid rgb(24 24 27 / 0.24);
   border-radius: 999px;
-  background: var(--mat);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 7px;
-  letter-spacing: 0.08em;
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-
-/* Paint chips, printed on the piece like a pantone fan deck. */
-.deck {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.22rem;
-  margin-top: 0.16rem;
 }
 
 .chip {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  border: 1px solid rgb(24 24 27 / 0.25);
-  border-radius: 3px;
-  background: var(--mat);
-  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.24rem;
+  padding: 0.08rem 0.34rem 0.08rem 0.1rem;
+  background: #fffaf1;
+  border: 1px solid rgb(24 24 27 / 0.24);
+  border-radius: 999px;
 }
 
 .chipFill {
-  height: 0.85rem;
+  width: 0.66rem;
+  height: 0.66rem;
+  border: 1px solid rgb(24 24 27 / 0.35);
+  border-radius: 50%;
 }
 
 .chipHex {
-  padding: 0.14rem 0.1rem 0.16rem;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 6px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.55rem;
   letter-spacing: 0.02em;
-  line-height: 1;
-  text-align: center;
   text-transform: uppercase;
-  color: var(--muted);
+  color: #3f3b46;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: auto;
+  padding-top: 0.45rem;
 }
 
 .cta {
   display: inline-flex;
   align-items: center;
-  align-self: flex-start;
-  gap: 0.3rem;
-  margin-top: auto;
-  /* The stamp button is pinned bottom-right; the CTA keeps clear of it. */
-  padding: 0.5rem 4.4rem 0 0;
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: var(--ink);
+  gap: 0.22rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: var(--card-ink);
   text-decoration: underline;
-  text-decoration-color: var(--tangerine);
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 4px;
-  text-decoration-style: wavy;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .ctaArrow {
-  width: 0.8rem;
-  height: 0.8rem;
-  transition: transform 0.2s var(--ease-spring);
+  width: 0.72rem;
+  height: 0.72rem;
 }
-
-.piece:hover .ctaArrow,
-.piece:focus-within .ctaArrow {
-  transform: translate(2px, -2px);
-}
-
-/* ── Stamp ─────────────────────────────────────────────────────────────── */
 
 .stampButton {
-  position: absolute;
-  z-index: 6;
-  right: 0.55rem;
-  bottom: 0.55rem;
-  padding: 0.3rem 0.45rem;
-  border: 1.5px solid rgb(24 24 27 / 0.55);
-  border-radius: 5px;
-  background: var(--mat);
-  color: var(--card-ink);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 7.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  line-height: 1;
+  position: relative;
+  z-index: 4;
+  margin-left: auto;
+  min-height: 2.4rem;
+  padding: 0.25rem 0.5rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  color: var(--card-ink);
+  background: #fffaf1;
+  border: 2px solid var(--card-ink);
+  border-radius: 8px;
   cursor: pointer;
   transition:
-    background-color 0.16s ease,
-    transform 0.16s var(--ease-spring);
+    background-color 0.18s ease,
+    color 0.18s ease;
 }
 
-.stampButton:hover {
-  background: var(--tape-butter);
-}
-
-.stampButton:active {
-  transform: translateY(1px);
-}
-
-.stampButton:focus-visible {
-  outline: 3px solid var(--cobalt);
-  outline-offset: 2px;
-}
-
-.piece[data-stamped='true'] .stampButton {
-  border-color: var(--card-ink);
+.stampButton[aria-pressed='true'] {
+  color: #fffaf1;
   background: var(--card-ink);
-  color: var(--tape-butter);
+}
+
+/* Whole-tile hit area: every card is one tap to its notes. */
+.openButton {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 14px;
 }
 
 .stamp {
   position: absolute;
-  z-index: 7;
-  right: 0.45rem;
-  bottom: 2.4rem;
-  display: flex;
-  align-items: baseline;
-  gap: 0.22rem;
-  padding: 0.18rem 0.4rem;
-  border: 2px solid #d13a5a;
-  border-radius: 4px;
-  color: #d13a5a;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
+  top: 34%;
+  right: 0.9rem;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 4.6rem;
+  height: 4.6rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6rem;
   line-height: 1;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  opacity: 0.85;
-  mix-blend-mode: multiply;
+  color: #c0392b;
+  border: 2px solid #c0392b;
+  border-radius: 50%;
+  rotate: -12deg;
+  opacity: 0.82;
   pointer-events: none;
 }
 
 .stampSmall {
-  font-size: 6px;
-  letter-spacing: 0.2em;
-  opacity: 0.75;
+  font-size: 0.48rem;
+  letter-spacing: 0.16em;
 }
 
-/* ── Vinyl scraps on the mat ───────────────────────────────────────────── */
+/* ── shelf progress ───────────────────────────────────────────────────── */
 
-/* The seven shapes are the same die-cut art peeled off the About release
-   liner: white rim, ink edges, no background of their own. The button is only
-   a handle — size comes from the sticker spec, and 2.4rem keeps one on the
-   mat's edge band rather than on a piece's copy. */
-.stickerZone {
-  position: absolute;
-  inset: 0;
-  z-index: 7;
-  pointer-events: none;
-}
-
-.sticker {
-  position: absolute;
-  z-index: 5;
-  pointer-events: auto;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--card-ink);
-  cursor: grab;
-  touch-action: none;
-  filter: drop-shadow(0 2px 0 rgb(24 24 27 / 0.22));
-  transition:
-    filter 0.18s var(--ease-spring),
-    opacity 0.18s ease;
-}
-
-.sticker svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.sticker:hover {
-  filter: drop-shadow(0 4px 0 rgb(24 24 27 / 0.26));
-}
-
-.sticker[aria-pressed='true'] {
-  opacity: 0.72;
-}
-
-.sticker[aria-pressed='true'] svg {
-  filter: saturate(0.55);
-}
-
-/* The peel is recorded with a tiny butter dot, not by moving the shape. */
-.stickerTick {
-  position: absolute;
-  right: -0.1rem;
-  bottom: -0.1rem;
-  display: grid;
-  place-items: center;
-  width: 0.9rem;
-  height: 0.9rem;
-  border: 1.5px solid var(--card-ink);
-  border-radius: 999px;
-  background: var(--tape-butter);
-  color: var(--card-ink);
-}
-
-.stickerTick svg {
-  width: 0.55rem;
-  height: 0.55rem;
-}
-
-.sticker:focus-visible {
-  outline: 3px solid var(--cobalt);
-  outline-offset: 4px;
-  border-radius: 999px;
-}
-
-/* ── Paper confetti ────────────────────────────────────────────────────── */
-
-.confetti {
-  position: absolute;
-  inset: 0;
-  z-index: 8;
+.shelfBar {
+  position: relative;
+  z-index: 2;
+  height: 3px;
+  margin: 0 0.2rem;
   overflow: hidden;
-  pointer-events: none;
+  background: rgb(24 24 27 / 0.32);
+  border-radius: 999px;
 }
 
-.scrap {
-  position: absolute;
-  top: 0;
-  border-radius: 1px;
-  background: var(--tape-amber);
-  box-shadow: 0 1px 0 rgb(24 24 27 / 0.14);
+.shelfBarFill {
+  height: 100%;
+  background: var(--washi-butter);
+  transform-origin: 0 50%;
+  transition: transform 0.25s var(--ease-spring);
 }
 
-.scrap[data-tone='pink'] {
-  background: var(--tape-pink);
+.shelfFoot {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-inline: 0.2rem;
+  font-family: var(--font-geist-mono), monospace;
+  color: #2b2117;
 }
 
-.scrap[data-tone='sky'] {
-  background: var(--tape-sky);
+.shelfNote {
+  margin: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.78;
 }
 
-.scrap[data-tone='mint'] {
-  background: var(--tape-mint);
-}
-
-.scrap[data-tone='butter'] {
-  background: var(--tape-butter);
-}
-
-.scrap[data-tone='rose'] {
-  background: var(--tape-rose);
+.shelfCount {
+  margin: 0;
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .masterNote {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  align-self: flex-start;
-  gap: 0.4rem;
-  margin: 0;
-  padding: 0.4rem 0.7rem;
+  gap: 0.45rem;
+  width: fit-content;
+  margin: 0.9rem auto 0;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.78rem;
+  color: var(--card-ink);
+  background: var(--washi-butter);
   border: 2px solid var(--card-ink);
   border-radius: 999px;
-  background: var(--tape-butter);
-  color: var(--card-ink);
-  font-size: 0.78rem;
-  font-weight: 650;
-  rotate: 0.8deg;
+  rotate: -0.8deg;
+  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.2);
 }
 
 .masterMark {
-  width: 0.95rem;
-  height: 0.95rem;
-  flex: none;
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
-/* ── Generated sleeves for the two releases without artwork ────────────── */
+/* ── drawer ───────────────────────────────────────────────────────────── */
+
+.dialog {
+  width: min(58rem, calc(100vw - 1.6rem));
+  max-height: min(90dvh, 54rem);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  color: var(--card-ink);
+  background: var(--card);
+  border: 2px solid var(--card-ink);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 6px #fffaf1,
+    14px 18px 0 rgb(24 24 27 / 0.26);
+}
+
+.dialog::backdrop {
+  background: rgb(19 20 36 / 0.64);
+}
+
+.dialogPanel {
+  position: relative;
+  padding: clamp(1rem, 2.4vw, 1.7rem);
+}
+
+.dialogClose {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--card-ink);
+  background: var(--washi-butter);
+  border: 2px solid var(--card-ink);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--card-ink);
+}
+
+.dialogGrid {
+  display: grid;
+  gap: clamp(1rem, 2.2vw, 1.6rem);
+  align-items: start;
+}
+
+.dialogPrint {
+  position: relative;
+}
+
+.dialogFrame {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #e9dfcf;
+  border: 2px solid var(--card-ink);
+  border-radius: 10px;
+}
+
+.dialogIndex {
+  position: absolute;
+  top: -0.6rem;
+  left: -0.35rem;
+  padding: 0.1rem 0.34rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6rem;
+  background: #fffaf1;
+  border: 1.5px solid var(--card-ink);
+  border-radius: 4px;
+  rotate: -3deg;
+}
+
+.dialogNotes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.dialogKicker {
+  margin: 0;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--card-muted);
+}
+
+.dialogTitle {
+  margin: 0;
+  padding-right: 2.6rem;
+  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+.dialogBody {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #3f3b46;
+}
+
+.dialogLabel {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--card-muted);
+}
+
+.dialogCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: fit-content;
+  min-height: 2.75rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--card-ink);
+  text-decoration: none;
+  background: var(--washi-butter);
+  border: 2px solid var(--card-ink);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 var(--card-ink);
+}
+
+.dialogCtaArrow {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+/* ── focus: butter is illegible on cork, so paper gets cobalt ─────────── */
+
+.moodboard
+  :is(
+    .chunky,
+    .pagerBtn,
+    .filter,
+    .stampButton,
+    .dialogClose,
+    .dialogCta
+  ):focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.moodboard .archive:focus-visible {
+  outline: 3px solid var(--card-ink);
+  outline-offset: 2px;
+}
+
+.moodboard .openButton:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ── generated sleeve art ─────────────────────────────────────────────── */
 
 .generatedCover {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: clamp(0.7rem, 1.6vw, 1.05rem);
+  display: grid;
+  place-items: center;
   overflow: hidden;
-  background: var(--cobalt);
-  color: var(--paper-hi);
-  isolation: isolate;
+  color: #f7f1e4;
+  background: radial-gradient(120% 90% at 18% 8%, #5568e6 0%, transparent 55%),
+    radial-gradient(90% 80% at 88% 96%, #2c3cae 0%, transparent 60%), #3d53d6;
+  container-type: size;
 }
 
 .generatedCover[data-variant='petri'] {
-  background: var(--mint);
-  color: var(--ink);
+  background: radial-gradient(110% 90% at 82% 12%, #a6e3c0 0%, transparent 58%),
+    radial-gradient(90% 80% at 8% 92%, #7fd0a6 0%, transparent 62%), #5fbf92;
+  color: #12322a;
 }
 
 .genGrid {
   position: absolute;
   inset: 0;
-  z-index: -1;
-  background-image: radial-gradient(currentColor 1px, transparent 1px);
-  background-size: 9px 9px;
-  opacity: 0.12;
-  pointer-events: none;
+  background-image: radial-gradient(currentColor 0.6px, transparent 0.7px);
+  background-size: 11px 11px;
+  opacity: 0.24;
 }
 
-.genCode,
-.genNote {
-  position: relative;
+.genCode {
+  position: absolute;
+  top: 0.55rem;
+  left: 0.6rem;
   z-index: 2;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 7px;
-  letter-spacing: 0.16em;
-  line-height: 1;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   opacity: 0.78;
 }
 
-.genNote {
-  margin-top: auto;
-}
-
 .genGhost {
   position: relative;
-  z-index: 2;
-  margin-top: auto;
-  font-family: var(--font-syne), var(--font-space-grotesk), system-ui,
-    sans-serif;
-  font-size: clamp(2.2rem, 18cqw, 5rem);
+  z-index: 1;
+  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  font-size: clamp(2.2rem, 22cqw, 5rem);
   font-weight: 800;
-  letter-spacing: -0.085em;
-  line-height: 0.7;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  opacity: 0.9;
 }
 
 .genRing {
   position: absolute;
-  right: -18%;
-  bottom: -26%;
-  width: 82%;
+  width: min(62%, 11rem);
   aspect-ratio: 1;
-  border: 2px solid currentColor;
+  border: 1.5px solid currentColor;
   border-radius: 50%;
-  opacity: 0.45;
+  opacity: 0.4;
 }
 
 .genOrbit {
   position: absolute;
-  z-index: 1;
-  top: 57%;
-  right: -6%;
-  width: 82%;
-  height: 2px;
-  background: var(--tangerine);
-  transform: rotate(-24deg);
-  opacity: 0.9;
-}
-
-.genOrbit::before,
-.genOrbit::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 0.55rem;
-  height: 0.55rem;
-  border: 1.5px solid currentColor;
+  width: min(38%, 6.5rem);
+  aspect-ratio: 1;
+  border: 6px solid currentColor;
   border-radius: 50%;
-  background: var(--cobalt);
-  translate: -50% -50%;
-}
-
-.genOrbit::before {
-  left: 0;
-}
-
-.genOrbit::after {
-  left: 100%;
+  opacity: 0.34;
+  translate: 38% -22%;
 }
 
 .genCell {
   position: absolute;
-  z-index: 1;
+  width: min(16%, 2.6rem);
+  aspect-ratio: 1;
   border: 1.5px solid currentColor;
   border-radius: 50%;
-  background: radial-gradient(
-    circle at 38% 34%,
-    color-mix(in srgb, var(--butter) 82%, transparent),
-    transparent 62%
-  );
-  opacity: 0.75;
-}
-
-.genCell[data-size='lg'] {
-  top: 16%;
-  right: 17%;
-  width: 38%;
-  aspect-ratio: 1;
+  opacity: 0.5;
+  translate: -46% 34%;
 }
 
 .genCell[data-size='sm'] {
-  top: 40%;
-  right: 11%;
-  width: 19%;
-  aspect-ratio: 1;
+  width: min(8%, 1.3rem);
+  translate: 62% 96%;
 }
 
-/* ── Hover peep ────────────────────────────────────────────────────────── */
-
-/* The same cover, printed big enough to read. It is a print, not a dialog: no
-   backdrop, no focus trap, no pointer events, and it never covers the toolbar
-   because `Peek` clamps it inside the mat. */
-.peek {
+.genNote {
   position: absolute;
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  padding: 0.5rem;
-  border-radius: 14px;
-  background: var(--card);
-  box-shadow:
-    0 0 0 4px #fffaf1,
-    0 8px 0 rgb(24 24 27 / 0.18),
-    0 34px 54px -22px rgb(18 10 2 / 0.85),
-    0 2px 10px rgb(18 10 2 / 0.3);
-  transform-origin: 50% 110%;
-  pointer-events: none;
-  will-change: transform;
-}
-
-.peekFrame {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  border: 1.5px solid rgb(24 24 27 / 0.55);
-  border-radius: 9px;
-  background: var(--paper-lo);
-  aspect-ratio: 16 / 10;
-}
-
-.peekBar {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  padding: 0.45rem 0.2rem 0.1rem;
-}
-
-.peekIndex {
-  font-family: var(--font-geist-mono);
-  font-size: 0.56rem;
-  letter-spacing: 0.16em;
-  color: rgb(24 24 27 / 0.45);
-}
-
-.peekTitle {
-  font-family: var(--font-syne);
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: var(--card-ink);
-}
-
-.peekKind {
-  margin-left: auto;
-  font-family: var(--font-geist-mono);
-  font-size: 0.52rem;
+  right: 0.6rem;
+  bottom: 0.5rem;
+  z-index: 2;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: rgb(24 24 27 / 0.42);
+  opacity: 0.8;
 }
 
-/* ── Tablet ────────────────────────────────────────────────────────────── */
+/* ── wider boards ─────────────────────────────────────────────────────── */
 
-@media (min-width: 1024px) {
+@media (min-width: 56rem) {
   .toolbar {
-    grid-template-columns: minmax(0, 1.25fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'hud filters controls'
+      'archives archives archives';
+    align-items: center;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .chunky {
+    flex: 0 0 auto;
   }
 
   .archiveLinks {
-    grid-column: auto;
     justify-content: flex-end;
   }
-}
 
-@media (max-width: 1200px) {
-  .pieceCell {
-    grid-column: span 4;
+  .archive {
+    flex: 0 1 auto;
+  }
+
+  .dialogGrid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   }
 }
 
-@media (max-width: 1023px) {
-  .toolbar {
-    grid-template-columns: minmax(0, 1fr);
+@media (max-width: 55.99rem) {
+  .hudNote {
+    display: none;
   }
 
-  .controls {
-    order: 2;
-  }
-
-  .pieceCell {
-    grid-column: span 6;
-  }
-
-  .pieceCell {
-    margin-top: calc(var(--cell-drop, 0rem) * 0.6);
+  .dialogFrame {
+    aspect-ratio: 4 / 3;
   }
 }
 
-/* ── Phone and touch ───────────────────────────────────────────────────── */
-
-@media (max-width: 767px) {
-  .desk {
-    padding: 0.4rem;
-    border-radius: 22px;
-  }
-
-  .mat {
-    border-radius: 16px;
-    gap: 1.35rem 0.85rem;
-  }
-
-  .pieceGrid {
-    gap: 1.35rem 0.85rem;
-  }
-
-  .pieceCell {
-    grid-column: span 12;
-    margin-top: 0;
-  }
-
-  .piece {
-    rotate: 0deg;
-    box-shadow:
-      0 0 0 4px #fffaf1,
-      4px 5px 0 rgb(24 24 27 / 0.14);
-  }
-
-  .tape {
-    width: 5.2rem;
-  }
-
-  .note {
-    -webkit-line-clamp: 2;
-  }
-
-  .stampButton {
-    padding: 0.36rem 0.5rem;
-    font-size: 8px;
-  }
-
-  /* One column: scraps stop floating over the copy and sit in their own row. */
-  .stickerZone {
-    position: static;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.9rem;
-    padding-block: 0.1rem 0.5rem;
-  }
-
-  .sticker {
-    position: static;
-    width: 2.4rem;
-    height: 2.4rem;
-  }
-
-  .toolbar {
-    grid-template-areas:
-      'hud'
-      'controls'
-      'filters'
-      'archives';
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .controls,
-  .archiveLinks {
-    justify-self: stretch;
-  }
-
+/* Three chips will not sit in one pill on a phone; give them a grid instead. */
+@media (max-width: 30rem) {
   .filters {
-    flex-wrap: wrap;
-    justify-self: stretch;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
+    border-radius: 14px;
   }
 
   .filter {
-    flex: 1;
-    justify-content: center;
+    padding: 0.35rem 0.25rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.02em;
   }
 
-  .archiveLinks {
-    justify-self: stretch;
+  .filterCount {
+    display: none;
   }
 
-  .hudCount {
-    min-width: 3rem;
-    height: 2.2rem;
-    font-size: 10px;
-  }
-
-  .controls {
-    flex-wrap: wrap;
-  }
-
-  .chunky,
-  .plainer {
-    flex: 1;
-    min-height: 2.4rem;
+  .shelfHint {
+    display: none;
   }
 }
 
-/* ── Reduced motion ────────────────────────────────────────────────────── */
-
 @media (prefers-reduced-motion: reduce) {
+  .track {
+    scroll-behavior: auto;
+  }
+
   .piece,
-  .tape,
-  .panTarget,
-  .ctaArrow,
-  .archive,
-  .archiveArrow,
-  .sticker,
-  .stampButton,
-  .chunky,
-  .plainer {
-    transition-duration: 0.01ms !important;
-  }
-
-  .piece {
-    rotate: 0deg;
-  }
-
   .piece:hover,
-  .piece:focus-within {
-    box-shadow:
-      0 0 0 5px #fffaf1,
-      5px 7px 0 rgb(24 24 27 / 0.16);
-    translate: none;
-  }
-
-  .panTarget {
-    transform: none !important;
-  }
-
+  .chunky,
+  .pagerBtn,
   .filter,
-  .filterCount {
-    transition-duration: 0.01ms !important;
+  .archive,
+  .shelfBarFill,
+  .panTarget,
+  .stampButton {
+    transition-duration: 0.01ms;
+  }
+
+  .piece,
+  .piece:hover {
+    transform: rotate(var(--tilt, 0deg));
+  }
+
+  .archive,
+  .archive:nth-child(2) {
+    rotate: 0deg;
   }
 }

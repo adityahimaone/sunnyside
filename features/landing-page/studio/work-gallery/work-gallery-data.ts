@@ -1,5 +1,5 @@
 import { WORK_PROJECTS, type WorkProject } from '@/data/projects'
-import { DESIGN_CASES } from '@/features/case-library/cases'
+import { DESIGN_CASES, type DesignCase } from '@/features/case-library/cases'
 
 type BaseGalleryItem = {
   id: string
@@ -71,6 +71,7 @@ const PROJECT_POSITION: Record<string, string> = {
  */
 const SYSTEM_SWATCHES: Record<string, readonly string[]> = {
   sunnyside: ['#f3ecdf', '#191a2e', '#3d53d6', '#ffd23f'],
+  vesper: ['#0d131f', '#2342c0', '#5470d6', '#fbf8f1'],
   'wildflower-wind': ['#e7e3ee', '#2a1e33', '#8f2a90', '#f4d9e8'],
   bluewater: ['#040b14', '#0d1d2c', '#8fb6d6', '#f4f9fd'],
   jakarta: ['#f7f4ee', '#1b2126', '#2830d0', '#dad4c9'],
@@ -79,6 +80,10 @@ const SYSTEM_SWATCHES: Record<string, readonly string[]> = {
   clearing: ['#0e211c', '#2f7a5e', '#cbdd82', '#f3edde'],
   strand: ['#f3f0e8', '#13232a', '#a85a22', '#2f5f6b'],
   cove: ['#060b18', '#111d36', '#3fe3c6', '#e9f0ff'],
+  hachure: ['#121612', '#2f4133', '#8fa87a', '#f5f3e9'],
+  riso: ['#141926', '#e85d3f', '#2d5ba6', '#fbf7ed'],
+  huginn: ['#1a0505', '#c8382d', '#eae4d9', '#f8f5ee'],
+  vitrine: ['#0b0d12', '#1c2230', '#4e6d94', '#d8e4f0'],
 }
 
 const slugify = (value: string) =>
@@ -120,9 +125,11 @@ export const PROJECT_GALLERY_ITEMS: readonly ProjectGalleryItem[] =
  * source of truth `/design-system` renders, so a case can never appear on the
  * board with a name, path or cover the case page does not have.
  */
-export const SYSTEM_GALLERY_ITEMS: readonly SystemGalleryItem[] =
-  DESIGN_CASES.slice(0, MOODBOARD_LIMIT).map((item, order) => {
-    const id = slugify(item.name)
+export function buildSystemGalleryItems(
+  cases: readonly DesignCase[] = DESIGN_CASES,
+): readonly SystemGalleryItem[] {
+  return cases.slice(0, MOODBOARD_LIMIT).map((item, order) => {
+    const id = slugify(item.slug || item.name)
 
     return {
       id,
@@ -141,6 +148,10 @@ export const SYSTEM_GALLERY_ITEMS: readonly SystemGalleryItem[] =
       swatches: SYSTEM_SWATCHES[id] ?? [],
     }
   })
+}
+
+export const SYSTEM_GALLERY_ITEMS: readonly SystemGalleryItem[] =
+  buildSystemGalleryItems(DESIGN_CASES)
 
 export const GALLERY_ITEMS: readonly GalleryItem[] = [
   ...PROJECT_GALLERY_ITEMS,

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -14,11 +15,15 @@ import {
 } from 'react'
 
 import type { WorkProject } from '@/data/projects'
+import type { DesignCase } from '@/features/case-library'
 import { ArrowUpRight, Sparkle } from '../doodles'
 import { Reveal } from '../reveal'
 import {
   ARCHIVE_LINKS,
   GALLERY_ITEMS,
+  PROJECT_GALLERY_ITEMS,
+  SYSTEM_GALLERY_ITEMS,
+  buildSystemGalleryItems,
   PIECE_TAPE,
   PIECE_TILT,
   type GalleryItem,
@@ -183,7 +188,7 @@ function PaperPiece({
         </span>
       </span>
 
-      <span className={styles.body}>
+      <div className={styles.body}>
         <span className={styles.meta}>
           {item.categoryLabel} · {item.year}
         </span>
@@ -202,11 +207,22 @@ function PaperPiece({
           </span>
         )}
 
-        <span className={styles.cta}>
-          {item.cta}
-          <ArrowUpRight className={styles.ctaArrow} />
-        </span>
-      </span>
+        <div className={styles.foot}>
+          <span className={styles.cta}>
+            {item.cta}
+            <ArrowUpRight className={styles.ctaArrow} />
+          </span>
+          <button
+            type="button"
+            className={styles.stampButton}
+            aria-pressed={stamped}
+            aria-label={`${stamped ? 'Remove the stamp from' : 'Stamp'} ${item.title}`}
+            onClick={() => onStamp(item.id)}
+          >
+            {stamped ? 'Stamped' : 'Stamp it'}
+          </button>
+        </div>
+      </div>
 
       <button
         type="button"
@@ -214,16 +230,6 @@ function PaperPiece({
         onClick={() => onOpen(item)}
         aria-label={`Open the notes for ${item.title}, ${item.categoryLabel}, ${item.year}`}
       />
-
-      <button
-        type="button"
-        className={styles.stampButton}
-        aria-pressed={stamped}
-        aria-label={`${stamped ? 'Remove the stamp from' : 'Stamp'} ${item.title}`}
-        onClick={() => onStamp(item.id)}
-      >
-        {stamped ? 'Stamped' : 'Stamp it'}
-      </button>
 
       {stamped ? (
         <span className={styles.stamp} aria-hidden>
@@ -235,7 +241,11 @@ function PaperPiece({
   )
 }
 
-export function WorkGallery() {
+export function WorkGallery({
+  designCases,
+}: {
+  designCases?: readonly DesignCase[]
+} = {}) {
   const reduced = useReducedMotion() ?? false
   const trackRef = useRef<HTMLDivElement>(null)
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -245,7 +255,6 @@ export function WorkGallery() {
     moved: boolean
     id: number
   } | null>(null)
-  const moved = useRef(false)
   const [dragging, setDragging] = useState(false)
   const [filter, setFilter] = useState<Filter>('all')
   const [stamped, setStamped] = useState<ReadonlySet<string>>(new Set())
@@ -254,10 +263,21 @@ export function WorkGallery() {
   const [progress, setProgress] = useState(0)
   const [edges, setEdges] = useState({ start: true, end: false })
 
+  const systemItems = useMemo(
+    () =>
+      designCases ? buildSystemGalleryItems(designCases) : SYSTEM_GALLERY_ITEMS,
+    [designCases],
+  )
+
+  const allItems = useMemo(
+    () => [...PROJECT_GALLERY_ITEMS, ...systemItems],
+    [systemItems],
+  )
+
   const visible =
     filter === 'all'
-      ? GALLERY_ITEMS
-      : GALLERY_ITEMS.filter((item) => item.kind === filter)
+      ? allItems
+      : allItems.filter((item) => item.kind === filter)
 
   const measure = useCallback(() => {
     const el = trackRef.current
@@ -379,20 +399,13 @@ export function WorkGallery() {
     if (!state || state.id !== event.pointerId) return
     drag.current = null
     setDragging(false)
-    if (state.moved) {
-      moved.current = true
-      window.setTimeout(() => {
-        moved.current = false
-      }, 0)
-    }
   }
 
   /** Mouse parallax on the print inside a tile. Decoration only. */
   const pan = (event: PointerEvent<HTMLElement>, reset = false) => {
     if (event.pointerType !== 'mouse') return
-    const media = event.currentTarget.querySelector<HTMLElement>(
-      '[data-pan-target]',
-    )
+    const media =
+      event.currentTarget.querySelector<HTMLElement>('[data-pan-target]')
     if (!media) return
     if (reset) {
       media.style.setProperty('--pan-x', '0px')
@@ -436,7 +449,9 @@ export function WorkGallery() {
         <div className={styles.desk}>
           <div
             className={styles.mat}
-            style={{ '--mat-pad': 'clamp(0.85rem, 1.9vw, 1.5rem)' } as CSSProperties}
+            style={
+              { '--mat-pad': 'clamp(0.85rem, 1.9vw, 1.5rem)' } as CSSProperties
+            }
           >
             <span className={styles.grain} aria-hidden />
 
@@ -473,7 +488,7 @@ export function WorkGallery() {
                     disabled={edges.start}
                     aria-label="Previous piece"
                   >
-                    <ArrowUpRight className={styles.pagerIcon} data-dir="left" />
+                    <ArrowUpRight className={styles.pagerIcon} />
                   </button>
                   <button
                     type="button"
@@ -553,7 +568,6 @@ export function WorkGallery() {
               onPointerMove={onPointerMove}
               onPointerUp={endDrag}
               onPointerCancel={endDrag}
-              onScroll={measure}
             >
               {visible.map((item) => (
                 <PaperPiece
@@ -577,7 +591,11 @@ export function WorkGallery() {
 
             <div className={styles.shelfFoot}>
               <p className={styles.shelfNote}>
-                {visible.length} pieces · drag, swipe or use the arrows
+                {visible.length} pieces
+                <span className={styles.shelfHint}>
+                  {' '}
+                  · drag, swipe or use the arrows
+                </span>
               </p>
               <p className={styles.shelfCount}>
                 {String(position).padStart(2, '0')}/{visible.length}
@@ -618,7 +636,10 @@ export function WorkGallery() {
             <div className={styles.dialogGrid}>
               <div className={styles.dialogPrint}>
                 <span className={styles.dialogFrame}>
-                  <PieceMedia item={active} sizes="(min-width: 900px) 42vw, 90vw" />
+                  <PieceMedia
+                    item={active}
+                    sizes="(min-width: 900px) 42vw, 90vw"
+                  />
                 </span>
                 <span className={styles.dialogIndex} aria-hidden>
                   {active.index}
@@ -647,7 +668,13 @@ export function WorkGallery() {
                   </span>
                 )}
 
-                <Link className={styles.dialogCta} href={active.href}>
+                <Link
+                  className={styles.dialogCta}
+                  href={active.href}
+                  {...(active.href.startsWith('http')
+                    ? { target: '_blank', rel: 'noreferrer' }
+                    : {})}
+                >
                   {active.cta}
                   <ArrowUpRight className={styles.dialogCtaArrow} />
                 </Link>

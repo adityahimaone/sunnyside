@@ -2,6 +2,7 @@
 
 import { useRef } from 'react'
 
+import type { DesignCase } from '@/features/case-library'
 import { About } from './about'
 import { ChapterRail } from './chapter-rail'
 import { Contact } from './contact'
@@ -52,7 +53,11 @@ function Marquee() {
  * a running tempo of stickers — but the machine is now a pinboard rather than
  * a mixing desk.
  */
-export default function Studio() {
+export default function Studio({
+  designCases,
+}: {
+  designCases?: readonly DesignCase[]
+} = {}) {
   const { active, scrolled, footerVisible } = usePagePosition()
   const rootRef = useRef<HTMLDivElement>(null)
   useLandingMotion(rootRef)
@@ -78,7 +83,7 @@ export default function Studio() {
         <Marquee />
         <About />
         <Showcase />
-        <Projects />
+        <Projects designCases={designCases} />
         <Skills />
         <Contact />
       </main>

@@ -1,5 +1,6 @@
 import { getRepos, toArchiveRepos } from '@/features/projects/lib/github'
 import { LandingPage } from '@/features/landing-page'
+import { getDesignCases } from '@/features/case-library'
 import { JsonLd, person, webSite } from '@/lib/structured-data'
 
 export default async function Home() {
@@ -44,7 +45,10 @@ export default async function Home() {
   // the whole subtree, leaving no hydrated handlers and no effects, so the page
   // silently stops being clickable and the GSAP timelines never start.
   // getRepos is cached for an hour by its own `next.revalidate`.
-  const { repos } = await getRepos()
+  const [{ repos }, designCases] = await Promise.all([
+    getRepos(),
+    getDesignCases(),
+  ])
 
   return (
     <>
@@ -56,7 +60,10 @@ export default async function Home() {
           objects put ~180KB of unused GitHub fields into the RSC payload that
           ships inline in this HTML, all of which is received and parsed before
           the first paint. */}
-      <LandingPage archiveRepos={toArchiveRepos(repos)} />
+      <LandingPage
+        archiveRepos={toArchiveRepos(repos)}
+        designCases={designCases}
+      />
     </>
   )
 }
