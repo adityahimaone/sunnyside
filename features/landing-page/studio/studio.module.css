@@ -529,7 +529,7 @@
 .heroDisplay {
   margin: 0;
   font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(2.8rem, 10.5vw, 4.4rem);
+  font-size: clamp(2.2rem, 8.4vw, 3.4rem);
   font-weight: 800;
   line-height: 0.9;
   letter-spacing: -0.058em;
@@ -882,17 +882,34 @@
    the disc drops to the horizon and the stage stacks: canopy, dock, word. */
 @media (max-width: 1023px) {
   .hero {
-    --sun-size: min(70vw, 18rem);
-    /* Same horizon rule as desktop: the hill is in front of the disc, so the
-       lift clears the taller hill instead of resting on the paper line. */
-    --sun-lift: 0.72;
+    --sun-size: min(64vw, 16rem);
+    /* The dock sits on the hill below the sun, so the lift is measured from a
+       taller stage: the disc clears the card by a hair instead of landing on
+       it, and the hill behind the card is stretched to wrap it. */
+    --sun-lift: 1.85;
     --items-lift: var(--sun-lift);
-    padding-bottom: calc(
-      var(--ground) + var(--sun-size) * var(--sun-top) + 1rem
-    );
+    --dock-space: 24rem;
+    padding-bottom: calc(var(--ground) + var(--dock-space));
+  }
+
+  /* The stage drops its own positioning so the card can anchor to the hero and
+     sit under the sun; it keeps z-index because a flex child with z-index
+     stacks whether or not it is positioned. */
+  .heroStage {
+    position: static;
+  }
+
+  /* Out of the stack and onto the hill: the card reads as sitting below the
+     sun, with the stretched hill behind it. */
+  .heroDock {
+    position: absolute;
+    right: 1.125rem;
+    bottom: calc(var(--ground) + 0.75rem);
+    left: 1.125rem;
   }
 
   .heroLower {
+    position: static;
     grid-template-columns: minmax(0, 1fr);
     gap: 1.6rem;
   }

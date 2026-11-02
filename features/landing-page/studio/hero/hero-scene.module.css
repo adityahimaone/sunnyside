@@ -388,6 +388,12 @@
     --ky: 0.42;
     --kx: 0.5;
   }
+
+  /* The bio card sits on the hill down here, so the hill is stretched to wrap
+     it rather than hugging the paper line. */
+  .farHill {
+    height: clamp(18rem, 44vh, 24rem);
+  }
 }
 
 /* A centred sun with a wide word on top leaves no room right of the disc on a

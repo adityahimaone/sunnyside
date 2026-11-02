@@ -29,7 +29,8 @@ export type DesignCase = {
 }
 
 export const DESIGN_SYSTEM_URL =
-  process.env.NEXT_PUBLIC_DESIGN_SYSTEM_URL || 'http://localhost:4321'
+  process.env.NEXT_PUBLIC_DESIGN_SYSTEM_URL ||
+  'https://design-system.adityahimaone.space'
 
 /**
  * Resolves URLs and image covers depending on whether a case is hosted locally

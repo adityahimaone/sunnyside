@@ -48,6 +48,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'i.scdn.co' },
       { protocol: 'https', hostname: 'img.youtube.com' },
+      { protocol: 'https', hostname: 'design-system.adityahimaone.space' },
     ],
     // WebP only, no AVIF. AVIF saves maybe 20% on file size but costs several
     // times the encode CPU and transient memory per image, paid inside the
@@ -64,7 +65,8 @@ const nextConfig = {
   // Direct destinations prevent 308 redirect chains (e.g. trailing slash normalization).
   async redirects() {
     const designSystemUrl =
-      process.env.NEXT_PUBLIC_DESIGN_SYSTEM_URL || 'http://localhost:4321'
+      process.env.NEXT_PUBLIC_DESIGN_SYSTEM_URL ||
+      'https://design-system.adityahimaone.space'
 
     return [
       // Design system cases separated to external design-system app

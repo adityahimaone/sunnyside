@@ -550,7 +550,7 @@ const CSS =
   '.ssf-pop li+li{border-top:1.5px dashed color-mix(in oklab,var(--ssf-ink) 22%,transparent)}' +
   '.ssf-pop b{font-size:11px;font-weight:600;opacity:.6;text-transform:lowercase}' +
   '.ssf-pop strong{font-weight:800;letter-spacing:-.01em}' +
-  '@container (max-width: 760px){.ssf-cols{grid-template-columns:minmax(0,1fr)}.ssf-top{padding-bottom:24px}.ssf-stage{width:min(165%,calc(var(--ssf-wmh) * var(--ssf-ar)));max-width:none;margin-left:-6%}}' +
+  '@container (max-width: 760px){.ssf-cols{grid-template-columns:minmax(0,1fr)}.ssf-top{padding-bottom:24px}}' +
   '@keyframes ssf-rewrite{0%{stroke-dashoffset:var(--l,120px)}100%{stroke-dashoffset:0}}' +
   '@keyframes ssf-popin{from{opacity:0;transform:translateY(10px) scale(.7) rotate(4deg)}}' +
   // the storyboard: everything above is the finished state; motion only adds the way in
