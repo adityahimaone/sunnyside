@@ -46,7 +46,7 @@ export function Contact() {
               the <span className="text-[var(--cobalt)]">hard part.</span>
             </span>
           }
-          intro="A design that won't survive data. A flow that feels slow. A front end that needs a second pair of hands. Start with the messy bit."
+          intro="A design that breaks under live data. A flow that drags. A front end that needs senior hands. Start with the messy bit."
         />
 
         <div className={styles.contactGrid}>
@@ -56,9 +56,9 @@ export function Contact() {
                 The interesting work is never the easy screen.
               </p>
               <p className={styles.contactBody}>
-                I&apos;m open to product work, design-system builds and short
-                rescues. Tell me what is stuck and what you have already tried.
-                I read everything and usually reply within a day or two.
+                I take on product work, design-system builds and short rescues.
+                Tell me what is stuck and what you have already tried. I read
+                every note and reply within a day or two.
               </p>
             </Reveal>
 

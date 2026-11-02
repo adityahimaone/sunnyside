@@ -1,3 +1,6 @@
+import { WORK_PROJECTS } from '@/data/projects'
+import { DESIGN_CASES } from '@/features/case-library/cases'
+
 /**
  * The landing page is one continuous side: a studio wall the reader scrolls
  * past. The colours are shared with the sticker-slap footer at the bottom, so
@@ -45,21 +48,25 @@ export const CHAPTERS = [
 
 export type ChapterId = (typeof CHAPTERS)[number]['id']
 
+/** Every piece on the shelf: shipped releases plus the documented systems. */
+export const CATALOGUE_SIDES = WORK_PROJECTS.length + DESIGN_CASES.length
+
 export const HERO_FACTS = [
-  { value: '4+', label: 'years shipping frontends' },
+  { value: '6+', label: 'years crafting interfaces' },
   { value: '15k+', label: 'people using the work' },
-  { value: '6', label: 'sides in the catalogue' },
+  { value: String(CATALOGUE_SIDES), label: 'sides in the catalogue' },
 ] as const
 
 export const ABOUT_FACTS = [
   {
     key: 'Day job',
-    value: 'Frontend Engineer at Fast 8 Group, working on product interfaces.',
+    value:
+      'Frontend Engineer at Fast 8 Group. The title says frontend; the work is the product UI and the component system under it.',
   },
   {
     key: 'Practice',
     value:
-      'Four years in React and TypeScript. I settle the interface calls in the browser.',
+      'Six years in React and TypeScript. Design systems, interactive motion, interface architecture. I settle the calls in the browser.',
   },
   {
     key: 'Home',
@@ -193,9 +200,9 @@ export const SKILL_GROUPS: readonly SkillGroup[] = [
 
 export const WORK_NOTES = [
   'Product interfaces that survive real data',
-  'Design systems people keep using',
+  'Design systems engineers actually keep using',
   'Motion that explains, not decorates',
-  'Front-end rescue work, with the tests',
+  'Front-end rescues, shipped with tests',
 ] as const
 
 export function scrollToSection(id: string, reduced: boolean) {

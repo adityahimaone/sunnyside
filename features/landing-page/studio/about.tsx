@@ -33,7 +33,7 @@ export function About() {
               </span>
             </span>
           }
-          intro="Four years of product work, one habit: decide in the browser, then leave enough structure that the next person can disagree with me."
+          intro="Six years of product work, one habit: decide in the browser, then leave enough structure that the next person can disagree with me."
         />
 
         <StickerPit />
@@ -43,15 +43,15 @@ export function About() {
             <Reveal>
               <p className={styles.aboutBody}>
                 I&apos;m Aditya Himawan, a design engineer based in Jakarta. For
-                four years I&apos;ve built product interfaces for teams in
+                six years I&apos;ve built product interfaces for teams in
                 manufacturing, developer tools and finance, usually the part
                 where a design has to survive{' '}
                 <strong>real data, real browsers and a real deadline.</strong>
               </p>
               <p className={styles.aboutBody}>
-                I sit between design and engineering. I prototype in the
-                browser, build the system, and keep the motion honest. The
-                handoff is a pull request, not a promise.
+                I prototype in the browser, own the component API and the state
+                behind it, and keep the motion honest. The handoff is a pull
+                request, not a promise.
               </p>
             </Reveal>
 

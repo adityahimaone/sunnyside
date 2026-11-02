@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 
+import { WORK_PROJECTS } from '@/data/projects'
 import { DESIGN_CASES } from '@/features/case-library/cases'
 
 import { ArrowUpRight, Sun } from './doodles'
@@ -19,10 +20,11 @@ import styles from './studio.module.css'
  * under every cover. `WorkGallery` owns the data, the filter state and the
  * drawings; this file only owns the chapter around it.
  *
- * The counts in the copy are read from `DESIGN_CASES` rather than typed, so
- * adding a case never leaves a stale "six systems" line behind.
+ * The counts in the copy are read from the data rather than typed, so adding a
+ * release or a case never leaves a stale "six systems" line behind.
  */
 export function Projects() {
+  const releases = WORK_PROJECTS.length
   const systems = DESIGN_CASES.length
 
   return (
@@ -47,14 +49,16 @@ export function Projects() {
               shipped.
             </span>
           }
-          intro={`Six releases from the catalogue and the ${systems} documented systems behind them. Filter the wall, then open a card for the notes.`}
+          intro={`${releases} releases and ${systems} documented systems in the catalogue. The wall shows the newest of them; filter it, then open a card for the notes.`}
         />
 
         <WorkGallery />
 
         <Reveal delay={0.1}>
           <div className={styles.archiveBand}>
-            <p>Six releases · {systems} systems · 2022–26</p>
+            <p>
+              {releases} releases · {systems} systems · 2022–26
+            </p>
             <Link className={styles.archiveLink} href="/projects">
               The full discography
               <ArrowUpRight className="size-5" />

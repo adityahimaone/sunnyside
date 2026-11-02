@@ -64,10 +64,10 @@ export function Hero() {
 
           <Reveal delay={0.18}>
             <p className={styles.heroLede}>
-              I&apos;m Aditya, a design engineer who builds product interfaces
-              in React and TypeScript, then sweats the{' '}
-              <strong>motion, type and tiny moments</strong> that make them feel
-              alive. Four years in, still convinced the details are the product.
+              I&apos;m Aditya, a design engineer working in React and
+              TypeScript. I bridge design and code: prototyping in the browser,
+              building the design system under the screens, and sweating the{' '}
+              <strong>motion and type</strong> that make software feel alive.
             </p>
           </Reveal>
 

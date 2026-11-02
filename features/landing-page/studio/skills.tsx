@@ -57,7 +57,7 @@ export function Skills() {
               reach for.
             </span>
           }
-          intro="A toolbox, not a scoreboard. The split below is honest about what pays the rent, what I sweat, and what keeps either from falling over."
+          intro="The split below says what pays the rent, what I sweat, and what keeps either from falling over."
         />
 
         <div className={styles.skillsGrid}>
