@@ -14,6 +14,14 @@
   --washi-mint: #b7e4c7;
   --washi-butter: #ffd23f;
   --washi-rose: #ff9d8a;
+  --paper-lo: #f6ecdb;
+  /* Confetti + peel ticks read from the same tape stock as the washi. */
+  --tape-amber: var(--washi-amber);
+  --tape-pink: var(--washi-pink);
+  --tape-sky: var(--washi-sky);
+  --tape-mint: var(--washi-mint);
+  --tape-butter: var(--washi-butter);
+  --tape-rose: var(--washi-rose);
   --wg-card: clamp(15rem, 78%, 22rem);
   --wg-gap: clamp(0.9rem, 1.6vw, 1.4rem);
   --ring: #2c3cae;
@@ -86,6 +94,16 @@
   opacity: 0.26;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+/* One hand on the board. The cell owns the layout slot so the piece can keep
+   its own tilt, tape and hover lift without fighting the track. */
+.pieceCell {
+  position: relative;
+  display: flex;
+  flex: 0 0 var(--wg-card);
+  min-width: 0;
+  scroll-snap-align: start;
 }
 
 /* ── toolbar ──────────────────────────────────────────────────────────── */
@@ -384,9 +402,9 @@
 .piece {
   position: relative;
   display: flex;
-  flex: 0 0 var(--wg-card);
+  flex: 1 1 auto;
   flex-direction: column;
-  scroll-snap-align: start;
+  width: 100%;
   padding: 0.7rem 0.75rem 0.8rem;
   background: var(--card);
   color: var(--card-ink);
@@ -1086,11 +1104,16 @@
     cursor: default;
   }
 
-  .piece {
-    /* Four across; the drop rides on the piece so a filter never re-deals it. */
+  .pieceCell {
+    /* Four across; the drop rides on the cell so a filter never re-deals it. */
+    display: block;
     grid-column: span 3;
     height: 100%;
     margin-top: var(--cell-drop, 0);
+  }
+
+  .piece {
+    height: 100%;
   }
 
   .pager,
@@ -1134,4 +1157,166 @@
   .archive:nth-child(2) {
     rotate: 0deg;
   }
+}
+
+/* ── hover print ───────────────────────────────────────────────────────── */
+
+/* The peep is the card the visitor is already looking at, only big enough to
+   read. It hangs over its own artwork, so it never covers the toolbar. */
+.peek {
+  position: absolute;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow:
+    0 0 0 4px #fffaf1,
+    0 8px 0 rgb(24 24 27 / 0.18),
+    0 34px 54px -22px rgb(18 10 2 / 0.85),
+    0 2px 10px rgb(18 10 2 / 0.3);
+  transform-origin: 50% 110%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.peekFrame {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1.5px solid rgb(24 24 27 / 0.55);
+  border-radius: 9px;
+  background: var(--paper-lo);
+  aspect-ratio: 16 / 10;
+}
+
+.peekBar {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.45rem 0.2rem 0.1rem;
+}
+
+.peekIndex {
+  font-family: var(--font-geist-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
+  color: rgb(24 24 27 / 0.45);
+}
+
+.peekTitle {
+  font-family: var(--font-syne);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--card-ink);
+}
+
+.peekKind {
+  margin-left: auto;
+  font-family: var(--font-geist-mono);
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgb(24 24 27 / 0.42);
+}
+
+/* ── vinyl on the mat ──────────────────────────────────────────────────── */
+
+/* The seven shapes are the same die-cut art peeled off the About liner: white
+   rim, ink edges, no background of their own. The button is only a handle —
+   2.4rem keeps one on the mat's edge band, not on a piece's copy. */
+.stickerZone {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.sticker {
+  position: absolute;
+  z-index: 5;
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--card-ink);
+  cursor: grab;
+  touch-action: none;
+  filter: drop-shadow(0 2px 0 rgb(24 24 27 / 0.22));
+  transition:
+    filter 0.18s var(--ease-spring),
+    opacity 0.18s ease;
+}
+
+.sticker:hover {
+  filter: drop-shadow(0 4px 0 rgb(24 24 27 / 0.26));
+}
+
+.sticker:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+.stickerTick {
+  position: absolute;
+  right: -0.1rem;
+  bottom: -0.1rem;
+  display: grid;
+  place-items: center;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1.5px solid var(--card-ink);
+  border-radius: 999px;
+  background: var(--tape-butter);
+  color: var(--card-ink);
+}
+
+/* The vinyl is pinned to the mat's rim, and a phone mat has no rim to spare:
+   below the desktop split every sticker would sit on a card's copy. */
+@media (max-width: 1023px) {
+  .stickerZone {
+    display: none;
+  }
+}
+
+/* ── paper party ───────────────────────────────────────────────────────── */
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.scrap {
+  position: absolute;
+  top: 0;
+  border-radius: 1px;
+  background: var(--tape-amber);
+  box-shadow: 0 1px 0 rgb(24 24 27 / 0.14);
+}
+
+.scrap[data-tone='pink'] {
+  background: var(--tape-pink);
+}
+
+.scrap[data-tone='sky'] {
+  background: var(--tape-sky);
+}
+
+.scrap[data-tone='mint'] {
+  background: var(--tape-mint);
+}
+
+.scrap[data-tone='butter'] {
+  background: var(--tape-butter);
+}
+
+.scrap[data-tone='rose'] {
+  background: var(--tape-rose);
 }

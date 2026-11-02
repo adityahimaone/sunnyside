@@ -1,6 +1,6 @@
 'use client'
 
-import { useReducedMotion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -17,6 +17,8 @@ import {
 import type { WorkProject } from '@/data/projects'
 import type { DesignCase } from '@/features/case-library'
 import { ArrowUpRight, Sparkle } from '../doodles'
+import { PIT_STICKERS, type PitKind } from '../gravity/pit-config'
+import { StickerArt } from '../gravity/sticker-art'
 import { Reveal } from '../reveal'
 import {
   ARCHIVE_LINKS,
@@ -59,6 +61,42 @@ const dropFor = (id: string) =>
     [...id].reduce((sum, char) => sum + char.charCodeAt(0), 0) %
       CELL_DROP.length
   ]
+
+/**
+ * The same seven die-cut shapes the About liner is peeled from, pinned to the
+ * mat's edge band so the decoration never sits over a piece's copy. `x`/`y` are
+ * shares of the board.
+ */
+const MAT_STICKERS: Record<PitKind, { label: string; x: number; y: number }> = {
+  // Pinned to the mat's rim: a die-cut sitting on the board's edge band reads
+  // as slapped on, and at most it laps ~14px over a card's border — never its
+  // copy, which starts a gutter further in.
+  smiley: { label: 'Smiley', x: 0.2, y: 2.1 },
+  burst: { label: 'Wow', x: 96.3, y: 1.7 },
+  daisy: { label: 'Daisy', x: 0.2, y: 33 },
+  bolt: { label: 'Bolt', x: 96.3, y: 30 },
+  atom: { label: 'Atom', x: 96.3, y: 65 },
+  stampCity: { label: 'Jakarta · GMT+7', x: 0.2, y: 62 },
+  stampRole: { label: 'Design engineer', x: 96.3, y: 94 },
+}
+
+// Filtering re-deals the board, so the set remounts instead of morphing: a
+// remount can never fly a card across the mat, it just settles in by hand.
+const GRID_VARIANTS = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.03 } },
+}
+
+// Never fades from nothing: the board stays legible while the new hand settles,
+// it only rises a few pixels in reading order.
+const CELL_VARIANTS = {
+  hidden: { opacity: 0.45, y: 14 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const },
+  },
+}
 
 /** Hand-placed tape per piece, assigned by position so it never re-deals. */
 const PIECE_META = (item: GalleryItem) => {
@@ -155,6 +193,10 @@ type PieceProps = {
   onStamp: (id: string) => void
   onOpen: (item: GalleryItem) => void
   onPan: (event: PointerEvent<HTMLElement>, reset?: boolean) => void
+  onPeek: (item: GalleryItem, element: HTMLElement) => void
+  onPeekEnd: () => void
+  /** Angle the party re-deals; `undefined` keeps the hand-placed one. */
+  tilt?: number
   drop: number
 }
 
@@ -165,9 +207,14 @@ function PaperPiece({
   onStamp,
   onOpen,
   onPan,
+  onPeek,
+  onPeekEnd,
+  tilt,
   drop,
 }: PieceProps) {
-  const { tilt, tape } = PIECE_META(item)
+  const meta = PIECE_META(item)
+  const tape = meta.tape
+  const angle = tilt ?? meta.tilt
 
   return (
     <article
@@ -179,12 +226,16 @@ function PaperPiece({
       data-piece
       style={
         {
-          '--tilt': `${tilt}deg`,
+          '--tilt': `${angle}deg`,
           '--cell-drop': `${drop}rem`,
         } as CSSProperties
       }
       onPointerMove={(event) => onPan(event)}
-      onPointerLeave={(event) => onPan(event, true)}
+      onPointerEnter={(event) => onPeek(item, event.currentTarget)}
+      onPointerLeave={(event) => {
+        onPan(event, true)
+        onPeekEnd()
+      }}
       aria-labelledby={`${item.id}-piece-title`}
     >
       <span className={styles.tape} aria-hidden />
@@ -258,6 +309,171 @@ function PaperPiece({
   )
 }
 
+/** Small deterministic PRNG so a confetti round renders the same twice. */
+function seeded(seed: number) {
+  let state = seed * 0x9e3779b9 + 0x6d2b79f5
+
+  return () => {
+    state = (state + 0x6d2b79f5) | 0
+    let t = Math.imul(state ^ (state >>> 15), 1 | state)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+/** Paper confetti. Pure decoration, and absent under reduced motion. */
+function PaperParty({ round }: { round: number }) {
+  const scraps = useMemo(() => {
+    const random = seeded(round)
+
+    return Array.from({ length: 18 }, (_, index) => ({
+      id: `${round}-${index}`,
+      left: 4 + random() * 92,
+      drift: -60 + random() * 120,
+      delay: random() * 0.18,
+      tilt: -220 + random() * 440,
+      tone: ['amber', 'pink', 'sky', 'mint', 'butter', 'rose'][index % 6],
+      size: 6 + random() * 8,
+    }))
+  }, [round])
+
+  return (
+    <div className={styles.confetti} aria-hidden>
+      {scraps.map((scrap) => (
+        <motion.span
+          key={scrap.id}
+          className={styles.scrap}
+          data-tone={scrap.tone}
+          style={{
+            left: `${scrap.left}%`,
+            width: scrap.size,
+            height: scrap.size * 0.62,
+          }}
+          initial={{ y: -30, opacity: 0, rotate: 0 }}
+          animate={{
+            y: 620,
+            x: scrap.drift,
+            opacity: [0, 1, 1, 0],
+            rotate: scrap.tilt,
+          }}
+          transition={{ duration: 1.5, delay: scrap.delay, ease: 'easeIn' }}
+        />
+      ))}
+    </div>
+  )
+}
+
+type PeekState = {
+  item: GalleryItem
+  x: number
+  y: number
+  width: number
+}
+
+/**
+ * Hovering a piece lifts a larger print of the same cover off the mat — the
+ * card the visitor is already looking at, only big enough to read. Decoration
+ * for the pointer: no focus trap, no controls, `aria-hidden`, and it never
+ * takes pointer events so the card underneath stays clickable.
+ */
+function Peek({ peek, reduced }: { peek: PeekState; reduced: boolean }) {
+  return (
+    <motion.div
+      className={styles.peek}
+      style={{ left: peek.x, top: peek.y, width: peek.width }}
+      initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.86, y: 18 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 10 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+      aria-hidden
+    >
+      <span className={styles.peekFrame}>
+        <PieceMedia item={peek.item} sizes="(min-width: 1024px) 34rem, 70vw" />
+      </span>
+      <span className={styles.peekBar}>
+        <span className={styles.peekIndex}>{peek.item.index}</span>
+        <span className={styles.peekTitle}>{peek.item.title}</span>
+        <span className={styles.peekKind}>
+          {peek.item.kind === 'design-system' ? 'System' : 'Release'}
+        </span>
+      </span>
+    </motion.div>
+  )
+}
+
+/** Movable vinyl on the mat. Small on purpose: decoration, never a card. */
+function MatStickers({
+  peeled,
+  onPeel,
+  bounds,
+}: {
+  peeled: ReadonlySet<string>
+  onPeel: (id: string) => void
+  bounds: React.RefObject<HTMLDivElement | null>
+}) {
+  const down = useRef({ x: 0, y: 0 })
+
+  return (
+    <div className={styles.stickerZone}>
+      {PIT_STICKERS.map((sticker) => {
+        const meta = MAT_STICKERS[sticker.id]
+        const done = peeled.has(sticker.id)
+        const stamp = sticker.id === 'stampCity' || sticker.id === 'stampRole'
+
+        return (
+          <motion.button
+            key={sticker.id}
+            type="button"
+            drag
+            dragConstraints={bounds}
+            dragMomentum={false}
+            dragElastic={0.14}
+            whileDrag={{
+              scale: 1.18,
+              rotate: 0,
+              zIndex: 9,
+              cursor: 'grabbing',
+            }}
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1, rotate: sticker.rest.rot }}
+            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+            className={styles.sticker}
+            data-kind={sticker.id}
+            style={{
+              left: `${meta.x}%`,
+              top: `${meta.y}%`,
+              width: stamp ? '3rem' : '2.4rem',
+              height: stamp ? '3rem' : '2.4rem',
+            }}
+            aria-pressed={done}
+            aria-label={`${meta.label} — ${done ? 'peeled' : 'peel me'}`}
+            title={meta.label}
+            onPointerDown={(event) => {
+              down.current = { x: event.clientX, y: event.clientY }
+            }}
+            onClick={(event) => {
+              // A drag that ends over the scrap is not a peel.
+              const moved = Math.hypot(
+                event.clientX - down.current.x,
+                event.clientY - down.current.y,
+              )
+              if (moved > 6) return
+              onPeel(sticker.id)
+            }}
+          >
+            <StickerArt id={sticker.id} />
+            {done ? (
+              <span className={styles.stickerTick} aria-hidden>
+                <Sparkle />
+              </span>
+            ) : null}
+          </motion.button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function WorkGallery({
   designCases,
 }: {
@@ -279,6 +495,12 @@ export function WorkGallery({
   const [active, setActive] = useState<GalleryItem | null>(null)
   const [progress, setProgress] = useState(0)
   const [edges, setEdges] = useState({ start: true, end: false })
+  const [peeled, setPeeled] = useState<ReadonlySet<string>>(new Set())
+  const [party, setParty] = useState(0)
+  const [tilts, setTilts] = useState<Record<string, number>>({})
+  const [peek, setPeek] = useState<PeekState | null>(null)
+  const boardRef = useRef<HTMLDivElement>(null)
+  const peekTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const systemItems = useMemo(
     () =>
@@ -436,6 +658,87 @@ export function WorkGallery({
     media.style.setProperty('--pan-y', `${y.toFixed(2)}px`)
   }
 
+  const peel = useCallback(
+    (id: string) =>
+      setPeeled((current) => {
+        const next = new Set(current)
+        if (next.has(id)) next.delete(id)
+        else next.add(id)
+        return next
+      }),
+    [],
+  )
+
+  /** Place the peep over the piece it came from, clamped to the mat. */
+  const openPeek = (item: GalleryItem, element: HTMLElement) => {
+    const mat = boardRef.current
+    if (!mat || reduced) return
+
+    const surface = mat.getBoundingClientRect()
+    const art = (
+      element.querySelector<HTMLElement>('[data-frame]') ?? element
+    ).getBoundingClientRect()
+    const width = Math.min(surface.width * 0.44, 30 * 16)
+    const height = width * 0.625 + 42
+    const x = Math.min(
+      Math.max(art.left - surface.left + art.width / 2 - width / 2, 12),
+      surface.width - width - 12,
+    )
+    // The print hangs over the artwork it enlarges, a little past its lower
+    // edge: it sits in front of the card's own thumbnail, not above it. The
+    // toolbar is the ceiling, so a print that would climb over it drops below
+    // its artwork instead and the controls stay readable.
+    const toolbar = mat.querySelector<HTMLElement>('[data-toolbar]')
+    const ceiling =
+      (toolbar ? toolbar.getBoundingClientRect().bottom - surface.top : 0) + 12
+    const overArt = art.bottom - surface.top - height + 18
+    const y = Math.min(
+      Math.max(
+        overArt >= ceiling ? overArt : art.bottom - surface.top + 18,
+        ceiling,
+      ),
+      surface.height - height - 12,
+    )
+
+    setPeek({ item, x, y, width })
+  }
+
+  const closePeek = useCallback(() => {
+    if (peekTimer.current) clearTimeout(peekTimer.current)
+    peekTimer.current = null
+    setPeek(null)
+  }, [])
+
+  /** Hover opens on a short delay, so crossing the board does not flicker. */
+  const peekLater = useCallback(
+    (item: GalleryItem, element: HTMLElement) => {
+      if (peekTimer.current) clearTimeout(peekTimer.current)
+      peekTimer.current = setTimeout(() => openPeek(item, element), 110)
+    },
+    // openPeek reads only refs and `reduced`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [reduced],
+  )
+
+  useEffect(
+    () => () => {
+      if (peekTimer.current) clearTimeout(peekTimer.current)
+    },
+    [],
+  )
+
+  /** Paper party: confetti plus a fresh set of angles. */
+  const throwParty = () => {
+    if (reduced) return
+    setPeek(null)
+    setParty((round) => round + 1)
+    setTilts(
+      Object.fromEntries(
+        GALLERY_ITEMS.map((item) => [item.id, -3.2 + Math.random() * 6.4]),
+      ),
+    )
+  }
+
   const toggle = useCallback(
     (id: string) =>
       setStamped((current) => {
@@ -465,6 +768,7 @@ export function WorkGallery({
         {/* The board is one surface: bezel, cork, toolbar, and paper all on it. */}
         <div className={styles.desk}>
           <div
+            ref={boardRef}
             className={styles.mat}
             style={
               { '--mat-pad': 'clamp(0.85rem, 1.9vw, 1.5rem)' } as CSSProperties
@@ -472,7 +776,7 @@ export function WorkGallery({
           >
             <span className={styles.grain} aria-hidden />
 
-            <div className={styles.toolbar}>
+            <div className={styles.toolbar} data-toolbar>
               <div className={styles.hud}>
                 <span className={styles.hudCount} aria-hidden>
                   {String(inspected).padStart(2, '0')}/{TOTAL}
@@ -506,6 +810,19 @@ export function WorkGallery({
                   onClick={luckyDip}
                 >
                   Lucky dip
+                </button>
+                <button
+                  type="button"
+                  className={styles.chunky}
+                  onClick={throwParty}
+                  disabled={reduced}
+                  title={
+                    reduced
+                      ? 'Paper party is off while reduced motion is on'
+                      : undefined
+                  }
+                >
+                  Paper party
                 </button>
                 <div className={styles.pager}>
                   <button
@@ -582,8 +899,12 @@ export function WorkGallery({
               {TOTAL} pieces.
             </p>
 
-            <div
+            <motion.div
+              key={filter}
               ref={trackRef}
+              variants={GRID_VARIANTS}
+              initial={reduced ? false : 'hidden'}
+              animate="show"
               className={`${styles.track} ${
                 dragging ? styles.trackDragging : ''
               }`}
@@ -597,18 +918,31 @@ export function WorkGallery({
               onPointerCancel={endDrag}
             >
               {visible.map((item) => (
-                <PaperPiece
+                <motion.div
                   key={item.id}
-                  item={item}
-                  stamped={stamped.has(item.id)}
-                  picked={picked === item.id}
-                  onStamp={toggle}
-                  onOpen={setActive}
-                  onPan={pan}
-                  drop={dropFor(item.id)}
-                />
+                  className={styles.pieceCell}
+                  variants={CELL_VARIANTS}
+                  style={
+                    {
+                      '--cell-drop': `${dropFor(item.id)}rem`,
+                    } as CSSProperties
+                  }
+                >
+                  <PaperPiece
+                    item={item}
+                    stamped={stamped.has(item.id)}
+                    picked={picked === item.id}
+                    onStamp={toggle}
+                    onOpen={setActive}
+                    onPan={pan}
+                    onPeek={peekLater}
+                    onPeekEnd={closePeek}
+                    drop={dropFor(item.id)}
+                    tilt={tilts[item.id]}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             <div className={styles.shelfBar} aria-hidden>
               <div
@@ -629,6 +963,20 @@ export function WorkGallery({
                 {String(position).padStart(2, '0')}/{visible.length}
               </p>
             </div>
+
+            <MatStickers peeled={peeled} onPeel={peel} bounds={boardRef} />
+
+            <AnimatePresence>
+              {party > 0 && !reduced ? (
+                <PaperParty key={party} round={party} />
+              ) : null}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {peek ? (
+                <Peek key={peek.item.id} peek={peek} reduced={reduced} />
+              ) : null}
+            </AnimatePresence>
           </div>
         </div>
       </Reveal>
