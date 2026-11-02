@@ -7,23 +7,24 @@
   --card: #faf4e8;
   --card-ink: #18181b;
   --card-muted: #57534e;
-  --cork: #c89b6a;
-  --washi-amber: #f3c969;
-  --washi-pink: #ffb6e1;
-  --washi-sky: #a9c8ff;
-  --washi-mint: #b7e4c7;
-  --washi-butter: #ffd23f;
-  --washi-rose: #ff9d8a;
-  --mat: #fbf8f1;
   --muted: #57534e;
+  /* The tape stock is the palette's accent set — the same six the About liner
+     and the hero stickers use, so the board never invents a colour. */
+  --tape-amber: #facc15;
+  --tape-pink: #f4a8d4;
+  --tape-sky: #a9c8ff;
+  --tape-mint: #b7e4c7;
+  --tape-butter: #ffd23f;
+  --tape-rose: #ffb6e1;
+  --washi-amber: var(--tape-amber);
+  --washi-pink: var(--tape-pink);
+  --washi-sky: var(--tape-sky);
+  --washi-mint: var(--tape-mint);
+  --washi-butter: var(--tape-butter);
+  --washi-rose: var(--tape-rose);
+  --mat: #fbf8f1;
   --paper-lo: #f6ecdb;
-  /* Confetti + peel ticks read from the same tape stock as the washi. */
-  --tape-amber: var(--washi-amber);
-  --tape-pink: var(--washi-pink);
-  --tape-sky: var(--washi-sky);
-  --tape-mint: var(--washi-mint);
-  --tape-butter: var(--washi-butter);
-  --tape-rose: var(--washi-rose);
+  --cork: #c89b6a;
   --wg-card: clamp(15rem, 78%, 22rem);
   --wg-gap: clamp(0.9rem, 1.6vw, 1.4rem);
   --ring: #2c3cae;
@@ -52,13 +53,21 @@
 /* ── bezel + cork ─────────────────────────────────────────────────────── */
 
 .desk {
-  padding: clamp(0.55rem, 1.2vw, 0.9rem);
-  background: linear-gradient(150deg, #23243c 0%, #141522 48%, #0f1019 100%);
+  position: relative;
+  padding: clamp(0.5rem, 1.1vw, 0.95rem);
   border-radius: clamp(26px, 3.2vw, 44px);
+  background: linear-gradient(
+    158deg,
+    #5c5147 0%,
+    #352e28 32%,
+    #241f1b 64%,
+    #4a4038 100%
+  );
   box-shadow:
-    0 2px 0 rgb(255 255 255 / 0.14) inset,
-    0 26px 60px -28px rgb(8 8 20 / 0.7),
-    0 2px 0 rgb(0 0 0 / 0.4);
+    0 44px 70px -36px rgb(6 8 26 / 0.85),
+    0 16px 28px -20px rgb(6 8 26 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    inset 0 -2px 4px rgb(0 0 0 / 0.55);
 }
 
 .mat {
@@ -66,36 +75,46 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.7rem, 1.6vw, 1.1rem);
+  gap: clamp(0.85rem, 1.8vw, 1.5rem);
   padding: var(--mat-pad);
-  background-color: var(--cork);
+  overflow: hidden;
+  border-radius: clamp(18px, 2.4vw, 32px);
+  background-color: #c89b6a;
   background-image: radial-gradient(
-      rgb(90 60 30 / 0.22) 0.5px,
-      transparent 0.6px
+      rgb(64 36 12 / 0.18) 1.1px,
+      transparent 1.2px
     ),
-    radial-gradient(rgb(255 245 230 / 0.16) 0.5px, transparent 0.6px);
+    radial-gradient(rgb(255 240 214 / 0.26) 1.3px, transparent 1.4px),
+    radial-gradient(
+      120% 92% at 50% -10%,
+      rgb(255 233 200 / 0.55),
+      transparent 62%
+    ),
+    linear-gradient(180deg, #cfa575 0%, #c09363 52%, #b1855a 100%);
   background-size:
-    7px 7px,
-    9px 9px;
+    28px 28px,
+    28px 28px,
+    100% 100%,
+    100% 100%;
   background-position:
     0 0,
-    3px 5px;
-  border-radius: clamp(20px, 2.4vw, 34px);
+    14px 14px,
+    0 0,
+    0 0;
   box-shadow:
-    0 0 0 2px rgb(24 24 27 / 0.55),
-    0 10px 26px -12px rgb(0 0 0 / 0.5) inset,
-    0 -1px 0 rgb(255 255 255 / 0.28) inset;
-  overflow: hidden;
+    inset 0 0 0 1px rgb(64 38 16 / 0.42),
+    inset 0 4px 12px rgb(46 26 8 / 0.4),
+    inset 0 -4px 14px rgb(46 26 8 / 0.3);
 }
 
 .grain {
   position: absolute;
   inset: 0;
   z-index: 0;
-  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   opacity: 0.26;
   mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  pointer-events: none;
 }
 
 /* One hand on the board. The cell owns the layout slot so the piece can keep
@@ -120,12 +139,11 @@
     'filters'
     'archives';
   gap: 0.6rem;
-  padding: 0.7rem 0.75rem;
-  background: var(--card);
-  color: var(--card-ink);
+  padding: 0.75rem 0.8rem;
   border: 2px solid var(--card-ink);
-  border-radius: 16px;
-  box-shadow: 5px 5px 0 rgb(24 24 27 / 0.16);
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: 5px 5px 0 var(--card-ink);
 }
 
 .hud {
@@ -405,7 +423,6 @@
   position: relative;
   display: flex;
   width: 100%;
-  height: 100%;
   flex-direction: column;
   padding: 0.6rem 0.6rem 0.7rem;
   border: 2px solid var(--card-ink);
@@ -1105,15 +1122,13 @@
   }
 
   .pieceCell {
-    /* Four across; the drop rides on the cell so a filter never re-deals it. */
+    /* Four across; the drop rides on the cell so a filter never re-deals it.
+       Each card is only as tall as its own copy — the wall is paper, not a
+       table, so ragged bottoms read as pinned rather than unfinished. */
     display: block;
+    align-self: start;
     grid-column: span 3;
-    height: 100%;
     margin-top: var(--cell-drop, 0);
-  }
-
-  .piece {
-    height: 100%;
   }
 
   .pager,
