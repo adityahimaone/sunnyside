@@ -384,9 +384,12 @@
 }
 
 @media (max-width: 1023px) {
+  /* The cluster opens out instead of bunching on the disc: each mark keeps a
+     clear channel, and the marks themselves shrink so they read as set dressing
+     rather than props competing with the word. */
   .scene {
-    --ky: 0.42;
-    --kx: 0.5;
+    --ky: 0.54;
+    --kx: 0.54;
   }
 
   /* The bio card sits on the hill down here, so the hill is stretched to wrap
@@ -403,6 +406,13 @@
   .sparkPaper,
   .sticker[data-slot='daisy'] {
     display: none;
+  }
+
+  /* Same die-cut language, a third smaller: at phone width the marks were the
+     loudest thing on the screen and clipped each other at the disc's edge. */
+  .sticker {
+    width: clamp(2.2rem, 9vw, 3.2rem);
+    margin: -1.35rem 0 0 -1.35rem;
   }
 }
 

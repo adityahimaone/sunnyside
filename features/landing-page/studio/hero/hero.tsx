@@ -67,8 +67,11 @@ export function Hero() {
 
           {/* 2 · Lower band: the dock on the left, the worked word on the right. */}
           <div className={styles.heroLower} data-hero-copy>
-            <Reveal delay={0.12}>
-              <div className={styles.heroDock}>
+            {/* The reveal lives inside the card: a transform on an ancestor
+                would make it the containing block, and the card would drop out
+                of the hero's bottom edge on every breakpoint. */}
+            <div className={styles.heroDock}>
+              <Reveal delay={0.12} className={styles.heroDockInner}>
                 <div className={styles.heroDockHead}>
                   <span>Design engineer</span>
                   <span aria-hidden>·</span>
@@ -113,8 +116,8 @@ export function Hero() {
                     </div>
                   ))}
                 </dl>
-              </div>
-            </Reveal>
+              </Reveal>
+            </div>
 
             <Reveal delay={0.2}>
               <div className={styles.heroPulseBlock}>

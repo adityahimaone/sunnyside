@@ -568,9 +568,6 @@
 }
 
 .heroDock {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
   padding: 1.1rem 1.2rem 1rem;
   border: 2px solid rgb(255 250 241 / 0.38);
   border-radius: 1.3rem;
@@ -578,6 +575,12 @@
   -webkit-backdrop-filter: blur(14px) saturate(1.25);
   backdrop-filter: blur(14px) saturate(1.25);
   box-shadow: 0 18px 44px rgb(9 14 32 / 0.34);
+}
+
+.heroDockInner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .heroDockHead {
@@ -888,8 +891,8 @@
        it, and the hill behind the card is stretched to wrap it. */
     --sun-lift: 1.85;
     --items-lift: var(--sun-lift);
-    --dock-space: 24rem;
-    padding-bottom: calc(var(--ground) + var(--dock-space));
+    --dock-space: 0rem;
+    padding-bottom: calc(var(--ground) + var(--dock-space) + 0.75rem);
   }
 
   /* The stage drops its own positioning so the card can anchor to the hero and
@@ -899,22 +902,26 @@
     position: static;
   }
 
-  /* Out of the stack and onto the hill: the card reads as sitting below the
-     sun, with the stretched hill behind it. */
+  /* The card stays in flow and is ordered after the worked word: absolutely
+     positioning it here anchored it to the parallax copy block, whose transform
+     made it the containing block, so the card floated up into the sun. */
   .heroDock {
-    position: absolute;
-    right: 1.125rem;
-    bottom: calc(var(--ground) + 0.75rem);
-    left: 1.125rem;
+    order: 2;
+    padding: 0.95rem 1rem 0.9rem;
+    border-radius: 1.1rem;
+  }
+
+  .heroDockInner {
+    gap: 0.7rem;
   }
 
   .heroLower {
-    position: static;
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.6rem;
+    gap: 1.05rem;
   }
 
   .heroPulseBlock {
+    order: 1;
     align-items: flex-start;
     justify-self: stretch;
   }

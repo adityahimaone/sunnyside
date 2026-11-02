@@ -64,7 +64,10 @@ export function runPit(pit: HTMLElement): PitRuntime {
   const fit = () => {
     world.width = pit.clientWidth
     world.height = pit.clientHeight
-    const scale = Math.min(1, Math.max(0.58, world.width / 880))
+    /* On a phone the tray is a third of the reference width. The floor used to
+       hold the marks near full size, so they crowded each other and out-shouted
+       the copy; it now tracks the hero's die-cuts, which shrink the same way. */
+    const scale = Math.min(1, Math.max(0.44, world.width / 980))
     for (const item of items) {
       item.size = item.spec.size * scale
       item.body.r = item.size * HIT
