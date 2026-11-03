@@ -53,7 +53,7 @@ export function Projects({
               shipped.
             </span>
           }
-          intro={`${releases} releases and ${systems} documented systems in the catalogue. The wall shows the newest of them; filter it, then open a card for the notes.`}
+          intro={`${releases} releases and ${systems} documented systems in the catalogue. The wall is a curated dozen; filter it, then open a card for the notes.`}
         />
 
         <WorkGallery designCases={designCases} />

@@ -15,13 +15,14 @@ import {
 } from 'react'
 
 import type { WorkProject } from '@/data/projects'
-import type { DesignCase } from '@/features/case-library'
+import { DESIGN_CASES, type DesignCase } from '@/features/case-library'
 import { ArrowUpRight, Sparkle } from '../doodles'
 import { PIT_STICKERS, type PitKind } from '../gravity/pit-config'
 import { StickerArt } from '../gravity/sticker-art'
 import { Reveal } from '../reveal'
 import {
   ARCHIVE_LINKS,
+  FEATURED_SYSTEM_SLUGS,
   GALLERY_ITEMS,
   PROJECT_GALLERY_ITEMS,
   SYSTEM_GALLERY_ITEMS,
@@ -35,15 +36,20 @@ import styles from './work-gallery.module.css'
 /**
  * The selected-work chapter is a cutting mat with paper taped to it.
  *
- * Twelve pieces — six releases and the six most recent systems — hang in a
- * hand-placed wall: four columns, each card dropped a little lower than the
- * last so the board reads pinned rather than gridded. Below the desktop split
- * the same DOM becomes one horizontal snap run instead, because four columns of
- * paper on a phone is a postage stamp; there the arrows step one tile at a time.
- * Filters redraw the wall, and a tap lifts the notes into a drawer.
+ * The board is curated. Everything shows the six releases and six featured
+ * systems; Systems reveals twelve (the featured six plus Wildflower, Cove and
+ * the four newest remaining cases). Pieces hang in a hand-placed wall: four
+ * columns, each card dropped a little lower than the last so the board reads
+ * pinned rather than gridded. Below the desktop split the same DOM becomes one
+ * horizontal snap run instead, because four columns of paper on a phone is a
+ * postage stamp; there the arrows step one tile at a time. Filters redraw the
+ * wall, and a tap lifts the notes into a drawer.
  */
 
 const TOTAL = GALLERY_ITEMS.length
+
+/** The six that sit beside the releases on the Everything tab. */
+const FEATURED_SYSTEMS = new Set<string>(FEATURED_SYSTEM_SLUGS)
 
 const FILTERS = [
   { id: 'all', label: 'Everything' },
@@ -101,8 +107,11 @@ const CELL_VARIANTS = {
 }
 
 /** Hand-placed tape per piece, assigned by position so it never re-deals. */
+const PIECE_AT = new Map(GALLERY_ITEMS.map((item, index) => [item.id, index]))
+
 const PIECE_META = (item: GalleryItem) => {
-  const at = GALLERY_ITEMS.indexOf(item)
+  // Look up by id, not object identity: the live API builds fresh case objects.
+  const at = PIECE_AT.get(item.id) ?? 0
 
   return {
     tilt: PIECE_TILT[at % PIECE_TILT.length],
@@ -519,15 +528,25 @@ export function WorkGallery({
     [designCases],
   )
 
-  const allItems = useMemo(
-    () => [...PROJECT_GALLERY_ITEMS, ...systemItems],
+  const featuredSystemItems = useMemo(
+    () => systemItems.filter((item) => FEATURED_SYSTEMS.has(item.id)),
     [systemItems],
+  )
+
+  /** The full catalogue, not just the twelve the board shows. */
+  const caseCount = designCases?.length ?? DESIGN_CASES.length
+
+  const allItems = useMemo(
+    () => [...PROJECT_GALLERY_ITEMS, ...featuredSystemItems],
+    [featuredSystemItems],
   )
 
   const visible =
     filter === 'all'
       ? allItems
-      : allItems.filter((item) => item.kind === filter)
+      : filter === 'design-system'
+        ? systemItems
+        : PROJECT_GALLERY_ITEMS
 
   const measure = useCallback(() => {
     const el = trackRef.current
@@ -802,7 +821,8 @@ export function WorkGallery({
                     ) : (
                       <>
                         <span className={styles.hintWide}>
-                          Twelve pieces taped to the mat. Tap one for its notes.
+                          Releases and systems taped to the mat. Tap one for its
+                          notes.
                         </span>
                         <span className={styles.hintNarrow}>
                           Swipe the shelf, or use the arrows. Tap a piece for
@@ -865,9 +885,11 @@ export function WorkGallery({
                 {FILTERS.map((option) => {
                   const count =
                     option.id === 'all'
-                      ? TOTAL
-                      : GALLERY_ITEMS.filter((item) => item.kind === option.id)
-                          .length
+                      ? PROJECT_GALLERY_ITEMS.length +
+                        featuredSystemItems.length
+                      : option.id === 'design-system'
+                        ? systemItems.length
+                        : PROJECT_GALLERY_ITEMS.length
 
                   return (
                     <button
@@ -897,7 +919,11 @@ export function WorkGallery({
                     <span className={styles.archiveNote}>{link.note}</span>
                     <span className={styles.archiveLabel}>
                       {link.label}
-                      <span className={styles.archiveCount}>{link.count}</span>
+                      <span className={styles.archiveCount}>
+                        {link.href === '/design-system'
+                          ? caseCount
+                          : link.count}
+                      </span>
                       <ArrowUpRight className={styles.archiveArrow} />
                     </span>
                   </Link>

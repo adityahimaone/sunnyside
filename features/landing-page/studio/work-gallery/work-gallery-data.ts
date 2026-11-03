@@ -36,9 +36,10 @@ export type GalleryItem = ProjectGalleryItem | SystemGalleryItem
 
 /**
  * The board is curated, not derived from the year. Switchyard leads because it
- * is the strongest release; the six systems that follow are the six most
- * recent documented cases, so the moodboard is "what I made lately" rather
- * than the whole catalogue — `/projects` and `/design-system` hold the rest.
+ * is the strongest release. The systems are split in two: the six carried beside
+ * the releases on the Everything tab, and six more revealed by the Systems tab.
+ * Together they are the twelve systems the board shows; `/projects` and
+ * `/design-system` hold the rest.
  */
 const PROJECT_ORDER = [
   'switchyard',
@@ -49,7 +50,34 @@ const PROJECT_ORDER = [
   'labgrownbeasts',
 ] as const
 
-const MOODBOARD_LIMIT = 6
+/** The six systems shown on the Everything tab, in board order. */
+export const FEATURED_SYSTEM_SLUGS = [
+  'sunnyside',
+  'jakarta',
+  'clearing',
+  'ledger',
+  'huginn',
+  'vesper',
+] as const
+
+/**
+ * The six more the Systems tab adds: Wildflower Wind, Cove, and the four most
+ * recent cases that are not already on the Everything tab.
+ */
+export const MORE_SYSTEM_SLUGS = [
+  'wildflower-wind',
+  'cove',
+  'tavola',
+  'bluewater',
+  'porphyry',
+  'strand',
+] as const
+
+/** Every system the board can show, Everything six first. */
+export const SYSTEM_SLUGS = [
+  ...FEATURED_SYSTEM_SLUGS,
+  ...MORE_SYSTEM_SLUGS,
+] as const
 
 /**
  * Each image gets its own focal point inside the native 16:10 project frame,
@@ -123,32 +151,36 @@ export const PROJECT_GALLERY_ITEMS: readonly ProjectGalleryItem[] =
   })
 
 /**
- * The six most recent documented systems, in `DESIGN_CASES` order — the same
- * source of truth `/design-system` renders, so a case can never appear on the
- * board with a name, path or cover the case page does not have.
+ * The twelve documented systems the board shows, in `SYSTEM_SLUGS` order — the
+ * same source of truth `/design-system` renders, so a case can never appear on
+ * the board with a name, path or cover the case page does not have. A slug the
+ * live API no longer returns is skipped rather than invented.
  */
 export function buildSystemGalleryItems(
   cases: readonly DesignCase[] = DESIGN_CASES,
 ): readonly SystemGalleryItem[] {
-  return cases.slice(0, MOODBOARD_LIMIT).map((item, order) => {
-    const id = slugify(item.slug || item.name)
+  return SYSTEM_SLUGS.flatMap((slug, order) => {
+    const item = cases.find((candidate) => slugify(candidate.slug) === slug)
+    if (!item) return []
 
-    return {
-      id,
-      kind: 'design-system',
-      index: `S${String(order + 1).padStart(2, '0')}`,
-      title: item.name,
-      categoryLabel: 'Design system',
-      year: item.status.match(/\d{4}/)?.[0] ?? '2026',
-      description: item.description,
-      tags: item.tags,
-      href: item.href,
-      cta: 'Open the case',
-      cover: item.cover,
-      coverAlt: item.coverAlt,
-      position: 'top center',
-      swatches: SYSTEM_SWATCHES[id] ?? [],
-    }
+    return [
+      {
+        id: slug,
+        kind: 'design-system' as const,
+        index: `S${String(order + 1).padStart(2, '0')}`,
+        title: item.name,
+        categoryLabel: 'Design system',
+        year: item.status.match(/\d{4}/)?.[0] ?? '2026',
+        description: item.description,
+        tags: item.tags,
+        href: item.href,
+        cta: 'Open the case',
+        cover: item.cover,
+        coverAlt: item.coverAlt,
+        position: 'top center',
+        swatches: SYSTEM_SWATCHES[slug] ?? [],
+      },
+    ]
   })
 }
 

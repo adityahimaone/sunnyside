@@ -45,8 +45,8 @@ export function resolveCase(item: DesignCase): DesignCase {
     href: isSunnyside
       ? '/sunnyside'
       : item.href.startsWith('http')
-      ? item.href
-      : `${DESIGN_SYSTEM_URL}${item.href}`,
+        ? item.href
+        : `${DESIGN_SYSTEM_URL}${item.href}`,
     cover:
       isSunnyside || item.cover.startsWith('http')
         ? item.cover
@@ -90,7 +90,12 @@ export const RAW_DESIGN_CASES: readonly DesignCase[] = [
     cover: '/brand/tavola/tavola-brandkit.png',
     coverAlt:
       'The Tavola 6-panel brand board: sunlit coastal lunch table with reverse lockup, Kuwayama 64-grid mark scale strip, 7 OKLCH primitives, 3 voices, 6-mark coastal cast, and architectural laws.',
-    tags: ['Coastal Dining', 'Ivory Linen', 'Parametric Mark', 'OKLCH Daylight'],
+    tags: [
+      'Coastal Dining',
+      'Ivory Linen',
+      'Parametric Mark',
+      'OKLCH Daylight',
+    ],
     tone: 'tavola',
   },
   {
@@ -317,7 +322,8 @@ export const RAW_DESIGN_CASES: readonly DesignCase[] = [
   },
 ]
 
-export const DESIGN_CASES: readonly DesignCase[] = RAW_DESIGN_CASES.map(resolveCase)
+export const DESIGN_CASES: readonly DesignCase[] =
+  RAW_DESIGN_CASES.map(resolveCase)
 
 /**
  * Fetch design cases from the design-system service API.
@@ -337,7 +343,22 @@ export async function getDesignCases(): Promise<DesignCase[]> {
     if (res.ok) {
       const data = (await res.json()) as DesignCase[]
       if (Array.isArray(data) && data.length > 0) {
-        return data.map(resolveCase)
+        const remote = data.map(resolveCase)
+        // The service can lag behind this repo (a case lands here before the
+        // deploy or its edge cache catches up). Fill any documented case the
+        // response omits from the local snapshot, in the service's own order:
+        // Sunnyside first, then newest case number.
+        const merged = [...remote]
+        for (const local of DESIGN_CASES) {
+          if (merged.some((item) => item.slug === local.slug)) continue
+          const at = merged.findIndex(
+            (item) =>
+              item.slug !== 'sunnyside' &&
+              Number(item.number) < Number(local.number),
+          )
+          merged.splice(at === -1 ? merged.length : at, 0, local)
+        }
+        return merged
       }
     }
   } catch {
