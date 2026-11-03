@@ -6,6 +6,14 @@ and an audit that names what it could not verify.
 
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand, Clearing, Porphyry, Jakarta, Bluewater, Vesper, Halation, and Tavola. The method travels; the marks do not.
 
+## v4.5: plain-geometry Step 0, 18-surface catalogue, and scope parity
+
+- **Step 0 rewritten as seven plain-English questions.** Every option is now named by what a non-designer already knows — *Cardboard & steel*, *Airport signage*, *Text left, photo right*, *Shape with a hole cut out* — instead of a case codename or a design term. Labels cap at 45 characters; the exact geometry moves into each option's `description`. Rail and Hero are split into two independent questions so a Rail B choice can no longer silently pull in a Hero the user did not pick.
+- **18-surface catalogue (`references/surfaces.md`).** Eight surfaces ship in the question; the other ten are reached through a prompt-mapping table, so a brief that says "I'm building a metro app" resolves to *Transit map* without a second question. Each surface fixes the same nine slots — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion` — plus a "fails loudly if" guardrail, so two agents given the same surface land on the same CSS.
+- **Scope parity is now an audit gate.** A single-scope build has no navbar toggle, no second token sheet, no `[data-<slug>='night']` block and no dark-mode audit line; a dual scope has all four. Previously Pillar III mandated a night block and Pillar VI mandated a toggle regardless of the Step 0 answer, so choosing "Daylight only" still produced a dark mode.
+- **Count parity is now an audit gate.** The surface intro line, the card count, the token-sheet count and the cast size must match what actually renders. The surface grid is locked to 4, 6 or 8 cards so the last row is never ragged.
+- **Case codenames removed from every question, pillar heading and section title.** Codenames survive only in `references/case-evidence.md` and this changelog, where they are evidence rather than labels.
+
 ## v4.4: Vesper / Clearing Rail Architecture, 5 Flagship Non-Template Heroes, and Comparative Surface Exploration Grid
 
 - **Unnumbered Hero & Clean Navbar (`01..07` in Left Rail Only).** The Hero stage is never counted as `01`, and topbar navigation links carry zero numbers (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`). Section numbers (`01`..`07`) live inside the left rail, with Step 0 (`ask_question`) letting the user choose between **Vesper's Per-Section Rail** (`176px` sticky `.rail` + `.body` inside each `.sec > .wrap`) and **Clearing's Sticky Contents TOC Sidebar** (`.shell.layout` wrapping a scroll-spy `<ol>` rail + content column).

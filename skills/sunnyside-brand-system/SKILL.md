@@ -1,16 +1,16 @@
 ---
 name: sunnyside-brand-system
-version: 4.4.0
-description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with an interactive Step 0 ask_question scope gate (including Vesper Per-Section Rail vs Clearing Sticky Contents Rail and 5 Flagship Hero Variants), then synthesizes custom archetypes, Kuwayama-grade parametric SVG marks + 6-mark companion casts, 6-panel 1500x1125 brandkit boards, Vesper-style comparative surface exploration grids, dual-scope OKLCH tokens, and unnumbered-hero 7-section interactive showcase pages.'
+version: 4.5.0
+description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with a 7-question Step 0 ask_question scope gate written in plain geometry, not case names: surface material, rail (2 shapes), hero (5 shapes), mark construction, colour polarity (1 or 2 scopes, binding on the toggle and token sheets), build scope, and add-ons. Then synthesizes a custom archetype, Kuwayama-grade parametric SVG marks + a 6-mark companion cast, a 6-panel 1500x1125 brandkit board, a comparative surface exploration grid, OKLCH tokens in the chosen polarity, and an unnumbered-hero 7-section interactive showcase page.'
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '4.4.0'
+  version: '4.5.0'
 ---
 
-# SUNNYSIDE BRAND SYSTEM ENGINE (v4.4 · Vesper / Clearing Rail + 5 Flagship Heroes + Surface Exploration Grid)
+# SUNNYSIDE BRAND SYSTEM ENGINE (v4.5 · Two Rails + 5 Hero Shapes + Surface Exploration Grid)
 
-You are a Principal Design Engineer & Brand Architect. Execute with zero looping tasks, zero placeholder copy (`Lorem ipsum` or generic `Acme` filler), zero emoji UI chrome, and flagship-grade visual engineering (matching the bar of **Vesper**, **Clearing**, **Strand**, **Porphyry**, **Jakarta**, **Hachure**, **Riso Co.**, **Huginn**, and **Tavola**).
+You are a Principal Design Engineer & Brand Architect. Execute with zero looping tasks, zero placeholder copy (`Lorem ipsum` or generic `Acme` filler), zero emoji UI chrome, and flagship-grade visual engineering.
 
 **One idea → one mark + cast → one 6-panel board → one non-template hero → one comparative surface grid → one honest contrast ledger.**
 
@@ -25,63 +25,96 @@ You are a Principal Design Engineer & Brand Architect. Execute with zero looping
 > - **Pre-fill smart recommendations:** If the user already supplied a theme, domain, or image attachments (e.g., *"Two-ink evening print"* or *"Field journal"*), tailor the `(Recommended)` first option of each question to match their theme while still letting them confirm or customize via the `ask_question` UI!
 > - **Never** run scripts or create files before the user submits their `ask_question` answers.
 
-Call `ask_question` with these 5 structured questions (users can pick any preset, combine options, or type any custom fusion in the UI's freeform option):
+Call `ask_question` with these 7 questions, verbatim. The JSON below is already in the tool schema — `id`, `header`, `question`, `multi_select`, and options as `{label, description}` objects.
+
+**Label rule:** every `label` names the thing by what a non-designer already knows — *Paper & ink*, *Airport signage*, *Text left, photo right*, *Shape with a hole cut out*. Never name an option after a case, a project, or a design term the reader has to look up. Keep `label` under 45 characters (it is what the selector renders) and let `description` carry the exact geometry. **Keep it English, keep it plain.** Call the tool with these English labels as written — do not translate them into the user's language, and do not swap in fancier English. A reader who has never opened a design book should still understand every option: *Cardboard & steel*, not *Constructed industrial*; *Text left, photo right*, not *Split editorial*; *Shape with a hole cut out*, not *Boolean counter-form*. If an option needs a term defined, the label is wrong — move the term into `description` or drop it.
 
 ```json
 {
   "questions": [
     {
-      "question": "1. Archetype & Surface Direction — Which visual archetype and tactile surface should anchor this brand system?",
-      "is_multi_select": false,
+      "id": "surface",
+      "header": "Material",
+      "question": "1. Surface & Material — if this brand were a physical object, what would it be made of? Eight of the eighteen surfaces are here; the rest are reached through references/surfaces.md.",
+      "multi_select": false,
       "options": [
-        "(Recommended) Two-Ink Print / Editorial Stipple & Paper — warm uncoated stock, flat ink impressions, register ghost or ordered dither, zero glow (like Vesper, Riso Co., Huginn)",
-        "Constructed Architectural & Field Journal — sharp geometric grids, mineral stone/paper surfaces, and disciplined neo-grotesque or old-style hierarchy (like Clearing, Porphyry, Hachure)",
-        "Tactile Linen / Editorial Hospitality — warm woven paper/linen plates, sunlit coastal or editorial serif authority, and sea-glass panes (like Tavola, Strand)",
-        "Precision SaaS / Night-First Instrument — 1px exposed hairlines, tabular data rows, and clinical dark/light cockpit clarity (like Cove, Bluewater, Ledger)",
-        "Civic / Multi-Ramp Wayfinding or Prismatic Glass — bold directional color ramps, exposed structural rules, or reeded optical refraction (like Jakarta, Halation)"
+        { "label": "(Recommended) Paper & ink", "description": "Like a book page or a screen-printed poster. Warm uncoated stock, flat solid colour, no glow, no blur, no gradient, 0px corners." },
+        { "label": "Cardboard & steel", "description": "Like a warehouse or a shipping container. Kraft and cold grey, sharp rectangular grid, 1px rules, 0px corners, plain sans type." },
+        { "label": "Linen & daylight", "description": "Like an interior magazine. Sunlit warm background, editorial serif headlines, soft panels with real blur, 12px corners." },
+        { "label": "Cockpit panel", "description": "Like an aircraft dashboard. Near-black ground, dense table rows, 1px hairlines, very high contrast, monospace numbers everywhere." },
+        { "label": "Airport signage", "description": "Like a terminal direction sign. Bold signal colour blocks, oversized numerals, heavy structural lines, no cards, no rules." },
+        { "label": "Concrete & rebar", "description": "Like a poured concrete wall. Cool mid-grey, matte, fine grain, 2px rules, 2px corners, heavy grotesque type." },
+        { "label": "Phosphor terminal", "description": "Like a CRT monitor. True black, green or amber text, scanlines, mono only, 80ms snap, 0px corners." },
+        { "label": "Marble & brass", "description": "Like a hotel lobby. Off-white marble with faint veining, warm brass as the plate, high-contrast serif, small-caps labels." }
       ]
     },
     {
-      "question": "2. Navigation, Section Rail & Hero Architecture — Which rail layout (Hero is unnumbered; topbar links carry no numbers) and Hero variant should structure the page?",
-      "is_multi_select": false,
+      "id": "rail",
+      "header": "Rail",
+      "question": "2. Rail — where should the section numbers 01–07 sit?",
+      "multi_select": false,
       "options": [
-        "(Recommended) Vesper Per-Section Rail (`176px` sticky `.rail` + `.body` inside each `.sec > .wrap`) + Variant A: Vesper Split Field & Overlapping Stat Bench (`78vh` art field top, `-30px` overlapping 5-cell bench, oversized display + lede below)",
-        "Clearing Sticky Contents TOC Sidebar (`.shell.layout` wrapping a scroll-spy `<ol>` rail `01..07` + content column) + Variant B: Clearing / Strand Split Editorial & Framed Media Pane (2-col editorial copy + pill badges left, framed artwork with floating lockup pane right)",
-        "Vesper Per-Section Rail + Variant C: Porphyry / Hachure Live Specimen Stage First (interactive diorama, dither canvas, or printed survey margin at the top edge, followed by display title + 4-stat ledger)",
-        "Clearing Sticky Contents TOC Sidebar + Variant D: Jakarta / Riso Physical Artifact & Hoarding Stage (oversized 760px watermark mark or pushpin sheet + torn polygon bottom edge + tinted panel)",
-        "Vesper Per-Section Rail + Variant E: Cove / Tavola Full-Bleed Atmospheric Plate (full-bleed field with solid reading plate + live station/specimen card)"
+        { "label": "(Recommended) Rail A · one per section", "description": "A 176px sticky column inside every section, holding that section's number and label beside its content, with a 1px rule above each section." },
+        { "label": "Rail B · one list for the page", "description": "A single 200px sticky sidebar for the whole page listing 01–07, highlighting the section you are reading, with content in one column beside it." }
       ]
     },
     {
-      "question": "3. Logo Construction (Kuwayama Protocol) — Which geometric primitive should construct the 64x64 primary mark and 6-mark companion cast?",
-      "is_multi_select": false,
+      "id": "hero",
+      "header": "Hero",
+      "question": "3. Hero — what does the very top of the page look like? Either rail works with any of these.",
+      "multi_select": false,
       "options": [
-        "(Recommended) Horizon Bar & Resting Star / Subject — a 4-unit structural horizon slab with a geometric star, arc, or drawn subject resting on it (like Vesper, Clearing, Tavola)",
-        "Boolean Counter-Form (`fill-rule=\"evenodd\"`) — bold foreground mass carved by an optical negative-space silhouette or portal (like Porphyry, Cove)",
-        "Cell Matrix / Offset Register Tear — modular grid cells with one off-grid escapee or a two-drum torn seam bridged by a single pin (like Huginn, Riso Co.)",
-        "Sheared Parallel Planes / Continuous Junction Stroke — two sheared masses separated by a 6-unit channel or one continuous ribbon turning a corner (like Strand, Jakarta)",
-        "Solid Mass with Lit Crest / Optical Louver — asymmetric rising ground with a contrasting 7-unit lit crest or parallel slit-scan bars (like Hachure, Halation)"
+        { "label": "(Recommended) A · Banner, then a number row", "description": "A full-width colour field on top, then a row of 5 number cells overlapping its bottom edge by 30px, then the oversized headline." },
+        { "label": "B · Text left, photo right", "description": "Left: small label, headline, 60ch paragraph, 4 pill badges. Right: a framed photo with one logo panel in its bottom corner." },
+        { "label": "C · Live demo on top", "description": "An interactive canvas, dither field or printed survey strip across the full width first, then the headline and a row of 4 numbers." },
+        { "label": "D · One giant sheet", "description": "A 760px logo impression on a paper sheet, bold headline, and the bottom edge cut into an 18-tooth torn polygon." },
+        { "label": "E · Full-screen photo", "description": "A photo covering the whole area behind a dark gradient, a solid text panel sitting on top of it, and one live number card." }
       ]
     },
     {
-      "question": "4. Theme Polarity & Surface Exploration — How should the color scope and Section 04 (`Surfaces`) behave?",
-      "is_multi_select": false,
+      "id": "mark",
+      "header": "Logo",
+      "question": "4. Logo — how should the 64×64 mark be drawn?",
+      "multi_select": false,
       "options": [
-        "(Recommended) Dual-Scope (Daylight + Night Toggle) + Vesper Comparative Surface Grid (4–6 explored surfaces in a 2-col grid with `210px` live visual demos, showing both `Shipped` and `Rejected` surfaces with zero range sliders)",
-        "Warm Stock / Paper Daylight First + Vesper Comparative Surface Grid + Full-Bleed Closing Band (dither divider, inverted cast band, or closing artwork)",
-        "Abyssal / Nocturnal Dark First + Vesper Comparative Surface Grid — night is the default surface, daylight is the secondary scope (like Cove, Bluewater, Porphyry)",
-        "Procedural Field (`field-forge.mjs`: stipple / dither / bands / mesh) + Vesper Comparative Surface Grid (when no photo is attached)"
+        { "label": "(Recommended) Bar + something on it", "description": "One horizontal bar 4 units thick, with a star, an arc or a simple subject resting on top of it." },
+        { "label": "Shape with a hole cut out", "description": "One bold solid shape, with a silhouette or arrow removed from inside it using fill-rule=\"evenodd\"." },
+        { "label": "Square grid, one cell off", "description": "Modular squares on the 64 grid, with exactly one square pushed off the grid to break the pattern." },
+        { "label": "Two offset blocks", "description": "Two masses shifted against each other with a 6-unit gap between them, or one continuous stroke that turns a corner." },
+        { "label": "Solid block + bright band", "description": "A rising solid mass with a 7-unit highlight band across it, or parallel slit-scan bars." }
       ]
     },
     {
-      "question": "5. Output Scope, Deliverables & Token-Saving QA — Which deliverables and verification level should we run?",
-      "is_multi_select": true,
+      "id": "polarity",
+      "header": "Colour",
+      "question": "5. Colour — how many colour scopes ship? This one is binding: it decides the navbar toggle, how many token sheets Section 07 shows, and whether the audit lists a dark-mode gap.",
+      "multi_select": false,
       "options": [
-        "(Recommended) Full Unnumbered-Hero + 7-Section Showcase Route + 6-Panel Brandkit Board (`<slug>-brandkit.png`) + 6-Mark Companion Cast (`cast/*.svg`)",
-        "(Recommended) Skip Browser E2E & Heavy QA Scripts (Fastest / Saves API Tokens) — builds the honest on-page contrast table directly in one pass without headless browser loops",
-        "Sync Both Repos (`design-system` + `sunnyside` Landing Page & Case Library registration)",
-        "Export Standalone `DESIGN.md` Agent Spec + W3C `tokens.json` + 3-Layer CSS Bundle",
-        "Token CSS + Parametric SVG Kit + 6-Panel Board Only (Skip full showcase route)"
+        { "label": "(Recommended) Light + dark", "description": "Both ship: a night token block, a navbar toggle, and both a Day and a Night sheet in Section 07." },
+        { "label": "Light only", "description": "One scope and nothing else: no night block, no toggle, no Night sheet, no dark-mode audit line. State the reason in Section 07." },
+        { "label": "Light + dark, dark first", "description": "The page opens on the dark scope and light is the secondary one, toggle still present." },
+        { "label": "Dark only", "description": "A single scope whose page ground is the dark material (lampblack or deep ink paper). No toggle, no second sheet." }
+      ]
+    },
+    {
+      "id": "build",
+      "header": "Build",
+      "question": "6. Deliverables — what should be built?",
+      "multi_select": false,
+      "options": [
+        { "label": "(Recommended) Full page + board + icons", "description": "The unnumbered hero with 7 sections, the 6-panel 3000×2250 brandkit board, and the 6-mark companion cast." },
+        { "label": "Board only, no web page", "description": "Token CSS, the parametric SVG kit and the 6-panel board. No showcase route, no rail, no hero." }
+      ]
+    },
+    {
+      "id": "addons",
+      "header": "Add-ons",
+      "question": "7. Add-ons — tick anything that applies, or nothing.",
+      "multi_select": true,
+      "options": [
+        { "label": "Skip browser tests", "description": "Compute the honest contrast table in one pass instead of running headless QA loops." },
+        { "label": "List it on the site", "description": "Add the case to the design-system index and the landing case library." },
+        { "label": "Export spec files", "description": "A standalone DESIGN.md agent spec, W3C tokens.json and the 3-layer CSS bundle." }
       ]
     }
   ]
@@ -91,17 +124,31 @@ Call `ask_question` with these 5 structured questions (users can pick any preset
 ### Step 1 · Single-Pass Deterministic Execution (Immediately after `ask_question` is answered)
 Once the user answers the `ask_question` prompt (or immediately on Turn 1 if the user explicitly wrote `"skip questions"`):
 1. State your **3-Axis Synthesis** in a tight 2-line architectural header summary at the top of your response:
-   > **`[BRAND NAME] (Case XX)` — 3-Axis Synthesis:** Surface: *[Tactility]* · Rail & Hero: *[Vesper Rail / Clearing TOC + Hero Variant]* · Physics: *[Corner/Stroke]*  
+   > **`[BRAND NAME] (Case XX)` — 3-Axis Synthesis:** Surface: *[Tactility]* · Rail: *[A 176px per-section / B 200px contents list]* · Hero: *[A–E shape]* · Physics: *[Corner/Stroke]*  
    > **DNA:** Archetype: *[Seed Fusion]* · Mark: *[Kuwayama Primitive + 6-Cast]* · Stack: *[Display + UI Sans + Mono]* · Polarity: *[Theme Scope]*
 2. Build the batch asset script (`scripts/build-<slug>.mjs`), 6-panel `<slug>-brandkit.png` board (`brandkit-board.mjs`), and `/design-system/[slug]` showcase route in **one deterministic pass**.
 
+**Reading the seven answers — every one changes a file, or it should not have been asked:**
+
+| Answer | What it decides |
+|---|---|
+| `surface` | The nine slots in `references/surfaces.md` — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion`. Fill all nine before writing a component; two agents given the same surface must land on the same CSS |
+| `rail` | `176px` per-section column **or** `200px` contents list — the two layouts are not interchangeable; do not build both |
+| `hero` | Exactly one of A–E for the opening stage; the rail above never changes which hero you pick |
+| `mark` | The geometric primitive set for `mark.svg`, and the cast must share its cut-line weight |
+| `polarity` | Number of `[data-<slug>]` scopes, presence of the navbar toggle, how many token sheets Section 07 renders (4 vs 5), and whether the audit lists a dark-mode gap |
+| `build` | *Full page + board + icons* → the showcase route, the board and the cast. *Board only, no web page* → no `src/pages/design-system/<slug>.astro`, no 7 sections, no rail, no hero variants; the board is the deliverable |
+| `addons` | *Skip browser tests* → compute contrast in-script, no headless loops. *List it on the site* → `src/data/cases.ts` entry + cover path. *Export spec files* → `DESIGN.md`, `tokens.json`, `<slug>-tokens.css` |
+
+If an answer changes nothing you build, say which answer it changed and where — otherwise you asked a question you ignored.
+
 ---
 
-## 2. SIX-PILLAR ARCHITECTURAL MANDATES (THE VESPER / CLEARING / PORPHYRY / HACHURE BAR)
+## 2. SIX-PILLAR ARCHITECTURAL MANDATES (THE FLAGSHIP BAR)
 
 ### Pillar I: Unbounded Archetype Synthesis Engine
 Never force a project into a rigid template. Synthesize the visual language dynamically across **3 continuous axes**:
-1. **Surface Tactility:** *Two-Ink Uncoated Print / Stipple* ↔ *Tactile Paper / Woven Linen Cardstock* ↔ *Optical Reeded / Sea Glass*
+1. **Surface Tactility — one of the eighteen catalogued materials (`references/surfaces.md`), never a blend:** *Paper & ink* (uncoated stock, flat ink, stipple or register ghost) · *Cardboard & steel* (kraft, grey metal, 1px rules, 0px corners) · *Linen & daylight* (warm sunlit ground, editorial serif, real-blur glass) · *Cockpit panel* (dense tabular rows, hairlines, monospace, clinical contrast) · *Airport signage* (signal colour blocks, oversized numerals, heavy structural lines) · *Concrete & rebar* (cool mid-grey, matte grain, 2px rules, 2px corners) · *Phosphor terminal* (true black, green or amber, scanlines, mono only) · *Marble & brass* (off-white veined ground, brass plate, high-contrast serif, small caps). Whichever was chosen sets the nine slots in `references/surfaces.md` — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion` — and those nine must be filled before any component is written. A second material may appear only as a one-off accent, never as a competing system. If the brief's theme implies a surface that is not one of the eight in Step 0, use the prompt-mapping table in `references/surfaces.md` and state the choice in one line.
 2. **Spatial Density:** *Gallery Airy (`p-12`, wide leading)* ↔ *Editorial Balanced (`60ch–66ch` reading measure)* ↔ *Terminal/Instrument High-Density (`1px` exposed hairlines, `tabular-nums` rows)*
 3. **Corner & Stroke Physics:** *Razor Printed (`0px` radius, `1px` exposed hairlines)* ↔ *Precision Organic (`10px` inner / `18px` outer concentric radii)* ↔ *Soft Squircle (`22px`)*
 
@@ -115,14 +162,18 @@ Construct bespoke `<svg viewBox="0 0 64 64">` marks using mathematical vector di
 - **Mandatory Mark Family Deliverables (`public/brand/<slug>/`):**
   1. **Primary (`mark.svg`, `mark-reverse.svg`, `glyph.svg`)** + **Separate 16px Compact Drawing (`mark-compact.svg`, `mark-compact-reverse.svg`)**: The 16px compact MUST be a distinct simplified drawing (fatter arms/bars, wider channels, small details removed so anti-aliasing never blurs at `16×16`), never just the 64px mark scaled down.
   2. **Outlined Vector Wordmark & Lockups (`wordmark.svg`, `lockup.svg`, `lockup-reverse.svg`, `lockup-stacked.svg`)**: Pure `<path>` geometry with ink baked in (`<img>` tags resolve `currentColor` to black).
-  3. **6-Mark Companion Cast (`public/brand/<slug>/cast/*.svg`)**: 6 domain-specific companion symbols drawn on the exact same `64×64` grid and cut-line weight (e.g., for Vesper: *Moon, Lamp, Horizon, Figure, Ray, Grain*; for Clearing: *Dawn, Track, Antler, Rain, Call*).
+  3. **6-Mark Companion Cast (`public/brand/<slug>/cast/*.svg`)**: 6 domain-specific companion symbols drawn on the exact same `64×64` grid and cut-line weight (six nouns from the brand's own operational vocabulary, never generic icons — a shipping identity gets *Parcel, Docket, Pallet, Tape, Route, Depot*; a print studio gets *Sheet, Plate, Squeegee, Register, Drier, Trim*).
 
 ---
 
-### Pillar III: Dual-Scope OKLCH Chromatic Architecture & Honest Contrast Ledger
+### Pillar III: OKLCH Chromatic Architecture (One or Two Scopes) & Honest Contrast Ledger
 Generate a perceptually uniform `oklch(L C H)` primitive palette (`6–12` primitives) tailored to the brand hue ($H$), wired through **Three Strict Token Layers**:
 1. **Layer 1 · Primitives (`--xx-cobalt`, `--xx-stock`, `--xx-chalk`):** Named once for the physical material. Primitives **NEVER** flip values in dark mode and **NEVER** use mode prefixes (`--night-ground` is banned).
-2. **Layer 2 · Semantic Scope (`:root` Day vs `[data-<slug>='night']` Night):** A night surface is a semantic scope over the same primitives (`--xx-surface-page`, `--xx-surface-plate`, `--xx-text-primary`, `--xx-text-secondary`, `--xx-line-strong`, `--xx-line-subtle`).
+2. **Layer 2 · Semantic Scope — count follows the Step 0 polarity answer, never a default:**
+   - *Daylight only:* `:root` alone. No night block, no `[data-<slug>='night']`, no toggle, no Night sheet, no dark-mode audit line. Write one sentence in Section 07 saying why (a waybill is a white document; a dark one is a different product).
+   - *Dual scope, day default:* `:root` plus a second `[data-<slug>='night']` semantic scope over the same primitives (`--xx-surface-page`, `--xx-surface-plate`, `--xx-text-primary`, `--xx-text-secondary`, `--xx-line-strong`, `--xx-line-subtle`).
+   - *Dual scope, night default:* the same two blocks, but the page ground is the night scope on load and the toggle switches to day. Never ship a toggle whose two states resolve to the same colours.
+   - *Single scope on a dark ground:* one `:root` whose page ground is the dark material. Still no toggle — a single scope is a single scope whatever its lightness.
 3. **Layer 3 · Component Tokens (`--xx-button-bg`, `--xx-chip-border`):** The only layer where a component knows its recipe.
 4. **Honest Contrast Ledger (Mandatory Published Failure):**
    - Compute WCAG contrast ratios from hex for `10–16` pairs.
@@ -143,24 +194,24 @@ Never default to generic Inter + Roboto. Synthesize a **3-Role Font Stack** (`--
 
 > [!CRITICAL]
 > **ANTI-TEMPLATE HERO LAW — NEVER REUSE THE SAME HERO BOX LAYOUT:**
-> Do **not** default every brand to the old `Quieta / Arête / Tavola` two-card hero (`left reading plate + right glass radar card + 4-cell bottom row`). Instead, build the Hero as an **unnumbered opening stage** using one of these **5 high-scoring flagship architectures** (chosen in Step 0 or matched to the brand's material):
+> Do **not** default every brand to the generic two-card hero (`left reading plate + right glass radar card + 4-cell bottom row`). Instead, build the Hero as an **unnumbered opening stage** using one of these **5 high-scoring flagship architectures** (chosen in Step 0 or matched to the brand's material):
 
-#### Variant A · Vesper Split Field + Overlapping Stat Bench (`vesper/page.tsx`)
-- **Top Field (`.vs-field`):** A full-width `height: min(78vh, 720px)` visual stage holding the primary artwork/stipple/photo edge-to-edge, with a minimal bottom-aligned monospace `.vs-stamp` bar (`Vesper · two inks · 2026` / `Cobalt #1b3fa2 / stock #e6cfa8`). No headline sits on top of the artwork.
+#### Variant A · Full-Width Field + Overlapping Stat Bench
+- **Top Field (`.vs-field`):** A full-width `height: min(78vh, 720px)` visual stage holding the primary artwork/stipple/photo edge-to-edge, with a minimal bottom-aligned monospace `.vs-stamp` bar (`Brand · material · year` / `Primary hex / ground hex`). No headline sits on top of the artwork.
 - **Opening Below (`.vs-opening`):** Immediately below the field, a 5-cell exposed-hairline `.vs-bench` (`margin-top: -30px; position: relative; z-index: 2; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--xx-line-strong)`) bridges the seam between the artwork and the paper ground. Below the bench sits the oversized display `<h1>` (`clamp(52px, 8.4vw, 112px)`, `line-height: 0.9`, with optional register-ghost `text-shadow`), a `56ch` `.vs-lede`, and split-arrow `.vs-btn` CTAs.
 
-#### Variant B · Clearing / Strand Split Editorial + Framed Media Pane (`clearing/page.tsx`, `strand/page.tsx`)
+#### Variant B · Split Editorial + Framed Media Pane
 - **2-Column Asymmetric Grid (`.heroGrid`):** Left column sits directly on the page ground with eyebrow, editorial `<h1>`, `60ch` lede, and 4 compact `.pill` metadata badges (`<b>27</b> tokens`, `<b>8.71:1</b> cream on emerald`, `<b>6</b> cast marks`, `<b>64</b> unit grid`).
 - **Right Framed Artwork + Single Floating Pane (`.heroMedia`):** A framed high-resolution painting or photograph (`border-radius`, `overflow: hidden`) with a single translucent bottom-left/right `.heroPane` carrying `lockup-reverse.svg` and a 2-line caption (`One pane / over painted light`). Followed by a 4-cell `.heroStats` row below.
 
-#### Variant C · Porphyry / Hachure Live Specimen Stage First (`porphyry/page.tsx`, `hachure/page.tsx`)
-- **Top Specimen Stage:** The hero opens with the system's signature interactive or procedural object across the full shell or viewport—such as Hachure's live `DitherField` + printed cartographic `.heroMargin` scale bar (`Sheet 05 · 0—1 km · 1:25 000 · seed 7`), or Porphyry's live stage header (`Fig. 01 · the stage, live`) + interactive diorama specimen.
+#### Variant C · Live Specimen Stage First
+- **Top Specimen Stage:** The hero opens with the system's signature interactive or procedural object across the full shell or viewport—such as a live `DitherField` plus a printed cartographic `.heroMargin` scale bar (`Sheet 05 · 0—1 km · 1:25 000 · seed 7`), or a live stage header (`Fig. 01 · the stage, live`) plus an interactive specimen.
 - **Hero Foot Below (`.heroFoot` / `.heroInner`):** Below the specimen sits the eyebrow, display headline, narrative lede, action buttons, and a 4-cell stat column/row.
 
-#### Variant D · Jakarta / Riso Physical Artifact & Torn Edge (`jakarta/page.tsx`, `riso/page.tsx`, `huginn/page.tsx`)
+#### Variant D · Physical Sheet & Torn Edge
 - **Physical Sheet / Hoarding Stage:** The hero is a physical printed sheet or civic hoarding—featuring an oversized `760px` decorative mark impression or a pinned top edge (`<Pin />` + live run/clock metadata row), bold display typography, and a bottom edge cut with an irregular 18-tooth polygon `clip-path` (`.heroFloor` / `.heroSheet`) or a Bayer dither dissolve into a solid paper `.heroPlate` below.
 
-#### Variant E · Cove / Tavola Full-Bleed Atmospheric Plate (`cove/page.tsx`, `tavola.astro`)
+#### Variant E · Full-Bleed Atmospheric Plate
 - **Full-Bleed Backdrop + Solid Reading Plate:** Full-bleed dark or sunlit photography behind a directional scrim, pairing a high-contrast reading plate with a live domain instrument/station readout card (`Station 04 · live readings` or `Coordinates + 4-axis spec`) and a breathing stat row.
 
 #### Mandatory 6-Panel Brandkit Board (`brandkit-board.mjs`)
@@ -179,11 +230,11 @@ node skills/sunnyside-brand-system/scripts/brandkit-board.mjs \
 ### Pillar VI: Navigation, Rail Options & 7 Canonical Numbered Sections
 
 > [!CRITICAL]
-> **NAVIGATION & RAIL MANDATE (THE VESPER & CLEARING STANDARD):**
+> **NAVIGATION & RAIL MANDATE (BOTH SUPPORTED RAILS):**
 > 1. **Hero is Unnumbered:** The Hero / Opening stage is **never** numbered `01`. Section numbering (`01` through `07`) begins at the first content section below the hero (`01 / Premise` or `01 / Idea`).
-> 2. **Navbar Links Have Zero Numbers:** The sticky top navigation bar carries the brand mark + name on the left, **clean word-only section links without numbers** (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`) in the center, and the theme scope toggle (using a geometric `.dot` or `<i>` square, never emojis) on the right.
+> 2. **Navbar Links Have Zero Numbers:** The sticky top navigation bar carries the brand mark + name on the left, **clean word-only section links without numbers** (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`) in the center, and the theme scope toggle on the right **only if Step 0 chose a dual scope** (a geometric `.dot` or `<i>` square, never emojis) — a single-scope build has no toggle at all.
 > 3. **Section Numbers Live in the Left Rail (Two Supported Architectures):**
->    - **Option 1 · Vesper Per-Section Rail (Default):** Each `.sec` has a `1px` top border (`border-top: 1px solid var(--xx-line-strong)`) and wraps both `.rail` and `.body` inside `.sec > .wrap`:
+>    - **Option 1 · Per-Section Rail (Rail A, default):** Each `.sec` has a `1px` top border (`border-top: 1px solid var(--xx-line-strong)`) and wraps both `.rail` and `.body` inside `.sec > .wrap`:
 >      ```css
 >      .sec { padding-block: 96px; border-top: 1px solid var(--xx-line-strong); scroll-margin-top: 92px; }
 >      .sec > .wrap { display: grid; grid-template-columns: 176px minmax(0, 1fr); gap: 40px; }
@@ -196,20 +247,20 @@ node skills/sunnyside-brand-system/scripts/brandkit-board.mjs \
 >        .rail { position: static; flex-direction: row; align-items: baseline; gap: 12px; }
 >      }
 >      ```
->    - **Option 2 · Clearing Sticky Contents TOC Sidebar:** Below the hero, a single outer `<div class="shell layout">` (`display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 56px; align-items: start`) holds a sticky `<nav class="contents" aria-label="Contents">` sidebar with an `<ol>` of `01`..`07` links (highlighting `aria-current="true"` via `IntersectionObserver` or scroll position) alongside the `<div>` stack of all 7 sections.
+>    - **Option 2 · Sticky Contents List (Rail B):** Below the hero, a single outer `<div class="shell layout">` (`display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 56px; align-items: start`) holds a sticky `<nav class="contents" aria-label="Contents">` sidebar with an `<ol>` of `01`..`07` links (highlighting `aria-current="true"` via `IntersectionObserver` or scroll position) alongside the `<div>` stack of all 7 sections.
 
 #### The 7 Canonical Numbered Sections (Below the Unnumbered Hero)
 
 1. **`01 / Premise (or Idea)`**
    - Section headline (`h2`) + lead paragraph (`p.big`) + 4 Premise cells (`Belief`, `Enemy`, `Material`, `Reject it when` in a `2×2` `.two` hairline grid) + **4 structured Decision Cards** (`.decs` `2×2` grid) where every card states: `Decision` (`h3`), `Because`, `Not when`, and `Breaks next`.
 2. **`02 / The Mark`**
-   - Kuwayama construction narrative + 4-tile `.logo-grid` (`Primary`, `Reverse` on loud/night ground, `Compact · 16–24px`, `Glyph`) + horizontal/reverse/stacked `.lock` rows + multi-size scale strip (`96`, `48`, `32`, `24 compact`, `16 compact`, `16 glyph`) + 3 structural rules (`Clear space`, `Never`, `Below 24px`) + optional scored concept bake-off table or 1-click SVG copy.
-   - *Companion Cast Placement:* Either render the **6-Mark Companion Cast** here in Section 02, OR render it as a **full-bleed inverted `.castband`** (like Vesper's cobalt cast band between `06 Kit` and `07 Tokens`, with its own `176px` `.rail` + 3×2 `.castgrid`).
+   - Kuwayama construction narrative + 4-tile `.logo-grid` (`Primary`, `Reverse` on a loud ground, `Compact · 16–24px`, `Glyph`) + horizontal/reverse/stacked `.lock` rows + multi-size scale strip (`96`, `48`, `32`, `24 compact`, `16 compact`, `16 glyph`) + 3 structural rules (`Clear space`, `Never`, `Below 24px`) + optional scored concept bake-off table or 1-click SVG copy.
+   - *Companion Cast Placement:* Either render the **6-Mark Companion Cast** here in Section 02, OR render it as a **full-bleed inverted `.castband`** (a full-bleed inverted band between `06 Kit` and `07 Tokens`, with its own `176px` `.rail` + 3×2 `.castgrid`).
 3. **`03 / Ink (or Colour)`**
    - Click-to-copy primitive swatch cards (`grid-template-columns: repeat(4, 1fr); gap: 1px`, showing color chip, token name, hex/OKLCH, and role) + the **complete Measured Contrast Ledger** (`.pairs` rows with dual 30×30 color chips, pair label, computed ratio, and assigned semantic job—explicitly highlighting the `1–3` failing pairs and what job they may *not* do).
-4. **`04 / Surfaces` (Vesper Comparative Surface Exploration Grid — No Range-Slider Stage)**
-   - **Never build a fake blur/tint range-slider stage unless explicitly requested.** Instead, follow Vesper's `"Six surfaces were tried. Four survived."` architecture:
-   - Render a `2-column` `.surf` hairline grid (`grid-template-columns: 1fr 1fr; gap: 1px; background: var(--xx-line-subtle)`) of **4 to 6 explored surface cards** (`.sc`).
+4. **`04 / Surfaces` (Comparative Surface Grid — No Range-Slider Stage)**
+   - **Never build a fake blur/tint range-slider stage unless explicitly requested.** Instead, use the count-then-cut architecture — state the real number tried and the real number kept in the intro line (`"Eight surfaces were tried. Five survived."`), and never write a count that does not match the cards rendered:
+   - Render a `2-column` `.surf` hairline grid (`grid-template-columns: 1fr 1fr; gap: 1px; background: var(--xx-line-subtle)`) of **4, 6 or 8 explored surface cards** (`.sc`) — an even count, so the last row never ends ragged.
    - Each card has:
      1. A `210px` live visual `.demo` box at the top demonstrating that exact surface treatment in real CSS/SVG/imagery (e.g., *Stipple / Artwork field*, *Ordered Bayer dither band*, *Register ghost type*, *Ruled ledger rows*, *Frosted pane that smudges the texture*, *Torn/cut clip-path edge*, or *Lifted paper seam*).
      2. A `.txt` body below with a flex header (`<b>Surface Title</b>` + monospace verdict tag `Shipped — the hero`, `Shipped — section dividers`, or `Rejected`) and a concise paragraph explaining *why* it survived or *why* it was rejected so nobody re-proposes it in six months. Cards with `rejected: true` get `.rej` (`filter: saturate(0.55)` on `.demo` and muted verdict tag).
@@ -218,7 +269,7 @@ node skills/sunnyside-brand-system/scripts/brandkit-board.mjs \
 6. **`06 / The Kit (or Domain Workbench)`**
    - A `2×2` `.kit` hairline grid of pressed/tactile UI controls and domain components (`Buttons` with primary/ghost/small/disabled states, `Chips & tags` with status indicators, `Fields` with a double-reported error summary + `aria-invalid="true"` input state, and `Data rows / Domain workbench` with `tabular-nums` alignment and live interactive selection).
 7. **`07 / Tokens (and Honest Audit Ledger)`**
-   - `2×2` `.sheet` grid of copyable code blocks (`1 · Primitives`, `2 · Day Scope`, `2 · Night Scope`, `3 · Component Tokens` with 1-click `Copy` buttons) + optional **Audit & Known Gaps** ledger (`What is verified, and what is not` + `2×2` `.gaps` cards) + closing full-bleed band or architectural footer.
+   - `2-column` `.sheet` grid of copyable code blocks — 4 cells on a single scope, 5 on a dual scope (`1 · Primitives`, `2 · Day Scope`, `3 · Component Tokens`, `4 · Physics` on a single scope — insert `3 · Night Scope` and shift the last two to `4` / `5` **only on a dual scope**) with 1-click `Copy` buttons + optional **Audit & Known Gaps** ledger (`What is verified, and what is not` + `2×2` `.gaps` cards) + closing full-bleed band or architectural footer.
 
 ---
 
@@ -237,11 +288,13 @@ To achieve maximum quality with minimal token consumption on both flagship and f
 
 Verify internally before finishing (never print this checklist):
 - [ ] `<slug>-brandkit.png` is a rendered `1500×1125` (`3000×2250` @2x) 6-panel Brand Kit Board—never a raw copied photo.
-- [ ] Hero is **unnumbered**, uses one of the **5 flagship Hero variants** (not a copy-paste of Quieta/Arête), and the sticky navbar links have **zero numbers** (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`).
-- [ ] Section numbers (`01`..`07`) live inside the left rail—either **Vesper's Per-Section Rail** (`.sec > .wrap` wrapping `176px` sticky `.rail` + `.body`) or **Clearing's Sticky Contents Sidebar** (`.shell.layout` wrapping a scroll-spy `<ol>` + content column).
-- [ ] Section `04 / Surfaces` uses **Vesper's Comparative Surface Exploration Grid** (`2-col` grid of 4–6 `.sc` cards with `210px` live `.demo` boxes + `Shipped` / `Rejected` verdicts, no range-slider stage).
+- [ ] Hero is **unnumbered**, uses the **Hero shape chosen in Step 0 Q3** (not the generic two-card hero), and the sticky navbar links have **zero numbers** (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`).
+- [ ] Section numbers (`01`..`07`) live inside the left rail—either the **Per-Section Rail** (`.sec > .wrap` wrapping a `176px` sticky `.rail` + `.body`) or the **Sticky Contents List** (`.shell.layout` wrapping a scroll-spy `<ol>` + content column).
+- [ ] Section `04 / Surfaces` uses the **Comparative Surface Grid** (`2-col` grid of 4, 6 or 8 `.sc` cards — an even count so the last row is never ragged — with `210px` live `.demo` boxes + `Shipped` / `Rejected` verdicts, no range-slider stage).
 - [ ] Mark family includes a separate `16px` compact drawing (`mark-compact.svg`) + 6 companion cast marks (`cast/*.svg`) on the 64-unit grid.
 - [ ] Section `01` includes 4 `Decision / Because / Not when / Breaks next` cards, and Section `03` publishes at least 1–3 failing contrast pairs with a restricted non-text job.
+- [ ] **Scope parity:** the shipped page matches the Step 0 polarity answer exactly. A single scope has no theme toggle in the navbar, no second token sheet, no `[data-<slug>='night']` block, and no dark-mode audit line. A dual scope has all four. Never leave a toggle that does nothing, and never leave a "no dark mode" sentence in a page that has one.
+- [ ] **Count parity:** every stated number matches what renders — the surface intro line ("Eight surfaces were tried. Five survived.") matches the card count and the verdict tags, the token-sheet count matches the scope answer, and the cast is exactly 6.
 - [ ] Zero emojis (`☀️`, `🌙`) in UI chrome; all 3 fonts load live.
 
 ---
@@ -254,4 +307,4 @@ End every response with this compact 1-keystroke action menu:
 > - **`[A] Tailwind v4 / CSS Token Export`** — Standalone `tokens.css` with OKLCH `@theme` variables and font rules.
 > - **`[B] Figma Variables & SVG Bundle`** — W3C Design Tokens JSON + clean standalone `.svg` files for all lockups and cast marks.
 > - **`[C] Extract Section 06 Kit Components`** — Package the kit and domain controls into modular `components/ui/` TSX files.
-> - **`[D] Remix Hero Variant / Rail / Archetype`** — Name any shift (e.g., *"Switch to Clearing TOC rail + Variant B Split Hero"*) for a surgical git patch diff.
+> - **`[D] Remix Rail / Hero / Archetype`** — Name any shift (e.g., *"Switch to Rail B + Hero B"*) for a surgical git patch diff.
