@@ -11,7 +11,6 @@ import './globals.css'
 import { ThemeProvider } from 'next-themes'
 import { GlassFilter } from '@/components/ui/liquid-glass'
 import { AudioProvider } from '@/features/landing-page/spotify/audio-context'
-import { MusicPlayer } from '@/features/landing-page/spotify/music-player'
 import Script from 'next/script'
 import {
   WEBSITE_URL,
@@ -141,7 +140,6 @@ export default function RootLayout({
             />
             <div className="flex min-h-screen w-full flex-col font-[family-name:var(--font-geist)]">
               <div className="relative flex-1">{children}</div>
-              <MusicPlayer />
             </div>
           </AudioProvider>
         </ThemeProvider>
