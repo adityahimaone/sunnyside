@@ -140,6 +140,11 @@
 }
 
 .layer[data-id] {
+  /* The drawn machinery sits about 14.5u right of the frame's centre, which
+     leaves a wide gap on the left and none on the right. Nudge the whole
+     composition back so both margins match. The wall and the frame stay put:
+     only the pieces move inside the box. */
+  translate: calc(var(--u) * -14.5) 0;
   transition:
     scale 0.6s var(--ease),
     filter 0.6s var(--ease),
