@@ -70,6 +70,8 @@ const PROJECT_POSITION: Record<string, string> = {
  * that is missing here simply prints no chips rather than inventing a palette.
  */
 const SYSTEM_SWATCHES: Record<string, readonly string[]> = {
+  tavola: ['#faf6ee', '#221a15', '#d85a38', '#2a62b6'],
+  halation: ['#fdf1ec', '#160912', '#f26857', '#9e344d'],
   sunnyside: ['#f3ecdf', '#191a2e', '#3d53d6', '#ffd23f'],
   vesper: ['#0d131f', '#2342c0', '#5470d6', '#fbf8f1'],
   'wildflower-wind': ['#e7e3ee', '#2a1e33', '#8f2a90', '#f4d9e8'],
