@@ -32,5 +32,8 @@ jobs:
         run: diff -rq skills/sunnyside-brand-system .agents/skills/sunnyside-brand-system
       - name: Unit tests
         run: node --test "skills/sunnyside-brand-system/scripts/test/*.test.mjs"
+      # Porphyry and the other generated systems live in the separate
+      # design-system repo now; sunnyside is the known-good case that still
+      # ships here, so it is the one this guard measures.
       - name: Known-good case still clears every gate
-        run: node skills/sunnyside-brand-system/scripts/gates.mjs --slug porphyry
+        run: node skills/sunnyside-brand-system/scripts/gates.mjs --slug sunnyside
