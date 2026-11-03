@@ -150,12 +150,12 @@ export function Skills() {
       className={`${styles.section} scroll-mt-24`}
       aria-labelledby="skills-title"
     >
+      <div className={styles.glow} aria-hidden />
       <div className={styles.shell}>
         <SectionHead
           number="04"
           label="Skills"
           script="in the bag"
-          onDark
           title={
             <span id="skills-title">
               What I
@@ -544,12 +544,7 @@ export function Skills() {
           <span>No percentages. Just what I reach for.</span>
           <span>Last audited · October 2026</span>
         </div>
-        <SectionNext
-          href="contact"
-          label="Contact"
-          note="the last page"
-          onDark
-        />
+        <SectionNext href="contact" label="Contact" note="the last page" />
       </div>
     </section>
   )

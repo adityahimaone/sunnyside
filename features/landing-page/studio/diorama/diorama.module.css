@@ -9,6 +9,8 @@
    would turn in your hands. */
 
 .shell {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 80rem;
   margin-inline: auto;
@@ -19,13 +21,22 @@
   position: relative;
   overflow-x: clip;
   padding-block: clamp(5rem, 9vw, 8rem) clamp(3rem, 5vw, 4.5rem);
-  background: radial-gradient(
-      ellipse 70% 40% at 50% 62%,
-      rgb(61 83 214 / 0.16),
-      transparent 70%
-    ),
-    #181822;
-  color: #f3ecdf;
+  background: var(--paper-hi);
+  color: var(--ink);
+}
+
+/* The butter wash the section carried before the shadowbox, so the frame
+   reads as hung on the same warm wall as the rest of the page. */
+.glow {
+  position: absolute;
+  z-index: 0;
+  top: 8%;
+  left: -12rem;
+  width: 34rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 210 63 / 0.32), transparent 68%);
+  pointer-events: none;
 }
 
 .srOnly {
@@ -858,7 +869,7 @@
   font-size: 10.5px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgb(243 236 223 / 0.68);
+  color: var(--muted);
 }
 
 /* ── Animation (SVG parts) ─────────────────────────────────────────────── */
