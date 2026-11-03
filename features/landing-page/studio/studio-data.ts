@@ -215,7 +215,7 @@ export const SKILL_GROUPS: readonly SkillGroup[] = [
   },
   {
     id: 'also',
-    eyebrow: 'Also in the bag',
+    eyebrow: 'Subterranean bedrock',
     title: 'The rest',
     line: 'Enough of everything else to be useful in a room: design files, a database, a deploy, a bug report that actually reproduces.',
     skills: ['Figma', 'Git', 'Cloudflare', 'PostgreSQL', 'Vitest', 'Go'],

@@ -47,10 +47,12 @@
 }
 
 .work :focus-visible,
-.menuPanel :focus-visible,
-.skillBuild :focus-visible {
+.menuPanel :focus-visible {
   outline-color: var(--butter);
 }
+
+/* Inside the observatory the station's own ink is the only reliable contrast:
+   the floors alternate cobalt, butter, pink, and cream. */
 
 /* A fixed, non-interactive paper tooth. Static paint, never inside a scroller. */
 .grain::after {
@@ -2034,357 +2036,65 @@
 
 /* ── Skills ─────────────────────────────────────────────────────────────── */
 
-.skills {
-  position: relative;
-  padding-block: clamp(5.5rem, 11vw, 9rem);
-  overflow: clip;
-  background: var(--paper-hi);
-}
+/* The wash carries the clipping so the sticky controller can stick. */
 
-.skillsGlow {
+/* Automation controller: a cardstock tab that hangs over the shadowbox. */
+
+/* ── The shadowbox ────────────────────────────────────────────────────── */
+
+/* Mitered corner joints of the wooden frame. */
+
+/* ── Chips: paper badges pinned on the floor ──────────────────────────── */
+
+/* ── 01 Build: cobalt stratosphere observatory ────────────────────────── */
+
+/* Two separate posts, not a table: the legs stand off the deck edges. */
+
+/* Paper conveyor that ties the instruments together. */
+
+/* A lens in the dome, so it reads as an observatory and not a bubble. */
+
+/* ── 02 Motion: butter solar engine ───────────────────────────────────── */
+
+/* ── 03 Systems: pink barometric deck ─────────────────────────────────── */
+
+/* The paper shelf every instrument stands on. */
+.deckShelf {
   position: absolute;
-  z-index: 0;
-  left: -12rem;
-  top: 18%;
-  width: 30rem;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgb(255 210 63 / 0.32), transparent 68%);
-  pointer-events: none;
+  inset: auto 0 0 0;
+  height: 0.42rem;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #bfa37c 0 5px, #9a7d55 5px 10px);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
 }
 
-.skillsGrid {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 1.1rem;
-  margin-top: clamp(2.8rem, 6vw, 4.4rem);
-}
+/* ── 04 The rest: cardboard bedrock drawer ────────────────────────────── */
+
+/* ── Station isolation ────────────────────────────────────────────────── */
 
 @media (min-width: 1024px) {
-  .skillsGrid {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
+  /* Floors you did not open keep only their plate and their scenery. */
+}
 
-  .cellBuild {
-    grid-column: span 7;
-  }
+/* ── The tower on narrow screens ──────────────────────────────────────── */
 
-  .cellMotion {
-    grid-column: span 5;
-  }
+@media (max-width: 1023px) {
+  /* Brass pipes bolting one floor to the next. */
+}
 
-  .cellSystems {
-    grid-column: span 5;
-  }
+/* ── Machinery: the only looping motion here ──────────────────────────── */
 
-  .cellAlso {
-    grid-column: span 7;
+@keyframes skillsSpin {
+  to {
+    rotate: 360deg;
   }
 }
 
-.skillCard {
-  position: relative;
-  display: flex;
-  height: 100%;
-  min-height: 20rem;
-  flex-direction: column;
-  padding: clamp(1.3rem, 2.6vw, 2rem);
-  overflow: hidden;
-  border: 2px solid var(--ink);
-  border-radius: 24px;
-  box-shadow: 7px 8px 0 rgb(25 26 46 / 0.1);
-  transition:
-    transform 0.35s var(--ease-out),
-    box-shadow 0.35s var(--ease-out);
-}
-
-.skillCard:hover {
-  transform: perspective(1200px) rotateX(1.2deg) rotateY(-2deg) translateY(-5px);
-  box-shadow: 10px 13px 0 rgb(25 26 46 / 0.13);
-}
-
-.skillBuild {
-  background: var(--cobalt);
-  color: var(--paper);
-}
-
-.skillMotion {
-  background: var(--butter);
-  color: var(--ink);
-}
-
-.skillSystems {
-  background: var(--pink);
-  color: var(--ink);
-}
-
-.skillAlso {
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.skillTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.skillTop span:last-child {
-  opacity: 0.85;
-}
-
-.skillTitle {
-  margin-top: 1rem;
-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(1.9rem, 3.2vw, 2.8rem);
-  font-weight: 800;
-  line-height: 0.94;
-  letter-spacing: -0.05em;
-}
-
-.skillLine {
-  position: relative;
-  z-index: 1;
-  max-width: 44ch;
-  margin-top: 0.7rem;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  opacity: 0.78;
-}
-
-.skillChips {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: auto;
-  padding-top: 1.2rem;
-}
-
-.chip {
-  padding: 0.3rem 0.6rem;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 9px;
-  letter-spacing: 0.05em;
-  opacity: 0.72;
-  transition:
-    opacity 0.18s ease,
-    transform 0.2s var(--ease-out);
-}
-
-.chip:hover {
-  opacity: 1;
-  transform: translateY(-2px);
-}
-
-.skillAtom {
-  position: absolute;
-  right: -2.5rem;
-  top: 2.5rem;
-  width: 15rem;
-  color: var(--paper);
-  opacity: 0.14;
-  animation: spinSlow 48s linear infinite;
-  pointer-events: none;
-}
-
-.skillMotion .skillLine,
-.skillSystems .skillLine,
-.skillAlso .skillLine {
-  opacity: 0.72;
-}
-
-.skillBuild .skillLine {
-  opacity: 0.92;
-}
-
-.skillBuild .chip {
-  opacity: 0.9;
-}
-
-.springDemo {
-  position: relative;
-  z-index: 1;
-  margin-top: 1.15rem;
-  padding: 0.8rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 14px;
-  background: rgb(255 250 241 / 0.5);
-}
-
-.springRow {
-  display: grid;
-  grid-template-columns: 3.2rem minmax(0, 1fr);
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.springRow + .springRow {
-  margin-top: 0.55rem;
-}
-
-.springLabel {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 8px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0.6;
-}
-
-.springTrack {
-  position: relative;
-  height: 1.3rem;
-  border-bottom: 1px solid rgb(25 26 46 / 0.22);
-  container-type: inline-size;
-}
-
-.springBall {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 1.1rem;
-  height: 1.1rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 50%;
-  background: var(--card-color, var(--cobalt));
-  transform: translateX(0);
-}
-
-.run .springBall {
-  animation: springRun var(--dur) var(--curve) both;
-}
-
-.springReplay {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-top: 0.75rem;
-  padding: 0.3rem 0.65rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 999px;
-  background: transparent;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 8px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink);
-  transition:
-    background-color 0.18s ease,
-    transform 0.18s var(--ease-out);
-}
-
-.springReplay:hover {
-  background: var(--paper-hi);
-}
-
-.springReplay:active {
-  transform: scale(0.96);
-}
-
-.systemDemo {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.55rem;
-  margin-top: 1.2rem;
-  padding: 0.75rem;
-  border: 1.5px dashed rgb(25 26 46 / 0.35);
-  border-radius: 14px;
-}
-
-.stateButton {
-  min-height: 2.4rem;
-  padding: 0.45rem 0.9rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 999px;
-  background: var(--paper-hi);
-  color: var(--ink);
-  font-size: 0.78rem;
-  font-weight: 600;
-  transition:
-    transform 0.16s var(--ease-out),
-    background-color 0.16s ease,
-    box-shadow 0.16s ease;
-}
-
-.stateButton:hover {
-  background: var(--butter);
-  box-shadow: 2px 2px 0 var(--ink);
-}
-
-.stateButton:active {
-  transform: scale(0.96);
-  box-shadow: none;
-}
-
-.stateCode {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 8px;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-}
-
-.alsoCloud {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-top: 1.2rem;
-  align-content: flex-start;
-}
-
-.alsoChip {
-  padding: 0.36rem 0.7rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 3px;
-  background: var(--paper-hi);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10px;
-  line-height: 1.2;
-  box-shadow: 2px 2px 0 rgb(25 26 46 / 0.12);
-  transition:
-    transform 0.18s var(--ease-out),
-    background-color 0.18s ease;
-}
-
-.alsoChip:nth-child(2n) {
-  background: var(--butter);
-  transform: rotate(-1.5deg);
-}
-
-.alsoChip:nth-child(3n) {
-  background: var(--paper-hi);
-  transform: rotate(1.2deg);
-}
-
-.alsoChip:hover {
-  transform: rotate(0) translateY(-2px);
-  background: var(--pink);
-}
-
-.skillNote {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1.5rem;
-  margin-top: 1.6rem;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
+@keyframes skillsDrift {
+  50% {
+    translate: 0.35rem -0.15rem;
+  }
 }
 
 /* ── Contact ────────────────────────────────────────────────────────────── */
@@ -2908,7 +2618,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skillCard:hover {
-    transform: none;
+  .pulseWord::after {
+    animation: none;
   }
 }

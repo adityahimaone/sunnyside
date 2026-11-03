@@ -1,0 +1,1271 @@
+/* The Skills shadowbox.
+
+   One unit, `--u`, is one pixel of the reference capture. The stage is exactly
+   813 units wide, the drawing's viewBox is the same 813 × 467, and every piece
+   of text and every control is placed by the same numbers (see geometry.ts), so
+   at any width the room is the picture, scaled. Nothing here is responsive in
+   the "reflow" sense on purpose: a shadowbox is a fixed composition. On a phone
+   it keeps a readable minimum width and scrolls sideways, like a real one you
+   would turn in your hands. */
+
+.shell {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: clamp(1.1rem, 4vw, 3.5rem);
+}
+
+.section {
+  position: relative;
+  overflow-x: clip;
+  padding-block: clamp(5rem, 9vw, 8rem) clamp(3rem, 5vw, 4.5rem);
+  background: radial-gradient(
+      ellipse 70% 40% at 50% 62%,
+      rgb(61 83 214 / 0.16),
+      transparent 70%
+    ),
+    #181822;
+  color: #f3ecdf;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Room and stage ────────────────────────────────────────────────────── */
+
+.room {
+  --stage-w: min(95rem, calc(100vw - 2rem));
+  --u: calc(var(--stage-w) / 813);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.stageWrap {
+  width: var(--stage-w);
+  flex: none;
+  /* room for the controller, which hangs above the frame */
+  padding-top: calc(var(--u) * 52);
+}
+
+@media (max-width: 860px) {
+  .room {
+    --stage-w: 860px;
+    justify-content: flex-start;
+    padding-inline: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .stageWrap {
+    scroll-snap-align: center;
+  }
+}
+
+.stage {
+  --px: 0;
+  --py: 0;
+
+  position: relative;
+  width: 100%;
+  aspect-ratio: 813 / 467;
+}
+
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--u) * 12) calc(var(--u) * 14);
+  z-index: 0;
+  box-shadow:
+    0 calc(var(--u) * 24) calc(var(--u) * 46) rgb(0 0 0 / 0.6),
+    0 calc(var(--u) * 4) calc(var(--u) * 10) rgb(0 0 0 / 0.5);
+}
+
+.defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: clip;
+  isolation: isolate;
+}
+
+/* paper tooth and a soft vignette over everything inside the frame */
+.scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  opacity: 0.1;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: calc(var(--u) * 160);
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* nearer layers slide further, against the pointer: that is the depth */
+  translate: calc(var(--px, 0) * var(--depth, 0) * var(--u) * -6)
+    calc(var(--py, 0) * var(--depth, 0) * var(--u) * -4);
+  transition:
+    translate 0.35s var(--ease),
+    scale 0.6s var(--ease),
+    filter 0.6s var(--ease),
+    opacity 0.6s var(--ease);
+}
+
+.layer[data-id] {
+  transition:
+    translate 0.35s var(--ease),
+    scale 0.6s var(--ease),
+    filter 0.6s var(--ease),
+    opacity 0.8s var(--ease) calc(var(--n, 0) * 0.12s),
+    transform 0.9s var(--ease) calc(var(--n, 0) * 0.12s);
+}
+
+/* Not yet arrived: below the fold, waiting. Above the fold nothing is hidden. */
+.stageWrap[data-armed='true']:not([data-in='true']) .layer[data-id] {
+  opacity: 0;
+  transform: translateY(calc(var(--u) * 26));
+}
+
+.layer > * {
+  pointer-events: none;
+}
+
+.layer :is(button, input, a, .tag, .drawerTools li, .ribbons li, .windTags li) {
+  pointer-events: auto;
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* The controller picks a station; the others recede, the chosen one steps forward. */
+.stage[data-station='build'] .layer[data-id]:not([data-id='build']),
+.stage[data-station='motion'] .layer[data-id]:not([data-id='motion']),
+.stage[data-station='systems'] .layer[data-id]:not([data-id='systems']),
+.stage[data-station='rest'] .layer[data-id]:not([data-id='rest']) {
+  filter: saturate(0.45) brightness(0.62);
+}
+
+.stage[data-station='build'] .layer[data-id='build'],
+.stage[data-station='motion'] .layer[data-id='motion'],
+.stage[data-station='systems'] .layer[data-id='systems'],
+.stage[data-station='rest'] .layer[data-id='rest'] {
+  scale: 1.012;
+  filter: brightness(1.06) saturate(1.08);
+}
+
+/* ── Controller ────────────────────────────────────────────────────────── */
+
+.controller {
+  position: absolute;
+  z-index: 20;
+  top: calc(var(--u) * -45);
+  /* the reference's controller is centred 20px right of the frame's centre */
+  left: calc(50% + var(--u) * 20.5);
+  translate: -50% 0;
+  width: calc(var(--u) * 414);
+  padding: calc(var(--u) * 11) calc(var(--u) * 12) calc(var(--u) * 11);
+  border-radius: 0 0 calc(var(--u) * 8) calc(var(--u) * 8);
+  background: #ece5d5;
+  color: #1a1a2b;
+  box-shadow:
+    inset 0 calc(var(--u) * -1) 0 rgb(0 0 0 / 0.08),
+    0 calc(var(--u) * 7) calc(var(--u) * 14) rgb(0 0 0 / 0.45);
+}
+
+.controllerTop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 10);
+  margin-bottom: calc(var(--u) * 8);
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: calc(var(--u) * 11.6);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.kinetic {
+  position: relative;
+  flex: none;
+  width: calc(var(--u) * 31);
+  height: calc(var(--u) * 16);
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #23242f;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.kinetic[aria-pressed='false'] {
+  background: #b9b2a0;
+}
+
+.knob {
+  position: absolute;
+  top: 50%;
+  left: calc(100% - var(--u) * 14);
+  width: calc(var(--u) * 11);
+  height: calc(var(--u) * 11);
+  border-radius: 50%;
+  background: #f1ead9;
+  translate: 0 -50%;
+  transition: left 0.3s var(--ease, ease);
+}
+
+.kinetic[aria-pressed='false'] .knob {
+  left: calc(var(--u) * 3);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: calc(var(--u) * 7);
+}
+
+.pill {
+  padding: calc(var(--u) * 4.4) calc(var(--u) * 10);
+  border: calc(var(--u) * 1) solid #4a4a58;
+  border-radius: 999px;
+  background: #f4eedf;
+  color: #1a1a2b;
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: calc(var(--u) * 9.6);
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s var(--ease, ease);
+}
+
+.pill:hover {
+  background: #fff;
+  transform: translateY(calc(var(--u) * -1));
+}
+
+.pill[aria-pressed='true'] {
+  background: #181a2c;
+  border-color: #181a2c;
+  color: #f4eedf;
+}
+
+.pill:focus-visible,
+.kinetic:focus-visible,
+.consoleBtn:focus-visible,
+.play:focus-visible,
+.ribbon:focus-visible,
+.curveInput:focus-visible {
+  outline: 2px solid #3d53d6;
+  outline-offset: 2px;
+}
+
+/* ── Type on the panels ────────────────────────────────────────────────── */
+
+.eyebrow {
+  position: absolute;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgb(34 24 12 / 0.82);
+}
+
+.layer[data-id='build'] .eyebrow {
+  color: rgb(255 255 255 / 0.88);
+}
+
+.title {
+  position: absolute;
+  margin: 0;
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+
+.titleInk {
+  color: #17182b;
+  text-shadow: 0 calc(var(--u) * 0.9) 0 rgb(255 255 255 / 0.32);
+}
+
+.titleCream {
+  color: #e9e1cc;
+  text-transform: uppercase;
+  text-shadow:
+    0 calc(var(--u) * 1) 0 #bdb49b,
+    calc(var(--u) * 1) calc(var(--u) * 2) 0 #948a73,
+    calc(var(--u) * 2) calc(var(--u) * 3.6) calc(var(--u) * 3) rgb(0 0 0 / 0.5);
+}
+
+.cloudText {
+  position: absolute;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgb(255 255 255 / 0.86);
+}
+
+/* ── Build: tags hanging on springs ────────────────────────────────────── */
+
+.tags,
+.windTags,
+.ribbons,
+.folderLabels {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: #1a1a2b;
+  background: #86c46e;
+  clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%);
+  filter: drop-shadow(
+    0 calc(var(--u) * 2.2) calc(var(--u) * 1.4) rgb(0 0 0 / 0.42)
+  );
+  animation: bob 3.4s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  cursor: default;
+  transition:
+    translate 0.25s var(--ease, ease),
+    filter 0.25s ease;
+}
+
+.tag:hover {
+  translate: 0 calc(var(--u) * -3);
+  filter: drop-shadow(
+      0 calc(var(--u) * 5) calc(var(--u) * 2.4) rgb(0 0 0 / 0.5)
+    )
+    brightness(1.06);
+}
+
+.tag:nth-child(1) {
+  background: #3d63d2;
+  color: #fff;
+  clip-path: none;
+  border-radius: calc(var(--u) * 3) 0 0 calc(var(--u) * 3);
+}
+.tag:nth-child(2) {
+  background: #f5d03e;
+}
+.tag:nth-child(3) {
+  background: #8ec1ea;
+}
+.tag:nth-child(4) {
+  background: #d9e7ec;
+}
+.tag:nth-child(5) {
+  background: #86c46e;
+}
+
+/* ── Motion ────────────────────────────────────────────────────────────── */
+
+.windTags li {
+  position: absolute;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #3d4a58;
+}
+
+.windTags li[data-slot='2'],
+.windTags li[data-slot='3'] {
+  padding: calc(var(--u) * 2.4) calc(var(--u) * 4.4);
+  border: calc(var(--u) * 0.8) solid #6a5320;
+  border-radius: calc(var(--u) * 2);
+  background: #f6e7a8;
+  color: #2b2118;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  box-shadow: 0 calc(var(--u) * 1.6) calc(var(--u) * 2) rgb(0 0 0 / 0.3);
+  animation: bob 4.2s ease-in-out infinite;
+}
+
+.windTags li[data-slot='3'] {
+  animation-delay: -1.6s;
+}
+
+.weather {
+  position: absolute;
+}
+
+.weatherHead {
+  position: absolute;
+  top: calc(var(--u) * 6.5);
+  left: calc(var(--u) * 8);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: calc(var(--u) * 5.4);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #3f3210;
+}
+
+.curveRow {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: calc(var(--u) * 14);
+  display: block;
+  translate: 0 -50%;
+  --track: calc(var(--u) * 50);
+  --thumb: calc(var(--u) * 11);
+}
+
+.curveLabel {
+  position: absolute;
+  left: calc(var(--u) * 8);
+  top: 50%;
+  translate: 0 -50%;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #3f3210;
+}
+
+.curveDot {
+  position: absolute;
+  left: calc(var(--u) * 38);
+  top: 50%;
+  width: calc(var(--u) * 12);
+  height: calc(var(--u) * 12);
+  border-radius: 50%;
+  border: calc(var(--u) * 0.9) solid #2b2118;
+  translate: 0 -50%;
+  box-shadow: inset calc(var(--u) * -1) calc(var(--u) * -1) 0 rgb(0 0 0 / 0.25);
+}
+
+/* the visible track and thumb are drawn here so the thumb can be sprung */
+.curveRow::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--u) * 50);
+  top: 50%;
+  width: var(--track);
+  height: calc(var(--u) * 1.8);
+  border-radius: 99px;
+  background: #5e4b1b;
+  translate: 0 -50%;
+}
+
+.curveRow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: calc(
+    var(--u) * 50 + (var(--track) - var(--thumb)) * var(--pct, 50) / 100
+  );
+  width: var(--thumb);
+  height: var(--thumb);
+  border-radius: 50%;
+  border: calc(var(--u) * 1) solid #6d5330;
+  background: #dcc59b;
+  translate: 0 -50%;
+  box-shadow: 0 calc(var(--u) * 1.4) calc(var(--u) * 1.4) rgb(0 0 0 / 0.35);
+}
+
+/* Each curve gets its own spring, but only while "Play the curves" is moving
+   them: dragging by hand should follow the pointer, not lag behind it. */
+.curveRow[data-playing]::after {
+  transition: left 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.curveRow[data-playing][data-curve='snap']::after {
+  transition: left 0.38s cubic-bezier(0.3, 1.7, 0.5, 1);
+}
+.curveRow[data-playing][data-curve='loose']::after {
+  transition: left 1.3s cubic-bezier(0.34, 1.9, 0.6, 0.85);
+}
+
+.curveInput {
+  position: absolute;
+  left: calc(var(--u) * 46);
+  top: 0;
+  width: calc(var(--track) + var(--u) * 8);
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: grab;
+}
+
+.curveRow:has(.curveInput:focus-visible)::after {
+  outline: 2px solid #3d53d6;
+  outline-offset: 2px;
+}
+
+.play {
+  position: absolute;
+  padding: 0;
+  border: calc(var(--u) * 1.2) solid #5a4318;
+  border-radius: calc(var(--u) * 11);
+  background: #f6e7a8;
+  color: #2b2118;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow:
+    0 calc(var(--u) * 2) 0 #b99a45,
+    0 calc(var(--u) * 4) calc(var(--u) * 3) rgb(0 0 0 / 0.38);
+  cursor: pointer;
+  transition:
+    transform 0.2s var(--ease, ease),
+    box-shadow 0.2s var(--ease, ease),
+    background-color 0.2s ease;
+}
+
+.play:hover {
+  background: #fff3c0;
+  transform: translateY(calc(var(--u) * -1.5));
+}
+
+.play:active {
+  transform: translateY(calc(var(--u) * 1.5));
+  box-shadow:
+    0 calc(var(--u) * 0.5) 0 #b99a45,
+    0 calc(var(--u) * 1) calc(var(--u) * 1) rgb(0 0 0 / 0.38);
+}
+
+/* ── Systems ───────────────────────────────────────────────────────────── */
+
+.deck {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border: calc(var(--u) * 1) solid #3a2a30;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.28);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #2b1d28;
+  white-space: nowrap;
+}
+
+.gateTitle {
+  position: absolute;
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: #17182b;
+}
+
+.consoleRow {
+  position: absolute;
+  display: grid;
+  grid-template-columns: 52fr 50fr;
+  gap: calc(var(--u) * 8);
+  padding-left: calc(var(--u) * 2);
+}
+
+.consoleBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 2);
+  height: calc(var(--u) * 20);
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--u) * 10);
+  background: #f2ecdc;
+  color: #2b2118;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 0.18s var(--ease, ease),
+    box-shadow 0.18s var(--ease, ease),
+    background-color 0.2s ease;
+}
+
+/* stacked paper discs: each shadow is one more sheet under the top one */
+.hoverBtn {
+  box-shadow:
+    0 calc(var(--u) * 2) 0 #d6cfba,
+    0 calc(var(--u) * 3) 0 #7d7762,
+    0 calc(var(--u) * 5) 0 #d6cfba,
+    0 calc(var(--u) * 6) 0 #7d7762,
+    0 calc(var(--u) * 8) calc(var(--u) * 2) rgb(0 0 0 / 0.32);
+}
+
+.pressBtn {
+  box-shadow:
+    0 calc(var(--u) * 2) 0 #3f5fd0,
+    0 calc(var(--u) * 4) 0 #2a44a4,
+    0 calc(var(--u) * 5.5) 0 #3f5fd0,
+    0 calc(var(--u) * 7) 0 #1f3382,
+    0 calc(var(--u) * 9) calc(var(--u) * 2) rgb(0 0 0 / 0.34);
+}
+
+.consoleBtn:hover {
+  transform: translateY(calc(var(--u) * -1.5));
+  background: #fff9e8;
+}
+
+.consoleBtn:active {
+  transform: translateY(calc(var(--u) * 2.5));
+}
+
+.hoverBtn:active {
+  box-shadow:
+    0 calc(var(--u) * 1) 0 #d6cfba,
+    0 calc(var(--u) * 2) 0 #7d7762,
+    0 calc(var(--u) * 3) calc(var(--u) * 1) rgb(0 0 0 / 0.3);
+}
+
+.pressBtn:active {
+  box-shadow:
+    0 calc(var(--u) * 1) 0 #3f5fd0,
+    0 calc(var(--u) * 2) 0 #1f3382,
+    0 calc(var(--u) * 3) calc(var(--u) * 1) rgb(0 0 0 / 0.3);
+}
+
+.pressBtn[aria-pressed='true'] {
+  background: #dff3e4;
+  box-shadow:
+    0 calc(var(--u) * 2) 0 #3c9d6b,
+    0 calc(var(--u) * 4) 0 #27704b,
+    0 calc(var(--u) * 5.5) 0 #3c9d6b,
+    0 calc(var(--u) * 7) 0 #1c5538,
+    0 calc(var(--u) * 9) calc(var(--u) * 2) rgb(0 0 0 / 0.34);
+}
+
+.tick {
+  width: calc(var(--u) * 7);
+  height: calc(var(--u) * 6);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.pressBtn[aria-pressed='true'] .tick {
+  opacity: 1;
+}
+
+.ribbons li {
+  position: absolute;
+  transform-origin: 0 50%;
+  filter: drop-shadow(0 0 0 #3a2a30)
+    drop-shadow(calc(var(--u) * 0.7) 0 0 #3a2a30)
+    drop-shadow(calc(var(--u) * -0.7) 0 0 #3a2a30)
+    drop-shadow(0 calc(var(--u) * 0.7) 0 #3a2a30)
+    drop-shadow(0 calc(var(--u) * -0.7) 0 #3a2a30)
+    drop-shadow(0 calc(var(--u) * 1.8) calc(var(--u) * 1.2) rgb(0 0 0 / 0.25));
+  animation: wave 4.4s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  transition: translate 0.3s var(--ease, ease);
+}
+
+.ribbons li:has(.ribbon[aria-pressed='true']) {
+  translate: calc(var(--u) * 5) 0;
+}
+
+.ribbon {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 calc(var(--u) * 7) 0 calc(var(--u) * 4.5);
+  border: 0;
+  background: #f5dde8;
+  color: #2b1d28;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.12;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  clip-path: polygon(0 0, 100% 0, 93% 50%, 100% 100%, 0 100%);
+  transition: filter 0.2s ease;
+}
+
+.ribbon:hover {
+  filter: brightness(1.06);
+}
+
+.ribbon[data-tone='hot'] {
+  background: #ee6f9a;
+  white-space: normal;
+}
+.ribbon[data-tone='cream'] {
+  background: #efe8d8;
+}
+.ribbon[data-tone='green'] {
+  background: #7cc08a;
+}
+
+.ribbon[aria-pressed='true'] {
+  font-weight: 700;
+  background-image: linear-gradient(
+    rgb(255 255 255 / 0.28),
+    rgb(255 255 255 / 0.28)
+  );
+}
+
+/* ── The rest ──────────────────────────────────────────────────────────── */
+
+.sticky {
+  position: absolute;
+  padding: calc(var(--u) * 6) calc(var(--u) * 7) calc(var(--u) * 5);
+  background: #e9ddc1;
+  border: calc(var(--u) * 0.8) solid #a89569;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #3a2f1d;
+  rotate: 2.6deg;
+  clip-path: polygon(
+    calc(var(--u) * 8) 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 calc(var(--u) * 8)
+  );
+  filter: drop-shadow(
+    calc(var(--u) * 1) calc(var(--u) * 2.2) calc(var(--u) * 1.6)
+      rgb(0 0 0 / 0.38)
+  );
+  transform-origin: 90% 0;
+  animation: sticky 6.5s ease-in-out infinite;
+}
+
+.sticky span {
+  display: inline-block;
+}
+
+.folderLabels li {
+  position: absolute;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+  color: #2b2118;
+  animation: folder 5s ease-in-out infinite;
+}
+
+.folderLabels li:nth-child(1) {
+  color: #fff;
+}
+
+.drawerTools {
+  position: absolute;
+  display: flex;
+  align-items: stretch;
+  gap: calc(var(--u) * 5.6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drawerTools li {
+  display: grid;
+  place-items: center;
+  padding: 0 calc(var(--u) * 6.2);
+  border: calc(var(--u) * 0.9) solid #2b2118;
+  border-radius: calc(var(--u) * 2.4);
+  background: #ece6d6;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #2b2118;
+  box-shadow:
+    calc(var(--u) * 0.8) calc(var(--u) * 1.8) 0 rgb(0 0 0 / 0.5),
+    inset 0 calc(var(--u) * 1) 0 rgb(255 255 255 / 0.55);
+  transition:
+    translate 0.2s var(--ease, ease),
+    box-shadow 0.2s ease;
+  cursor: default;
+}
+
+.drawerTools li[data-hot] {
+  background: #f2c23a;
+}
+
+.drawerTools li:hover {
+  translate: 0 calc(var(--u) * -2.4);
+  box-shadow:
+    calc(var(--u) * 0.8) calc(var(--u) * 4) 0 rgb(0 0 0 / 0.4),
+    inset 0 calc(var(--u) * 1) 0 rgb(255 255 255 / 0.55);
+}
+
+/* ── Caption under the frame ───────────────────────────────────────────── */
+
+.note {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 1.1rem;
+  /* the reference sets the caption on the content edge, not inside the shell's padding */
+  margin-inline: calc(-1 * clamp(1.1rem, 4vw, 3.5rem));
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgb(243 236 223 / 0.68);
+}
+
+/* ── Animation (SVG parts) ─────────────────────────────────────────────── */
+
+.spinCW,
+.spinCCW,
+.slowSpin,
+.twinkle,
+.squash,
+.squashTag,
+.atom,
+.pulse,
+.drift,
+.sway,
+.sweep,
+.blink,
+.crank,
+.needle,
+.plunger,
+.plungerTop,
+.leverA,
+.leverB,
+.toggleKnob,
+.slideKnob,
+.folder,
+.sunFace,
+.windowGlow {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.spinCW {
+  animation: spin var(--dur, 20s) linear infinite;
+}
+.spinCCW {
+  animation: spin var(--dur, 20s) linear infinite reverse;
+}
+.slowSpin {
+  animation: spin var(--dur, 30s) linear infinite;
+}
+
+.twinkle {
+  animation: twinkle 3.2s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.squash {
+  transform-origin: 50% 100%;
+  animation: squash 2.4s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+.squashTag {
+  transform-origin: 50% 100%;
+  animation: squashTag 3.4s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.atom {
+  animation: spin 46s linear infinite;
+}
+.pulse {
+  animation: pulse 2.6s ease-in-out infinite;
+}
+
+.drift {
+  animation: drift var(--dur, 10s) ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+.sway {
+  transform-origin: 0 50%;
+  animation: swayBanner var(--dur, 7s) ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+.flow path {
+  stroke-dasharray: 10 6;
+  animation: flow 2.4s linear infinite;
+}
+.belt {
+  animation: beltRun 1.6s linear infinite;
+}
+.signal {
+  animation: signal 2.2s linear infinite;
+}
+
+.sweep {
+  animation: sweep 9s ease-in-out infinite;
+}
+
+.sunFace {
+  animation: pulse 4.5s ease-in-out infinite;
+}
+.blink {
+  transform-origin: center;
+  animation: blink 6s infinite;
+}
+
+.crank {
+  animation: crank 3.2s ease-in-out infinite;
+}
+
+.lever {
+  transform-origin: 856px 262px;
+  transform: rotate(var(--lever, 0deg));
+  transition: transform 0.9s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+.needle {
+  transform-origin: 0 0;
+  animation: needle 3.6s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.plunger {
+  transform-box: view-box;
+}
+.plungerTop {
+  transform-origin: 50% 100%;
+  animation: plunge 3.4s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.leverA {
+  transform-origin: 50% 100%;
+  animation: leverA 4.2s ease-in-out infinite;
+}
+.leverB {
+  transform-origin: 50% 100%;
+  animation: leverB 5s ease-in-out infinite;
+}
+.toggleKnob {
+  animation: toggle 6s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+.slideKnob {
+  animation: slide 5.5s ease-in-out infinite;
+}
+
+.folder {
+  animation: folder 5s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.windowGlow {
+  animation: flicker 5s steps(1) infinite;
+}
+
+.doorL,
+.doorR {
+  transition: translate 0.7s var(--ease, ease);
+}
+.stage[data-station='systems'] .doorL {
+  translate: -7px 0;
+}
+.stage[data-station='systems'] .doorR {
+  translate: 7px 0;
+}
+
+/* the controller's off switch: everything holds still */
+.stage[data-running='false'] * {
+  animation-play-state: paused !important;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.8) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.18) rotate(18deg);
+  }
+}
+@keyframes squash {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.84);
+  }
+}
+@keyframes squashTag {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.16);
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+@keyframes drift {
+  from {
+    transform: translateX(calc(var(--dx, 5px) * -1));
+  }
+  to {
+    transform: translateX(var(--dx, 5px));
+  }
+}
+@keyframes swayBanner {
+  from {
+    transform: rotate(-0.7deg) translateY(-1px);
+  }
+  to {
+    transform: rotate(0.7deg) translateY(1px);
+  }
+}
+@keyframes flow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+@keyframes beltRun {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+@keyframes signal {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+@keyframes sweep {
+  0%,
+  35% {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(95px);
+    opacity: 0;
+  }
+}
+@keyframes blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.12);
+  }
+}
+@keyframes crank {
+  0%,
+  100% {
+    transform: translateY(-2px) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(3px) rotate(8deg);
+  }
+}
+@keyframes needle {
+  0%,
+  100% {
+    transform: rotate(-9deg);
+  }
+  35% {
+    transform: rotate(11deg);
+  }
+  70% {
+    transform: rotate(-3deg);
+  }
+}
+@keyframes plunge {
+  0%,
+  100% {
+    transform: scaleY(1) translateY(0);
+  }
+  45% {
+    transform: scaleY(0.82) translateY(3px);
+  }
+  60% {
+    transform: scaleY(1.04) translateY(-1px);
+  }
+}
+@keyframes leverA {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+@keyframes leverB {
+  0%,
+  100% {
+    transform: rotate(-7deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+@keyframes toggle {
+  0%,
+  40% {
+    transform: translateX(0);
+  }
+  50%,
+  90% {
+    transform: translateX(var(--dx, 15px));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+@keyframes slide {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+@keyframes folder {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.6px);
+  }
+}
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  42% {
+    opacity: 0.18;
+  }
+  46% {
+    opacity: 0.55;
+  }
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(var(--u) * -2.2));
+  }
+}
+@keyframes wave {
+  0%,
+  100% {
+    transform: skewY(0deg) rotate(0deg);
+  }
+  50% {
+    transform: skewY(-2.4deg) rotate(0.5deg);
+  }
+}
+@keyframes sticky {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-1.4deg);
+  }
+}
+
+/* Reduced motion keeps every control and the whole picture; it removes the
+   entrance, the depth shift, and everything that moves by itself. */
+@media (prefers-reduced-motion: reduce) {
+  .stage *,
+  .stage *::before,
+  .stage *::after {
+    animation: none !important;
+  }
+
+  .layer {
+    translate: none;
+    transition-duration: 0.01ms !important;
+  }
+
+  .stageWrap[data-armed='true']:not([data-in='true']) .layer[data-id] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .curveRow[data-playing]::after,
+  .lever,
+  .tag,
+  .ribbons li {
+    transition-duration: 0.01ms !important;
+  }
+}
