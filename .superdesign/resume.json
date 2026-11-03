@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "targets": {
+    "/#work": {
+      "targetKind": "existing-ui",
+      "projectId": "ace21faf-e929-4380-8f89-2016aad0dcfd",
+      "activeDraftId": "5e6ea5c6-4267-4bc7-9037-f0d2570bcce9",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "features/landing-page/studio/work-gallery/work-gallery.tsx",
+        "features/landing-page/studio/work-gallery/work-gallery-data.ts",
+        "features/landing-page/studio/work-gallery/work-gallery.module.css",
+        "features/landing-page/studio/gravity/sticker-art.tsx",
+        "features/landing-page/studio/gravity/pit-config.ts",
+        "features/landing-page/studio/projects.tsx",
+        "features/landing-page/studio/skills.tsx",
+        "features/landing-page/studio/studio-data.ts"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4cd12efd074f4d201c89abbcfe12b2176c54fb7d8f62798c65fdc19bfa16ccc4",
+        "features/landing-page/studio/work-gallery/work-gallery.tsx": "b1775fa5db67bc8797b10b51598c452c321f3f8e6d3e1046fdb01d500b203aaa",
+        "features/landing-page/studio/work-gallery/work-gallery-data.ts": "ee567bf9c89de161062001a89ec9c4322d3ceaad76c9053e241670636b55fd16",
+        "features/landing-page/studio/work-gallery/work-gallery.module.css": "97d3c8c622955f51bba92049af9a26b7e279d0c059902629d390084a6fb157e8",
+        "features/landing-page/studio/gravity/sticker-art.tsx": "abe796e00620c8d11235415b899c3adb95423dccb9be57bbbac07c65aed441af",
+        "features/landing-page/studio/gravity/pit-config.ts": "0b027c7fec0ac3833ac472450303d1841669dca39f81d6e872c7df41999ae3be",
+        "features/landing-page/studio/projects.tsx": "edd91a22047046ebae2550adddc57d5acbe86a8a0a68ca037f41f59fef38220c",
+        "features/landing-page/studio/skills.tsx": "dd32fb3c33dd0b897fd33550b9450f26a6deb41b6fef1b8cbc4a4f28701d8d32",
+        "features/landing-page/studio/studio-data.ts": "5da211dab5994344832260d7b65b9279127ace47bdc344c1dd0b86fc8c378870"
+      },
+      "drafts": {
+        "5e6ea5c6-4267-4bc7-9037-f0d2570bcce9": {
+          "title": "Work \u2014 Papercraft Moodboard",
+          "visualDirection": "papercraft moodboard / cutting mat, taped pieces, stamps",
+          "currentVersion": 1
+        }
+      }
+    }
+  }
+}

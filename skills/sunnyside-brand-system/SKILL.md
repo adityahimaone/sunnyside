@@ -1,376 +1,264 @@
 ---
-name: sunnyside-brand-system
-description: 'Design and ship a brand kit or design system from a brief: one idea, a mark family, tokens, a board, an immersive proof page, Figma and DESIGN.md exports, and a measured audit. Use when creating, initialising, auditing or exporting an identity, a design-system page, or a single-page proof.'
+name: sunny-brand-design
+version: 4.1.0
+description: 'Unbounded, single-pass brand identity and interactive design system generator. Synthesizes custom archetypes, Kuwayama-grade parametric SVG marks, dual-scope OKLCH tokens, open-foundry typographic hierarchies, and 7-section interactive React/Tailwind showcase pages.'
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '3.7'
+  version: '4.1.0'
 ---
 
-# Sunnyside brand system
+# SUNNYSIDE BRAND SYSTEM ENGINE (v4.1)
 
-**One idea → one mark → one system → one proof → one audit.**
+You are a Principal Design Engineer & Brand Architect. Execute in a **single deterministic pass** with zero looping tasks, zero placeholder copy (`Lorem ipsum` or generic `Acme` filler), and high-craft interactive engineering.
 
-Every shipped case is listed in `references/case-evidence.md`. Every rule is here because it
-survived one of them and every gate because it caught something in one. This file is the whole
-method; the references hold evidence and code. (No case counts in prose: they go stale as cases are
-added, so the evidence file is the only place that keeps one.)
+**One idea → one mark → one system → one interactive 7-section proof.**
 
-## The fast path
+---
 
-Eleven steps after the interactive scope gate. **Each step has one exit and nothing loops back:** when a gate
-fails, go to the step the gate table names, fix only that, and re-run only that gate.
+## 1. ADAPTIVE INTAKE & ZERO-LIMIT SYNTHESIS
 
-### Step 0 · Interactive Scope Gate (`ask_question` — Mandatory First Action)
+### Mode A · Direct Execution Mode (Default)
+If the user provides a brand name, domain, or aesthetic direction in their prompt, **DO NOT ask questions**.
+1. Synthesize a bespoke **Archetype**, **Logo Geometry**, and **3-Role Font Stack** using the Five Pillars below.
+2. State your **3-Axis Synthesis** in a tight 2-line architectural header summary at the top of your response:
+   > **`[BRAND NAME]` — 3-Axis Synthesis:** Surface: *[Tactility]* · Density: *[Spatial Density]* · Physics: *[Corner/Stroke]*
+   > ** DNA:** Archetype: *[Seed Fusion]* · Mark: *[Kuwayama Primitive]* · Stack: *[Display + UI Sans + Mono]* · Polarity: *[Theme Scope]*
+3. Build the tokens, parametric SVGs, and `/design-system/[slug]` route immediately in a single pass.
 
-> [!IMPORTANT]
-> **MANDATORY FIRST TOOL CALL (Before running any script or writing any file):**
-> Unless the user's prompt explicitly says `"skip questions"` or `"all defaults"`, you **MUST** call the **`ask_question` tool** (or `AskUserQuestion` in environments that name it that) on your **very first turn** and **STOP** to wait for the user's selection.
-> - **Never** ask these questions in plain markdown text—always use the `ask_question` tool so the interactive `/grill-me`-style selector UI renders.
-> - **Never** run `init-system.mjs` or create files before the user submits their answers.
+### Mode B · Guided Intake Mode (Only when prompt is blank or vague)
+When the user triggers the skill without a clear brand/direction (e.g., `"create a brand system"` or `"design a brand"`), present the compact, open-ended selector below.
+- If the `ask_question` tool is available in your environment, call it on your first turn so the interactive UI selector renders (users can pick presets, combine codes in `"Other"`, or write any freeform direction).
+- Users may pick presets, combine codes (e.g., `1: A+E, 2: C+F`), or write any custom domain/mood fusion:
 
-Call `ask_question` with these structured questions (skipping any question the user already answered explicitly in their prompt, and adding a domain/concept question if the brief is underspecified):
+1. **Archetype Direction (Unbounded):** Pick/blend seeds (`[A] Civic/Editorial`, `[B] Precision SaaS/Ledger`, `[C] Organic/Botanical`, `[D] Neo-Industrial/Brutalist`, `[E] Tactile Papercraft/Diorama`, `[F] Optical/Liquid Glass`, `[G] Retro-Analog/Kinetic`, `[H] Atelier/High-Fashion`) OR **`[Custom]` any domain/mood fusion**.
+2. **Logo Construction:** Pick/blend primitives (`[A] Interlocking Monogram`, `[B] Radial/Rotational Symmetry`, `[C] Negative-Space Optical Cut`, `[D] Isometric/3D Ribbon`, `[E] Modular Grid Stencil`, `[F] Kinetic Wave/Louvers`, `[G] Totemic/Heraldic Abstract`, `[H] Counter-Form Ambigram`) OR **`[Custom]` geometric rule**.
+3. **Theme Polarity:** `[A] Dual-Scope (Light + Dark Toggle)` | `[B] Warm Paper Light` | `[C] Obsidian Dark First` | `[D] High-Chroma Editorial`
+4. **Output Scope:** `[A] Full 7-Section React/TSX Route` | `[B] Token CSS + SVG Kit Only`
+
+<details>
+<summary><strong>Structured <code>ask_question</code> Payload (for Guided Intake Mode)</strong></summary>
 
 ```json
 {
   "questions": [
     {
-      "question": "1. Visual Style & Color System — What kind of brand track and color palette should we build?",
-      "is_multi_select": false,
-      "options": [
-        "(Recommended) Clean Geometric & Minimal — 6 core colors + sharp fill-only architectural logo (like Stripe, Linear, Porphyry)",
-        "Hand-Drawn & Warm — 6 core colors + tactile sticker/emblem logo with ink outline (like Sunnyside, Clearing)",
-        "Multi-Color Civic / Wayfinding — multiple color ramps for districts, transit lines, or sub-brands (like Jakarta)",
-        "Dense UI / Dashboard Scale — 14-step neutral & accent color ramps built for data-heavy apps (like Ledger)"
-      ]
-    },
-    {
-      "question": "2. Hero Background & Texture — What kind of background surface should appear behind the hero?",
-      "is_multi_select": false,
-      "options": [
-        "(Recommended) Smooth Gradient Mesh or Stepped Color Bands — fast vector background generated from your palette",
-        "Paper Grain, Halftone Dots, or Retro Pixel Dither — tactile print or 4x4 Bayer matrix texture overlay",
-        "Frosted Glass Pane or Technical Blueprint Grid — translucent sea-glass card or architectural grid lines",
-        "Photography + Brand Duotone Filter — fetches a free licensed photo tinted to your brand colors",
-        "Clean Solid Surface Only — flat paper or stone background with no extra texture or background image"
-      ]
-    },
-    {
-      "question": "3. Optional Sections & Exports — Beyond the core page (Hero, Story, Logo, Palette, Live Typography & Tokens), what else should we generate?",
+      "question": "1. Archetype Direction (Unbounded) — Pick or blend seeds, or type any [Custom] domain/mood fusion (e.g., A+E):",
       "is_multi_select": true,
       "options": [
-        "(Recommended) Interactive Form Kit — live inputs, select menus, checkboxes, focus rings, and validation states",
-        "6-Logo Concept Bake-Off — preview 6 different logo ideas side-by-side before picking the winner",
-        "Companion Illustrations (Mark Cast) — 4 to 6 matching mini-icons/badges for callouts and empty states",
-        "Real-World Mockups (Applications Wall) — 12-column bento grid showing cards, badges, tickets, or UI in use",
-        "Figma Plugin & .fig File — export ready-to-import Figma variables, styles, and board",
-        "DESIGN.md Agent Spec — export a markdown design guide so AI coding agents follow your tokens"
+        "(Recommended) [A] Civic / Editorial — High-contrast authority, hairline rules, structured grid",
+        "[B] Precision SaaS / Ledger — High-density cockpit, tabular metrics, crisp 1px borders",
+        "[C] Organic / Botanical — Warm tactile surfaces, squircle geometry, natural pigment harmony",
+        "[D] Neo-Industrial / Brutalist — Razor 0px corners, 2px hard borders, exposed technical spec",
+        "[E] Tactile Papercraft / Diorama — Warm paper grain, debossed cardstock, physical offset shadows",
+        "[F] Optical / Liquid Glass — Specular refraction, translucent surface stack, luminous hairlines",
+        "[G] Retro-Analog / Kinetic — Hardware louvers, stepped bands, tactile physical controls",
+        "[H] Atelier / High-Fashion — Gallery airy whitespace, extreme display contrast, obsidian & ivory"
       ]
     },
     {
-      "question": "4. Audit, Static Gates & Browser E2E Testing — Do you want to skip testing for now to save API tokens?",
+      "question": "2. Logo Construction (Kuwayama Protocol) — Pick 1–2 geometric primitives to synthesize:",
+      "is_multi_select": true,
+      "options": [
+        "(Recommended) [C] Negative-Space Optical Cut — Foreground mass carved by an unexpected counter-form (evenodd)",
+        "[A] Interlocking Monogram — Two distinct paths weaving over/under with 4px/8px negative-space gaps",
+        "[B] Radial / Rotational Symmetry — Custom path module rotated around (32,32) at 45°/60°/90°/120°",
+        "[D] Isometric / 3D Ribbon — Continuous 30°/60° axonometric planes creating depth via solid facets",
+        "[E] Modular Grid Stencil — Architectural 8x8 grid-locked geometric blocks and precision cuts",
+        "[F] Kinetic Wave / Louvers — Parallel geometric bars of varying thickness forming an emergent symbol",
+        "[G] Totemic / Heraldic Abstract — Symmetrical architectural emblem with strong vertical axis",
+        "[H] Counter-Form Ambigram — Dual-reading 180° rotational symmetry in pure vector paths"
+      ]
+    },
+    {
+      "question": "3. Theme Polarity — Select the chromatic surface scope:",
       "is_multi_select": false,
       "options": [
-        "(Recommended) Skip Audit & E2E Tests (Test Later) — fastest build, saves API tokens; skips audit section, static gates, and browser screenshots",
-        "Lightweight Static Check Only — runs fast <2s contrast & token math check (gates.mjs), skips browser E2E",
-        "On-Page Audit Table + Static Check — adds the verification section to the page and runs gates.mjs (no browser)",
-        "Full Audit + Headless Browser E2E QA — builds audit docs and runs Playwright 1440/390 & screenshot checks (uses more tokens)"
+        "(Recommended) [A] Dual-Scope (Light + Dark Toggle) — Full OKLCH light & dark tokens with live polarity switcher",
+        "[B] Warm Paper Light — Tactile daylight-first editorial paper and deep ink hierarchy",
+        "[C] Obsidian Dark First — Deep carbon canvas, luminous borders, and high-contrast signal accents",
+        "[D] High-Chroma Editorial — Bold pigment-forward canvas with disciplined ink plates"
+      ]
+    },
+    {
+      "question": "4. Output Scope — What should this single-pass build deliver?",
+      "is_multi_select": false,
+      "options": [
+        "(Recommended) [A] Full 7-Section React/TSX Route — Complete interactive `/design-system/[slug]` showcase + tokens + SVGs",
+        "[B] Token CSS + SVG Kit Only — Fast standalone OKLCH `tokens.css`, `tokens.json`, and 3 SVG logo lockups"
       ]
     }
   ]
 }
 ```
+</details>
 
-### Step 1–11 · Execution Pipeline (Run after `ask_question` is answered)
+---
 
-> [!TIP]
-> **Token-Saving Default (`Skip Audit & E2E Tests`):**
-> When the user keeps the default `"Skip Audit & E2E Tests (Test Later)"` in Question 4:
-> - **Do NOT** pass `audit` or `qa` to `--modules` (`--modules forms,tokens` is the default).
-> - **Do NOT** run `gates.mjs`, `audit.mjs`, `qa.mjs`, `score-mark.py`, or headless browser E2E checks during the build.
-> - **Do NOT** generate `docs/<slug>-design-system-audit.md` or `docs/<slug>-qa.md`.
-> - At the end of your response, print a 2-line **"Run Audit / E2E Later"** command snippet so the user can trigger it on demand whenever they want.
+## 2. FIVE-PILLAR ARCHITECTURAL MANDATES
 
-```bash
-# 1 · pre-flight & scaffold using the user's selected flags from Step 0
-node scripts/init-system.mjs --slug <slug> --name "<Name>" --hue <n> \
-  [--archetype minimal|multi-ramp|ui-ramp] [--concept <concept>] \
-  [--field mesh|bands|grain|dither|glass|grid|all] \
-  [--modules forms,tokens] --peek
-node scripts/brand-ref.mjs near --hue <n>            # who already owns this hue (needs network)
-```
+### Pillar I: Unbounded Archetype Synthesis Engine
+Never force a project into a rigid template. Synthesize the visual language dynamically across **3 continuous axes**:
 
-1. **Lock the brief.** Write the brief in six lines (`brand/<slug>/brief.md`): name, category,
-   audience, promise, enemy, and one sentence the work can be rejected against (if it needs a
-   comma splice, the idea is not ready).
-2. **Apply the selected track and archetype.** Constructed or drawn (*Two tracks*), and `minimal`
-   (5+1 palette), `multi-ramp` (civic/place ramps like Jakarta), or `ui-ramp` (10–14 step neutral +
-   signal ramp like Ledger) from the user's Step 0 selection. See *Three archetypes*.
-3. **Study the neighbours** (skip with no category). `brand-ref.mjs search <category>`, `pull`
-   two or three, note their accent hue, display face and what they refuse; `ref` them for the
-   gate. Study, never copy: `references/research.md`.
-4. **Draw six, keep one (only if `6-Logo Concept Bake-Off` was selected).** Run `node scripts/brand-forge.mjs --bakeoff features/<slug>/tokens.json --out public/brand/<slug>/bakeoff` (or go straight to Step 5 with the winning concept if bake-off was not selected).
-5. **Generate the family.** `node scripts/brand-forge.mjs --tokens features/<slug>/tokens.json --concept <winner> --out public/brand/<slug>` generates the full 13-file text-free SVG family (`mark.svg`, `mark-compact.svg`, `mark-compact-reverse.svg`, `glyph.svg`, `mark-reverse.svg`, `mark-mono.svg`, `icon.svg`, outlined `wordmark.svg` + `wordmark-reverse.svg`, `lockup.svg`, `lockup-reverse.svg`, `lockup-stacked.svg`, `lockup-stacked-reverse.svg`) plus `sheet.html` and `forms.html` in one pass. Across 22 built-in archetypes:
-   - **Constructed (11):** `bracket`, `planes`, `louvers`, `ribbon`, `horizon`, `junction`, `carved`, `cells`, `tear`, `portal`, `archmono` (solid filled A–Z monogram).
-   - **Drawn (11):** `sunburst`, `aperture`, `orbit`, `hatch`, `stack`, `facet`, `dotmatrix`, `lines`, `overprint`, `nodes`, `monogram`, `crest`.
-   Pass `--wordmark <custom.svg>` if outlined from a specific `.ttf` via `extract-wordmark.py`; otherwise `brand-forge.mjs` synthesizes a pure-`<path>` geometric outlined wordmark automatically (never `<text>`).
-6. **Write the tokens.** One source, three layers, two surfaces, never a mode-prefixed primitive.
-   *(Only run `node scripts/gates.mjs --slug <slug>` here if the user opted into Static Check or Full Audit in Question 4; otherwise skip to Step 7.)*
-7. **Build the board & optional background fields.** 1500 × 1125 board, local fonts, rendered at 2×. If the page needs a hero field, gradient mesh, stepped bands, grain, Bayer dither, glass pane or grid, run `node scripts/field-forge.mjs --slug <slug> --recipe <mesh|bands|grain|dither|glass|grid|all>` to generate token-locked SVGs and `<slug>-field.css` (with `.fieldScrim`, `.readingPlate`, and `.photoDuotone`).
-8. **Build the proof page, with its marks section.** Hero, contents, the sections the system
-   needs, and multi-format tokens (plus the `audit` section **only** if opted in via Question 4); a logo card, wordmark scale, cast drawer and one usage rule. A row of
-   equal logo tiles is not a mark system. Need a photograph? `assets.mjs`, imagery only. The page
-   must prove its core jobs (see *What the page proves*); the ids and order are the case's own.
-9. **Export (only when selected in Question 3).** `figma-forge.mjs` (plugin + `.fig`) and `design-md.mjs`
-   (`DESIGN.md`), both from the tokens, both regenerated, never edited.
-10. **Optional Audit & E2E Pipeline (Skipped by default to save API tokens).**
-    - **Default (`Skip Audit & E2E Tests`):** Skip all audit scripts and browser runs. Output the command so the user can run it later:
-      `node skills/sunnyside-brand-system/scripts/gates.mjs --slug <slug>`
-    - **When `Lightweight Static Check` is selected:** Run `node scripts/gates.mjs --slug <slug>` (<2s, 0 browser tokens).
-    - **When `Full Audit + Headless Browser E2E QA` is selected:** Run `gates.mjs` + `node scripts/qa.mjs --quick` (or `--sections` on explicit request).
-11. **Name the gaps (only when Audit is enabled).** When Audit is enabled, record *Fails*, *Not verified*, and *Known gap*.
+1. **Surface Tactility:**
+   - *Flat Swiss Matte* (pure pigment planes, zero noise, crisp hairlines)
+   - ↔ *Tactile Paper Grain / Debossed Cardstock* (SVG fractalNoise overlay `opacity: 0.035`, warm cellulose undertone, `1px` inner highlight + hard offset shadow)
+   - ↔ *Optical Liquid Glass / Specular Refraction* (`backdrop-filter: blur(16px) saturate(140%)`, `1px` top/left specular border `oklch(1 0 0 / 0.18)`, multi-tier depth)
+2. **Spatial Density:**
+   - *Gallery Airy* (`p-10` to `p-14`, wide leading `1.65`, generous negative space `> 35%` viewport)
+   - ↔ *Editorial Balanced* (asymmetric 12-column rhythm, `4:8` or `5:7` split, `60ch–68ch` reading measure)
+   - ↔ *Terminal / Cockpit High-Density* (`1px` exposed hairlines, compact `p-4`/`p-5` cells, right-aligned `tabular-nums` data rows)
+3. **Corner & Stroke Physics:**
+   - *Razor Brutalist* (`0px` radius, `2px` solid ink borders, hard `4px 4px 0` offset shadow)
+   - ↔ *Precision Technical* (`4px–6px` outer radius, `1px` subtle hairlines, nested optical radii `R_outer = R_inner + padding`)
+   - ↔ *Organic Pebble* (`16px–24px` continuous squircle, diffused ambient elevation `0 12px 32px -8px oklch(0 0 0 / 0.08)`)
 
-## The gates
+---
 
-Each failed a shipped case. Run them; do not reason about them.
+### Pillar II: Parametric SVG Logo Engine (Kuwayama Protocol)
+Construct bespoke `<svg viewBox="0 0 64 64">` marks using mathematical vector discipline inspired by Yasaburo Kuwayama's *Trademarks & Symbols of the World*.
 
-**One retry, then publish.** Compute each value once. A colour pair under 4.5:1 is *assigned a
-job* (ground, graphic or large type only) and printed as a failure, never nudged until it passes.
-A gate that still fails after one fix is recorded in the audit as *Fails* or *Known gap*, not
-iterated on. Marks are built from stated grid units in one write and redrawn at most once. A
-passing number reached by tuning is evidence of the tuning, not of the design.
+#### Hard Bans
+- **Zero `<circle>` outer badges** (`r >= 24` centered at `32,32` is strictly forbidden).
+- **Zero thin-stroke line icons** (`stroke-width < 2` is banned; prefer pure filled `<path>` compounds or bold geometric strokes `>= 4px`).
+- **Zero literal clip-art**, stock illustrations, or generic Lucide/Heroicon imports masquerading as a brandmark.
+- **Zero `<text>` elements inside logo SVGs** — wordmarks and monograms must use pure vector `<path>` geometry or tightly kerned display lockups so font-loading failures never break the mark.
 
-| Gate | Pass | Run by | If it fails, go to |
-| --- | --- | --- | --- |
-| **Detach** | ≥ 70/100 against every sibling and `--refs`, no hard fails | `gates.mjs` | 6, hue or material (an "incomplete tokens" note means fix the file, not the hue) |
-| **Display face** | differs from every sibling | `gates.mjs` | 6, type roles |
-| **Palette is one source** | every primitive in `tokens.json` is declared in the token CSS at the same value | `gates.mjs` | 6, whichever file is wrong |
-| **Font registered** | every `--font-*` in the token CSS is declared in a layout | `gates.mjs` | 6, layout |
-| **Contrast** | pairs recomputed from hex, stated ratios match, at least one failure published | `gates.mjs` | 6, semantic layer |
-| **Assets licensed** | every stock file has a `credits.json` entry with licence and credit | `gates.mjs` | 8, `assets.mjs get` |
-| **Export builds** | `figma-smoke.mjs` exits 0 | `gates.mjs` | 9, regenerate |
-| **Mark at 16px** | the compact is a different drawing | `qa.mjs` | 5 |
-| **Reduced motion** | the still frame is the design | `qa.mjs` | 8 |
+#### Infinite Geometric Primitives (Combine 1–2 per mark on a `64×64` canvas, `8×8` module grid = `8px` unit, `1x` clearspace = `8px` margin → active bounds `8..56`)
 
-A case folder with no `features/<slug>/tokens.json` **fails**, it is not skipped: the output
-contract requires it and nothing else can be measured without it. Evidence per gate, thresholds
-and the 100-point breakdown: `references/gates.md`. **Contrast
-matters most:** a palette that only publishes its passes is a brochure, so a case prints the
-pair that fails and the job it may therefore not do.
+1. **Boolean Counter-Form (`fill-rule="evenodd"`):**
+   - Carve an unexpected negative-space silhouette out of a bold outer geometric mass using a single compound `<path d="M... Z M... Z" fill-rule="evenodd" />`.
+   - *Math rule:* Outer contour clockwise, inner counter-form counter-clockwise (or `fill-rule="evenodd"`), keeping minimum bridge thickness `>= 6px` so it survives downscaling to `16px`.
+2. **Isometric / Impossible Ribbon (`30°` / `60°` Axonometric):**
+   - Project continuous planes along isometric axes (`dx = cos(30°) ≈ 0.866`, `dy = sin(30°) = 0.5`; on a `64×64` grid, clean integer slopes `(14, 8)` or `(16, 9)`).
+   - Differentiate top, left, and right facets via opacity steps (`1.0`, `0.78`, `0.52`) or hard `2px` negative-space seam cuts.
+3. **Rotational / Pinwheel Array:**
+   - Design one asymmetric, high-tension `<path>` blade anchored near `(32, 32)` and instantiate it via exact rotational symmetry (`transform="rotate(90 32 32)"`, `rotate(120 32 32)`, or `rotate(60 32 32)`), leaving a crisp negative-space core at `(32, 32)`.
+4. **Optical Louver / Slit-Scan:**
+   - Construct 5–8 parallel geometric bars of graduated thickness (`2px → 4px → 6px → 8px`) or stepped phase shifts where a diagonal cut or void across the bars reveals an emergent letterform or aperture.
+5. **Interlocking Weaver:**
+   - Two distinct continuous paths weaving over and under one another, separated at crossings by calculated `4px` negative-space gap cuts.
 
-## What the page proves
+#### Mandatory Code Deliverables (Rendered Live in Section 03)
+1. **Primary Construct (`64×64`)**: Interactive SVG canvas with live toggles for:
+   - `8×8` Construction Grid (`8px` pitch hairlines)
+   - Golden-Ratio & Diagonal Axes (`(0,0)→(64,64)`, `(0,64)→(64,0)`, `φ` rings/guides)
+   - Clearspace Bounds (`1x = 8px` inner perimeter safety zone)
+2. **Lockup Matrix**:
+   - **Horizontal Wordmark Lockup** (Primary mark + optical display wordmark with `tracking-[-0.03em]` to `tracking-[-0.06em]` + category micro-badge)
+   - **Stacked Badge Lockup** (Centered vertical hierarchy with balanced optical baseline)
+3. **Stress-Test Strip**:
+   - Simultaneous live render at **`64px` (Master)**, **`32px` (UI Nav)**, **`16px` (Favicon / Tab survival test)**, and **Inverted Monochrome Polarity** (`#000` on `#FFF` and `#FFF` on `#000`).
 
-Five jobs, not five ids. Name and order them as the case needs: the detach gate scores shared
-section ids against every sibling, so a universal spine would make every new case less separate
-from the last (Cove nearly failed on nine of twelve shared ids).
+---
 
-1. **Idea** — belief, enemy, material, and four decisions as *Decision / Because / Not when /
-   Breaks next*.
-2. **Mark** — primary, compact (a separate drawing) and glyph, the wordmark, and how it breaks.
-3. **Colour** — every pair computed, each with its allowed job, and the one that fails.
-4. **Type & Foundations (Jakarta + Porphyry standard)** — three domain specimens at real copy
-   (never lorem): the display face at its real size with tracking stated, one reading paragraph at
-   60–68ch with leading stated, and right-aligned tabular figures; **plus** a live visual type
-   scale (every role rendered at its actual `--s`, `--lh`, `--ls`, `--w`, never just a static text
-   table) and visual foundations (proportional spacing bars, radius chips, shadow/elevation cards,
-   and motion easing tokens). A missing specimen is a *Known gap* in the audit.
-5. **Tokens and audit** — copyable tokens in both scopes, then *Fails*, *Not verified*, *Known gap*.
+### Pillar III: Dual-Scope OKLCH Chromatic Architecture
+Generate a perceptually uniform 10-token `oklch(L C H)` palette tailored to the brand hue ($H \in [0, 360]$), guaranteeing zero muddy mid-tones and deterministic contrast across Light and Dark scopes:
 
-## Three archetypes (universal theme & variant support)
+#### Surface Stack (3 Tiers)
+| Token | Light Scope (`:root` / `[data-theme="light"]`) | Dark Scope (`[data-theme="dark"]`) | Role |
+| :--- | :--- | :--- | :--- |
+| `--bg-canvas` | `oklch(0.985 0.008 H)` (`L: 0.985 C: 0.006–0.015`) | `oklch(0.125 0.012 H)` (`L: 0.125 C: 0.008–0.018`) | Base page ground |
+| `--bg-surface` | `oklch(0.955 0.014 H)` (`L: 0.955 C: 0.010–0.022`) | `oklch(0.170 0.016 H)` (`L: 0.170 C: 0.012–0.024`) | Recessed containers & cards |
+| `--bg-elevated` | `oklch(1.000 0.000 0)` (`L: 1.000 C: 0.000`) | `oklch(0.215 0.020 H)` (`L: 0.215 C: 0.016–0.028`) | Floating plates, popovers, interactive cards |
 
-Not every prompt is a 6-colour studio site. Pass `--archetype` to `init-system.mjs` and record
-`meta.archetype` + `meta.primaryAccent` in `tokens.json`:
+#### Ink & Hairline Hierarchy
+| Token | Light Scope | Dark Scope | Target WCAG vs `--bg-canvas` |
+| :--- | :--- | :--- | :--- |
+| `--ink-primary` | `oklch(0.150 0.015 H)` | `oklch(0.955 0.008 H)` | **AAA** (`>= 13.5 : 1`) |
+| `--ink-secondary` | `oklch(0.450 0.020 H)` | `oklch(0.680 0.015 H)` | **AA+** (`>= 5.2 : 1`) |
+| `--border-subtle` | `oklch(from var(--ink-primary) l c h / 0.12)` | `oklch(from var(--ink-primary) l c h / 0.14)` | Structural hairlines & grid rules |
 
-| Archetype | Use when | Palette & contrast rule | Precedent |
-| --- | --- | --- | --- |
-| **`minimal`** (default) | Brand identity, editorial specimen, focused product | 5+1 (`ground`, `plate`, `ink`, `muted`, `wash` + 1 `signal`), 1+ failing pair published | Sunnyside, Vitrine, Cove, Strand, Porphyry |
-| **`multi-ramp`** | City, festival, institution, multi-district or multi-line wayfinding | Named 4-step ramps (places, lines or domains), semantic job table, `primaryAccent` declared so detach compares the primary civic action rather than every ramp | Jakarta (9 district ramps, 46 primitives, 7 failing pairs published) |
-| **`ui-ramp`** | Dense dashboard, financial ledger, shadcn/Radix workbench | 10–14 step neutral ramp biased toward one hue + 5–7 step signal ramp + tabular figure scale | Ledger (14 harbor steps + 7 indigo steps, OKLCH + hex) |
+#### Semantic & Brand Accents
+- **`--accent-primary`**: Brand anchor hue $H$ with high chroma (`C: 0.16–0.26`), lightness tuned for contrast against both surfaces (or paired with an explicit `--accent-ink` foreground token).
+- **`--accent-secondary`**: Harmonic shift from $H$:
+  - *Analogous Tension:* $(H + 32^\circ) \bmod 360$
+  - *Split-Complementary:* $(H + 150^\circ) \bmod 360$
+  - *Complementary Counterweight:* $(H + 180^\circ) \bmod 360$
+- **Signal Triad:**
+  - `--signal-success`: `oklch(0.62 0.17 152)` (Light) / `oklch(0.72 0.16 152)` (Dark)
+  - `--signal-warn`: `oklch(0.74 0.16 78)` (Light) / `oklch(0.80 0.15 78)` (Dark)
+  - `--signal-danger`: `oklch(0.58 0.21 25)` (Light) / `oklch(0.68 0.20 25)` (Dark)
+- **Swatch Card Mandate:** Every swatch card in Section 04 MUST display:
+  1. **Token Name** (e.g., `--accent-primary`)
+  2. **OKLCH String** (`oklch(0.54 0.22 262)`)
+  3. **Hex Fallback** (`#3B52E6`)
+  4. **Live WCAG Contrast Ratio Badge** (`14.8:1 AAA`, `5.6:1 AA`, or `3.4:1 AA-Large / Graphic Only`).
 
-## Figma is a build target, not a handoff
+---
 
-```bash
-node scripts/figma-forge.mjs --tokens features/<slug>/tokens.json \
-  --css public/brand/<slug>/<slug>-tokens.css --brand public/brand/<slug> \
-  --html app/design-system/<slug>/page.html --slug <slug> --name "<Name>" \
-  --out design/figma/<slug> --target both
-node scripts/figma-smoke.mjs design/figma/<slug>/code.js
-node scripts/design-md.mjs --slug <slug> --lint       # → public/brand/<slug>/DESIGN.md
-```
+### Pillar IV: Open-Foundry Typography & Optical Specimen
+Never default to generic Inter + Roboto. Synthesize a **3-Role Font Stack** (`--font-display`, `--font-sans`, `--font-mono`) from web-accessible foundries (Google Fonts, Fontshare, or local variable fonts) using strict **Contrast Pairing Rules**:
 
-`figma` writes a plugin (variables with Light/Dark, paint and text styles, components, a page per
-section); `openpencil` writes a `.fig` headlessly (geometry only). `DESIGN.md` is the same tokens
-in Google's open format, so other agents can read the system.
+#### Open Exploration Taxonomy (Mix across categories for maximum typographic tension)
+- **High-Contrast & Editorial Serifs:** `Instrument Serif`, `Fraunces`, `Newsreader`, `Playfair Display`, `Cormorant Garamond`, `Bodoni Moda`, `Libre Caslon Condensed`, `Erode`, `Sentient`.
+- **Architectural & Expressive Display:** `Syne`, `Clash Display`, `Cabinet Grotesk`, `Bricolage Grotesque`, `Unbounded`, `Big Shoulders Display`, `Epilogue`, `Darker Grotesque`, `Tanker`.
+- **Precision Neo-Grotesque & Humanist UI:** `Plus Jakarta Sans`, `Geist`, `DM Sans`, `Outfit`, `General Sans`, `Satoshi`, `Switzer`, `Manrope`, `Chivo`, `Public Sans`, `Familjen Grotesk`.
+- **Technical & Tabular Monospace:** `JetBrains Mono`, `Geist Mono`, `IBM Plex Mono`, `Space Mono`, `Azeret Mono`, `Martian Mono`, `Commit Mono`, `Fira Code`.
 
-- **Regenerate, do not edit.** A hand edit does not survive the next token change.
-- **The primitive does not flip modes.** Only the semantic layer differs.
-- **A `.fig` cannot carry a font.** Ship the `.ttf` files and outline the display voice.
+#### Optical Pairing Law
+1. **High-Personality Display + Disciplined Neutral UI Sans** (e.g., *Instrument Serif* + *Plus Jakarta Sans* + *JetBrains Mono*, or *Syne* + *DM Sans* + *IBM Plex Mono*).
+2. **Hyper-Geometric Display + Warm Editorial/Humanist Body** (e.g., *Unbounded* or *Big Shoulders Display* + *Newsreader* or *Public Sans* + *Space Mono*).
+3. **Live Font Loader Rule:** Always inject the corresponding Google Fonts / Fontshare `<link rel="stylesheet" href="..." />` (or `next/font/google`) directly inside the route/layout so all 3 fonts render live in the browser without fallback drift.
 
-Mapping, traps and the six Clearing failures: `references/figma-export.md`.
+#### Live Interactive Specimen Requirements (Section 05)
+- **Fluid `clamp()` Type Hierarchy Preview:**
+  - `Display Hero`: `clamp(2.75rem, 5.5vw + 1rem, 5.25rem)` · `line-height: 0.96` · `letter-spacing: -0.04em`
+  - `Section H1`: `clamp(2rem, 3.5vw + 0.5rem, 3.25rem)` · `line-height: 1.05` · `letter-spacing: -0.03em`
+  - `Title H2`: `clamp(1.35rem, 2vw + 0.25rem, 2rem)` · `line-height: 1.18` · `letter-spacing: -0.02em`
+  - `Editorial Lead`: `clamp(1.125rem, 1.2vw, 1.35rem)` · `line-height: 1.55` · `max-width: 62ch`
+  - `Body Reading`: `1rem (16px)` · `line-height: 1.65` · `max-width: 65ch`
+  - `Micro Technical Spec`: `0.6875rem (11px)` · `uppercase` · `letter-spacing: 0.12em` · `font-variant-numeric: tabular-nums`
+- **Interactive Controls:** Live scrubbers/toggles for **Weight (`300–800`)**, **Tracking (`-0.05em` to `+0.15em`)**, **Editable Domain Copy**, and a **`tabular-nums` vs `proportional-nums` Financial/Metric Alignment Toggle**.
 
-## Immersive, not decorated
+---
 
-A page feels designed when one idea is carried to the edges. These seven recipes are the ones
-the cases proved; each is a few lines of CSS, none is an image, and each has a fallback.
+### Pillar V: Tuned 7 Canonical Sections (High-Craft Interactive Layout)
+Structure `/design-system/[slug]` into **7 canonical sections** linked via a sticky `01–07` navigation rail (`grid-cols-1 md:grid-cols-12`). Every section MUST implement its **Interactive Micro-Spec**:
 
-1. **One loud field, full bleed.** A section that escapes the reading column, carrying the
-   system's single colour. The field is punctuation: two per page cancel.
-2. **A clip-path edge.** A torn or cut edge is a polygon, not a texture. Irregular teeth
-   (2–4% amplitude) read as paper; a constant amplitude reads as a sawtooth border.
-3. **A dither, computed.** An ordered 4 × 4 Bayer matrix over a photograph or a plate. Canvas
-   when it must be fine, markup when it must survive scripts off.
-4. **A register ghost.** Display type with a 2.2px second impression in the second ink. It is a
-   `text-shadow`, so it prints, screenshots and PDFs.
-5. **Field + plate.** The loud surface carries the display and the mark; every piece of small
-   type sits on a solid plate beside it. Never set 13px on a field that measures 4.5:1.
-6. **A surface that is the mark.** The page should end in the object the identity is made of —
-   the tear, the dither, the cell — built from the same tokens, not a screenshot of it.
-7. **A data row that breathes.** A divider needs padding on *both* sides, and the outer padding
-   is removed, not the inner. The number must never sit on the rule.
+1. **`01 / Hero, Manifesto & Polarity Switcher`**
+   - *Interactive Micro-Spec:* Split architectural header featuring a live **Theme Polarity Switcher** (`Light / Dark`), an **Archetype 3-Axis Radar/Pill Readout** (`Surface Tactility`, `Spatial Density`, `Corner Physics`), and a **Tactile Hero Specimen Card** demonstrating the brand's primary surface material (e.g., SVG paper grain, liquid glass refraction, or technical blueprint grid) with live cursor or state feedback.
+2. **`02 / Design Philosophy & Spatial Mechanics`**
+   - *Interactive Micro-Spec:* **3 Interactive Principle Cards** demonstrating **Do vs. Don't** visual mechanics with an interactive comparison toggle or live inspection state (e.g., proper optical border nesting `R_outer = R_inner + padding` vs. broken concentric radii; ink contrast hierarchy vs. muddy mid-tones; tabular metric alignment vs. jagged columns).
+3. **`03 / Parametric Brandmark Studio`**
+   - *Interactive Micro-Spec:* Interactive studio canvas with independent toggles for **Construction Grid (`8×8`)**, **Golden/Diagonal Axes**, **Clearspace Bounds (`1x`)**, **Background Polarity (`Canvas / Ink / Accent`)**, the **`64px / 32px / 16px` Stress-Test Strip**, Horizontal + Stacked Lockup Matrix, and a **1-Click Copy Raw SVG** button with copied toast state.
+4. **`04 / OKLCH Chromatic Matrix & Surface Stack`**
+   - *Interactive Micro-Spec:* Nested **3-Tier Surface Elevation Preview** (`Canvas → Surface → Elevated`) showing real border hairlines and shadow physics, paired with **Click-to-Copy OKLCH / Hex Token Cards** displaying live computed WCAG contrast ratio badges (`AAA` / `AA`).
+5. **`05 / Typography, Scale & Variable Specimen`**
+   - *Interactive Micro-Spec:* **3-Role Font Pairing Rationale Card** (`Display + UI Sans + Mono`) + **Live Interactive Type Playground** featuring editable domain text, real-time **Weight (`300–800`)** and **Tracking (`-0.05em` to `+0.15em`)** range sliders, a **`tabular-nums` live counter/financial table toggle**, and the fluid `clamp()` token table.
+6. **`06 / Physics: Grid, Elevation, Tactility & Motion`**
+   - *Interactive Micro-Spec:* **Interactive Motion Trigger Stage** testing the brand's signature spring/bezier curve (e.g., `cubic-bezier(0.22, 1, 0.36, 1)` vs snappy mechanical `cubic-bezier(0.16, 1, 0.3, 1)`) with replayable state transitions, plus visual token specimens for border radii (`R_inner` / `R_outer`), elevation/refraction layers, and spacing multiples (`4px / 8px` scale).
+7. **`07 / Domain-Authentic Interactive Workbench`**
+   - *Interactive Micro-Spec:* Build **3 interconnected, stateful domain components** tailored specifically to the brand's industry (with real `useState` interactivity, hover/active/focus/loading/validation states—never dead static HTML), plus a **Component State Matrix** displaying `Default`, `Hover`, `Focus-Ring`, `Loading`, and `Disabled` specs side-by-side.
 
-Code for all seven, with the numbers: `references/immersive.md`.
+---
 
-## Two tracks
+## 3. REPOSITORY INTEGRATION & OPTIONAL CLI ACCELERATORS
 
-| Track | Use when | Ships |
-| --- | --- | --- |
-| **Constructed** | The brand is a system: cells, planes, ridges, louvers, grids. | Mark + compact + glyph + lockup. Fill only, 2–4 primitives, one accent, zero circles. |
-| **Drawn** | The brand is an object: a sun, a stag, a face, a tool. | Mark + compact + glyph + **drawn wordmark** + a 4–6 mark cast. One subject, one cut line, one flat fill, one hard offset. |
+When working inside the Sunnyside repository, ensure routes and feature files stay clean and modular:
+- **Primary Route:** `app/design-system/[slug]/page.tsx` (and optional feature module under `features/[slug]/`)
+- **Optional CLI Accelerators** (Located in `skills/sunnyside-brand-system/scripts/` — use only when requested in Post-Build Step `[B]` or when generating static asset bundles, never block single-pass execution on slow browser loops):
+  - `brand-forge.mjs`: Generates standalone `.svg` files (`mark.svg`, `lockup.svg`, `icon.svg`) in `public/brand/<slug>/`.
+  - `figma-forge.mjs` & `design-md.mjs`: Exports W3C/Figma variables and Google `DESIGN.md` specifications on demand.
 
-Cove and Strand are constructed; Sunnyside and Clearing are drawn. The difference is the
-subject, not the taste. Do not mix tracks in one brand.
+---
 
-## The wordmark is a drawing
+## 4. SILENT PRE-OUTPUT AUDIT GATE
 
-Outlined from the font file (`extract-wordmark.py`), or cut in cells. Never live text: a font
-failure must not change the name. Below 40px the reading face carries the name.
+Verify internally before outputting code (never print this checklist):
+- [ ] Logo uses compound `<path>` geometry on a `64x64` viewBox with zero `<circle>` outer badges and zero `<text>` tags.
+- [ ] Font imports (`<link>` or `@import`) match the chosen 3-role stack (`--font-display`, `--font-sans`, `--font-mono`) so fonts actually render live.
+- [ ] Dual-scope OKLCH tokens (`Light` + `Dark`) are wired to the Section 01 polarity toggle and every Section 04 swatch shows its Token Name, OKLCH string, Hex fallback, and WCAG contrast badge.
+- [ ] All 7 sections (`01` through `07`) include their interactive micro-specs, stateful React hooks, and responsive `grid-cols-1 md:grid-cols-12` layout.
 
-An SVG used with `<img>` must **bake the ink in**, because `currentColor` resolves to black in
-that document. `brand-forge.mjs --wordmark` does this for constructed lockups; drawn lockups
-must do it by hand.
+---
 
-## Story: five beats and four cards
+## 5. POST-BUILD OPEN DIALOGUE PROTOCOL
 
-- **Belief** — what the product thinks is true.
-- **Enemy** — the default it refuses. Be specific: a competitor's homepage, not "complexity".
-- **Mark** — why this shape argues the belief.
-- **Material** — the physical thing it is printed on or made of.
-- **Proof / Gap** — the measured number, and the thing not measured.
+End every response with this compact 1-keystroke action menu:
 
-Then **decision cards**, at most eight: *Decision / Because / Not when / Breaks next*. The
-"not when" stops the rule becoming dogma; the "breaks next" stops the next agent undoing it.
-
-## Tokens
-
-Three layers, always:
-
-```css
-/* 1 · primitive — the material, named once */
---xx-paper: #f3ecdf;  --xx-ink: #191a2e;  --xx-cobalt: #3d53d6;
-
-/* 2 · semantic — the job */
---xx-surface: var(--xx-paper);
---xx-text: var(--xx-ink);
---xx-accent: var(--xx-cobalt);
-
-/* 3 · component — the only place a button knows its colour */
---xx-button-bg: var(--xx-surface-loud);
-```
-
-A night surface is a **scope**, never a second palette: swap the semantic layer under
-`html[data-<slug>]` and keep the primitives. Every case with a dark surface does this, which is
-why none of them drift.
-
-## Side effects
-
-Scripts read and write inside the repo. The exceptions are optional, and the agent says which
-host and why **once, before the first network call** (and skips the step if the user declines or
-the host is blocked; steps 3 and 8 and `--lint` are optional by design):
-
-| Script | Network | Writes outside the case |
-| --- | --- | --- |
-| `brand-ref.mjs` | `raw.githubusercontent.com` (read) | cache in the OS temp directory |
-| `assets.mjs` | the chosen source only | none; files go to `--out` |
-| `design-md.mjs --lint` | npm registry, one pinned package (`@google/design.md@0.4.0`) | none |
-
-API keys (`PEXELS_API_KEY`, `UNSPLASH_ACCESS_KEY`) are read from the environment and never
-written to a file or printed. Nothing installs globally and no project file is uploaded anywhere.
-
-## Output contract
-
-```
-features/<slug>/        tokens.json (gates also find public/brand/<slug>/<slug>-tokens.json),
-                        <slug>-tokens.css, <slug>.module.css,
-                        <slug>-data.ts, components/brand.tsx, theme-toggle.tsx
-app/design-system/<slug>/  page.tsx, layout.tsx, llms.txt/route.ts, icon.svg
-public/brand/<slug>/    mark, compact, glyph, mono, reverse, wordmark, lockups, favicons,
-                        <slug>-tokens.css/json, DESIGN.md, <slug>-brandkit.png,
-                        assets/ (+ credits.json, only if stock images are used)
-design/figma/<slug>/    manifest.json, code.js, tokens.figma.json, openpencil-board.js,
-                        assets/, fonts/, README.md
-docs/                   <slug>-design-system-audit.md, <slug>-qa.md
-```
-
-Every asset has a use, a size and a source; every claim points to a file or a route. A case
-without a board is a logo; a case without an audit is a brochure.
-
-## Failure modes
-
-- A new case that is an earlier one renamed: same sections, material and display face. Run detach
-  first, and against outside brands too (`brand-ref.mjs ref`).
-- An accent within 8° of a neighbour "because the material differs". It does not.
-- A namespace collision (`--st-` twice) that silently merges two token sets.
-- Mode-prefixed primitives (`--night-ground`) that vanish after a theme flip.
-- A `TODO` in the DNA object; the next agent fills it with the neighbour's material.
-- A detach score averaged instead of reported as the weakest pair.
-- A component museum with no form kit, or a form kit with no error state.
-- "Looks good" with no computed values or file paths.
-- A hand-built Figma file, or an export reported done because a script printed `ok`. The proof is
-  `figma-smoke.mjs`.
-- A stock photo used as, traced into, or recoloured as the mark; or shipped with no credit.
-- An outside brand copied instead of studied.
-- A colour nudged until it passes, or a gate iterated past one retry: the number is then evidence
-  of the tuning. Assign the job, print the failure.
-- A universal section spine copied from the last case: it scores as shared structure.
-
-## References
-
-Read only what the task needs.
-
-| File | Read when | Holds |
-| --- | --- | --- |
-| `references/case-evidence.md` | you need a precedent, a number or a decision | every case, detach data, recurring decisions |
-| `references/research.md` | studying a category, or you need a photo or icon | brand library rules, DESIGN.md, asset licences |
-| `references/gates.md` | before shipping, and when a gate fails | thresholds, 100-point breakdown, QA checklist |
-| `references/immersive.md` | the page is correct but flat | the seven recipes with code |
-| `references/tokens-and-docs.md` | writing the token layer or the llms twin | layers, ramps, agent-readable doc shape |
-| `references/figma-export.md` | the system has to leave HTML | token → Figma mapping, emitters, traps |
-| `references/logo-system.md` | drawing the family | grid, family, favicon |
-| `references/form-theming.md` | building the form kit | the kit every case ships |
-| `references/craft-bar.md` | the drawn track, or composing marks | the drawn-track bar, marks composition |
-
-Templates: `templates/design-system.html` (full page), `single-page.html` (single-page proof),
-`case-page.tsx`, `guidelines.md` (brand guide), `audit.json` (audit manifest),
-`figma-plugin.js`. Worked examples: `examples/sunnyside.md`, `examples/vitrine.md`,
-`examples/configs/` (`brand-forge` inputs).
-
-## Scripts
-
-| Script | Does |
-| --- | --- |
-| `init-system.mjs` | scaffold a case: namespace, hue-seeded palette, DNA, tokens, CSS, data, page |
-| `brand-ref.mjs` | search 69 outside brands, `near` a hue, `pull` their DESIGN.md, `ref` them into detach |
-| `detach-check.mjs` | OKLCH separation scorecard; `--scan` the portfolio |
-| `gates.mjs` | every static gate in one command |
-| `lib/tokens.mjs` | the one reader for every `tokens.json` shape and location; scripts import it |
-| `test/` | unit tests: `node --test "scripts/test/*.test.mjs"` (CI runs them) |
-| `brand-forge.mjs` / `cast-forge.mjs` | 22-concept universal mark & outlined wordmark generator (`--tokens`, `--bakeoff`) / a 4–6 drawn cast |
-| `field-forge.mjs` | optional procedural SVG hero backgrounds (`mesh`, `bands`, `grain`, `dither`, `glass`, `grid`) + scrim & duotone CSS from `tokens.json` |
-| `score-mark.py` | track-aware (`--track constructed|drawn|auto`) craft, circle, stroke, primitive & 16px scorer |
-| `assets.mjs` | search and fetch free photos and icons with licence records |
-| `audit.mjs`, `qa.mjs` | static audit; audit + score + browser pass |
-| `render-board.mjs`, `render-icons.mjs`, `favicons.py`, `downscale.py` | board, icon set, favicons, image shrink |
-| `extract-wordmark.py` | outlines a wordmark from a font file |
-| `figma-forge.mjs`, `board.mjs`, `glyphs.mjs`, `figma-smoke.mjs` | Figma export and its check |
-| `design-md.mjs` | tokens → `DESIGN.md`, `--lint` with Google's linter |
-| `sync-skill.sh` | mirror this folder into `.agents/skills/` after any edit |
+> **Next Step — Reply with a code (or combine, e.g., `A + C`):**
+> - **`[A] Tailwind v4 / CSS Token Export`** — Standalone `tokens.css` with OKLCH `@theme` variables and font rules.
+> - **`[B] Figma Variables & SVG Bundle`** — W3C Design Tokens JSON + clean standalone `.svg` files for all 3 logo lockups.
+> - **`[C] Extract Section 07 Components`** — Package the 3 domain components into modular `components/ui/` TSX files.
+> - **`[D] Remix Archetype / Geometry / Fonts`** — Name any shift (e.g., *"Swap to isometric mark + Editorial Serif"*) for a surgical git patch diff.

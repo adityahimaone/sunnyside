@@ -1,0 +1,5854 @@
+From e480cc4293a3e7d632802ae9fc88240b1faaed2e Mon Sep 17 00:00:00 2001
+From: Adit <adit@example.com>
+Date: Tue, 3 Nov 2026 03:01:32 +0000
+Subject: [PATCH] feat(skills): rebuild the diorama as a layered shadowbox
+ matching the reference
+
+One SVG layer per physical panel (back wall, Build, Motion, The rest, Systems,
+frame) drawn in the reference's own pixel space, with real HTML over it for
+text, tags, sliders and buttons. Pointer parallax by depth, a station filter
+that recedes the other panels, the controller toggle pausing all motion, and a
+full reduced-motion branch. Removes ~1,260 lines of now-dead CSS.
+---
+ .../studio/diorama/diorama-art.tsx            | 1859 +++++++++++++++++
+ .../studio/diorama/diorama.module.css         | 1271 +++++++++++
+ .../landing-page/studio/diorama/geometry.ts   |  122 ++
+ features/landing-page/studio/skills.tsx       |  837 ++++----
+ features/landing-page/studio/studio-data.ts   |    2 +-
+ .../landing-page/studio/studio.module.css     | 1495 +------------
+ 6 files changed, 3832 insertions(+), 1754 deletions(-)
+ create mode 100644 features/landing-page/studio/diorama/diorama-art.tsx
+ create mode 100644 features/landing-page/studio/diorama/diorama.module.css
+ create mode 100644 features/landing-page/studio/diorama/geometry.ts
+
+diff --git a/features/landing-page/studio/diorama/diorama-art.tsx b/features/landing-page/studio/diorama/diorama-art.tsx
+new file mode 100644
+index 0000000..acdebb5
+--- /dev/null
++++ b/features/landing-page/studio/diorama/diorama-art.tsx
+@@ -0,0 +1,1859 @@
++import type { CSSProperties, ReactNode } from 'react'
++
++import {
++  coilPath,
++  domeRibs,
++  gearPath,
++  starPath,
++  VIEWBOX,
++  vars,
++} from './geometry'
++import s from './diorama.module.css'
++
++/**
++ * The drawn half of the diorama. Every shape is in the reference capture's own
++ * pixel space (see geometry.ts), grouped into one SVG per physical layer so the
++ * stage can move them against each other. All of it is decorative: the words,
++ * numbers, sliders and buttons are real HTML in the overlay.
++ */
++
++const INK = '#2b2118'
++const CARD = '#6d5330'
++
++function Layer({ children, label }: { children: ReactNode; label?: string }) {
++  return (
++    <svg
++      viewBox={VIEWBOX}
++      preserveAspectRatio="none"
++      className={s.art}
++      data-art={label}
++      aria-hidden
++      focusable="false"
++    >
++      {children}
++    </svg>
++  )
++}
++
++/** Shared gradients and soft shadows. Referenced by id from every layer. */
++export function DioramaDefs() {
++  return (
++    <svg className={s.defs} width="0" height="0" aria-hidden focusable="false">
++      <defs>
++        <filter id="dg-s1" x="-20%" y="-20%" width="140%" height="150%">
++          <feDropShadow
++            dx="0.8"
++            dy="1.6"
++            stdDeviation="1.1"
++            floodColor="#1a0f08"
++            floodOpacity="0.42"
++          />
++        </filter>
++        <filter id="dg-s2" x="-10%" y="-10%" width="125%" height="135%">
++          <feDropShadow
++            dx="2"
++            dy="3.2"
++            stdDeviation="2.6"
++            floodColor="#140a05"
++            floodOpacity="0.5"
++          />
++        </filter>
++        <filter id="dg-s3" x="-10%" y="-10%" width="130%" height="140%">
++          <feDropShadow
++            dx="3.4"
++            dy="5"
++            stdDeviation="4.4"
++            floodColor="#0c0603"
++            floodOpacity="0.6"
++          />
++        </filter>
++        <linearGradient id="dg-blue" x1="0" y1="0" x2="1" y2="1">
++          <stop offset="0" stopColor="#4262c8" />
++          <stop offset="0.55" stopColor="#3453ad" />
++          <stop offset="1" stopColor="#2a418f" />
++        </linearGradient>
++        <linearGradient id="dg-yellow" x1="0" y1="0" x2="1" y2="1">
++          <stop offset="0" stopColor="#f9cf48" />
++          <stop offset="0.6" stopColor="#f2bd32" />
++          <stop offset="1" stopColor="#e4a824" />
++        </linearGradient>
++        <linearGradient id="dg-pink" x1="0" y1="0" x2="1" y2="1">
++          <stop offset="0" stopColor="#f4bad2" />
++          <stop offset="1" stopColor="#ecaac6" />
++        </linearGradient>
++        <linearGradient id="dg-tan" x1="0" y1="0" x2="0" y2="1">
++          <stop offset="0" stopColor="#d3bd98" />
++          <stop offset="1" stopColor="#c0a67d" />
++        </linearGradient>
++        <linearGradient id="dg-cardboard" x1="0" y1="0" x2="0" y2="1">
++          <stop offset="0" stopColor="#c5a373" />
++          <stop offset="1" stopColor="#a98557" />
++        </linearGradient>
++        <radialGradient id="dg-dome" cx="0.38" cy="0.3" r="0.85">
++          <stop offset="0" stopColor="#5876d6" />
++          <stop offset="0.6" stopColor="#4561c4" />
++          <stop offset="1" stopColor="#2f48a4" />
++        </radialGradient>
++        <radialGradient id="dg-cavity" cx="0.5" cy="0.55" r="0.75">
++          <stop offset="0" stopColor="#5b3e27" />
++          <stop offset="1" stopColor="#2c1a0e" />
++        </radialGradient>
++        <linearGradient id="dg-wood-h" x1="0" y1="0" x2="0" y2="1">
++          <stop offset="0" stopColor="#d3b184" />
++          <stop offset="1" stopColor="#a98660" />
++        </linearGradient>
++        <linearGradient id="dg-wood-v" x1="0" y1="0" x2="1" y2="0">
++          <stop offset="0" stopColor="#c7a47a" />
++          <stop offset="1" stopColor="#a58059" />
++        </linearGradient>
++        <pattern
++          id="dg-grain-h"
++          width="40"
++          height="3"
++          patternUnits="userSpaceOnUse"
++        >
++          <path
++            d="M0 1.2H40"
++            stroke="#5a3d22"
++            strokeOpacity="0.14"
++            strokeWidth="0.5"
++          />
++        </pattern>
++        <pattern
++          id="dg-grain-v"
++          width="3"
++          height="40"
++          patternUnits="userSpaceOnUse"
++        >
++          <path
++            d="M1.2 0V40"
++            stroke="#5a3d22"
++            strokeOpacity="0.14"
++            strokeWidth="0.5"
++          />
++        </pattern>
++        <pattern
++          id="dg-corrugate"
++          width="3"
++          height="10"
++          patternUnits="userSpaceOnUse"
++        >
++          <path
++            d="M0 0V10"
++            stroke="#6b4a26"
++            strokeOpacity="0.22"
++            strokeWidth="0.8"
++          />
++        </pattern>
++      </defs>
++    </svg>
++  )
++}
++
++/* ── small parts ─────────────────────────────────────────────────────────── */
++
++function Cloud({
++  x,
++  y,
++  w,
++  h,
++  fill,
++  shade,
++  stroke,
++  className,
++  style,
++}: {
++  x: number
++  y: number
++  w: number
++  h: number
++  fill: string
++  shade: string
++  stroke: string
++  className?: string
++  style?: CSSProperties
++}) {
++  const d =
++    'M16 52C5 52-2 44 3 35C7 28 15 26 20 28C19 15 31 6 44 10C50 1 70 1 75 14C88 11 99 21 94 33C101 43 94 52 82 52Z'
++  return (
++    <g transform={`translate(${x} ${y}) scale(${w / 100} ${h / 56})`}>
++      <g className={className} style={style}>
++        <path d={d} fill={shade} transform="translate(1.5 4)" opacity="0.55" />
++        <path
++          d={d}
++          fill={fill}
++          stroke={stroke}
++          strokeWidth="1.4"
++          vectorEffect="non-scaling-stroke"
++        />
++        <path
++          d="M20 30C22 18 32 12 44 14C52 6 68 7 73 17"
++          fill="none"
++          stroke="#fff"
++          strokeOpacity="0.38"
++          strokeWidth="2.4"
++          strokeLinecap="round"
++        />
++      </g>
++    </g>
++  )
++}
++
++function Sparkle4({
++  x,
++  y,
++  r,
++  delay,
++}: {
++  x: number
++  y: number
++  r: number
++  delay: number
++}) {
++  return (
++    <g transform={`translate(${x} ${y}) scale(${r / 8})`}>
++      <path
++        d="M0-8C1-2 2-1 8 0C2 1 1 2 0 8C-1 2-2 1-8 0C-2-1-1-2 0-8Z"
++        fill="#86a8f2"
++        stroke="#2b43a2"
++        strokeWidth="0.7"
++        className={s.twinkle}
++        style={vars({ '--delay': `${delay}s` })}
++      />
++    </g>
++  )
++}
++
++function Coil({
++  x,
++  y1,
++  y2,
++  className,
++  style,
++  color = '#8a6a3c',
++}: {
++  x: number
++  y1: number
++  y2: number
++  className?: string
++  style?: CSSProperties
++  color?: string
++}) {
++  const d = coilPath(x, y1, y2, 7.5, 5)
++  return (
++    <g className={className} style={style}>
++      <path
++        d={d}
++        fill="none"
++        stroke={INK}
++        strokeWidth="2.6"
++        strokeLinecap="round"
++        opacity="0.7"
++      />
++      <path
++        d={d}
++        fill="none"
++        stroke={color}
++        strokeWidth="1.5"
++        strokeLinecap="round"
++      />
++    </g>
++  )
++}
++
++function Gear({
++  cx,
++  cy,
++  outer,
++  root,
++  teeth,
++  fill,
++  stroke,
++  hub,
++  holes,
++  holeRadius,
++  holeFill,
++  className,
++  style,
++}: {
++  cx: number
++  cy: number
++  outer: number
++  root: number
++  teeth: number
++  fill: string
++  stroke: string
++  hub: number
++  holes: number
++  holeRadius: number
++  holeFill: string
++  className?: string
++  style?: CSSProperties
++}) {
++  return (
++    <g className={className} style={style} filter="url(#dg-s2)">
++      <path
++        d={gearPath(cx, cy, outer, root, teeth)}
++        fill={fill}
++        stroke={stroke}
++        strokeWidth="0.9"
++        strokeLinejoin="round"
++      />
++      <circle
++        cx={cx}
++        cy={cy}
++        r={root - 3}
++        fill="none"
++        stroke={stroke}
++        strokeOpacity="0.55"
++        strokeWidth="0.6"
++      />
++      {Array.from({ length: holes }, (_, i) => {
++        const a = (i / holes) * Math.PI * 2
++        const rr = (root - 3 + hub) / 2
++        return (
++          <circle
++            key={i}
++            cx={cx + Math.cos(a) * rr}
++            cy={cy + Math.sin(a) * rr}
++            r={holeRadius}
++            fill={holeFill}
++            stroke={stroke}
++            strokeWidth="0.6"
++          />
++        )
++      })}
++      <circle
++        cx={cx}
++        cy={cy}
++        r={hub}
++        fill={fill}
++        stroke={stroke}
++        strokeWidth="0.9"
++      />
++      <circle
++        cx={cx}
++        cy={cy}
++        r={hub * 0.42}
++        fill="#e9e1cd"
++        stroke={stroke}
++        strokeWidth="0.7"
++      />
++    </g>
++  )
++}
++
++/* ── the room and the frame ──────────────────────────────────────────────── */
++
++export function BackWall() {
++  return (
++    <Layer label="wall">
++      <rect x="100" y="76" width="823" height="476" fill="url(#dg-cavity)" />
++      {/* the wall's own paper seams */}
++      <path
++        d="M520 92V535"
++        stroke="#000"
++        strokeOpacity="0.12"
++        strokeWidth="1"
++      />
++      <rect
++        x="118"
++        y="92"
++        width="787"
++        height="30"
++        fill="#1a0e06"
++        opacity="0.2"
++      />
++      {/* the cardboard floor of the box */}
++      <rect x="118" y="522" width="787" height="14" fill="url(#dg-cardboard)" />
++      <rect
++        x="118"
++        y="522"
++        width="787"
++        height="1.2"
++        fill="#e0c49a"
++        opacity="0.7"
++      />
++    </Layer>
++  )
++}
++
++export function FrameFront() {
++  return (
++    <Layer label="frame">
++      {/* four mitred bars */}
++      <path d="M105 80H918L905 92H118Z" fill="url(#dg-wood-h)" />
++      <path
++        d="M105 547H918L905 535H118Z"
++        fill="url(#dg-wood-h)"
++        opacity="0.92"
++      />
++      <path d="M105 80L118 92V535L105 547Z" fill="url(#dg-wood-v)" />
++      <path
++        d="M918 80L905 92V535L918 547Z"
++        fill="url(#dg-wood-v)"
++        opacity="0.9"
++      />
++      <path d="M105 80H918L905 92H118Z" fill="url(#dg-grain-h)" />
++      <path d="M105 547H918L905 535H118Z" fill="url(#dg-grain-h)" />
++      <path d="M105 80L118 92V535L105 547Z" fill="url(#dg-grain-v)" />
++      <path d="M918 80L905 92V535L918 547Z" fill="url(#dg-grain-v)" />
++      {/* bevels: light on the outer lip, dark where the wood meets the dark */}
++      <path
++        d="M105.5 547V80.5H918"
++        fill="none"
++        stroke="#f0dcb8"
++        strokeOpacity="0.7"
++        strokeWidth="1"
++      />
++      <path
++        d="M918 80V547H105"
++        fill="none"
++        stroke="#5b3f25"
++        strokeOpacity="0.8"
++        strokeWidth="1"
++      />
++      <path
++        d="M118 92H905V535H118Z"
++        fill="none"
++        stroke="#2a190d"
++        strokeOpacity="0.9"
++        strokeWidth="1.4"
++      />
++      <path
++        d="M105 80L118 92M918 80L905 92M105 547L118 535M918 547L905 535"
++        stroke="#6b4b2e"
++        strokeOpacity="0.8"
++        strokeWidth="0.8"
++      />
++    </Layer>
++  )
++}
++
++/* ── Build ───────────────────────────────────────────────────────────────── */
++
++const TAG_X = [166, 220, 278, 340, 402]
++
++export function BuildArt() {
++  const ribs = domeRibs(281.5, 265, 81.5, 3)
++  return (
++    <Layer label="build">
++      <rect
++        x="155"
++        y="118"
++        width="386"
++        height="262"
++        rx="20"
++        fill="url(#dg-blue)"
++        filter="url(#dg-s3)"
++      />
++      <rect
++        x="155.5"
++        y="118.5"
++        width="385"
++        height="261"
++        rx="19.5"
++        fill="none"
++        stroke="#fff"
++        strokeOpacity="0.14"
++      />
++
++      {/* faint annotations, like pencil on a blueprint */}
++      <g
++        className={s.annot}
++        style={{ fontFamily: 'var(--font-geist-mono), monospace' }}
++        fill="#fff"
++        fillOpacity="0.55"
++        fontSize="5.4"
++        letterSpacing="0.6"
++      >
++        <path
++          d="M318 142H336"
++          stroke="#fff"
++          strokeOpacity="0.5"
++          strokeWidth="0.7"
++        />
++        <text x="337" y="144">
++          +2000
++        </text>
++        <path
++          d="M335 152V170"
++          stroke="#fff"
++          strokeOpacity="0.5"
++          strokeWidth="0.7"
++        />
++        <text x="340" y="160">
++          TROPOSPHERE
++        </text>
++        <path
++          d="M487 180V190"
++          stroke="#fff"
++          strokeOpacity="0.5"
++          strokeWidth="0.7"
++        />
++        <text x="463" y="196">
++          MESOSPHERE
++        </text>
++        <path
++          d="M485 207V216"
++          stroke="#fff"
++          strokeOpacity="0.5"
++          strokeWidth="0.7"
++        />
++        <text x="489" y="226">
++          STRATEGY
++        </text>
++        <path
++          d="M458 245H476"
++          stroke="#fff"
++          strokeOpacity="0.5"
++          strokeWidth="0.7"
++          strokeDasharray="3 3"
++        />
++        <text x="478" y="247">
++          9
++        </text>
++        <text x="171" y="258">
++          SHALOR
++        </text>
++        <path
++          d="M184 258H194"
++          stroke="#fff"
++          strokeOpacity="0.5"
++          strokeWidth="0.7"
++        />
++      </g>
++
++      <Sparkle4 x={303} y={141} r={7} delay={0} />
++      <Sparkle4 x={353} y={190} r={9} delay={0.9} />
++      <Sparkle4 x={205} y={212} r={7} delay={1.6} />
++      <Sparkle4 x={181} y={225} r={6} delay={0.4} />
++      <Sparkle4 x={486} y={234} r={7} delay={1.2} />
++
++      {/* the lattice under the scaffold, behind the pink wall */}
++      <g stroke="#1f3280" strokeWidth="4" strokeLinecap="square">
++        {[185, 225, 265, 305, 345].map((x) => (
++          <path key={x} d={`M${x} 320V372`} />
++        ))}
++        {[185, 225, 265, 305].map((x) => (
++          <path
++            key={`x${x}`}
++            d={`M${x} 322L${x + 40} 370M${x + 40} 322L${x} 370`}
++            strokeWidth="3"
++          />
++        ))}
++      </g>
++      <g stroke="#4c6ad0" strokeWidth="1.5" opacity="0.9">
++        {[185, 225, 265, 305, 345].map((x) => (
++          <path key={x} d={`M${x} 320V372`} />
++        ))}
++        {[185, 225, 265, 305].map((x) => (
++          <path
++            key={`x${x}`}
++            d={`M${x} 322L${x + 40} 370M${x + 40} 322L${x} 370`}
++          />
++        ))}
++      </g>
++
++      {/* dome */}
++      <g filter="url(#dg-s2)">
++        <path
++          d="M200 265A81.5 81.5 0 0 1 363 265Z"
++          fill="url(#dg-dome)"
++          stroke="#223a96"
++          strokeWidth="1.2"
++        />
++        <path
++          d="M207 275H357V317H207Z"
++          fill="#3552b4"
++          stroke="#223a96"
++          strokeWidth="1"
++        />
++      </g>
++      <g fill="none" stroke="#1f3585" strokeOpacity="0.62" strokeWidth="0.9">
++        {ribs.map((d) => (
++          <path key={d} d={d} />
++        ))}
++      </g>
++      <path
++        d="M200 265A81.5 81.5 0 0 1 363 265"
++        fill="none"
++        stroke="#fff"
++        strokeOpacity="0.16"
++        strokeWidth="1.2"
++      />
++      <g className={s.sweep}>
++        <path
++          d="M262 186C250 210 248 240 252 265H268C266 240 268 210 275 187Z"
++          fill="#fff"
++          opacity="0.1"
++        />
++      </g>
++      <rect
++        x="198"
++        y="265"
++        width="167"
++        height="10"
++        rx="3"
++        fill="#3b59bd"
++        stroke="#223a96"
++        strokeWidth="1"
++      />
++      <rect
++        x="199"
++        y="266"
++        width="165"
++        height="2"
++        rx="1"
++        fill="#fff"
++        opacity="0.18"
++      />
++      <path
++        d="M232 275V317M331 275V317"
++        stroke="#223a96"
++        strokeOpacity="0.5"
++        strokeWidth="0.8"
++      />
++      <g
++        style={{ fontFamily: 'var(--font-geist-mono), monospace' }}
++        fill="#fff"
++        fillOpacity="0.62"
++        fontSize="5.2"
++        className={s.annot}
++      >
++        <path
++          d="M308 215V259"
++          stroke="#fff"
++          strokeOpacity="0.6"
++          strokeWidth="0.8"
++        />
++        <path
++          d="M308 215h4M308 237h4M308 259h4"
++          stroke="#fff"
++          strokeOpacity="0.6"
++          strokeWidth="0.8"
++        />
++        <text x="314" y="217">
++          05
++        </text>
++        <text x="314" y="239">
++          2203
++        </text>
++        <text x="314" y="261">
++          2004
++        </text>
++        <text x="296" y="312" fillOpacity="0.5">
++          DOME-01
++        </text>
++      </g>
++
++      {/* ladder */}
++      <g stroke={CARD} strokeWidth="0.9" fill="#c9a874">
++        <path
++          d="M180 272L175 314M191 270L186 313"
++          fill="none"
++          strokeWidth="2.2"
++          stroke="#b08a56"
++        />
++        {[280, 288, 296, 304].map((y, i) => (
++          <path
++            key={y}
++            d={`M${179 - i * 0.9} ${y}H${190 - i * 0.9}`}
++            fill="none"
++            strokeWidth="1.5"
++            stroke="#8a6a3c"
++          />
++        ))}
++      </g>
++
++      {/* tower */}
++      <g filter="url(#dg-s2)">
++        <rect x="395" y="252" width="6" height="74" fill="#2f4aa8" />
++        <rect x="439" y="252" width="6" height="74" fill="#2f4aa8" />
++        <rect
++          x="380"
++          y="218"
++          width="82"
++          height="5"
++          rx="1"
++          fill="#a9bde6"
++          stroke="#6277b8"
++          strokeWidth="0.8"
++        />
++        <rect
++          x="386"
++          y="223"
++          width="70"
++          height="30"
++          fill="#3a58bd"
++          stroke="#223a96"
++          strokeWidth="1"
++        />
++      </g>
++      <g stroke="#223a96" strokeWidth="3.4">
++        <path d="M401 262L439 300M439 262L401 300M401 300L439 326M439 300L401 326" />
++        <path d="M401 258H439M401 296H439" strokeWidth="2.6" />
++      </g>
++      <g stroke="#4c6ad0" strokeWidth="1.4">
++        <path d="M401 262L439 300M439 262L401 300M401 300L439 326M439 300L401 326" />
++        <path d="M401 258H439M401 296H439" />
++      </g>
++      <g fill="#1a2760" stroke="#9fb4e6" strokeWidth="0.7">
++        <rect x="397" y="228" width="16" height="10" />
++        <rect x="416" y="228" width="12" height="10" />
++        <rect x="431" y="228" width="16" height="10" />
++        <rect x="385" y="228" width="6" height="11" />
++        <rect x="451" y="228" width="6" height="11" />
++      </g>
++      <g className={s.windowGlow} fill="#7fc4ff" opacity="0.5">
++        <rect x="398" y="234" width="14" height="3" />
++        <rect x="417" y="234" width="10" height="3" />
++        <rect x="432" y="234" width="14" height="3" />
++      </g>
++
++      {/* bridge */}
++      <g stroke={CARD} strokeWidth="0.8">
++        <rect x="354" y="238" width="32" height="14" fill="#c8a46d" />
++        <path
++          d="M354 238L386 252M386 238L354 252M370 238V252"
++          fill="none"
++          strokeWidth="0.7"
++        />
++      </g>
++
++      {/* scaffold beam, with a tick pattern like a ruler */}
++      <rect
++        x="160"
++        y="313"
++        width="238"
++        height="8"
++        rx="1"
++        fill="#c5a26c"
++        stroke={CARD}
++        strokeWidth="0.9"
++        filter="url(#dg-s1)"
++      />
++      <path
++        d="M162 317H396"
++        stroke="#5a4326"
++        strokeWidth="2.2"
++        strokeDasharray="1 2.6"
++        opacity="0.7"
++      />
++
++      {/* react atom on springs */}
++      <Coil
++        x={405}
++        y1={203}
++        y2={219}
++        className={s.squash}
++        style={vars({ '--delay': '0s' })}
++      />
++      <Coil
++        x={433}
++        y1={203}
++        y2={219}
++        className={s.squash}
++        style={vars({ '--delay': '0.35s' })}
++      />
++      <g className={s.atom} filter="url(#dg-s2)">
++        {[0, 60, 120].map((deg) => (
++          <g key={deg} transform={`rotate(${deg} 418 166)`}>
++            <ellipse
++              cx="418"
++              cy="168"
++              rx="40"
++              ry="15"
++              fill="none"
++              stroke="#5f93b8"
++              strokeWidth="5"
++              opacity="0.55"
++            />
++            <ellipse
++              cx="418"
++              cy="166"
++              rx="40"
++              ry="15"
++              fill="none"
++              stroke="#a6dcf0"
++              strokeWidth="3.6"
++            />
++            <ellipse
++              cx="418"
++              cy="166"
++              rx="40"
++              ry="15"
++              fill="none"
++              stroke="#d6f1fb"
++              strokeWidth="0.9"
++              opacity="0.8"
++            />
++          </g>
++        ))}
++        <circle
++          cx="418"
++          cy="166"
++          r="8"
++          fill="#9fd8ec"
++          stroke="#6fb0d2"
++          strokeWidth="1.2"
++          className={s.pulse}
++        />
++      </g>
++
++      {/* the pie-chart gauge on a cardboard arm */}
++      <g filter="url(#dg-s2)">
++        <path
++          d="M485 326L488 303Q490 296 498 296L502 296L500 326Z"
++          fill="#b98f5c"
++          stroke={CARD}
++          strokeWidth="0.9"
++        />
++        <g className={s.slowSpin} style={vars({ '--dur': '30s' })}>
++          <circle
++            cx="504"
++            cy="292"
++            r="15"
++            fill="#f0eadb"
++            stroke={CARD}
++            strokeWidth="1"
++          />
++          <path
++            d="M504 292L504 277A15 15 0 0 1 519 292Z"
++            fill="#f2c23a"
++            stroke={CARD}
++            strokeWidth="0.8"
++          />
++          <path d="M504 292L489 292" stroke={CARD} strokeWidth="0.8" />
++        </g>
++        <circle
++          cx="504"
++          cy="292"
++          r="2.2"
++          fill="#c9bfa4"
++          stroke={CARD}
++          strokeWidth="0.6"
++        />
++      </g>
++
++      {/* clouds */}
++      <Cloud
++        x={149}
++        y={166}
++        w={74}
++        h={34}
++        fill="#5f9bd1"
++        shade="#2c5d9a"
++        stroke="#2f5f9c"
++        className={s.drift}
++        style={vars({ '--dur': '11s', '--dx': '5px' })}
++      />
++      <Cloud
++        x={469}
++        y={146}
++        w={58}
++        h={27}
++        fill="#6aa7dd"
++        shade="#2c5d9a"
++        stroke="#2f5f9c"
++        className={s.drift}
++        style={vars({ '--dur': '9s', '--dx': '-4px', '--delay': '-2s' })}
++      />
++      <Cloud
++        x={497}
++        y={170}
++        w={54}
++        h={36}
++        fill="#5c9ad0"
++        shade="#2c5d9a"
++        stroke="#2f5f9c"
++        className={s.drift}
++        style={vars({ '--dur': '13s', '--dx': '4px', '--delay': '-5s' })}
++      />
++
++      {/* coils under each tag, in time with it */}
++      {TAG_X.map((x, i) => (
++        <Coil
++          key={x}
++          x={x}
++          y1={300}
++          y2={314}
++          className={s.squashTag}
++          style={vars({ '--delay': `${i * 0.4}s` })}
++        />
++      ))}
++    </Layer>
++  )
++}
++
++/* ── Motion ──────────────────────────────────────────────────────────────── */
++
++export function MotionArt() {
++  const rays = starPath(660, 237, 49, 37, 12)
++  const rays2 = starPath(660, 237, 41, 33, 12, 15)
++  return (
++    <Layer label="motion">
++      <rect
++        x="551"
++        y="117"
++        width="321"
++        height="262"
++        rx="18"
++        fill="url(#dg-yellow)"
++        filter="url(#dg-s3)"
++      />
++      <rect
++        x="551.5"
++        y="117.5"
++        width="320"
++        height="261"
++        rx="17.5"
++        fill="none"
++        stroke="#fff"
++        strokeOpacity="0.28"
++      />
++
++      {/* belt */}
++      <g fill="none" stroke="#2c2630" strokeLinejoin="round">
++        <path
++          d="M697 198L727 187A14 14 0 0 1 747 201L751 262A12 12 0 0 1 739 275L705 262A55 55 0 0 0 697 198Z"
++          strokeWidth="1.7"
++        />
++        <path
++          d="M697 198L727 187A14 14 0 0 1 747 201L751 262A12 12 0 0 1 739 275L705 262A55 55 0 0 0 697 198Z"
++          stroke="#f1c64a"
++          strokeWidth="1"
++          strokeDasharray="1.2 7"
++          className={s.belt}
++        />
++        <path d="M703 266L722 300M692 277L712 304" strokeWidth="0.9" />
++      </g>
++      {/* pulleys */}
++      <g filter="url(#dg-s2)">
++        <circle
++          cx="733"
++          cy="200"
++          r="14"
++          fill="#cdb287"
++          stroke={CARD}
++          strokeWidth="1"
++        />
++        <g className={s.spinCW} style={vars({ '--dur': '9s' })}>
++          <circle
++            cx="733"
++            cy="200"
++            r="8"
++            fill="#b99468"
++            stroke={CARD}
++            strokeWidth="0.8"
++          />
++          <path d="M733 192V208M725 200H741" stroke={CARD} strokeWidth="0.8" />
++        </g>
++        <circle
++          cx="733"
++          cy="200"
++          r="2.6"
++          fill="#e9e0cc"
++          stroke={CARD}
++          strokeWidth="0.6"
++        />
++        <circle
++          cx="739"
++          cy="263"
++          r="12"
++          fill="#cdb287"
++          stroke={CARD}
++          strokeWidth="1"
++        />
++        <g className={s.spinCW} style={vars({ '--dur': '9s' })}>
++          <circle
++            cx="739"
++            cy="263"
++            r="7"
++            fill="#b99468"
++            stroke={CARD}
++            strokeWidth="0.8"
++          />
++          <path d="M739 256V270M732 263H746" stroke={CARD} strokeWidth="0.8" />
++        </g>
++        <circle
++          cx="739"
++          cy="263"
++          r="2.4"
++          fill="#e9e0cc"
++          stroke={CARD}
++          strokeWidth="0.6"
++        />
++      </g>
++
++      {/* post, discs and crank under the sun */}
++      <g filter="url(#dg-s2)">
++        <rect
++          x="654"
++          y="288"
++          width="13"
++          height="56"
++          fill="#c7a574"
++          stroke={CARD}
++          strokeWidth="0.9"
++        />
++        <path
++          d="M658 290V342M663 290V342"
++          stroke={CARD}
++          strokeWidth="0.5"
++          opacity="0.6"
++        />
++        {[338, 343, 348].map((y, i) => (
++          <ellipse
++            key={y}
++            cx="661"
++            cy={y}
++            rx="26"
++            ry="5"
++            fill={['#bfa078', '#dcc79f', '#b99468'][i]}
++            stroke={CARD}
++            strokeWidth="0.8"
++          />
++        ))}
++        <ellipse
++          cx="661"
++          cy="376"
++          rx="39"
++          ry="6"
++          fill="#c9a572"
++          stroke={CARD}
++          strokeWidth="0.9"
++        />
++        <ellipse cx="661" cy="376" rx="39" ry="6" fill="url(#dg-corrugate)" />
++        <path
++          d="M676 346L702 352"
++          stroke={CARD}
++          strokeWidth="4"
++          strokeLinecap="round"
++        />
++        <path
++          d="M676 346L702 352"
++          stroke="#c7a574"
++          strokeWidth="2.4"
++          strokeLinecap="round"
++        />
++        <g className={s.crank}>
++          <rect
++            x="699"
++            y="350"
++            width="21"
++            height="7.5"
++            rx="3.2"
++            fill="#ee7a4c"
++            stroke="#a04a24"
++            strokeWidth="0.9"
++          />
++        </g>
++      </g>
++      <g filter="url(#dg-s1)" stroke={CARD} strokeWidth="0.7">
++        <rect x="618" y="311" width="104" height="5" rx="1" fill="#c9a572" />
++        <rect x="640" y="300" width="42" height="4" rx="1" fill="#c9a572" />
++        <path
++          d="M620 313.5H720"
++          stroke="#5a4326"
++          strokeWidth="2"
++          strokeDasharray="1 2.6"
++          opacity="0.6"
++        />
++      </g>
++
++      {/* gears */}
++      <Gear
++        cx={562}
++        cy={259}
++        outer={41}
++        root={34}
++        teeth={14}
++        fill="#f2c33b"
++        stroke="#80601a"
++        hub={11}
++        holes={6}
++        holeRadius={5.6}
++        holeFill="#7a5a33"
++        className={s.spinCW}
++        style={vars({ '--dur': '26s' })}
++      />
++      <circle
++        cx="562"
++        cy="259"
++        r="26"
++        fill="#b99468"
++        stroke={CARD}
++        strokeWidth="0.8"
++        opacity="0.55"
++        className={s.spinCW}
++        style={vars({ '--dur': '26s' })}
++      />
++      <Gear
++        cx={612}
++        cy={302}
++        outer={31}
++        root={26}
++        teeth={14}
++        fill="#efe6d0"
++        stroke="#8a7a56"
++        hub={6}
++        holes={6}
++        holeRadius={5}
++        holeFill="#c99d34"
++        className={s.spinCCW}
++        style={vars({ '--dur': '19s' })}
++      />
++      <Gear
++        cx={729}
++        cy={314}
++        outer={23}
++        root={19}
++        teeth={12}
++        fill="#efe6d0"
++        stroke="#8a7a56"
++        hub={4.4}
++        holes={5}
++        holeRadius={3.6}
++        holeFill="#c99d34"
++        className={s.spinCW}
++        style={vars({ '--dur': '14s' })}
++      />
++
++      {/* the sun automaton */}
++      <g filter="url(#dg-s3)">
++        <circle
++          cx="660"
++          cy="237"
++          r="55"
++          fill="#f4e2a0"
++          stroke="#bd922f"
++          strokeWidth="1"
++        />
++        <circle
++          cx="660"
++          cy="237"
++          r="50.5"
++          fill="none"
++          stroke="#fff"
++          strokeOpacity="0.45"
++          strokeWidth="0.8"
++        />
++      </g>
++      <g className={s.spinCW} style={vars({ '--dur': '60s' })}>
++        <path
++          d={rays}
++          fill="#f29a2c"
++          stroke="#b9701a"
++          strokeWidth="0.9"
++          strokeLinejoin="round"
++        />
++        <path
++          d={rays2}
++          fill="#f8b53a"
++          stroke="#c27b1c"
++          strokeWidth="0.7"
++          strokeLinejoin="round"
++        />
++      </g>
++      <circle
++        cx="660"
++        cy="237"
++        r="33"
++        fill="#f6b73b"
++        stroke="#c97f1d"
++        strokeWidth="1"
++      />
++      <circle
++        cx="660"
++        cy="237"
++        r="27.5"
++        fill="#fadb4d"
++        stroke="#d9a21f"
++        strokeWidth="0.9"
++        className={s.sunFace}
++      />
++      <g className={s.blink}>
++        <path
++          d="M650 236Q654 231 658 236M663 236Q667 231 671 236"
++          fill="none"
++          stroke="#2a2118"
++          strokeWidth="1.8"
++          strokeLinecap="round"
++        />
++      </g>
++      <circle cx="646.5" cy="245" r="4.2" fill="#ef8f78" opacity="0.85" />
++      <circle cx="673.5" cy="245" r="4.2" fill="#ef8f78" opacity="0.85" />
++      <path d="M652 245.5Q660 256 668 245.5Z" fill="#2a2118" />
++
++      {/* wind banners */}
++      <g
++        className={s.sway}
++        style={vars({ '--dur': '7s' })}
++        filter="url(#dg-s1)"
++      >
++        <path
++          d="M764 150Q790 144 818 150T875 148V172Q850 178 822 172T766 177Z"
++          fill="#d4e1ea"
++          stroke="#8aa0b3"
++          strokeWidth="0.8"
++        />
++        <Cloud
++          x={768}
++          y={146}
++          w={58}
++          h={30}
++          fill="#f5f4f0"
++          shade="#9aa3ad"
++          stroke="#9aa3ad"
++        />
++      </g>
++      <g
++        className={s.sway}
++        style={vars({ '--dur': '8.5s', '--delay': '-3s' })}
++        filter="url(#dg-s1)"
++      >
++        <path
++          d="M764 197Q790 191 818 197T875 195V222Q850 228 822 222T766 226Z"
++          fill="#d4e1ea"
++          stroke="#8aa0b3"
++          strokeWidth="0.8"
++        />
++        <Cloud
++          x={768}
++          y={193}
++          w={42}
++          h={30}
++          fill="#f5f4f0"
++          shade="#9aa3ad"
++          stroke="#9aa3ad"
++        />
++        <g
++          fill="none"
++          stroke="#7e8fa0"
++          strokeWidth="1.1"
++          strokeLinecap="round"
++          className={s.flow}
++        >
++          <path d="M824 203C836 199 844 205 852 201C858 198 864 200 866 204" />
++          <path d="M822 209C838 206 848 212 858 208C862 206 868 208 868 212" />
++          <path d="M826 214C834 212 840 216 848 214" />
++        </g>
++      </g>
++
++      {/* weather card (the words and sliders are HTML on top) and its lever */}
++      <rect
++        x="764"
++        y="237"
++        width="100"
++        height="70"
++        rx="6"
++        fill="#f7de8c"
++        stroke="#7a5f1c"
++        strokeWidth="1"
++        filter="url(#dg-s2)"
++      />
++      <path
++        d="M817 308C819 330 812 350 816 376"
++        fill="none"
++        stroke="#2f3a55"
++        strokeWidth="1.6"
++      />
++      <g className={s.lever}>
++        <path
++          d="M856 262L833 328"
++          stroke={CARD}
++          strokeWidth="5"
++          strokeLinecap="round"
++        />
++        <path
++          d="M856 262L833 328"
++          stroke="#cfb58a"
++          strokeWidth="3.2"
++          strokeLinecap="round"
++        />
++        <circle
++          cx="833"
++          cy="328"
++          r="5"
++          fill="#e0c9a0"
++          stroke={CARD}
++          strokeWidth="1"
++        />
++      </g>
++
++      {/* the stand the play button sits on */}
++      <g filter="url(#dg-s1)" stroke={CARD} strokeWidth="0.8">
++        <path d="M726 382L737 366H760V382Z" fill="#b99468" />
++        <rect x="737" y="360" width="90" height="6" rx="2" fill="#c9a572" />
++      </g>
++    </Layer>
++  )
++}
++
++/* ── The rest ────────────────────────────────────────────────────────────── */
++
++export function RestArt({ folderCount }: { folderCount: number }) {
++  const folders = [
++    { x: 635, w: 53, y: 452, fill: '#3f5fc8', dark: '#27408f' },
++    { x: 698, w: 55, y: 452, fill: '#f2c23a', dark: '#b8881a' },
++    { x: 755, w: 53, y: 448, fill: '#ee8f8a', dark: '#b35a56' },
++    { x: 813, w: 59, y: 452, fill: '#efe8d8', dark: '#9a8f78' },
++  ].slice(0, folderCount)
++  return (
++    <Layer label="rest">
++      <rect
++        x="578"
++        y="386"
++        width="320"
++        height="139"
++        fill="url(#dg-tan)"
++        filter="url(#dg-s3)"
++      />
++      <rect x="578" y="378" width="327" height="10" fill="#b48f5f" />
++      <rect x="578" y="378" width="327" height="10" fill="url(#dg-corrugate)" />
++      <path
++        d="M578 386.5H905"
++        stroke="#5f4528"
++        strokeWidth="1.3"
++        strokeDasharray="1.4 1.8"
++        opacity="0.85"
++      />
++      <rect
++        x="578"
++        y="378"
++        width="327"
++        height="1.2"
++        fill="#e8d2ab"
++        opacity="0.8"
++      />
++
++      {/* folders standing in the drawer, tabs showing */}
++      {folders.map((f, i) => (
++        <g
++          key={f.x}
++          className={s.folder}
++          style={vars({ '--delay': `${i * 0.5}s` })}
++          filter="url(#dg-s1)"
++        >
++          <path
++            d={`M${f.x} ${f.y + 12}V${f.y + 3}Q${f.x} ${f.y} ${f.x + 3} ${f.y}H${f.x + 22}L${f.x + 26} ${f.y + 4}H${f.x + f.w - 3}Q${f.x + f.w} ${f.y + 4} ${f.x + f.w} ${f.y + 7}V${f.y + 12}Z`}
++            fill={f.fill}
++            stroke={f.dark}
++            strokeWidth="0.9"
++          />
++          <path
++            d={`M${f.x + 1} ${f.y + 5}H${f.x + f.w - 1}`}
++            stroke="#fff"
++            strokeOpacity="0.3"
++            strokeWidth="0.7"
++          />
++        </g>
++      ))}
++
++      {/* the drawer itself */}
++      <g filter="url(#dg-s2)">
++        <path d="M610 454H893V461H618Z" fill="#6a4d30" />
++        <path
++          d="M610 454L618 461V519L610 512Z"
++          fill="#9f7d55"
++          stroke="#6a4d30"
++          strokeWidth="0.7"
++        />
++        <path
++          d="M618 461H893V519H618Z"
++          fill="#b9976d"
++          stroke="#6a4d30"
++          strokeWidth="1"
++        />
++        <path d="M618 461H893V464H618Z" fill="#000" opacity="0.14" />
++        <path d="M618 518H893" stroke="#8a6a3c" strokeWidth="1.2" />
++      </g>
++    </Layer>
++  )
++}
++
++/* ── Systems ─────────────────────────────────────────────────────────────── */
++
++function Needle({
++  cx,
++  cy,
++  angle,
++  delay,
++}: {
++  cx: number
++  cy: number
++  angle: number
++  delay: number
++}) {
++  return (
++    <g
++      className={s.needle}
++      style={vars({ '--delay': `${delay}s`, '--rot': `${angle}deg` })}
++    >
++      <path
++        d={`M${cx} ${cy}L${cx} ${cy - 12}`}
++        stroke="#2a3a8a"
++        strokeWidth="1.6"
++        strokeLinecap="round"
++        transform={`rotate(${angle} ${cx} ${cy})`}
++      />
++    </g>
++  )
++}
++
++function Shield({ x, y, left }: { x: number; y: number; left: boolean }) {
++  return (
++    <g filter="url(#dg-s1)" transform={`translate(${x} ${y})`}>
++      <path
++        d="M0-24L18-18V3Q18 18 0 26Q-18 18-18 3V-18Z"
++        fill="#d6b88a"
++        stroke="#8a6a3e"
++        strokeWidth="1.2"
++      />
++      <path
++        d="M0-20L14-15V3Q14 15 0 22Q-14 15-14 3V-15Z"
++        fill="#ecebe0"
++        stroke="#8a6a3e"
++        strokeWidth="0.7"
++      />
++      <path
++        d="M-9 -2A10 10 0 0 1 -3 -10"
++        fill="none"
++        stroke="#3f5fd0"
++        strokeWidth="2.6"
++        strokeLinecap="round"
++      />
++      <path
++        d="M-3 -10A10 10 0 0 1 5 -9"
++        fill="none"
++        stroke="#f2c23a"
++        strokeWidth="2.6"
++        strokeLinecap="round"
++      />
++      <path
++        d="M5 -9A10 10 0 0 1 9 -2"
++        fill="none"
++        stroke="#ee6f5a"
++        strokeWidth="2.6"
++        strokeLinecap="round"
++      />
++      <path
++        d={left ? 'M-5 14H5M-4 17H4' : 'M0 12c-3 3-3 6 0 7c3-1 3-4 0-7Z'}
++        fill={left ? 'none' : '#3f5fd0'}
++        stroke="#3f5fd0"
++        strokeWidth="1"
++        strokeLinecap="round"
++      />
++      <g transform={`translate(0 2)`}>
++        <Needle cx={0} cy={0} angle={left ? 35 : -35} delay={left ? 0 : 0.8} />
++      </g>
++      <circle cx="0" cy="2" r="2" fill="#2a3a8a" />
++    </g>
++  )
++}
++
++function Plunger({
++  x,
++  top,
++  side,
++  delay,
++}: {
++  x: number
++  top: string
++  side: string
++  delay: number
++}) {
++  return (
++    <g
++      className={s.plunger}
++      style={vars({ '--delay': `${delay}s` })}
++      filter="url(#dg-s1)"
++    >
++      <path
++        d={`M${x - 19} 492L${x - 11} 478H${x + 11}L${x + 19} 492Z`}
++        fill="#bf9a68"
++        stroke={CARD}
++        strokeWidth="0.9"
++      />
++      <path d={`M${x - 19} 492H${x + 19}`} stroke={CARD} strokeWidth="1.6" />
++      <g className={s.plungerTop}>
++        <Coil x={x} y1={456} y2={479} color="#6a6058" />
++        <rect
++          x={x - 17}
++          y="443"
++          width="34"
++          height="13"
++          rx="3"
++          fill={side}
++          stroke={CARD}
++          strokeWidth="0.8"
++        />
++        <ellipse
++          cx={x}
++          cy="443"
++          rx="17"
++          ry="6.4"
++          fill={top}
++          stroke={CARD}
++          strokeWidth="0.8"
++        />
++      </g>
++    </g>
++  )
++}
++
++export function SystemsArt() {
++  return (
++    <Layer label="systems">
++      {/* the low wall on the left, crenellated like a gatehouse */}
++      <g filter="url(#dg-s3)">
++        <path
++          d="M157 460V365H175V380H195V365H215V380H233V365H253V380H271V365H291V380H308V365H328V380H347V460Z"
++          fill="url(#dg-pink)"
++          stroke="#cf86a7"
++          strokeWidth="0.9"
++        />
++        <rect
++          x="147"
++          y="460"
++          width="200"
++          height="72"
++          fill="#f3b8d0"
++          stroke="#cf86a7"
++          strokeWidth="0.9"
++        />
++      </g>
++      <rect x="147" y="460" width="200" height="3" fill="#fff" opacity="0.32" />
++      <rect
++        x="147"
++        y="522"
++        width="200"
++        height="10"
++        fill="#d98aad"
++        opacity="0.45"
++      />
++      <path
++        d="M157 365H175M195 365H215M233 365H253M271 365H291M308 365H328"
++        stroke="#fff"
++        strokeOpacity="0.35"
++        strokeWidth="1.2"
++      />
++
++      {/* gauges, toggles and levers on the wall */}
++      <Shield x={187} y={411} left />
++      <Shield x={238} y={411} left={false} />
++
++      <g filter="url(#dg-s1)">
++        <rect
++          x="272"
++          y="391"
++          width="24"
++          height="44"
++          rx="2"
++          fill="#cba577"
++          stroke="#7c5c34"
++          strokeWidth="0.9"
++        />
++        <path
++          d="M278 399L281 404L279 409"
++          fill="none"
++          stroke="#7c5c34"
++          strokeWidth="0.7"
++        />
++        <rect x="277" y="421" width="14" height="4" fill="#7c5c34" />
++        <rect
++          x="280"
++          y="418"
++          width="8"
++          height="10"
++          rx="1"
++          fill="#e6ddc8"
++          stroke="#7c5c34"
++          strokeWidth="0.7"
++          className={s.slideKnob}
++        />
++      </g>
++      <g filter="url(#dg-s1)">
++        {[393, 408, 423].map((y, i) => (
++          <g key={y}>
++            <rect
++              x="307"
++              y={y}
++              width="26"
++              height="10"
++              rx="5"
++              fill={i === 2 ? '#f0735a' : '#e6ddc8'}
++              stroke="#7c5c34"
++              strokeWidth="0.9"
++            />
++            <circle
++              cx={i === 2 ? 328 : 312}
++              cy={y + 5}
++              r="4"
++              fill="#f4eee0"
++              stroke="#7c5c34"
++              strokeWidth="0.8"
++              className={s.toggleKnob}
++              style={vars({
++                '--delay': `${i * 1.4}s`,
++                '--dx': i === 2 ? '-15px' : '15px',
++              })}
++            />
++          </g>
++        ))}
++      </g>
++
++      <Plunger x={182} top="#f6d24d" side="#f3c63c" delay={0} />
++      <Plunger x={236} top="#f48470" side="#ee6f5a" delay={0.9} />
++
++      <g filter="url(#dg-s1)">
++        <rect
++          x="278"
++          y="466"
++          width="14"
++          height="22"
++          rx="2"
++          fill="#a88454"
++          stroke={CARD}
++          strokeWidth="0.8"
++        />
++        <rect x="283" y="470" width="4" height="16" fill="#3a2a18" />
++        <g className={s.leverA}>
++          <circle
++            cx="285"
++            cy="458"
++            r="5"
++            fill="#cfa86f"
++            stroke={CARD}
++            strokeWidth="0.9"
++          />
++          <rect
++            x="283.5"
++            y="460"
++            width="3"
++            height="14"
++            fill="#cfa86f"
++            stroke={CARD}
++            strokeWidth="0.7"
++          />
++        </g>
++        <rect
++          x="308"
++          y="478"
++          width="18"
++          height="12"
++          rx="2"
++          fill="#a88454"
++          stroke={CARD}
++          strokeWidth="0.8"
++        />
++        <g className={s.leverB}>
++          <rect
++            x="314"
++            y="455"
++            width="4"
++            height="26"
++            fill="#cfa86f"
++            stroke={CARD}
++            strokeWidth="0.7"
++          />
++          <rect
++            x="305"
++            y="445"
++            width="23"
++            height="8"
++            rx="2"
++            fill="#c9a574"
++            stroke={CARD}
++            strokeWidth="0.8"
++          />
++        </g>
++      </g>
++
++      {/* the cords */}
++      <g fill="none" strokeLinecap="round">
++        <path
++          d="M258 477C268 482 270 506 290 512C310 516 330 513 345 513"
++          stroke="#8a5f38"
++          strokeWidth="3.2"
++          opacity="0.5"
++        />
++        <path
++          d="M258 477C268 482 270 506 290 512C310 516 330 513 345 513"
++          stroke="#d1a06c"
++          strokeWidth="2"
++        />
++        <path
++          d="M299 474C312 476 332 472 338 462C342 452 340 430 345 418"
++          stroke="#8a5f38"
++          strokeWidth="3.2"
++          opacity="0.5"
++        />
++        <path
++          d="M299 474C312 476 332 472 338 462C342 452 340 430 345 418"
++          stroke="#d1a06c"
++          strokeWidth="2"
++        />
++      </g>
++
++      {/* the main panel, rounded at the top right */}
++      <path
++        d="M345 326H556A22 22 0 0 1 578 348V532H345Z"
++        fill="url(#dg-pink)"
++        stroke="#cf86a7"
++        strokeWidth="0.9"
++        filter="url(#dg-s3)"
++      />
++      <path
++        d="M346 327H556A21 21 0 0 1 577 348"
++        fill="none"
++        stroke="#fff"
++        strokeOpacity="0.4"
++        strokeWidth="1"
++      />
++
++      {/* icon tiles and their cords */}
++      <g filter="url(#dg-s1)">
++        <rect
++          x="489"
++          y="388"
++          width="14"
++          height="14"
++          rx="1.5"
++          fill="#cba577"
++          stroke="#7c5c34"
++          strokeWidth="0.8"
++        />
++        <rect
++          x="507"
++          y="388"
++          width="14"
++          height="14"
++          rx="1.5"
++          fill="#cba577"
++          stroke="#7c5c34"
++          strokeWidth="0.8"
++        />
++        <path
++          d="M491 396l3-3 3 3 3-4M509 395l3 2 3-4 3 3"
++          fill="none"
++          stroke="#5a4326"
++          strokeWidth="0.8"
++        />
++      </g>
++      <g fill="none" strokeLinecap="round">
++        <path
++          d="M494 403V457"
++          stroke="#8a6a1c"
++          strokeWidth="2.8"
++          opacity="0.45"
++        />
++        <path d="M494 403V457" stroke="#e3b64a" strokeWidth="1.8" />
++        <path
++          d="M514 403V470C514 490 500 497 483 500"
++          stroke="#1f2f80"
++          strokeWidth="2.8"
++          opacity="0.45"
++        />
++        <path
++          d="M514 403V470C514 490 500 497 483 500"
++          stroke="#3f5fd0"
++          strokeWidth="1.8"
++        />
++        <path
++          d="M494 403V457M514 403V470"
++          stroke="#fff"
++          strokeWidth="1"
++          strokeDasharray="1 9"
++          opacity="0.8"
++          className={s.signal}
++        />
++      </g>
++      <rect
++        x="493"
++        y="455"
++        width="22"
++        height="12"
++        rx="2"
++        fill="#cba577"
++        stroke="#7c5c34"
++        strokeWidth="0.8"
++        filter="url(#dg-s1)"
++      />
++
++      {/* the flag pole */}
++      <path
++        d="M531 410V493"
++        stroke="#e8e0cf"
++        strokeWidth="2.4"
++        strokeLinecap="round"
++      />
++      <path d="M531 410V493" stroke="#9c9380" strokeWidth="0.6" />
++      <circle
++        cx="531"
++        cy="494"
++        r="3.6"
++        fill="none"
++        stroke="#9c9380"
++        strokeWidth="1.2"
++      />
++
++      {/* the gatehouse in front */}
++      <g filter="url(#dg-s3)">
++        <path
++          d="M345 443H482V532H345Z"
++          fill="#f2b3cd"
++          stroke="#cf86a7"
++          strokeWidth="0.9"
++        />
++        <path
++          d="M345 415H482V443H345Z"
++          fill="#f5c0d6"
++          stroke="#cf86a7"
++          strokeWidth="0.9"
++        />
++        <path d="M482 417H486V532H482Z" fill="#df8fb0" />
++      </g>
++      <path
++        d="M346 416H481"
++        stroke="#fff"
++        strokeOpacity="0.5"
++        strokeWidth="1"
++      />
++      <path
++        d="M388 531V505A25 25 0 0 1 438 505V531Z"
++        fill="#b78f5e"
++        stroke={CARD}
++        strokeWidth="1"
++      />
++      <path
++        d="M392 531V505A21 21 0 0 1 434 505V531Z"
++        fill="#8a6a3c"
++        opacity="0.5"
++      />
++      <g className={s.door}>
++        <path
++          d="M388 531V505A25 25 0 0 1 413 480V531Z"
++          fill="#b78f5e"
++          stroke={CARD}
++          strokeWidth="1"
++          className={s.doorL}
++        />
++        <path
++          d="M438 531V505A25 25 0 0 0 413 480V531Z"
++          fill="#b78f5e"
++          stroke={CARD}
++          strokeWidth="1"
++          className={s.doorR}
++        />
++      </g>
++      <g fill="none" stroke="#cf7c9f" strokeWidth="0.9">
++        <rect x="447" y="480" width="13" height="6.4" rx="1.4" />
++        <rect x="454" y="486.4" width="13" height="6.4" rx="1.4" />
++        <rect x="355" y="507" width="13" height="6.4" rx="1.4" />
++        <rect x="362" y="513.4" width="13" height="6.4" rx="1.4" />
++      </g>
++    </Layer>
++  )
++}
+diff --git a/features/landing-page/studio/diorama/diorama.module.css b/features/landing-page/studio/diorama/diorama.module.css
+new file mode 100644
+index 0000000..8c22ae1
+--- /dev/null
++++ b/features/landing-page/studio/diorama/diorama.module.css
+@@ -0,0 +1,1271 @@
++/* The Skills shadowbox.
++
++   One unit, `--u`, is one pixel of the reference capture. The stage is exactly
++   813 units wide, the drawing's viewBox is the same 813 × 467, and every piece
++   of text and every control is placed by the same numbers (see geometry.ts), so
++   at any width the room is the picture, scaled. Nothing here is responsive in
++   the "reflow" sense on purpose: a shadowbox is a fixed composition. On a phone
++   it keeps a readable minimum width and scrolls sideways, like a real one you
++   would turn in your hands. */
++
++.shell {
++  width: 100%;
++  max-width: 80rem;
++  margin-inline: auto;
++  padding-inline: clamp(1.1rem, 4vw, 3.5rem);
++}
++
++.section {
++  position: relative;
++  overflow-x: clip;
++  padding-block: clamp(5rem, 9vw, 8rem) clamp(3rem, 5vw, 4.5rem);
++  background: radial-gradient(
++      ellipse 70% 40% at 50% 62%,
++      rgb(61 83 214 / 0.16),
++      transparent 70%
++    ),
++    #181822;
++  color: #f3ecdf;
++}
++
++.srOnly {
++  position: absolute;
++  width: 1px;
++  height: 1px;
++  margin: -1px;
++  padding: 0;
++  overflow: hidden;
++  clip: rect(0, 0, 0, 0);
++  white-space: nowrap;
++  border: 0;
++}
++
++/* ── Room and stage ────────────────────────────────────────────────────── */
++
++.room {
++  --stage-w: min(95rem, calc(100vw - 2rem));
++  --u: calc(var(--stage-w) / 813);
++  --ease: cubic-bezier(0.16, 1, 0.3, 1);
++
++  display: flex;
++  justify-content: center;
++  margin-top: clamp(1.5rem, 3vw, 2.5rem);
++}
++
++.stageWrap {
++  width: var(--stage-w);
++  flex: none;
++  /* room for the controller, which hangs above the frame */
++  padding-top: calc(var(--u) * 52);
++}
++
++@media (max-width: 860px) {
++  .room {
++    --stage-w: 860px;
++    justify-content: flex-start;
++    padding-inline: 1rem;
++    overflow-x: auto;
++    scroll-snap-type: x proximity;
++    -webkit-overflow-scrolling: touch;
++  }
++
++  .stageWrap {
++    scroll-snap-align: center;
++  }
++}
++
++.stage {
++  --px: 0;
++  --py: 0;
++
++  position: relative;
++  width: 100%;
++  aspect-ratio: 813 / 467;
++}
++
++.stage::before {
++  content: '';
++  position: absolute;
++  inset: calc(var(--u) * 12) calc(var(--u) * 14);
++  z-index: 0;
++  box-shadow:
++    0 calc(var(--u) * 24) calc(var(--u) * 46) rgb(0 0 0 / 0.6),
++    0 calc(var(--u) * 4) calc(var(--u) * 10) rgb(0 0 0 / 0.5);
++}
++
++.defs {
++  position: absolute;
++  width: 0;
++  height: 0;
++  overflow: hidden;
++}
++
++.scene {
++  position: absolute;
++  inset: 0;
++  z-index: 1;
++  overflow: clip;
++  isolation: isolate;
++}
++
++/* paper tooth and a soft vignette over everything inside the frame */
++.scene::after {
++  content: '';
++  position: absolute;
++  inset: 0;
++  z-index: 9;
++  pointer-events: none;
++  opacity: 0.1;
++  mix-blend-mode: multiply;
++  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
++  background-size: calc(var(--u) * 160);
++}
++
++.layer {
++  position: absolute;
++  inset: 0;
++  pointer-events: none;
++  /* nearer layers slide further, against the pointer: that is the depth */
++  translate: calc(var(--px, 0) * var(--depth, 0) * var(--u) * -6)
++    calc(var(--py, 0) * var(--depth, 0) * var(--u) * -4);
++  transition:
++    translate 0.35s var(--ease),
++    scale 0.6s var(--ease),
++    filter 0.6s var(--ease),
++    opacity 0.6s var(--ease);
++}
++
++.layer[data-id] {
++  transition:
++    translate 0.35s var(--ease),
++    scale 0.6s var(--ease),
++    filter 0.6s var(--ease),
++    opacity 0.8s var(--ease) calc(var(--n, 0) * 0.12s),
++    transform 0.9s var(--ease) calc(var(--n, 0) * 0.12s);
++}
++
++/* Not yet arrived: below the fold, waiting. Above the fold nothing is hidden. */
++.stageWrap[data-armed='true']:not([data-in='true']) .layer[data-id] {
++  opacity: 0;
++  transform: translateY(calc(var(--u) * 26));
++}
++
++.layer > * {
++  pointer-events: none;
++}
++
++.layer :is(button, input, a, .tag, .drawerTools li, .ribbons li, .windTags li) {
++  pointer-events: auto;
++}
++
++.art {
++  position: absolute;
++  inset: 0;
++  display: block;
++  width: 100%;
++  height: 100%;
++  overflow: visible;
++}
++
++/* The controller picks a station; the others recede, the chosen one steps forward. */
++.stage[data-station='build'] .layer[data-id]:not([data-id='build']),
++.stage[data-station='motion'] .layer[data-id]:not([data-id='motion']),
++.stage[data-station='systems'] .layer[data-id]:not([data-id='systems']),
++.stage[data-station='rest'] .layer[data-id]:not([data-id='rest']) {
++  filter: saturate(0.45) brightness(0.62);
++}
++
++.stage[data-station='build'] .layer[data-id='build'],
++.stage[data-station='motion'] .layer[data-id='motion'],
++.stage[data-station='systems'] .layer[data-id='systems'],
++.stage[data-station='rest'] .layer[data-id='rest'] {
++  scale: 1.012;
++  filter: brightness(1.06) saturate(1.08);
++}
++
++/* ── Controller ────────────────────────────────────────────────────────── */
++
++.controller {
++  position: absolute;
++  z-index: 20;
++  top: calc(var(--u) * -45);
++  /* the reference's controller is centred 20px right of the frame's centre */
++  left: calc(50% + var(--u) * 20.5);
++  translate: -50% 0;
++  width: calc(var(--u) * 414);
++  padding: calc(var(--u) * 11) calc(var(--u) * 12) calc(var(--u) * 11);
++  border-radius: 0 0 calc(var(--u) * 8) calc(var(--u) * 8);
++  background: #ece5d5;
++  color: #1a1a2b;
++  box-shadow:
++    inset 0 calc(var(--u) * -1) 0 rgb(0 0 0 / 0.08),
++    0 calc(var(--u) * 7) calc(var(--u) * 14) rgb(0 0 0 / 0.45);
++}
++
++.controllerTop {
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  gap: calc(var(--u) * 10);
++  margin-bottom: calc(var(--u) * 8);
++  font-family: var(--font-geist), system-ui, sans-serif;
++  font-size: calc(var(--u) * 11.6);
++  font-weight: 600;
++  letter-spacing: -0.005em;
++}
++
++.kinetic {
++  position: relative;
++  flex: none;
++  width: calc(var(--u) * 31);
++  height: calc(var(--u) * 16);
++  padding: 0;
++  border: 0;
++  border-radius: 999px;
++  background: #23242f;
++  cursor: pointer;
++  transition: background-color 0.25s ease;
++}
++
++.kinetic[aria-pressed='false'] {
++  background: #b9b2a0;
++}
++
++.knob {
++  position: absolute;
++  top: 50%;
++  left: calc(100% - var(--u) * 14);
++  width: calc(var(--u) * 11);
++  height: calc(var(--u) * 11);
++  border-radius: 50%;
++  background: #f1ead9;
++  translate: 0 -50%;
++  transition: left 0.3s var(--ease, ease);
++}
++
++.kinetic[aria-pressed='false'] .knob {
++  left: calc(var(--u) * 3);
++}
++
++.pills {
++  display: flex;
++  flex-wrap: nowrap;
++  justify-content: center;
++  gap: calc(var(--u) * 7);
++}
++
++.pill {
++  padding: calc(var(--u) * 4.4) calc(var(--u) * 10);
++  border: calc(var(--u) * 1) solid #4a4a58;
++  border-radius: 999px;
++  background: #f4eedf;
++  color: #1a1a2b;
++  font-family: var(--font-geist), system-ui, sans-serif;
++  font-size: calc(var(--u) * 9.6);
++  font-weight: 500;
++  line-height: 1.2;
++  white-space: nowrap;
++  cursor: pointer;
++  transition:
++    background-color 0.2s ease,
++    color 0.2s ease,
++    transform 0.2s var(--ease, ease);
++}
++
++.pill:hover {
++  background: #fff;
++  transform: translateY(calc(var(--u) * -1));
++}
++
++.pill[aria-pressed='true'] {
++  background: #181a2c;
++  border-color: #181a2c;
++  color: #f4eedf;
++}
++
++.pill:focus-visible,
++.kinetic:focus-visible,
++.consoleBtn:focus-visible,
++.play:focus-visible,
++.ribbon:focus-visible,
++.curveInput:focus-visible {
++  outline: 2px solid #3d53d6;
++  outline-offset: 2px;
++}
++
++/* ── Type on the panels ────────────────────────────────────────────────── */
++
++.eyebrow {
++  position: absolute;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 500;
++  letter-spacing: 0.13em;
++  line-height: 1;
++  text-transform: uppercase;
++  white-space: nowrap;
++  color: rgb(34 24 12 / 0.82);
++}
++
++.layer[data-id='build'] .eyebrow {
++  color: rgb(255 255 255 / 0.88);
++}
++
++.title {
++  position: absolute;
++  margin: 0;
++  font-family: var(--font-syne), system-ui, sans-serif;
++  font-weight: 800;
++  line-height: 1;
++  letter-spacing: -0.035em;
++  white-space: nowrap;
++}
++
++.titleInk {
++  color: #17182b;
++  text-shadow: 0 calc(var(--u) * 0.9) 0 rgb(255 255 255 / 0.32);
++}
++
++.titleCream {
++  color: #e9e1cc;
++  text-transform: uppercase;
++  text-shadow:
++    0 calc(var(--u) * 1) 0 #bdb49b,
++    calc(var(--u) * 1) calc(var(--u) * 2) 0 #948a73,
++    calc(var(--u) * 2) calc(var(--u) * 3.6) calc(var(--u) * 3) rgb(0 0 0 / 0.5);
++}
++
++.cloudText {
++  position: absolute;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  letter-spacing: 0.1em;
++  text-transform: uppercase;
++  white-space: nowrap;
++  color: rgb(255 255 255 / 0.86);
++}
++
++/* ── Build: tags hanging on springs ────────────────────────────────────── */
++
++.tags,
++.windTags,
++.ribbons,
++.folderLabels {
++  margin: 0;
++  padding: 0;
++  list-style: none;
++}
++
++.tag {
++  position: absolute;
++  display: grid;
++  place-items: center;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 600;
++  letter-spacing: 0.01em;
++  white-space: nowrap;
++  color: #1a1a2b;
++  background: #86c46e;
++  clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%);
++  filter: drop-shadow(
++    0 calc(var(--u) * 2.2) calc(var(--u) * 1.4) rgb(0 0 0 / 0.42)
++  );
++  animation: bob 3.4s ease-in-out infinite;
++  animation-delay: var(--delay, 0s);
++  cursor: default;
++  transition:
++    translate 0.25s var(--ease, ease),
++    filter 0.25s ease;
++}
++
++.tag:hover {
++  translate: 0 calc(var(--u) * -3);
++  filter: drop-shadow(
++      0 calc(var(--u) * 5) calc(var(--u) * 2.4) rgb(0 0 0 / 0.5)
++    )
++    brightness(1.06);
++}
++
++.tag:nth-child(1) {
++  background: #3d63d2;
++  color: #fff;
++  clip-path: none;
++  border-radius: calc(var(--u) * 3) 0 0 calc(var(--u) * 3);
++}
++.tag:nth-child(2) {
++  background: #f5d03e;
++}
++.tag:nth-child(3) {
++  background: #8ec1ea;
++}
++.tag:nth-child(4) {
++  background: #d9e7ec;
++}
++.tag:nth-child(5) {
++  background: #86c46e;
++}
++
++/* ── Motion ────────────────────────────────────────────────────────────── */
++
++.windTags li {
++  position: absolute;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 600;
++  letter-spacing: 0.1em;
++  line-height: 1;
++  text-transform: uppercase;
++  white-space: nowrap;
++  color: #3d4a58;
++}
++
++.windTags li[data-slot='2'],
++.windTags li[data-slot='3'] {
++  padding: calc(var(--u) * 2.4) calc(var(--u) * 4.4);
++  border: calc(var(--u) * 0.8) solid #6a5320;
++  border-radius: calc(var(--u) * 2);
++  background: #f6e7a8;
++  color: #2b2118;
++  letter-spacing: 0.04em;
++  text-transform: none;
++  box-shadow: 0 calc(var(--u) * 1.6) calc(var(--u) * 2) rgb(0 0 0 / 0.3);
++  animation: bob 4.2s ease-in-out infinite;
++}
++
++.windTags li[data-slot='3'] {
++  animation-delay: -1.6s;
++}
++
++.weather {
++  position: absolute;
++}
++
++.weatherHead {
++  position: absolute;
++  top: calc(var(--u) * 6.5);
++  left: calc(var(--u) * 8);
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-size: calc(var(--u) * 5.4);
++  font-weight: 600;
++  letter-spacing: 0.07em;
++  line-height: 1;
++  text-transform: uppercase;
++  white-space: nowrap;
++  color: #3f3210;
++}
++
++.curveRow {
++  position: absolute;
++  left: 0;
++  width: 100%;
++  height: calc(var(--u) * 14);
++  display: block;
++  translate: 0 -50%;
++  --track: calc(var(--u) * 50);
++  --thumb: calc(var(--u) * 11);
++}
++
++.curveLabel {
++  position: absolute;
++  left: calc(var(--u) * 8);
++  top: 50%;
++  translate: 0 -50%;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 600;
++  letter-spacing: 0.06em;
++  text-transform: uppercase;
++  color: #3f3210;
++}
++
++.curveDot {
++  position: absolute;
++  left: calc(var(--u) * 38);
++  top: 50%;
++  width: calc(var(--u) * 12);
++  height: calc(var(--u) * 12);
++  border-radius: 50%;
++  border: calc(var(--u) * 0.9) solid #2b2118;
++  translate: 0 -50%;
++  box-shadow: inset calc(var(--u) * -1) calc(var(--u) * -1) 0 rgb(0 0 0 / 0.25);
++}
++
++/* the visible track and thumb are drawn here so the thumb can be sprung */
++.curveRow::before {
++  content: '';
++  position: absolute;
++  left: calc(var(--u) * 50);
++  top: 50%;
++  width: var(--track);
++  height: calc(var(--u) * 1.8);
++  border-radius: 99px;
++  background: #5e4b1b;
++  translate: 0 -50%;
++}
++
++.curveRow::after {
++  content: '';
++  position: absolute;
++  top: 50%;
++  left: calc(
++    var(--u) * 50 + (var(--track) - var(--thumb)) * var(--pct, 50) / 100
++  );
++  width: var(--thumb);
++  height: var(--thumb);
++  border-radius: 50%;
++  border: calc(var(--u) * 1) solid #6d5330;
++  background: #dcc59b;
++  translate: 0 -50%;
++  box-shadow: 0 calc(var(--u) * 1.4) calc(var(--u) * 1.4) rgb(0 0 0 / 0.35);
++}
++
++/* Each curve gets its own spring, but only while "Play the curves" is moving
++   them: dragging by hand should follow the pointer, not lag behind it. */
++.curveRow[data-playing]::after {
++  transition: left 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
++}
++.curveRow[data-playing][data-curve='snap']::after {
++  transition: left 0.38s cubic-bezier(0.3, 1.7, 0.5, 1);
++}
++.curveRow[data-playing][data-curve='loose']::after {
++  transition: left 1.3s cubic-bezier(0.34, 1.9, 0.6, 0.85);
++}
++
++.curveInput {
++  position: absolute;
++  left: calc(var(--u) * 46);
++  top: 0;
++  width: calc(var(--track) + var(--u) * 8);
++  height: 100%;
++  margin: 0;
++  opacity: 0;
++  cursor: grab;
++}
++
++.curveRow:has(.curveInput:focus-visible)::after {
++  outline: 2px solid #3d53d6;
++  outline-offset: 2px;
++}
++
++.play {
++  position: absolute;
++  padding: 0;
++  border: calc(var(--u) * 1.2) solid #5a4318;
++  border-radius: calc(var(--u) * 11);
++  background: #f6e7a8;
++  color: #2b2118;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 600;
++  letter-spacing: 0.09em;
++  text-transform: uppercase;
++  white-space: nowrap;
++  box-shadow:
++    0 calc(var(--u) * 2) 0 #b99a45,
++    0 calc(var(--u) * 4) calc(var(--u) * 3) rgb(0 0 0 / 0.38);
++  cursor: pointer;
++  transition:
++    transform 0.2s var(--ease, ease),
++    box-shadow 0.2s var(--ease, ease),
++    background-color 0.2s ease;
++}
++
++.play:hover {
++  background: #fff3c0;
++  transform: translateY(calc(var(--u) * -1.5));
++}
++
++.play:active {
++  transform: translateY(calc(var(--u) * 1.5));
++  box-shadow:
++    0 calc(var(--u) * 0.5) 0 #b99a45,
++    0 calc(var(--u) * 1) calc(var(--u) * 1) rgb(0 0 0 / 0.38);
++}
++
++/* ── Systems ───────────────────────────────────────────────────────────── */
++
++.deck {
++  position: absolute;
++  display: grid;
++  place-items: center;
++  border: calc(var(--u) * 1) solid #3a2a30;
++  border-radius: 999px;
++  background: rgb(255 255 255 / 0.28);
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 500;
++  letter-spacing: 0.05em;
++  color: #2b1d28;
++  white-space: nowrap;
++}
++
++.gateTitle {
++  position: absolute;
++  font-family: var(--font-syne), system-ui, sans-serif;
++  font-weight: 800;
++  line-height: 1;
++  letter-spacing: -0.035em;
++  color: #17182b;
++}
++
++.consoleRow {
++  position: absolute;
++  display: grid;
++  grid-template-columns: 52fr 50fr;
++  gap: calc(var(--u) * 8);
++  padding-left: calc(var(--u) * 2);
++}
++
++.consoleBtn {
++  position: relative;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  gap: calc(var(--u) * 2);
++  height: calc(var(--u) * 20);
++  padding: 0;
++  border: 0;
++  border-radius: calc(var(--u) * 10);
++  background: #f2ecdc;
++  color: #2b2118;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 600;
++  letter-spacing: 0.01em;
++  white-space: nowrap;
++  cursor: pointer;
++  transition:
++    transform 0.18s var(--ease, ease),
++    box-shadow 0.18s var(--ease, ease),
++    background-color 0.2s ease;
++}
++
++/* stacked paper discs: each shadow is one more sheet under the top one */
++.hoverBtn {
++  box-shadow:
++    0 calc(var(--u) * 2) 0 #d6cfba,
++    0 calc(var(--u) * 3) 0 #7d7762,
++    0 calc(var(--u) * 5) 0 #d6cfba,
++    0 calc(var(--u) * 6) 0 #7d7762,
++    0 calc(var(--u) * 8) calc(var(--u) * 2) rgb(0 0 0 / 0.32);
++}
++
++.pressBtn {
++  box-shadow:
++    0 calc(var(--u) * 2) 0 #3f5fd0,
++    0 calc(var(--u) * 4) 0 #2a44a4,
++    0 calc(var(--u) * 5.5) 0 #3f5fd0,
++    0 calc(var(--u) * 7) 0 #1f3382,
++    0 calc(var(--u) * 9) calc(var(--u) * 2) rgb(0 0 0 / 0.34);
++}
++
++.consoleBtn:hover {
++  transform: translateY(calc(var(--u) * -1.5));
++  background: #fff9e8;
++}
++
++.consoleBtn:active {
++  transform: translateY(calc(var(--u) * 2.5));
++}
++
++.hoverBtn:active {
++  box-shadow:
++    0 calc(var(--u) * 1) 0 #d6cfba,
++    0 calc(var(--u) * 2) 0 #7d7762,
++    0 calc(var(--u) * 3) calc(var(--u) * 1) rgb(0 0 0 / 0.3);
++}
++
++.pressBtn:active {
++  box-shadow:
++    0 calc(var(--u) * 1) 0 #3f5fd0,
++    0 calc(var(--u) * 2) 0 #1f3382,
++    0 calc(var(--u) * 3) calc(var(--u) * 1) rgb(0 0 0 / 0.3);
++}
++
++.pressBtn[aria-pressed='true'] {
++  background: #dff3e4;
++  box-shadow:
++    0 calc(var(--u) * 2) 0 #3c9d6b,
++    0 calc(var(--u) * 4) 0 #27704b,
++    0 calc(var(--u) * 5.5) 0 #3c9d6b,
++    0 calc(var(--u) * 7) 0 #1c5538,
++    0 calc(var(--u) * 9) calc(var(--u) * 2) rgb(0 0 0 / 0.34);
++}
++
++.tick {
++  width: calc(var(--u) * 7);
++  height: calc(var(--u) * 6);
++  opacity: 0;
++  transition: opacity 0.2s ease;
++}
++
++.pressBtn[aria-pressed='true'] .tick {
++  opacity: 1;
++}
++
++.ribbons li {
++  position: absolute;
++  transform-origin: 0 50%;
++  filter: drop-shadow(0 0 0 #3a2a30)
++    drop-shadow(calc(var(--u) * 0.7) 0 0 #3a2a30)
++    drop-shadow(calc(var(--u) * -0.7) 0 0 #3a2a30)
++    drop-shadow(0 calc(var(--u) * 0.7) 0 #3a2a30)
++    drop-shadow(0 calc(var(--u) * -0.7) 0 #3a2a30)
++    drop-shadow(0 calc(var(--u) * 1.8) calc(var(--u) * 1.2) rgb(0 0 0 / 0.25));
++  animation: wave 4.4s ease-in-out infinite;
++  animation-delay: var(--delay, 0s);
++  transition: translate 0.3s var(--ease, ease);
++}
++
++.ribbons li:has(.ribbon[aria-pressed='true']) {
++  translate: calc(var(--u) * 5) 0;
++}
++
++.ribbon {
++  display: flex;
++  align-items: center;
++  width: 100%;
++  height: 100%;
++  padding: 0 calc(var(--u) * 7) 0 calc(var(--u) * 4.5);
++  border: 0;
++  background: #f5dde8;
++  color: #2b1d28;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 500;
++  letter-spacing: 0.01em;
++  line-height: 1.12;
++  text-align: left;
++  white-space: nowrap;
++  cursor: pointer;
++  clip-path: polygon(0 0, 100% 0, 93% 50%, 100% 100%, 0 100%);
++  transition: filter 0.2s ease;
++}
++
++.ribbon:hover {
++  filter: brightness(1.06);
++}
++
++.ribbon[data-tone='hot'] {
++  background: #ee6f9a;
++  white-space: normal;
++}
++.ribbon[data-tone='cream'] {
++  background: #efe8d8;
++}
++.ribbon[data-tone='green'] {
++  background: #7cc08a;
++}
++
++.ribbon[aria-pressed='true'] {
++  font-weight: 700;
++  background-image: linear-gradient(
++    rgb(255 255 255 / 0.28),
++    rgb(255 255 255 / 0.28)
++  );
++}
++
++/* ── The rest ──────────────────────────────────────────────────────────── */
++
++.sticky {
++  position: absolute;
++  padding: calc(var(--u) * 6) calc(var(--u) * 7) calc(var(--u) * 5);
++  background: #e9ddc1;
++  border: calc(var(--u) * 0.8) solid #a89569;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 600;
++  line-height: 1.45;
++  color: #3a2f1d;
++  rotate: 2.6deg;
++  clip-path: polygon(
++    calc(var(--u) * 8) 0,
++    100% 0,
++    100% 100%,
++    0 100%,
++    0 calc(var(--u) * 8)
++  );
++  filter: drop-shadow(
++    calc(var(--u) * 1) calc(var(--u) * 2.2) calc(var(--u) * 1.6)
++      rgb(0 0 0 / 0.38)
++  );
++  transform-origin: 90% 0;
++  animation: sticky 6.5s ease-in-out infinite;
++}
++
++.sticky span {
++  display: inline-block;
++}
++
++.folderLabels li {
++  position: absolute;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 600;
++  letter-spacing: 0.04em;
++  line-height: 1;
++  white-space: nowrap;
++  color: #2b2118;
++  animation: folder 5s ease-in-out infinite;
++}
++
++.folderLabels li:nth-child(1) {
++  color: #fff;
++}
++
++.drawerTools {
++  position: absolute;
++  display: flex;
++  align-items: stretch;
++  gap: calc(var(--u) * 5.6);
++  margin: 0;
++  padding: 0;
++  list-style: none;
++}
++
++.drawerTools li {
++  display: grid;
++  place-items: center;
++  padding: 0 calc(var(--u) * 6.2);
++  border: calc(var(--u) * 0.9) solid #2b2118;
++  border-radius: calc(var(--u) * 2.4);
++  background: #ece6d6;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 600;
++  white-space: nowrap;
++  color: #2b2118;
++  box-shadow:
++    calc(var(--u) * 0.8) calc(var(--u) * 1.8) 0 rgb(0 0 0 / 0.5),
++    inset 0 calc(var(--u) * 1) 0 rgb(255 255 255 / 0.55);
++  transition:
++    translate 0.2s var(--ease, ease),
++    box-shadow 0.2s ease;
++  cursor: default;
++}
++
++.drawerTools li[data-hot] {
++  background: #f2c23a;
++}
++
++.drawerTools li:hover {
++  translate: 0 calc(var(--u) * -2.4);
++  box-shadow:
++    calc(var(--u) * 0.8) calc(var(--u) * 4) 0 rgb(0 0 0 / 0.4),
++    inset 0 calc(var(--u) * 1) 0 rgb(255 255 255 / 0.55);
++}
++
++/* ── Caption under the frame ───────────────────────────────────────────── */
++
++.note {
++  display: flex;
++  align-items: baseline;
++  justify-content: space-between;
++  gap: 1.5rem;
++  margin-top: 1.1rem;
++  /* the reference sets the caption on the content edge, not inside the shell's padding */
++  margin-inline: calc(-1 * clamp(1.1rem, 4vw, 3.5rem));
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-size: 10.5px;
++  letter-spacing: 0.15em;
++  text-transform: uppercase;
++  color: rgb(243 236 223 / 0.68);
++}
++
++/* ── Animation (SVG parts) ─────────────────────────────────────────────── */
++
++.spinCW,
++.spinCCW,
++.slowSpin,
++.twinkle,
++.squash,
++.squashTag,
++.atom,
++.pulse,
++.drift,
++.sway,
++.sweep,
++.blink,
++.crank,
++.needle,
++.plunger,
++.plungerTop,
++.leverA,
++.leverB,
++.toggleKnob,
++.slideKnob,
++.folder,
++.sunFace,
++.windowGlow {
++  transform-box: fill-box;
++  transform-origin: center;
++}
++
++.spinCW {
++  animation: spin var(--dur, 20s) linear infinite;
++}
++.spinCCW {
++  animation: spin var(--dur, 20s) linear infinite reverse;
++}
++.slowSpin {
++  animation: spin var(--dur, 30s) linear infinite;
++}
++
++.twinkle {
++  animation: twinkle 3.2s ease-in-out infinite;
++  animation-delay: var(--delay, 0s);
++}
++
++.squash {
++  transform-origin: 50% 100%;
++  animation: squash 2.4s ease-in-out infinite;
++  animation-delay: var(--delay, 0s);
++}
++.squashTag {
++  transform-origin: 50% 100%;
++  animation: squashTag 3.4s ease-in-out infinite;
++  animation-delay: var(--delay, 0s);
++}
++
++.atom {
++  animation: spin 46s linear infinite;
++}
++.pulse {
++  animation: pulse 2.6s ease-in-out infinite;
++}
++
++.drift {
++  animation: drift var(--dur, 10s) ease-in-out infinite alternate;
++  animation-delay: var(--delay, 0s);
++}
++
++.sway {
++  transform-origin: 0 50%;
++  animation: swayBanner var(--dur, 7s) ease-in-out infinite alternate;
++  animation-delay: var(--delay, 0s);
++}
++
++.flow path {
++  stroke-dasharray: 10 6;
++  animation: flow 2.4s linear infinite;
++}
++.belt {
++  animation: beltRun 1.6s linear infinite;
++}
++.signal {
++  animation: signal 2.2s linear infinite;
++}
++
++.sweep {
++  animation: sweep 9s ease-in-out infinite;
++}
++
++.sunFace {
++  animation: pulse 4.5s ease-in-out infinite;
++}
++.blink {
++  transform-origin: center;
++  animation: blink 6s infinite;
++}
++
++.crank {
++  animation: crank 3.2s ease-in-out infinite;
++}
++
++.lever {
++  transform-origin: 856px 262px;
++  transform: rotate(var(--lever, 0deg));
++  transition: transform 0.9s cubic-bezier(0.3, 1.5, 0.5, 1);
++}
++
++.needle {
++  transform-origin: 0 0;
++  animation: needle 3.6s ease-in-out infinite;
++  animation-delay: var(--delay, 0s);
++}
++
++.plunger {
++  transform-box: view-box;
++}
++.plungerTop {
++  transform-origin: 50% 100%;
++  animation: plunge 3.4s ease-in-out infinite;
++  animation-delay: var(--delay, 0s);
++}
++
++.leverA {
++  transform-origin: 50% 100%;
++  animation: leverA 4.2s ease-in-out infinite;
++}
++.leverB {
++  transform-origin: 50% 100%;
++  animation: leverB 5s ease-in-out infinite;
++}
++.toggleKnob {
++  animation: toggle 6s ease-in-out infinite;
++  animation-delay: var(--delay, 0s);
++}
++.slideKnob {
++  animation: slide 5.5s ease-in-out infinite;
++}
++
++.folder {
++  animation: folder 5s ease-in-out infinite;
++  animation-delay: var(--delay, 0s);
++}
++
++.windowGlow {
++  animation: flicker 5s steps(1) infinite;
++}
++
++.doorL,
++.doorR {
++  transition: translate 0.7s var(--ease, ease);
++}
++.stage[data-station='systems'] .doorL {
++  translate: -7px 0;
++}
++.stage[data-station='systems'] .doorR {
++  translate: 7px 0;
++}
++
++/* the controller's off switch: everything holds still */
++.stage[data-running='false'] * {
++  animation-play-state: paused !important;
++}
++
++@keyframes spin {
++  to {
++    transform: rotate(360deg);
++  }
++}
++@keyframes twinkle {
++  0%,
++  100% {
++    opacity: 0.55;
++    transform: scale(0.8) rotate(0deg);
++  }
++  50% {
++    opacity: 1;
++    transform: scale(1.18) rotate(18deg);
++  }
++}
++@keyframes squash {
++  0%,
++  100% {
++    transform: scaleY(1);
++  }
++  50% {
++    transform: scaleY(0.84);
++  }
++}
++@keyframes squashTag {
++  0%,
++  100% {
++    transform: scaleY(1);
++  }
++  50% {
++    transform: scaleY(1.16);
++  }
++}
++@keyframes pulse {
++  0%,
++  100% {
++    transform: scale(1);
++  }
++  50% {
++    transform: scale(1.08);
++  }
++}
++@keyframes drift {
++  from {
++    transform: translateX(calc(var(--dx, 5px) * -1));
++  }
++  to {
++    transform: translateX(var(--dx, 5px));
++  }
++}
++@keyframes swayBanner {
++  from {
++    transform: rotate(-0.7deg) translateY(-1px);
++  }
++  to {
++    transform: rotate(0.7deg) translateY(1px);
++  }
++}
++@keyframes flow {
++  to {
++    stroke-dashoffset: -32;
++  }
++}
++@keyframes beltRun {
++  to {
++    stroke-dashoffset: -16;
++  }
++}
++@keyframes signal {
++  to {
++    stroke-dashoffset: -20;
++  }
++}
++@keyframes sweep {
++  0%,
++  35% {
++    transform: translateX(-30px);
++    opacity: 0;
++  }
++  55% {
++    opacity: 1;
++  }
++  100% {
++    transform: translateX(95px);
++    opacity: 0;
++  }
++}
++@keyframes blink {
++  0%,
++  92%,
++  100% {
++    transform: scaleY(1);
++  }
++  95% {
++    transform: scaleY(0.12);
++  }
++}
++@keyframes crank {
++  0%,
++  100% {
++    transform: translateY(-2px) rotate(-6deg);
++  }
++  50% {
++    transform: translateY(3px) rotate(8deg);
++  }
++}
++@keyframes needle {
++  0%,
++  100% {
++    transform: rotate(-9deg);
++  }
++  35% {
++    transform: rotate(11deg);
++  }
++  70% {
++    transform: rotate(-3deg);
++  }
++}
++@keyframes plunge {
++  0%,
++  100% {
++    transform: scaleY(1) translateY(0);
++  }
++  45% {
++    transform: scaleY(0.82) translateY(3px);
++  }
++  60% {
++    transform: scaleY(1.04) translateY(-1px);
++  }
++}
++@keyframes leverA {
++  0%,
++  100% {
++    transform: translateY(0);
++  }
++  50% {
++    transform: translateY(5px);
++  }
++}
++@keyframes leverB {
++  0%,
++  100% {
++    transform: rotate(-7deg);
++  }
++  50% {
++    transform: rotate(8deg);
++  }
++}
++@keyframes toggle {
++  0%,
++  40% {
++    transform: translateX(0);
++  }
++  50%,
++  90% {
++    transform: translateX(var(--dx, 15px));
++  }
++  100% {
++    transform: translateX(0);
++  }
++}
++@keyframes slide {
++  0%,
++  100% {
++    transform: translateY(0);
++  }
++  50% {
++    transform: translateY(-9px);
++  }
++}
++@keyframes folder {
++  0%,
++  100% {
++    transform: translateY(0);
++  }
++  50% {
++    transform: translateY(-1.6px);
++  }
++}
++@keyframes flicker {
++  0%,
++  100% {
++    opacity: 0.5;
++  }
++  42% {
++    opacity: 0.18;
++  }
++  46% {
++    opacity: 0.55;
++  }
++}
++@keyframes bob {
++  0%,
++  100% {
++    transform: translateY(0);
++  }
++  50% {
++    transform: translateY(calc(var(--u) * -2.2));
++  }
++}
++@keyframes wave {
++  0%,
++  100% {
++    transform: skewY(0deg) rotate(0deg);
++  }
++  50% {
++    transform: skewY(-2.4deg) rotate(0.5deg);
++  }
++}
++@keyframes sticky {
++  0%,
++  100% {
++    transform: rotate(0deg);
++  }
++  50% {
++    transform: rotate(-1.4deg);
++  }
++}
++
++/* Reduced motion keeps every control and the whole picture; it removes the
++   entrance, the depth shift, and everything that moves by itself. */
++@media (prefers-reduced-motion: reduce) {
++  .stage *,
++  .stage *::before,
++  .stage *::after {
++    animation: none !important;
++  }
++
++  .layer {
++    translate: none;
++    transition-duration: 0.01ms !important;
++  }
++
++  .stageWrap[data-armed='true']:not([data-in='true']) .layer[data-id] {
++    opacity: 1;
++    transform: none;
++  }
++
++  .curveRow[data-playing]::after,
++  .lever,
++  .tag,
++  .ribbons li {
++    transition-duration: 0.01ms !important;
++  }
++}
+diff --git a/features/landing-page/studio/diorama/geometry.ts b/features/landing-page/studio/diorama/geometry.ts
+new file mode 100644
+index 0000000..a603607
+--- /dev/null
++++ b/features/landing-page/studio/diorama/geometry.ts
+@@ -0,0 +1,122 @@
++import type { CSSProperties } from 'react'
++
++/**
++ * The diorama is drawn in the reference's own pixel space: a 1024 × 572
++ * capture whose wooden frame occupies x 105–918, y 80–547. Every coordinate in
++ * the art and the overlay is a coordinate in that capture. Nothing is
++ * re-measured: the SVG uses it as its viewBox, and the HTML overlay converts
++ * the same numbers to percentages of the stage, so a change to one number moves
++ * the drawing and the text that sits on it together.
++ */
++export const OX = 105
++export const OY = 80
++export const W = 813
++export const H = 467
++export const VIEWBOX = `${OX} ${OY} ${W} ${H}`
++
++const pct = (n: number) => `${(n * 100).toFixed(3)}%`
++
++/** Top-left anchored box, optionally sized. */
++export function at(
++  x: number,
++  y: number,
++  w?: number,
++  h?: number,
++): CSSProperties {
++  return {
++    left: pct((x - OX) / W),
++    top: pct((y - OY) / H),
++    ...(w === undefined ? null : { width: pct(w / W) }),
++    ...(h === undefined ? null : { height: pct(h / H) }),
++  }
++}
++
++/** Right-anchored: `x` is the right edge, so text that grows stays on its edge. */
++export function atRight(x: number, y: number): CSSProperties {
++  return { right: pct((OX + W - x) / W), top: pct((y - OY) / H) }
++}
++
++/** A length in the reference's pixels, scaled with the stage. */
++export const u = (n: number) => `calc(var(--u) * ${n})`
++
++/** Fill a CSS custom property for a size, so the stylesheet can use it too. */
++export const vars = (record: Record<string, string | number>) =>
++  record as unknown as CSSProperties
++
++/* ── drawing helpers ─────────────────────────────────────────────────────── */
++
++const f = (n: number) => Number(n.toFixed(2))
++
++/** A gear outline: trapezoid teeth around a root circle. */
++export function gearPath(
++  cx: number,
++  cy: number,
++  outer: number,
++  root: number,
++  teeth: number,
++) {
++  const step = (Math.PI * 2) / teeth
++  const points: string[] = []
++  for (let i = 0; i < teeth; i += 1) {
++    const a = i * step
++    const spans: Array<[number, number]> = [
++      [a - step * 0.3, root],
++      [a - step * 0.17, outer],
++      [a + step * 0.17, outer],
++      [a + step * 0.3, root],
++    ]
++    for (const [angle, radius] of spans) {
++      points.push(
++        `${f(cx + Math.cos(angle) * radius)} ${f(cy + Math.sin(angle) * radius)}`,
++      )
++    }
++  }
++  return `M${points.join('L')}Z`
++}
++
++/** A many-pointed star: the sun's rays. */
++export function starPath(
++  cx: number,
++  cy: number,
++  outer: number,
++  inner: number,
++  points: number,
++  rotate = 0,
++) {
++  const out: string[] = []
++  for (let i = 0; i < points * 2; i += 1) {
++    const a = (i * Math.PI) / points + (rotate * Math.PI) / 180 - Math.PI / 2
++    const r = i % 2 === 0 ? outer : inner
++    out.push(`${f(cx + Math.cos(a) * r)} ${f(cy + Math.sin(a) * r)}`)
++  }
++  return `M${out.join('L')}Z`
++}
++
++/** A wire spring standing on `y2` and reaching up to `y1`. */
++export function coilPath(
++  x: number,
++  y1: number,
++  y2: number,
++  width = 8,
++  turns = 5,
++) {
++  const h = (y2 - y1) / turns
++  let d = `M${x - width / 2} ${f(y2)}`
++  for (let i = 0; i < turns; i += 1) {
++    const top = y2 - h * (i + 1)
++    d += `C${x - width / 2} ${f(top + h * 0.7)} ${x + width / 2} ${f(top + h * 0.7)} ${x + width / 2} ${f(top + h * 0.5)}`
++    d += `C${x + width / 2} ${f(top + h * 0.2)} ${x - width / 2} ${f(top + h * 0.3)} ${x - width / 2} ${f(top)}`
++  }
++  return d
++}
++
++/** Quarter-ellipse meridians over a dome of radius `r`. */
++export function domeRibs(cx: number, baseY: number, r: number, count: number) {
++  const paths: string[] = [`M${cx} ${baseY - r}V${baseY}`]
++  for (let i = 1; i <= count; i += 1) {
++    const d = (r / (count + 0.6)) * i
++    paths.push(`M${cx} ${baseY - r}A${f(d)} ${r} 0 0 1 ${f(cx + d)} ${baseY}`)
++    paths.push(`M${cx} ${baseY - r}A${f(d)} ${r} 0 0 0 ${f(cx - d)} ${baseY}`)
++  }
++  return paths
++}
+diff --git a/features/landing-page/studio/skills.tsx b/features/landing-page/studio/skills.tsx
+index a024ad3..88e5182 100644
+--- a/features/landing-page/studio/skills.tsx
++++ b/features/landing-page/studio/skills.tsx
+@@ -1,76 +1,161 @@
+ 'use client'
+ 
+-import { useState } from 'react'
++import { useEffect, useRef, useState, type CSSProperties } from 'react'
+ 
+ import { cn } from '@/lib/utils'
+ 
+-import { Atom, Sun } from './doodles'
+-import { Reveal } from './reveal'
++import {
++  BackWall,
++  BuildArt,
++  DioramaDefs,
++  FrameFront,
++  MotionArt,
++  RestArt,
++  SystemsArt,
++} from './diorama/diorama-art'
++import styles from './diorama/diorama.module.css'
++import { at, atRight, u, vars } from './diorama/geometry'
+ import { SectionHead, SectionNext } from './section-head'
+ import { SKILL_GROUPS } from './studio-data'
+-import styles from './studio.module.css'
++import { useInView } from './use-in-view'
+ 
+ type StationId = 'all' | 'build' | 'motion' | 'systems' | 'rest'
+ 
+ const STATIONS: { id: StationId; label: string }[] = [
+-  { id: 'all', label: 'All machinery' },
++  { id: 'all', label: 'All Machinery' },
+   { id: 'build', label: '01. Build' },
+   { id: 'motion', label: '02. Motion' },
+   { id: 'systems', label: '03. Systems' },
+   { id: 'rest', label: '04. The rest' },
+ ]
+ 
+-// Each curve keeps its own spring: the slider moves the ball, the stiffness
+-// decides how it gets there. Same three curves the old card demonstrated.
++// Each curve keeps its own spring: the slider moves the thumb, the stiffness
++// decides how it gets there when "Play the curves" sends it somewhere new.
+ const CURVES = [
+-  { id: 'soft', label: 'Soft', stiffness: 120, damping: 26 },
+-  { id: 'snap', label: 'Snap', stiffness: 360, damping: 22 },
+-  { id: 'loose', label: 'Loose', stiffness: 62, damping: 12 },
++  { id: 'soft', label: 'Soft', stiffness: 120, damping: 26, dot: '#161727' },
++  { id: 'snap', label: 'Snap', stiffness: 360, damping: 22, dot: '#3f5fd0' },
++  { id: 'loose', label: 'Loose', stiffness: 62, damping: 12, dot: '#ee6f5a' },
+ ] as const
+ 
+ type CurveId = (typeof CURVES)[number]['id']
+ type CurveValues = Record<CurveId, number>
+ 
+ const CURVE_PRESETS: CurveValues[] = [
+-  { soft: 38, snap: 72, loose: 46 },
+-  { soft: 62, snap: 88, loose: 24 },
+-  { soft: 26, snap: 54, loose: 80 },
++  { soft: 40, snap: 90, loose: 28 },
++  { soft: 70, snap: 38, loose: 84 },
++  { soft: 92, snap: 74, loose: 98 },
+ ]
+ 
+-const RIBBONS = ['Design systems', 'Accessibility', 'Performance', 'Playwright']
++/** Where each Build tag hangs on the scaffold. The first overhangs the panel edge. */
++const TAGS = [
++  { x: 150, w: 32 },
++  { x: 197, w: 46 },
++  { x: 253, w: 51 },
++  { x: 312, w: 57 },
++  { x: 382, w: 41 },
++] as const
++
++const RIBBONS = [
++  { x: 529, y: 388, w: 41, h: 24, tone: 'hot' },
++  { x: 530, y: 419, w: 60, h: 16, tone: 'pale' },
++  { x: 530, y: 440, w: 53, h: 16, tone: 'cream' },
++  { x: 530, y: 460, w: 53, h: 17, tone: 'green' },
++] as const
++
++/** The six tools that sit on the drawer front; anything else becomes a folder. */
++const DRAWER_TOOLS = [
++  'Figma',
++  'Git',
++  'Cloudflare',
++  'PostgreSQL',
++  'Vitest',
++  'Go',
++]
++const HOT_TOOLS = new Set(['Git', 'PostgreSQL'])
++const FOLDER_X = [641, 704, 761, 819]
+ 
+ export function Skills() {
+   const [station, setStation] = useState<StationId>('all')
+   const [running, setRunning] = useState(true)
+-  const [curves, setCurves] = useState<CurveValues>(CURVE_PRESETS[0])
++  const [curves, setCurves] = useState<CurveValues>({
++    soft: 92,
++    snap: 74,
++    loose: 98,
++  })
+   const [run, setRun] = useState(0)
++  const [playing, setPlaying] = useState(false)
+   const [pressed, setPressed] = useState(false)
+-  const [ribbon, setRibbon] = useState(RIBBONS[0])
++  const [ribbon, setRibbon] = useState(0)
++
++  const stage = useRef<HTMLDivElement>(null)
++  const { ref, inView, armed } = useInView<HTMLDivElement>(0.12)
+ 
+   const build = SKILL_GROUPS.find((group) => group.id === 'build')!
+   const motionGroup = SKILL_GROUPS.find((group) => group.id === 'motion')!
+   const systems = SKILL_GROUPS.find((group) => group.id === 'systems')!
+   const also = SKILL_GROUPS.find((group) => group.id === 'also')!
+ 
++  const folders = also.skills
++    .filter((skill) => !DRAWER_TOOLS.includes(skill))
++    .slice(0, 4)
++  const tools = also.skills.filter((skill) => !folders.includes(skill))
++
++  /**
++   * Depth. The pointer nudges each layer by its own distance from the glass, so
++   * the panels slide against the frame like a real shadowbox. The numbers go
++   * straight to custom properties: no state, no re-render per mouse move.
++   */
++  useEffect(() => {
++    const el = stage.current
++    if (!el) return
++    const fine = window.matchMedia('(pointer: fine)').matches
++    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
++    if (!fine || calm) return
++
++    let frame = 0
++    const move = (event: PointerEvent) => {
++      cancelAnimationFrame(frame)
++      frame = requestAnimationFrame(() => {
++        const box = el.getBoundingClientRect()
++        const x = ((event.clientX - box.left) / box.width - 0.5) * 2
++        const y = ((event.clientY - box.top) / box.height - 0.5) * 2
++        el.style.setProperty('--px', Math.max(-1, Math.min(1, x)).toFixed(3))
++        el.style.setProperty('--py', Math.max(-1, Math.min(1, y)).toFixed(3))
++      })
++    }
++    const leave = () => {
++      el.style.setProperty('--px', '0')
++      el.style.setProperty('--py', '0')
++    }
++    el.addEventListener('pointermove', move)
++    el.addEventListener('pointerleave', leave)
++    return () => {
++      cancelAnimationFrame(frame)
++      el.removeEventListener('pointermove', move)
++      el.removeEventListener('pointerleave', leave)
++    }
++  }, [])
++
+   const playCurves = () => {
++    setPlaying(true)
++    setCurves(CURVE_PRESETS[run % CURVE_PRESETS.length])
+     setRun((value) => value + 1)
+-    setCurves(CURVE_PRESETS[(run + 1) % CURVE_PRESETS.length])
+   }
+ 
++  const lever = ((curves.soft + curves.snap + curves.loose) / 3 - 50) * -0.28
++
+   return (
+     <section
+       id="skills"
+-      className={`${styles.skills} scroll-mt-24`}
++      className={`${styles.section} scroll-mt-24`}
+       aria-labelledby="skills-title"
+     >
+-      <div className={styles.skillsWash} aria-hidden>
+-        <div className={styles.skillsGlow} />
+-      </div>
+       <div className={styles.shell}>
+         <SectionHead
+           number="04"
+           label="Skills"
+           script="in the bag"
++          onDark
+           title={
+             <span id="skills-title">
+               What I
+@@ -80,410 +165,418 @@ export function Skills() {
+           }
+           intro="A toolbox, not a scoreboard. The split below is honest about what pays the rent, what I sweat, and what keeps either from falling over."
+         />
++      </div>
+ 
+-        <div className={styles.controller}>
+-          <div className={styles.controllerTop}>
+-            <span>Automation controller</span>
+-            <button
+-              type="button"
+-              className={styles.kinetic}
+-              aria-pressed={running}
+-              aria-label="Run the machinery"
+-              onClick={() => setRunning((value) => !value)}
+-            >
+-              <span className={styles.knob} aria-hidden />
+-            </button>
+-          </div>
+-          <div className={styles.pills} role="group" aria-label="Stations">
+-            {STATIONS.map((item) => (
+-              <button
+-                key={item.id}
+-                type="button"
+-                className={styles.pill}
+-                aria-pressed={station === item.id}
+-                onClick={() => setStation(item.id)}
+-              >
+-                {item.label}
+-              </button>
+-            ))}
+-          </div>
+-        </div>
+-
++      <div className={styles.room}>
+         <div
+-          className={styles.observatory}
+-          data-station={station}
+-          data-running={running}
++          ref={ref}
++          className={styles.stageWrap}
++          data-armed={armed}
++          data-in={inView}
+         >
+-          <div className={styles.cavity}>
+-            <div className={styles.stations}>
+-              <Reveal
+-                className={cn(styles.station, styles.stationBuild)}
+-                y={20}
++          <div
++            ref={stage}
++            className={styles.stage}
++            data-station={station}
++            data-running={running}
++            style={vars({ '--lever': `${lever.toFixed(1)}deg` })}
++          >
++            <DioramaDefs />
++
++            <div className={styles.controller}>
++              <div className={styles.controllerTop}>
++                <span>Automation Controller</span>
++                <button
++                  type="button"
++                  className={styles.kinetic}
++                  aria-pressed={running}
++                  aria-label="Run the machinery"
++                  onClick={() => setRunning((value) => !value)}
++                >
++                  <span className={styles.knob} aria-hidden />
++                </button>
++              </div>
++              <div className={styles.pills} role="group" aria-label="Stations">
++                {STATIONS.map((item) => (
++                  <button
++                    key={item.id}
++                    type="button"
++                    className={styles.pill}
++                    aria-pressed={station === item.id}
++                    onClick={() => setStation(item.id)}
++                  >
++                    {item.label}
++                  </button>
++                ))}
++              </div>
++            </div>
++
++            <div className={styles.scene}>
++              <div
++                className={cn(styles.layer, styles.wall)}
++                style={vars({ '--depth': 0.15 })}
++              >
++                <BackWall />
++              </div>
++
++              {/* 04 · The rest */}
++              <div
++                className={styles.layer}
++                data-id="rest"
++                style={vars({ '--depth': 0.45, '--n': 0 })}
+               >
+-                <StationTop eyebrow={build.eyebrow} index="01 / 04" />
+-                <div className={styles.stationBody}>
+-                  <h3 className={styles.stationTitle}>{build.title}</h3>
+-                  <p className={styles.stationLine}>{build.line}</p>
++                <RestArt folderCount={folders.length} />
++                <Eyebrow
++                  x={610}
++                  y={401}
++                  text={also.eyebrow}
++                  index="04 / 04"
++                  xr={879}
++                />
++                <h3
++                  className={cn(styles.title, styles.titleInk)}
++                  style={{ ...at(610, 416), fontSize: u(26.5) }}
++                >
++                  {also.title}
++                </h3>
++                <p className={styles.srOnly}>{also.line}</p>
++
++                <div
++                  className={styles.sticky}
++                  style={{ ...at(808, 411, 80, 37), fontSize: u(6.3) }}
++                >
++                  currently poking:
++                  <br />
++                  <span>view transitions</span>
+                 </div>
+ 
+-                <div className={styles.buildScene} aria-hidden>
+-                  <span className={styles.girder} />
+-                  <span className={styles.cloudTag} data-side="left">
+-                    space atmosphere
+-                  </span>
+-                  <span className={styles.cloudTag} data-side="right">
+-                    stratosphere
+-                  </span>
++                <ul
++                  className={styles.folderLabels}
++                  aria-label="Also in the drawer"
++                >
++                  {folders.map((name, i) => (
++                    <li
++                      key={name}
++                      style={{ ...at(FOLDER_X[i], 452.5), fontSize: u(5.6) }}
++                    >
++                      {name}
++                    </li>
++                  ))}
++                </ul>
+ 
+-                  <span className={styles.domeUnit}>
+-                    <span className={styles.dome}>
+-                      <i className={styles.domeRibs} />
+-                      <i className={styles.domeSlit} />
+-                      <i className={styles.domeTicks}>
+-                        <span>- 05</span>
+-                        <span>- 2200</span>
+-                        <span>- 2004</span>
+-                      </i>
+-                    </span>
+-                    <span className={styles.domeBase}>
+-                      <span>dome-01</span>
+-                      <i />
+-                    </span>
+-                  </span>
++                <ul
++                  className={styles.drawerTools}
++                  style={{ ...at(630, 478, 255, 19), fontSize: u(7.2) }}
++                >
++                  {tools.map((tool) => (
++                    <li key={tool} data-hot={HOT_TOOLS.has(tool) || undefined}>
++                      {tool}
++                    </li>
++                  ))}
++                </ul>
++              </div>
+ 
+-                  <span className={styles.towerUnit}>
+-                    <span className={styles.atomRig}>
+-                      <Atom className={styles.atomArt} />
+-                      <span className={styles.springRow}>
+-                        <CoiledSpring className={styles.coil} />
+-                        <CoiledSpring className={styles.coil} />
+-                      </span>
+-                    </span>
+-                    <span className={styles.towerDeck}>
+-                      <i />
+-                      <i />
+-                      <i />
+-                    </span>
+-                    <span className={styles.towerLegs}>
+-                      <i />
+-                      <i />
+-                      <svg viewBox="0 0 50 30" preserveAspectRatio="none">
+-                        <line x1="1" y1="1" x2="49" y2="29" />
+-                        <line x1="49" y1="1" x2="1" y2="29" />
+-                      </svg>
+-                    </span>
+-                  </span>
+-                </div>
++              {/* 01 · Build */}
++              <div
++                className={styles.layer}
++                data-id="build"
++                style={vars({ '--depth': 0.8, '--n': 1 })}
++              >
++                <BuildArt />
++                <Eyebrow
++                  x={172}
++                  y={129}
++                  text={build.eyebrow}
++                  index="01 / 04"
++                  xr={527}
++                />
++                <h3
++                  className={cn(styles.title, styles.titleCream)}
++                  style={{ ...at(172, 148), fontSize: u(24.5) }}
++                >
++                  {build.title}
++                </h3>
++                <p className={styles.srOnly}>{build.line}</p>
++
++                <span
++                  className={styles.cloudText}
++                  style={{ ...at(159, 183), fontSize: u(4.8) }}
++                  aria-hidden
++                >
++                  space atmosphere
++                </span>
++                <span
++                  className={styles.cloudText}
++                  style={{ ...at(478, 156), fontSize: u(4.8) }}
++                  aria-hidden
++                >
++                  stratosphere
++                </span>
+ 
+-                <ul className={styles.chips}>
+-                  {build.skills.map((skill) => (
+-                    <li key={skill} className={styles.stationChip}>
++                <ul className={styles.tags} aria-label="Build tools">
++                  {build.skills.slice(0, TAGS.length).map((skill, i) => (
++                    <li
++                      key={skill}
++                      className={styles.tag}
++                      data-skill={skill}
++                      style={{
++                        ...at(TAGS[i].x, 283, TAGS[i].w, 17),
++                        fontSize: u(6.7),
++                        ...vars({ '--delay': `${i * 0.4}s` }),
++                      }}
++                    >
+                       {skill}
+                     </li>
+                   ))}
+                 </ul>
+-              </Reveal>
++              </div>
+ 
+-              <Reveal
+-                className={cn(styles.station, styles.stationMotion)}
+-                delay={0.05}
+-                y={20}
++              {/* 02 · Motion */}
++              <div
++                className={styles.layer}
++                data-id="motion"
++                style={vars({ '--depth': 0.8, '--n': 2 })}
+               >
+-                <StationTop eyebrow={motionGroup.eyebrow} index="02 / 04" />
+-                <div className={styles.stationBody}>
+-                  <h3 className={styles.stationTitle}>{motionGroup.title}</h3>
+-                  <p className={styles.stationLine}>{motionGroup.line}</p>
+-                </div>
++                <MotionArt />
++                <Eyebrow
++                  x={565}
++                  y={129}
++                  text={motionGroup.eyebrow}
++                  index="02 / 04"
++                  xr={858}
++                />
++                <h3
++                  className={cn(styles.title, styles.titleInk)}
++                  style={{ ...at(565, 146), fontSize: u(27) }}
++                >
++                  {motionGroup.title}
++                </h3>
++                <p className={styles.srOnly}>{motionGroup.line}</p>
++
++                <ul className={styles.windTags} aria-label="Motion tools">
++                  {motionGroup.skills.map((skill, i) => (
++                    <li
++                      key={skill}
++                      data-slot={i}
++                      style={{
++                        ...at(
++                          [833, 840, 588, 592][i] ?? 588,
++                          [165, 216, 343, 358][i] ?? 343,
++                        ),
++                        fontSize: u(i < 2 ? 5.6 : 5.8),
++                      }}
++                    >
++                      {skill}
++                    </li>
++                  ))}
++                </ul>
+ 
+-                <div className={styles.motionScene} aria-hidden>
+-                  <span className={styles.sunRig}>
+-                    <i className={styles.sunPulley} />
+-                    <Gear className={styles.gearTop} size={54} />
+-                    <Sun className={styles.sunArt} />
+-                    <Gear className={styles.gearSide} size={40} />
++                <div
++                  className={styles.weather}
++                  style={{ ...at(764, 237, 100, 70), fontSize: u(6.2) }}
++                >
++                  <span className={styles.weatherHead}>
++                    Weather &amp; current machine
+                   </span>
+-                </div>
+-
+-                <div className={styles.curveBox}>
+-                  <div className={styles.curveHead}>
+-                    <span>Weather &amp; current</span>
+-                    <span>k / d</span>
+-                  </div>
+-                  {CURVES.map((curve) => (
+-                    <label key={curve.id} className={styles.curveRow}>
++                  {CURVES.map((curve, i) => (
++                    <label
++                      key={curve.id}
++                      className={styles.curveRow}
++                      data-curve={curve.id}
++                      data-playing={playing || undefined}
++                      style={{
++                        top: u(25.5 + i * 18.5),
++                        ...vars({ '--pct': curves[curve.id] }),
++                      }}
++                    >
+                       <span className={styles.curveLabel}>{curve.label}</span>
++                      <i
++                        className={styles.curveDot}
++                        style={{ background: curve.dot }}
++                        aria-hidden
++                      />
+                       <input
+                         type="range"
+-                        min={8}
++                        min={0}
+                         max={100}
+                         value={curves[curve.id]}
+                         className={styles.curveInput}
+                         aria-label={`${curve.label} curve`}
+-                        onChange={(event) =>
++                        aria-valuetext={`${curve.label}: stiffness ${curve.stiffness}, damping ${curve.damping}`}
++                        onPointerDown={() => setPlaying(false)}
++                        onChange={(event) => {
++                          setPlaying(false)
+                           setCurves((values) => ({
+                             ...values,
+                             [curve.id]: Number(event.target.value),
+                           }))
+-                        }
+-                        style={
+-                          {
+-                            '--pct': `${curves[curve.id]}%`,
+-                          } as React.CSSProperties
+-                        }
++                        }}
+                       />
+-                      <span className={styles.curveValue}>
+-                        {curve.stiffness}/{curve.damping}
++                      <span className={styles.srOnly}>
++                        {curve.stiffness} / {curve.damping}
+                       </span>
+                     </label>
+                   ))}
+-                  <span className={styles.curvePedestal}>
+-                    <button
+-                      type="button"
+-                      className={styles.curvePlay}
+-                      onClick={playCurves}
+-                    >
+-                      {run > 0 ? 'Play again' : 'Play the curves'}{' '}
+-                      <span aria-hidden>→</span>
+-                    </button>
+-                    <i aria-hidden />
+-                  </span>
+-                  <ul className={styles.chips}>
+-                    {motionGroup.skills.map((skill) => (
+-                      <li key={skill} className={styles.stationChip}>
+-                        {skill}
+-                      </li>
+-                    ))}
+-                  </ul>
+                 </div>
+-              </Reveal>
+ 
+-              <Reveal
+-                className={cn(styles.station, styles.stationSystems)}
+-                delay={0.08}
+-                y={20}
++                <button
++                  type="button"
++                  className={styles.play}
++                  style={{ ...at(742, 342, 86, 22), fontSize: u(6.6) }}
++                  onClick={playCurves}
++                >
++                  {run > 0 ? 'Play again' : 'Play the curves'}{' '}
++                  <span aria-hidden>→</span>
++                </button>
++              </div>
++
++              {/* 03 · Systems */}
++              <div
++                className={styles.layer}
++                data-id="systems"
++                style={vars({ '--depth': 1.35, '--n': 3 })}
+               >
+-                <span className={styles.crenel} aria-hidden>
+-                  <i />
+-                  <i />
+-                  <i />
+-                  <i />
++                <SystemsArt />
++                <Eyebrow
++                  x={357}
++                  y={334}
++                  text={systems.eyebrow}
++                  index="03 / 04"
++                  xr={563}
++                />
++                <h3
++                  className={cn(styles.title, styles.titleInk)}
++                  style={{ ...at(357, 348), fontSize: u(27) }}
++                >
++                  {systems.title}
++                </h3>
++                <p className={styles.srOnly}>{systems.line}</p>
++
++                <span
++                  className={styles.deck}
++                  style={{ ...at(357, 388, 116, 17), fontSize: u(6.8) }}
++                >
++                  Barometric Control Deck
+                 </span>
+-                <StationTop eyebrow={systems.eyebrow} index="03 / 04" />
+-                <div className={styles.stationBody}>
+-                  <h3 className={styles.stationTitle}>{systems.title}</h3>
+-                  <p className={styles.stationLine}>{systems.line}</p>
+-                </div>
+-
+-                <div className={styles.systemsScene}>
+-                  <span className={styles.belt} aria-hidden />
+-                  <span className={styles.gauges} aria-hidden>
+-                    <span className={styles.gauge} data-tilt="left">
+-                      <i className={styles.dial}>
+-                        <b />
+-                      </i>
+-                      <em>04 / 04</em>
+-                    </span>
+-                    <span className={styles.gauge} data-tilt="right">
+-                      <i className={styles.dial}>
+-                        <b />
+-                      </i>
+-                      <em>ok</em>
+-                    </span>
+-                  </span>
+ 
+-                  <div className={styles.console}>
+-                    <span className={styles.plungerRow}>
+-                      <span className={styles.plunger}>
+-                        <button type="button" className={styles.consoleBtn}>
+-                          Hover me
+-                        </button>
+-                        <CoiledSpring className={styles.plungerCoil} />
+-                      </span>
+-                      <span className={styles.plunger}>
+-                        <button
+-                          type="button"
+-                          className={styles.consoleBtn}
+-                          aria-pressed={pressed}
+-                          onClick={() => setPressed((value) => !value)}
+-                        >
+-                          {pressed ? 'Pressed! ✓' : 'Press me'}
+-                        </button>
+-                        <CoiledSpring className={styles.plungerCoil} />
+-                      </span>
+-                    </span>
+-                    <span className={styles.arch}>
+-                      <i />
+-                    </span>
+-                    <span className={styles.consoleNote}>
+-                      hover · focus · active · disabled
+-                    </span>
+-                  </div>
+-
+-                  <ul className={styles.ribbons}>
+-                    {RIBBONS.map((item) => (
+-                      <li key={item}>
+-                        <button
+-                          type="button"
+-                          className={styles.ribbon}
+-                          aria-pressed={ribbon === item}
+-                          onClick={() => setRibbon(item)}
+-                        >
+-                          {item}
+-                        </button>
+-                      </li>
+-                    ))}
+-                  </ul>
+-                </div>
+-              </Reveal>
++                <span
++                  className={styles.gateTitle}
++                  style={{ ...at(367, 451), fontSize: u(15) }}
++                  aria-hidden
++                >
++                  Systems
++                </span>
+ 
+-              <Reveal
+-                className={cn(styles.station, styles.stationAlso)}
+-                delay={0.1}
+-                y={20}
+-              >
+-                <span className={styles.corrugate} aria-hidden />
+-                <StationTop eyebrow={also.eyebrow} index="04 / 04" />
+-                <div className={styles.stationBody}>
+-                  <h3 className={styles.stationTitle}>{also.title}</h3>
+-                  <p className={styles.stationLine}>{also.line}</p>
++                <div
++                  className={styles.consoleRow}
++                  style={at(356, 409, 116, 31)}
++                >
++                  <button
++                    type="button"
++                    className={cn(styles.consoleBtn, styles.hoverBtn)}
++                    style={{ fontSize: u(7) }}
++                  >
++                    Hover me
++                  </button>
++                  <button
++                    type="button"
++                    className={cn(styles.consoleBtn, styles.pressBtn)}
++                    style={{ fontSize: u(7) }}
++                    aria-pressed={pressed}
++                    onClick={() => setPressed((value) => !value)}
++                  >
++                    Press me
++                    <svg viewBox="0 0 10 8" aria-hidden className={styles.tick}>
++                      <path
++                        d="M1 4.2L3.8 7L9 1"
++                        fill="none"
++                        stroke="currentColor"
++                        strokeWidth="1.8"
++                        strokeLinecap="round"
++                        strokeLinejoin="round"
++                      />
++                    </svg>
++                  </button>
+                 </div>
+ 
+-                <div className={styles.drawerWrap}>
+-                  <span className={styles.drawerTabs} aria-hidden>
+-                    <i>design</i>
+-                    <i>infra</i>
+-                    <i>data</i>
+-                    <i>test</i>
+-                  </span>
+-                  <div className={styles.drawer}>
+-                    <span className={styles.drawerHead}>Tool drawer</span>
+-                    <div className={styles.drawerSlot}>
+-                      <div className={styles.tools}>
+-                        {also.skills.map((skill) => (
+-                          <span
+-                            key={skill}
+-                            className={styles.tool}
+-                            data-figma={skill === 'Figma' ? '' : undefined}
+-                          >
+-                            {skill}
+-                          </span>
+-                        ))}
+-                      </div>
+-                    </div>
+-                  </div>
+-                </div>
++                <ul className={styles.ribbons} aria-label="Systems practices">
++                  {systems.skills.slice(0, RIBBONS.length).map((item, i) => (
++                    <li
++                      key={item}
++                      style={{
++                        ...at(
++                          RIBBONS[i].x,
++                          RIBBONS[i].y,
++                          RIBBONS[i].w,
++                          RIBBONS[i].h,
++                        ),
++                        ...vars({ '--delay': `${i * 0.45}s` }),
++                      }}
++                    >
++                      <button
++                        type="button"
++                        className={styles.ribbon}
++                        data-tone={RIBBONS[i].tone}
++                        aria-pressed={ribbon === i}
++                        onClick={() => setRibbon(i)}
++                        style={{ fontSize: u(6.6) }}
++                      >
++                        {item}
++                      </button>
++                    </li>
++                  ))}
++                </ul>
++              </div>
+ 
+-                <span className={styles.status}>
+-                  currently poking: <span>view transitions</span>
+-                </span>
+-              </Reveal>
++              <div
++                className={cn(styles.layer, styles.front)}
++                style={vars({ '--depth': 0 })}
++              >
++                <FrameFront />
++              </div>
+             </div>
+           </div>
+         </div>
++      </div>
+ 
+-        <div className={styles.skillNote}>
++      <div className={styles.shell}>
++        <div className={styles.note}>
+           <span>No percentages. Just what I reach for.</span>
+           <span>Last audited · October 2026</span>
+         </div>
+-
+-        <SectionNext href="contact" label="Contact" note="the last page" />
++        <SectionNext
++          href="contact"
++          label="Contact"
++          note="the last page"
++          onDark
++        />
+       </div>
+     </section>
+   )
+ }
+ 
+-function StationTop({ eyebrow, index }: { eyebrow: string; index: string }) {
++function Eyebrow({
++  x,
++  y,
++  text,
++  index,
++  xr,
++}: {
++  x: number
++  y: number
++  text: string
++  index: string
++  xr: number
++}) {
++  const size = { fontSize: u(7.4) } as CSSProperties
+   return (
+-    <div className={styles.stationTop}>
+-      <span>{eyebrow}</span>
+-      <span>{index}</span>
+-    </div>
+-  )
+-}
+-
+-/** Paper coil, drawn twice: ink outline under a light highlight stroke. */
+-function CoiledSpring({ className }: { className?: string }) {
+-  return (
+-    <svg viewBox="0 0 24 44" fill="none" className={className} aria-hidden>
+-      <rect
+-        x="2"
+-        y="38"
+-        width="20"
+-        height="5"
+-        rx="2"
+-        fill="currentColor"
+-        stroke="var(--ink)"
+-        strokeWidth="2"
+-      />
+-      <path
+-        d="M4 37C4 32 20 32 20 27C20 22 4 22 4 17C4 12 20 12 20 7C20 4 6 4 6 2"
+-        stroke="var(--ink)"
+-        strokeWidth="5"
+-        strokeLinecap="round"
+-      />
+-      <path
+-        d="M4 37C4 32 20 32 20 27C20 22 4 22 4 17C4 12 20 12 20 7C20 4 6 4 6 2"
+-        stroke="currentColor"
+-        strokeWidth="2"
+-        strokeLinecap="round"
+-      />
+-    </svg>
+-  )
+-}
+-
+-/** Corrugated cardboard gear — the machines' joints. */
+-function Gear({ size = 60, className }: { size?: number; className?: string }) {
+-  const teeth = 12
+-  const points = Array.from({ length: teeth * 2 }, (_, i) => {
+-    const angle = (i * Math.PI) / teeth
+-    const radius = i % 2 === 0 ? 46 : 36
+-    const x = 50 + radius * Math.cos(angle)
+-    const y = 50 + radius * Math.sin(angle)
+-    return `${x.toFixed(2)},${y.toFixed(2)}`
+-  }).join(' ')
+-
+-  return (
+-    <svg
+-      viewBox="0 0 100 100"
+-      width={size}
+-      height={size}
+-      className={className}
+-      aria-hidden
+-    >
+-      <polygon
+-        points={points}
+-        fill="#c89d66"
+-        stroke="var(--ink)"
+-        strokeWidth="3.5"
+-        strokeLinejoin="round"
+-      />
+-      <circle
+-        cx="50"
+-        cy="50"
+-        r="24"
+-        fill="#a88149"
+-        stroke="var(--ink)"
+-        strokeWidth="3"
+-      />
+-      {[0, 90, 180, 270].map((deg) => (
+-        <circle
+-          key={deg}
+-          cx={50 + 14 * Math.cos((deg * Math.PI) / 180)}
+-          cy={50 + 14 * Math.sin((deg * Math.PI) / 180)}
+-          r="4.5"
+-          fill="#27201c"
+-          stroke="var(--ink)"
+-          strokeWidth="2"
+-        />
+-      ))}
+-      <circle
+-        cx="50"
+-        cy="50"
+-        r="6"
+-        fill="#f5f2eb"
+-        stroke="var(--ink)"
+-        strokeWidth="2.5"
+-      />
+-    </svg>
++    <>
++      <span className={styles.eyebrow} style={{ ...at(x, y), ...size }}>
++        {text}
++      </span>
++      <span className={styles.eyebrow} style={{ ...atRight(xr, y), ...size }}>
++        {index}
++      </span>
++    </>
+   )
+ }
+diff --git a/features/landing-page/studio/studio-data.ts b/features/landing-page/studio/studio-data.ts
+index 69aaa52..6245701 100644
+--- a/features/landing-page/studio/studio-data.ts
++++ b/features/landing-page/studio/studio-data.ts
+@@ -183,7 +183,7 @@ export const SKILL_GROUPS: readonly SkillGroup[] = [
+   },
+   {
+     id: 'also',
+-    eyebrow: 'Also in the bag',
++    eyebrow: 'Subterranean bedrock',
+     title: 'The rest',
+     line: 'Enough of everything else to be useful in a room: design files, a database, a deploy, a bug report that actually reproduces.',
+     skills: [
+diff --git a/features/landing-page/studio/studio.module.css b/features/landing-page/studio/studio.module.css
+index 89daedb..2a6d1f3 100644
+--- a/features/landing-page/studio/studio.module.css
++++ b/features/landing-page/studio/studio.module.css
+@@ -53,9 +53,6 @@
+ 
+ /* Inside the observatory the station's own ink is the only reliable contrast:
+    the floors alternate cobalt, butter, pink, and cream. */
+-.observatory :focus-visible {
+-  outline-color: currentColor;
+-}
+ 
+ /* A fixed, non-interactive paper tooth. Static paint, never inside a scroller. */
+ .grain::after {
+@@ -1657,1446 +1654,190 @@
+ 
+ /* ── Skills ────────────────────────────────────────────────────────────── */
+ 
+-.skills {
+-  position: relative;
+-  padding-block: clamp(5.5rem, 11vw, 9rem);
+-  background: var(--paper-hi);
+-}
+-
+ /* The wash carries the clipping so the sticky controller can stick. */
+-.skillsWash {
+-  position: absolute;
+-  inset: 0;
+-  overflow: clip;
+-  pointer-events: none;
+-}
+-
+-.skillsGlow {
+-  position: absolute;
+-  left: -12rem;
+-  top: 18%;
+-  width: 30rem;
+-  aspect-ratio: 1;
+-  border-radius: 50%;
+-  background: radial-gradient(circle, rgb(255 210 63 / 0.32), transparent 68%);
+-}
+ 
+ /* Automation controller: a cardstock tab that hangs over the shadowbox. */
+-.controller {
+-  position: sticky;
+-  top: 4.6rem;
+-  z-index: 30;
+-  display: grid;
+-  gap: 0.5rem;
+-  margin-top: clamp(2.2rem, 4.6vw, 3rem);
+-  padding: 0.55rem 0.7rem 0.5rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 12px 12px 4px 4px;
+-  background: var(--paper-hi);
+-  box-shadow:
+-    0 12px 26px -16px rgb(25 26 46 / 0.6),
+-    4px 5px 0 var(--ink);
+-}
+-
+-.controllerTop {
+-  display: flex;
+-  align-items: center;
+-  justify-content: space-between;
+-  gap: 1rem;
+-  padding-bottom: 0.4rem;
+-  border-bottom: 1.5px solid rgb(25 26 46 / 0.18);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 9px;
+-  letter-spacing: 0.16em;
+-  text-transform: uppercase;
+-}
+-
+-.kinetic {
+-  display: inline-flex;
+-  align-items: center;
+-  width: 2.5rem;
+-  height: 1.3rem;
+-  padding: 0.14rem;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 999px;
+-  background: var(--paper-lo);
+-  box-shadow: inset 0 1px 2px rgb(25 26 46 / 0.3);
+-  transition: background 0.2s var(--ease-out);
+-}
+ 
+-.kinetic[aria-pressed='true'] {
+-  background: #2b2b33;
+-}
++/* ── The shadowbox ────────────────────────────────────────────────────── */
+ 
+-.knob {
+-  width: 0.95rem;
+-  height: 0.95rem;
+-  margin-left: 0;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 50%;
+-  background: var(--paper-hi);
+-  transition:
+-    translate 0.22s var(--ease-out),
+-    background 0.22s var(--ease-out);
+-}
++/* Mitered corner joints of the wooden frame. */
+ 
+-.kinetic[aria-pressed='true'] .knob {
+-  translate: 1.15rem 0;
+-  background: var(--butter);
+-}
++/* ── Chips: paper badges pinned on the floor ──────────────────────────── */
+ 
+-.pills {
+-  display: flex;
+-  flex-wrap: wrap;
+-  gap: 0.3rem;
+-}
++/* ── 01 Build: cobalt stratosphere observatory ────────────────────────── */
+ 
+-.pill {
+-  padding: 0.24rem 0.6rem;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 999px;
+-  background: var(--paper);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 9px;
+-  font-weight: 600;
+-  letter-spacing: 0.06em;
+-  text-transform: uppercase;
+-  color: var(--ink);
+-  box-shadow: 1.5px 2px 0 rgb(25 26 46 / 0.35);
+-  transition:
+-    translate 0.16s var(--ease-out),
+-    box-shadow 0.16s var(--ease-out),
+-    background 0.16s var(--ease-out);
+-}
++/* Two separate posts, not a table: the legs stand off the deck edges. */
+ 
+-.pill:hover {
+-  background: rgb(255 210 63 / 0.45);
+-}
++/* Paper conveyor that ties the instruments together. */
+ 
+-.pill[aria-pressed='true'] {
+-  translate: 0 -1px;
+-  background: var(--ink);
+-  color: var(--paper-hi);
+-  box-shadow: 2px 3px 0 rgb(25 26 46 / 0.45);
+-}
++/* A lens in the dome, so it reads as an observatory and not a bubble. */
+ 
+-/* ── The shadowbox ────────────────────────────────────────────────────── */
++/* ── 02 Motion: butter solar engine ───────────────────────────────────── */
+ 
+-.observatory {
+-  position: relative;
+-  margin-top: 1rem;
+-  padding: clamp(0.55rem, 1.2vw, 1rem);
+-  border: 3px solid var(--ink);
+-  border-radius: 14px;
+-  background: linear-gradient(
+-    158deg,
+-    #a57b4f,
+-    #7f5c39 40%,
+-    #6b4a2c 74%,
+-    #8f6c45
+-  );
+-  box-shadow:
+-    0 30px 54px -24px rgb(18 10 2 / 0.75),
+-    0 6px 0 #3a2818,
+-    inset 0 1px 0 rgb(255 255 255 / 0.28),
+-    inset 0 -3px 8px rgb(0 0 0 / 0.35);
+-}
++/* ── 03 Systems: pink barometric deck ─────────────────────────────────── */
+ 
+-/* Mitered corner joints of the wooden frame. */
+-.observatory::before,
+-.observatory::after {
+-  content: '';
++/* The paper shelf every instrument stands on. */
++.deckShelf {
+   position: absolute;
+-  top: 0.2rem;
+-  width: 1.1rem;
+-  height: 1.1rem;
+-  border-bottom: 2px solid rgb(0 0 0 / 0.32);
+-  border-right: 2px solid rgb(0 0 0 / 0.32);
+-  pointer-events: none;
++  inset: auto 0 0 0;
++  height: 0.42rem;
++  border: 2px solid var(--ink);
++  border-radius: 2px;
++  background: repeating-linear-gradient(90deg, #bfa37c 0 5px, #9a7d55 5px 10px);
++  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
+ }
+ 
+-.observatory::before {
+-  left: 0.2rem;
+-  transform: rotate(45deg);
+-}
++/* ── 04 The rest: cardboard bedrock drawer ────────────────────────────── */
+ 
+-.observatory::after {
+-  right: 0.2rem;
+-  transform: rotate(-45deg);
+-}
++/* ── Station isolation ────────────────────────────────────────────────── */
+ 
+-.cavity {
+-  border: 3px solid var(--ink);
+-  border-radius: 9px;
+-  padding: clamp(0.45rem, 1vw, 0.75rem);
+-  background: #2a211a;
+-  box-shadow:
+-    inset 0 18px 36px rgb(0 0 0 / 0.82),
+-    inset 0 -2px 0 rgb(255 255 255 / 0.07);
+-  overflow: hidden;
++@media (min-width: 1024px) {
++  /* Floors you did not open keep only their plate and their scenery. */
+ }
+ 
+-.stations {
+-  display: grid;
+-  grid-template-columns: repeat(12, minmax(0, 1fr));
+-  gap: clamp(0.45rem, 0.8vw, 0.7rem);
+-  align-items: stretch;
+-}
++/* ── The tower on narrow screens ──────────────────────────────────────── */
+ 
+-.station {
+-  position: relative;
+-  display: flex;
+-  flex-direction: column;
+-  gap: 0.4rem;
+-  padding: 0.75rem 0.8rem 0.85rem;
+-  border: 2.5px solid var(--ink);
+-  border-radius: 10px;
+-  background: var(--paper-hi);
+-  color: var(--ink);
+-  box-shadow: 5px 6px 0 rgb(16 14 12 / 0.6);
+-  overflow: hidden;
++@media (max-width: 1023px) {
++  /* Brass pipes bolting one floor to the next. */
+ }
+ 
+-.stationBuild {
+-  grid-column: span 7;
+-  rotate: -0.35deg;
+-  color: #eef3ff;
+-  background-color: #3a4fd0;
+-  background-image: linear-gradient(
+-      to right,
+-      rgb(255 255 255 / 0.12) 1px,
+-      transparent 1px
+-    ),
+-    linear-gradient(to bottom, rgb(255 255 255 / 0.12) 1px, transparent 1px);
+-  background-size: 34px 34px;
+-}
++/* ── Machinery: the only looping motion here ──────────────────────────── */
+ 
+-.stationMotion {
+-  grid-column: span 5;
+-  rotate: 0.45deg;
+-  background-color: var(--butter);
++@keyframes skillsSpin {
++  to {
++    rotate: 360deg;
++  }
+ }
+ 
+-.stationSystems {
+-  grid-column: span 7;
+-  z-index: 3;
+-  margin-top: -1.3rem;
+-  rotate: -0.3deg;
+-  background-color: #f7b0d4;
++@keyframes skillsDrift {
++  50% {
++    translate: 0.35rem -0.15rem;
++  }
+ }
+ 
+-.stationAlso {
+-  grid-column: span 5;
+-  z-index: 3;
+-  margin-top: 0.4rem;
+-  rotate: 0.5deg;
+-  background-color: #ddd3c2;
+-}
++/* ── Contact ────────────────────────────────────────────────────────────── */
+ 
+-.stationTop {
+-  display: flex;
+-  align-items: baseline;
+-  justify-content: space-between;
+-  gap: 1rem;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 8px;
+-  letter-spacing: 0.16em;
+-  text-transform: uppercase;
+-  opacity: 0.78;
++.contact {
++  position: relative;
++  padding-block: clamp(5.5rem, 11vw, 9rem);
++  overflow: clip;
+ }
+ 
+-.stationBody {
++.contactGrid {
+   display: grid;
+-  gap: 0.2rem;
++  gap: clamp(2.5rem, 6vw, 4.5rem);
++  margin-top: clamp(2.6rem, 6vw, 4rem);
++  align-items: center;
+ }
+ 
+-.stationTitle {
+-  font-family: var(--font-syne), sans-serif;
+-  font-size: clamp(1.65rem, 3vw, 2.5rem);
+-  font-weight: 800;
+-  line-height: 0.92;
+-  letter-spacing: 0.005em;
+-  text-transform: uppercase;
+-  color: var(--ink);
+-  text-shadow:
+-    1.5px 1.5px 0 #fff,
+-    3px 3px 0 rgb(25 26 46 / 0.9);
++@media (min-width: 1024px) {
++  .contactGrid {
++    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
++  }
+ }
+ 
+-.stationBuild .stationTitle {
+-  color: var(--paper-hi);
+-  text-shadow:
+-    2px 2px 0 var(--ink),
+-    5px 5px 0 rgb(0 0 0 / 0.35);
++.contactLead {
++  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
++  font-size: clamp(1.65rem, 2.8vw, 2.5rem);
++  font-weight: 750;
++  line-height: 1.04;
++  letter-spacing: -0.045em;
++  text-wrap: balance;
+ }
+ 
+-.stationLine {
+-  max-width: 36ch;
+-  font-size: 11px;
+-  line-height: 1.5;
+-  opacity: 0.92;
++.contactLead em {
++  font-style: normal;
++  color: var(--cobalt);
+ }
+ 
+-.stationBuild .stationLine {
+-  color: #d8e2ff;
++.contactBody {
++  max-width: 46ch;
++  margin-top: 1.2rem;
++  font-size: 0.98rem;
++  line-height: 1.7;
++  color: var(--muted);
++  text-wrap: pretty;
+ }
+ 
+-/* ── Chips: paper badges pinned on the floor ──────────────────────────── */
+-
+-.chips {
++.contactActions {
+   display: flex;
+   flex-wrap: wrap;
+-  gap: 0.28rem;
+-  margin-top: 0.55rem;
+-  list-style: none;
++  align-items: center;
++  gap: 0.8rem 1rem;
++  margin-top: 1.8rem;
+ }
+ 
+-.stationChip {
+-  padding: 0.14rem 0.48rem;
+-  border: 2px solid var(--ink);
++.contactEmail {
++  display: inline-flex;
++  align-items: center;
++  gap: 0.5rem;
++  min-height: 3rem;
++  padding: 0.7rem 1.1rem;
++  border: 1.5px solid var(--ink);
+   border-radius: 999px;
+-  background: var(--paper-hi);
++  background: var(--butter);
+   color: var(--ink);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 8px;
+-  font-weight: 600;
+-  letter-spacing: 0.05em;
+-  text-transform: uppercase;
+-  box-shadow: 1.5px 2px 0 rgb(0 0 0 / 0.35);
++  font-size: 0.9rem;
++  font-weight: 650;
++  box-shadow: 4px 4px 0 var(--ink);
++  transition:
++    transform 0.18s var(--ease-out),
++    box-shadow 0.18s var(--ease-out);
+ }
+ 
+-.stationChip:nth-child(3n + 2) {
+-  rotate: -1.4deg;
++.contactEmail:hover {
++  transform: translate(-2px, -2px);
++  box-shadow: 6px 6px 0 var(--ink);
+ }
+ 
+-.stationChip:nth-child(3n) {
+-  rotate: 1.2deg;
++.contactEmail:active {
++  transform: translate(2px, 2px);
++  box-shadow: 1px 1px 0 var(--ink);
+ }
+ 
+-/* ── 01 Build: cobalt stratosphere observatory ────────────────────────── */
+-
+-.cloudTag {
+-  position: absolute;
+-  z-index: 2;
+-  padding: 0.12rem 0.42rem;
+-  border: 2px solid var(--ink);
++.copyButton {
++  min-height: 2.75rem;
++  padding: 0.55rem 0.95rem;
++  border: 1.5px solid var(--ink);
+   border-radius: 999px;
+-  background: #6698ec;
++  background: transparent;
++  color: var(--ink);
+   font-family: var(--font-geist-mono), monospace;
+-  font-size: 5px;
++  font-size: 9px;
+   letter-spacing: 0.12em;
+   text-transform: uppercase;
+-  color: #f2f6ff;
+-  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.45);
++  transition:
++    background-color 0.18s ease,
++    transform 0.18s var(--ease-out);
+ }
+ 
+-.girder {
+-  position: absolute;
+-  left: 44%;
+-  bottom: 36%;
+-  z-index: 1;
+-  width: 16%;
+-  height: 0.5rem;
+-  border: 2px solid var(--ink);
+-  background: repeating-linear-gradient(-45deg, #2f45b4 0 4px, #22337f 4px 8px);
+-  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.45);
++.copyButton:hover {
++  background: var(--paper-hi);
+ }
+ 
+-.cloudTag[data-side='left'] {
+-  top: 0.1rem;
+-  left: 0;
+-  rotate: -2deg;
+-  animation: skillsDrift 9s ease-in-out infinite;
++.copyButton:active {
++  transform: scale(0.97);
+ }
+ 
+-.cloudTag[data-side='right'] {
+-  top: 0.9rem;
+-  right: 0;
+-  rotate: 2deg;
+-  border-radius: 9px;
+-  background: #4f7fe0;
+-  animation: skillsDrift 11s ease-in-out infinite reverse;
++.copyButton[data-copied='true'] {
++  background: var(--mint);
+ }
+ 
+-.buildScene {
+-  position: relative;
+-  display: flex;
+-  flex: 1 1 auto;
+-  align-items: stretch;
+-  justify-content: space-between;
+-  gap: 0.6rem;
+-  min-height: 8.6rem;
+-  margin-top: 0.55rem;
++.contactNote {
++  margin-top: 1rem;
++  font-family: var(--font-geist-mono), monospace;
++  font-size: 9px;
++  letter-spacing: 0.12em;
++  text-transform: uppercase;
++  color: var(--muted);
+ }
+ 
+-.domeUnit {
+-  display: flex;
+-  flex-direction: column;
+-  align-items: center;
+-  align-self: stretch;
+-  width: 56%;
++.contactList {
++  margin-top: 1.8rem;
++  border-top: 1px solid var(--line);
+ }
+ 
+-.dome {
+-  position: relative;
+-  display: flex;
+-  justify-content: center;
+-  flex: 1 1 auto;
+-  width: 100%;
+-  min-height: 5.2rem;
+-  border: 2.5px solid var(--ink);
+-  border-bottom: 0;
+-  border-radius: 999px 999px 0 0;
+-  background: linear-gradient(180deg, #6079ee, #3348c4);
+-  box-shadow: inset 0 -7px 0 rgb(0 0 0 / 0.18);
+-  overflow: hidden;
+-}
+-
+-.domeRibs {
+-  position: absolute;
+-  inset: 0 auto 0 50%;
+-  width: 62%;
+-  translate: -50% 0;
+-  border-inline: 2px solid rgb(25 26 46 / 0.5);
+-  border-radius: 999px 999px 0 0;
+-}
+-
+-.domeSlit {
+-  position: absolute;
+-  top: 0.35rem;
+-  width: 1rem;
+-  height: 76%;
+-  border: 2px solid var(--ink);
+-  border-radius: 999px 999px 0 0;
+-  background: #16204a;
+-}
+-
+-.domeTicks {
+-  position: absolute;
+-  right: 0.4rem;
+-  top: 0.6rem;
+-  display: grid;
+-  gap: 0.28rem;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 5px;
+-  font-style: normal;
+-  letter-spacing: 0.08em;
+-  color: #cfe0ff;
+-}
+-
+-.domeBase {
+-  display: flex;
+-  align-items: center;
+-  justify-content: space-between;
+-  gap: 0.4rem;
+-  width: 100%;
+-  padding: 0.16rem 0.4rem;
+-  border: 2.5px solid var(--ink);
+-  border-radius: 3px;
+-  background: #1e3a8a;
+-  box-shadow: 3px 3px 0 rgb(0 0 0 / 0.4);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 5px;
+-  letter-spacing: 0.14em;
+-  text-transform: uppercase;
+-  color: #cfe0ff;
+-}
+-
+-.domeBase i {
+-  width: 0.34rem;
+-  height: 0.34rem;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 50%;
+-  background: #5ce1a0;
+-}
+-
+-.towerUnit {
+-  display: flex;
+-  flex-direction: column;
+-  align-items: center;
+-  justify-content: flex-end;
+-  align-self: stretch;
+-  width: 40%;
+-}
+-
+-.atomRig {
+-  display: flex;
+-  flex-direction: column;
+-  align-items: center;
+-}
+-
+-.atomArt {
+-  width: 3.3rem;
+-  height: 3.3rem;
+-  color: #9ae6ff;
+-  animation: skillsSpin 18s linear infinite;
+-}
+-
+-.springRow {
+-  display: flex;
+-  gap: 1.9rem;
+-  margin-top: -0.1rem;
+-  color: #fdf8ea;
+-  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.45));
+-}
+-
+-.coil {
+-  width: 0.62rem;
+-  height: 1.35rem;
+-}
+-
+-.towerUnit::after {
+-  content: '';
+-  display: block;
+-  width: 92%;
+-  height: 0.3rem;
+-  margin-top: 0.1rem;
+-  border: 2.5px solid var(--ink);
+-  border-radius: 2px;
+-  background: #1e3a8a;
+-  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.4);
+-}
+-
+-.towerDeck {
+-  display: grid;
+-  grid-template-columns: repeat(3, 1fr);
+-  gap: 0.14rem;
+-  width: 100%;
+-  margin-top: -0.05rem;
+-  padding: 0.16rem;
+-  border: 2.5px solid var(--ink);
+-  border-radius: 3px 3px 0 0;
+-  background: #3a59cf;
+-}
+-
+-.towerDeck i {
+-  height: 0.34rem;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 1px;
+-  background: #16204a;
+-}
+-
+-.towerLegs {
+-  position: relative;
+-  display: block;
+-  flex: 1 1 auto;
+-  width: 82%;
+-  min-height: 2.2rem;
+-  background: rgb(30 58 138 / 0.45);
+-}
+-
+-/* Two separate posts, not a table: the legs stand off the deck edges. */
+-.towerLegs i {
+-  position: absolute;
+-  top: 0;
+-  bottom: 0;
+-  width: 0.28rem;
+-  border: 2px solid var(--ink);
+-  background: #1e3a8a;
+-}
+-
+-.towerLegs i:nth-child(1) {
+-  left: 0;
+-}
+-
+-.towerLegs i:nth-child(2) {
+-  right: 0;
+-}
+-
+-.towerLegs svg {
+-  position: absolute;
+-  inset: 0.15rem 0.2rem;
+-  width: calc(100% - 0.4rem);
+-  height: calc(100% - 0.3rem);
+-  stroke: var(--ink);
+-  stroke-width: 2;
+-}
+-
+-/* Paper conveyor that ties the instruments together. */
+-.belt {
+-  position: absolute;
+-  inset: 62% 0 auto 0;
+-  height: 0.55rem;
+-  border-block: 2px solid var(--ink);
+-  background: repeating-linear-gradient(
+-    -55deg,
+-    #f7d3e6 0 5px,
+-    #e8a8c9 5px 10px
+-  );
+-}
+-
+-.belt::before,
+-.belt::after {
+-  content: '';
+-  position: absolute;
+-  top: 50%;
+-  width: 0.5rem;
+-  height: 0.5rem;
+-  translate: 0 -50%;
+-  border: 2px solid var(--ink);
+-  border-radius: 999px;
+-  background: #c88b4a;
+-}
+-
+-.belt::before {
+-  left: -0.2rem;
+-}
+-
+-.belt::after {
+-  right: -0.2rem;
+-}
+-
+-/* A lens in the dome, so it reads as an observatory and not a bubble. */
+-.domeSlit::after {
+-  content: '';
+-  position: absolute;
+-  inset: 12% 18% auto;
+-  height: 0.5rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 999px;
+-  background: #8fd8ff;
+-}
+-
+-/* ── 02 Motion: butter solar engine ───────────────────────────────────── */
+-
+-.motionScene {
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  min-height: 7.6rem;
+-  margin-top: 0.4rem;
+-}
+-
+-.sunRig {
+-  position: relative;
+-  display: grid;
+-  place-items: center;
+-  width: 7.6rem;
+-  height: 7.6rem;
+-}
+-
+-.sunPulley {
+-  position: absolute;
+-  inset: 0;
+-  border: 2.5px solid var(--ink);
+-  border-radius: 50%;
+-  background: #dfc38d;
+-  box-shadow:
+-    inset 0 -7px 0 rgb(0 0 0 / 0.12),
+-    3px 4px 0 rgb(0 0 0 / 0.35);
+-}
+-
+-.sunArt {
+-  position: relative;
+-  width: 5.1rem;
+-  height: 5.1rem;
+-  color: var(--tangerine);
+-  animation: skillsSpin 24s linear infinite reverse;
+-}
+-
+-.gearTop {
+-  position: absolute;
+-  top: -0.5rem;
+-  right: -0.6rem;
+-  rotate: -8deg;
+-  animation: skillsSpin 14s linear infinite;
+-}
+-
+-.gearSide {
+-  position: absolute;
+-  bottom: -0.55rem;
+-  left: -0.75rem;
+-  rotate: 12deg;
+-  animation: skillsSpin 18s linear infinite reverse;
+-}
+-
+-.curveBox {
+-  display: grid;
+-  gap: 0.3rem;
+-  margin-top: 0.5rem;
+-  padding: 0.5rem 0.55rem 0.55rem;
+-  border: 2.5px solid var(--ink);
+-  border-radius: 8px;
+-  background: var(--paper-hi);
+-  box-shadow: 3px 3px 0 rgb(0 0 0 / 0.3);
+-}
+-
+-.curveHead {
+-  display: flex;
+-  align-items: baseline;
+-  justify-content: space-between;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 7px;
+-  letter-spacing: 0.14em;
+-  text-transform: uppercase;
+-  color: var(--muted);
+-}
+-
+-.curveRow {
+-  display: grid;
+-  grid-template-columns: 2.3rem minmax(0, 1fr) auto;
+-  align-items: center;
+-  gap: 0.4rem;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 8px;
+-}
+-
+-.curveLabel {
+-  letter-spacing: 0.08em;
+-  text-transform: uppercase;
+-}
+-
+-.curveInput {
+-  appearance: none;
+-  width: 100%;
+-  height: 0.42rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 999px;
+-  background: linear-gradient(
+-    90deg,
+-    var(--mint) var(--pct),
+-    #e6e1d4 var(--pct)
+-  );
+-}
+-
+-.curveInput::-webkit-slider-thumb {
+-  appearance: none;
+-  width: 0.78rem;
+-  height: 0.78rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 50%;
+-  background: var(--tangerine);
+-  box-shadow: 1.5px 1.5px 0 var(--ink);
+-}
+-
+-.curveInput::-moz-range-thumb {
+-  width: 0.78rem;
+-  height: 0.78rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 50%;
+-  background: var(--tangerine);
+-  box-shadow: 1.5px 1.5px 0 var(--ink);
+-}
+-
+-.curveValue {
+-  color: var(--muted);
+-}
+-
+-.curvePedestal {
+-  display: flex;
+-  flex-direction: column;
+-  align-items: center;
+-  margin-top: 0.15rem;
+-}
+-
+-.curvePedestal i {
+-  width: 2.6rem;
+-  height: 0.34rem;
+-  border-inline: 2px solid var(--ink);
+-  border-bottom: 2px solid var(--ink);
+-  background: #c89d66;
+-}
+-
+-.curvePlay {
+-  padding: 0.2rem 0.7rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 999px;
+-  background: var(--butter);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 8px;
+-  font-weight: 700;
+-  letter-spacing: 0.08em;
+-  text-transform: uppercase;
+-  box-shadow: 2px 2px 0 var(--ink);
+-  transition:
+-    translate 0.15s var(--ease-out),
+-    box-shadow 0.15s var(--ease-out),
+-    background 0.15s var(--ease-out);
+-}
+-
+-.curvePlay:hover {
+-  background: var(--paper-hi);
+-}
+-
+-.curvePlay:active {
+-  translate: 0 2px;
+-  box-shadow: 0 0 0 var(--ink);
+-}
+-
+-/* ── 03 Systems: pink barometric deck ─────────────────────────────────── */
+-
+-.crenel {
+-  display: flex;
+-  gap: 0.16rem;
+-  margin-bottom: 0.1rem;
+-}
+-
+-.crenel i {
+-  width: 1.1rem;
+-  height: 0.4rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 1px;
+-  background: #f9c6e0;
+-  box-shadow: 1px 1px 0 rgb(0 0 0 / 0.5);
+-}
+-
+-.systemsScene {
+-  position: relative;
+-  display: grid;
+-  flex: 1 1 auto;
+-  grid-template-columns: auto minmax(0, 1fr) auto;
+-  align-items: stretch;
+-  gap: 0.6rem;
+-  margin-top: 0.5rem;
+-  padding-bottom: 0.55rem;
+-}
+-
+-/* The paper shelf every instrument stands on. */
+-.deckShelf {
+-  position: absolute;
+-  inset: auto 0 0 0;
+-  height: 0.42rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 2px;
+-  background: repeating-linear-gradient(90deg, #bfa37c 0 5px, #9a7d55 5px 10px);
+-  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
+-}
+-
+-.gauges {
+-  position: relative;
+-  z-index: 1;
+-  display: flex;
+-  gap: 0.28rem;
+-  align-self: end;
+-}
+-
+-.gauge {
+-  display: flex;
+-  flex-direction: column;
+-  align-items: center;
+-  gap: 0.14rem;
+-  width: 3.4rem;
+-  padding: 0.18rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 8px 8px 12px 12px;
+-  background: var(--paper-hi);
+-  box-shadow: 2px 2.5px 0 rgb(0 0 0 / 0.35);
+-}
+-
+-.dial {
+-  position: relative;
+-  display: block;
+-  width: 100%;
+-  height: 1.5rem;
+-  border: 2px solid var(--ink);
+-  border-bottom: 0;
+-  border-radius: 999px 999px 0 0;
+-  background: conic-gradient(
+-    from 180deg at 50% 100%,
+-    var(--butter),
+-    var(--mint),
+-    var(--sky)
+-  );
+-  overflow: hidden;
+-}
+-
+-.dial b {
+-  position: absolute;
+-  bottom: 0;
+-  left: 50%;
+-  width: 2px;
+-  height: 72%;
+-  translate: -50% 0;
+-  background: var(--ink);
+-  transform-origin: bottom center;
+-}
+-
+-[data-tilt='left'] .dial b {
+-  rotate: -22deg;
+-}
+-
+-[data-tilt='right'] .dial b {
+-  rotate: 18deg;
+-}
+-
+-.gauge em {
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 5px;
+-  font-style: normal;
+-  letter-spacing: 0.08em;
+-  text-transform: uppercase;
+-  color: var(--muted);
+-}
+-
+-.console {
+-  position: relative;
+-  z-index: 1;
+-  display: grid;
+-  flex: 1 1 auto;
+-  grid-template-rows: auto 1fr auto;
+-  gap: 0.3rem;
+-  justify-items: center;
+-  align-self: stretch;
+-  justify-self: center;
+-  width: min(100%, 15rem);
+-  padding: 0.45rem 0.45rem 0.4rem;
+-  border: 2.5px solid var(--ink);
+-  border-radius: 10px 10px 5px 5px;
+-  background: #f7b7d8;
+-  box-shadow: 3px 3px 0 rgb(0 0 0 / 0.3);
+-}
+-
+-.plungerRow {
+-  display: flex;
+-  align-items: flex-end;
+-  gap: 0.5rem;
+-}
+-
+-.plunger {
+-  display: flex;
+-  flex-direction: column;
+-  align-items: center;
+-  gap: 0.1rem;
+-}
+-
+-.plungerCoil {
+-  width: 0.45rem;
+-  height: 0.7rem;
+-  color: #f5f2eb;
+-}
+-
+-.consoleBtn {
+-  width: auto;
+-  min-width: 4.6rem;
+-  padding: 0.18rem 0.5rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 999px;
+-  background: var(--paper-hi);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 8px;
+-  font-weight: 700;
+-  letter-spacing: 0.04em;
+-  color: var(--ink);
+-  box-shadow: 0 3px 0 var(--ink);
+-  transition:
+-    translate 0.15s var(--ease-out),
+-    box-shadow 0.15s var(--ease-out),
+-    background 0.15s var(--ease-out);
+-}
+-
+-.consoleBtn:hover {
+-  background: var(--butter);
+-}
+-
+-.consoleBtn:active,
+-.consoleBtn[aria-pressed='true'] {
+-  translate: 0 3px;
+-  box-shadow: 0 0 0 var(--ink);
+-  background: var(--sky);
+-}
+-
+-.arch {
+-  display: flex;
+-  flex: 1 1 auto;
+-  align-items: flex-end;
+-  justify-content: center;
+-  width: 2.6rem;
+-  min-height: 1.4rem;
+-  border: 2px solid var(--ink);
+-  border-bottom: 0;
+-  border-radius: 999px 999px 0 0;
+-  background: #f9c6e0;
+-}
+-
+-.arch i {
+-  display: block;
+-  width: 1rem;
+-  height: 0.8rem;
+-  border: 2px solid var(--ink);
+-  border-bottom: 0;
+-  border-radius: 999px 999px 0 0;
+-  background: #9c7340;
+-}
+-
+-.consoleNote {
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 6px;
+-  letter-spacing: 0.1em;
+-  text-transform: uppercase;
+-  color: rgb(25 26 46 / 0.6);
+-}
+-
+-.ribbons {
+-  position: relative;
+-  z-index: 1;
+-  display: grid;
+-  gap: 0.2rem;
+-  align-self: end;
+-  list-style: none;
+-}
+-
+-.ribbon {
+-  padding: 0.14rem 0.4rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 0 5px 5px 0;
+-  background: var(--paper-hi);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 6px;
+-  font-weight: 700;
+-  letter-spacing: 0.06em;
+-  text-align: left;
+-  text-transform: uppercase;
+-  color: var(--ink);
+-  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
+-  transition:
+-    translate 0.15s var(--ease-out),
+-    background 0.15s var(--ease-out),
+-    color 0.15s var(--ease-out);
+-}
+-
+-.ribbon[aria-pressed='true'] {
+-  translate: 0.3rem 0;
+-  background: var(--tangerine);
+-  color: var(--paper-hi);
+-}
+-
+-/* ── 04 The rest: cardboard bedrock drawer ────────────────────────────── */
+-
+-.corrugate {
+-  display: block;
+-  height: 0.4rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 2px;
+-  background: repeating-linear-gradient(90deg, #b99362 0 5px, #785937 5px 10px);
+-}
+-
+-.drawerWrap {
+-  margin-top: 0.5rem;
+-}
+-
+-.drawerTabs {
+-  display: flex;
+-  align-items: flex-end;
+-  gap: 0.24rem;
+-  padding-inline: 0.45rem;
+-}
+-
+-.drawerTabs i {
+-  display: block;
+-  padding: 0.1rem 0.4rem;
+-  border: 2px solid var(--ink);
+-  border-bottom: 0;
+-  border-radius: 4px 4px 0 0;
+-  background: #3b82f6;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 5px;
+-  font-style: normal;
+-  letter-spacing: 0.12em;
+-  text-transform: uppercase;
+-  color: #fff;
+-}
+-
+-.drawerTabs i:nth-child(2) {
+-  background: var(--butter);
+-  color: var(--ink);
+-}
+-
+-.drawerTabs i:nth-child(3) {
+-  background: #f472b6;
+-  color: var(--ink);
+-}
+-
+-.drawerTabs i:nth-child(4) {
+-  background: #a88149;
+-  color: var(--paper-hi);
+-}
+-
+-.drawer {
+-  padding: 0.4rem;
+-  border: 2.5px solid var(--ink);
+-  border-radius: 5px 9px 9px 9px;
+-  background: #bfa37c;
+-  box-shadow: 4px 4px 0 rgb(0 0 0 / 0.35);
+-}
+-
+-.drawerHead {
+-  display: block;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 6px;
+-  letter-spacing: 0.14em;
+-  text-transform: uppercase;
+-  color: #4b3620;
+-}
+-
+-.drawerSlot {
+-  margin-top: 0.28rem;
+-  padding: 0.4rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 5px;
+-  background: #523d28;
+-  box-shadow: inset 0 8px 14px rgb(0 0 0 / 0.55);
+-}
+-
+-.tools {
+-  display: flex;
+-  flex-wrap: wrap;
+-  gap: 0.24rem;
+-}
+-
+-.tool {
+-  padding: 0.14rem 0.42rem;
+-  border: 2px solid var(--ink);
+-  border-radius: 4px;
+-  background: var(--paper-hi);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 7px;
+-  font-weight: 600;
+-  color: var(--ink);
+-  box-shadow: 1.5px 2px 0 rgb(0 0 0 / 0.4);
+-}
+-
+-.tool[data-figma] {
+-  background: var(--cobalt);
+-  color: var(--paper-hi);
+-  rotate: -1.5deg;
+-}
+-
+-.status {
+-  align-self: flex-end;
+-  margin-top: 0.55rem;
+-  padding: 0.28rem 0.5rem;
+-  rotate: -2deg;
+-  border: 2px solid var(--ink);
+-  border-radius: 4px;
+-  background: var(--paper-hi);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 7px;
+-  letter-spacing: 0.04em;
+-  color: var(--ink);
+-  box-shadow: 3px 4px 0 rgb(0 0 0 / 0.35);
+-}
+-
+-.status span {
+-  text-decoration: underline wavy var(--butter) 1.5px;
+-  text-underline-offset: 2px;
+-}
+-
+-/* ── Station isolation ────────────────────────────────────────────────── */
+-
+-@media (min-width: 1024px) {
+-  .observatory:not([data-station='all']) .stations > .station {
+-    grid-column: span 4;
+-    margin-top: 0;
+-    rotate: none;
+-  }
+-
+-  .observatory[data-station='build'] .stations > .stationBuild,
+-  .observatory[data-station='motion'] .stations > .stationMotion,
+-  .observatory[data-station='systems'] .stations > .stationSystems,
+-  .observatory[data-station='rest'] .stations > .stationAlso {
+-    grid-column: 1 / -1;
+-  }
+-
+-  /* Floors you did not open keep only their plate and their scenery. */
+-  .observatory[data-station='build']
+-    .stations
+-    > .station:not(.stationBuild)
+-    :is(
+-      .stationLine,
+-      .curveBox,
+-      .systemsScene,
+-      .chips,
+-      .drawerWrap,
+-      .status,
+-      .motionScene
+-    ),
+-  .observatory[data-station='motion']
+-    .stations
+-    > .station:not(.stationMotion)
+-    :is(
+-      .stationLine,
+-      .buildScene,
+-      .systemsScene,
+-      .chips,
+-      .drawerWrap,
+-      .status,
+-      .crenel
+-    ),
+-  .observatory[data-station='systems']
+-    .stations
+-    > .station:not(.stationSystems)
+-    :is(
+-      .stationLine,
+-      .buildScene,
+-      .motionScene,
+-      .curveBox,
+-      .chips,
+-      .drawerWrap,
+-      .status
+-    ),
+-  .observatory[data-station='rest']
+-    .stations
+-    > .station:not(.stationAlso)
+-    :is(
+-      .stationLine,
+-      .buildScene,
+-      .motionScene,
+-      .curveBox,
+-      .systemsScene,
+-      .chips,
+-      .corrugate
+-    ) {
+-    display: none;
+-  }
+-}
+-
+-/* ── The tower on narrow screens ──────────────────────────────────────── */
+-
+-@media (max-width: 1023px) {
+-  .stations {
+-    grid-template-columns: minmax(0, 1fr);
+-  }
+-
+-  .stationBuild,
+-  .stationMotion,
+-  .stationSystems,
+-  .stationAlso {
+-    grid-column: 1 / -1;
+-    margin-top: 0;
+-    rotate: none;
+-  }
+-
+-  /* Brass pipes bolting one floor to the next. */
+-  .stations > .station + .station::before {
+-    content: '';
+-    position: absolute;
+-    top: -0.62rem;
+-    left: 50%;
+-    width: 0.3rem;
+-    height: 0.62rem;
+-    translate: -50% 0;
+-    border: 2px solid var(--ink);
+-    border-radius: 2px;
+-    background: linear-gradient(180deg, #e0b463, #a9813d);
+-  }
+-
+-  .observatory:not([data-station='all']) .stations > .station {
+-    display: none;
+-  }
+-
+-  .observatory[data-station='build'] .stations > .stationBuild,
+-  .observatory[data-station='motion'] .stations > .stationMotion,
+-  .observatory[data-station='systems'] .stations > .stationSystems,
+-  .observatory[data-station='rest'] .stations > .stationAlso {
+-    display: flex;
+-  }
+-
+-  .stationTitle {
+-    font-size: clamp(1.9rem, 9vw, 2.6rem);
+-  }
+-
+-  .systemsScene {
+-    grid-template-columns: auto minmax(0, 1fr);
+-  }
+-
+-  .ribbons {
+-    grid-column: 1 / -1;
+-    grid-template-columns: repeat(2, minmax(0, 1fr));
+-  }
+-}
+-
+-@media (max-width: 560px) {
+-  .systemsScene {
+-    grid-template-columns: 1fr;
+-  }
+-
+-  .gauges {
+-    justify-content: flex-start;
+-  }
+-
+-  .buildScene {
+-    min-height: 7.2rem;
+-  }
+-}
+-
+-/* ── Machinery: the only looping motion here ──────────────────────────── */
+-
+-@keyframes skillsSpin {
+-  to {
+-    rotate: 360deg;
+-  }
+-}
+-
+-@keyframes skillsDrift {
+-  50% {
+-    translate: 0.35rem -0.15rem;
+-  }
+-}
+-
+-.observatory[data-running='false'] .atomArt,
+-.observatory[data-running='false'] .sunArt,
+-.observatory[data-running='false'] .gearTop,
+-.observatory[data-running='false'] .gearSide,
+-.observatory[data-running='false'] .cloudTag {
+-  animation-play-state: paused;
+-}
+-
+-@media (prefers-reduced-motion: reduce) {
+-  .atomArt,
+-  .sunArt,
+-  .gearTop,
+-  .gearSide,
+-  .cloudTag[data-side] {
+-    animation: none;
+-  }
+-
+-  .station,
+-  .stationChip,
+-  .pill,
+-  .knob,
+-  .consoleBtn,
+-  .ribbon,
+-  .curvePlay {
+-    transition: none;
+-  }
+-}
+-
+-.skillNote {
+-  display: flex;
+-  align-items: baseline;
+-  justify-content: space-between;
+-  gap: 1.5rem;
+-  margin-top: 1.6rem;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 9px;
+-  letter-spacing: 0.14em;
+-  text-transform: uppercase;
+-  color: var(--muted);
+-}
+-
+-/* ── Contact ────────────────────────────────────────────────────────────── */
+-
+-.contact {
+-  position: relative;
+-  padding-block: clamp(5.5rem, 11vw, 9rem);
+-  overflow: clip;
+-}
+-
+-.contactGrid {
+-  display: grid;
+-  gap: clamp(2.5rem, 6vw, 4.5rem);
+-  margin-top: clamp(2.6rem, 6vw, 4rem);
+-  align-items: center;
+-}
+-
+-@media (min-width: 1024px) {
+-  .contactGrid {
+-    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+-  }
+-}
+-
+-.contactLead {
+-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+-  font-size: clamp(1.65rem, 2.8vw, 2.5rem);
+-  font-weight: 750;
+-  line-height: 1.04;
+-  letter-spacing: -0.045em;
+-  text-wrap: balance;
+-}
+-
+-.contactLead em {
+-  font-style: normal;
+-  color: var(--cobalt);
+-}
+-
+-.contactBody {
+-  max-width: 46ch;
+-  margin-top: 1.2rem;
+-  font-size: 0.98rem;
+-  line-height: 1.7;
+-  color: var(--muted);
+-  text-wrap: pretty;
+-}
+-
+-.contactActions {
+-  display: flex;
+-  flex-wrap: wrap;
+-  align-items: center;
+-  gap: 0.8rem 1rem;
+-  margin-top: 1.8rem;
+-}
+-
+-.contactEmail {
+-  display: inline-flex;
+-  align-items: center;
+-  gap: 0.5rem;
+-  min-height: 3rem;
+-  padding: 0.7rem 1.1rem;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 999px;
+-  background: var(--butter);
+-  color: var(--ink);
+-  font-size: 0.9rem;
+-  font-weight: 650;
+-  box-shadow: 4px 4px 0 var(--ink);
+-  transition:
+-    transform 0.18s var(--ease-out),
+-    box-shadow 0.18s var(--ease-out);
+-}
+-
+-.contactEmail:hover {
+-  transform: translate(-2px, -2px);
+-  box-shadow: 6px 6px 0 var(--ink);
+-}
+-
+-.contactEmail:active {
+-  transform: translate(2px, 2px);
+-  box-shadow: 1px 1px 0 var(--ink);
+-}
+-
+-.copyButton {
+-  min-height: 2.75rem;
+-  padding: 0.55rem 0.95rem;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 999px;
+-  background: transparent;
+-  color: var(--ink);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 9px;
+-  letter-spacing: 0.12em;
+-  text-transform: uppercase;
+-  transition:
+-    background-color 0.18s ease,
+-    transform 0.18s var(--ease-out);
+-}
+-
+-.copyButton:hover {
+-  background: var(--paper-hi);
+-}
+-
+-.copyButton:active {
+-  transform: scale(0.97);
+-}
+-
+-.copyButton[data-copied='true'] {
+-  background: var(--mint);
+-}
+-
+-.contactNote {
+-  margin-top: 1rem;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 9px;
+-  letter-spacing: 0.12em;
+-  text-transform: uppercase;
+-  color: var(--muted);
+-}
+-
+-.contactList {
+-  margin-top: 1.8rem;
+-  border-top: 1px solid var(--line);
+-}
+-
+-.contactList li {
++.contactList li {
+   display: flex;
+   align-items: baseline;
+   gap: 0.7rem;
+@@ -3472,12 +2213,4 @@
+   .pulseWord::after {
+     animation: none;
+   }
+-
+-  .knob,
+-  .pill,
+-  .tool,
+-  .curvePlay,
+-  .consoleBtn {
+-    transition: none !important;
+-  }
+ }
+-- 
+2.43.0
+
