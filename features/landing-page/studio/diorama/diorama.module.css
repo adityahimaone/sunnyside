@@ -86,9 +86,6 @@
 }
 
 .stage {
-  --px: 0;
-  --py: 0;
-
   position: relative;
   width: 100%;
   aspect-ratio: 813 / 467;
@@ -136,11 +133,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  /* nearer layers slide further, against the pointer: that is the depth */
-  translate: calc(var(--px, 0) * var(--depth, 0) * var(--u) * -6)
-    calc(var(--py, 0) * var(--depth, 0) * var(--u) * -4);
   transition:
-    translate 0.35s var(--ease),
     scale 0.6s var(--ease),
     filter 0.6s var(--ease),
     opacity 0.6s var(--ease);
@@ -148,7 +141,6 @@
 
 .layer[data-id] {
   transition:
-    translate 0.35s var(--ease),
     scale 0.6s var(--ease),
     filter 0.6s var(--ease),
     opacity 0.8s var(--ease) calc(var(--n, 0) * 0.12s),

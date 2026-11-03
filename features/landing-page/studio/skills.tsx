@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -87,7 +87,6 @@ export function Skills() {
   const [pressed, setPressed] = useState(false)
   const [ribbon, setRibbon] = useState(0)
 
-  const stage = useRef<HTMLDivElement>(null)
   const { ref, inView, armed } = useInView<HTMLDivElement>(0.12)
 
   const build = SKILL_GROUPS.find((group) => group.id === 'build')!
@@ -99,42 +98,6 @@ export function Skills() {
     .filter((skill) => !DRAWER_TOOLS.includes(skill))
     .slice(0, 4)
   const tools = also.skills.filter((skill) => !folders.includes(skill))
-
-  /**
-   * Depth. The pointer nudges each layer by its own distance from the glass, so
-   * the panels slide against the frame like a real shadowbox. The numbers go
-   * straight to custom properties: no state, no re-render per mouse move.
-   */
-  useEffect(() => {
-    const el = stage.current
-    if (!el) return
-    const fine = window.matchMedia('(pointer: fine)').matches
-    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!fine || calm) return
-
-    let frame = 0
-    const move = (event: PointerEvent) => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => {
-        const box = el.getBoundingClientRect()
-        const x = ((event.clientX - box.left) / box.width - 0.5) * 2
-        const y = ((event.clientY - box.top) / box.height - 0.5) * 2
-        el.style.setProperty('--px', Math.max(-1, Math.min(1, x)).toFixed(3))
-        el.style.setProperty('--py', Math.max(-1, Math.min(1, y)).toFixed(3))
-      })
-    }
-    const leave = () => {
-      el.style.setProperty('--px', '0')
-      el.style.setProperty('--py', '0')
-    }
-    el.addEventListener('pointermove', move)
-    el.addEventListener('pointerleave', leave)
-    return () => {
-      cancelAnimationFrame(frame)
-      el.removeEventListener('pointermove', move)
-      el.removeEventListener('pointerleave', leave)
-    }
-  }, [])
 
   const playCurves = () => {
     setPlaying(true)
@@ -175,7 +138,6 @@ export function Skills() {
           data-in={inView}
         >
           <div
-            ref={stage}
             className={styles.stage}
             data-station={station}
             data-running={running}
@@ -212,10 +174,7 @@ export function Skills() {
             </div>
 
             <div className={styles.scene}>
-              <div
-                className={cn(styles.layer, styles.wall)}
-                style={vars({ '--depth': 0.15 })}
-              >
+              <div className={cn(styles.layer, styles.wall)}>
                 <BackWall />
               </div>
 
@@ -223,7 +182,7 @@ export function Skills() {
               <div
                 className={styles.layer}
                 data-id="rest"
-                style={vars({ '--depth': 0.45, '--n': 0 })}
+                style={vars({ '--n': 0 })}
               >
                 <RestArt folderCount={folders.length} />
                 <Eyebrow
@@ -280,7 +239,7 @@ export function Skills() {
               <div
                 className={styles.layer}
                 data-id="build"
-                style={vars({ '--depth': 0.8, '--n': 1 })}
+                style={vars({ '--n': 1 })}
               >
                 <BuildArt />
                 <Eyebrow
@@ -335,7 +294,7 @@ export function Skills() {
               <div
                 className={styles.layer}
                 data-id="motion"
-                style={vars({ '--depth': 0.8, '--n': 2 })}
+                style={vars({ '--n': 2 })}
               >
                 <MotionArt />
                 <Eyebrow
@@ -434,7 +393,7 @@ export function Skills() {
               <div
                 className={styles.layer}
                 data-id="systems"
-                style={vars({ '--depth': 1.35, '--n': 3 })}
+                style={vars({ '--n': 3 })}
               >
                 <SystemsArt />
                 <Eyebrow
@@ -528,10 +487,7 @@ export function Skills() {
                 </ul>
               </div>
 
-              <div
-                className={cn(styles.layer, styles.front)}
-                style={vars({ '--depth': 0 })}
-              >
+              <div className={cn(styles.layer, styles.front)}>
                 <FrameFront />
               </div>
             </div>
