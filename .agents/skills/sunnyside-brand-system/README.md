@@ -4,8 +4,13 @@ An installable agent skill for shipping **brand kits** and **design systems** fr
 one idea, a mark family, tokens, a board, an immersive proof page, Figma and DESIGN.md exports,
 and an audit that names what it could not verify.
 
-Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand and
-Clearing. The method travels; the marks do not.
+Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand, Clearing, Porphyry, Jakarta, Bluewater, Vesper, Halation, and Tavola. The method travels; the marks do not.
+
+## v4.4: Vesper / Clearing Rail Architecture, 5 Flagship Non-Template Heroes, and Comparative Surface Exploration Grid
+
+- **Unnumbered Hero & Clean Navbar (`01..07` in Left Rail Only).** The Hero stage is never counted as `01`, and topbar navigation links carry zero numbers (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`). Section numbers (`01`..`07`) live inside the left rail, with Step 0 (`ask_question`) letting the user choose between **Vesper's Per-Section Rail** (`176px` sticky `.rail` + `.body` inside each `.sec > .wrap`) and **Clearing's Sticky Contents TOC Sidebar** (`.shell.layout` wrapping a scroll-spy `<ol>` rail + content column).
+- **Vesper Comparative Surface Exploration Grid (`04 / Surfaces`).** Replaces the mandatory blur/tint range-slider stage from Quieta/Arête with Vesper's `"Six surfaces were tried. Four survived."` comparative 2-column `.surf` grid: 4–6 explored surface cards, each with a `210px` live visual `.demo`, a `Shipped` or `Rejected` verdict tag, and the architectural reason why it survived or was rejected.
+- **5 Curated High-Scoring Hero Variants (Anti-Template Law).** Retires the single repetitive `.plate + .glass-card` box hero in favor of 5 flagship hero architectures drawn from the highest-scoring cases: **Variant A** (Vesper Split Field + `-30px` Overlapping 5-Cell Stat Bench), **Variant B** (Clearing / Strand 2-Col Editorial + Framed Media with Single Floating Pane), **Variant C** (Porphyry / Hachure Live Specimen Stage First + Printed Survey Margin), **Variant D** (Jakarta / Riso Physical Sheet, Oversized Hoarding Mark & Torn Polygon Edge), and **Variant E** (Cove / Tavola Full-Bleed Atmospheric Plate + Station Readout).
 
 ## v3.7: universal 22-concept logo forge, built-in outlined wordmark, track-aware scoring, and optional background field generator
 

@@ -28,6 +28,7 @@ export type DesignCase = {
     | 'vesper'
     | 'halation'
     | 'tavola'
+    | 'arete'
 }
 
 export const DESIGN_SYSTEM_URL =
@@ -75,6 +76,23 @@ export const RAW_DESIGN_CASES: readonly DesignCase[] = [
       'The Sunnyside brand kit: paper and ink identity board with the sun mark, palette, type specimens and favicon sizes.',
     tags: ['Paper', 'Cobalt', 'Marker', 'Stickers'],
     tone: 'sunnyside',
+  },
+  {
+    slug: 'arete',
+    number: '18',
+    name: 'Arête',
+    href: '/design-system/arete',
+    tagline: 'Paper-cut alpine · every layer is a cut.',
+    description:
+      'An alpine cartography atelier built from two papers: ivory cartridge stock and one ultramarine ink. Sculptural ridges are stacked rather than rendered — the supplied torn-paper collage (white peak, grey layer, black ridge, one cobalt seam) rebuilt as a floating ribbon over a grounded mass, parted by a single 5-unit seam. Four named surfaces, a snow-capped Kuwayama mark with a separate 16px massif, and a contrast ledger that publishes the three pairs it fails.',
+    status: 'Shipped · 2026',
+    role: 'Identity · design system · parametric mark · paper surfaces · routes workbench · docs',
+    material: 'Ivory cartridge stock + ultramarine ink + one oxide blaze',
+    cover: '/brand/arete/arete-brandkit.png',
+    coverAlt:
+      'The Arête 6-panel brand board: the supplied paper-cut alpine collage with reverse lockup, the layered-ridge Kuwayama mark and its ARÊTE wordmark, seven OKLCH primitives, three voices, six companion cut marks, and the paper laws.',
+    tags: ['Paper-cut', 'Alpine', 'Ultramarine', 'Cartography'],
+    tone: 'arete',
   },
   {
     slug: 'tavola',

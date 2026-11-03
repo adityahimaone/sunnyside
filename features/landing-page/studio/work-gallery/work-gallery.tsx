@@ -37,8 +37,8 @@ import styles from './work-gallery.module.css'
  * The selected-work chapter is a cutting mat with paper taped to it.
  *
  * The board is curated. Everything shows the six releases and six featured
- * systems; Systems reveals twelve (the featured six plus Wildflower, Cove and
- * the four newest remaining cases). Pieces hang in a hand-placed wall: four
+ * systems; Systems reveals thirteen (the featured six plus the newest case,
+ * Wildflower, Cove and the recent cases). Pieces hang in a hand-placed wall: four
  * columns, each card dropped a little lower than the last so the board reads
  * pinned rather than gridded. Below the desktop split the same DOM becomes one
  * horizontal snap run instead, because four columns of paper on a phone is a
@@ -533,7 +533,7 @@ export function WorkGallery({
     [systemItems],
   )
 
-  /** The full catalogue, not just the twelve the board shows. */
+  /** The full catalogue, not just the thirteen the board shows. */
   const caseCount = designCases?.length ?? DESIGN_CASES.length
 
   const allItems = useMemo(

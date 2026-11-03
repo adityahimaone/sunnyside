@@ -186,6 +186,10 @@
   --case-accent: #d85a38;
 }
 
+.tone_arete {
+  --case-accent: #2036c8;
+}
+
 /* Bluewater's daylight signal. The night wake (#8FB6D6) is a graphic, never
    text, so the card takes the darkened value the system actually ships. */
 .tone_bluewater {

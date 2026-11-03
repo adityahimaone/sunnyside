@@ -37,8 +37,8 @@ export type GalleryItem = ProjectGalleryItem | SystemGalleryItem
 /**
  * The board is curated, not derived from the year. Switchyard leads because it
  * is the strongest release. The systems are split in two: the six carried beside
- * the releases on the Everything tab, and six more revealed by the Systems tab.
- * Together they are the twelve systems the board shows; `/projects` and
+ * the releases on the Everything tab, and seven more revealed by the Systems tab.
+ * Together they are the thirteen systems the board shows; `/projects` and
  * `/design-system` hold the rest.
  */
 const PROJECT_ORDER = [
@@ -61,10 +61,11 @@ export const FEATURED_SYSTEM_SLUGS = [
 ] as const
 
 /**
- * The six more the Systems tab adds: Wildflower Wind, Cove, and the four most
- * recent cases that are not already on the Everything tab.
+ * The seven more the Systems tab adds: the newest case, then Wildflower Wind,
+ * Cove, and the recent cases not already on the Everything tab.
  */
 export const MORE_SYSTEM_SLUGS = [
+  'arete',
   'wildflower-wind',
   'cove',
   'tavola',
@@ -99,6 +100,7 @@ const PROJECT_POSITION: Record<string, string> = {
  */
 const SYSTEM_SWATCHES: Record<string, readonly string[]> = {
   tavola: ['#faf6ee', '#221a15', '#d85a38', '#2a62b6'],
+  arete: ['#f2ede3', '#101229', '#1e3a8a', '#c4462b'],
   halation: ['#fdf1ec', '#160912', '#f26857', '#9e344d'],
   sunnyside: ['#f3ecdf', '#191a2e', '#3d53d6', '#ffd23f'],
   vesper: ['#0d131f', '#2342c0', '#5470d6', '#fbf8f1'],
@@ -151,7 +153,7 @@ export const PROJECT_GALLERY_ITEMS: readonly ProjectGalleryItem[] =
   })
 
 /**
- * The twelve documented systems the board shows, in `SYSTEM_SLUGS` order — the
+ * The thirteen documented systems the board shows, in `SYSTEM_SLUGS` order — the
  * same source of truth `/design-system` renders, so a case can never appear on
  * the board with a name, path or cover the case page does not have. A slug the
  * live API no longer returns is skipped rather than invented.
