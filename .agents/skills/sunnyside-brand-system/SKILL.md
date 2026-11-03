@@ -1,5 +1,5 @@
 ---
-name: sunny-brand-design
+name: sunnyside-brand-system
 version: 4.2.0
 description: 'Unbounded, single-pass brand identity and interactive design system generator. Synthesizes custom archetypes, Kuwayama-grade parametric SVG marks + 6-mark companion casts, 6-panel 1500x1125 brandkit boards, 3-point full-bleed surface continuity, dual-scope OKLCH tokens, and 8-section interactive showcase pages.'
 metadata:
