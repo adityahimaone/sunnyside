@@ -1,14 +1,14 @@
 ---
 name: sunnyside-brand-system
-version: 4.7.0
-description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with a 7-question Step 0 ask_question scope gate written in plain geometry, not case names: surface material, rail (2 shapes), hero (8 shapes), mark construction, colour polarity (1 or 2 scopes, binding on the toggle and token sheets), build scope, and add-ons. Then synthesizes a custom archetype, Kuwayama-grade parametric SVG marks + a 6-mark companion cast, a 6-panel 1500x1125 brandkit board, a comparative surface exploration grid, OKLCH tokens in the chosen polarity, an unnumbered-hero 7-section interactive showcase page, and a footer shape derived from the hero rather than copied from the last case. Pillars V and VII carry a house-rules layer curated from shipped builds: no eyebrow, no monospace labels outside code, no outlined chips or 1px stat boxes, no gradient except one directional scrim drawn in the surface’s own colour, one accent on the action, a two-line headline cap, and a footer that is a band with a real photograph rather than a colophon strip.'
+version: 4.8.0
+description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with a 7-question Step 0 ask_question scope gate written in plain geometry, not case names: surface material, rail (2 shapes), hero (8 shapes), mark construction, colour polarity (1 or 2 scopes, binding on the toggle and token sheets), build scope, and add-ons. Then synthesizes a custom archetype, Kuwayama-grade parametric SVG marks + a 6-mark companion cast, a 6-panel 1500x1125 brandkit board, a comparative surface exploration grid, OKLCH tokens in the chosen polarity, an unnumbered-hero 7-section interactive showcase page, a cast that belongs to the mark argument rather than to the end of the page, and a footer shape derived from the hero rather than copied from the last case. Pillars V and VII carry a house-rules layer curated from shipped builds: no eyebrow, no monospace labels outside code, no outlined chips or 1px stat boxes, no gradient except one directional scrim drawn in the surface’s own colour, one accent on the action, a two-line headline cap, and a footer that is a band with a real photograph rather than a colophon strip.'
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '4.7.0'
+  version: '4.8.0'
 ---
 
-# SUNNYSIDE BRAND SYSTEM ENGINE (v4.7 · Two Rails + 8 Hero Shapes + 5 Footer Shapes + Surface Grid)
+# SUNNYSIDE BRAND SYSTEM ENGINE (v4.8 · Two Rails + 8 Hero Shapes + 5 Footer Shapes + Surface Grid)
 
 You are a Principal Design Engineer & Brand Architect. Execute with zero looping tasks, zero placeholder copy (`Lorem ipsum` or generic `Acme` filler), zero emoji UI chrome, and flagship-grade visual engineering.
 
@@ -167,6 +167,9 @@ Construct bespoke `<svg viewBox="0 0 64 64">` marks using mathematical vector di
   2. **Outlined Vector Wordmark & Lockups (`wordmark.svg`, `lockup.svg`, `lockup-reverse.svg`, `lockup-stacked.svg`)**: Pure `<path>` geometry with ink baked in (`<img>` tags resolve `currentColor` to black).
   3. **6-Mark Companion Cast (`public/brand/<slug>/cast/*.svg`)**: 6 domain-specific companion symbols drawn on the exact same `64×64` grid and cut-line weight (six nouns from the brand's own operational vocabulary, never generic icons — a shipping identity gets *Parcel, Docket, Pallet, Tape, Route, Depot*; a print studio gets *Sheet, Plate, Squeegee, Register, Drier, Trim*).
 
+> [!CRITICAL]
+> **CAST IS CONTENT, NOT A CLOSING COMPOSITION.** The cast is the proof that the mark was drawn as a family, so it belongs to the argument, not to the end of the page. Render it **inside `02 / The Mark`**, under the scale strip, as a `6 × 1` (or `3 × 2`) hairline grid on the page ground — heading, six marks, six nouns, six one-line notes. It may also be a **mid-page inverted band** bounded by `06 Kit` above and `07 Tokens` below. It may **not** be the last band before the footer: a full-bleed band carrying a photograph *and* a lockup *and* a caption, sitting directly above a footer that also carries a photograph and a lockup, makes the page end twice and spends the one closing composition the footer is for. **A band owns one of three things — a photograph, a lockup, or a statement. The footer owns all three, which is why nothing else may sit beside it holding two.**
+
 ---
 
 ### Pillar III: OKLCH Chromatic Architecture (One or Two Scopes) & Honest Contrast Ledger
@@ -321,7 +324,7 @@ node skills/sunnyside-brand-system/scripts/brandkit-board.mjs \
    - Section headline (`h2`) + lead paragraph (`p.big`) + 4 Premise cells (`Belief`, `Enemy`, `Material`, `Reject it when` in a `2×2` `.two` hairline grid) + **4 structured Decision Cards** (`.decs` `2×2` grid) where every card states: `Decision` (`h3`), `Because`, `Not when`, and `Breaks next`.
 2. **`02 / The Mark`**
    - Kuwayama construction narrative + 4-tile `.logo-grid` (`Primary`, `Reverse` on a loud ground, `Compact · 16–24px`, `Glyph`) + horizontal/reverse/stacked `.lock` rows + multi-size scale strip (`96`, `48`, `32`, `24 compact`, `16 compact`, `16 glyph`) + 3 structural rules (`Clear space`, `Never`, `Below 24px`) + optional scored concept bake-off table or 1-click SVG copy.
-   - *Companion Cast Placement:* Either render the **6-Mark Companion Cast** here in Section 02, OR render it as a **full-bleed inverted `.castband`** (a full-bleed inverted band between `06 Kit` and `07 Tokens`, with its own `176px` `.rail` + 3×2 `.castgrid`).
+   - *Companion Cast Placement:* **Default — render the 6-Mark Companion Cast here**, directly under the scale strip, as a `6 × 1` hairline grid on the page ground (`.castin`): a `13px` heading, six `26px` marks, six nouns, six one-line notes. *Exception —* a mid-page inverted band between `06 Kit` and `07 Tokens` is allowed **only** with flat ink ground, six marks and one heading: no photograph, no lockup, no caption (see the Pillar II cast law). Never place it after `07 Tokens` or immediately above the footer.
 3. **`03 / Ink (or Colour)`**
    - Click-to-copy primitive swatch cards (`grid-template-columns: repeat(4, 1fr); gap: 1px`, showing color chip, token name, hex/OKLCH, and role) + the **complete Measured Contrast Ledger** (`.pairs` rows with dual 30×30 color chips, pair label, computed ratio, and assigned semantic job—explicitly highlighting the `1–3` failing pairs and what job they may *not* do).
 4. **`04 / Surfaces` (Comparative Surface Grid — No Range-Slider Stage)**
@@ -397,6 +400,9 @@ For any case whose hero carries a photograph band: the photograph returns full-w
 
 Anything else — a newsletter field, a social icon row, a sitemap — is filler and must be cut. If a cell has nothing real to say, delete it and re-balance the grid; never pad it.
 
+> [!CRITICAL]
+> **ONE CLOSING COMPOSITION PER PAGE.** The footer is the page's only full-bleed closing band. Anything above it that carries a photograph with a lockup on it is a second footer, and the first one wins: the real footer then reads as an afterthought. If the cast, a CTA or an "endcap" band wants that slot, it gives up its photograph or it moves into a section — and if the closing band *is* the design you want, it becomes the footer and the footer's data folds into it.
+
 **Footer house rules.**
 - **A footer is a band, not a strip.** Give it `min-height` or a plate: `220–440px` of composition, not a `52px` bar with two spans.
 - **The statement carries the footer.** `clamp(24px, 2.6vw, 34px)`, two lines at most, in full ink on its own surface.
@@ -435,6 +441,7 @@ Verify internally before finishing (never print this checklist):
 - [ ] **Hero house rules:** no eyebrow, no mono label outside code, no outlined chip/pill row, no `1px` stat strip or hairline box, no gradient except one directional scrim in the surface's own colour, no shadow or `backdrop-filter` at rest (navbar included), no accent-coloured word in the `<h1>`, and the accent appears on the primary action only.
 - [ ] **Hero measured:** the `<h1>` is two lines or fewer at 1440 / 1024 / 390, the lede is `44–48ch` in full ink, the crop's `object-position` was chosen from the asset (not a default), and `scrollWidth === clientWidth` at all four widths.
 - [ ] **Footer shape declared:** the footer names one of F1–F5 in a comment, that shape is the one Pillar VII pairs with the chosen hero, and it carries all five contract items and no filler. Two consecutive cases in `src/data/cases.ts` do not share a footer family.
+- [ ] **Cast placement:** the 6-mark cast sits inside `02 / The Mark` (or as one mid-page inverted band between 06 and 07), it carries no photograph, no lockup and no caption, and nothing that carries a photograph *and* a lockup sits immediately above the footer.
 - [ ] **Footer is a band, not a strip:** it has real height (`min-height` clamp or a photograph plate), its statement is set at `clamp(24px, 2.6vw, 34px)`, its photograph is a *different* asset from the hero's, and its lockup measures `≈26px` tall (`width: auto; object-fit: contain`) with the rule scoped as `.foot__art > img.foot__lock`.
 - [ ] Zero emojis (`☀️`, `🌙`) in UI chrome; all 3 fonts load live.
 
