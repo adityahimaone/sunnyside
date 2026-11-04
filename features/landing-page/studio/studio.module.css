@@ -443,7 +443,7 @@
   --ground: clamp(2.6rem, 5.2vh, 3.6rem);
   /* The disc drops behind the cobalt hill: two thirds of it clears the crest,
      the rest is buried, so the hill reads as being in front of it. */
-  --sun-lift: 0.62;
+  --sun-lift: 0.67;
   /* Where the sticker cluster sits, frozen at this lift. */
   --items-lift: 0.62;
   /* Distance from the hero's bottom edge to the top of the disc. */
@@ -893,7 +893,7 @@
     /* The dock sits on the hill below the sun, so the lift is measured from a
        taller stage: the disc clears the card by a hair instead of landing on
        it, and the hill behind the card is stretched to wrap it. */
-    --sun-lift: 2;
+    --sun-lift: 2.1;
     --items-lift: var(--sun-lift);
     --dock-space: 0rem;
     /* A phone hero is taller than the glass: the extra band goes between the
@@ -2559,7 +2559,7 @@
     /* The card wraps to more lines down here, so the disc climbs to keep clear
        of it; the hill is stretched by the same amount in hero-scene.module.css
        so the sun still sits *in* it rather than floating above the crest. */
-    --sun-lift: 2.07;
+    --sun-lift: 2.17;
     --items-lift: var(--sun-lift);
   }
 }
