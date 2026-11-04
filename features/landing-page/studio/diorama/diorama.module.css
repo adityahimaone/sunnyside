@@ -72,6 +72,7 @@
 }
 
 .stage {
+  --nudge: -14.5;
   position: relative;
   width: 100%;
   aspect-ratio: 813 / 467;
@@ -149,8 +150,9 @@
   /* The drawn machinery sits about 14.5u right of the frame's centre, which
      leaves a wide gap on the left and none on the right. Nudge the whole
      composition back so both margins match. The wall and the frame stay put:
-     only the pieces move inside the box. */
-  translate: calc(var(--u) * -14.5) 0;
+     only the pieces move inside the box. Phones set --nudge to 0 because their
+     crops are already measured from the frame corner. */
+  translate: calc(var(--u) * var(--nudge)) 0;
   transition:
     scale 0.6s var(--ease),
     filter 0.6s var(--ease),
@@ -1339,6 +1341,7 @@
 
   .stage {
     --tz: 1.5;
+    --nudge: 0;
     aspect-ratio: auto;
   }
 
@@ -1357,22 +1360,36 @@
     overflow: visible;
   }
 
-  /* the controller stops floating over a frame and sticks under the header */
+  /* On a phone the plate becomes one compact sticky bar: the automation
+     controller alone, no station picker, no screws. */
   .controller {
     position: sticky;
     top: 4.5rem;
     left: auto;
-    translate: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
     width: 100%;
-    margin-bottom: 1.25rem;
-    padding: 0.75rem 0.85rem 0.85rem;
-    border-radius: 0.9rem;
+    margin: 0 0 1.25rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #6b4a26;
+    border-radius: 0.8rem;
+    translate: none;
+  }
+
+  .controller::before,
+  .controller::after {
+    display: none;
   }
 
   .controllerTop {
+    justify-content: space-between;
+    width: 100%;
     gap: 0.7rem;
-    margin-bottom: 0.6rem;
-    font-size: 0.9rem;
+    margin: 0;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
   }
 
   .kinetic {
@@ -1390,14 +1407,9 @@
     left: 0.25rem;
   }
 
+  /* The card stack is the station picker on a phone. */
   .pills {
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .pill {
-    padding: 0.38rem 0.75rem;
-    font-size: 0.78rem;
+    display: none;
   }
 
   .card[data-id='build'] {
@@ -1460,16 +1472,14 @@
     top: calc(var(--oy) * var(--u) * -1);
     width: calc(813 * var(--u));
     height: calc(467 * var(--u));
-    translate: none;
-    scale: none;
     filter: none;
     opacity: 1;
     transform: none;
   }
 
-  /* the art is decoration here; the real controls are underneath */
-  .layer :is(button, input) {
-    pointer-events: none;
+  /* Systems' eyebrow fills the crop, so its index would sit on top of it. */
+  .layer[data-id='systems'] .eyebrow + .eyebrow {
+    display: none;
   }
 
   .deskLine {
@@ -1485,192 +1495,11 @@
   }
 
   .belowLine {
-    margin: 0 0 0.9rem;
+    margin: 0;
     font-family: var(--font-geist), system-ui, sans-serif;
     font-size: 0.95rem;
     line-height: 1.5;
     color: rgb(243 236 223 / 0.84);
-  }
-
-  .belowNote {
-    margin: 0.9rem 0 0;
-    font-family: var(--font-geist-mono), ui-monospace, monospace;
-    font-size: 0.78rem;
-    color: rgb(243 236 223 / 0.7);
-  }
-
-  .belowNote strong {
-    color: #f2c23a;
-    font-weight: 600;
-  }
-
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0 0 0.9rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .chips:last-child {
-    margin-bottom: 0;
-  }
-
-  .chips li,
-  .chipBtn {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.25rem;
-    padding: 0 0.8rem;
-    border: 1.5px solid #2b2118;
-    border-radius: 0.55rem;
-    background: #ece6d6;
-    color: #1a1a2b;
-    font-family: var(--font-geist-mono), ui-monospace, monospace;
-    font-size: 0.82rem;
-    font-weight: 600;
-    box-shadow: 2px 3px 0 rgb(0 0 0 / 0.5);
-  }
-
-  .chips li:nth-child(4n + 1) {
-    background: #f5d03e;
-  }
-  .chips li:nth-child(4n + 2) {
-    background: #8ec1ea;
-  }
-  .chips li:nth-child(4n + 3) {
-    background: #d9e7ec;
-  }
-  .chips li:nth-child(4n) {
-    background: #86c46e;
-  }
-  .chips li[data-hot] {
-    background: #f2c23a;
-  }
-
-  .chips li:has(.chipBtn) {
-    padding: 0;
-    background: none;
-    border: 0;
-    box-shadow: none;
-  }
-
-  .chipBtn {
-    min-height: 2.5rem;
-    cursor: pointer;
-  }
-
-  .chipBtn[aria-pressed='true'] {
-    background: #ee6f9a;
-  }
-
-  .mWeather {
-    margin-top: 1rem;
-    padding: 0.9rem 0.9rem 1rem;
-    border: 1.5px solid #6a5320;
-    border-radius: 0.7rem;
-    background: #f7de8c;
-    color: #3f3210;
-  }
-
-  .mWeather h4 {
-    margin: 0 0 0.6rem;
-    font-family: var(--font-geist-mono), ui-monospace, monospace;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .mCurve {
-    display: grid;
-    grid-template-columns: 4.6rem 1fr 3.4rem;
-    align-items: center;
-    gap: 0.6rem;
-    min-height: 2.75rem;
-    font-family: var(--font-geist-mono), ui-monospace, monospace;
-    font-size: 0.78rem;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-
-  .mCurve span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  .mCurve i {
-    width: 0.7rem;
-    height: 0.7rem;
-    border: 1.5px solid #2b2118;
-    border-radius: 50%;
-  }
-
-  .mCurve input {
-    width: 100%;
-    height: 2.4rem;
-    margin: 0;
-    accent-color: #ee6f5a;
-  }
-
-  .mCurve output {
-    text-align: right;
-    font-size: 0.7rem;
-    color: #6a5320;
-  }
-
-  .mPlay,
-  .mBtn {
-    min-height: 2.9rem;
-    border: 2px solid #2b2118;
-    border-radius: 999px;
-    background: #f6e7a8;
-    color: #2b2118;
-    font-family: var(--font-geist-mono), ui-monospace, monospace;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    box-shadow: 0 3px 0 #b99a45;
-    cursor: pointer;
-  }
-
-  .mPlay {
-    width: 100%;
-    margin-top: 0.7rem;
-  }
-
-  .mPlay:active,
-  .mBtn:active {
-    transform: translateY(2px);
-    box-shadow: 0 1px 0 #b99a45;
-  }
-
-  .mConsole {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.7rem;
-    margin-bottom: 0.9rem;
-  }
-
-  .mBtn {
-    background: #f2ecdc;
-    box-shadow: 0 3px 0 #8f8873;
-  }
-
-  .mBtn[aria-pressed='true'] {
-    background: #dff3e4;
-    box-shadow: 0 3px 0 #3c9d6b;
-  }
-
-  .mPlay:focus-visible,
-  .mBtn:focus-visible,
-  .chipBtn:focus-visible,
-  .mCurve input:focus-visible {
-    outline: 2px solid #3d53d6;
-    outline-offset: 2px;
   }
 
   .note {

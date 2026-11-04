@@ -1,11 +1,6 @@
 'use client'
 
-import {
-  useState,
-  useSyncExternalStore,
-  type CSSProperties,
-  type ReactNode,
-} from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -79,24 +74,6 @@ const DRAWER_TOOLS = [
 const HOT_TOOLS = new Set(['Git', 'PostgreSQL'])
 const FOLDER_X = [641, 704, 761, 819]
 
-/** Phones get a vertical stack of cards instead of one scaled scene. */
-const MOBILE_QUERY = '(max-width: 860px)'
-
-function subscribeMobile(onChange: () => void) {
-  const query = window.matchMedia(MOBILE_QUERY)
-  query.addEventListener('change', onChange)
-  return () => query.removeEventListener('change', onChange)
-}
-
-/** Server and first paint say "not mobile"; layout itself is CSS, this only toggles `inert`. */
-function useMobile() {
-  return useSyncExternalStore(
-    subscribeMobile,
-    () => window.matchMedia(MOBILE_QUERY).matches,
-    () => false,
-  )
-}
-
 /**
  * Each station's footprint in the reference capture (relative to the frame's
  * corner): where to crop the scene on a phone, and how big that crop is.
@@ -130,24 +107,6 @@ function Card({
   )
 }
 
-function Chips({
-  items,
-  hot,
-}: {
-  items: readonly string[]
-  hot?: ReadonlySet<string>
-}) {
-  return (
-    <ul className={styles.chips}>
-      {items.map((item) => (
-        <li key={item} data-hot={hot?.has(item) || undefined}>
-          {item}
-        </li>
-      ))}
-    </ul>
-  )
-}
-
 export function Skills() {
   const [station, setStation] = useState<StationId>('all')
   const [running, setRunning] = useState(true)
@@ -161,8 +120,6 @@ export function Skills() {
   const [pressed, setPressed] = useState(false)
   const [ribbon, setRibbon] = useState(0)
 
-  const mobile = useMobile()
-  const art = mobile ? ({ inert: true, 'aria-hidden': true } as const) : {}
   const { ref, inView, armed } = useInView<HTMLDivElement>(0.12)
 
   const build = SKILL_GROUPS.find((group) => group.id === 'build')!
@@ -257,15 +214,7 @@ export function Skills() {
               {/* 04 · The rest */}
               <Card
                 id="rest"
-                below={
-                  <>
-                    <p className={styles.belowLine}>{also.line}</p>
-                    <Chips items={[...tools, ...folders]} hot={HOT_TOOLS} />
-                    <p className={styles.belowNote}>
-                      currently poking: <strong>view transitions</strong>
-                    </p>
-                  </>
-                }
+                below={<p className={styles.belowLine}>{also.line}</p>}
               >
                 <div
                   className={styles.layer}
@@ -290,7 +239,6 @@ export function Skills() {
 
                   <div
                     className={styles.sticky}
-                    {...art}
                     style={{ ...at(808, 411, 80, 37), fontSize: u(6.3) }}
                   >
                     currently poking:
@@ -300,7 +248,6 @@ export function Skills() {
 
                   <ul
                     className={styles.folderLabels}
-                    {...art}
                     aria-label="Also in the drawer"
                   >
                     {folders.map((name, i) => (
@@ -315,7 +262,6 @@ export function Skills() {
 
                   <ul
                     className={styles.drawerTools}
-                    {...art}
                     style={{ ...at(630, 478, 255, 19), fontSize: u(7.2) }}
                   >
                     {tools.map((tool) => (
@@ -333,12 +279,7 @@ export function Skills() {
               {/* 01 · Build */}
               <Card
                 id="build"
-                below={
-                  <>
-                    <p className={styles.belowLine}>{build.line}</p>
-                    <Chips items={build.skills} />
-                  </>
-                }
+                below={<p className={styles.belowLine}>{build.line}</p>}
               >
                 <div
                   className={styles.layer}
@@ -376,7 +317,7 @@ export function Skills() {
                     stratosphere
                   </span>
 
-                  <ul className={styles.tags} {...art} aria-label="Build tools">
+                  <ul className={styles.tags} aria-label="Build tools">
                     {build.skills.slice(0, TAGS.length).map((skill, i) => (
                       <li
                         key={skill}
@@ -398,50 +339,7 @@ export function Skills() {
               {/* 02 · Motion */}
               <Card
                 id="motion"
-                below={
-                  <>
-                    <p className={styles.belowLine}>{motionGroup.line}</p>
-                    <Chips items={motionGroup.skills} />
-                    <div className={styles.mWeather}>
-                      <h4>Weather &amp; current machine</h4>
-                      {CURVES.map((curve) => (
-                        <label key={curve.id} className={styles.mCurve}>
-                          <span>
-                            <i style={{ background: curve.dot }} aria-hidden />{' '}
-                            {curve.label}
-                          </span>
-                          <input
-                            type="range"
-                            min={0}
-                            max={100}
-                            value={curves[curve.id]}
-                            aria-label={`${curve.label} curve`}
-                            aria-valuetext={`${curve.label}: stiffness ${curve.stiffness}, damping ${curve.damping}`}
-                            onPointerDown={() => setPlaying(false)}
-                            onChange={(event) => {
-                              setPlaying(false)
-                              setCurves((values) => ({
-                                ...values,
-                                [curve.id]: Number(event.target.value),
-                              }))
-                            }}
-                          />
-                          <output>
-                            {curve.stiffness}/{curve.damping}
-                          </output>
-                        </label>
-                      ))}
-                      <button
-                        type="button"
-                        className={styles.mPlay}
-                        onClick={playCurves}
-                      >
-                        {run > 0 ? 'Play again' : 'Play the curves'}{' '}
-                        <span aria-hidden>→</span>
-                      </button>
-                    </div>
-                  </>
-                }
+                below={<p className={styles.belowLine}>{motionGroup.line}</p>}
               >
                 <div
                   className={styles.layer}
@@ -464,11 +362,7 @@ export function Skills() {
                   </h3>
                   <p className={styles.deskLine}>{motionGroup.line}</p>
 
-                  <ul
-                    className={styles.windTags}
-                    {...art}
-                    aria-label="Motion tools"
-                  >
+                  <ul className={styles.windTags} aria-label="Motion tools">
                     {motionGroup.skills.map((skill, i) => (
                       <li
                         key={skill}
@@ -488,7 +382,6 @@ export function Skills() {
 
                   <div
                     className={styles.weather}
-                    {...art}
                     style={{ ...at(764, 237, 100, 70), fontSize: u(6.2) }}
                   >
                     <span className={styles.weatherHead}>
@@ -538,7 +431,6 @@ export function Skills() {
                   <button
                     type="button"
                     className={styles.play}
-                    {...art}
                     style={{ ...at(742, 342, 86, 22), fontSize: u(6.6) }}
                     onClick={playCurves}
                   >
@@ -551,38 +443,7 @@ export function Skills() {
               {/* 03 · Systems */}
               <Card
                 id="systems"
-                below={
-                  <>
-                    <p className={styles.belowLine}>{systems.line}</p>
-                    <div className={styles.mConsole}>
-                      <button type="button" className={styles.mBtn}>
-                        Hover me
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.mBtn}
-                        aria-pressed={pressed}
-                        onClick={() => setPressed((value) => !value)}
-                      >
-                        Press me <span aria-hidden>{pressed ? '✓' : ''}</span>
-                      </button>
-                    </div>
-                    <ul className={styles.chips} aria-label="Systems practices">
-                      {systems.skills.map((item, i) => (
-                        <li key={item}>
-                          <button
-                            type="button"
-                            className={styles.chipBtn}
-                            aria-pressed={ribbon === i}
-                            onClick={() => setRibbon(i)}
-                          >
-                            {item}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                }
+                below={<p className={styles.belowLine}>{systems.line}</p>}
               >
                 <div
                   className={styles.layer}
@@ -623,7 +484,6 @@ export function Skills() {
 
                   <div
                     className={styles.consoleRow}
-                    {...art}
                     style={at(356, 409, 116, 31)}
                   >
                     <button
@@ -658,11 +518,7 @@ export function Skills() {
                     </button>
                   </div>
 
-                  <ul
-                    className={styles.ribbons}
-                    {...art}
-                    aria-label="Systems practices"
-                  >
+                  <ul className={styles.ribbons} aria-label="Systems practices">
                     {systems.skills.slice(0, RIBBONS.length).map((item, i) => (
                       <li
                         key={item}
