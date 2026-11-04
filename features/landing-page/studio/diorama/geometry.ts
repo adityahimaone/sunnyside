@@ -39,6 +39,9 @@ export function atRight(x: number, y: number): CSSProperties {
 /** A length in the reference's pixels, scaled with the stage. */
 export const u = (n: number) => `calc(var(--u) * ${n})`
 
+/** A font size in reference pixels, times the stage's text zoom (larger on phone cards). */
+export const fs = (n: number) => `calc(var(--u) * var(--tz, 1) * ${n})`
+
 /** Fill a CSS custom property for a size, so the stylesheet can use it too. */
 export const vars = (record: Record<string, string | number>) =>
   record as unknown as CSSProperties

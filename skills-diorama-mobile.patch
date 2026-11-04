@@ -1,0 +1,1308 @@
+From 901ca0469f4ac6bcbd523dbc7c774b38e8e804a7 Mon Sep 17 00:00:00 2001
+From: Adit <adit@example.com>
+Date: Wed, 4 Nov 2026 01:44:53 +0000
+Subject: [PATCH] feat(skills): vertical card layout on phones instead of a
+ sideways-scrolling scene
+
+Below 860px the diorama is cut into one framed card per station, stacked
+vertically, each cropping the same drawing. Real full-size controls sit
+underneath (tool chips, curve sliders with values, play button, hover/press
+buttons, practice chips); the in-art copies become inert decoration so nothing
+is duplicated for assistive tech. The controller sticks under the header and
+chooses a card instead of dimming the others.
+---
+ .../studio/diorama/diorama.module.css         | 399 ++++++++-
+ .../landing-page/studio/diorama/geometry.ts   |   3 +
+ features/landing-page/studio/skills.tsx       | 773 +++++++++++-------
+ 3 files changed, 875 insertions(+), 300 deletions(-)
+
+diff --git a/features/landing-page/studio/diorama/diorama.module.css b/features/landing-page/studio/diorama/diorama.module.css
+index 8c22ae1..46db9a5 100644
+--- a/features/landing-page/studio/diorama/diorama.module.css
++++ b/features/landing-page/studio/diorama/diorama.module.css
+@@ -5,8 +5,9 @@
+    of text and every control is placed by the same numbers (see geometry.ts), so
+    at any width the room is the picture, scaled. Nothing here is responsive in
+    the "reflow" sense on purpose: a shadowbox is a fixed composition. On a phone
+-   it keeps a readable minimum width and scrolls sideways, like a real one you
+-   would turn in your hands. */
++   that composition is cut into one framed card per station, stacked vertically,
++   each card cropping the same drawing and carrying its readable controls
++   underneath (see the last block). */
+ 
+ .shell {
+   width: 100%;
+@@ -59,21 +60,6 @@
+   padding-top: calc(var(--u) * 52);
+ }
+ 
+-@media (max-width: 860px) {
+-  .room {
+-    --stage-w: 860px;
+-    justify-content: flex-start;
+-    padding-inline: 1rem;
+-    overflow-x: auto;
+-    scroll-snap-type: x proximity;
+-    -webkit-overflow-scrolling: touch;
+-  }
+-
+-  .stageWrap {
+-    scroll-snap-align: center;
+-  }
+-}
+-
+ .stage {
+   --px: 0;
+   --py: 0;
+@@ -121,6 +107,26 @@
+   background-size: calc(var(--u) * 160);
+ }
+ 
++/* On desktop the card and its window are invisible plumbing. */
++.card,
++.view {
++  display: contents;
++}
++
++.below {
++  display: none;
++}
++
++.deskLine {
++  position: absolute;
++  width: 1px;
++  height: 1px;
++  margin: -1px;
++  overflow: hidden;
++  clip: rect(0, 0, 0, 0);
++  white-space: nowrap;
++}
++
+ .layer {
+   position: absolute;
+   inset: 0;
+@@ -1269,3 +1275,362 @@
+     transition-duration: 0.01ms !important;
+   }
+ }
++
++/* ── Phones: one framed card per station, stacked ──────────────────────── */
++
++@media (max-width: 860px) {
++  .room {
++    --stage-w: min(calc(100vw - 2rem), 34rem);
++    display: block;
++    padding-inline: 1rem;
++  }
++
++  .stageWrap {
++    width: 100%;
++    max-width: 34rem;
++    margin-inline: auto;
++    padding-top: 0;
++  }
++
++  .stage {
++    --tz: 1.5;
++    aspect-ratio: auto;
++  }
++
++  .stage::before,
++  .scene::after,
++  .wall,
++  .front {
++    display: none;
++  }
++
++  .scene {
++    position: static;
++    display: flex;
++    flex-direction: column;
++    gap: 1.5rem;
++    overflow: visible;
++  }
++
++  /* the controller stops floating over a frame and sticks under the header */
++  .controller {
++    position: sticky;
++    top: 4.5rem;
++    left: auto;
++    translate: none;
++    width: 100%;
++    margin-bottom: 1.25rem;
++    padding: 0.75rem 0.85rem 0.85rem;
++    border-radius: 0.9rem;
++  }
++
++  .controllerTop {
++    gap: 0.7rem;
++    margin-bottom: 0.6rem;
++    font-size: 0.9rem;
++  }
++
++  .kinetic {
++    width: 2.4rem;
++    height: 1.3rem;
++  }
++
++  .knob {
++    width: 0.9rem;
++    height: 0.9rem;
++    left: calc(100% - 1.15rem);
++  }
++
++  .kinetic[aria-pressed='false'] .knob {
++    left: 0.25rem;
++  }
++
++  .pills {
++    flex-wrap: wrap;
++    gap: 0.4rem;
++  }
++
++  .pill {
++    padding: 0.38rem 0.75rem;
++    font-size: 0.78rem;
++  }
++
++  .card[data-id='build'] {
++    order: 1;
++  }
++  .card[data-id='motion'] {
++    order: 2;
++  }
++  .card[data-id='systems'] {
++    order: 3;
++  }
++  .card[data-id='rest'] {
++    order: 4;
++  }
++
++  /* on a phone the controller chooses a card, it does not dim the others */
++  .stage[data-station='build'] .card:not([data-id='build']),
++  .stage[data-station='motion'] .card:not([data-id='motion']),
++  .stage[data-station='systems'] .card:not([data-id='systems']),
++  .stage[data-station='rest'] .card:not([data-id='rest']) {
++    display: none;
++  }
++
++  .card {
++    --card-w: min(calc(100vw - 2rem), 34rem);
++    --frame: 0.45rem;
++    --u: calc((var(--card-w) - var(--frame) * 2) / var(--pw));
++
++    display: block;
++    position: relative;
++    width: 100%;
++    overflow: hidden;
++    border-radius: 0.9rem;
++    background: #1f1f2c;
++    box-shadow:
++      0 0 0 1px #6b4b2e,
++      0 0.9rem 1.6rem rgb(0 0 0 / 0.45);
++  }
++
++  /* the window: a wooden frame round the crop of the scene */
++  .view {
++    display: block;
++    position: relative;
++    box-sizing: content-box;
++    width: calc(100% - var(--frame) * 2);
++    aspect-ratio: calc(var(--pw) / var(--ph));
++    overflow: hidden;
++    border: var(--frame) solid #b08c66;
++    border-bottom: 0;
++    border-radius: 0.9rem 0.9rem 0 0;
++    background: radial-gradient(ellipse at 50% 55%, #5b3e27, #2c1a0e);
++    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
++  }
++
++  .layer,
++  .layer[data-id] {
++    position: absolute;
++    inset: auto;
++    left: calc(var(--ox) * var(--u) * -1);
++    top: calc(var(--oy) * var(--u) * -1);
++    width: calc(813 * var(--u));
++    height: calc(467 * var(--u));
++    translate: none;
++    scale: none;
++    filter: none;
++    opacity: 1;
++    transform: none;
++  }
++
++  /* the art is decoration here; the real controls are underneath */
++  .layer :is(button, input) {
++    pointer-events: none;
++  }
++
++  .deskLine {
++    display: none;
++  }
++
++  .below {
++    display: block;
++    padding: 1rem 1rem 1.25rem;
++    background: #1f1f2c;
++    color: #f3ecdf;
++    border-top: 3px solid #b08c66;
++  }
++
++  .belowLine {
++    margin: 0 0 0.9rem;
++    font-family: var(--font-geist), system-ui, sans-serif;
++    font-size: 0.95rem;
++    line-height: 1.5;
++    color: rgb(243 236 223 / 0.84);
++  }
++
++  .belowNote {
++    margin: 0.9rem 0 0;
++    font-family: var(--font-geist-mono), ui-monospace, monospace;
++    font-size: 0.78rem;
++    color: rgb(243 236 223 / 0.7);
++  }
++
++  .belowNote strong {
++    color: #f2c23a;
++    font-weight: 600;
++  }
++
++  .chips {
++    display: flex;
++    flex-wrap: wrap;
++    gap: 0.5rem;
++    margin: 0 0 0.9rem;
++    padding: 0;
++    list-style: none;
++  }
++
++  .chips:last-child {
++    margin-bottom: 0;
++  }
++
++  .chips li,
++  .chipBtn {
++    display: inline-flex;
++    align-items: center;
++    min-height: 2.25rem;
++    padding: 0 0.8rem;
++    border: 1.5px solid #2b2118;
++    border-radius: 0.55rem;
++    background: #ece6d6;
++    color: #1a1a2b;
++    font-family: var(--font-geist-mono), ui-monospace, monospace;
++    font-size: 0.82rem;
++    font-weight: 600;
++    box-shadow: 2px 3px 0 rgb(0 0 0 / 0.5);
++  }
++
++  .chips li:nth-child(4n + 1) {
++    background: #f5d03e;
++  }
++  .chips li:nth-child(4n + 2) {
++    background: #8ec1ea;
++  }
++  .chips li:nth-child(4n + 3) {
++    background: #d9e7ec;
++  }
++  .chips li:nth-child(4n) {
++    background: #86c46e;
++  }
++  .chips li[data-hot] {
++    background: #f2c23a;
++  }
++
++  .chips li:has(.chipBtn) {
++    padding: 0;
++    background: none;
++    border: 0;
++    box-shadow: none;
++  }
++
++  .chipBtn {
++    min-height: 2.5rem;
++    cursor: pointer;
++  }
++
++  .chipBtn[aria-pressed='true'] {
++    background: #ee6f9a;
++  }
++
++  .mWeather {
++    margin-top: 1rem;
++    padding: 0.9rem 0.9rem 1rem;
++    border: 1.5px solid #6a5320;
++    border-radius: 0.7rem;
++    background: #f7de8c;
++    color: #3f3210;
++  }
++
++  .mWeather h4 {
++    margin: 0 0 0.6rem;
++    font-family: var(--font-geist-mono), ui-monospace, monospace;
++    font-size: 0.72rem;
++    font-weight: 600;
++    letter-spacing: 0.08em;
++    text-transform: uppercase;
++  }
++
++  .mCurve {
++    display: grid;
++    grid-template-columns: 4.6rem 1fr 3.4rem;
++    align-items: center;
++    gap: 0.6rem;
++    min-height: 2.75rem;
++    font-family: var(--font-geist-mono), ui-monospace, monospace;
++    font-size: 0.78rem;
++    font-weight: 600;
++    text-transform: uppercase;
++  }
++
++  .mCurve span {
++    display: inline-flex;
++    align-items: center;
++    gap: 0.35rem;
++  }
++
++  .mCurve i {
++    width: 0.7rem;
++    height: 0.7rem;
++    border: 1.5px solid #2b2118;
++    border-radius: 50%;
++  }
++
++  .mCurve input {
++    width: 100%;
++    height: 2.4rem;
++    margin: 0;
++    accent-color: #ee6f5a;
++  }
++
++  .mCurve output {
++    text-align: right;
++    font-size: 0.7rem;
++    color: #6a5320;
++  }
++
++  .mPlay,
++  .mBtn {
++    min-height: 2.9rem;
++    border: 2px solid #2b2118;
++    border-radius: 999px;
++    background: #f6e7a8;
++    color: #2b2118;
++    font-family: var(--font-geist-mono), ui-monospace, monospace;
++    font-size: 0.8rem;
++    font-weight: 600;
++    letter-spacing: 0.06em;
++    text-transform: uppercase;
++    box-shadow: 0 3px 0 #b99a45;
++    cursor: pointer;
++  }
++
++  .mPlay {
++    width: 100%;
++    margin-top: 0.7rem;
++  }
++
++  .mPlay:active,
++  .mBtn:active {
++    transform: translateY(2px);
++    box-shadow: 0 1px 0 #b99a45;
++  }
++
++  .mConsole {
++    display: grid;
++    grid-template-columns: 1fr 1fr;
++    gap: 0.7rem;
++    margin-bottom: 0.9rem;
++  }
++
++  .mBtn {
++    background: #f2ecdc;
++    box-shadow: 0 3px 0 #8f8873;
++  }
++
++  .mBtn[aria-pressed='true'] {
++    background: #dff3e4;
++    box-shadow: 0 3px 0 #3c9d6b;
++  }
++
++  .mPlay:focus-visible,
++  .mBtn:focus-visible,
++  .chipBtn:focus-visible,
++  .mCurve input:focus-visible {
++    outline: 2px solid #3d53d6;
++    outline-offset: 2px;
++  }
++
++  .note {
++    flex-direction: column;
++    gap: 0.4rem;
++    margin-inline: 0;
++  }
++}
+diff --git a/features/landing-page/studio/diorama/geometry.ts b/features/landing-page/studio/diorama/geometry.ts
+index a603607..5d96841 100644
+--- a/features/landing-page/studio/diorama/geometry.ts
++++ b/features/landing-page/studio/diorama/geometry.ts
+@@ -39,6 +39,9 @@ export function atRight(x: number, y: number): CSSProperties {
+ /** A length in the reference's pixels, scaled with the stage. */
+ export const u = (n: number) => `calc(var(--u) * ${n})`
+ 
++/** A font size in reference pixels, times the stage's text zoom (larger on phone cards). */
++export const fs = (n: number) => `calc(var(--u) * var(--tz, 1) * ${n})`
++
+ /** Fill a CSS custom property for a size, so the stylesheet can use it too. */
+ export const vars = (record: Record<string, string | number>) =>
+   record as unknown as CSSProperties
+diff --git a/features/landing-page/studio/skills.tsx b/features/landing-page/studio/skills.tsx
+index 88e5182..da21a62 100644
+--- a/features/landing-page/studio/skills.tsx
++++ b/features/landing-page/studio/skills.tsx
+@@ -1,6 +1,13 @@
+ 'use client'
+ 
+-import { useEffect, useRef, useState, type CSSProperties } from 'react'
++import {
++  useEffect,
++  useRef,
++  useState,
++  useSyncExternalStore,
++  type CSSProperties,
++  type ReactNode,
++} from 'react'
+ 
+ import { cn } from '@/lib/utils'
+ 
+@@ -14,7 +21,7 @@ import {
+   SystemsArt,
+ } from './diorama/diorama-art'
+ import styles from './diorama/diorama.module.css'
+-import { at, atRight, u, vars } from './diorama/geometry'
++import { at, atRight, fs, u, vars } from './diorama/geometry'
+ import { SectionHead, SectionNext } from './section-head'
+ import { SKILL_GROUPS } from './studio-data'
+ import { useInView } from './use-in-view'
+@@ -74,6 +81,75 @@ const DRAWER_TOOLS = [
+ const HOT_TOOLS = new Set(['Git', 'PostgreSQL'])
+ const FOLDER_X = [641, 704, 761, 819]
+ 
++/** Phones get a vertical stack of cards instead of one scaled scene. */
++const MOBILE_QUERY = '(max-width: 860px)'
++
++function subscribeMobile(onChange: () => void) {
++  const query = window.matchMedia(MOBILE_QUERY)
++  query.addEventListener('change', onChange)
++  return () => query.removeEventListener('change', onChange)
++}
++
++/** Server and first paint say "not mobile"; layout itself is CSS, this only toggles `inert`. */
++function useMobile() {
++  return useSyncExternalStore(
++    subscribeMobile,
++    () => window.matchMedia(MOBILE_QUERY).matches,
++    () => false,
++  )
++}
++
++/**
++ * Each station's footprint in the reference capture (relative to the frame's
++ * corner): where to crop the scene on a phone, and how big that crop is.
++ */
++const CROPS = {
++  build: { '--ox': 41, '--oy': 32, '--pw': 402, '--ph': 272 },
++  motion: { '--ox': 414, '--oy': 32, '--pw': 361, '--ph': 274 },
++  systems: { '--ox': 38, '--oy': 242, '--pw': 451, '--ph': 214 },
++  rest: { '--ox': 467, '--oy': 292, '--pw': 328, '--ph': 156 },
++} as const
++
++/**
++ * On desktop a card is invisible plumbing (`display: contents`) and the layer
++ * inside it is positioned on the stage. On a phone the card is a framed window
++ * onto its own piece of the scene, with the readable controls underneath.
++ */
++function Card({
++  id,
++  below,
++  children,
++}: {
++  id: keyof typeof CROPS
++  below: ReactNode
++  children: ReactNode
++}) {
++  return (
++    <div className={styles.card} data-id={id} style={vars(CROPS[id])}>
++      <div className={styles.view}>{children}</div>
++      <div className={styles.below}>{below}</div>
++    </div>
++  )
++}
++
++function Chips({
++  items,
++  hot,
++}: {
++  items: readonly string[]
++  hot?: ReadonlySet<string>
++}) {
++  return (
++    <ul className={styles.chips}>
++      {items.map((item) => (
++        <li key={item} data-hot={hot?.has(item) || undefined}>
++          {item}
++        </li>
++      ))}
++    </ul>
++  )
++}
++
+ export function Skills() {
+   const [station, setStation] = useState<StationId>('all')
+   const [running, setRunning] = useState(true)
+@@ -87,6 +163,8 @@ export function Skills() {
+   const [pressed, setPressed] = useState(false)
+   const [ribbon, setRibbon] = useState(0)
+ 
++  const mobile = useMobile()
++  const art = mobile ? ({ inert: true, 'aria-hidden': true } as const) : {}
+   const stage = useRef<HTMLDivElement>(null)
+   const { ref, inView, armed } = useInView<HTMLDivElement>(0.12)
+ 
+@@ -220,313 +298,442 @@ export function Skills() {
+               </div>
+ 
+               {/* 04 · The rest */}
+-              <div
+-                className={styles.layer}
+-                data-id="rest"
+-                style={vars({ '--depth': 0.45, '--n': 0 })}
++              <Card
++                id="rest"
++                below={
++                  <>
++                    <p className={styles.belowLine}>{also.line}</p>
++                    <Chips items={[...tools, ...folders]} hot={HOT_TOOLS} />
++                    <p className={styles.belowNote}>
++                      currently poking: <strong>view transitions</strong>
++                    </p>
++                  </>
++                }
+               >
+-                <RestArt folderCount={folders.length} />
+-                <Eyebrow
+-                  x={610}
+-                  y={401}
+-                  text={also.eyebrow}
+-                  index="04 / 04"
+-                  xr={879}
+-                />
+-                <h3
+-                  className={cn(styles.title, styles.titleInk)}
+-                  style={{ ...at(610, 416), fontSize: u(26.5) }}
+-                >
+-                  {also.title}
+-                </h3>
+-                <p className={styles.srOnly}>{also.line}</p>
+-
+                 <div
+-                  className={styles.sticky}
+-                  style={{ ...at(808, 411, 80, 37), fontSize: u(6.3) }}
++                  className={styles.layer}
++                  data-id="rest"
++                  style={vars({ '--depth': 0.45, '--n': 0 })}
+                 >
+-                  currently poking:
+-                  <br />
+-                  <span>view transitions</span>
++                  <RestArt folderCount={folders.length} />
++                  <Eyebrow
++                    x={610}
++                    y={401}
++                    text={also.eyebrow}
++                    index="04 / 04"
++                    xr={879}
++                  />
++                  <h3
++                    className={cn(styles.title, styles.titleInk)}
++                    style={{ ...at(610, 416), fontSize: u(26.5) }}
++                  >
++                    {also.title}
++                  </h3>
++                  <p className={styles.deskLine}>{also.line}</p>
++
++                  <div
++                    className={styles.sticky}
++                    {...art}
++                    style={{ ...at(808, 411, 80, 37), fontSize: u(6.3) }}
++                  >
++                    currently poking:
++                    <br />
++                    <span>view transitions</span>
++                  </div>
++
++                  <ul
++                    className={styles.folderLabels}
++                    {...art}
++                    aria-label="Also in the drawer"
++                  >
++                    {folders.map((name, i) => (
++                      <li
++                        key={name}
++                        style={{ ...at(FOLDER_X[i], 452.5), fontSize: u(5.6) }}
++                      >
++                        {name}
++                      </li>
++                    ))}
++                  </ul>
++
++                  <ul
++                    className={styles.drawerTools}
++                    {...art}
++                    style={{ ...at(630, 478, 255, 19), fontSize: u(7.2) }}
++                  >
++                    {tools.map((tool) => (
++                      <li
++                        key={tool}
++                        data-hot={HOT_TOOLS.has(tool) || undefined}
++                      >
++                        {tool}
++                      </li>
++                    ))}
++                  </ul>
+                 </div>
+-
+-                <ul
+-                  className={styles.folderLabels}
+-                  aria-label="Also in the drawer"
+-                >
+-                  {folders.map((name, i) => (
+-                    <li
+-                      key={name}
+-                      style={{ ...at(FOLDER_X[i], 452.5), fontSize: u(5.6) }}
+-                    >
+-                      {name}
+-                    </li>
+-                  ))}
+-                </ul>
+-
+-                <ul
+-                  className={styles.drawerTools}
+-                  style={{ ...at(630, 478, 255, 19), fontSize: u(7.2) }}
+-                >
+-                  {tools.map((tool) => (
+-                    <li key={tool} data-hot={HOT_TOOLS.has(tool) || undefined}>
+-                      {tool}
+-                    </li>
+-                  ))}
+-                </ul>
+-              </div>
++              </Card>
+ 
+               {/* 01 · Build */}
+-              <div
+-                className={styles.layer}
+-                data-id="build"
+-                style={vars({ '--depth': 0.8, '--n': 1 })}
+-              >
+-                <BuildArt />
+-                <Eyebrow
+-                  x={172}
+-                  y={129}
+-                  text={build.eyebrow}
+-                  index="01 / 04"
+-                  xr={527}
+-                />
+-                <h3
+-                  className={cn(styles.title, styles.titleCream)}
+-                  style={{ ...at(172, 148), fontSize: u(24.5) }}
+-                >
+-                  {build.title}
+-                </h3>
+-                <p className={styles.srOnly}>{build.line}</p>
+-
+-                <span
+-                  className={styles.cloudText}
+-                  style={{ ...at(159, 183), fontSize: u(4.8) }}
+-                  aria-hidden
+-                >
+-                  space atmosphere
+-                </span>
+-                <span
+-                  className={styles.cloudText}
+-                  style={{ ...at(478, 156), fontSize: u(4.8) }}
+-                  aria-hidden
+-                >
+-                  stratosphere
+-                </span>
+-
+-                <ul className={styles.tags} aria-label="Build tools">
+-                  {build.skills.slice(0, TAGS.length).map((skill, i) => (
+-                    <li
+-                      key={skill}
+-                      className={styles.tag}
+-                      data-skill={skill}
+-                      style={{
+-                        ...at(TAGS[i].x, 283, TAGS[i].w, 17),
+-                        fontSize: u(6.7),
+-                        ...vars({ '--delay': `${i * 0.4}s` }),
+-                      }}
+-                    >
+-                      {skill}
+-                    </li>
+-                  ))}
+-                </ul>
+-              </div>
+-
+-              {/* 02 · Motion */}
+-              <div
+-                className={styles.layer}
+-                data-id="motion"
+-                style={vars({ '--depth': 0.8, '--n': 2 })}
++              <Card
++                id="build"
++                below={
++                  <>
++                    <p className={styles.belowLine}>{build.line}</p>
++                    <Chips items={build.skills} />
++                  </>
++                }
+               >
+-                <MotionArt />
+-                <Eyebrow
+-                  x={565}
+-                  y={129}
+-                  text={motionGroup.eyebrow}
+-                  index="02 / 04"
+-                  xr={858}
+-                />
+-                <h3
+-                  className={cn(styles.title, styles.titleInk)}
+-                  style={{ ...at(565, 146), fontSize: u(27) }}
+-                >
+-                  {motionGroup.title}
+-                </h3>
+-                <p className={styles.srOnly}>{motionGroup.line}</p>
+-
+-                <ul className={styles.windTags} aria-label="Motion tools">
+-                  {motionGroup.skills.map((skill, i) => (
+-                    <li
+-                      key={skill}
+-                      data-slot={i}
+-                      style={{
+-                        ...at(
+-                          [833, 840, 588, 592][i] ?? 588,
+-                          [165, 216, 343, 358][i] ?? 343,
+-                        ),
+-                        fontSize: u(i < 2 ? 5.6 : 5.8),
+-                      }}
+-                    >
+-                      {skill}
+-                    </li>
+-                  ))}
+-                </ul>
+-
+                 <div
+-                  className={styles.weather}
+-                  style={{ ...at(764, 237, 100, 70), fontSize: u(6.2) }}
++                  className={styles.layer}
++                  data-id="build"
++                  style={vars({ '--depth': 0.8, '--n': 1 })}
+                 >
+-                  <span className={styles.weatherHead}>
+-                    Weather &amp; current machine
++                  <BuildArt />
++                  <Eyebrow
++                    x={172}
++                    y={129}
++                    text={build.eyebrow}
++                    index="01 / 04"
++                    xr={527}
++                  />
++                  <h3
++                    className={cn(styles.title, styles.titleCream)}
++                    style={{ ...at(172, 148), fontSize: u(24.5) }}
++                  >
++                    {build.title}
++                  </h3>
++                  <p className={styles.deskLine}>{build.line}</p>
++
++                  <span
++                    className={styles.cloudText}
++                    style={{ ...at(159, 183), fontSize: u(4.8) }}
++                    aria-hidden
++                  >
++                    space atmosphere
+                   </span>
+-                  {CURVES.map((curve, i) => (
+-                    <label
+-                      key={curve.id}
+-                      className={styles.curveRow}
+-                      data-curve={curve.id}
+-                      data-playing={playing || undefined}
+-                      style={{
+-                        top: u(25.5 + i * 18.5),
+-                        ...vars({ '--pct': curves[curve.id] }),
+-                      }}
+-                    >
+-                      <span className={styles.curveLabel}>{curve.label}</span>
+-                      <i
+-                        className={styles.curveDot}
+-                        style={{ background: curve.dot }}
+-                        aria-hidden
+-                      />
+-                      <input
+-                        type="range"
+-                        min={0}
+-                        max={100}
+-                        value={curves[curve.id]}
+-                        className={styles.curveInput}
+-                        aria-label={`${curve.label} curve`}
+-                        aria-valuetext={`${curve.label}: stiffness ${curve.stiffness}, damping ${curve.damping}`}
+-                        onPointerDown={() => setPlaying(false)}
+-                        onChange={(event) => {
+-                          setPlaying(false)
+-                          setCurves((values) => ({
+-                            ...values,
+-                            [curve.id]: Number(event.target.value),
+-                          }))
++                  <span
++                    className={styles.cloudText}
++                    style={{ ...at(478, 156), fontSize: u(4.8) }}
++                    aria-hidden
++                  >
++                    stratosphere
++                  </span>
++
++                  <ul className={styles.tags} {...art} aria-label="Build tools">
++                    {build.skills.slice(0, TAGS.length).map((skill, i) => (
++                      <li
++                        key={skill}
++                        className={styles.tag}
++                        data-skill={skill}
++                        style={{
++                          ...at(TAGS[i].x, 283, TAGS[i].w, 17),
++                          fontSize: u(6.7),
++                          ...vars({ '--delay': `${i * 0.4}s` }),
+                         }}
+-                      />
+-                      <span className={styles.srOnly}>
+-                        {curve.stiffness} / {curve.damping}
+-                      </span>
+-                    </label>
+-                  ))}
++                      >
++                        {skill}
++                      </li>
++                    ))}
++                  </ul>
+                 </div>
++              </Card>
+ 
+-                <button
+-                  type="button"
+-                  className={styles.play}
+-                  style={{ ...at(742, 342, 86, 22), fontSize: u(6.6) }}
+-                  onClick={playCurves}
+-                >
+-                  {run > 0 ? 'Play again' : 'Play the curves'}{' '}
+-                  <span aria-hidden>→</span>
+-                </button>
+-              </div>
+-
+-              {/* 03 · Systems */}
+-              <div
+-                className={styles.layer}
+-                data-id="systems"
+-                style={vars({ '--depth': 1.35, '--n': 3 })}
++              {/* 02 · Motion */}
++              <Card
++                id="motion"
++                below={
++                  <>
++                    <p className={styles.belowLine}>{motionGroup.line}</p>
++                    <Chips items={motionGroup.skills} />
++                    <div className={styles.mWeather}>
++                      <h4>Weather &amp; current machine</h4>
++                      {CURVES.map((curve) => (
++                        <label key={curve.id} className={styles.mCurve}>
++                          <span>
++                            <i style={{ background: curve.dot }} aria-hidden />{' '}
++                            {curve.label}
++                          </span>
++                          <input
++                            type="range"
++                            min={0}
++                            max={100}
++                            value={curves[curve.id]}
++                            aria-label={`${curve.label} curve`}
++                            aria-valuetext={`${curve.label}: stiffness ${curve.stiffness}, damping ${curve.damping}`}
++                            onPointerDown={() => setPlaying(false)}
++                            onChange={(event) => {
++                              setPlaying(false)
++                              setCurves((values) => ({
++                                ...values,
++                                [curve.id]: Number(event.target.value),
++                              }))
++                            }}
++                          />
++                          <output>
++                            {curve.stiffness}/{curve.damping}
++                          </output>
++                        </label>
++                      ))}
++                      <button
++                        type="button"
++                        className={styles.mPlay}
++                        onClick={playCurves}
++                      >
++                        {run > 0 ? 'Play again' : 'Play the curves'}{' '}
++                        <span aria-hidden>→</span>
++                      </button>
++                    </div>
++                  </>
++                }
+               >
+-                <SystemsArt />
+-                <Eyebrow
+-                  x={357}
+-                  y={334}
+-                  text={systems.eyebrow}
+-                  index="03 / 04"
+-                  xr={563}
+-                />
+-                <h3
+-                  className={cn(styles.title, styles.titleInk)}
+-                  style={{ ...at(357, 348), fontSize: u(27) }}
+-                >
+-                  {systems.title}
+-                </h3>
+-                <p className={styles.srOnly}>{systems.line}</p>
+-
+-                <span
+-                  className={styles.deck}
+-                  style={{ ...at(357, 388, 116, 17), fontSize: u(6.8) }}
+-                >
+-                  Barometric Control Deck
+-                </span>
+-
+-                <span
+-                  className={styles.gateTitle}
+-                  style={{ ...at(367, 451), fontSize: u(15) }}
+-                  aria-hidden
+-                >
+-                  Systems
+-                </span>
+-
+                 <div
+-                  className={styles.consoleRow}
+-                  style={at(356, 409, 116, 31)}
++                  className={styles.layer}
++                  data-id="motion"
++                  style={vars({ '--depth': 0.8, '--n': 2 })}
+                 >
+-                  <button
+-                    type="button"
+-                    className={cn(styles.consoleBtn, styles.hoverBtn)}
+-                    style={{ fontSize: u(7) }}
++                  <MotionArt />
++                  <Eyebrow
++                    x={565}
++                    y={129}
++                    text={motionGroup.eyebrow}
++                    index="02 / 04"
++                    xr={858}
++                  />
++                  <h3
++                    className={cn(styles.title, styles.titleInk)}
++                    style={{ ...at(565, 146), fontSize: u(27) }}
+                   >
+-                    Hover me
+-                  </button>
++                    {motionGroup.title}
++                  </h3>
++                  <p className={styles.deskLine}>{motionGroup.line}</p>
++
++                  <ul
++                    className={styles.windTags}
++                    {...art}
++                    aria-label="Motion tools"
++                  >
++                    {motionGroup.skills.map((skill, i) => (
++                      <li
++                        key={skill}
++                        data-slot={i}
++                        style={{
++                          ...at(
++                            [833, 840, 588, 592][i] ?? 588,
++                            [165, 216, 343, 358][i] ?? 343,
++                          ),
++                          fontSize: u(i < 2 ? 5.6 : 5.8),
++                        }}
++                      >
++                        {skill}
++                      </li>
++                    ))}
++                  </ul>
++
++                  <div
++                    className={styles.weather}
++                    {...art}
++                    style={{ ...at(764, 237, 100, 70), fontSize: u(6.2) }}
++                  >
++                    <span className={styles.weatherHead}>
++                      Weather &amp; current machine
++                    </span>
++                    {CURVES.map((curve, i) => (
++                      <label
++                        key={curve.id}
++                        className={styles.curveRow}
++                        data-curve={curve.id}
++                        data-playing={playing || undefined}
++                        style={{
++                          top: u(25.5 + i * 18.5),
++                          ...vars({ '--pct': curves[curve.id] }),
++                        }}
++                      >
++                        <span className={styles.curveLabel}>{curve.label}</span>
++                        <i
++                          className={styles.curveDot}
++                          style={{ background: curve.dot }}
++                          aria-hidden
++                        />
++                        <input
++                          type="range"
++                          min={0}
++                          max={100}
++                          value={curves[curve.id]}
++                          className={styles.curveInput}
++                          aria-label={`${curve.label} curve`}
++                          aria-valuetext={`${curve.label}: stiffness ${curve.stiffness}, damping ${curve.damping}`}
++                          onPointerDown={() => setPlaying(false)}
++                          onChange={(event) => {
++                            setPlaying(false)
++                            setCurves((values) => ({
++                              ...values,
++                              [curve.id]: Number(event.target.value),
++                            }))
++                          }}
++                        />
++                        <span className={styles.srOnly}>
++                          {curve.stiffness} / {curve.damping}
++                        </span>
++                      </label>
++                    ))}
++                  </div>
++
+                   <button
+                     type="button"
+-                    className={cn(styles.consoleBtn, styles.pressBtn)}
+-                    style={{ fontSize: u(7) }}
+-                    aria-pressed={pressed}
+-                    onClick={() => setPressed((value) => !value)}
++                    className={styles.play}
++                    {...art}
++                    style={{ ...at(742, 342, 86, 22), fontSize: u(6.6) }}
++                    onClick={playCurves}
+                   >
+-                    Press me
+-                    <svg viewBox="0 0 10 8" aria-hidden className={styles.tick}>
+-                      <path
+-                        d="M1 4.2L3.8 7L9 1"
+-                        fill="none"
+-                        stroke="currentColor"
+-                        strokeWidth="1.8"
+-                        strokeLinecap="round"
+-                        strokeLinejoin="round"
+-                      />
+-                    </svg>
++                    {run > 0 ? 'Play again' : 'Play the curves'}{' '}
++                    <span aria-hidden>→</span>
+                   </button>
+                 </div>
++              </Card>
+ 
+-                <ul className={styles.ribbons} aria-label="Systems practices">
+-                  {systems.skills.slice(0, RIBBONS.length).map((item, i) => (
+-                    <li
+-                      key={item}
+-                      style={{
+-                        ...at(
+-                          RIBBONS[i].x,
+-                          RIBBONS[i].y,
+-                          RIBBONS[i].w,
+-                          RIBBONS[i].h,
+-                        ),
+-                        ...vars({ '--delay': `${i * 0.45}s` }),
+-                      }}
+-                    >
++              {/* 03 · Systems */}
++              <Card
++                id="systems"
++                below={
++                  <>
++                    <p className={styles.belowLine}>{systems.line}</p>
++                    <div className={styles.mConsole}>
++                      <button type="button" className={styles.mBtn}>
++                        Hover me
++                      </button>
+                       <button
+                         type="button"
+-                        className={styles.ribbon}
+-                        data-tone={RIBBONS[i].tone}
+-                        aria-pressed={ribbon === i}
+-                        onClick={() => setRibbon(i)}
+-                        style={{ fontSize: u(6.6) }}
++                        className={styles.mBtn}
++                        aria-pressed={pressed}
++                        onClick={() => setPressed((value) => !value)}
+                       >
+-                        {item}
++                        Press me <span aria-hidden>{pressed ? '✓' : ''}</span>
+                       </button>
+-                    </li>
+-                  ))}
+-                </ul>
+-              </div>
++                    </div>
++                    <ul className={styles.chips} aria-label="Systems practices">
++                      {systems.skills.map((item, i) => (
++                        <li key={item}>
++                          <button
++                            type="button"
++                            className={styles.chipBtn}
++                            aria-pressed={ribbon === i}
++                            onClick={() => setRibbon(i)}
++                          >
++                            {item}
++                          </button>
++                        </li>
++                      ))}
++                    </ul>
++                  </>
++                }
++              >
++                <div
++                  className={styles.layer}
++                  data-id="systems"
++                  style={vars({ '--depth': 1.35, '--n': 3 })}
++                >
++                  <SystemsArt />
++                  <Eyebrow
++                    x={357}
++                    y={334}
++                    text={systems.eyebrow}
++                    index="03 / 04"
++                    xr={563}
++                  />
++                  <h3
++                    className={cn(styles.title, styles.titleInk)}
++                    style={{ ...at(357, 348), fontSize: u(27) }}
++                  >
++                    {systems.title}
++                  </h3>
++                  <p className={styles.deskLine}>{systems.line}</p>
++
++                  <span
++                    className={styles.deck}
++                    aria-hidden
++                    style={{ ...at(357, 388, 116, 17), fontSize: u(6.8) }}
++                  >
++                    Barometric Control Deck
++                  </span>
++
++                  <span
++                    className={styles.gateTitle}
++                    style={{ ...at(367, 451), fontSize: u(15) }}
++                    aria-hidden
++                  >
++                    Systems
++                  </span>
++
++                  <div
++                    className={styles.consoleRow}
++                    {...art}
++                    style={at(356, 409, 116, 31)}
++                  >
++                    <button
++                      type="button"
++                      className={cn(styles.consoleBtn, styles.hoverBtn)}
++                      style={{ fontSize: u(7) }}
++                    >
++                      Hover me
++                    </button>
++                    <button
++                      type="button"
++                      className={cn(styles.consoleBtn, styles.pressBtn)}
++                      style={{ fontSize: u(7) }}
++                      aria-pressed={pressed}
++                      onClick={() => setPressed((value) => !value)}
++                    >
++                      Press me
++                      <svg
++                        viewBox="0 0 10 8"
++                        aria-hidden
++                        className={styles.tick}
++                      >
++                        <path
++                          d="M1 4.2L3.8 7L9 1"
++                          fill="none"
++                          stroke="currentColor"
++                          strokeWidth="1.8"
++                          strokeLinecap="round"
++                          strokeLinejoin="round"
++                        />
++                      </svg>
++                    </button>
++                  </div>
++
++                  <ul
++                    className={styles.ribbons}
++                    {...art}
++                    aria-label="Systems practices"
++                  >
++                    {systems.skills.slice(0, RIBBONS.length).map((item, i) => (
++                      <li
++                        key={item}
++                        style={{
++                          ...at(
++                            RIBBONS[i].x,
++                            RIBBONS[i].y,
++                            RIBBONS[i].w,
++                            RIBBONS[i].h,
++                          ),
++                          ...vars({ '--delay': `${i * 0.45}s` }),
++                        }}
++                      >
++                        <button
++                          type="button"
++                          className={styles.ribbon}
++                          data-tone={RIBBONS[i].tone}
++                          aria-pressed={ribbon === i}
++                          onClick={() => setRibbon(i)}
++                          style={{ fontSize: u(6.6) }}
++                        >
++                          {item}
++                        </button>
++                      </li>
++                    ))}
++                  </ul>
++                </div>
++              </Card>
+ 
+               <div
+                 className={cn(styles.layer, styles.front)}
+@@ -568,7 +775,7 @@ function Eyebrow({
+   index: string
+   xr: number
+ }) {
+-  const size = { fontSize: u(7.4) } as CSSProperties
++  const size = { fontSize: fs(7.4) } as CSSProperties
+   return (
+     <>
+       <span className={styles.eyebrow} style={{ ...at(x, y), ...size }}>
+-- 
+2.43.0
+
