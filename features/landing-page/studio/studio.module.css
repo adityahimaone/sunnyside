@@ -297,23 +297,19 @@
   opacity: 0.5;
 }
 
-.resumeNav.resumeNav {
-  display: none;
-  gap: 0.28rem;
+/* The foot rule is the row list's last divider: drop the final row's own
+   border so the two do not stack into a double line above Mixtape. */
+.menuNav.menuNav > :last-child {
+  border-bottom: 0;
 }
 
-.resumeNav svg {
-  transition: transform 0.18s var(--ease-out);
-}
-
-.resumeNav:hover svg {
-  transform: translate(2px, -2px);
-}
-
-@media (min-width: 640px) {
-  .resumeNav.resumeNav {
-    display: inline-flex;
-  }
+/* The archive's row number is mixed against its own cobalt; on the studio
+   panel it lands too close to the blue to read. Paint it in paper white. */
+.menuNum.menuNum {
+  color: var(--paper-hi);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
 }
 
 .menuLinkCopy {

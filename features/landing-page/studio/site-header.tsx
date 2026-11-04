@@ -17,7 +17,7 @@ import {
 import archive from '@/features/archive/archive.module.css'
 import { cn } from '@/lib/utils'
 
-import { CHAPTERS, CONTACT, SOCIALS, scrollToSection } from './studio-data'
+import { CHAPTERS, SOCIALS, scrollToSection } from './studio-data'
 import styles from './studio.module.css'
 
 type Props = {
@@ -58,13 +58,6 @@ const DESTINATIONS = [
     label: 'Practice',
     note: 'the field manual',
     number: '06',
-  },
-  {
-    href: CONTACT.resume,
-    label: 'Résumé',
-    note: 'the paper trail',
-    number: '07',
-    external: true,
   },
 ] as const
 
@@ -173,17 +166,6 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
             </nav>
 
             <div className={archive.headerTools}>
-              {/* A recruiter looks for this in the bar, not in a menu. It stays
-                  out of the way below 640px, where the chapter menu carries it. */}
-              <a
-                href={CONTACT.resume}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(archive.navLink, styles.resumeNav)}
-              >
-                Résumé
-                <ArrowUpRight size={13} strokeWidth={2} aria-hidden />
-              </a>
               <button
                 type="button"
                 className={archive.cta}
@@ -250,44 +232,24 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
                   ease: [0.22, 1, 0.36, 1],
                 }}
               >
-                {DESTINATIONS.map((destination) => {
-                  const body = (
-                    <>
-                      <span className={styles.menuLinkCopy}>
-                        {destination.label}
-                        <small className={styles.menuLinkNote}>
-                          {destination.note}
-                        </small>
-                      </span>
-                      <span className={archive.menuNum}>
-                        {destination.number}
-                      </span>
-                    </>
-                  )
-                  // The résumé leaves the site, so it opens in its own tab
-                  // instead of routing through the client router.
-                  return 'external' in destination ? (
-                    <a
-                      key={destination.href}
-                      href={destination.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={cn(archive.menuLink, styles.menuLink)}
-                      onClick={() => setOpen(false)}
-                    >
-                      {body}
-                    </a>
-                  ) : (
-                    <Link
-                      key={destination.href}
-                      href={destination.href}
-                      className={cn(archive.menuLink, styles.menuLink)}
-                      onClick={() => setOpen(false)}
-                    >
-                      {body}
-                    </Link>
-                  )
-                })}
+                {DESTINATIONS.map((destination) => (
+                  <Link
+                    key={destination.href}
+                    href={destination.href}
+                    className={cn(archive.menuLink, styles.menuLink)}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className={styles.menuLinkCopy}>
+                      {destination.label}
+                      <small className={styles.menuLinkNote}>
+                        {destination.note}
+                      </small>
+                    </span>
+                    <span className={cn(archive.menuNum, styles.menuNum)}>
+                      {destination.number}
+                    </span>
+                  </Link>
+                ))}
               </motion.nav>
 
               <div className={cn(archive.menuFoot, styles.menuFoot)}>
