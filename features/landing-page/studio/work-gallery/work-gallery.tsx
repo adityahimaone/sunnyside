@@ -41,6 +41,8 @@ import {
   type YarnLink,
   type YarnSpool,
 } from './work-gallery-data'
+import { ImagePlate, useDeveloped } from '@/components/ui/image-plate'
+
 import styles from './work-gallery.module.css'
 
 /**
@@ -286,7 +288,7 @@ function CoverPlate({
   sizes: string
   eager?: boolean
 }) {
-  const [developed, setDeveloped] = useState(false)
+  const { developed, onLoad, ref } = useDeveloped()
   const project = item.kind === 'project' ? item.project : undefined
   const src = item.kind === 'design-system' ? item.cover : project?.cover
 
@@ -294,11 +296,7 @@ function CoverPlate({
 
   return (
     <>
-      <span className={styles.plate} data-developed={developed} aria-hidden>
-        <span className={styles.plateGrid} />
-        <span className={styles.plateSheen} />
-        <span className={styles.plateNote}>{item.index} developing</span>
-      </span>
+      <ImagePlate developed={developed} label={`${item.index} developing`} />
       <Image
         src={src}
         alt={
@@ -311,12 +309,8 @@ function CoverPlate({
         preload={eager}
         className={styles.cover}
         style={{ objectPosition: item.position }}
-        onLoad={() => setDeveloped(true)}
-        ref={(element) => {
-          // A cached cover is already complete before hydration, so the load
-          // event never arrives; read the element instead of waiting for it.
-          if (element?.complete) setDeveloped(true)
-        }}
+        onLoad={onLoad}
+        ref={ref}
       />
     </>
   )

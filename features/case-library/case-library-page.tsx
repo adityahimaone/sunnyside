@@ -1,7 +1,7 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 
+import { DevelopingImage } from '@/components/ui/image-plate'
 import layout from '@/features/archive/archive.module.css'
 import { Sparkle } from '@/features/landing-page/studio/doodles'
 import { ScriptWord } from '@/features/landing-page/studio/script-word'
@@ -86,7 +86,9 @@ export function CaseLibraryPage({
               href={item.href}
               className={`${styles.card} ${styles[`tone_${item.tone}`]}`}
               aria-label={`Open the ${item.name} case`}
-              {...(item.slug !== 'sunnyside' ? { target: '_blank', rel: 'noreferrer' } : {})}
+              {...(item.slug !== 'sunnyside'
+                ? { target: '_blank', rel: 'noreferrer' }
+                : {})}
             >
               <div className={styles.cardTop}>
                 <span className={styles.caseNumber}>Case {item.number}</span>
@@ -94,12 +96,13 @@ export function CaseLibraryPage({
               </div>
 
               <div className={styles.cover}>
-                <Image
+                <DevelopingImage
                   src={item.cover}
                   alt={item.coverAlt}
                   width={1500}
                   height={1125}
                   sizes="(max-width: 900px) 100vw, 50vw"
+                  label={`Case ${item.number} developing`}
                 />
               </div>
 

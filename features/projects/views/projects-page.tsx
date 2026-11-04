@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowUpRight,
@@ -22,6 +21,7 @@ import {
   trackLabel,
 } from '@/data/projects'
 import type { ContributionDay, FeaturedProject, GitHubRepo } from '../index'
+import { DevelopingImage } from '@/components/ui/image-plate'
 import { LinerSheet } from '../components/liner-sheet'
 import ContributionSkyline from '@/components/ui/contribution-skyline'
 import { GeneratedCover } from '@/features/landing-page/studio/work-gallery/work-gallery'
@@ -173,13 +173,14 @@ export function ProjectsPage({
               <span className={`${layout.tape} ${styles.sleeveTape}`} />
               <div className={styles.sleeveArt}>
                 {project.cover ? (
-                  <Image
+                  <DevelopingImage
                     src={project.cover}
                     alt=""
                     fill
                     sizes="(min-width: 960px) 34vw, 90vw"
                     className="object-cover"
-                    priority
+                    preload
+                    label={`${trackLabel(index)} developing`}
                   />
                 ) : (
                   <span
@@ -212,12 +213,13 @@ export function ProjectsPage({
           <div className={styles.deckMain}>
             <div className={styles.deckCover}>
               {project.cover ? (
-                <Image
+                <DevelopingImage
                   src={project.cover}
                   alt=""
                   fill
                   sizes="132px"
                   className="object-cover"
+                  label={`${trackLabel(index)} cover`}
                 />
               ) : (
                 <span
@@ -414,12 +416,13 @@ export function ProjectsPage({
                     <div className={styles.cardArt}>
                       <span className={`${layout.tape} ${styles.cardTape}`} />
                       {item.cover ? (
-                        <Image
+                        <DevelopingImage
                           src={item.cover}
                           alt={`${item.title} interface`}
                           fill
                           sizes="(min-width: 900px) 40vw, 92vw"
                           className="object-cover"
+                          label={`${trackLabel(catalogue)} developing`}
                         />
                       ) : (
                         <GeneratedCover project={item} />
