@@ -1,11 +1,13 @@
 'use client'
 
+import { Pin, RotateCcw, Scissors } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -16,20 +18,28 @@ import {
 
 import type { WorkProject } from '@/data/projects'
 import { DESIGN_CASES, type DesignCase } from '@/features/case-library'
+import { useMediaQuery } from '@/hooks/use-media'
 import { ArrowUpRight, Sparkle } from '../doodles'
 import { PIT_STICKERS, type PitKind } from '../gravity/pit-config'
 import { StickerArt } from '../gravity/sticker-art'
 import { Reveal } from '../reveal'
 import {
   ARCHIVE_LINKS,
+  DEFAULT_YARN,
   FEATURED_SYSTEM_SLUGS,
   GALLERY_ITEMS,
   PROJECT_GALLERY_ITEMS,
   SYSTEM_GALLERY_ITEMS,
+  YARN_HEX,
+  YARN_SPOOLS,
   buildSystemGalleryItems,
+  pinFor,
   PIECE_TAPE,
   PIECE_TILT,
   type GalleryItem,
+  type PiecePin,
+  type YarnLink,
+  type YarnSpool,
 } from './work-gallery-data'
 import styles from './work-gallery.module.css'
 
@@ -86,6 +96,102 @@ const MAT_STICKERS: Record<PitKind, { label: string; x: number; y: number }> = {
   // lower than the others — there it only laps the card's paper edge.
   stampCity: { label: 'Jakarta · GMT+7', x: 0.2, y: 74 },
   stampRole: { label: 'Design engineer', x: 97.4, y: 94 },
+}
+
+/** A pin's centre, in mat-local pixels. */
+type Point = { x: number; y: number }
+
+/**
+ * The strand's shape. A taut line between two pins looks printed; real yarn
+ * hangs, so the control point drops below the midpoint by a share of the span,
+ * clamped so a short hop does not sag like a long one. Pure geometry, no state.
+ */
+function yarnPath(a: Point, b: Point) {
+  const span = Math.hypot(b.x - a.x, b.y - a.y)
+  const sag = Math.min(64, Math.max(15, span * 0.16))
+  const cx = (a.x + b.x) / 2
+  const cy = (a.y + b.y) / 2 + sag
+
+  return `M ${a.x.toFixed(1)} ${a.y.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(
+    1,
+  )} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`
+}
+
+/**
+ * The strings themselves. Drawn in mat pixels over the paper, so the thread
+ * crosses a card the way a thread does; the pin sits inside the card and the
+ * strand ties over it. Decorative and non-interactive: the pins are the
+ * controls, everything here is `aria-hidden` and takes no pointer events.
+ */
+function YarnLayer({
+  links,
+  pins,
+  selected,
+}: {
+  links: readonly YarnLink[]
+  pins: Record<string, Point>
+  selected: string | null
+}) {
+  const drawn = links.flatMap((link) => {
+    const a = pins[link.from]
+    const b = pins[link.to]
+    if (!a || !b) return []
+    const hex = YARN_HEX[link.spool]
+    const live = link.from === selected || link.to === selected
+
+    return [{ key: `${link.from}:${link.to}:${link.spool}`, a, b, hex, live }]
+  })
+
+  if (!drawn.length) return null
+
+  return (
+    <svg className={styles.yarnLayer} aria-hidden focusable="false">
+      {drawn.map(({ key, a, b, hex, live }) => {
+        const d = yarnPath(a, b)
+
+        return (
+          <g key={key} opacity={live ? 1 : 0.92}>
+            {/* A dark under-strand keeps a thin thread legible on cork. */}
+            <path
+              d={d}
+              fill="none"
+              stroke="#241505"
+              strokeWidth={live ? 4.8 : 4.2}
+              strokeLinecap="round"
+              opacity="0.42"
+            />
+            <path
+              d={d}
+              fill="none"
+              stroke={hex}
+              strokeWidth={live ? 3 : 2.4}
+              strokeLinecap="round"
+            />
+            {/* The twist: a dashed highlight reads as fibre, not as ink. */}
+            <path
+              d={d}
+              fill="none"
+              stroke="rgb(255 250 241 / 0.55)"
+              strokeWidth={1}
+              strokeDasharray="4 6"
+              strokeLinecap="round"
+            />
+            {[a, b].map((point, index) => (
+              <circle
+                key={index}
+                cx={point.x}
+                cy={point.y}
+                r={4.6}
+                fill="none"
+                stroke={hex}
+                strokeWidth="2"
+              />
+            ))}
+          </g>
+        )
+      })}
+    </svg>
+  )
 }
 
 // Filtering re-deals the board, so the set remounts instead of morphing: a
@@ -164,69 +270,98 @@ function SwatchDeck({ swatches }: { swatches: readonly string[] }) {
   )
 }
 
-/** The cover art for one piece, shared by the tile and its drawer. */
-function PieceMedia({ item, sizes }: { item: GalleryItem; sizes: string }) {
+/**
+ * The cover art for one piece, shared by the tile and its drawer.
+ *
+ * A cover is a print being developed: paper and a thin grid hold the frame,
+ * a slow sheen crosses it, and the photograph fades up underneath once it
+ * decodes. The frame's aspect ratio reserves the space, so nothing jumps.
+ */
+function CoverPlate({
+  item,
+  sizes,
+  eager,
+}: {
+  item: GalleryItem
+  sizes: string
+  eager?: boolean
+}) {
+  const [developed, setDeveloped] = useState(false)
   const project = item.kind === 'project' ? item.project : undefined
+  const src = item.kind === 'design-system' ? item.cover : project?.cover
 
-  if (item.kind === 'design-system') {
-    return (
+  if (!src) return project ? <GeneratedCover project={project} /> : null
+
+  return (
+    <>
+      <span className={styles.plate} data-developed={developed} aria-hidden>
+        <span className={styles.plateGrid} />
+        <span className={styles.plateSheen} />
+        <span className={styles.plateNote}>{item.index} developing</span>
+      </span>
       <Image
-        src={item.cover}
-        alt={item.coverAlt}
+        src={src}
+        alt={
+          item.kind === 'design-system'
+            ? item.coverAlt
+            : `${project?.title} interface`
+        }
         fill
         sizes={sizes}
+        preload={eager}
         className={styles.cover}
         style={{ objectPosition: item.position }}
+        onLoad={() => setDeveloped(true)}
+        ref={(element) => {
+          // A cached cover is already complete before hydration, so the load
+          // event never arrives; read the element instead of waiting for it.
+          if (element?.complete) setDeveloped(true)
+        }}
       />
-    )
-  }
-
-  if (project?.cover) {
-    return (
-      <Image
-        src={project.cover}
-        alt={`${project.title} interface`}
-        fill
-        sizes={sizes}
-        className={styles.cover}
-        style={{ objectPosition: item.position }}
-      />
-    )
-  }
-
-  return project ? <GeneratedCover project={project} /> : null
+    </>
+  )
 }
 
 type PieceProps = {
   item: GalleryItem
   stamped: boolean
-  picked: boolean
+  /** This pin is the first end of a string waiting for a second one. */
+  armed: boolean
+  /** The pin already carries at least one strand. */
+  threaded: boolean
+  /** Below the wall there is no gutter to string across, so the pin is
+      hardware only: no tab stop, no promise it cannot keep. */
+  pinnable: boolean
+  pin: PiecePin
+  pinRef: (element: HTMLElement | null) => void
+  onPin: (id: string) => void
   onStamp: (id: string) => void
   onOpen: (item: GalleryItem) => void
   onPan: (event: PointerEvent<HTMLElement>, reset?: boolean) => void
   onPeek: (item: GalleryItem, element: HTMLElement) => void
   onPeekEnd: () => void
-  /** Angle the party re-deals; `undefined` keeps the hand-placed one. */
-  tilt?: number
   drop: number
 }
 
 function PaperPiece({
   item,
   stamped,
-  picked,
+  armed,
+  threaded,
+  pinnable,
+  pin,
+  pinRef,
+  onPin,
   onStamp,
   onOpen,
   onPan,
   onPeek,
   onPeekEnd,
-  tilt,
   drop,
 }: PieceProps) {
   const reduced = useReducedMotion() ?? false
   const meta = PIECE_META(item)
   const tape = meta.tape
-  const angle = tilt ?? meta.tilt
 
   return (
     <article
@@ -234,11 +369,11 @@ function PaperPiece({
       data-kind={item.kind}
       data-tape={tape}
       data-stamped={stamped}
-      data-picked={picked}
+      data-pin={pin}
       data-piece
       style={
         {
-          '--tilt': `${angle}deg`,
+          '--tilt': `${meta.tilt}deg`,
           '--cell-drop': `${drop}rem`,
         } as CSSProperties
       }
@@ -252,13 +387,46 @@ function PaperPiece({
     >
       <span className={styles.tape} aria-hidden />
 
+      {/* The pin is the card's hardware and its one linking control: click it,
+          then click a second pin, and a strand ties the two. */}
+      <button
+        type="button"
+        ref={pinRef}
+        className={styles.pin}
+        data-armed={armed}
+        data-threaded={threaded}
+        disabled={!pinnable}
+        tabIndex={pinnable ? 0 : -1}
+        aria-hidden={pinnable ? undefined : true}
+        aria-pressed={armed}
+        aria-label={`Pin ${item.index}, ${item.title}${
+          armed ? ' — click another pin to tie a strand' : ' — tie a strand'
+        }`}
+        title={
+          armed
+            ? 'Click another pin to tie a strand, or this one to cancel'
+            : 'Click two pins to tie a strand'
+        }
+        onClick={(event) => {
+          event.stopPropagation()
+          onPin(item.id)
+        }}
+      >
+        <span className={styles.pinShadow} aria-hidden />
+        <span className={styles.pinNeedle} aria-hidden />
+        <span className={styles.pinCap} aria-hidden>
+          <span className={styles.pinCore} />
+        </span>
+        {armed ? <span className={styles.pinPulse} aria-hidden /> : null}
+      </button>
+
       <span className={styles.pieceIndex} aria-hidden>
         {item.index}
       </span>
 
       <span className={styles.frame} data-frame>
         <span className={styles.panTarget} data-pan-target>
-          <PieceMedia
+          <CoverPlate
             item={item}
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 60vw, 78vw"
           />
@@ -329,60 +497,6 @@ function PaperPiece({
   )
 }
 
-/** Small deterministic PRNG so a confetti round renders the same twice. */
-function seeded(seed: number) {
-  let state = seed * 0x9e3779b9 + 0x6d2b79f5
-
-  return () => {
-    state = (state + 0x6d2b79f5) | 0
-    let t = Math.imul(state ^ (state >>> 15), 1 | state)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
-/** Paper confetti. Pure decoration, and absent under reduced motion. */
-function PaperParty({ round }: { round: number }) {
-  const scraps = useMemo(() => {
-    const random = seeded(round)
-
-    return Array.from({ length: 18 }, (_, index) => ({
-      id: `${round}-${index}`,
-      left: 4 + random() * 92,
-      drift: -60 + random() * 120,
-      delay: random() * 0.18,
-      tilt: -220 + random() * 440,
-      tone: ['amber', 'pink', 'sky', 'mint', 'butter', 'rose'][index % 6],
-      size: 6 + random() * 8,
-    }))
-  }, [round])
-
-  return (
-    <div className={styles.confetti} aria-hidden>
-      {scraps.map((scrap) => (
-        <motion.span
-          key={scrap.id}
-          className={styles.scrap}
-          data-tone={scrap.tone}
-          style={{
-            left: `${scrap.left}%`,
-            width: scrap.size,
-            height: scrap.size * 0.62,
-          }}
-          initial={{ y: -30, opacity: 0, rotate: 0 }}
-          animate={{
-            y: 620,
-            x: scrap.drift,
-            opacity: [0, 1, 1, 0],
-            rotate: scrap.tilt,
-          }}
-          transition={{ duration: 1.5, delay: scrap.delay, ease: 'easeIn' }}
-        />
-      ))}
-    </div>
-  )
-}
-
 type PeekState = {
   item: GalleryItem
   x: number
@@ -408,7 +522,7 @@ function Peek({ peek, reduced }: { peek: PeekState; reduced: boolean }) {
       aria-hidden
     >
       <span className={styles.peekFrame}>
-        <PieceMedia item={peek.item} sizes="(min-width: 1024px) 34rem, 70vw" />
+        <CoverPlate item={peek.item} sizes="(min-width: 1024px) 34rem, 70vw" />
       </span>
       <span className={styles.peekBar}>
         <span className={styles.peekIndex}>{peek.item.index}</span>
@@ -511,16 +625,28 @@ export function WorkGallery({
   const [dragging, setDragging] = useState(false)
   const [filter, setFilter] = useState<Filter>('all')
   const [stamped, setStamped] = useState<ReadonlySet<string>>(new Set())
-  const [picked, setPicked] = useState<string | null>(null)
   const [active, setActive] = useState<GalleryItem | null>(null)
   const [progress, setProgress] = useState(0)
   const [edges, setEdges] = useState({ start: true, end: false })
   const [peeled, setPeeled] = useState<ReadonlySet<string>>(new Set())
-  const [party, setParty] = useState(0)
-  const [tilts, setTilts] = useState<Record<string, number>>({})
   const [peek, setPeek] = useState<PeekState | null>(null)
   const boardRef = useRef<HTMLDivElement>(null)
   const peekTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  /* ── the corkboard's hardware ───────────────────────────────────────────
+     Strings, the waiting pin, the spool in hand, and a remount counter that
+     puts every card back where the wall dealt it. */
+  const wall = useMediaQuery('(min-width: 1024px)')
+  const [yarn, setYarn] = useState<readonly YarnLink[]>(DEFAULT_YARN)
+  const [spool, setSpool] = useState<YarnSpool>('crimson')
+  const [strings, setStrings] = useState(true)
+  const [armed, setArmed] = useState<string | null>(null)
+  const [pins, setPins] = useState<Record<string, Point>>({})
+  const [redrawn, setRedrawn] = useState(0)
+  const [moved, setMoved] = useState(false)
+  const [notice, setNotice] = useState('')
+  const pinEls = useRef<Record<string, HTMLElement | null>>({})
+  const pinFrame = useRef(0)
 
   const systemItems = useMemo(
     () =>
@@ -547,6 +673,139 @@ export function WorkGallery({
       : filter === 'design-system'
         ? systemItems
         : PROJECT_GALLERY_ITEMS
+
+  const drawn = useMemo(
+    () =>
+      yarn.filter(
+        (link) =>
+          visible.some((piece) => piece.id === link.from) &&
+          visible.some((piece) => piece.id === link.to),
+      ),
+    [yarn, visible],
+  )
+
+  const threaded = useMemo(() => {
+    const ids = new Set<string>()
+    for (const link of drawn) {
+      ids.add(link.from)
+      ids.add(link.to)
+    }
+    return ids
+  }, [drawn])
+
+  /**
+   * Pin centres in mat pixels. The strands are geometry, not layout: they are
+   * measured off the live buttons, so a dragged card, a filter or a resize
+   * re-ties the same string to the same pin instead of holding a stale path.
+   */
+  const measurePins = useCallback(() => {
+    const mat = boardRef.current
+    if (!mat) return
+    const base = mat.getBoundingClientRect()
+    const next: Record<string, Point> = {}
+
+    for (const [id, element] of Object.entries(pinEls.current)) {
+      if (!element) continue
+      const rect = element.getBoundingClientRect()
+      next[id] = {
+        x: rect.left - base.left + rect.width / 2,
+        y: rect.top - base.top + rect.height / 2,
+      }
+    }
+
+    setPins(next)
+  }, [])
+
+  /** A drag fires on every frame; measure once per frame at most. */
+  const requeuePins = useCallback(() => {
+    if (pinFrame.current) cancelAnimationFrame(pinFrame.current)
+    pinFrame.current = requestAnimationFrame(() => {
+      pinFrame.current = 0
+      measurePins()
+    })
+  }, [measurePins])
+
+  useLayoutEffect(() => {
+    measurePins()
+    // The wall settles in passes: cells stagger in, covers decode. A single
+    // measure on mount reads half-placed paper, so take the late reading too.
+    const settled = window.setTimeout(measurePins, 340)
+    const observer = new ResizeObserver(requeuePins)
+    if (boardRef.current) observer.observe(boardRef.current)
+    window.addEventListener('resize', requeuePins)
+    void document.fonts?.ready.then(measurePins)
+
+    return () => {
+      window.clearTimeout(settled)
+      observer.disconnect()
+      window.removeEventListener('resize', requeuePins)
+      if (pinFrame.current) cancelAnimationFrame(pinFrame.current)
+    }
+  }, [measurePins, requeuePins, visible, filter, redrawn, wall])
+
+  /** One pin, then a second: tie or cut the strand between them. */
+  const tieYarn = useCallback(
+    (id: string) => {
+      const label = visible.find((piece) => piece.id === id)?.index ?? id
+
+      if (!armed) {
+        setArmed(id)
+        setNotice(`Pin ${label} held. Choose a second pin to tie a strand.`)
+        return
+      }
+
+      if (armed === id) {
+        setArmed(null)
+        setNotice(`Pin ${label} released.`)
+        return
+      }
+
+      const fromLabel =
+        visible.find((piece) => piece.id === armed)?.index ?? armed
+      const existing = yarn.find(
+        (link) =>
+          (link.from === armed && link.to === id) ||
+          (link.from === id && link.to === armed),
+      )
+
+      setYarn((current) =>
+        existing
+          ? current.filter((link) => link !== existing)
+          : [...current, { from: armed, to: id, spool }],
+      )
+      setArmed(null)
+      setNotice(
+        existing
+          ? `Strand cut between ${fromLabel} and ${label}.`
+          : `Strand tied between ${fromLabel} and ${label}.`,
+      )
+    },
+    [armed, spool, visible, yarn],
+  )
+
+  const resetBoard = () => {
+    setYarn(DEFAULT_YARN)
+    setArmed(null)
+    setMoved(false)
+    setRedrawn((round) => round + 1)
+    setNotice('Board reset. Cards back on their pins, strings re-tied.')
+  }
+
+  /** Has the visitor re-drawn the board? Then the reset button earns its place. */
+  const redrawnBoard =
+    moved ||
+    yarn.length !== DEFAULT_YARN.length ||
+    yarn.some((link, index) => {
+      const original = DEFAULT_YARN[index]
+      return (
+        !original ||
+        original.from !== link.from ||
+        original.to !== link.to ||
+        original.spool !== link.spool
+      )
+    })
+
+  const stringsOn = strings && wall
 
   const measure = useCallback(() => {
     const el = trackRef.current
@@ -605,18 +864,6 @@ export function WorkGallery({
       left: direction * step(),
       behavior: reduced ? 'auto' : 'smooth',
     })
-  }
-
-  /** Put one card flush to the track's start edge, snapping on release. */
-  const scrollToCard = (index: number) => {
-    const el = trackRef.current
-    const card = el?.querySelectorAll<HTMLElement>('[data-piece]')[index]
-    if (!el || !card) return
-    const left =
-      card.getBoundingClientRect().left -
-      el.getBoundingClientRect().left +
-      el.scrollLeft
-    el.scrollTo({ left, behavior: reduced ? 'auto' : 'smooth' })
   }
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -757,18 +1004,6 @@ export function WorkGallery({
     [],
   )
 
-  /** Paper party: confetti plus a fresh set of angles. */
-  const throwParty = () => {
-    if (reduced) return
-    setPeek(null)
-    setParty((round) => round + 1)
-    setTilts(
-      Object.fromEntries(
-        GALLERY_ITEMS.map((item) => [item.id, -3.2 + Math.random() * 6.4]),
-      ),
-    )
-  }
-
   const toggle = useCallback(
     (id: string) =>
       setStamped((current) => {
@@ -780,17 +1015,12 @@ export function WorkGallery({
     [],
   )
 
-  /** Lucky dip: step the shelf to one piece and ring it. No motion, always on. */
-  const luckyDip = () => {
-    if (!visible.length) return
-    const index = Math.floor(Math.random() * visible.length)
-    setPicked(visible[index].id)
-    scrollToCard(index)
-  }
-
   const inspected = stamped.size
   const complete = inspected >= TOTAL
   const position = Math.round(progress * Math.max(visible.length - 1, 0)) + 1
+  const armedLabel = armed
+    ? (visible.find((piece) => piece.id === armed)?.index ?? armed)
+    : null
 
   return (
     <div className={styles.moodboard}>
@@ -806,9 +1036,18 @@ export function WorkGallery({
           >
             <span className={styles.grain} aria-hidden />
 
-            <div className={styles.toolbar} data-toolbar>
+            {/* The label is not part of the controller: it is a scrap of
+                notebook paper pinned straight to the cork, to the left of it. */}
+            <div className={styles.boardTop}>
               <div className={styles.hud}>
-                <span className={styles.hudCount} aria-hidden>
+                <span className={styles.hudPin} aria-hidden />
+                <span className={styles.hudTape} aria-hidden />
+                <span className={styles.hudHoles} aria-hidden>
+                  <span />
+                  <span />
+                  <span />
+                </span>
+                <span className={styles.hudCount}>
                   {String(inspected).padStart(2, '0')}/{TOTAL}
                 </span>
                 <span className={styles.hudStack}>
@@ -816,128 +1055,160 @@ export function WorkGallery({
                     Moodboard / cutting mat
                   </span>
                   <span className={styles.hudNote}>
-                    {complete ? (
-                      'Master crafter. Every piece on the mat is stamped.'
-                    ) : (
-                      <>
-                        <span className={styles.hintWide}>
-                          Releases and systems taped to the mat. Tap one for its
-                          notes.
-                        </span>
-                        <span className={styles.hintNarrow}>
-                          Swipe the shelf, or use the arrows. Tap a piece for
-                          its notes.
-                        </span>
-                      </>
-                    )}
+                    {complete
+                      ? 'Master crafter. Every piece on the mat is stamped.'
+                      : 'Releases & systems pinned to the cork — tap a card for the notes.'}
                   </span>
                 </span>
               </div>
 
-              <div className={styles.controls}>
-                <button
-                  type="button"
-                  className={styles.chunky}
-                  onClick={luckyDip}
+              <div className={styles.toolbar} data-toolbar>
+                <div
+                  className={styles.filters}
+                  role="group"
+                  aria-label="Filter the board"
                 >
-                  Lucky dip
-                </button>
-                <button
-                  type="button"
-                  className={styles.chunky}
-                  onClick={throwParty}
-                  disabled={reduced}
-                  title={
-                    reduced
-                      ? 'Paper party is off while reduced motion is on'
-                      : undefined
-                  }
-                >
-                  Paper party
-                </button>
-                <div className={styles.pager}>
-                  <button
-                    type="button"
-                    className={styles.pagerBtn}
-                    onClick={() => nudge(-1)}
-                    disabled={edges.start}
-                    aria-label="Previous piece"
-                  >
-                    <ArrowUpRight className={styles.pagerIcon} />
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.pagerBtn}
-                    onClick={() => nudge(1)}
-                    disabled={edges.end}
-                    aria-label="Next piece"
-                  >
-                    <ArrowUpRight className={styles.pagerIcon} />
-                  </button>
+                  {FILTERS.map((option) => {
+                    const count =
+                      option.id === 'all'
+                        ? PROJECT_GALLERY_ITEMS.length +
+                          featuredSystemItems.length
+                        : option.id === 'design-system'
+                          ? systemItems.length
+                          : PROJECT_GALLERY_ITEMS.length
+
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        className={styles.filter}
+                        data-tab={option.id}
+                        aria-pressed={filter === option.id}
+                        onClick={() => {
+                          setFilter(option.id)
+                          setArmed(null)
+                        }}
+                      >
+                        {option.label}
+                        <span className={styles.filterCount}>{count}</span>
+                      </button>
+                    )
+                  })}
                 </div>
-              </div>
 
-              <div
-                className={styles.filters}
-                role="group"
-                aria-label="Filter the board"
-              >
-                {FILTERS.map((option) => {
-                  const count =
-                    option.id === 'all'
-                      ? PROJECT_GALLERY_ITEMS.length +
-                        featuredSystemItems.length
-                      : option.id === 'design-system'
-                        ? systemItems.length
-                        : PROJECT_GALLERY_ITEMS.length
-
-                  return (
+                <div className={styles.controls}>
+                  <div className={styles.pager}>
                     <button
-                      key={option.id}
                       type="button"
-                      className={styles.filter}
-                      aria-pressed={filter === option.id}
-                      onClick={() => {
-                        setFilter(option.id)
-                        setPicked(null)
-                      }}
+                      className={styles.pagerBtn}
+                      onClick={() => nudge(-1)}
+                      disabled={edges.start}
+                      aria-label="Previous piece"
                     >
-                      {option.label}
-                      <span className={styles.filterCount}>{count}</span>
+                      <ArrowUpRight className={styles.pagerIcon} />
                     </button>
-                  )
-                })}
-              </div>
+                    <button
+                      type="button"
+                      className={styles.pagerBtn}
+                      onClick={() => nudge(1)}
+                      disabled={edges.end}
+                      aria-label="Next piece"
+                    >
+                      <ArrowUpRight className={styles.pagerIcon} />
+                    </button>
+                  </div>
+                </div>
 
-              <div className={styles.archiveLinks}>
-                {ARCHIVE_LINKS.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={styles.archive}
+                {/* The spool drawer. Three inks, a pair of scissors, and the way
+                  back to the way the wall was dealt. */}
+                <div
+                  className={styles.yarnBar}
+                  role="group"
+                  aria-label="Yarn strings"
+                >
+                  <span className={styles.yarnTitle}>
+                    <Pin className={styles.yarnPin} aria-hidden />
+                    Yarn:
+                  </span>
+
+                  <span className={styles.spools}>
+                    {YARN_SPOOLS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        className={styles.spool}
+                        data-spool={option.id}
+                        aria-pressed={strings && spool === option.id}
+                        aria-label={`${option.label} yarn`}
+                        title={`${option.label} yarn`}
+                        onClick={() => {
+                          setSpool(option.id)
+                          setStrings(true)
+                        }}
+                      />
+                    ))}
+                  </span>
+
+                  <span className={styles.yarnHint}>
+                    {strings
+                      ? `${drawn.length} strands · click two pins to tie`
+                      : 'Strings cut'}
+                  </span>
+
+                  <button
+                    type="button"
+                    className={styles.yarnCut}
+                    aria-pressed={!strings}
+                    onClick={() => setStrings((on) => !on)}
                   >
-                    <span className={styles.archiveNote}>{link.note}</span>
-                    <span className={styles.archiveLabel}>
-                      {link.label}
-                      <span className={styles.archiveCount}>
-                        {link.href === '/design-system'
-                          ? caseCount
-                          : link.count}
+                    <Scissors className={styles.yarnIcon} aria-hidden />
+                    {strings ? 'Hide strings' : 'Show strings'}
+                  </button>
+
+                  {redrawnBoard ? (
+                    <button
+                      type="button"
+                      className={styles.yarnReset}
+                      onClick={resetBoard}
+                    >
+                      <RotateCcw className={styles.yarnIcon} aria-hidden />
+                      Reset
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className={styles.archiveLinks}>
+                  {ARCHIVE_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={styles.archive}
+                    >
+                      <span className={styles.archiveNote}>{link.note}</span>
+                      <span className={styles.archiveLabel}>
+                        {link.label}
+                        <span className={styles.archiveCount}>
+                          {link.href === '/design-system'
+                            ? caseCount
+                            : link.count}
+                        </span>
+                        <ArrowUpRight className={styles.archiveArrow} />
                       </span>
-                      <ArrowUpRight className={styles.archiveArrow} />
-                    </span>
-                  </Link>
-                ))}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
 
             <p className={styles.srOnly} role="status" aria-live="polite">
               {inspected} of {TOTAL} pieces stamped. Showing {visible.length} of{' '}
-              {TOTAL} pieces.
+              {TOTAL} pieces.{' '}
+              {armedLabel ? `Pin ${armedLabel} held, pick a second. ` : ''}
+              {notice}
             </p>
 
             <motion.div
-              key={filter}
+              key={`${filter}:${redrawn}`}
               ref={trackRef}
               variants={GRID_VARIANTS}
               initial={reduced ? false : 'hidden'}
@@ -959,6 +1230,18 @@ export function WorkGallery({
                   key={item.id}
                   className={styles.pieceCell}
                   variants={CELL_VARIANTS}
+                  /* Drag is the wall's privilege: on the phone shelf a drag is
+                     the scroll gesture, and reduced motion gets no free handout. */
+                  drag={wall && !reduced}
+                  dragMomentum={false}
+                  dragElastic={0.06}
+                  whileDrag={{ cursor: 'grabbing' }}
+                  onDragStart={() => setArmed(null)}
+                  onDrag={requeuePins}
+                  onDragEnd={() => {
+                    setMoved(true)
+                    requeuePins()
+                  }}
                   style={
                     {
                       '--cell-drop': `${dropFor(item.id)}rem`,
@@ -968,18 +1251,28 @@ export function WorkGallery({
                   <PaperPiece
                     item={item}
                     stamped={stamped.has(item.id)}
-                    picked={picked === item.id}
+                    armed={armed === item.id}
+                    threaded={threaded.has(item.id)}
+                    pinnable={wall}
+                    pin={pinFor(item.id)}
+                    pinRef={(element) => {
+                      pinEls.current[item.id] = element
+                    }}
+                    onPin={tieYarn}
                     onStamp={toggle}
                     onOpen={setActive}
                     onPan={pan}
                     onPeek={peekLater}
                     onPeekEnd={closePeek}
                     drop={dropFor(item.id)}
-                    tilt={tilts[item.id]}
                   />
                 </motion.div>
               ))}
             </motion.div>
+
+            {stringsOn ? (
+              <YarnLayer links={drawn} pins={pins} selected={armed} />
+            ) : null}
 
             <div className={styles.shelfBar} aria-hidden>
               <div
@@ -993,7 +1286,7 @@ export function WorkGallery({
                 {visible.length} pieces
                 <span className={styles.shelfHint}>
                   {' '}
-                  · drag, swipe or use the arrows
+                  · swipe or use the arrows
                 </span>
               </p>
               <p className={styles.shelfCount}>
@@ -1003,11 +1296,7 @@ export function WorkGallery({
 
             <MatStickers peeled={peeled} onPeel={peel} bounds={boardRef} />
 
-            <AnimatePresence>
-              {party > 0 && !reduced ? (
-                <PaperParty key={party} round={party} />
-              ) : null}
-            </AnimatePresence>
+            <AnimatePresence></AnimatePresence>
 
             <AnimatePresence>
               {peek ? (
@@ -1049,9 +1338,10 @@ export function WorkGallery({
             <div className={styles.dialogGrid}>
               <div className={styles.dialogPrint}>
                 <span className={styles.dialogFrame}>
-                  <PieceMedia
+                  <CoverPlate
                     item={active}
                     sizes="(min-width: 900px) 42vw, 90vw"
+                    eager
                   />
                 </span>
                 <span className={styles.dialogIndex} aria-hidden>

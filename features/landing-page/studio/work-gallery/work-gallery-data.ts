@@ -229,3 +229,105 @@ export type PieceTape = (typeof PIECE_TAPE)[number]
 export const PIECE_TILT = [
   -2.6, 1.9, -1.2, 2.8, -3.1, 1.4, 2.2, -1.8, 3.2, -2.2, 1.1, -2.9,
 ] as const
+
+/**
+ * Pushpins are the board's hardware: four spool colours, dealt by position so a
+ * filter or a re-render never swaps the pin in a card's tape.
+ */
+export const PIECE_PIN = ['crimson', 'amber', 'cobalt', 'emerald'] as const
+
+export type PiecePin = (typeof PIECE_PIN)[number]
+
+const pinAt = new Map(GALLERY_ITEMS.map((item, index) => [item.id, index]))
+
+export function pinFor(id: string): PiecePin {
+  return PIECE_PIN[(pinAt.get(id) ?? 0) % PIECE_PIN.length]
+}
+
+/** The three spools the yarn controller offers, and the ink each strand uses. */
+export const YARN_SPOOLS = [
+  { id: 'crimson', label: 'Crimson', hex: '#c22026' },
+  { id: 'gold', label: 'Gold', hex: '#b07b06' },
+  { id: 'cobalt', label: 'Cobalt', hex: '#2740b6' },
+] as const
+
+export type YarnSpool = (typeof YARN_SPOOLS)[number]['id']
+
+export const YARN_HEX: Record<YarnSpool, string> = Object.fromEntries(
+  YARN_SPOOLS.map((spool) => [spool.id, spool.hex]),
+) as Record<YarnSpool, string>
+
+/** One strand between two pinned pieces. */
+export type YarnLink = { from: string; to: string; spool: YarnSpool }
+
+const spoolFor = (seed: string): YarnSpool =>
+  YARN_SPOOLS[
+    [...seed].reduce((sum, char) => sum + char.charCodeAt(0), 0) %
+      YARN_SPOOLS.length
+  ].id
+
+/**
+ * The board's first strings are not decorative noise: a strand joins the pieces
+ * that share a material. A tag held by exactly two or three pieces is the
+ * strongest thread — one string, one meaning — so those are the ones tied.
+ * Tags shared by four or more pieces are a category, not a connection, and are
+ * skipped rather than tangled into a net. The colour comes from the tag, so
+ * every "Glass" string in the room is the same ink.
+ *
+ * Stable by construction: the same catalogue always ties the same strings, and
+ * a filter only hides the strands whose far end is off the board.
+ */
+export function buildDefaultYarn(
+  items: readonly GalleryItem[] = GALLERY_ITEMS,
+): YarnLink[] {
+  const byTag = new Map<string, string[]>()
+
+  for (const item of items) {
+    for (const tag of item.tags) {
+      const holders = byTag.get(tag)
+      if (holders) holders.push(item.id)
+      else byTag.set(tag, [item.id])
+    }
+  }
+
+  const groups = [...byTag.entries()]
+    .filter(([, ids]) => ids.length === 2 || ids.length === 3)
+    .sort((a, b) => a[1].length - b[1].length || a[0].localeCompare(b[0]))
+
+  const tied = new Set<string>()
+  const links: YarnLink[] = []
+  const key = (a: string, b: string) => (a < b ? `${a}:${b}` : `${b}:${a}`)
+
+  // The board is not two halves. Each release hangs off the system it was drawn
+  // in, so every project carries one strand into the system wall: without it the
+  // yarn piles up on the left and the right of the mat reads as untouched.
+  const projects = items.filter((item) => item.kind === 'project')
+  const systems = items.filter((item) => item.kind === 'design-system')
+
+  projects.forEach((project, index) => {
+    const system = systems[index % systems.length]
+    if (!system) return
+    const pair = key(project.id, system.id)
+    if (tied.has(pair)) return
+    tied.add(pair)
+    links.push({
+      from: project.id,
+      to: system.id,
+      spool: YARN_SPOOLS[index % YARN_SPOOLS.length].id,
+    })
+  })
+
+  for (const [tag, ids] of groups) {
+    for (let index = 0; index < ids.length - 1; index += 1) {
+      const [from, to] = [ids[index], ids[index + 1]]
+      const pair = key(from, to)
+      if (tied.has(pair)) continue
+      tied.add(pair)
+      links.push({ from, to, spool: spoolFor(tag) })
+    }
+  }
+
+  return links.slice(0, 12)
+}
+
+export const DEFAULT_YARN: readonly YarnLink[] = buildDefaultYarn()

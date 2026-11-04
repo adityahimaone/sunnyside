@@ -4,6 +4,9 @@
    one horizontal snap run, because four columns on a phone is a postage stamp. */
 
 .moodboard {
+  /* The chapter head ends on an intro line; the board needs air under it or the
+     bezel reads as part of the paragraph. */
+  margin-top: clamp(1.6rem, 3.4vw, 3.1rem);
   --card: #faf4e8;
   --card-ink: #18181b;
   --card-muted: #57534e;
@@ -25,6 +28,11 @@
   --mat: #fbf8f1;
   --paper-lo: #f6ecdb;
   --cork: #c89b6a;
+  /* Three yarn inks, darker than the tape stock so a 2.4px thread still reads
+     as thread on cork. */
+  --yarn-crimson: #c22026;
+  --yarn-gold: #b07b06;
+  --yarn-cobalt: #2740b6;
   --wg-card: clamp(15rem, 78%, 22rem);
   --wg-gap: clamp(0.9rem, 1.6vw, 1.4rem);
   --ring: #2c3cae;
@@ -127,36 +135,109 @@
   scroll-snap-align: start;
 }
 
-/* ── toolbar ──────────────────────────────────────────────────────────── */
+/* ── pinned label ─────────────────────────────────────────────────────── */
 
-.toolbar {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-areas:
-    'hud'
-    'controls'
-    'filters'
-    'archives';
-  gap: 0.6rem;
-  padding: 0.75rem 0.8rem;
-  border: 2px solid var(--card-ink);
-  border-radius: 18px;
-  background: var(--card);
-  box-shadow: 5px 5px 0 var(--card-ink);
+/* The label is its own object: a torn notebook scrap pinned straight to the
+   cork beside the controller, not a panel inside it. */
+.boardTop {
+  /* Two objects on one board, pushed to opposite ends: the pinned label reads
+     as a note left on the cork, the controller as the toolbox set down beside
+     it. Neither stretches to the other's height. */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(0.75rem, 1.6vw, 1.35rem);
 }
 
 .hud {
-  grid-area: hud;
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
+  flex: 0 1 auto;
+  align-self: flex-start;
+  align-items: flex-start;
+  /* The count stamp is rotated; a wider seam keeps it off the punched gutter. */
+  gap: 0.7rem;
+  width: fit-content;
+  max-width: 21rem;
   min-width: 0;
+  padding: 0.7rem 0.8rem 0.75rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 8px;
+  background: var(--card);
+  rotate: -0.6deg;
+  box-shadow: 4px 5px 0 var(--card-ink);
+}
+
+/* Brass tack over the top edge, a second pin in blue, washi under the foot. */
+.hud::before {
+  content: '';
+  position: absolute;
+  top: -0.45rem;
+  right: 1.15rem;
+  width: 0.82rem;
+  height: 0.82rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #fef08a, #ca8a04 78%);
+  box-shadow: 1px 2px 2px rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+
+.hudPin {
+  position: absolute;
+  top: -0.45rem;
+  left: 0.75rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #bfdbfe, #2563eb 78%);
+  box-shadow: 1px 2px 2px rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+
+.hudTape {
+  position: absolute;
+  /* Hangs off the bottom edge, clear of the note's last line. */
+  bottom: -0.82rem;
+  right: 2.2rem;
+  width: 3.6rem;
+  height: 0.9rem;
+  rotate: -4deg;
+  border-block: 1px solid rgb(24 24 27 / 0.18);
+  background: repeating-linear-gradient(
+    45deg,
+    rgb(244 168 212 / 0.92) 0 5px,
+    rgb(251 247 240 / 0.9) 5px 9px
+  );
+  pointer-events: none;
+}
+
+/* Punched gutter down the left edge of the scrap. */
+.hudHoles {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 0.26rem;
+  margin-top: 0.1rem;
+  padding-right: 0.45rem;
+  border-right: 1px dashed rgb(24 24 27 / 0.3);
+}
+
+.hudHoles > span {
+  width: 0.32rem;
+  height: 0.32rem;
+  border: 1px solid rgb(24 24 27 / 0.45);
+  border-radius: 50%;
+  background: #c39262;
+  box-shadow: inset 0 1px 1px rgb(24 24 27 / 0.35);
 }
 
 .hudCount {
   flex: none;
-  padding: 0.3rem 0.45rem;
+  align-self: flex-start;
+  padding: 0.32rem 0.45rem;
   font-family: var(--font-geist-mono), monospace;
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
@@ -166,38 +247,126 @@
   border: 2px solid var(--card-ink);
   border-radius: 7px;
   rotate: -1.6deg;
-  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.22);
+  box-shadow: 2px 2px 0 var(--card-ink);
 }
 
 .hudStack {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.12rem;
 }
 
 .hudTitle {
   font-family: var(--font-geist-mono), monospace;
   font-size: 0.66rem;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--card-ink);
 }
 
 .hudNote {
-  font-size: 0.76rem;
+  max-width: 34ch;
+  font-size: 0.74rem;
   line-height: 1.35;
   color: var(--card-muted);
+}
+
+@media (max-width: 55.99rem) {
+  .boardTop {
+    /* Column, not wrapped columns: a wrapping column needs a height and invents
+       a canyon of empty cardboard between the tabs and the archive tags. */
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+
+  .hud {
+    /* Still a note, not a banner: keep it to note width and let the cork show
+       beside it. */
+    width: auto;
+    max-width: 26rem;
+    align-self: flex-start;
+  }
+}
+
+/* ── toolbar ──────────────────────────────────────────────────────────── */
+
+/* The controls are not a UI card floating on the cork: they are one scrap of
+   cardboard taped to it, two rows of sticky notes and paper slips. */
+.toolbar {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  /* Two strips even when the board is stacked: tabs and the shelf pager share a
+     line, the yarn tools and the catalogue tags share the next. A single column
+     leaves the pager marooned on a row of its own. */
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'filters controls'
+    'yarn archives';
+  gap: 0.45rem;
+  padding: 0.6rem 0.6rem 0.55rem;
+  border: 2px solid #3f2a18;
+  border-radius: 14px;
+  background-color: #b58456;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgb(72 42 16 / 0.13) 0 3px,
+      transparent 3px 7px
+    ),
+    linear-gradient(180deg, #c69666 0%, #ab7a4b 100%);
+  box-shadow:
+    5px 6px 0 rgb(32 18 6 / 0.4),
+    inset 0 1px 0 rgb(255 255 255 / 0.22);
+  /* The toolbox is only as wide as the tools in it. A fixed basis left a band of
+     bare cardboard between the tabs and the archive tags. */
+  flex: 0 1 auto;
+  width: fit-content;
+  min-width: min(100%, 22rem);
+  max-width: 100%;
+  margin-left: auto;
+}
+
+/* Two strips of washi holding the panel down. Decorative, no hit area. */
+.toolbar::before,
+.toolbar::after {
+  content: '';
+  position: absolute;
+  top: -0.6rem;
+  width: 4.6rem;
+  height: 1.1rem;
+  border-block: 1px solid rgb(24 24 27 / 0.16);
+  box-shadow: 0 1px 2px rgb(24 24 27 / 0.16);
+  pointer-events: none;
+}
+
+.toolbar::before {
+  left: 1.5rem;
+  rotate: -5deg;
+  background: repeating-linear-gradient(
+    45deg,
+    rgb(244 168 212 / 0.9) 0 4px,
+    rgb(255 250 241 / 0.85) 4px 8px
+  );
+}
+
+.toolbar::after {
+  right: 2.2rem;
+  rotate: 3deg;
+  background: rgb(169 200 255 / 0.88);
 }
 
 .controls {
   grid-area: controls;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
 }
 
-.chunky,
 .pagerBtn,
 .filter {
   font-family: var(--font-geist-mono), monospace;
@@ -212,25 +381,12 @@
     background-color 0.18s ease;
 }
 
-.chunky {
-  flex: 1;
-  min-height: 2.75rem;
-  padding: 0.5rem 0.8rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  background: var(--washi-butter);
-  box-shadow: 3px 3px 0 var(--card-ink);
-}
-
-.chunky:hover,
 .pagerBtn:hover:not(:disabled),
 .filter:hover {
   translate: 0 -1px;
   box-shadow: 4px 4px 0 var(--card-ink);
 }
 
-.chunky:active,
 .pagerBtn:active:not(:disabled),
 .filter:active {
   translate: 1px 1px;
@@ -239,15 +395,16 @@
 
 .pager {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.3rem;
+  margin-left: auto;
 }
 
 .pagerBtn {
   display: grid;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  box-shadow: 3px 3px 0 var(--card-ink);
+  width: 2.1rem;
+  height: 2.1rem;
+  box-shadow: 2px 2px 0 var(--card-ink);
 }
 
 .pagerBtn:disabled {
@@ -257,8 +414,8 @@
 }
 
 .pagerIcon {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 /* The doodle points north-east: 225deg reads as "back", 45deg as "next". */
@@ -270,41 +427,77 @@
   rotate: 45deg;
 }
 
-/* ── filters ──────────────────────────────────────────────────────────── */
+/* ── sticky filter tabs ───────────────────────────────────────────────── */
 
 .filters {
   grid-area: filters;
   display: flex;
-  flex-wrap: wrap;
   gap: 0.4rem;
-  padding: 0.25rem;
-  background: #efe4d2;
-  border: 2px solid rgb(24 24 27 / 0.28);
-  border-radius: 999px;
+  min-width: 0;
+  padding: 0.1rem;
 }
 
+/* Each tab is a sticky note pressed onto the cardboard: square corner, a tack
+   in the middle of its top edge, and its own small disagreement about level. */
 .filter {
+  position: relative;
   display: inline-flex;
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  min-width: 0;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  min-height: 2.75rem;
-  padding: 0.4rem 0.7rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
+  gap: 0.32rem;
+  min-height: 2.1rem;
+  padding: 0.28rem 0.6rem;
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  background: transparent;
-  border-color: transparent;
-  border-radius: 999px;
-  box-shadow: none;
+  color: var(--card-ink);
+  background: var(--sticky, #f5e6d3);
+  border: 2px solid var(--card-ink);
+  border-radius: 3px;
+  box-shadow: 2px 2px 0 var(--card-ink);
+  rotate: var(--sticky-rot, -1.2deg);
+}
+
+/* Sits inline before the label, the way a tack pinches a sticky note flat
+   against the board rather than floating above it. */
+.filter::before {
+  content: '';
+  flex: none;
+  width: 0.34rem;
+  height: 0.34rem;
+  border: 1.5px solid var(--card-ink);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #fef08a, #ca8a04 82%);
+}
+
+.filter[data-tab='all'] {
+  --sticky: #e6d2fb;
+  --sticky-rot: -2.1deg;
+}
+
+.filter[data-tab='project'] {
+  --sticky: #f5e6d3;
+  --sticky-rot: 1.5deg;
+}
+
+.filter[data-tab='design-system'] {
+  --sticky: #cdf3d8;
+  --sticky-rot: -1deg;
 }
 
 .filter[aria-pressed='true'] {
   color: var(--washi-butter);
   background: var(--card-ink);
   border-color: var(--card-ink);
-  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.28);
+  box-shadow: 1px 1px 0 var(--card-ink);
+  rotate: 0deg;
+}
+
+.filter[aria-pressed='true']::before {
+  background: var(--washi-butter);
 }
 
 .filterCount {
@@ -313,29 +506,175 @@
   opacity: 0.72;
 }
 
+/* ── yarn spool drawer ───────────────────────────────────────────────── */
+
+/* The controller for the strings: a paper slip taped under the tabs, holding
+   three spools, the scissors that hide them, and the way back to the deal. */
+.yarnBar {
+  grid-area: yarn;
+  justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.4rem;
+  min-width: 0;
+  padding: 0.24rem 0.4rem 0.28rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 7px;
+  background: var(--card);
+  rotate: 0.45deg;
+  box-shadow: 3px 3px 0 var(--card-ink);
+}
+
+.yarnTitle {
+  color: var(--card-ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.yarnPin {
+  width: 0.85rem;
+  height: 0.85rem;
+  rotate: -38deg;
+  color: #a4161a;
+}
+
+.spools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+/* The dot is the spool; the button is the thumb-sized target around it. */
+.spool {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.8rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.spool::before {
+  content: '';
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 50%;
+  background: var(--spool, var(--yarn-crimson));
+  box-shadow: inset 0 -2px 3px rgb(0 0 0 / 0.35);
+  transition:
+    translate 0.16s var(--ease-spring),
+    box-shadow 0.16s ease;
+}
+
+.spool[data-spool='gold'] {
+  --spool: var(--yarn-gold);
+}
+
+.spool[data-spool='cobalt'] {
+  --spool: var(--yarn-cobalt);
+}
+
+.spool:hover::before {
+  translate: 0 -1px;
+}
+
+.spool[aria-pressed='true']::before {
+  box-shadow:
+    0 0 0 2px var(--card),
+    0 0 0 4px var(--card-ink),
+    inset 0 -2px 3px rgb(0 0 0 / 0.35);
+}
+
+.yarnHint {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(63 42 24 / 0.68);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yarnCut,
+.yarnReset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.24rem;
+  min-height: 1.8rem;
+  padding: 0.16rem 0.42rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--card-ink);
+  background: #fdf3d0;
+  border: 2px solid var(--card-ink);
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 var(--card-ink);
+  cursor: pointer;
+  transition: translate 0.16s var(--ease-spring);
+}
+
+.yarnCut[aria-pressed='true'] {
+  background: var(--card-ink);
+  color: var(--washi-butter);
+}
+
+.yarnReset {
+  background: var(--washi-amber);
+}
+
+.yarnCut:hover,
+.yarnReset:hover {
+  translate: 0 -1px;
+}
+
+.yarnIcon {
+  width: 0.68rem;
+  height: 0.68rem;
+}
+
 /* ── archive tape links ───────────────────────────────────────────────── */
 
 .archiveLinks {
   grid-area: archives;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+  justify-content: flex-end;
+  gap: 0.35rem;
   align-items: center;
 }
 
 .archive {
   display: flex;
-  flex: 1 1 12rem;
+  /* A tag is written on, not stretched: it keeps the width of its own line. */
+  flex: 0 1 auto;
   flex-direction: column;
-  gap: 0.12rem;
-  min-height: 2.75rem;
-  padding: 0.4rem 0.85rem;
+  gap: 0.06rem;
+  min-height: 2.1rem;
+  padding: 0.24rem 0.6rem;
   color: var(--card-ink);
   text-decoration: none;
   background: var(--washi-amber);
   border: 2px solid var(--card-ink);
   border-radius: 4px;
-  box-shadow: 2px 2px 0 rgb(24 24 27 / 0.2);
+  box-shadow: 3px 3px 0 var(--card-ink);
   rotate: -1.1deg;
   transition: rotate 0.2s var(--ease-spring);
 }
@@ -351,7 +690,8 @@
 
 .archiveNote {
   font-family: var(--font-geist-mono), monospace;
-  font-size: 0.58rem;
+  font-size: 0.5rem;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   opacity: 0.7;
@@ -360,21 +700,22 @@
 .archiveLabel {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.78rem;
-  font-weight: 600;
+  gap: 0.3rem;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  font-weight: 800;
 }
 
 .archiveCount {
   font-family: var(--font-geist-mono), monospace;
-  font-size: 0.6rem;
+  font-size: 0.54rem;
   font-variant-numeric: tabular-nums;
   opacity: 0.65;
 }
 
 .archiveArrow {
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 0.72rem;
+  height: 0.72rem;
   margin-left: auto;
 }
 
@@ -444,6 +785,156 @@
   z-index: 3;
 }
 
+/* ── pushpin ──────────────────────────────────────────────────────────── */
+
+/* The button box is the cap itself, so the strand measured in JS ties exactly
+   at the head of the pin. Needle and shadow hang outside the box on purpose. */
+.pin {
+  position: absolute;
+  z-index: 9;
+  top: -0.5rem;
+  left: 50%;
+  width: 1.55rem;
+  height: 1.55rem;
+  padding: 0;
+  translate: -50% 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pinShadow {
+  position: absolute;
+  top: 1.15rem;
+  left: 50%;
+  width: 1.1rem;
+  height: 0.5rem;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: rgb(20 12 4 / 0.45);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.pinNeedle {
+  position: absolute;
+  top: 0.96rem;
+  left: 50%;
+  width: 2px;
+  height: 0.62rem;
+  translate: -50% 0;
+  rotate: 9deg;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(180deg, #e4e4e7, #52525b 58%, #27272a);
+  pointer-events: none;
+}
+
+.pinCap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--card-ink);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 33% 29%,
+    var(--pin-core, #ffc2c2) 0%,
+    var(--pin-cap, #d92b30) 52%,
+    var(--pin-rim, #8c1216) 100%
+  );
+  box-shadow:
+    inset 0 -2px 3px rgb(0 0 0 / 0.38),
+    2px 3px 5px rgb(30 16 4 / 0.42);
+  transition: translate 0.16s var(--ease-spring);
+}
+
+.pin:hover .pinCap {
+  translate: 0 -1px;
+}
+
+.pinCore {
+  width: 0.72rem;
+  height: 0.72rem;
+  border: 1px solid rgb(0 0 0 / 0.22);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 30%,
+    #fff 0%,
+    var(--pin-cap, #d92b30) 76%
+  );
+}
+
+.pinPulse {
+  position: absolute;
+  inset: -0.3rem;
+  border: 2px solid var(--card-ink);
+  border-radius: 50%;
+  animation: pinPing 1.5s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pinPing {
+  0% {
+    scale: 0.68;
+    opacity: 0.9;
+  }
+
+  100% {
+    scale: 1.45;
+    opacity: 0;
+  }
+}
+
+.pin:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+
+/* Four hardware inks, cycled down the board by index so neighbours rarely match. */
+.piece[data-pin='crimson'] {
+  --pin-cap: #d92b30;
+  --pin-rim: #8c1216;
+  --pin-core: #ffc2c2;
+}
+
+.piece[data-pin='amber'] {
+  --pin-cap: #e0a309;
+  --pin-rim: #8a5f05;
+  --pin-core: #ffe89a;
+}
+
+.piece[data-pin='cobalt'] {
+  --pin-cap: #3059cf;
+  --pin-rim: #1b3487;
+  --pin-core: #c3d4ff;
+}
+
+.piece[data-pin='emerald'] {
+  --pin-cap: #0f9b6c;
+  --pin-rim: #06654a;
+  --pin-core: #a8f0d0;
+}
+
+/* ── the strings ──────────────────────────────────────────────────────── */
+
+/* Mat pixels, so it lines up with the measured pin centres; above the paper
+   because a thread lies over a photograph, below the toolbar and the stickers. */
+.yarnLayer {
+  position: absolute;
+  inset: 0;
+  /* Behind the paper, in front of the cork: a strand leaves one pin, slides
+     under the card, and comes back out in the gutter. Painting it over the
+     cards put lines through the body copy, which read as damage. */
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 2px rgb(28 14 4 / 0.3));
+}
+
 .tape {
   position: absolute;
   z-index: 5;
@@ -501,6 +992,80 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* ── a cover develops ─────────────────────────────────────────────────── */
+
+/* Sits over the frame while the photograph decodes: paper stock, a 12px grid
+   and a mono caption. Fades out, never fades the image in, so a failed decode
+   still shows the picture rather than an empty box. */
+.plate {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f6ecdb 0%, #efe2cd 100%);
+  pointer-events: none;
+  transition:
+    opacity 0.5s ease,
+    visibility 0s linear 0.5s;
+}
+
+.plate[data-developed='true'] {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.plateGrid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgb(24 24 27 / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(24 24 27 / 0.07) 1px, transparent 1px);
+  background-size: 12px 12px;
+  opacity: 0.9;
+}
+
+.plateSheen {
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(
+    104deg,
+    transparent 38%,
+    rgb(255 255 255 / 0.55) 50%,
+    transparent 62%
+  );
+  translate: -120% 0;
+  animation: plateSweep 2.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.plateNote {
+  position: absolute;
+  left: 0.42rem;
+  bottom: 0.32rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.46rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgb(24 24 27 / 0.42);
+}
+
+@keyframes plateSweep {
+  to {
+    translate: 120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plateSheen {
+    animation: none;
+    opacity: 0.4;
+  }
+
+  .plate {
+    transition: opacity 0.2s ease;
+  }
 }
 
 .kindTag {
@@ -732,14 +1297,6 @@
   color: #2b2117;
 }
 
-.hintNarrow {
-  display: inline;
-}
-
-.hintWide {
-  display: none;
-}
-
 .shelfNote {
   margin: 0;
   font-size: 0.62rem;
@@ -925,7 +1482,6 @@
 
 .moodboard
   :is(
-    .chunky,
     .pagerBtn,
     .filter,
     .stampButton,
@@ -1045,26 +1601,44 @@
 
 /* ── wider boards ─────────────────────────────────────────────────────── */
 
+/* Between the tablet stack and a wide desktop there is not enough cork for the
+   label and the toolbox to sit on one line without touching: give each a row,
+   keep the toolbox right-aligned to the mat's edge. */
+@media (min-width: 56rem) and (max-width: 67.99rem) {
+  .boardTop {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+
+  .hud {
+    align-self: flex-start;
+  }
+
+  .toolbar {
+    flex: 0 0 auto;
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
+  }
+}
+
 @media (min-width: 56rem) {
   .toolbar {
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    /* Two rows with a job each: tabs beside the catalogue tags, then one full
+       yarn strip. The panel hugs its widest row, so no band of bare cardboard
+       is left in a corner. */
     grid-template-areas:
-      'hud filters controls'
-      'archives archives archives';
+      'filters archives'
+      'yarn yarn';
     align-items: center;
-    padding: 0.75rem 0.9rem;
+    /* A little more room on the right: the catalogue tags carry a 3px drop
+       shadow and a tilt, so they read as clipped at 0.9rem. */
+    padding: 0.75rem 1.15rem 0.8rem 0.9rem;
   }
 
-  .chunky {
-    flex: 0 0 auto;
-  }
-
-  .archiveLinks {
-    justify-content: flex-end;
-  }
-
-  .archive {
-    flex: 0 1 auto;
+  .yarnBar {
+    width: 100%;
   }
 
   .dialogGrid {
@@ -1073,8 +1647,68 @@
 }
 
 @media (max-width: 55.99rem) {
-  .hudNote {
+  /* Stacked, the panel takes the mat's width; only side-by-side does it hug its
+     own tools. Keep this AFTER the base .toolbar rule. */
+  .toolbar {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    margin-left: 0;
+    /* Stacked, every tool owns its own row: tabs, pager, tags. Side-by-side
+       pairings leave a gutter of bare cardboard beside the shorter row, and the
+       yarn row is empty here because the tools are hidden below 1024px. */
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'filters'
+      'controls'
+      'archives';
+  }
+
+  /* The pager is a label and two arrows: let it span the row so the label sits
+     on the panel's left edge and the arrows on its right, not adrift mid-row. */
+  .pager {
+    justify-content: flex-start;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  /* Chips are sticky notes, not banners: let them keep their own width and wrap
+     when the mat is wide but the board is stacked. */
+  .filters {
+    flex-wrap: wrap;
+  }
+
+  .filter {
+    flex: 0 1 auto;
+  }
+
+  /* Two catalogue tags, one row: each takes half so the strip ends flush with
+     the tabs above it instead of trailing off into bare cardboard. */
+  .archiveLinks {
+    justify-content: stretch;
+  }
+
+  .archive {
+    flex: 1 1 0;
+  }
+
+  /* One tape per corner is enough: the toolbar already wears two. */
+  .hudTape {
     display: none;
+  }
+
+  .pager::before {
+    /* The label takes the left end and the arrows stay together at the right;
+       spreading all three children left one arrow stranded mid-row. */
+    margin-right: auto;
+    content: 'Swipe the shelf';
+    font-family: var(--font-geist-mono), monospace;
+    font-size: 0.52rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(63 42 24 / 0.72);
   }
 
   .dialogFrame {
@@ -1082,13 +1716,32 @@
   }
 }
 
-/* Three chips will not sit in one pill on a phone; give them a grid instead. */
-@media (max-width: 30rem) {
+@media (max-width: 40rem) {
+  /* Three chips will not sit in one pill on a phone, and left to themselves
+     they wrap into a ragged stack; a grid shares the row evenly. */
   .filters {
+    display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.35rem;
-    border-radius: 14px;
   }
+
+  /* Thumb-sized, not cursor-sized: 44px is the floor for a control you tap
+     while holding the phone. */
+  .filter,
+  .pagerBtn,
+  .archive {
+    min-height: 2.75rem;
+  }
+
+  /* Label on the left, then the two arrows share whatever the row has left:
+     a bare 290px strip with two thumbnails at its end was mostly hole. */
+  .pagerBtn {
+    flex: 1 1 0;
+    width: auto;
+  }
+}
+
+@media (max-width: 30rem) {
 
   .filter {
     padding: 0.35rem 0.25rem;
@@ -1137,13 +1790,6 @@
     display: none;
   }
 
-  .hintWide {
-    display: inline;
-  }
-
-  .hintNarrow {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1153,13 +1799,27 @@
 
   .piece,
   .piece:hover,
-  .chunky,
   .pagerBtn,
   .filter,
   .archive,
   .shelfBarFill,
   .panTarget,
   .stampButton {
+    transition-duration: 0.01ms;
+  }
+
+  /* The held pin still has to announce itself, so it keeps its ring and loses
+     only the ping. */
+  .pinPulse {
+    animation: none;
+    inset: -0.22rem;
+    opacity: 1;
+  }
+
+  .pinCap,
+  .spool::before,
+  .yarnCut,
+  .yarnReset {
     transition-duration: 0.01ms;
   }
 
@@ -1249,14 +1909,6 @@
 .piece:focus-within {
   outline: 3px solid var(--cobalt);
   outline-offset: 3px;
-}
-
-/* Lucky dip: a butter marker ring, no motion, so it works everywhere. */
-.piece[data-picked='true'] {
-  box-shadow:
-    0 0 0 5px #fffaf1,
-    0 0 0 11px color-mix(in srgb, var(--tape-butter) 72%, transparent),
-    5px 7px 0 rgb(24 24 27 / 0.16);
 }
 
 .piece[data-tape='pink'] .tape {
@@ -1368,44 +2020,17 @@
   .stickerZone {
     display: none;
   }
-}
 
-/* ── paper party ───────────────────────────────────────────────────────── */
+  /* No gutter on a snap shelf, so no strands and no spools: the yarn bar would
+     be a controller for a picture that is never drawn. */
+  .yarnBar {
+    display: none;
+  }
 
-.confetti {
-  position: absolute;
-  inset: 0;
-  z-index: 8;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.scrap {
-  position: absolute;
-  top: 0;
-  border-radius: 1px;
-  background: var(--tape-amber);
-  box-shadow: 0 1px 0 rgb(24 24 27 / 0.14);
-}
-
-.scrap[data-tone='pink'] {
-  background: var(--tape-pink);
-}
-
-.scrap[data-tone='sky'] {
-  background: var(--tape-sky);
-}
-
-.scrap[data-tone='mint'] {
-  background: var(--tape-mint);
-}
-
-.scrap[data-tone='butter'] {
-  background: var(--tape-butter);
-}
-
-.scrap[data-tone='rose'] {
-  background: var(--tape-rose);
+  .pin {
+    pointer-events: none;
+    cursor: default;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
