@@ -279,10 +279,9 @@
       .stats {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 0.8rem;
-        margin: 2rem 0 0;
-        padding: 1rem 0 0;
-        border-top: 1px solid var(--line);
+        gap: 1.4rem 0.8rem;
+        margin: 2.4rem 0 0;
+        padding: 0;
         list-style: none;
       }
       .stats b {
@@ -295,7 +294,6 @@
       .stats span {
         display: block;
         color: var(--muted);
-        font-family: var(--mono);
         font-size: 0.58rem;
         letter-spacing: 0.05em;
         text-transform: uppercase;
@@ -887,16 +885,25 @@
       .endcap p { margin: 0.7rem 0 0; max-width: 46ch; opacity: 0.82; }
       .endcap .button { background: var(--accent-ink); color: var(--accent); border-color: transparent; }
       .endcap .button.ghost { background: transparent; color: var(--accent-ink); border-color: rgb(255 255 255 / 0.4); }
+      /* footer: a band, not a colophon strip — statement first, provenance second, no rule, no mono */
       .footer {
-        display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.6rem;
-        padding-block: 1.4rem 2.5rem;
-        border-top: 1px solid var(--line);
-        color: var(--muted);
-        font-family: var(--mono);
-        font-size: 0.58rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
+        display: grid; gap: 1.6rem;
+        padding-block: 3rem 3.4rem;
+        color: var(--ink);
       }
+      .footer__say {
+        margin: 0; max-width: 26ch;
+        font-family: var(--display);
+        font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+        line-height: 1.08; letter-spacing: -0.02em;
+      }
+      .footer__row {
+        display: flex; flex-wrap: wrap; align-items: baseline;
+        justify-content: space-between; gap: 0.8rem 1.6rem;
+        font-size: 0.86rem; color: var(--muted);
+      }
+      .footer__row a { color: var(--ink); text-decoration: none; font-weight: 600; }
+      .footer__row a::after { content: ' ↗'; }
 
       @media (max-width: 900px) {
         .hero, .head-grid, .code-wrap, .endcap { grid-template-columns: 1fr; }
@@ -971,10 +978,7 @@
     <main>
       <section id="top" class="shell hero" aria-labelledby="system-title">
         <div>
-          <div class="meta-row">
-            <span class="pill"><span class="dot" aria-hidden="true"></span>System · v1.0</span>
-            <span>Design system / 2026</span>
-          </div>
+          <!-- hero: no eyebrow, no pill above the headline — the h1 says what this is -->
           <h1 id="system-title">One system, every surface.</h1>
           <p class="lede">
             A working specimen: foundations, one material, marks, colour, type,
@@ -1384,8 +1388,11 @@
     </main>
 
     <footer class="shell footer">
-      <span>System design system · v1.0 · 2026</span>
-      <span>Replace with the real author, licence and source.</span>
+      <p class="footer__say">One material, one loud field, one idea.</p>
+      <div class="footer__row">
+        <span>System design system · v1.0 · 2026 · replace with the real author and licence</span>
+        <span><a href="#top">Back to the top</a></span>
+      </div>
     </footer>
 
     <script>

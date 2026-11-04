@@ -1,14 +1,14 @@
 ---
 name: sunnyside-brand-system
-version: 4.6.0
-description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with a 7-question Step 0 ask_question scope gate written in plain geometry, not case names: surface material, rail (2 shapes), hero (8 shapes), mark construction, colour polarity (1 or 2 scopes, binding on the toggle and token sheets), build scope, and add-ons. Then synthesizes a custom archetype, Kuwayama-grade parametric SVG marks + a 6-mark companion cast, a 6-panel 1500x1125 brandkit board, a comparative surface exploration grid, OKLCH tokens in the chosen polarity, an unnumbered-hero 7-section interactive showcase page, and a footer shape derived from the hero rather than copied from the last case.'
+version: 4.7.0
+description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with a 7-question Step 0 ask_question scope gate written in plain geometry, not case names: surface material, rail (2 shapes), hero (8 shapes), mark construction, colour polarity (1 or 2 scopes, binding on the toggle and token sheets), build scope, and add-ons. Then synthesizes a custom archetype, Kuwayama-grade parametric SVG marks + a 6-mark companion cast, a 6-panel 1500x1125 brandkit board, a comparative surface exploration grid, OKLCH tokens in the chosen polarity, an unnumbered-hero 7-section interactive showcase page, and a footer shape derived from the hero rather than copied from the last case. Pillars V and VII carry a house-rules layer curated from shipped builds: no eyebrow, no monospace labels outside code, no outlined chips or 1px stat boxes, no gradient except one directional scrim drawn in the surface’s own colour, one accent on the action, a two-line headline cap, and a footer that is a band with a real photograph rather than a colophon strip.'
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '4.6.0'
+  version: '4.7.0'
 ---
 
-# SUNNYSIDE BRAND SYSTEM ENGINE (v4.6 · Two Rails + 8 Hero Shapes + 4 Footer Shapes + Surface Grid)
+# SUNNYSIDE BRAND SYSTEM ENGINE (v4.7 · Two Rails + 8 Hero Shapes + 5 Footer Shapes + Surface Grid)
 
 You are a Principal Design Engineer & Brand Architect. Execute with zero looping tasks, zero placeholder copy (`Lorem ipsum` or generic `Acme` filler), zero emoji UI chrome, and flagship-grade visual engineering.
 
@@ -127,7 +127,7 @@ Call `ask_question` with these 7 questions, verbatim. The JSON below is already 
 ### Step 1 · Single-Pass Deterministic Execution (Immediately after `ask_question` is answered)
 Once the user answers the `ask_question` prompt (or immediately on Turn 1 if the user explicitly wrote `"skip questions"`):
 1. State your **3-Axis Synthesis** in a tight 2-line architectural header summary at the top of your response:
-   > **`[BRAND NAME] (Case XX)` — 3-Axis Synthesis:** Surface: *[Tactility]* · Rail: *[A 176px per-section / B 200px contents list]* · Hero: *[A–E shape]* · Physics: *[Corner/Stroke]*  
+   > **`[BRAND NAME] (Case XX)` — 3-Axis Synthesis:** Surface: *[Tactility]* · Rail: *[A 176px per-section / B 200px contents list]* · Hero: *[A–H shape · relation `<relation>`]* · Physics: *[Corner/Stroke]*  
    > **DNA:** Archetype: *[Seed Fusion]* · Mark: *[Kuwayama Primitive + 6-Cast]* · Stack: *[Display + UI Sans + Mono]* · Polarity: *[Theme Scope]*
 2. Build the batch asset script (`scripts/build-<slug>.mjs`), 6-panel `<slug>-brandkit.png` board (`brandkit-board.mjs`), and `/design-system/[slug]` showcase route in **one deterministic pass**.
 
@@ -204,51 +204,81 @@ Never default to generic Inter + Roboto. Synthesize a **3-Role Font Stack** (`--
 | Relation | What the reader sees | Shapes |
 |---|---|---|
 | `below` | artwork or object first, type underneath on the page ground | A, C |
-| `beside` | type on bare ground, artwork in its own column | B |
+| `beside` | type on bare ground, artwork in its own column that bleeds to a viewport edge | B |
 | `inside` | the hero *is* a printed object and the type is printed on it | D |
 | `on` | type sits directly on a full-bleed image, no panel, no card | E |
 | `around` | one isolated object, type wrapping the empty space | F |
 | `none` / `rhythm` | no artwork at all, or type carried by bands of colour | G, H |
 
-#### Variant A · Full-Width Field + Overlapping Stat Bench · relation `below`
-- **Top Field (`.xx-field`):** full-width `height: min(78vh, 720px)` stage holding the artwork/stipple/photo edge-to-edge, with a minimal bottom-aligned monospace `.xx-stamp` bar (`Brand · material · year` / `Primary hex / ground hex`). **No headline sits on the artwork.**
-- **Opening Below (`.xx-opening`):** a 5-cell exposed-hairline `.xx-bench` (`margin-top: -30px; position: relative; z-index: 2; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--xx-line-strong)`) bridges the seam. Below the bench: oversized `<h1>` (`clamp(52px, 8.4vw, 112px)`, `line-height: 0.9`, optional register-ghost `text-shadow`), a `56ch` lede, split-arrow CTAs.
+#### The house rules every hero inherits — no exceptions, whatever the shape
 
-#### Variant B · Split Editorial + Framed Media · relation `beside`
-- **2-column asymmetric grid:** left column on the bare ground — eyebrow, editorial `<h1>`, `60ch` lede, 4 compact `.pill` badges (`<b>27</b> tokens`, `<b>8.71:1</b> cream on emerald`, `<b>6</b> cast marks`, `<b>64</b> unit grid`).
-- **Right framed artwork:** high-resolution painting or photograph, `overflow: hidden`, **plus one** small pane carrying `lockup-reverse.svg` and a 2-line caption. One pane, not a card stack. Followed by a 4-cell stat row.
-- *Vary it:* alternate the text column left/right by case, and let the framed artwork bleed off the right viewport edge on wide screens. A B-hero with the image inset 40px from every edge is a different hero.
+These are the laws the shapes below are already shaped by. They were written after a curated build in which a hero passed the anti-template test and still read as assembled: it had an eyebrow, four outlined chips, a hairline docket, a 4-cell strip with `1px` borders and an accent-coloured word in the headline. The composition was fine. Every ornament was the tell.
+
+| Rule | Instead |
+|---|---|
+| **No eyebrow.** No small label, case number, category line or pill above the `<h1>`. | The headline says what this is. `Case 19 — Identity · design system` above `Every parcel leaves a paper trail.` deletes itself. |
+| **No monospace in the hero**, and no tiny uppercase letter-spaced labels anywhere. | The reading face, sentence case, at a size someone reads. Mono is legal in exactly four places on the whole page: the rail number, tabular figures in a ledger, a code sheet, and one data stamp on a photograph. Never a hero label, a nav link or a colophon. |
+| **No outlined chips, pill rows, `1px` stat strips or hairline boxes.** | A plain `2×2` `<dl>`: labels at `62%` ink at `13px`, values at `15px/600` with `font-variant-numeric: tabular-nums`, separated by space only. A boundary, if one is truly needed, is a step in tone — never a stroke. |
+| **Rules are material, not decoration.** A paper or cardboard surface may print `1px` rules as its own grain (the rail, a ledger row). | A rule may never box a chip, a stat cell or a button, and never separates two blocks that space could separate. |
+| **No gradients.** | One exception, and it is compositional: a *directional scrim* that lets type sit on a photograph. It is drawn in the surface's own colour (paper falling away, not black laid on), and it is described in the hero comment as `scrim 96deg paper → transparent`. |
+| **No shadows on anything at rest.** No glow, no blur, no glass, no `backdrop-filter` — including the navbar. | A tone step between surfaces; the navbar is a plain bar on the page ground with no border. |
+| **No styled accent word.** No italic, coloured, underlined or serif-swapped word inside the headline. | One face, one colour. The words carry the emphasis. |
+| **One accent, on the action.** | The accent fill appears on the primary button and nowhere else in the first screen. A second link is plain ink with ` →`. |
+| **One dominant image, at least ~45% of the first screen** whenever the brief supplies photographs. | Not a framed thumbnail beside six chips. The photo bleeds to a viewport edge or fills a full column. |
+| **The `<h1>` is two lines or fewer at every width** (1440 / 1024 / 390), measured, not assumed. | Cap it in `ch` (`max-width: 18ch`), then shrink the `clamp()`. 33 characters at `15ch` renders as three lines — one character-width of `ch` is the difference between composed and cramped. |
+| **A statement is a paragraph.** The lede is `16.5–18px` at `1.55` leading, `44–48ch` wide, in full ink, right under the headline. | Not a `58ch` grey block, not a sentence set at display size. |
+
+#### Variant A · Full-Width Field + Overlapping Stat Bench · relation `below`
+- **Top Field (`.xx-field`):** full-width `height: min(78vh, 720px)` stage holding the artwork edge-to-edge with a minimal bottom-aligned `.xx-stamp` (`Brand · material · year`). **No headline sits on the artwork.**
+- **Opening Below (`.xx-opening`):** a 5-cell `.xx-bench` (`margin-top: -30px; position: relative; z-index: 2; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--xx-line-strong)`) bridges the seam. Below the bench: oversized `<h1>` (`clamp(52px, 8.4vw, 112px)`, `line-height: 0.9`), a `56ch` lede, split-arrow CTAs.
+- **Trap:** the bench is the only hairline grid the shape may own, and its five cells are data — never `10 primitives · 6.25:1 · 6 cast marks`, which is a chip row wearing a grid.
+
+#### Variant B · Split Editorial + Full-Bleed Media · relation `beside`
+- **The curated build (shipping identity, `Cardboard & steel`):** `.xx-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr); min-height: min(78vh, 730px); background: var(--xx-kraft) }`. The left column is a flex column, `justify-content: center`, gap `clamp(18px, 2vw, 26px)`, with `padding-left: max(clamp(24px, 3.4vw, 56px), calc((100% - 1180px) / 2))` so the type sits on the page's own left edge. The right column is the photograph, `overflow: hidden`, running off the right viewport edge — no frame, no inset, no `border-radius`.
+- **Type block:** `<h1>` `clamp(38px, 4.5vw, 68px)`, `line-height: 0.96`, `letter-spacing: -0.032em`, `max-width: 18ch` → two lines at 1440, 1024 and 390. Lede `16.5px/1.56`, `44ch`, full ink. One accent-filled button, one plain `See the mark →` link.
+- **Facts:** the `2×2` `<dl>` from the house rules, `16px 28px` gap, pushed `clamp(10px, 2.2vh, 30px)` below the actions.
+- **Mobile:** one column, plate `order: 2; height: clamp(240px, 52vw, 380px)`, type column loses its `max()` padding.
+- **Crop from the source, not from a default.** `object-position` is a measurement: a landscape photograph whose subject is a torso shot crops at `center top`; a scene with the horizon in the lower third crops at `center 30%`. Look at the asset before writing the value.
 
 #### Variant C · Live Specimen Stage First · relation `below`
-- **Top specimen stage:** the system's signature interactive or procedural object across the full shell or viewport — a live `DitherField` with a printed cartographic `.xx-margin` scale bar (`Sheet 05 · 0—1 km · 1:25 000 · seed 7`), or a stage header (`Fig. 01 · the stage, live`) plus an interactive specimen.
-- **Hero foot below:** eyebrow, display headline, narrative lede, actions, 4-cell stat column.
+- **Top specimen stage:** the system's signature interactive or procedural object across the full shell or viewport, with a `.xx-margin` scale bar (`Sheet 05 · 0—1 km · 1:25 000 · seed 7`).
+- **Hero foot below:** display headline, narrative lede, actions, and the `2×2` fact list — not a 4-cell strip.
+- The stage must be the brand's own object. A generic "live dashboard" of grey bars is the fake-dashboard tell; if there is no real object, take G.
 
 #### Variant D · Physical Sheet & Torn Edge · relation `inside`
-- **Sheet / hoarding stage:** the hero is a physical printed sheet or civic hoarding — pinned top edge (`<Pin />` + live run/clock metadata row), an oversized `760px` mark impression, bold display typography **printed on the sheet**, and a bottom edge cut with an irregular 18-tooth polygon `clip-path`, or a Bayer dither dissolve into a solid paper plate below.
+- **Sheet / hoarding stage:** the hero is a physical printed sheet — pinned top edge (`<Pin />` + run/clock metadata row), an oversized mark impression, bold display typography **printed on the sheet**, and a bottom edge cut with an irregular 18-tooth polygon `clip-path`.
+- **Trap, learned the hard way:** a printed sheet with a pin row, a docket `<dl>` with hairlines, four chips, a 4-cell strip and a tear is five ornaments deep. Keep exactly two of them. The curated rebuild of this hero dropped the pin row, the chips, the hairline docket and the strip, and kept only the sheet and the photograph; the sheet alone does not earn a hero.
+- A tear or perforation on the sheet is legal **once**. If the footer later tears too (F4), one of the two goes.
 
 #### Variant E · Full-Bleed Atmospheric Plate · relation `on`
-- **Full-bleed image + type directly on it:** photograph covers the section, a *directional* scrim (not a flat 50% black) carries contrast, and the headline, lede and a stat row are set **on the image itself**.
-- **Hard bans for E:** no solid reading panel, no frosted card, no "live readout" box floating in a corner. Those three are the tell that a hero was assembled rather than composed. Text sits on the photograph or the shape is not E — pick F or G instead.
-- Type on a photograph needs `text-shadow: 0 1px 24px rgba(0,0,0,.35)` or a 1px dark rule under the baseline; verify the real contrast against the *lightest* region behind each line, not against the scrim colour.
+- **The curated build (mountain identity, `Paper & ink`):** `.xx-hero { min-height: min(88vh, 820px) }` with the photograph `object-fit: cover` and a *measured* `object-position` — the asset was three-quarters bare paper, so the frame was pinned at `84% 100%` to put the ridge in the composition.
+- **The scrim follows the photograph's luminance, not a formula.** That source is a paper-white sky over a dark ridge, so the wash is the *paper colour falling away*: `linear-gradient(96deg, paper 97% → 92% 32% → 46% 54% → transparent 68%)` plus `linear-gradient(180deg, paper 78% → 18% 46% → transparent 62%)`. Type inherits indigo-on-paper at `15.8:1`. A `50%` black scrim here would have produced a grey page with a dark stripe.
+- **Type on the image:** the `<h1>` at `clamp(50px, 7vw, 104px)/0.9`, one lede of `44ch`, actions, and the `2×2` facts — all on the paper side of the wash. `text-shadow` is a crutch; if the type needs one, the scrim is in the wrong place.
+- **Hard bans for E:** no solid reading panel, no frosted card, no "live readout" box in a corner, no lockup pill floating on the photo. Those are the tell that a hero was assembled.
+- **Caption:** if a caption belongs on the image, give it a paper bar with `padding: 12px max(var(--xx-gutter), calc((100% - var(--xx-wrap)) / 2 + var(--xx-gutter)))`. Do not stack a `padding-block` shorthand after a `padding-inline` — the shorthand silently wins and the caption drifts off the margin.
 
 #### Variant F · One Object, Isolated · relation `around`
 - **Plain ground, one subject:** a single product, tool, specimen or printed object, large, on an unscrimmed ground (paper, seamless, single flat colour). No full-bleed photo.
-- **Type wraps it:** the `<h1>` occupies the empty band above or beside the object, the lede and stat row take the opposite corner, and the object's own shadow or edge is the only depth on the page. Because the object is isolated, the page reads as a catalogue plate — the most expensive-looking hero available and the least used.
-- Use this whenever the brief's photographs contain **one dominant object** rather than a scene.
+- **Type wraps it:** the `<h1>` occupies the empty band above or beside the object, the lede and fact list take the opposite corner, and the object's own edge is the only depth on the page.
+- Use this whenever the brief's photographs contain **one dominant object** rather than a scene, and the background plate must be a real photograph of that object, never a cut-out on a flat colour that the brand invented.
 
 #### Variant G · Typographic Cover · relation `none`
-- **No artwork.** A typeset cover: one enormous display line filling the measure (`clamp(64px, 12vw, 190px)`, `letter-spacing: -0.04em`), two rules, the case numbers set as a small ledger, the mark 40px in a corner, and one `56ch` lede. Background is the material itself — paper, kraft, ink, frost.
-- This is the correct answer when the brand has **no usable photograph**, or when the photographs would only ever be decorative. A type-only cover cannot look templated, because there is nothing to arrange but the type.
+- **No artwork.** One enormous display line filling the measure (`clamp(64px, 12vw, 190px)`, `letter-spacing: -0.04em`), the case numbers set as a small ledger, the mark `40px` in a corner, one `56ch` lede. Ground is the material itself.
+- **Trap:** a hero grid of `auto 1fr auto` rows with `min-height: min(76vh, 720px)` stretches the middle row and opens a 125px canyon between the headline and the lede. Use `auto auto auto` with a `clamp(1.6rem, 2.6vw, 2.4rem)` gap and let the section's `min-height` come from the sum.
+- This is the correct answer when the brand has **no usable photograph**, or when the photographs would only ever be decorative.
 
 #### Variant H · Stacked Colour Bands · relation `rhythm`
-- **3–5 full-bleed horizontal bands** of different colour or material, each holding exactly one line of the argument (a claim, a number, a material name), separated by `1px` rules or by nothing at all. The `<h1>` lands in the widest band; the mark sits in the narrowest.
+- **3–5 full-bleed horizontal bands** of different colour or material, each holding exactly one line of the argument, separated by `1px` rules or by nothing at all. The `<h1>` lands in the widest band; the mark in the narrowest.
 - **Why it works:** the eye reads the page as a printed chart rather than a layout, and the bands are made of the brand's own primitives, so it cannot drift toward another case's look.
+- **Trap:** the bands must carry the argument, not the palette. Five bands of five colours with no sentence in them is a swatch test.
 
 #### The composition clause — read this before drawing any hero
-1. **State the relation in one line** at the top of the hero section comment: `hero: E · relation on · scrim 118deg · type on image`.
-2. **A `plate` is not the default.** At most two shapes (B, D) may contain a rectangular panel of type. If your hero has a rounded rectangle holding an eyebrow, a headline and a paragraph, and a second smaller rounded rectangle beside it, you have built the banned generic hero — stop and re-pick.
-3. **Photographs are material, not wallpaper.** If the brief supplies photographs and you pick A, C, F or H, at least one of them must be used as a *texture* — a blurred light field behind panes, a band fill, an isolated cut-out, a dither source — not only as a hero backdrop.
-4. **Vary across the library.** Before choosing, list the shapes already used by the cases in `src/data/cases.ts`. Do not pick a shape that the two most recent cases already use; if the Step 0 answer points at one of those, say so in one line and take the nearest shape with a different relation.
+1. **State the relation in one line** in the hero section comment: `hero: E · relation on · scrim 96deg paper → transparent · type on image`.
+2. **A `plate` is not the default.** Only B and D may hold a rectangular panel of type, and on B the panel is the *page ground itself*, not a card. If your hero has a rounded rectangle holding an eyebrow, a headline and a paragraph, and a second smaller rounded rectangle beside it, you have built the banned generic hero — stop and re-pick.
+3. **Photographs are material, not wallpaper.** If the brief supplies photographs and you pick A, C, F or H, at least one must be used as a *texture* — a band fill, an isolated cut-out, a dither source — not only as a backdrop.
+4. **Measure the crop and the line count.** `object-position` comes from the asset's actual composition; the `<h1>` line count is verified at 1440 / 1024 / 390 before the hero is called done.
+5. **Vary across the library.** Before choosing, list the shapes already used by the cases in `src/data/cases.ts`. Do not pick a shape the two most recent cases already use; if the Step 0 answer points at one of those, say so in one line and take the nearest shape with a different relation.
+6. **Verify the frame before shipping:** `scrollWidth === clientWidth` at 1440 / 1024 / 768 / 390, zero console errors, and the hero's own height printed once (`702px` at 1440 is a hero; `1149px` is a hero with a canyon in it).
 
 #### Mandatory 6-Panel Brandkit Board (`brandkit-board.mjs`)
 Every case MUST generate a real **`1500 × 1125` (`3000 × 2250` @2x) 6-Panel Brand Kit Board** (`<slug>-brandkit.png` & `.webp`)—never copy a raw photo as `<slug>-brandkit.png`:
@@ -311,43 +341,71 @@ node skills/sunnyside-brand-system/scripts/brandkit-board.mjs \
 
 > [!CRITICAL]
 > **FOOTER LAW — THE FOOTER IS A SECOND COMPOSITION, NOT A CREDIT LINE:**
-> The generic footer is `mono line · 1px border-top · two spans pushed apart`. That is a colophon, not a design. It is also the single most reliable tell that a page was assembled from a template, because it is identical on every page. **Four footer shapes ship, and the footer shape is derived from the hero shape — never copied from the last case.**
+> The generic footer is `mono line · 1px border-top · two spans pushed apart`. That is a colophon, not a design. It is also the single most reliable tell that a page was assembled from a template, because it is identical on every page. **Five footer shapes ship, and the footer shape is derived from the hero shape — never copied from the last case.**
 
 **The pairing table.** Pick the footer from the hero answer, then vary the one dimension named in the last column. Two cases may share a footer family; they must never share the variation.
 
 | Hero | Footer shape | Why the pairing holds | Vary by |
 |---|---|---|---|
-| A · Banner + bench | **F1 · Bench echo** — the same 5-cell hairline grid returns at the bottom, holding contact, city, year, licence, one link | the bench that opened the page closes it | which cells carry links vs. plain data |
-| B · Text left, photo right | **F2 · Reversed split** — the framed artwork returns on the *left*, the closing statement and links sit on the *right* | the composition flips, the page bookends | image crop / scrim direction |
+| A · Banner + bench | **F1 · Bench echo** — the same 5-cell grid returns at the bottom, holding place, year, licence, one link, the mark | the bench that opened the page closes it | which cells carry links vs. plain data |
+| B · Text left, photo right | **F5 · Plate & receipt** — the photograph returns as a full-width band, then a receipt row underneath carrying the lockup, one statement and the data | the column that opened becomes the band that closes | which receipt field leads, and the plate's height |
 | C · Live demo | **F3 · Frozen specimen** — a small, static, final frame of the live object (same seed, last state) above the colophon | the live thing is shown stopped | whether the frame is captioned `Fig. 07 · final state` |
 | D · One giant sheet | **F4 · Torn receipt** — a paper strip with a torn or perforated top edge carrying the sign-off, then a plain colophon underneath | the sheet is torn off and kept | tooth count / which side is torn |
-| E · Full-screen photo | **F1 or F2** — a full-bleed band at `min(46vh, 420px)` with a *strong* two-axis scrim and the reverse lockup on it, then a thin bar | the photograph returns, quieter | scrim angle / lockup alignment |
+| E · Full-screen photo | **F2 · Reversed split** — the photograph returns on the *left*, the closing statement and links on the *right* | the composition flips, the page bookends | image crop / which side the scrim falls from |
 | F · One object | **F3 or F1** — the isolated object repeated small and alone on the plain ground, sign-off beside it | catalogue-plate bookend | object scale / which side it sits |
-| G · Typographic cover | **F4 or F1** — a final typeset block: one large line, a rule, the ledger of case numbers | type opened, type closes | number of rules |
+| G · Typographic cover | **F4 or F1** — a final typeset block: one large line, the ledger of case numbers | type opened, type closes | number of rules |
 | H · Stacked bands | **F2 or F4** — the last band widens and holds the sign-off, or the bands invert to a single tall band | the rhythm resolves | band count / inverted order |
 
 #### Shape F1 · Bench echo
-A `repeat(5, 1fr)` hairline grid (`gap: 1px; background: var(--xx-line-strong)`) with 5 cells, each `padding: 22px 20px`, holding a mono label above a value. Cells 1–3 are data (city, year, licence), cell 4 is one real link, cell 5 is the mark at 28px. Below it, a `56px` bar with the copyright and the back-link. **Ban:** no photo, no glass, no card.
+A `repeat(5, 1fr)` grid (`gap: 1px; background: var(--xx-line-strong)`) with 5 cells, each `padding: 22px 20px`, holding a label above a value. Cells 1–3 are data (place, year, licence), cell 4 is one real link, cell 5 is the mark at `28px`. Below it a `56px` bar with the copyright and the back-link. **Bans:** no photo, no glass, no card, and no mono label — sentence case at a size someone reads.
 
-#### Shape F2 · Reversed split
-`grid-template-columns: 0.92fr 1.08fr; gap: 1px` — the framed artwork occupies the left column at `aspect-ratio: 4/3` with `overflow: hidden` and one directional scrim, the right column carries eyebrow, a `34ch` closing statement at `clamp(24px, 2.6vw, 34px)`, a `48ch` sub-line, and the link row. On mobile the artwork goes *below* the statement (opposite of the hero, where it went above).
+#### Shape F2 · Reversed split — the curated build
+```css
+.xx-foot__split { display: grid; grid-template-columns: 0.92fr 1.08fr; gap: 1px; }
+.xx-foot__art   { position: relative; overflow: hidden; min-height: clamp(300px, 34vw, 440px); background: var(--xx-surface-plate); }
+.xx-foot__say   { background: var(--xx-surface-page); }   /* ← required, see trap 2 */
+.xx-foot__art > img      { width: 100%; height: 100%; object-fit: cover; object-position: center 52%; }
+.xx-foot__art > img.xx-foot__lock { position: absolute; width: auto; height: 26px; left: clamp(20px, 3vw, 40px); bottom: clamp(46px, 5vw, 64px); max-width: 60%; object-fit: contain; filter: none; }
+```
+- **Trap 1 — specificity.** `.xx-foot__art img { width:100%; height:100% }` is `(0,1,1)` and silently beats `.xx-foot__lock` at `(0,1,0)`: the lockup scales to the column and gets clipped to two letters. Scope the photo rule with `>` and put the lockup rule at `.xx-foot__art > img.xx-foot__lock`. Measure it afterwards (`86.9 × 26px` is right; `200px` tall is the bug).
+- **Trap 2 — the 1px split gap.** `gap: 1px` exposes the parent's background between the columns. If the statement column has no explicit `background`, the page's own ground bleeds through as a grey stripe down the footer. Give it a surface token.
+- **Right column content:** one statement at `clamp(24px, 2.6vw, 34px)` on a `34ch` measure, a `48ch` sub-line, and the link row. No eyebrow above the statement — the statement is the opening line.
+- **Mobile:** the artwork goes *below* the statement (opposite of the hero, where it went above).
 
 #### Shape F3 · Frozen specimen
-A `min(340px, 42vh)` stage holding a static final frame of the brand's own live object — the dither field at its last seed, the specimen at rest, the chart at its final value — with a mono caption (`Fig. 07 · final state · seed 11`) at its bottom-left. No scrim, no overlay type: the object is the whole composition. Colophon bar below.
+A `min(340px, 42vh)` stage holding a static final frame of the brand's own live object — the dither field at its last seed, the chart at its final value — captioned at the bottom-left. No scrim, no overlay type: the object is the whole composition. Colophon bar below.
 
 #### Shape F4 · Torn receipt
-A paper or kraft strip (`background: var(--xx-surface-plate)`, `clip-path` with 14–20 teeth on the top edge, `margin-top: -1px`) carrying: the reverse lockup at 30px, one `30ch` sign-off line, and the mark small at the far right. Then a plain `1px` rule and a single-line colophon. **Ban:** never combine the torn edge with a photograph; the strip must read as paper.
+A paper or kraft strip (`background: var(--xx-surface-plate)`, `clip-path` with 14–20 teeth on the top edge, `margin-top: -1px`) carrying the reverse lockup at `30px`, one `30ch` sign-off line, and the mark small at the far right. Then a plain rule and a single-line colophon. **Ban:** never combine the torn edge with a photograph; the strip must read as paper. If the hero is D (a torn sheet), the footer may not tear as well — one tear per page.
+
+#### Shape F5 · Plate & receipt — the curated workhorse
+For any case whose hero carries a photograph band: the photograph returns full-width, and the receipt is set underneath it as a real form, not a link row.
+- **The plate.** `height: clamp(230px, 25vw, 350px)`, `object-fit: cover`, `object-position` measured from the asset (`34% 50%` put the hands and the signed tablet in frame), caption as a small chip on the surface colour at the bottom-left, e.g. `Plate 02 · the receipt, signed at the threshold`.
+- **The receipt row.** `grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) auto; gap: 28px; padding-block: 34px 30px`:
+  1. lockup at `22px` + the closing statement on a `22ch` measure;
+  2. a `<dl>` of three real fields (received in / gross weight / signed at), carrying `border-left: 1px solid` at `26%` ink so the gap reads as a ruled form cell — the one place a rule is the material;
+  3. the mark inside a bordered cell with one line of provenance (`1 of 1`).
+- **Alternates from the same family, already shipped:** *plate above a statement* (a `clamp(210px, 26vw, 330px)` full-bleed plate, caption chip, statement below on the ground) and *plate beside the stage* (`.xx-foot__stage { display: flex; gap: clamp(1.5rem, 3vw, 3rem); min-height: clamp(300px, 34vw, 430px) }` with the figure at `flex: 0 0 40%`, the sign-off in the remaining space, stacking under 900px with the photo at `208px`).
+- **The footer photograph is never the hero photograph.** If the hero used the table, the footer uses the dish; if the hero used the handoff, the footer uses the signature. A repeated image reads as a mistake, not a bookend.
 
 **Footer content contract — every footer carries all five, and nothing else:**
-1. The mark or the lockup (one of them, not both).
+1. The mark or the lockup, one of them, not both.
 2. One closing line that is a *statement*, not a thank-you (`Every parcel leaves a paper trail.`).
 3. Three to four real links, each a real destination on the page or in the brand.
-4. The provenance row: city, year, licence or version.
+4. The provenance row: place, year, licence or version.
 5. The back-link to the shelf.
 
-Anything else — a newsletter field, a social icon row, a sitemap — is filler and must be cut. If a footer cell has nothing real to say, delete the cell and re-balance the grid; never pad it.
+Anything else — a newsletter field, a social icon row, a sitemap — is filler and must be cut. If a cell has nothing real to say, delete it and re-balance the grid; never pad it.
 
-**Immersive-footer clause (applies to F2, F3, F4).** The footer must survive `prefers-reduced-motion` looking finished, and any animation in it must be a *completion*, not an entrance — the last state is what a screenshot shows. A footer whose lockup only appears after a scroll-triggered fade has no footer in a static capture, which is how it gets judged.
+**Footer house rules.**
+- **A footer is a band, not a strip.** Give it `min-height` or a plate: `220–440px` of composition, not a `52px` bar with two spans.
+- **The statement carries the footer.** `clamp(24px, 2.6vw, 34px)`, two lines at most, in full ink on its own surface.
+- **No mono colophon.** The provenance row is set in the reading face; tabular figures where numbers align.
+- **No gradient on the plate** except one directional scrim in the surface's own colour when the lockup sits on the photograph.
+- **Two consecutive cases in `src/data/cases.ts` never share a footer family**, and no two cases share the family *and* the variation.
+- **The caption names what the picture is** (`Plate 03 · the run`) — never a sentence about where the picture came from.
+
+**Immersive-footer clause (applies to F2–F5).** The footer must survive `prefers-reduced-motion` looking finished, and any animation in it must be a *completion*, not an entrance — the last state is what a screenshot shows. A footer whose lockup only appears after a scroll-triggered fade has no footer in a static capture, which is how it gets judged.
 
 ---
 
@@ -374,7 +432,10 @@ Verify internally before finishing (never print this checklist):
 - [ ] **Scope parity:** the shipped page matches the Step 0 polarity answer exactly. A single scope has no theme toggle in the navbar, no second token sheet, no `[data-<slug>='night']` block, and no dark-mode audit line. A dual scope has all four. Never leave a toggle that does nothing, and never leave a "no dark mode" sentence in a page that has one.
 - [ ] **Count parity:** every stated number matches what renders — the surface intro line ("Eight surfaces were tried. Five survived.") matches the card count and the verdict tags, the token-sheet count matches the scope answer, and the cast is exactly 6.
 - [ ] **Hero relation declared:** the hero section comment names one shape letter and one relation (`below` / `beside` / `inside` / `on` / `around` / `none` / `rhythm`), and the built hero matches it. No hero contains both a rounded text panel *and* a second smaller floating card.
-- [ ] **Footer shape declared:** the footer names one of F1–F4 in a comment, that shape is the one Pillar VII pairs with the chosen hero, and it carries all five contract items and no filler. Two consecutive cases in `src/data/cases.ts` do not share a footer family.
+- [ ] **Hero house rules:** no eyebrow, no mono label outside code, no outlined chip/pill row, no `1px` stat strip or hairline box, no gradient except one directional scrim in the surface's own colour, no shadow or `backdrop-filter` at rest (navbar included), no accent-coloured word in the `<h1>`, and the accent appears on the primary action only.
+- [ ] **Hero measured:** the `<h1>` is two lines or fewer at 1440 / 1024 / 390, the lede is `44–48ch` in full ink, the crop's `object-position` was chosen from the asset (not a default), and `scrollWidth === clientWidth` at all four widths.
+- [ ] **Footer shape declared:** the footer names one of F1–F5 in a comment, that shape is the one Pillar VII pairs with the chosen hero, and it carries all five contract items and no filler. Two consecutive cases in `src/data/cases.ts` do not share a footer family.
+- [ ] **Footer is a band, not a strip:** it has real height (`min-height` clamp or a photograph plate), its statement is set at `clamp(24px, 2.6vw, 34px)`, its photograph is a *different* asset from the hero's, and its lockup measures `≈26px` tall (`width: auto; object-fit: contain`) with the rule scoped as `.foot__art > img.foot__lock`.
 - [ ] Zero emojis (`☀️`, `🌙`) in UI chrome; all 3 fonts load live.
 
 ---

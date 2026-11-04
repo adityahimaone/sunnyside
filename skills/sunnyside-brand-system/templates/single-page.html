@@ -102,7 +102,11 @@
       .tokens th, .tokens td { padding: 0.6rem 0.7rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
       .tokens th { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
       .tokens code { font-family: var(--mono); font-size: 0.72rem; }
-      .footer { padding-block: 2rem; border-top: 1.5px solid var(--ink); font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+      /* footer: a band, not a colophon strip — statement first, provenance second, no rule, no mono */
+      .footer { display: grid; gap: 1.2rem; padding-block: 3rem 3.4rem; color: var(--ink); }
+      .footer__say { margin: 0; max-width: 26ch; font-family: var(--display); font-size: clamp(1.5rem, 2.8vw, 2.2rem); line-height: 1.08; letter-spacing: -0.02em; }
+      .footer__row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.8rem 1.6rem; font-size: 0.86rem; color: var(--muted); }
+      .footer__row a { color: var(--ink); text-decoration: none; font-weight: 600; }
       @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
     </style>
   </head>
@@ -197,7 +201,11 @@
     </main>
 
     <footer class="footer wrap">
-      <span>Brand 1.0 · 2026 · Replace with the real author and licence.</span>
+      <p class="footer__say">One idea, drawn once and kept.</p>
+      <div class="footer__row">
+        <span>Brand 1.0 · 2026 · replace with the real author and licence</span>
+        <span><a href="#top">Back to the top</a></span>
+      </div>
     </footer>
   </body>
 </html>
