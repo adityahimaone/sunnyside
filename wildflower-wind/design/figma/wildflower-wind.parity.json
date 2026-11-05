@@ -124,6 +124,7 @@
     "autoLayout": 217,
     "layoutBindings": 245,
     "textStyleBindings": 501,
+    "stretchedRows": 30,
     "paintBindings": 846,
     "styleBindings": 312,
     "replaced": 1,
