@@ -21,7 +21,7 @@ A seed manifest is embedded (8 sheets, 1016 nodes, 751,541 chars), so the textar
 ## Fonts
 
 A `.fig` stores family names, not font data, and a plugin cannot install a font.
-No `.ttf`/`.otf` faces were found next to this brand; install the families named in `tokens.json` before building.
+The 4 installable face(s) this brand ships are copied to `fonts/` — drag them onto Font Book once, then rebuild.
 Without them Figma substitutes Inter, which is why type can look wrong while
 the layout still holds. The plugin reports how many faces it had to fall back to.
 

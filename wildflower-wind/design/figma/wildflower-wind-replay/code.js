@@ -19,7 +19,7 @@ const report = {
   pages: 0, frames: 0, texts: 0, rects: 0, vectors: 0,
   variables: 0, paintStyles: 0, textStyles: 0, components: 0,
   autoLayout: 0, replaced: 0, textInk: 0, textBoosted: 0,
-  fontFallbacks: 0, vectorsScaled: 0, effects: 0, errors: [],
+  fontFallbacks: 0, vectorsScaled: 0, effects: 0, chips: 0, grown: 0, errors: [],
 };
 const fail = (where, e) => report.errors.push(where + ': ' + ((e && e.message) || String(e)));
 
@@ -222,9 +222,16 @@ function applyLayout(frame, L, children) {
      * axis unless a child actually needs FILL. */
     const hasFillChild = Array.isArray(children) &&
       children.some((c) => c && c.layout && Number(c.layout.grow) > 0);
+    /* `space-between` and friends only exist relative to a fixed length. Hugging
+     * collapses them, which is why the banner's right block sat next to the
+     * title instead of at the far edge. */
+    const distributed = ['SPACE_BETWEEN', 'SPACE_AROUND', 'SPACE_EVENLY'].indexOf(justify(L.justify)) !== -1;
     frame.layoutMode = L.mode;
-    frame.primaryAxisSizingMode = hasFillChild ? 'FIXED' : 'AUTO';
-    frame.counterAxisSizingMode = 'FIXED';
+    frame.primaryAxisSizingMode = (hasFillChild || distributed) ? 'FIXED' : 'AUTO';
+    /* Cross axis: a horizontal row hugs its height so a taller-than-measured
+     * line cannot spill out of a row sized from the browser. A vertical stack
+     * keeps its measured width and hugs its height. */
+    frame.counterAxisSizingMode = L.mode === 'HORIZONTAL' ? 'AUTO' : 'FIXED';
     frame.itemSpacing = Number(L.spacing) || 0;
     frame.paddingTop = padding(L, 0);
     frame.paddingRight = padding(L, 1);
@@ -334,17 +341,21 @@ async function createNode(node, parentBox, byRgb, depth, options) {
   const box = safeBox(node);
   let out = null;
   let textInk = null;
+  let chip = false;
+  let oneLine = false;
 
   if (node.type === 'TEXT') {
+    const rawSize = Number(node.style && node.style.fontSize) || 14;
+    const minSize = Number(options && options.minFontSize) || 0;
+    const size = Math.max(rawSize, minSize);
+    if (size > rawSize) report.textBoosted++;
+    textInk = parseColor(node.style && node.style.color) || { r: 0.07, g: 0.09, b: 0.15, a: 1 };
+
     const t = figma.createText();
     t.name = String(node.name || 'Text');
     t.fontName = await loadFont(node.style && node.style.fontFamily, node.style && node.style.fontWeight);
     t.characters = String(node.text || '');
-    const rawSize = Number(node.style && node.style.fontSize) || 14;
-    const minSize = Number(options && options.minFontSize) || 0;
-    t.fontSize = Math.max(rawSize, minSize);
-    if (t.fontSize > rawSize) report.textBoosted++;
-    textInk = parseColor(node.style && node.style.color) || { r: 0.07, g: 0.09, b: 0.15, a: 1 };
+    t.fontSize = size;
     const lh = node.style && node.style.lineHeight;
     if (lh && lh !== 'normal') {
       const px = parseFloat(lh);
@@ -352,10 +363,38 @@ async function createNode(node, parentBox, byRgb, depth, options) {
     }
     const ls = parseFloat(node.style && node.style.letterSpacing);
     if (Number.isFinite(ls) && ls !== 0) t.letterSpacing = { unit: 'PIXELS', value: ls };
-    /* Wrap inside the measured column instead of running off as one line. */
-    t.textAutoResize = 'HEIGHT';
-    out = t;
+    t.fills = [solid(textInk)];
+
+    /* A label that occupied one line in the browser must stay one line. With
+     * HEIGHT + the measured width, a 1–3% metric difference wraps a heading and
+     * the row it sits in — sized from the browser — is then too short. */
+    oneLine = box.h <= size * 1.6;
+    t.textAutoResize = oneLine ? 'WIDTH_AND_HEIGHT' : 'HEIGHT';
+    t.x = 0;
+    t.y = 0;
     report.texts++;
+    report.textInk++;
+
+    const bg = parseColor(node.style && node.style.fill);
+    if (bg && bg.a > 0.05) {
+      /* A leaf with text *and* a background is a badge or a chip. A TEXT node
+       * cannot carry the plate, so wrap it in a frame that does. */
+      const plate = figma.createFrame();
+      plate.name = String(node.name || 'Chip');
+      plate.fills = [];
+      applyStyle(plate, node.style, byRgb);
+      try { plate.resize(box.w, box.h); } catch (e) { fail('chip/' + node.name, e); }
+      try {
+        plate.appendChild(t);
+        t.x = Math.max(0, (box.w - t.width) / 2);
+        t.y = Math.max(0, (box.h - t.height) / 2);
+      } catch (e) { fail('chipText/' + node.name, e); }
+      out = plate;
+      chip = true;
+      report.chips++;
+    } else {
+      out = t;
+    }
   } else if (node.type === 'VECTOR') {
     try {
       out = figma.createNodeFromSvg(String(node.svg || ''));
@@ -390,17 +429,20 @@ async function createNode(node, parentBox, byRgb, depth, options) {
     else report.frames++;
   }
 
-  applyStyle(out, node.style, byRgb);
+  /* A chip already had its plate styled and its child inked. */
+  if (!chip) applyStyle(out, node.style, byRgb);
 
   /* applyStyle writes the CSS *background* into fills. Text ink comes from
    * CSS `color`, which is transparent-as-background for 78% of labels — that
    * overwrite made almost every text layer invisible. Re-apply it last. */
-  if (node.type === 'TEXT' && textInk) {
-    try { out.fills = [solid(textInk)]; report.textInk++; } catch (e) { fail('textInk/' + node.name, e); }
+  if (node.type === 'TEXT' && textInk && !chip) {
+    try { out.fills = [solid(textInk)]; } catch (e) { fail('textInk/' + node.name, e); }
   }
 
   try {
-    if (node.type === 'TEXT') out.resize(Math.max(box.w, 32), box.h);
+    if (chip) { /* sized when the plate was built */ }
+    else if (node.type === 'TEXT' && oneLine) { /* auto-width keeps the line intact */ }
+    else if (node.type === 'TEXT') out.resize(Math.max(box.w, 32), box.h);
     else out.resize(box.w, box.h);
   } catch (e) { fail('resize/' + node.name, e); }
   out.x = box.x - parentBox.x;
@@ -424,6 +466,29 @@ async function createNode(node, parentBox, byRgb, depth, options) {
     }
   }
   return out;
+}
+
+/* A frame with layoutMode NONE keeps the height the browser measured, and
+ * cannot hug. When a child is taller than that — a heading that wrapped, a chip
+ * with a bigger font — the child spills out of its box. Grow the frame to its
+ * children; never shrink it, because the browser height is still the intent. */
+function fitAbsoluteFrames(node) {
+  if (!node) return;
+  const kids = Array.isArray(node.children) ? node.children : [];
+  for (const child of kids) fitAbsoluteFrames(child);
+  if (node.type !== 'FRAME' && node.type !== 'COMPONENT') return;
+  if (node.layoutMode && node.layoutMode !== 'NONE') return;
+  if (!kids.length) return;
+  let maxRight = 0;
+  let maxBottom = 0;
+  for (const child of kids) {
+    maxRight = Math.max(maxRight, (Number(child.x) || 0) + (Number(child.width) || 0));
+    maxBottom = Math.max(maxBottom, (Number(child.y) || 0) + (Number(child.height) || 0));
+  }
+  try {
+    if (maxBottom > node.height + 1) { node.resize(node.width, maxBottom); report.grown++; }
+    if (maxRight > node.width + 1) { node.resize(maxRight, node.height); report.grown++; }
+  } catch (e) { fail('fit/' + node.name, e); }
 }
 
 /* ── build ──────────────────────────────────────────────────────────────── */
@@ -459,6 +524,7 @@ async function build(manifest, replace, options) {
     await usePage(page);
     const root = await createNode(sheet.node, { x: 0, y: 0 }, byRgb, 0, options);
     if (root) {
+      fitAbsoluteFrames(root);
       root.x = 0;
       root.y = 0;
       page.appendChild(root);
@@ -493,6 +559,7 @@ figma.ui.onmessage = async (msg) => {
       report.texts + ' texts (' + report.textInk + ' inked' +
       (report.textBoosted ? ', ' + report.textBoosted + ' boosted to ' + options.minFontSize + 'px' : '') + '), ' +
       report.rects + ' rects, ' + report.vectors + ' vectors, ' + report.effects + ' shadows, ' +
+      (report.chips ? report.chips + ' chips, ' : '') +
       report.variables + ' variables, ' + report.paintStyles + ' paint styles, ' +
       report.textStyles + ' text styles, ' + report.components + ' components' +
       (report.replaced ? ' · replaced ' + report.replaced + ' existing page(s)' : '') +
