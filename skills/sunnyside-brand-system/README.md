@@ -6,6 +6,48 @@ and an audit that names what it could not verify.
 
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand, Clearing, Porphyry, Jakarta, Bluewater, Vesper, Halation, and Tavola. The method travels; the marks do not.
 
+## v5.1.0: excellent layers — nothing blank, nothing wrapped, nothing off-canvas
+
+Fixed the defects measured from `test ds 4.fig` (Causeway + Mullion export) and
+four canvas screenshots.
+
+- **Pages 06/07 were nearly blank.** `buildComponentLibrary()` cloned COMPONENT
+  nodes nested in the sheet and passed a not-yet-parented frame to
+  `combineAsVariants`. Figma reparented their containers (`surface-box`,
+  `grid-2-cols`, `modal-stage`) to the page root, leaving the sheet body empty.
+  The library is now rebuilt from the manifest into fresh page-level masters —
+  no `clone()`, nothing in the sheet is touched. Verified: **0 detached frames**
+  across all 25 cases.
+- **The library was off-canvas** at x=1640 in a 420×120 frame with 17 children.
+  It is now a full-width (1440px) auto-layout board **above the sheet** on every
+  page that carries components (05 assets, 06 components, 07 overlays), with a
+  heading, one labelled section per family, variant sets and live instances.
+- **Action groups were not full width.** HORIZONTAL frames hugged their primary
+  axis (= width), so the grey modal footer collapsed around its buttons and
+  `justify: flex-end` had nowhere to push. HORIZONTAL now keeps the measured
+  width (`FIXED`) and only hugs the cross axis. Verified 622px / 444px — exactly
+  the card widths.
+- **Buttons, badges, titles and headings wrapped.** `box.h <= fontSize × 1.6`
+  misclassified padded labels as multi-line and gave them `HEIGHT` + a fixed
+  width. One-line detection now uses the inner line box (`box.h − paddingY` vs
+  computed `lineHeight`), honours `whiteSpace: nowrap`, and chip labels are
+  always `WIDTH_AND_HEIGHT`. Wrapped text fell from ~every label to **1–4%**
+  (only genuinely long copy). The HTML also declares `white-space: nowrap` on
+  all one-line labels so Doop / html.to.design imports stay one line too, with
+  **zero** nowrap overflow measured.
+- **Assets icons are real components now.** The 6 companion cast marks, 8 system
+  icons and 4 spot illustrations carry `data-figma-component` / variant /
+  description and `data-figma-role="icon"`. Component families went 4 → **7**,
+  component refs 16 → **34**, sets 4 → **7**, instances 16 → **34** per kit.
+- **Icons and manifest layers.** SVG captures now keep `componentRef`, `role`
+  and `tokenRef`; modal footers are named `action-group` layers; the spec records
+  `whiteSpace` / `textOverflow` on every node.
+- **Parity gate grew to 17 gates**: action groups full width, zero detached
+  sheet frames, library boards above the sheet, and ≤5% wrapped labels. Smoke
+  gained matching regression assertions (padded label, full-width action row,
+  library position). **25/25 design-system cases + 3 workspace kits green**,
+  39/39 unit tests.
+
 ## v5.0.0: one canonical spec, plugin-only handoff, real component library
 
 Rebuilt around the audit of `test ds 3.fig` (Mullion). The Doop page had 1575

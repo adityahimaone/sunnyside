@@ -67,7 +67,10 @@ const fixture = {
           children: [
             { name: 'Title', type: 'TEXT', box: B(32, 32, 600, 60), layout: L(), style: S({ fontSize: 48, fontWeight: '700' }), component: null, text: 'Fixture system', children: [] },
             { name: 'caption', type: 'TEXT', box: B(32, 96, 200, 16), layout: L(), style: S({ fontSize: 10, color: 'rgb(100, 116, 139)' }), component: null, text: 'small caption', children: [] },
-            { name: 'badge', type: 'TEXT', box: B(32, 120, 72, 24), layout: L(), style: S({ fontSize: 11, color: 'rgb(255, 255, 255)', fill: 'rgb(17, 24, 39)', radius: 999 }), component: null, text: 'PASS', children: [] },
+            /* A padded one-line label. `box.h` (24) is larger than fontSize*1.6,
+             * which used to make the plugin classify it as wrapped and break
+             * every button / badge label onto two lines. */
+            { name: 'badge', type: 'TEXT', box: B(32, 120, 72, 24), layout: L({ padding: [8, 12, 8, 12] }), style: S({ fontSize: 11, color: 'rgb(255, 255, 255)', fill: 'rgb(17, 24, 39)', radius: 999, whiteSpace: 'nowrap', lineHeight: '14px' }), component: null, text: 'PASS', children: [] },
             { name: 'paragraph', type: 'TEXT', box: B(32, 156, 300, 120), layout: L(), style: S({ fontSize: 14, color: 'rgb(71, 85, 105)' }), component: null, text: 'A longer paragraph that wrapped across several lines in the browser and must keep wrapping inside its measured column.', children: [] },
             { name: 'swatch', type: 'RECTANGLE', box: B(648, 32, 200, 60), layout: L({ grow: 1 }), style: S({ fill: 'rgb(247, 245, 240)', radius: 8 }), component: null, text: null, children: [] },
           ],
@@ -78,6 +81,16 @@ const fixture = {
           style: S(), component: null, text: null,
           children: [
             { name: 'absolute chip', type: 'RECTANGLE', box: B(40, 260, 64, 64), layout: L({ positioning: 'ABSOLUTE' }), style: S(), component: null, text: null, children: [] },
+            /* A modal-style action row. HORIZONTAL frames must keep their
+             * measured width or the footer collapses around its buttons. */
+            {
+              name: 'action-group', type: 'FRAME', box: B(32, 500, 1136, 48), role: 'action-group',
+              layout: L({ mode: 'HORIZONTAL', justify: 'flex-end', spacing: 10, padding: [10, 20, 10, 20] }),
+              style: S({ fill: 'rgb(250, 250, 250)' }), component: null, text: null,
+              children: [
+                { name: 'Cancel', type: 'TEXT', box: B(900, 510, 80, 28), layout: L({ padding: [7, 14, 7, 14] }), style: S({ fontSize: 12, whiteSpace: 'nowrap', lineHeight: 'normal' }), component: null, text: 'Cancel', children: [] },
+              ],
+            },
             { name: 'vector', type: 'VECTOR', box: B(120, 260, 64, 64), svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#101820"/></svg>', component: null, text: null, children: [] },
           ],
         },
@@ -122,8 +135,15 @@ export async function runReplay({ source, manifest, messages }) {
       boundVariables: null, parent: null,
       appendChild(child) {
         if (!child || typeof child !== 'object') throw new Error('appendChild got ' + child)
+        /* Figma moves a node when it is re-parented; the old host must lose it
+         * or the page ends up with phantom top-level frames. */
+        if (child.parent && child.parent !== node) {
+          const prev = child.parent.children
+          const i = prev.indexOf(child)
+          if (i !== -1) prev.splice(i, 1)
+        }
+        if (node.children.indexOf(child) === -1) node.children.push(child)
         child.parent = node
-        node.children.push(child)
         return child
       },
       resize(w, h) {
@@ -334,6 +354,9 @@ export function summarise(log, thrown, manifestPath) {
     rects: log.rects.length,
     chips: log.frames.filter((f) => f.name === 'badge').length,
     chipBox: (() => { const f = log.frames.find((x) => x.name === 'badge'); return f ? { w: Math.round(f.width), h: Math.round(f.height), r: f.cornerRadius } : null })(),
+    actionGroupWidth: (() => { const f = log.frames.find((x) => x.name === 'action-group'); return f ? Math.round(f.width) : null })(),
+    paddedLabelResize: (() => { const t = log.texts.find((x) => x.name === 'badge'); return t ? t.textAutoResize : null })(),
+    libraryY: (() => { const f = log.frames.find((x) => x.name === '◆ Component Library'); return f ? Math.round(f.y) : null })(),
     skippedSheets: Number((/skipped (\d+) sheet/.exec(summary) || [])[1] || 0),
     vectors: log.vectors.length,
     variables: log.variables.length,
@@ -381,6 +404,9 @@ export function smokeProblems(report, manifestPath) {
     if (report.instances < 1) problems.push('no component instance was created')
     if (report.componentSets < 1) problems.push('no component set was created')
     if (report.componentDescriptions < 1) problems.push('components have no descriptions')
+    if (report.actionGroupWidth !== 1136) problems.push('horizontal action group hugged its width (' + report.actionGroupWidth + ' instead of 1136) — modal footers will not span the card')
+    if (report.paddedLabelResize !== 'WIDTH_AND_HEIGHT') problems.push('a padded one-line label was treated as wrapped (' + report.paddedLabelResize + ') — button/badge text will break onto two lines')
+    if (report.libraryY === null || report.libraryY >= 0) problems.push('component library is not placed above the sheet (y=' + report.libraryY + ')')
     const caption = report.textSizes.find((t) => t.name === 'caption')
     if (!caption) problems.push('caption fixture text was not created')
     else if (Number(caption.size) < 12) problems.push('minFontSize did not raise the 10px caption (got ' + caption.size + ')')

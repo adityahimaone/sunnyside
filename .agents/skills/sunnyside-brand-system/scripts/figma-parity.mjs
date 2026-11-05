@@ -79,10 +79,16 @@ const spec = {
   componentRefs: 0,
   extraWrappers: 0,
   roots: [],
+  nowrap: 0,
+  actionGroups: [],
+  componentPages: new Set(),
 }
-function walkSpec(n) {
+function walkSpec(n, sheetName) {
   spec.nodes++
   if (n.type === 'TEXT') spec.texts++
+  if (/nowrap/i.test(String((n.style && n.style.whiteSpace) || ''))) spec.nowrap++
+  if (n.role === 'action-group') spec.actionGroups.push(Number(n.box.w))
+  if (n.componentRef) spec.componentPages.add(sheetName)
   const fill = cssHex(n.style && n.style.fill)
   if (fill) spec.colours.add(fill)
   /* Inherited `color` on a container is never painted; only text ink is. */
@@ -98,10 +104,10 @@ function walkSpec(n) {
     spec.componentRefs++
     spec.components.add(n.componentRef.name)
   }
-  for (const c of n.children || []) walkSpec(c)
+  for (const c of n.children || []) walkSpec(c, sheetName)
 }
 for (const s of manifest.sheets) {
-  walkSpec(s.node)
+  walkSpec(s.node, s.name)
   spec.roots.push({ name: s.name, w: Number(s.node.box.w), h: Number(s.node.box.h) })
 }
 
@@ -120,13 +126,18 @@ function sheetRoots(r) {
     .filter(Boolean)
 }
 const roots = sheetRoots(run)
-const replay = { nodes: 0, texts: 0, solidFills: 0, boundFills: 0, colours: new Set(), styleBoundTexts: 0 }
+const replay = {
+  nodes: 0, texts: 0, solidFills: 0, boundFills: 0, colours: new Set(),
+  styleBoundTexts: 0, wrappedTexts: 0, actionGroups: [],
+}
 function walkReplay(n) {
   replay.nodes++
   if (n.type === 'TEXT') {
     replay.texts++
     if (n.textStyleId) replay.styleBoundTexts++
+    if (n.textAutoResize === 'HEIGHT') replay.wrappedTexts++
   }
+  if (n.name === 'action-group') replay.actionGroups.push(Number(n.width))
   for (const p of n.fills || []) {
     if (!p || p.type !== 'SOLID' || !p.color) continue
     replay.solidFills++
@@ -163,6 +174,20 @@ const rerunDuplicates = rerunNames.length - new Set(rerunNames).size
 const rerunGeneratedPages = rerun.pages.filter((p) => /^\d{2} · /.test(p.name)).length
 const lastReport = run.log.uiMessages.at(-1)?.report || {}
 const rerunReport = rerun.log.uiMessages.at(-1)?.report || {}
+
+/* v5.1 structural gates: no sheet frames were reparented to the page root,
+ * the library sits above the sheet, action groups keep their full width, and
+ * only genuinely multi-line copy uses HEIGHT. */
+const pageMeta = run.pages.filter((p) => /^\d{2} · /.test(p.name)).map((p) => {
+  const kids = p.children || []
+  const lib = kids.find((c) => c.name === '◆ Component Library')
+  return { name: p.name, extra: Math.max(0, kids.length - (lib ? 2 : 1)), libraryY: lib ? Number(lib.y) : null }
+})
+const detachedFrames = pageMeta.reduce((a, p) => a + p.extra, 0)
+const librariesAbove = pageMeta.filter((p) => p.libraryY !== null && p.libraryY < 0).length
+const wrappedRatio = replay.texts ? replay.wrappedTexts / replay.texts : 0
+const actionWidthOk = spec.actionGroups.length > 0 &&
+  spec.actionGroups.every((w, i) => Math.abs((replay.actionGroups[i] ?? 0) - w) <= 2)
 
 let signature = { valid: false, expected: null, actual: null }
 if (manifest.capture && manifest.capture.checksum) {
@@ -212,6 +237,10 @@ const gates = [
   { gate: 'duplicate collections', value: duplicateCollections, threshold: 0, pass: duplicateCollections === 0 },
   { gate: 'safe re-run', value: `${rerunDuplicates} dup collections · ${rerunGeneratedPages} generated pages · ${rerunReport.variablesReused ?? 0} reused vars`, threshold: '0 dup / 1 page set', pass: rerunDuplicates === 0 && rerunGeneratedPages === spec.sheets && (rerunReport.variablesReused ?? 0) > 0 },
   { gate: 'no console errors', value: run.log.errors.length, threshold: 0, pass: run.log.errors.length === 0 && !run.thrown },
+  { gate: 'action groups full width', value: `${replay.actionGroups.map(Math.round).join('/')} vs ${spec.actionGroups.join('/')}`, threshold: '≤2px each', pass: spec.actionGroups.length ? actionWidthOk : true },
+  { gate: 'no detached sheet frames', value: detachedFrames, threshold: 0, pass: detachedFrames === 0 },
+  { gate: 'library above sheet', value: `${librariesAbove} boards / ${spec.componentPages.size} pages`, threshold: 'one per component page', pass: spec.componentPages.size > 0 ? librariesAbove >= spec.componentPages.size : true },
+  { gate: 'one-line labels', value: `${replay.wrappedTexts}/${replay.texts} wrapped · ${(wrappedRatio * 100).toFixed(1)}%`, threshold: '≤5%', pass: spec.nowrap > 0 ? wrappedRatio <= 0.05 : true },
 ]
 
 const report = {
@@ -222,7 +251,13 @@ const report = {
   checksum: manifest.capture?.checksum,
   signature,
   spec: { sheets: spec.sheets, nodes: spec.nodes, texts: spec.texts, colours: spec.colours.size, componentRefs: spec.componentRefs, components: [...spec.components] },
-  replay: { pages: roots.length, nodes: replay.nodes, adjustedNodes, extraWrappers: expectedExtra, texts: replay.texts, solidFills: replay.solidFills, boundFills: replay.boundFills, styleBoundTexts: replay.styleBoundTexts, instances, componentSets: run.log.componentSets.length, variables: run.log.variables.length },
+  replay: {
+    pages: roots.length, nodes: replay.nodes, adjustedNodes, extraWrappers: expectedExtra,
+    texts: replay.texts, solidFills: replay.solidFills, boundFills: replay.boundFills,
+    styleBoundTexts: replay.styleBoundTexts, wrappedTexts: replay.wrappedTexts,
+    actionGroups: replay.actionGroups, detachedFrames, librariesAbove,
+    instances, componentSets: run.log.componentSets.length, variables: run.log.variables.length,
+  },
   geometry,
   missingColours,
   report: lastReport,

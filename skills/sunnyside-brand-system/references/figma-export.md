@@ -543,3 +543,31 @@ not a gate: Doop imports invisible chrome and cannot reconstruct a system.
 
 `figma-handoff.mjs --with-replay` runs the gate automatically after the replay
 smoke test and writes `<slug>.parity.json`.
+
+### v5.1.0 layer-quality fixes
+
+Measured on `test ds 4.fig` and four canvas screenshots. **Never call `clone()`
+on a COMPONENT that is nested in the sheet** — Figma reparented its container
+(`surface-box`, `grid-2-cols`, `modal-stage`) to the page root when the clone was
+combined into a variant set, leaving pages 06/07 blank. Variant masters are now
+rebuilt from `manifestNode` into fresh page-level COMPONENTs; the sheet keeps its
+own components and the board shows INSTANCEs of them.
+
+The library is a 1440px vertical auto-layout board placed **above** the sheet
+(`y = -(height + 96)`) on every page with components (05/06/07), with a heading
+and one labelled section per family. HORIZONTAL frames keep their measured width
+(`primaryAxisSizingMode = 'FIXED'`) — only VERTICAL stacks hug — so a modal
+footer with `justify: flex-end` stays full width. One-line detection uses
+`innerH = box.h − paddingY` against the computed `lineHeight`, plus `whiteSpace:
+nowrap`; chip labels are always `WIDTH_AND_HEIGHT`. The HTML declares
+`white-space: nowrap` on all one-line labels for importer robustness and names
+modal footers `action-group`.
+
+Assets icons (6 cast marks, 8 system icons, 4 spot illustrations) now carry
+`data-figma-component` / variant / description and become real components —
+7 families, 34 refs, 7 sets, 34 instances per kit.
+
+Four extra parity gates lock this in: action groups within 2px of their measured
+width, zero detached sheet frames, one library board above each component page,
+and ≤5% of TEXT nodes using `HEIGHT`. Thirteen gates became **17**; all 25
+design-system cases and 3 workspace kits pass.

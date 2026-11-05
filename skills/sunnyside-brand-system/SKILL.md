@@ -628,7 +628,21 @@ frame; 390px is a separate frame someone has to draw.
 **Audit gate:** a Figma handoff is not done until `figma-smoke.mjs` passes on the
 build plugin, `figma-bind-smoke.mjs` passes on the binder, `figma-replay-smoke.mjs`
 passes on the native plugin (including the upgrader), `figma-parity.mjs` reports
-all gates green, and the sheet opens in a browser with all 8 sections.
+all **17** gates green, and the sheet opens in a browser with all 8 sections.
+
+### v5.1.0 · layer quality (from `test ds 4.fig`)
+
+Four defects were measured on a real export: blank components/overlays pages,
+an off-canvas 420×120 library, collapsed modal action bars, and wrapped button /
+badge / title text. Fixes: never `clone()` a sheet-nested component — rebuild
+variant masters from the manifest into page-level COMPONENTs; put a full-width
+library board **above** the sheet on the component-bearing pages; keep the
+measured width of HORIZONTAL frames (`FIXED` primary axis); detect one line from
+`box.h − paddingY` vs `lineHeight` / `whiteSpace`, never from `box.h` alone. The
+HTML also declares `white-space: nowrap` for one-line labels so a Doop import
+does not substitute a wider font and wrap them. Assets icons are now real
+components (7 families, 34 refs, 7 sets, 34 instances per kit). Parity added
+four structural gates; all 25 cases + 3 kits pass.
 
 ---
 
