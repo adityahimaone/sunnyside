@@ -1,0 +1,217 @@
+{
+  "manifest": "/Users/adityahimawan/WorkBuddy AI/sunnyside/vesper/design/figma/vesper.manifest.json",
+  "plugin": "/Users/adityahimawan/WorkBuddy AI/sunnyside/vesper/design/figma/vesper-replay/code.js",
+  "brand": "Vesper",
+  "dsId": "vesper@1.0.0",
+  "checksum": "3f7847dc",
+  "signature": {
+    "valid": true,
+    "expected": "3f7847dc",
+    "actual": "3f7847dc"
+  },
+  "spec": {
+    "sheets": 8,
+    "nodes": 953,
+    "texts": 428,
+    "colours": 68,
+    "componentRefs": 16,
+    "components": [
+      "Button",
+      "Input",
+      "Badge",
+      "Modal"
+    ]
+  },
+  "replay": {
+    "pages": 8,
+    "nodes": 1029,
+    "adjustedNodes": 953,
+    "extraWrappers": 76,
+    "texts": 428,
+    "solidFills": 700,
+    "boundFills": 700,
+    "styleBoundTexts": 428,
+    "instances": 16,
+    "componentSets": 4,
+    "variables": 122
+  },
+  "geometry": [
+    {
+      "sheet": "colors",
+      "spec": "1440×4085",
+      "replay": "1440×4085",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "primitives",
+      "spec": "1440×1558",
+      "replay": "1440×1558",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "typography",
+      "spec": "1440×1242",
+      "replay": "1440×1242",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "logo",
+      "spec": "1440×842",
+      "replay": "1440×842",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "assets",
+      "spec": "1440×1086",
+      "replay": "1440×1086",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "components",
+      "spec": "1440×841",
+      "replay": "1440×841",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "overlays",
+      "spec": "1440×704",
+      "replay": "1440×704",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "patterns",
+      "spec": "1440×3345",
+      "replay": "1440×3345",
+      "dw": 0,
+      "dh": 0
+    }
+  ],
+  "missingColours": [],
+  "report": {
+    "pages": 8,
+    "frames": 402,
+    "texts": 428,
+    "rects": 54,
+    "vectors": 43,
+    "variables": 122,
+    "variablesReused": 0,
+    "autoVariables": 18,
+    "paintStyles": 89,
+    "textStyles": 46,
+    "effectStyles": 3,
+    "gridStyles": 1,
+    "components": 40,
+    "componentSets": 4,
+    "instances": 16,
+    "componentDescriptions": 16,
+    "autoLayout": 182,
+    "layoutBindings": 187,
+    "textStyleBindings": 428,
+    "paintBindings": 700,
+    "styleBindings": 257,
+    "replaced": 1,
+    "upgradedTexts": 0,
+    "upgradedFills": 0,
+    "upgradedLayouts": 0,
+    "upgradedPages": 0,
+    "skippedPages": 0,
+    "textInk": 428,
+    "textBoosted": 0,
+    "fontFallbacks": 0,
+    "vectorsScaled": 0,
+    "effects": 58,
+    "chips": 62,
+    "grown": 0,
+    "skippedSheets": 0,
+    "errors": []
+  },
+  "figReference": null,
+  "gates": [
+    {
+      "gate": "canonical signature",
+      "value": "VALID",
+      "threshold": "valid",
+      "pass": true
+    },
+    {
+      "gate": "capture mode",
+      "value": "canonical-v2",
+      "threshold": "canonical-v2",
+      "pass": true
+    },
+    {
+      "gate": "sheets in spec",
+      "value": 8,
+      "threshold": 8,
+      "pass": true
+    },
+    {
+      "gate": "node count ≤2%",
+      "value": "953 vs 953 (+76 wrappers) · 0.00%",
+      "threshold": "≤2%",
+      "pass": true
+    },
+    {
+      "gate": "text count ≤2%",
+      "value": "428 vs 428 · 0.00%",
+      "threshold": "≤2%",
+      "pass": true
+    },
+    {
+      "gate": "sheet geometry ≤2px",
+      "value": "0px max",
+      "threshold": "≤2px",
+      "pass": true
+    },
+    {
+      "gate": "exact colours",
+      "value": "68/68 · 100.0%",
+      "threshold": "100%",
+      "pass": true
+    },
+    {
+      "gate": "text → styles ≥95%",
+      "value": "100.0%",
+      "threshold": "≥95%",
+      "pass": true
+    },
+    {
+      "gate": "fills → variables ≥90%",
+      "value": "100.0%",
+      "threshold": "≥90%",
+      "pass": true
+    },
+    {
+      "gate": "instances ≥ components",
+      "value": "16 instances / 4 components",
+      "threshold": "≥1 each",
+      "pass": true
+    },
+    {
+      "gate": "duplicate collections",
+      "value": 0,
+      "threshold": 0,
+      "pass": true
+    },
+    {
+      "gate": "safe re-run",
+      "value": "0 dup collections · 8 generated pages · 104 reused vars",
+      "threshold": "0 dup / 1 page set",
+      "pass": true
+    },
+    {
+      "gate": "no console errors",
+      "value": 0,
+      "threshold": 0,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

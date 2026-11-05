@@ -1,0 +1,217 @@
+{
+  "manifest": "/Users/adityahimawan/WorkBuddy AI/sunnyside/jakarta/design/figma/jakarta.manifest.json",
+  "plugin": "/Users/adityahimawan/WorkBuddy AI/sunnyside/jakarta/design/figma/jakarta-replay/code.js",
+  "brand": "Jakarta",
+  "dsId": "jakarta@1.0",
+  "checksum": "835e484a",
+  "signature": {
+    "valid": true,
+    "expected": "835e484a",
+    "actual": "835e484a"
+  },
+  "spec": {
+    "sheets": 8,
+    "nodes": 1335,
+    "texts": 652,
+    "colours": 104,
+    "componentRefs": 16,
+    "components": [
+      "Button",
+      "Input",
+      "Badge",
+      "Modal"
+    ]
+  },
+  "replay": {
+    "pages": 8,
+    "nodes": 1449,
+    "adjustedNodes": 1335,
+    "extraWrappers": 114,
+    "texts": 652,
+    "solidFills": 1007,
+    "boundFills": 1007,
+    "styleBoundTexts": 652,
+    "instances": 16,
+    "componentSets": 4,
+    "variables": 134
+  },
+  "geometry": [
+    {
+      "sheet": "colors",
+      "spec": "1440×5450",
+      "replay": "1440×5450",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "primitives",
+      "spec": "1440×1558",
+      "replay": "1440×1558",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "typography",
+      "spec": "1440×1248",
+      "replay": "1440×1248",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "logo",
+      "spec": "1440×842",
+      "replay": "1440×842",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "assets",
+      "spec": "1440×1086",
+      "replay": "1440×1086",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "components",
+      "spec": "1440×849",
+      "replay": "1440×849",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "overlays",
+      "spec": "1440×708",
+      "replay": "1440×708",
+      "dw": 0,
+      "dh": 0
+    },
+    {
+      "sheet": "patterns",
+      "spec": "1440×4219",
+      "replay": "1440×4219",
+      "dw": 0,
+      "dh": 0
+    }
+  ],
+  "missingColours": [],
+  "report": {
+    "pages": 8,
+    "frames": 549,
+    "texts": 652,
+    "rects": 65,
+    "vectors": 43,
+    "variables": 134,
+    "variablesReused": 0,
+    "autoVariables": 17,
+    "paintStyles": 100,
+    "textStyles": 36,
+    "effectStyles": 3,
+    "gridStyles": 1,
+    "components": 40,
+    "componentSets": 4,
+    "instances": 16,
+    "componentDescriptions": 16,
+    "autoLayout": 154,
+    "layoutBindings": 521,
+    "textStyleBindings": 652,
+    "paintBindings": 1007,
+    "styleBindings": 340,
+    "replaced": 1,
+    "upgradedTexts": 0,
+    "upgradedFills": 0,
+    "upgradedLayouts": 0,
+    "upgradedPages": 0,
+    "skippedPages": 0,
+    "textInk": 652,
+    "textBoosted": 0,
+    "fontFallbacks": 4,
+    "vectorsScaled": 0,
+    "effects": 96,
+    "chips": 100,
+    "grown": 0,
+    "skippedSheets": 0,
+    "errors": []
+  },
+  "figReference": null,
+  "gates": [
+    {
+      "gate": "canonical signature",
+      "value": "VALID",
+      "threshold": "valid",
+      "pass": true
+    },
+    {
+      "gate": "capture mode",
+      "value": "canonical-v2",
+      "threshold": "canonical-v2",
+      "pass": true
+    },
+    {
+      "gate": "sheets in spec",
+      "value": 8,
+      "threshold": 8,
+      "pass": true
+    },
+    {
+      "gate": "node count ≤2%",
+      "value": "1335 vs 1335 (+114 wrappers) · 0.00%",
+      "threshold": "≤2%",
+      "pass": true
+    },
+    {
+      "gate": "text count ≤2%",
+      "value": "652 vs 652 · 0.00%",
+      "threshold": "≤2%",
+      "pass": true
+    },
+    {
+      "gate": "sheet geometry ≤2px",
+      "value": "0px max",
+      "threshold": "≤2px",
+      "pass": true
+    },
+    {
+      "gate": "exact colours",
+      "value": "104/104 · 100.0%",
+      "threshold": "100%",
+      "pass": true
+    },
+    {
+      "gate": "text → styles ≥95%",
+      "value": "100.0%",
+      "threshold": "≥95%",
+      "pass": true
+    },
+    {
+      "gate": "fills → variables ≥90%",
+      "value": "100.0%",
+      "threshold": "≥90%",
+      "pass": true
+    },
+    {
+      "gate": "instances ≥ components",
+      "value": "16 instances / 4 components",
+      "threshold": "≥1 each",
+      "pass": true
+    },
+    {
+      "gate": "duplicate collections",
+      "value": 0,
+      "threshold": 0,
+      "pass": true
+    },
+    {
+      "gate": "safe re-run",
+      "value": "0 dup collections · 8 generated pages · 117 reused vars",
+      "threshold": "0 dup / 1 page set",
+      "pass": true
+    },
+    {
+      "gate": "no console errors",
+      "value": 0,
+      "threshold": 0,
+      "pass": true
+    }
+  ],
+  "pass": true
+}
