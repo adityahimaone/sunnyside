@@ -786,6 +786,12 @@ export const RESOURCES: Resource[] = [
     note: 'The identity board, with the lockup, palette, type and favicon sizes.',
     group: 'Artefact',
   },
+  {
+    label: 'Sunnyside — Figma HTML Sheet',
+    href: '/brand/sunnyside/sunnyside-figma.html',
+    note: 'The 8-sheet white-background Convertible Figma / HTML-to-Design documentation sheet.',
+    group: 'Artefact',
+  },
 ]
 
 /* ── The eight cases ─────────────────────────────────────────────────────────

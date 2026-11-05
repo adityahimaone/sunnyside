@@ -121,7 +121,9 @@ than a screenshot of it.
 
 ## 7 · A data row that breathes
 
-Every case has a row of numbers under the hero. It is the most common place a page goes
+Every case has a row of numbers under the hero. Set it as a plain `2×2` `<dl>` — label at 62%
+ink, value at 15px/600 with `tabular-nums`, separated by space only. Never a `1px` stat strip, never
+outlined cells, never a mono label: the strip is the most common place a page goes
 cheap, because a divider with padding on one side only makes the number look printed on the
 rule.
 

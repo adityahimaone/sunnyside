@@ -101,3 +101,43 @@ test('field-forge generates all 6 SVG background fields + CSS helper from tokens
   assert.match(css, /\.fieldScrim/)
   assert.match(css, /\.photoDuotone/)
 })
+
+test('figma-html generates 8-sheet white-background convertible Figma HTML documentation sheet from tokens.json', () => {
+  const r = tmp()
+  const tf = put(r, 'features/tidewater/tokens.json', {
+    ...sampleTokens,
+    contrast: [
+      { label: 'ink on plate', fg: '#181c24', bg: '#fffdf9', ratio: 16.4, pass: true },
+      { label: 'signal on plate', fg: '#c84b28', bg: '#fffdf9', ratio: 4.9, pass: true },
+    ],
+  })
+  const outDir = join(r, 'public/brand/tidewater')
+  run('brand-forge.mjs', ['--tokens', tf, '--concept', 'junction', '--out', outDir])
+
+  const res = run('figma-html.mjs', ['--slug', 'tidewater', '--root', r])
+  assert.equal(res.code, 0, res.err || res.out)
+
+  const htmlPath = join(outDir, 'tidewater-figma.html')
+  assert.ok(existsSync(htmlPath), 'missing tidewater-figma.html')
+  const html = readFileSync(htmlPath, 'utf8')
+
+  // Verify all 8 convertible Figma artboard sheets exist
+  for (const id of [
+    'section-colors',
+    'section-primitives',
+    'section-typography',
+    'section-logo',
+    'section-assets',
+    'section-components',
+    'section-overlays',
+    'section-patterns',
+  ]) {
+    assert.ok(html.includes(`id="${id}"`), `missing sheet #${id}`)
+  }
+
+  // Verify brand tokens, pure white sheet background, and inlined vector SVG mark
+  assert.match(html, /Tidewater — Figma &amp; HTML-to-Design Documentation Sheet/)
+  assert.match(html, /--bg-white:\s*#FFFFFF/)
+  assert.match(html, /#C84B28/i)
+  assert.match(html, /viewBox="0 0 64 64"/)
+})

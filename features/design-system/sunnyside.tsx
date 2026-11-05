@@ -301,6 +301,13 @@ function Hero() {
                 See it on Side A
                 <ArrowUpRight className="size-4" />
               </Link>
+              <a
+                href="/brand/sunnyside/sunnyside-figma.html"
+                className={styles.ghostButton}
+              >
+                Figma HTML sheet
+                <ArrowUpRight className="size-4" />
+              </a>
             </div>
 
             <ul className={styles.heroStats}>
@@ -1538,6 +1545,13 @@ function Tokens() {
                 filename="sunnyside.tokens.json"
                 label="Download JSON"
               />
+              <a
+                href="/brand/sunnyside/sunnyside-figma.html"
+                className={styles.codeCopy}
+              >
+                Figma HTML sheet
+                <ArrowUpRight className="size-3.5" />
+              </a>
             </div>
           </div>
 
@@ -1580,10 +1594,17 @@ function Tokens() {
               </p>
             </div>
             <div className={styles.noteCard}>
-              <span className={styles.cardLabel}>Exports</span>
+              <span className={styles.cardLabel}>Exports &amp; Figma Sheet</span>
               <p>
-                CSS for the browser. JSON for Figma, a design tool or a future
-                build.
+                CSS for the browser, JSON for variables, and an 8-sheet
+                white-background{' '}
+                <a
+                  href="/brand/sunnyside/sunnyside-figma.html"
+                  style={{ textDecoration: 'underline', fontWeight: 600 }}
+                >
+                  Convertible Figma HTML sheet ↗
+                </a>{' '}
+                for 1:1 HTML-to-Design import.
               </p>
             </div>
           </div>
@@ -1610,6 +1631,13 @@ function Endcap() {
                 Back to Side A
                 <ArrowUpRight className="size-4" />
               </Link>
+              <a
+                href="/brand/sunnyside/sunnyside-figma.html"
+                className={styles.ghostButton}
+              >
+                Figma HTML sheet
+                <ArrowUpRight className="size-4" />
+              </a>
               <a href={`mailto:${SYSTEM.email}`} className={styles.ghostButton}>
                 Say hello
                 <ArrowUpRight className="size-4" />

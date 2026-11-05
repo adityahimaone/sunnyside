@@ -1,18 +1,18 @@
 ---
 name: sunnyside-brand-system
-version: 4.8.0
-description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with a 7-question Step 0 ask_question scope gate written in plain geometry, not case names: surface material, rail (2 shapes), hero (8 shapes), mark construction, colour polarity (1 or 2 scopes, binding on the toggle and token sheets), build scope, and add-ons. Then synthesizes a custom archetype, Kuwayama-grade parametric SVG marks + a 6-mark companion cast, a 6-panel 1500x1125 brandkit board, a comparative surface exploration grid, OKLCH tokens in the chosen polarity, an unnumbered-hero 7-section interactive showcase page, a cast that belongs to the mark argument rather than to the end of the page, and a footer shape derived from the hero rather than copied from the last case. Pillars V and VII carry a house-rules layer curated from shipped builds: no eyebrow, no monospace labels outside code, no outlined chips or 1px stat boxes, no gradient except one directional scrim drawn in the surface’s own colour, one accent on the action, a two-line headline cap, and a footer that is a band with a real photograph rather than a colophon strip.'
+version: 4.9.0
+description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with a 7-question Step 0 ask_question scope gate written in plain geometry, not case names: surface material, rail (2 shapes), hero (8 shapes), mark construction, colour polarity (1 or 2 scopes, binding on the toggle and token sheets), build scope, and add-ons. Then synthesizes a custom archetype, Kuwayama-grade parametric SVG marks + a 6-mark companion cast, a 6-panel 1500x1125 brandkit board, a comparative surface exploration grid, OKLCH tokens in the chosen polarity, an unnumbered-hero 7-section interactive showcase page, an automated 8-sheet white-background Convertible Figma / HTML-to-Design Documentation Sheet (<slug>-figma.html) linked in the hero and footer, a cast that belongs to the mark argument rather than to the end of the page, and a footer shape derived from the hero rather than copied from the last case. Pillars V and VII carry a house-rules layer curated from shipped builds: no eyebrow, no monospace labels outside code, no outlined chips or 1px stat boxes, no gradient except one directional scrim drawn in the surface’s own colour, one accent on the action, a two-line headline cap, and a footer that is a band with a real photograph rather than a colophon strip.'
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '4.8.0'
+  version: '4.9.0'
 ---
 
-# SUNNYSIDE BRAND SYSTEM ENGINE (v4.8 · Two Rails + 8 Hero Shapes + 5 Footer Shapes + Surface Grid)
+# SUNNYSIDE BRAND SYSTEM ENGINE (v4.9 · Two Rails + 8 Hero Shapes + 5 Footer Shapes + Surface Grid + Convertible Figma HTML Sheet)
 
 You are a Principal Design Engineer & Brand Architect. Execute with zero looping tasks, zero placeholder copy (`Lorem ipsum` or generic `Acme` filler), zero emoji UI chrome, and flagship-grade visual engineering.
 
-**One idea → one mark + cast → one 6-panel board → one non-template hero → one comparative surface grid → one honest contrast ledger.**
+**One idea → one mark + cast → one 6-panel board → one non-template hero → one comparative surface grid → one honest contrast ledger → one 8-sheet Convertible Figma HTML documentation sheet (`<slug>-figma.html`).**
 
 ---
 
@@ -105,8 +105,8 @@ Call `ask_question` with these 7 questions, verbatim. The JSON below is already 
       "question": "6. Deliverables — what should be built?",
       "multi_select": false,
       "options": [
-        { "label": "(Recommended) Full page + board + icons", "description": "The unnumbered hero with 7 sections, the 6-panel 3000×2250 brandkit board, and the 6-mark companion cast." },
-        { "label": "Board only, no web page", "description": "Token CSS, the parametric SVG kit and the 6-panel board. No showcase route, no rail, no hero." }
+        { "label": "(Recommended) Full page + board + Figma HTML", "description": "The unnumbered hero with 7 sections, the 6-panel 3000×2250 brandkit board, the 6-mark companion cast, and the 8-sheet white-background Convertible Figma HTML sheet (<slug>-figma.html)." },
+        { "label": "Board + Figma HTML only, no web page", "description": "Token CSS, the parametric SVG kit, the 6-panel board, and the 8-sheet Convertible Figma HTML sheet (<slug>-figma.html). No showcase route." }
       ]
     },
     {
@@ -117,7 +117,7 @@ Call `ask_question` with these 7 questions, verbatim. The JSON below is already 
       "options": [
         { "label": "Skip browser tests", "description": "Compute the honest contrast table in one pass instead of running headless QA loops." },
         { "label": "List it on the site", "description": "Add the case to the design-system index and the landing case library." },
-        { "label": "Export spec files", "description": "A standalone DESIGN.md agent spec, W3C tokens.json and the 3-layer CSS bundle." }
+        { "label": "Export spec files", "description": "A standalone DESIGN.md agent spec, W3C tokens.json, 3-layer CSS bundle, and Figma plugin bundle." }
       ]
     }
   ]
@@ -415,13 +415,60 @@ Anything else — a newsletter field, a social icon row, a sitemap — is filler
 
 ---
 
+### PILLAR VIII: CONVERTIBLE FIGMA / HTML-TO-DESIGN DOCUMENTATION SHEET (`<slug>-figma.html`)
+
+Every design system generated by this skill MUST emit a standalone, 100% self-contained, zero-CDN, pure white (`#FFFFFF` / `#FAFAFA`) **Convertible Figma / HTML-to-Design Documentation Sheet** at `public/brand/<slug>/<slug>-figma.html` (template reference: `templates/figma-doc.html`, automated generator: `scripts/figma-html.mjs`), and link to `/brand/<slug>/<slug>-figma.html` in the showcase page's **Hero** and **Footer** (plus Section `07 / Tokens`).
+
+```bash
+# Generate the 8-sheet Convertible Figma HTML documentation sheet for one case:
+node skills/sunnyside-brand-system/scripts/figma-html.mjs --slug <slug> --root .
+
+# Or regenerate for all cases in a workspace at once:
+node skills/sunnyside-brand-system/scripts/figma-html.mjs --all --root .
+```
+
+#### Why a Dedicated White-Background 8-Sheet HTML Template?
+While the interactive showcase page (`/design-system/<slug>`) uses an atmospheric editorial surface, sticky rails, and custom hero geometry, design tools that convert HTML to editable frames (**Figma `html.to.design`**, **Builder.io**, **Code-to-Design**, **Penpot**, **OpenPencil**) require clean, isolated, pure-white (`#FFFFFF`) `<section class="figma-sheet">` artboards with pre-rendered static DOM and inlined SVG vector paths.
+
+#### Architecture of `<slug>-figma.html` (8 Isolated `<section class="figma-sheet">` Artboards)
+1. **Sheet `01` · Colors (`#section-colors`):**
+   - **Main Color Swatches** (Primary, Secondary, Tertiary with token names, roles, and click-to-copy HEX).
+   - **10-Step OKLCH Color Scales (`10`–`100`)** for Primary, Secondary, and Tertiary derived mathematically from the brand's primitives, plus Neutral (`#FAFAFA`–`#18181B`) and Semantic (`Success`, `Info`, `Warning`, `Danger`) scales.
+   - **Honest Contrast Ledger (`AAA` / `AA` / `FAIL — Non-Text Only`)** pre-rendered directly from `tokens.json` with live foreground/background `Aa` chips and measured WCAG ratios.
+2. **Sheet `02` · Primitives & Physical Foundations (`#section-primitives`):**
+   - Full `tokens.json` primitive swatches with OKLCH & HEX values, 8-step **Spacing Scale (`4px`–`64px`)** with proportional bars, **Border Radius Tokens** (`0px` structural plate through `9999px` pill), and **Elevation / Box-Shadow Tokens** (`shadow-xs` to `shadow-xl`).
+3. **Sheet `03` · Typography (`#section-typography`):**
+   - **Font Family Showcase Cards** (`Display`, `Reading / UI`, `Monospace / Tabular`) with full character sets (`A–Z`, `a–z`, `0–9`) and live specimen lines.
+   - **Complete Type Scale Specimen Table** (`DisplayXL` 56px, `DisplayLG` 48px, `H1`–`H6`, `BodyLg`, `BodyMd`, `BodySm`, `Caption`, `Mono`) across Regular, Medium, SemiBold, and Bold weights.
+4. **Sheet `04` · Logo & Mark Family (`#section-logo`):**
+   - **64×64 Vector Construction Blueprint Grid** with crosshair guides and inlined `mark.svg`.
+   - **Horizontal & Stacked Lockups** on light (`#FFFFFF`), dark (`#0F172A`), and brand-tinted plates, plus **16px Compact Mark (`mark-compact.svg`)** and **1-Ink Glyph (`glyph.svg`)** optical scaling test (`64px`, `32px`, `24px`, `16px`).
+5. **Sheet `05` · Companion Cast & Brand Assets (`#section-assets`):**
+   - All **6 Companion Cast Marks (`cast/*.svg`)** inlined on the 64-unit grid with figure numbers and roles, plus a 3-up **Brand Surface & Card Specimen Grid** (`Primary Brand Surface`, `Dark Ink Plate`, `Tinted Editorial Card`).
+6. **Sheet `06` · UI Components & States (`#section-components`):**
+   - **Buttons Matrix** (`Primary`, `Secondary`, `Outline`, `Ghost`, `Danger` × `Default`, `Hover`, `Focus Ring`, `Disabled`, `Small`), **Form Inputs** (`Default`, `Focused`, `Success`, `Error`, `Disabled`, `Select`, `Textarea`), **Selection Controls** (`Checkbox`, `Radio`, `Toggle Switch`), and **Segmented Tabs & Badges**.
+7. **Sheet `07` · Modals, Alerts & Overlays (`#section-overlays`):**
+   - **Inline Alert Banners** (`Info`, `Success`, `Warning`, `Danger`), **Modal Dialog Variants** (`Standard Confirmation`, `Destructive Action`), and **Toast Notification Bars**.
+8. **Sheet `08` · Patterns, Data Table & Copyable CSS Token Sheets (`#section-patterns`):**
+   - **KPI Metric Summary Cards**, **Token Registry Table** (every `--<ns>-*` token with role, HEX, OKLCH, and status), and **Copyable CSS Token Sheets** (`Primitives` + full `<slug>-tokens.css`).
+
+#### Built-in Figma / HTML-to-Code Ergonomics
+- **Zero Client-Side DOM Injection for Swatches:** Every color swatch, contrast card, spacing bar, and SVG vector is pre-rendered in static HTML so headless importers and browser extensions capture 100% of the nodes.
+- **Sticky Control Bar (Hidden in Clean Export Mode):**
+  - **Section Filter Pills** (`All 8 Sheets`, `01 Colors`, ..., `08 Patterns & Tokens`).
+  - **Spec Inspector (`?spec=1`):** Overlays dashed `#9747FF` Figma component node boundaries and `data-figma-node="❖ ..."` labels on every category block.
+  - **Clean Export Mode (`?clean=1` or `?figma=1`):** Hides the sticky control bar and interactive helper chrome so `html.to.design` imports only the pure white artboard sheets.
+  - **One-Click `Copy Section HTML` Button on Every Sheet Banner:** Copies that sheet's self-contained `<section>` HTML to the clipboard for targeted section-by-section import.
+
+---
+
 ## 3. TOKEN-EFFICIENCY RULES FOR FAST & NON-FLAGSHIP MODELS
 
 To achieve maximum quality with minimal token consumption on both flagship and fast models:
-1. **Batch Asset Generation in One Node Script (`scripts/build-<slug>.mjs`):** Write a single ~150-line Node script that outputs all mark/wordmark/lockup SVGs, the 6 `cast/*.svg` files, `tokens.json`, `<slug>-tokens.css`, and `DESIGN.md` in one execution, then call `brandkit-board.mjs` to render `<slug>-brandkit.png`.
-2. **Data-Driven Loops in Templates:** In `.astro` or `.tsx` showcase pages, define `NAV`, `STATS`, `PREMISE`, `DECISIONS`, `SURFACES`, `CAST`, and `CODE_BLOCKS` as compact arrays in the frontmatter/data file and `.map()` over them—cutting template token usage by **45%** while guaranteeing zero structural drift.
+1. **Batch Asset Generation in One Node Script (`scripts/build-<slug>.mjs`):** Write a single ~150-line Node script that outputs all mark/wordmark/lockup SVGs, the 6 `cast/*.svg` files, `tokens.json`, `<slug>-tokens.css`, and `DESIGN.md` in one execution, then call `brandkit-board.mjs` to render `<slug>-brandkit.png` and `figma-html.mjs` to generate `public/brand/<slug>/<slug>-figma.html`.
+2. **Data-Driven Loops in Templates:** In `.astro` or `.tsx` showcase pages, define `NAV`, `STATS`, `PREMISE`, `DECISIONS`, `SURFACES`, `CAST`, and `CODE_BLOCKS` as compact arrays in the frontmatter/data file and `.map()` over them—cutting template token usage by **45%** while guaranteeing zero structural drift. Always include a link to `/brand/<slug>/<slug>-figma.html` in the Hero, Tokens section, and Footer.
 3. **Sync Both Repos When Targeting External `design-system`:**
-   - Write the showcase route to `src/pages/design-system/<slug>.astro`, styles/tokens to `src/features/<slug>/`, assets to `public/brand/<slug>/`, and register the case in `src/data/cases.ts`.
+   - Write the showcase route to `src/pages/design-system/<slug>.astro` (or `src/cases/<slug>/page.tsx`), styles/tokens to `src/features/<slug>/`, assets (including `<slug>-figma.html`) to `public/brand/<slug>/`, and register the case in `src/data/cases.ts`.
    - Mirror `public/brand/<slug>/` into `sunnyside`, add the entry to `features/case-library/cases.ts`, `.tone_<slug>` to `features/case-library/case-library.module.css`, and the 4 hex chips to `SYSTEM_SWATCHES` in `features/landing-page/studio/work-gallery/work-gallery-data.ts`.
 
 ---
@@ -443,6 +490,7 @@ Verify internally before finishing (never print this checklist):
 - [ ] **Footer shape declared:** the footer names one of F1–F5 in a comment, that shape is the one Pillar VII pairs with the chosen hero, and it carries all five contract items and no filler. Two consecutive cases in `src/data/cases.ts` do not share a footer family.
 - [ ] **Cast placement:** the 6-mark cast sits inside `02 / The Mark` (or as one mid-page inverted band between 06 and 07), it carries no photograph, no lockup and no caption, and nothing that carries a photograph *and* a lockup sits immediately above the footer.
 - [ ] **Footer is a band, not a strip:** it has real height (`min-height` clamp or a photograph plate), its statement is set at `clamp(24px, 2.6vw, 34px)`, its photograph is a *different* asset from the hero's, and its lockup measures `≈26px` tall (`width: auto; object-fit: contain`) with the rule scoped as `.foot__art > img.foot__lock`.
+- [ ] **Convertible Figma HTML sheet (`<slug>-figma.html`):** `public/brand/<slug>/<slug>-figma.html` is generated via `scripts/figma-html.mjs` with all 8 white-background `.figma-sheet` artboards, inlined SVG marks + 6 cast icons, and linked from the showcase page's Hero and Footer (`/brand/<slug>/<slug>-figma.html`).
 - [ ] Zero emojis (`☀️`, `🌙`) in UI chrome; all 3 fonts load live.
 
 ---
@@ -453,6 +501,6 @@ End every response with this compact 1-keystroke action menu:
 
 > **Next Step — Reply with a code (or combine, e.g., `A + C`):**
 > - **`[A] Tailwind v4 / CSS Token Export`** — Standalone `tokens.css` with OKLCH `@theme` variables and font rules.
-> - **`[B] Figma Variables & SVG Bundle`** — W3C Design Tokens JSON + clean standalone `.svg` files for all lockups and cast marks.
+> - **`[B] Figma Variables, Plugin & HTML Sheet (`/brand/<slug>/<slug>-figma.html`)`** — 8-sheet white-background Convertible Figma HTML template + W3C Design Tokens JSON + standalone `.svg` files.
 > - **`[C] Extract Section 06 Kit Components`** — Package the kit and domain controls into modular `components/ui/` TSX files.
 > - **`[D] Remix Rail / Hero / Archetype`** — Name any shift (e.g., *"Switch to Rail B + Hero B"*) for a surgical git patch diff.

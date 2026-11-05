@@ -56,33 +56,53 @@ export default function CasePage() {
       </header>
 
       <main>
+        {/* hero: B · relation beside · photograph runs off the right edge · no eyebrow, no chips */}
         <section className="vt-hero" aria-labelledby="hero-title">
-          <div>
-            <p className="vt-eyebrow">Case 01 / Brand system</p>
+          <div className="vt-hero__copy">
             <h1 id="hero-title">One idea, drawn once.</h1>
             <p className="vt-lead">
-              Replace this with the promise in the audience&apos;s words. Keep
-              it to one sentence; the page is the proof, not the pitch.
+              Replace this with the promise in the audience&apos;s words. One
+              sentence, 44 characters a line; the page is the proof, not the
+              pitch.
             </p>
             <div className="vt-actions">
               <a className="vt-button" href="#forms">
                 Try the controls
               </a>
-              <a className="vt-button vt-secondary" href="#tokens">
+              <a className="vt-more" href="#tokens">
                 Read the tokens
               </a>
+              <a className="vt-more" href={`/brand/${SLUG}/${SLUG}-figma.html`}>
+                Figma HTML sheet
+              </a>
             </div>
+            <dl className="vt-facts">
+              <div>
+                <dt>Material</dt>
+                <dd>Paper and ink</dd>
+              </div>
+              <div>
+                <dt>Mark</dt>
+                <dd>64-unit grid</dd>
+              </div>
+              <div>
+                <dt>Scope</dt>
+                <dd>Daylight only</dd>
+              </div>
+              <div>
+                <dt>Contrast</dt>
+                <dd>11 of 14 pass</dd>
+              </div>
+            </dl>
           </div>
-          <figure className="vt-art">
+          <figure className="vt-plate">
             <Image
-              src={`/brand/${SLUG}/${SLUG}-brandkit.png`}
-              alt="The brand kit board"
-              width={1500}
-              height={1125}
+              src={`/brand/${SLUG}/${SLUG}-hero.webp`}
+              alt="The brand's own photograph, described plainly"
+              width={1672}
+              height={941}
             />
-            <figcaption>
-              Brand kit / rendered from source, not an image model
-            </figcaption>
+            <figcaption>Plate 01 · the handoff</figcaption>
           </figure>
         </section>
 
@@ -254,8 +274,49 @@ export default function CasePage() {
         </section>
       </main>
 
+      {/* footer: F5 · plate and receipt · the plate uses a DIFFERENT asset from the hero */}
       <footer className="vt-footer">
-        <span>Brand 1.0 · 2026 · Replace with the real author and licence.</span>
+        <figure className="vt-footer__plate">
+          <Image
+            src={`/brand/${SLUG}/${SLUG}-closing.webp`}
+            alt="The closing photograph, described plainly"
+            width={1672}
+            height={941}
+          />
+          <figcaption>Plate 02 · the closing cut</figcaption>
+        </figure>
+        <div className="vt-footer__in">
+          <div className="vt-footer__id">
+            <Image
+              src={`/brand/${SLUG}/lockup.svg`}
+              alt="Brand lockup"
+              width={187}
+              height={40}
+            />
+            <p className="vt-footer__say">
+              One idea, drawn once and kept.
+            </p>
+          </div>
+          <dl className="vt-footer__rec">
+            <div>
+              <dt>Built</dt>
+              <dd>2026</dd>
+            </div>
+            <div>
+              <dt>Material</dt>
+              <dd>Paper and ink</dd>
+            </div>
+            <div>
+              <dt>Licence</dt>
+              <dd>All rights reserved</dd>
+            </div>
+          </dl>
+          <p className="vt-footer__back">
+            <a href={`/brand/${SLUG}/${SLUG}-figma.html`}>Figma HTML sheet</a>
+            {' · '}
+            <a href="/design-system">Back to the shelf</a>
+          </p>
+        </div>
       </footer>
 
       <style>{`
@@ -283,40 +344,49 @@ export default function CasePage() {
         .vt-page main, .vt-nav, .vt-footer { width: min(1120px, 100% - 2rem); margin-inline: auto; }
         .vt-skip { position: absolute; top: -80px; left: 1rem; z-index: 10; padding: .6rem .8rem; background: var(--focus); color: var(--ink); }
         .vt-skip:focus { top: 1rem; }
-        .vt-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem; border-bottom: 1.5px solid var(--ink); }
+        .vt-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.1rem; }
         .vt-brand { display: flex; align-items: center; gap: .7rem; text-decoration: none; font-family: var(--display); font-weight: 700; letter-spacing: -.03em; }
-        .vt-nav nav { display: flex; gap: 1rem; font-family: var(--mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; }
+        .vt-nav nav { display: flex; gap: 1.4rem; font-size: .9rem; }
         .vt-nav nav a { color: var(--muted); text-decoration: none; }
         .vt-nav nav a:hover { color: var(--ink); }
         .vt-hero { display: grid; gap: 2rem; padding-block: clamp(3rem, 8vw, 7rem); }
         @media (min-width: 900px) { .vt-hero { grid-template-columns: 1.1fr .9fr; align-items: center; } }
-        .vt-eyebrow { margin: 0 0 .8rem; font-family: var(--mono); font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-        .vt-page h1 { margin: 0; font-family: var(--display); font-size: clamp(2.6rem, 6vw, 5.2rem); line-height: .94; letter-spacing: -.055em; text-wrap: balance; }
-        .vt-lead { max-width: 56ch; margin: 1rem 0 0; color: var(--muted); font-size: 1.05rem; }
-        .vt-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.4rem; }
-        .vt-button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 1rem; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--accent); color: var(--accent-ink); box-shadow: 3px 3px 0 var(--ink); font-family: var(--mono); font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; cursor: pointer; }
+        .vt-page h1 { margin: 0; font-family: var(--display); font-size: clamp(2.4rem, 4.6vw, 4.25rem); line-height: .96; letter-spacing: -.032em; max-width: 18ch; color: var(--ink); }
+        .vt-lead { max-width: 44ch; margin: 1rem 0 0; color: var(--ink); font-size: 1.03rem; line-height: 1.56; }
+        .vt-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1.2rem; margin-top: 1.5rem; }
+        .vt-button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 1.1rem; border: 0; border-radius: 0; background: var(--accent); color: var(--accent-ink); font-family: var(--body, var(--display)); font-size: .92rem; font-weight: 600; text-decoration: none; cursor: pointer; }
+        .vt-button:hover { background: var(--accent-deep, var(--accent)); }
         .vt-secondary { background: var(--paper-hi); color: var(--ink); }
-        .vt-art { margin: 0; border: 1.5px solid var(--ink); border-radius: 20px; background: var(--paper-hi); box-shadow: 9px 11px 0 var(--line); overflow: hidden; }
-        .vt-art img { display: block; width: 100%; height: auto; }
-        .vt-art figcaption { padding: .7rem .9rem; border-top: 1px solid var(--line); font-family: var(--mono); font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-        .vt-section { padding-block: clamp(3rem, 7vw, 6rem); border-top: 1.5px solid var(--ink); }
-        .vt-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem 1rem; margin-bottom: 1.5rem; }
-        .vt-page h2 { margin: 0; font-family: var(--display); font-size: clamp(1.7rem, 3.5vw, 2.6rem); line-height: 1; letter-spacing: -.04em; }
-        .vt-head p { margin: 0; max-width: 58ch; color: var(--muted); font-size: .95rem; }
-        .vt-grid { display: grid; gap: 1rem; }
-        @media (min-width: 800px) { .vt-grid.three { grid-template-columns: repeat(3, 1fr); } }
-        .vt-grid article { padding: 1.2rem; border: 1px solid var(--line); border-radius: 14px; background: var(--paper-hi); }
-        .vt-grid h3 { margin: 0 0 .4rem; font-family: var(--display); font-size: 1.15rem; letter-spacing: -.02em; }
-        .vt-grid p { margin: 0; color: var(--muted); font-size: .88rem; }
-        .vt-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        @media (max-width: 720px) { .vt-form { grid-template-columns: 1fr; } }
-        .vt-field { display: grid; gap: .35rem; }
-        .vt-field label, .vt-fieldset legend { font-family: var(--mono); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-        .vt-field input:not([type='range']):not([type='file']), .vt-field select, .vt-field textarea { width: 100%; min-height: 46px; padding: .7rem .8rem; border: 1px solid var(--line); border-radius: 8px; background: var(--paper-hi); color: var(--ink); font: inherit; }
-        .vt-field textarea { min-height: 100px; resize: vertical; }
-        .vt-field input:focus-visible, .vt-field select:focus-visible, .vt-field textarea:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(61 83 214 / .2); outline: none; }
-        .vt-fieldset { display: flex; flex-wrap: wrap; gap: .8rem; border: 0; padding: 0; margin: 0; }
-        .vt-fieldset label, .vt-check { display: flex; align-items: center; gap: .45rem; min-height: 44px; font-size: .88rem; }
+        .vt-secondary:hover { background: var(--paper); }
+        .vt-more { font-size: .92rem; font-weight: 600; color: var(--ink); text-decoration: none; }
+        .vt-more::after { content: ' →'; }
+        .vt-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.75rem; margin: clamp(.6rem, 2.2vh, 1.9rem) 0 0; padding: 0; }
+        .vt-facts dt { font-size: .8rem; color: color-mix(in srgb, var(--ink) 62%, transparent); }
+        .vt-facts dd { margin: .15rem 0 0; font-size: .94rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .vt-plate { position: relative; margin: 0; overflow: hidden; }
+        .vt-plate img { display: block; width: 100%; height: 100%; min-height: 320px; object-fit: cover; object-position: center top; }
+        .vt-plate figcaption { position: absolute; left: 1.2rem; bottom: 1.1rem; color: var(--paper-hi); font-size: .8rem; text-shadow: 0 1px 2px rgb(0 0 0 / .55), 0 2px 18px rgb(0 0 0 / .35); }
+        .vt-footer { margin-top: clamp(4rem, 8vw, 7rem); }
+        .vt-footer__plate { position: relative; margin: 0; overflow: hidden; }
+        .vt-footer__plate img { display: block; width: 100%; height: clamp(14rem, 25vw, 22rem); object-fit: cover; object-position: 34% 50%; }
+        .vt-footer__plate figcaption { position: absolute; left: 1.2rem; bottom: 1.1rem; padding: .3rem .55rem; background: var(--paper); color: var(--ink); font-size: .78rem; }
+        .vt-footer__in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) auto; gap: 1.75rem; padding-block: 2.1rem 1.9rem; }
+        .vt-footer__id img { display: block; width: auto; height: 22px; }
+        .vt-footer__say { margin: .9rem 0 0; max-width: 22ch; font-family: var(--display); font-size: clamp(1.4rem, 2.2vw, 1.9rem); line-height: 1.1; letter-spacing: -.02em; color: var(--ink); }
+        .vt-footer__rec { margin: 0; padding-left: 1.75rem; border-left: 1px solid color-mix(in srgb, var(--ink) 26%, transparent); }
+        .vt-footer__rec div + div { margin-top: .7rem; }
+        .vt-footer__rec dt { font-size: .8rem; color: color-mix(in srgb, var(--ink) 62%, transparent); }
+        .vt-footer__rec dd { margin: .1rem 0 0; font-size: .9rem; font-weight: 600; }
+        .vt-footer__back { margin: 0; align-self: start; font-size: .88rem; font-weight: 600; }
+        .vt-footer__back a { color: var(--ink); text-decoration: none; }
+        .vt-footer__back a::after { content: ' ↗'; }
+        @media (max-width: 900px) {
+          .vt-hero { grid-template-columns: 1fr; }
+          .vt-plate { order: 2; }
+          .vt-plate img { min-height: 0; height: clamp(15rem, 52vw, 24rem); }
+          .vt-footer__in { grid-template-columns: 1fr; gap: 1.4rem; }
+          .vt-footer__rec { padding-left: 0; border-left: 0; }
+        }
         .vt-fieldset input, .vt-check input { width: 18px; height: 18px; accent-color: var(--accent); }
         .vt-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
         .vt-table th, .vt-table td { padding: .6rem .7rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }

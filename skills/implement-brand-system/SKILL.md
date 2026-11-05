@@ -27,8 +27,8 @@ brief → sunnyside-brand-system → approved kit → implement-brand-system →
 | `brief.md` | Audience, promise, constraints, references | Ask for the one-sentence promise and the stack |
 | `DESIGN.md` / `design.md` / the project's design guide | Decisions, tokens, component rules, what not to do | Derive a short one from the tokens and board; do not invent intent |
 | `tokens.json` + `tokens.css` | Every colour, type, space and radius decision | Stop; the brand pass is not done |
-| `public/brand/<slug>/` | Mark, wordmark, lockups, favicon, icons | Stop; do not redraw the mark |
-| Board PNG + `brandkit.html` | Visual reference, section composition | Use the tokens; do not screenshot the board as the page |
+| `public/brand/<slug>/` | Mark, wordmark, lockups, favicon, icons, `<slug>-figma.html` | Stop; do not redraw the mark |
+| Board PNG + `brandkit.html` + `<slug>-figma.html` | Visual reference, section composition, and 8-sheet Convertible Figma HTML doc | Use the tokens; generate `<slug>-figma.html` via `scripts/figma-html.mjs` if missing |
 | System notes | Components, forms, motion, voice, gaps | Ask for the 5–10 primitives and the one effect |
 | Target route + stack | Where this ships | Ask: HTML mockup, TSX page, or pen source |
 
@@ -98,10 +98,13 @@ palette is a different brand.
 | **Pen** | A `.pen` source already exists | Use `pen-dev`; the code tokens and page are still the product |
 
 Use `templates/design-system.html` for a specimen, `templates/single-page.html`
-for a mockup, and `templates/case-page.tsx` for a case route. Copy them; do not
-rebuild a page shell. If the host has no route, do not create one. For a TSX
-specimen, keep the page server-rendered and move theme/nav/copy controls into
-small client islands.
+for a mockup, `templates/figma-doc.html` (generated via `scripts/figma-html.mjs`)
+for the 8-sheet white-background Convertible Figma / HTML-to-Design sheet at
+`public/brand/<slug>/<slug>-figma.html`, and `templates/case-page.tsx` for a case
+route. Always link to `/brand/<slug>/<slug>-figma.html` in the Hero and Footer of
+the showcase page. Copy them; do not rebuild a page shell. If the host has no
+route, do not create one. For a TSX specimen, keep the page server-rendered and
+move theme/nav/copy controls into small client islands.
 
 ## Implementation sequence
 

@@ -1,18 +1,18 @@
 ---
 name: sunnyside-brand-system
-version: 4.4.0
-description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with an interactive Step 0 ask_question scope gate (including Vesper Per-Section Rail vs Clearing Sticky Contents Rail and 5 Flagship Hero Variants), then synthesizes custom archetypes, Kuwayama-grade parametric SVG marks + 6-mark companion casts, 6-panel 1500x1125 brandkit boards, Vesper-style comparative surface exploration grids, dual-scope OKLCH tokens, and unnumbered-hero 7-section interactive showcase pages.'
+version: 4.9.0
+description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with a 7-question Step 0 ask_question scope gate written in plain geometry, not case names: surface material, rail (2 shapes), hero (8 shapes), mark construction, colour polarity (1 or 2 scopes, binding on the toggle and token sheets), build scope, and add-ons. Then synthesizes a custom archetype, Kuwayama-grade parametric SVG marks + a 6-mark companion cast, a 6-panel 1500x1125 brandkit board, a comparative surface exploration grid, OKLCH tokens in the chosen polarity, an unnumbered-hero 7-section interactive showcase page, an automated 8-sheet white-background Convertible Figma / HTML-to-Design Documentation Sheet (<slug>-figma.html) linked in the hero and footer, a cast that belongs to the mark argument rather than to the end of the page, and a footer shape derived from the hero rather than copied from the last case. Pillars V and VII carry a house-rules layer curated from shipped builds: no eyebrow, no monospace labels outside code, no outlined chips or 1px stat boxes, no gradient except one directional scrim drawn in the surface’s own colour, one accent on the action, a two-line headline cap, and a footer that is a band with a real photograph rather than a colophon strip.'
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
-  version: '4.4.0'
+  version: '4.9.0'
 ---
 
-# SUNNYSIDE BRAND SYSTEM ENGINE (v4.4 · Vesper / Clearing Rail + 5 Flagship Heroes + Surface Exploration Grid)
+# SUNNYSIDE BRAND SYSTEM ENGINE (v4.9 · Two Rails + 8 Hero Shapes + 5 Footer Shapes + Surface Grid + Convertible Figma HTML Sheet)
 
-You are a Principal Design Engineer & Brand Architect. Execute with zero looping tasks, zero placeholder copy (`Lorem ipsum` or generic `Acme` filler), zero emoji UI chrome, and flagship-grade visual engineering (matching the bar of **Vesper**, **Clearing**, **Strand**, **Porphyry**, **Jakarta**, **Hachure**, **Riso Co.**, **Huginn**, and **Tavola**).
+You are a Principal Design Engineer & Brand Architect. Execute with zero looping tasks, zero placeholder copy (`Lorem ipsum` or generic `Acme` filler), zero emoji UI chrome, and flagship-grade visual engineering.
 
-**One idea → one mark + cast → one 6-panel board → one non-template hero → one comparative surface grid → one honest contrast ledger.**
+**One idea → one mark + cast → one 6-panel board → one non-template hero → one comparative surface grid → one honest contrast ledger → one 8-sheet Convertible Figma HTML documentation sheet (`<slug>-figma.html`).**
 
 ---
 
@@ -25,63 +25,99 @@ You are a Principal Design Engineer & Brand Architect. Execute with zero looping
 > - **Pre-fill smart recommendations:** If the user already supplied a theme, domain, or image attachments (e.g., *"Two-ink evening print"* or *"Field journal"*), tailor the `(Recommended)` first option of each question to match their theme while still letting them confirm or customize via the `ask_question` UI!
 > - **Never** run scripts or create files before the user submits their `ask_question` answers.
 
-Call `ask_question` with these 5 structured questions (users can pick any preset, combine options, or type any custom fusion in the UI's freeform option):
+Call `ask_question` with these 7 questions, verbatim. The JSON below is already in the tool schema — `id`, `header`, `question`, `multi_select`, and options as `{label, description}` objects.
+
+**Label rule:** every `label` names the thing by what a non-designer already knows — *Paper & ink*, *Airport signage*, *Text left, photo right*, *Shape with a hole cut out*. Never name an option after a case, a project, or a design term the reader has to look up. Keep `label` under 45 characters (it is what the selector renders) and let `description` carry the exact geometry. **Keep it English, keep it plain.** Call the tool with these English labels as written — do not translate them into the user's language, and do not swap in fancier English. A reader who has never opened a design book should still understand every option: *Cardboard & steel*, not *Constructed industrial*; *Text left, photo right*, not *Split editorial*; *Shape with a hole cut out*, not *Boolean counter-form*. If an option needs a term defined, the label is wrong — move the term into `description` or drop it.
 
 ```json
 {
   "questions": [
     {
-      "question": "1. Archetype & Surface Direction — Which visual archetype and tactile surface should anchor this brand system?",
-      "is_multi_select": false,
+      "id": "surface",
+      "header": "Material",
+      "question": "1. Surface & Material — if this brand were a physical object, what would it be made of? Eight of the eighteen surfaces are here; the rest are reached through references/surfaces.md.",
+      "multi_select": false,
       "options": [
-        "(Recommended) Two-Ink Print / Editorial Stipple & Paper — warm uncoated stock, flat ink impressions, register ghost or ordered dither, zero glow (like Vesper, Riso Co., Huginn)",
-        "Constructed Architectural & Field Journal — sharp geometric grids, mineral stone/paper surfaces, and disciplined neo-grotesque or old-style hierarchy (like Clearing, Porphyry, Hachure)",
-        "Tactile Linen / Editorial Hospitality — warm woven paper/linen plates, sunlit coastal or editorial serif authority, and sea-glass panes (like Tavola, Strand)",
-        "Precision SaaS / Night-First Instrument — 1px exposed hairlines, tabular data rows, and clinical dark/light cockpit clarity (like Cove, Bluewater, Ledger)",
-        "Civic / Multi-Ramp Wayfinding or Prismatic Glass — bold directional color ramps, exposed structural rules, or reeded optical refraction (like Jakarta, Halation)"
+        { "label": "(Recommended) Paper & ink", "description": "Like a book page or a screen-printed poster. Warm uncoated stock, flat solid colour, no glow, no blur, no gradient, 0px corners." },
+        { "label": "Cardboard & steel", "description": "Like a warehouse or a shipping container. Kraft and cold grey, sharp rectangular grid, 1px rules, 0px corners, plain sans type." },
+        { "label": "Linen & daylight", "description": "Like an interior magazine. Sunlit warm background, editorial serif headlines, soft panels with real blur, 12px corners." },
+        { "label": "Cockpit panel", "description": "Like an aircraft dashboard. Near-black ground, dense table rows, 1px hairlines, very high contrast, monospace numbers everywhere." },
+        { "label": "Airport signage", "description": "Like a terminal direction sign. Bold signal colour blocks, oversized numerals, heavy structural lines, no cards, no rules." },
+        { "label": "Concrete & rebar", "description": "Like a poured concrete wall. Cool mid-grey, matte, fine grain, 2px rules, 2px corners, heavy grotesque type." },
+        { "label": "Phosphor terminal", "description": "Like a CRT monitor. True black, green or amber text, scanlines, mono only, 80ms snap, 0px corners." },
+        { "label": "Marble & brass", "description": "Like a hotel lobby. Off-white marble with faint veining, warm brass as the plate, high-contrast serif, small-caps labels." }
       ]
     },
     {
-      "question": "2. Navigation, Section Rail & Hero Architecture — Which rail layout (Hero is unnumbered; topbar links carry no numbers) and Hero variant should structure the page?",
-      "is_multi_select": false,
+      "id": "rail",
+      "header": "Rail",
+      "question": "2. Rail — where should the section numbers 01–07 sit?",
+      "multi_select": false,
       "options": [
-        "(Recommended) Vesper Per-Section Rail (`176px` sticky `.rail` + `.body` inside each `.sec > .wrap`) + Variant A: Vesper Split Field & Overlapping Stat Bench (`78vh` art field top, `-30px` overlapping 5-cell bench, oversized display + lede below)",
-        "Clearing Sticky Contents TOC Sidebar (`.shell.layout` wrapping a scroll-spy `<ol>` rail `01..07` + content column) + Variant B: Clearing / Strand Split Editorial & Framed Media Pane (2-col editorial copy + pill badges left, framed artwork with floating lockup pane right)",
-        "Vesper Per-Section Rail + Variant C: Porphyry / Hachure Live Specimen Stage First (interactive diorama, dither canvas, or printed survey margin at the top edge, followed by display title + 4-stat ledger)",
-        "Clearing Sticky Contents TOC Sidebar + Variant D: Jakarta / Riso Physical Artifact & Hoarding Stage (oversized 760px watermark mark or pushpin sheet + torn polygon bottom edge + tinted panel)",
-        "Vesper Per-Section Rail + Variant E: Cove / Tavola Full-Bleed Atmospheric Plate (full-bleed field with solid reading plate + live station/specimen card)"
+        { "label": "(Recommended) Rail A · one per section", "description": "A 176px sticky column inside every section, holding that section's number and label beside its content, with a 1px rule above each section." },
+        { "label": "Rail B · one list for the page", "description": "A single 200px sticky sidebar for the whole page listing 01–07, highlighting the section you are reading, with content in one column beside it." }
       ]
     },
     {
-      "question": "3. Logo Construction (Kuwayama Protocol) — Which geometric primitive should construct the 64x64 primary mark and 6-mark companion cast?",
-      "is_multi_select": false,
+      "id": "hero",
+      "header": "Hero",
+      "question": "3. Hero — what does the very top of the page look like? Each shape puts the type in a different place relative to the artwork, and the footer follows from this answer.",
+      "multi_select": false,
       "options": [
-        "(Recommended) Horizon Bar & Resting Star / Subject — a 4-unit structural horizon slab with a geometric star, arc, or drawn subject resting on it (like Vesper, Clearing, Tavola)",
-        "Boolean Counter-Form (`fill-rule=\"evenodd\"`) — bold foreground mass carved by an optical negative-space silhouette or portal (like Porphyry, Cove)",
-        "Cell Matrix / Offset Register Tear — modular grid cells with one off-grid escapee or a two-drum torn seam bridged by a single pin (like Huginn, Riso Co.)",
-        "Sheared Parallel Planes / Continuous Junction Stroke — two sheared masses separated by a 6-unit channel or one continuous ribbon turning a corner (like Strand, Jakarta)",
-        "Solid Mass with Lit Crest / Optical Louver — asymmetric rising ground with a contrasting 7-unit lit crest or parallel slit-scan bars (like Hachure, Halation)"
+        { "label": "(Recommended) A · Banner, then a number row", "description": "Type sits BELOW the art. A wide banner on top, five number cells overlapping its bottom edge, then the headline." },
+        { "label": "B · Text left, photo right", "description": "Type sits BESIDE the art. Words on the left, a framed photo on the right with one small logo pane in its corner." },
+        { "label": "C · Live demo on top", "description": "Type sits BELOW a live thing. An animated field or specimen runs full width first, then the headline and numbers." },
+        { "label": "D · One giant sheet", "description": "Type sits INSIDE the object. The hero is one big printed sheet with a torn bottom edge and the headline printed on it." },
+        { "label": "E · Full-screen photo", "description": "Type sits ON the photo. A full-bleed image with a directional scrim, headline and paragraph right on top. No panel." },
+        { "label": "F · One object, isolated", "description": "Type sits AROUND one object. A single product alone on a plain ground, headline and numbers in the empty space." },
+        { "label": "G · No photo, all type", "description": "No photo at all. One enormous line of type filling the width, a rule, the numbers set as a ledger." },
+        { "label": "H · Stacked colour bands", "description": "Type in a rhythm. Three to five full-width colour bands, one line of the argument in each." }
       ]
     },
     {
-      "question": "4. Theme Polarity & Surface Exploration — How should the color scope and Section 04 (`Surfaces`) behave?",
-      "is_multi_select": false,
+      "id": "mark",
+      "header": "Logo",
+      "question": "4. Logo — how should the 64×64 mark be drawn?",
+      "multi_select": false,
       "options": [
-        "(Recommended) Dual-Scope (Daylight + Night Toggle) + Vesper Comparative Surface Grid (4–6 explored surfaces in a 2-col grid with `210px` live visual demos, showing both `Shipped` and `Rejected` surfaces with zero range sliders)",
-        "Warm Stock / Paper Daylight First + Vesper Comparative Surface Grid + Full-Bleed Closing Band (dither divider, inverted cast band, or closing artwork)",
-        "Abyssal / Nocturnal Dark First + Vesper Comparative Surface Grid — night is the default surface, daylight is the secondary scope (like Cove, Bluewater, Porphyry)",
-        "Procedural Field (`field-forge.mjs`: stipple / dither / bands / mesh) + Vesper Comparative Surface Grid (when no photo is attached)"
+        { "label": "(Recommended) Bar + something on it", "description": "One horizontal bar 4 units thick, with a star, an arc or a simple subject resting on top of it." },
+        { "label": "Shape with a hole cut out", "description": "One bold solid shape, with a silhouette or arrow removed from inside it using fill-rule=\"evenodd\"." },
+        { "label": "Square grid, one cell off", "description": "Modular squares on the 64 grid, with exactly one square pushed off the grid to break the pattern." },
+        { "label": "Two offset blocks", "description": "Two masses shifted against each other with a 6-unit gap between them, or one continuous stroke that turns a corner." },
+        { "label": "Solid block + bright band", "description": "A rising solid mass with a 7-unit highlight band across it, or parallel slit-scan bars." }
       ]
     },
     {
-      "question": "5. Output Scope, Deliverables & Token-Saving QA — Which deliverables and verification level should we run?",
-      "is_multi_select": true,
+      "id": "polarity",
+      "header": "Colour",
+      "question": "5. Colour — how many colour scopes ship? This one is binding: it decides the navbar toggle, how many token sheets Section 07 shows, and whether the audit lists a dark-mode gap.",
+      "multi_select": false,
       "options": [
-        "(Recommended) Full Unnumbered-Hero + 7-Section Showcase Route + 6-Panel Brandkit Board (`<slug>-brandkit.png`) + 6-Mark Companion Cast (`cast/*.svg`)",
-        "(Recommended) Skip Browser E2E & Heavy QA Scripts (Fastest / Saves API Tokens) — builds the honest on-page contrast table directly in one pass without headless browser loops",
-        "Sync Both Repos (`design-system` + `sunnyside` Landing Page & Case Library registration)",
-        "Export Standalone `DESIGN.md` Agent Spec + W3C `tokens.json` + 3-Layer CSS Bundle",
-        "Token CSS + Parametric SVG Kit + 6-Panel Board Only (Skip full showcase route)"
+        { "label": "(Recommended) Light + dark", "description": "Both ship: a night token block, a navbar toggle, and both a Day and a Night sheet in Section 07." },
+        { "label": "Light only", "description": "One scope and nothing else: no night block, no toggle, no Night sheet, no dark-mode audit line. State the reason in Section 07." },
+        { "label": "Light + dark, dark first", "description": "The page opens on the dark scope and light is the secondary one, toggle still present." },
+        { "label": "Dark only", "description": "A single scope whose page ground is the dark material (lampblack or deep ink paper). No toggle, no second sheet." }
+      ]
+    },
+    {
+      "id": "build",
+      "header": "Build",
+      "question": "6. Deliverables — what should be built?",
+      "multi_select": false,
+      "options": [
+        { "label": "(Recommended) Full page + board + Figma HTML", "description": "The unnumbered hero with 7 sections, the 6-panel 3000×2250 brandkit board, the 6-mark companion cast, and the 8-sheet white-background Convertible Figma HTML sheet (<slug>-figma.html)." },
+        { "label": "Board + Figma HTML only, no web page", "description": "Token CSS, the parametric SVG kit, the 6-panel board, and the 8-sheet Convertible Figma HTML sheet (<slug>-figma.html). No showcase route." }
+      ]
+    },
+    {
+      "id": "addons",
+      "header": "Add-ons",
+      "question": "7. Add-ons — tick anything that applies, or nothing.",
+      "multi_select": true,
+      "options": [
+        { "label": "Skip browser tests", "description": "Compute the honest contrast table in one pass instead of running headless QA loops." },
+        { "label": "List it on the site", "description": "Add the case to the design-system index and the landing case library." },
+        { "label": "Export spec files", "description": "A standalone DESIGN.md agent spec, W3C tokens.json, 3-layer CSS bundle, and Figma plugin bundle." }
       ]
     }
   ]
@@ -91,17 +127,31 @@ Call `ask_question` with these 5 structured questions (users can pick any preset
 ### Step 1 · Single-Pass Deterministic Execution (Immediately after `ask_question` is answered)
 Once the user answers the `ask_question` prompt (or immediately on Turn 1 if the user explicitly wrote `"skip questions"`):
 1. State your **3-Axis Synthesis** in a tight 2-line architectural header summary at the top of your response:
-   > **`[BRAND NAME] (Case XX)` — 3-Axis Synthesis:** Surface: *[Tactility]* · Rail & Hero: *[Vesper Rail / Clearing TOC + Hero Variant]* · Physics: *[Corner/Stroke]*  
+   > **`[BRAND NAME] (Case XX)` — 3-Axis Synthesis:** Surface: *[Tactility]* · Rail: *[A 176px per-section / B 200px contents list]* · Hero: *[A–H shape · relation `<relation>`]* · Physics: *[Corner/Stroke]*  
    > **DNA:** Archetype: *[Seed Fusion]* · Mark: *[Kuwayama Primitive + 6-Cast]* · Stack: *[Display + UI Sans + Mono]* · Polarity: *[Theme Scope]*
 2. Build the batch asset script (`scripts/build-<slug>.mjs`), 6-panel `<slug>-brandkit.png` board (`brandkit-board.mjs`), and `/design-system/[slug]` showcase route in **one deterministic pass**.
 
+**Reading the seven answers — every one changes a file, or it should not have been asked:**
+
+| Answer | What it decides |
+|---|---|
+| `surface` | The nine slots in `references/surfaces.md` — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion`. Fill all nine before writing a component; two agents given the same surface must land on the same CSS |
+| `rail` | `176px` per-section column **or** `200px` contents list — the two layouts are not interchangeable; do not build both |
+| `hero` | Exactly one of A–H for the opening stage, and it also decides the footer shape (Pillar VII pairing table). The rail never changes which hero you pick |
+| `mark` | The geometric primitive set for `mark.svg`, and the cast must share its cut-line weight |
+| `polarity` | Number of `[data-<slug>]` scopes, presence of the navbar toggle, how many token sheets Section 07 renders (4 vs 5), and whether the audit lists a dark-mode gap |
+| `build` | *Full page + board + icons* → the showcase route, the board and the cast. *Board only, no web page* → no `src/pages/design-system/<slug>.astro`, no 7 sections, no rail, no hero variants; the board is the deliverable |
+| `addons` | *Skip browser tests* → compute contrast in-script, no headless loops. *List it on the site* → `src/data/cases.ts` entry + cover path. *Export spec files* → `DESIGN.md`, `tokens.json`, `<slug>-tokens.css` |
+
+If an answer changes nothing you build, say which answer it changed and where — otherwise you asked a question you ignored.
+
 ---
 
-## 2. SIX-PILLAR ARCHITECTURAL MANDATES (THE VESPER / CLEARING / PORPHYRY / HACHURE BAR)
+## 2. SEVEN-PILLAR ARCHITECTURAL MANDATES (THE FLAGSHIP BAR)
 
 ### Pillar I: Unbounded Archetype Synthesis Engine
 Never force a project into a rigid template. Synthesize the visual language dynamically across **3 continuous axes**:
-1. **Surface Tactility:** *Two-Ink Uncoated Print / Stipple* ↔ *Tactile Paper / Woven Linen Cardstock* ↔ *Optical Reeded / Sea Glass*
+1. **Surface Tactility — one of the eighteen catalogued materials (`references/surfaces.md`), never a blend:** *Paper & ink* (uncoated stock, flat ink, stipple or register ghost) · *Cardboard & steel* (kraft, grey metal, 1px rules, 0px corners) · *Linen & daylight* (warm sunlit ground, editorial serif, real-blur glass) · *Cockpit panel* (dense tabular rows, hairlines, monospace, clinical contrast) · *Airport signage* (signal colour blocks, oversized numerals, heavy structural lines) · *Concrete & rebar* (cool mid-grey, matte grain, 2px rules, 2px corners) · *Phosphor terminal* (true black, green or amber, scanlines, mono only) · *Marble & brass* (off-white veined ground, brass plate, high-contrast serif, small caps). Whichever was chosen sets the nine slots in `references/surfaces.md` — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion` — and those nine must be filled before any component is written. A second material may appear only as a one-off accent, never as a competing system. If the brief's theme implies a surface that is not one of the eight in Step 0, use the prompt-mapping table in `references/surfaces.md` and state the choice in one line.
 2. **Spatial Density:** *Gallery Airy (`p-12`, wide leading)* ↔ *Editorial Balanced (`60ch–66ch` reading measure)* ↔ *Terminal/Instrument High-Density (`1px` exposed hairlines, `tabular-nums` rows)*
 3. **Corner & Stroke Physics:** *Razor Printed (`0px` radius, `1px` exposed hairlines)* ↔ *Precision Organic (`10px` inner / `18px` outer concentric radii)* ↔ *Soft Squircle (`22px`)*
 
@@ -115,14 +165,21 @@ Construct bespoke `<svg viewBox="0 0 64 64">` marks using mathematical vector di
 - **Mandatory Mark Family Deliverables (`public/brand/<slug>/`):**
   1. **Primary (`mark.svg`, `mark-reverse.svg`, `glyph.svg`)** + **Separate 16px Compact Drawing (`mark-compact.svg`, `mark-compact-reverse.svg`)**: The 16px compact MUST be a distinct simplified drawing (fatter arms/bars, wider channels, small details removed so anti-aliasing never blurs at `16×16`), never just the 64px mark scaled down.
   2. **Outlined Vector Wordmark & Lockups (`wordmark.svg`, `lockup.svg`, `lockup-reverse.svg`, `lockup-stacked.svg`)**: Pure `<path>` geometry with ink baked in (`<img>` tags resolve `currentColor` to black).
-  3. **6-Mark Companion Cast (`public/brand/<slug>/cast/*.svg`)**: 6 domain-specific companion symbols drawn on the exact same `64×64` grid and cut-line weight (e.g., for Vesper: *Moon, Lamp, Horizon, Figure, Ray, Grain*; for Clearing: *Dawn, Track, Antler, Rain, Call*).
+  3. **6-Mark Companion Cast (`public/brand/<slug>/cast/*.svg`)**: 6 domain-specific companion symbols drawn on the exact same `64×64` grid and cut-line weight (six nouns from the brand's own operational vocabulary, never generic icons — a shipping identity gets *Parcel, Docket, Pallet, Tape, Route, Depot*; a print studio gets *Sheet, Plate, Squeegee, Register, Drier, Trim*).
+
+> [!CRITICAL]
+> **CAST IS CONTENT, NOT A CLOSING COMPOSITION.** The cast is the proof that the mark was drawn as a family, so it belongs to the argument, not to the end of the page. Render it **inside `02 / The Mark`**, under the scale strip, as a `6 × 1` (or `3 × 2`) hairline grid on the page ground — heading, six marks, six nouns, six one-line notes. It may also be a **mid-page inverted band** bounded by `06 Kit` above and `07 Tokens` below. It may **not** be the last band before the footer: a full-bleed band carrying a photograph *and* a lockup *and* a caption, sitting directly above a footer that also carries a photograph and a lockup, makes the page end twice and spends the one closing composition the footer is for. **A band owns one of three things — a photograph, a lockup, or a statement. The footer owns all three, which is why nothing else may sit beside it holding two.**
 
 ---
 
-### Pillar III: Dual-Scope OKLCH Chromatic Architecture & Honest Contrast Ledger
+### Pillar III: OKLCH Chromatic Architecture (One or Two Scopes) & Honest Contrast Ledger
 Generate a perceptually uniform `oklch(L C H)` primitive palette (`6–12` primitives) tailored to the brand hue ($H$), wired through **Three Strict Token Layers**:
 1. **Layer 1 · Primitives (`--xx-cobalt`, `--xx-stock`, `--xx-chalk`):** Named once for the physical material. Primitives **NEVER** flip values in dark mode and **NEVER** use mode prefixes (`--night-ground` is banned).
-2. **Layer 2 · Semantic Scope (`:root` Day vs `[data-<slug>='night']` Night):** A night surface is a semantic scope over the same primitives (`--xx-surface-page`, `--xx-surface-plate`, `--xx-text-primary`, `--xx-text-secondary`, `--xx-line-strong`, `--xx-line-subtle`).
+2. **Layer 2 · Semantic Scope — count follows the Step 0 polarity answer, never a default:**
+   - *Daylight only:* `:root` alone. No night block, no `[data-<slug>='night']`, no toggle, no Night sheet, no dark-mode audit line. Write one sentence in Section 07 saying why (a waybill is a white document; a dark one is a different product).
+   - *Dual scope, day default:* `:root` plus a second `[data-<slug>='night']` semantic scope over the same primitives (`--xx-surface-page`, `--xx-surface-plate`, `--xx-text-primary`, `--xx-text-secondary`, `--xx-line-strong`, `--xx-line-subtle`).
+   - *Dual scope, night default:* the same two blocks, but the page ground is the night scope on load and the toggle switches to day. Never ship a toggle whose two states resolve to the same colours.
+   - *Single scope on a dark ground:* one `:root` whose page ground is the dark material. Still no toggle — a single scope is a single scope whatever its lightness.
 3. **Layer 3 · Component Tokens (`--xx-button-bg`, `--xx-chip-border`):** The only layer where a component knows its recipe.
 4. **Honest Contrast Ledger (Mandatory Published Failure):**
    - Compute WCAG contrast ratios from hex for `10–16` pairs.
@@ -139,29 +196,92 @@ Never default to generic Inter + Roboto. Synthesize a **3-Role Font Stack** (`--
 
 ---
 
-### Pillar V: Non-Template Hero Exploration (5 Flagship Variants) & 6-Panel Brandkit Board
+### Pillar V: Non-Template Hero Exploration (8 Flagship Shapes) & 6-Panel Brandkit Board
 
 > [!CRITICAL]
-> **ANTI-TEMPLATE HERO LAW — NEVER REUSE THE SAME HERO BOX LAYOUT:**
-> Do **not** default every brand to the old `Quieta / Arête / Tavola` two-card hero (`left reading plate + right glass radar card + 4-cell bottom row`). Instead, build the Hero as an **unnumbered opening stage** using one of these **5 high-scoring flagship architectures** (chosen in Step 0 or matched to the brand's material):
+> **ANTI-TEMPLATE HERO LAW — THE SHAPE IS THE RELATION, NOT THE DECORATION:**
+> The generic hero is `left reading plate + right glass radar card + 4-cell bottom row`. Every case that reaches for "a panel of text over a photo, plus a small floating card" produces that same page. **Eight shapes ship, and each one is defined by where the type sits relative to the artwork** — that relation is the thing a reader perceives, so changing the photo, the palette or the font does not make a new hero.
 
-#### Variant A · Vesper Split Field + Overlapping Stat Bench (`vesper/page.tsx`)
-- **Top Field (`.vs-field`):** A full-width `height: min(78vh, 720px)` visual stage holding the primary artwork/stipple/photo edge-to-edge, with a minimal bottom-aligned monospace `.vs-stamp` bar (`Vesper · two inks · 2026` / `Cobalt #1b3fa2 / stock #e6cfa8`). No headline sits on top of the artwork.
-- **Opening Below (`.vs-opening`):** Immediately below the field, a 5-cell exposed-hairline `.vs-bench` (`margin-top: -30px; position: relative; z-index: 2; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--xx-line-strong)`) bridges the seam between the artwork and the paper ground. Below the bench sits the oversized display `<h1>` (`clamp(52px, 8.4vw, 112px)`, `line-height: 0.9`, with optional register-ghost `text-shadow`), a `56ch` `.vs-lede`, and split-arrow `.vs-btn` CTAs.
+**The six relations.** Every hero must declare exactly one, and the shape you picked in Step 0 already fixes it:
 
-#### Variant B · Clearing / Strand Split Editorial + Framed Media Pane (`clearing/page.tsx`, `strand/page.tsx`)
-- **2-Column Asymmetric Grid (`.heroGrid`):** Left column sits directly on the page ground with eyebrow, editorial `<h1>`, `60ch` lede, and 4 compact `.pill` metadata badges (`<b>27</b> tokens`, `<b>8.71:1</b> cream on emerald`, `<b>6</b> cast marks`, `<b>64</b> unit grid`).
-- **Right Framed Artwork + Single Floating Pane (`.heroMedia`):** A framed high-resolution painting or photograph (`border-radius`, `overflow: hidden`) with a single translucent bottom-left/right `.heroPane` carrying `lockup-reverse.svg` and a 2-line caption (`One pane / over painted light`). Followed by a 4-cell `.heroStats` row below.
+| Relation | What the reader sees | Shapes |
+|---|---|---|
+| `below` | artwork or object first, type underneath on the page ground | A, C |
+| `beside` | type on bare ground, artwork in its own column that bleeds to a viewport edge | B |
+| `inside` | the hero *is* a printed object and the type is printed on it | D |
+| `on` | type sits directly on a full-bleed image, no panel, no card | E |
+| `around` | one isolated object, type wrapping the empty space | F |
+| `none` / `rhythm` | no artwork at all, or type carried by bands of colour | G, H |
 
-#### Variant C · Porphyry / Hachure Live Specimen Stage First (`porphyry/page.tsx`, `hachure/page.tsx`)
-- **Top Specimen Stage:** The hero opens with the system's signature interactive or procedural object across the full shell or viewport—such as Hachure's live `DitherField` + printed cartographic `.heroMargin` scale bar (`Sheet 05 · 0—1 km · 1:25 000 · seed 7`), or Porphyry's live stage header (`Fig. 01 · the stage, live`) + interactive diorama specimen.
-- **Hero Foot Below (`.heroFoot` / `.heroInner`):** Below the specimen sits the eyebrow, display headline, narrative lede, action buttons, and a 4-cell stat column/row.
+#### The house rules every hero inherits — no exceptions, whatever the shape
 
-#### Variant D · Jakarta / Riso Physical Artifact & Torn Edge (`jakarta/page.tsx`, `riso/page.tsx`, `huginn/page.tsx`)
-- **Physical Sheet / Hoarding Stage:** The hero is a physical printed sheet or civic hoarding—featuring an oversized `760px` decorative mark impression or a pinned top edge (`<Pin />` + live run/clock metadata row), bold display typography, and a bottom edge cut with an irregular 18-tooth polygon `clip-path` (`.heroFloor` / `.heroSheet`) or a Bayer dither dissolve into a solid paper `.heroPlate` below.
+These are the laws the shapes below are already shaped by. They were written after a curated build in which a hero passed the anti-template test and still read as assembled: it had an eyebrow, four outlined chips, a hairline docket, a 4-cell strip with `1px` borders and an accent-coloured word in the headline. The composition was fine. Every ornament was the tell.
 
-#### Variant E · Cove / Tavola Full-Bleed Atmospheric Plate (`cove/page.tsx`, `tavola.astro`)
-- **Full-Bleed Backdrop + Solid Reading Plate:** Full-bleed dark or sunlit photography behind a directional scrim, pairing a high-contrast reading plate with a live domain instrument/station readout card (`Station 04 · live readings` or `Coordinates + 4-axis spec`) and a breathing stat row.
+| Rule | Instead |
+|---|---|
+| **No eyebrow.** No small label, case number, category line or pill above the `<h1>`. | The headline says what this is. `Case 19 — Identity · design system` above `Every parcel leaves a paper trail.` deletes itself. |
+| **No monospace in the hero**, and no tiny uppercase letter-spaced labels anywhere. | The reading face, sentence case, at a size someone reads. Mono is legal in exactly four places on the whole page: the rail number, tabular figures in a ledger, a code sheet, and one data stamp on a photograph. Never a hero label, a nav link or a colophon. |
+| **No outlined chips, pill rows, `1px` stat strips or hairline boxes.** | A plain `2×2` `<dl>`: labels at `62%` ink at `13px`, values at `15px/600` with `font-variant-numeric: tabular-nums`, separated by space only. A boundary, if one is truly needed, is a step in tone — never a stroke. |
+| **Rules are material, not decoration.** A paper or cardboard surface may print `1px` rules as its own grain (the rail, a ledger row). | A rule may never box a chip, a stat cell or a button, and never separates two blocks that space could separate. |
+| **No gradients.** | One exception, and it is compositional: a *directional scrim* that lets type sit on a photograph. It is drawn in the surface's own colour (paper falling away, not black laid on), and it is described in the hero comment as `scrim 96deg paper → transparent`. |
+| **No shadows on anything at rest.** No glow, no blur, no glass, no `backdrop-filter` — including the navbar. | A tone step between surfaces; the navbar is a plain bar on the page ground with no border. |
+| **No styled accent word.** No italic, coloured, underlined or serif-swapped word inside the headline. | One face, one colour. The words carry the emphasis. |
+| **One accent, on the action.** | The accent fill appears on the primary button and nowhere else in the first screen. A second link is plain ink with ` →`. |
+| **One dominant image, at least ~45% of the first screen** whenever the brief supplies photographs. | Not a framed thumbnail beside six chips. The photo bleeds to a viewport edge or fills a full column. |
+| **The `<h1>` is two lines or fewer at every width** (1440 / 1024 / 390), measured, not assumed. | Cap it in `ch` (`max-width: 18ch`), then shrink the `clamp()`. 33 characters at `15ch` renders as three lines — one character-width of `ch` is the difference between composed and cramped. |
+| **A statement is a paragraph.** The lede is `16.5–18px` at `1.55` leading, `44–48ch` wide, in full ink, right under the headline. | Not a `58ch` grey block, not a sentence set at display size. |
+
+#### Variant A · Full-Width Field + Overlapping Stat Bench · relation `below`
+- **Top Field (`.xx-field`):** full-width `height: min(78vh, 720px)` stage holding the artwork edge-to-edge with a minimal bottom-aligned `.xx-stamp` (`Brand · material · year`). **No headline sits on the artwork.**
+- **Opening Below (`.xx-opening`):** a 5-cell `.xx-bench` (`margin-top: -30px; position: relative; z-index: 2; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--xx-line-strong)`) bridges the seam. Below the bench: oversized `<h1>` (`clamp(52px, 8.4vw, 112px)`, `line-height: 0.9`), a `56ch` lede, split-arrow CTAs.
+- **Trap:** the bench is the only hairline grid the shape may own, and its five cells are data — never `10 primitives · 6.25:1 · 6 cast marks`, which is a chip row wearing a grid.
+
+#### Variant B · Split Editorial + Full-Bleed Media · relation `beside`
+- **The curated build (shipping identity, `Cardboard & steel`):** `.xx-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr); min-height: min(78vh, 730px); background: var(--xx-kraft) }`. The left column is a flex column, `justify-content: center`, gap `clamp(18px, 2vw, 26px)`, with `padding-left: max(clamp(24px, 3.4vw, 56px), calc((100% - 1180px) / 2))` so the type sits on the page's own left edge. The right column is the photograph, `overflow: hidden`, running off the right viewport edge — no frame, no inset, no `border-radius`.
+- **Type block:** `<h1>` `clamp(38px, 4.5vw, 68px)`, `line-height: 0.96`, `letter-spacing: -0.032em`, `max-width: 18ch` → two lines at 1440, 1024 and 390. Lede `16.5px/1.56`, `44ch`, full ink. One accent-filled button, one plain `See the mark →` link.
+- **Facts:** the `2×2` `<dl>` from the house rules, `16px 28px` gap, pushed `clamp(10px, 2.2vh, 30px)` below the actions.
+- **Mobile:** one column, plate `order: 2; height: clamp(240px, 52vw, 380px)`, type column loses its `max()` padding.
+- **Crop from the source, not from a default.** `object-position` is a measurement: a landscape photograph whose subject is a torso shot crops at `center top`; a scene with the horizon in the lower third crops at `center 30%`. Look at the asset before writing the value.
+
+#### Variant C · Live Specimen Stage First · relation `below`
+- **Top specimen stage:** the system's signature interactive or procedural object across the full shell or viewport, with a `.xx-margin` scale bar (`Sheet 05 · 0—1 km · 1:25 000 · seed 7`).
+- **Hero foot below:** display headline, narrative lede, actions, and the `2×2` fact list — not a 4-cell strip.
+- The stage must be the brand's own object. A generic "live dashboard" of grey bars is the fake-dashboard tell; if there is no real object, take G.
+
+#### Variant D · Physical Sheet & Torn Edge · relation `inside`
+- **Sheet / hoarding stage:** the hero is a physical printed sheet — pinned top edge (`<Pin />` + run/clock metadata row), an oversized mark impression, bold display typography **printed on the sheet**, and a bottom edge cut with an irregular 18-tooth polygon `clip-path`.
+- **Trap, learned the hard way:** a printed sheet with a pin row, a docket `<dl>` with hairlines, four chips, a 4-cell strip and a tear is five ornaments deep. Keep exactly two of them. The curated rebuild of this hero dropped the pin row, the chips, the hairline docket and the strip, and kept only the sheet and the photograph; the sheet alone does not earn a hero.
+- A tear or perforation on the sheet is legal **once**. If the footer later tears too (F4), one of the two goes.
+
+#### Variant E · Full-Bleed Atmospheric Plate · relation `on`
+- **The curated build (mountain identity, `Paper & ink`):** `.xx-hero { min-height: min(88vh, 820px) }` with the photograph `object-fit: cover` and a *measured* `object-position` — the asset was three-quarters bare paper, so the frame was pinned at `84% 100%` to put the ridge in the composition.
+- **The scrim follows the photograph's luminance, not a formula.** That source is a paper-white sky over a dark ridge, so the wash is the *paper colour falling away*: `linear-gradient(96deg, paper 97% → 92% 32% → 46% 54% → transparent 68%)` plus `linear-gradient(180deg, paper 78% → 18% 46% → transparent 62%)`. Type inherits indigo-on-paper at `15.8:1`. A `50%` black scrim here would have produced a grey page with a dark stripe.
+- **Type on the image:** the `<h1>` at `clamp(50px, 7vw, 104px)/0.9`, one lede of `44ch`, actions, and the `2×2` facts — all on the paper side of the wash. `text-shadow` is a crutch; if the type needs one, the scrim is in the wrong place.
+- **Hard bans for E:** no solid reading panel, no frosted card, no "live readout" box in a corner, no lockup pill floating on the photo. Those are the tell that a hero was assembled.
+- **Caption:** if a caption belongs on the image, give it a paper bar with `padding: 12px max(var(--xx-gutter), calc((100% - var(--xx-wrap)) / 2 + var(--xx-gutter)))`. Do not stack a `padding-block` shorthand after a `padding-inline` — the shorthand silently wins and the caption drifts off the margin.
+
+#### Variant F · One Object, Isolated · relation `around`
+- **Plain ground, one subject:** a single product, tool, specimen or printed object, large, on an unscrimmed ground (paper, seamless, single flat colour). No full-bleed photo.
+- **Type wraps it:** the `<h1>` occupies the empty band above or beside the object, the lede and fact list take the opposite corner, and the object's own edge is the only depth on the page.
+- Use this whenever the brief's photographs contain **one dominant object** rather than a scene, and the background plate must be a real photograph of that object, never a cut-out on a flat colour that the brand invented.
+
+#### Variant G · Typographic Cover · relation `none`
+- **No artwork.** One enormous display line filling the measure (`clamp(64px, 12vw, 190px)`, `letter-spacing: -0.04em`), the case numbers set as a small ledger, the mark `40px` in a corner, one `56ch` lede. Ground is the material itself.
+- **Trap:** a hero grid of `auto 1fr auto` rows with `min-height: min(76vh, 720px)` stretches the middle row and opens a 125px canyon between the headline and the lede. Use `auto auto auto` with a `clamp(1.6rem, 2.6vw, 2.4rem)` gap and let the section's `min-height` come from the sum.
+- This is the correct answer when the brand has **no usable photograph**, or when the photographs would only ever be decorative.
+
+#### Variant H · Stacked Colour Bands · relation `rhythm`
+- **3–5 full-bleed horizontal bands** of different colour or material, each holding exactly one line of the argument, separated by `1px` rules or by nothing at all. The `<h1>` lands in the widest band; the mark in the narrowest.
+- **Why it works:** the eye reads the page as a printed chart rather than a layout, and the bands are made of the brand's own primitives, so it cannot drift toward another case's look.
+- **Trap:** the bands must carry the argument, not the palette. Five bands of five colours with no sentence in them is a swatch test.
+
+#### The composition clause — read this before drawing any hero
+1. **State the relation in one line** in the hero section comment: `hero: E · relation on · scrim 96deg paper → transparent · type on image`.
+2. **A `plate` is not the default.** Only B and D may hold a rectangular panel of type, and on B the panel is the *page ground itself*, not a card. If your hero has a rounded rectangle holding an eyebrow, a headline and a paragraph, and a second smaller rounded rectangle beside it, you have built the banned generic hero — stop and re-pick.
+3. **Photographs are material, not wallpaper.** If the brief supplies photographs and you pick A, C, F or H, at least one must be used as a *texture* — a band fill, an isolated cut-out, a dither source — not only as a backdrop.
+4. **Measure the crop and the line count.** `object-position` comes from the asset's actual composition; the `<h1>` line count is verified at 1440 / 1024 / 390 before the hero is called done.
+5. **Vary across the library.** Before choosing, list the shapes already used by the cases in `src/data/cases.ts`. Do not pick a shape the two most recent cases already use; if the Step 0 answer points at one of those, say so in one line and take the nearest shape with a different relation.
+6. **Verify the frame before shipping:** `scrollWidth === clientWidth` at 1440 / 1024 / 768 / 390, zero console errors, and the hero's own height printed once (`702px` at 1440 is a hero; `1149px` is a hero with a canyon in it).
 
 #### Mandatory 6-Panel Brandkit Board (`brandkit-board.mjs`)
 Every case MUST generate a real **`1500 × 1125` (`3000 × 2250` @2x) 6-Panel Brand Kit Board** (`<slug>-brandkit.png` & `.webp`)—never copy a raw photo as `<slug>-brandkit.png`:
@@ -179,11 +299,11 @@ node skills/sunnyside-brand-system/scripts/brandkit-board.mjs \
 ### Pillar VI: Navigation, Rail Options & 7 Canonical Numbered Sections
 
 > [!CRITICAL]
-> **NAVIGATION & RAIL MANDATE (THE VESPER & CLEARING STANDARD):**
+> **NAVIGATION & RAIL MANDATE (BOTH SUPPORTED RAILS):**
 > 1. **Hero is Unnumbered:** The Hero / Opening stage is **never** numbered `01`. Section numbering (`01` through `07`) begins at the first content section below the hero (`01 / Premise` or `01 / Idea`).
-> 2. **Navbar Links Have Zero Numbers:** The sticky top navigation bar carries the brand mark + name on the left, **clean word-only section links without numbers** (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`) in the center, and the theme scope toggle (using a geometric `.dot` or `<i>` square, never emojis) on the right.
+> 2. **Navbar Links Have Zero Numbers:** The sticky top navigation bar carries the brand mark + name on the left, **clean word-only section links without numbers** (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`) in the center, and the theme scope toggle on the right **only if Step 0 chose a dual scope** (a geometric `.dot` or `<i>` square, never emojis) — a single-scope build has no toggle at all.
 > 3. **Section Numbers Live in the Left Rail (Two Supported Architectures):**
->    - **Option 1 · Vesper Per-Section Rail (Default):** Each `.sec` has a `1px` top border (`border-top: 1px solid var(--xx-line-strong)`) and wraps both `.rail` and `.body` inside `.sec > .wrap`:
+>    - **Option 1 · Per-Section Rail (Rail A, default):** Each `.sec` has a `1px` top border (`border-top: 1px solid var(--xx-line-strong)`) and wraps both `.rail` and `.body` inside `.sec > .wrap`:
 >      ```css
 >      .sec { padding-block: 96px; border-top: 1px solid var(--xx-line-strong); scroll-margin-top: 92px; }
 >      .sec > .wrap { display: grid; grid-template-columns: 176px minmax(0, 1fr); gap: 40px; }
@@ -196,20 +316,20 @@ node skills/sunnyside-brand-system/scripts/brandkit-board.mjs \
 >        .rail { position: static; flex-direction: row; align-items: baseline; gap: 12px; }
 >      }
 >      ```
->    - **Option 2 · Clearing Sticky Contents TOC Sidebar:** Below the hero, a single outer `<div class="shell layout">` (`display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 56px; align-items: start`) holds a sticky `<nav class="contents" aria-label="Contents">` sidebar with an `<ol>` of `01`..`07` links (highlighting `aria-current="true"` via `IntersectionObserver` or scroll position) alongside the `<div>` stack of all 7 sections.
+>    - **Option 2 · Sticky Contents List (Rail B):** Below the hero, a single outer `<div class="shell layout">` (`display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 56px; align-items: start`) holds a sticky `<nav class="contents" aria-label="Contents">` sidebar with an `<ol>` of `01`..`07` links (highlighting `aria-current="true"` via `IntersectionObserver` or scroll position) alongside the `<div>` stack of all 7 sections.
 
 #### The 7 Canonical Numbered Sections (Below the Unnumbered Hero)
 
 1. **`01 / Premise (or Idea)`**
    - Section headline (`h2`) + lead paragraph (`p.big`) + 4 Premise cells (`Belief`, `Enemy`, `Material`, `Reject it when` in a `2×2` `.two` hairline grid) + **4 structured Decision Cards** (`.decs` `2×2` grid) where every card states: `Decision` (`h3`), `Because`, `Not when`, and `Breaks next`.
 2. **`02 / The Mark`**
-   - Kuwayama construction narrative + 4-tile `.logo-grid` (`Primary`, `Reverse` on loud/night ground, `Compact · 16–24px`, `Glyph`) + horizontal/reverse/stacked `.lock` rows + multi-size scale strip (`96`, `48`, `32`, `24 compact`, `16 compact`, `16 glyph`) + 3 structural rules (`Clear space`, `Never`, `Below 24px`) + optional scored concept bake-off table or 1-click SVG copy.
-   - *Companion Cast Placement:* Either render the **6-Mark Companion Cast** here in Section 02, OR render it as a **full-bleed inverted `.castband`** (like Vesper's cobalt cast band between `06 Kit` and `07 Tokens`, with its own `176px` `.rail` + 3×2 `.castgrid`).
+   - Kuwayama construction narrative + 4-tile `.logo-grid` (`Primary`, `Reverse` on a loud ground, `Compact · 16–24px`, `Glyph`) + horizontal/reverse/stacked `.lock` rows + multi-size scale strip (`96`, `48`, `32`, `24 compact`, `16 compact`, `16 glyph`) + 3 structural rules (`Clear space`, `Never`, `Below 24px`) + optional scored concept bake-off table or 1-click SVG copy.
+   - *Companion Cast Placement:* **Default — render the 6-Mark Companion Cast here**, directly under the scale strip, as a `6 × 1` hairline grid on the page ground (`.castin`): a `13px` heading, six `26px` marks, six nouns, six one-line notes. *Exception —* a mid-page inverted band between `06 Kit` and `07 Tokens` is allowed **only** with flat ink ground, six marks and one heading: no photograph, no lockup, no caption (see the Pillar II cast law). Never place it after `07 Tokens` or immediately above the footer.
 3. **`03 / Ink (or Colour)`**
    - Click-to-copy primitive swatch cards (`grid-template-columns: repeat(4, 1fr); gap: 1px`, showing color chip, token name, hex/OKLCH, and role) + the **complete Measured Contrast Ledger** (`.pairs` rows with dual 30×30 color chips, pair label, computed ratio, and assigned semantic job—explicitly highlighting the `1–3` failing pairs and what job they may *not* do).
-4. **`04 / Surfaces` (Vesper Comparative Surface Exploration Grid — No Range-Slider Stage)**
-   - **Never build a fake blur/tint range-slider stage unless explicitly requested.** Instead, follow Vesper's `"Six surfaces were tried. Four survived."` architecture:
-   - Render a `2-column` `.surf` hairline grid (`grid-template-columns: 1fr 1fr; gap: 1px; background: var(--xx-line-subtle)`) of **4 to 6 explored surface cards** (`.sc`).
+4. **`04 / Surfaces` (Comparative Surface Grid — No Range-Slider Stage)**
+   - **Never build a fake blur/tint range-slider stage unless explicitly requested.** Instead, use the count-then-cut architecture — state the real number tried and the real number kept in the intro line (`"Eight surfaces were tried. Five survived."`), and never write a count that does not match the cards rendered:
+   - Render a `2-column` `.surf` hairline grid (`grid-template-columns: 1fr 1fr; gap: 1px; background: var(--xx-line-subtle)`) of **4, 6 or 8 explored surface cards** (`.sc`) — an even count, so the last row never ends ragged.
    - Each card has:
      1. A `210px` live visual `.demo` box at the top demonstrating that exact surface treatment in real CSS/SVG/imagery (e.g., *Stipple / Artwork field*, *Ordered Bayer dither band*, *Register ghost type*, *Ruled ledger rows*, *Frosted pane that smudges the texture*, *Torn/cut clip-path edge*, or *Lifted paper seam*).
      2. A `.txt` body below with a flex header (`<b>Surface Title</b>` + monospace verdict tag `Shipped — the hero`, `Shipped — section dividers`, or `Rejected`) and a concise paragraph explaining *why* it survived or *why* it was rejected so nobody re-proposes it in six months. Cards with `rejected: true` get `.rej` (`filter: saturate(0.55)` on `.demo` and muted verdict tag).
@@ -218,17 +338,137 @@ node skills/sunnyside-brand-system/scripts/brandkit-board.mjs \
 6. **`06 / The Kit (or Domain Workbench)`**
    - A `2×2` `.kit` hairline grid of pressed/tactile UI controls and domain components (`Buttons` with primary/ghost/small/disabled states, `Chips & tags` with status indicators, `Fields` with a double-reported error summary + `aria-invalid="true"` input state, and `Data rows / Domain workbench` with `tabular-nums` alignment and live interactive selection).
 7. **`07 / Tokens (and Honest Audit Ledger)`**
-   - `2×2` `.sheet` grid of copyable code blocks (`1 · Primitives`, `2 · Day Scope`, `2 · Night Scope`, `3 · Component Tokens` with 1-click `Copy` buttons) + optional **Audit & Known Gaps** ledger (`What is verified, and what is not` + `2×2` `.gaps` cards) + closing full-bleed band or architectural footer.
+   - `2-column` `.sheet` grid of copyable code blocks — 4 cells on a single scope, 5 on a dual scope (`1 · Primitives`, `2 · Day Scope`, `3 · Component Tokens`, `4 · Physics` on a single scope — insert `3 · Night Scope` and shift the last two to `4` / `5` **only on a dual scope**) with 1-click `Copy` buttons + optional **Audit & Known Gaps** ledger (`What is verified, and what is not` + `2×2` `.gaps` cards), then the closing band and the footer built per Pillar VII.
+
+### Pillar VII: Footer Shapes — The Hero Turned Around
+
+> [!CRITICAL]
+> **FOOTER LAW — THE FOOTER IS A SECOND COMPOSITION, NOT A CREDIT LINE:**
+> The generic footer is `mono line · 1px border-top · two spans pushed apart`. That is a colophon, not a design. It is also the single most reliable tell that a page was assembled from a template, because it is identical on every page. **Five footer shapes ship, and the footer shape is derived from the hero shape — never copied from the last case.**
+
+**The pairing table.** Pick the footer from the hero answer, then vary the one dimension named in the last column. Two cases may share a footer family; they must never share the variation.
+
+| Hero | Footer shape | Why the pairing holds | Vary by |
+|---|---|---|---|
+| A · Banner + bench | **F1 · Bench echo** — the same 5-cell grid returns at the bottom, holding place, year, licence, one link, the mark | the bench that opened the page closes it | which cells carry links vs. plain data |
+| B · Text left, photo right | **F5 · Plate & receipt** — the photograph returns as a full-width band, then a receipt row underneath carrying the lockup, one statement and the data | the column that opened becomes the band that closes | which receipt field leads, and the plate's height |
+| C · Live demo | **F3 · Frozen specimen** — a small, static, final frame of the live object (same seed, last state) above the colophon | the live thing is shown stopped | whether the frame is captioned `Fig. 07 · final state` |
+| D · One giant sheet | **F4 · Torn receipt** — a paper strip with a torn or perforated top edge carrying the sign-off, then a plain colophon underneath | the sheet is torn off and kept | tooth count / which side is torn |
+| E · Full-screen photo | **F2 · Reversed split** — the photograph returns on the *left*, the closing statement and links on the *right* | the composition flips, the page bookends | image crop / which side the scrim falls from |
+| F · One object | **F3 or F1** — the isolated object repeated small and alone on the plain ground, sign-off beside it | catalogue-plate bookend | object scale / which side it sits |
+| G · Typographic cover | **F4 or F1** — a final typeset block: one large line, the ledger of case numbers | type opened, type closes | number of rules |
+| H · Stacked bands | **F2 or F4** — the last band widens and holds the sign-off, or the bands invert to a single tall band | the rhythm resolves | band count / inverted order |
+
+#### Shape F1 · Bench echo
+A `repeat(5, 1fr)` grid (`gap: 1px; background: var(--xx-line-strong)`) with 5 cells, each `padding: 22px 20px`, holding a label above a value. Cells 1–3 are data (place, year, licence), cell 4 is one real link, cell 5 is the mark at `28px`. Below it a `56px` bar with the copyright and the back-link. **Bans:** no photo, no glass, no card, and no mono label — sentence case at a size someone reads.
+
+#### Shape F2 · Reversed split — the curated build
+```css
+.xx-foot__split { display: grid; grid-template-columns: 0.92fr 1.08fr; gap: 1px; }
+.xx-foot__art   { position: relative; overflow: hidden; min-height: clamp(300px, 34vw, 440px); background: var(--xx-surface-plate); }
+.xx-foot__say   { background: var(--xx-surface-page); }   /* ← required, see trap 2 */
+.xx-foot__art > img      { width: 100%; height: 100%; object-fit: cover; object-position: center 52%; }
+.xx-foot__art > img.xx-foot__lock { position: absolute; width: auto; height: 26px; left: clamp(20px, 3vw, 40px); bottom: clamp(46px, 5vw, 64px); max-width: 60%; object-fit: contain; filter: none; }
+```
+- **Trap 1 — specificity.** `.xx-foot__art img { width:100%; height:100% }` is `(0,1,1)` and silently beats `.xx-foot__lock` at `(0,1,0)`: the lockup scales to the column and gets clipped to two letters. Scope the photo rule with `>` and put the lockup rule at `.xx-foot__art > img.xx-foot__lock`. Measure it afterwards (`86.9 × 26px` is right; `200px` tall is the bug).
+- **Trap 2 — the 1px split gap.** `gap: 1px` exposes the parent's background between the columns. If the statement column has no explicit `background`, the page's own ground bleeds through as a grey stripe down the footer. Give it a surface token.
+- **Right column content:** one statement at `clamp(24px, 2.6vw, 34px)` on a `34ch` measure, a `48ch` sub-line, and the link row. No eyebrow above the statement — the statement is the opening line.
+- **Mobile:** the artwork goes *below* the statement (opposite of the hero, where it went above).
+
+#### Shape F3 · Frozen specimen
+A `min(340px, 42vh)` stage holding a static final frame of the brand's own live object — the dither field at its last seed, the chart at its final value — captioned at the bottom-left. No scrim, no overlay type: the object is the whole composition. Colophon bar below.
+
+#### Shape F4 · Torn receipt
+A paper or kraft strip (`background: var(--xx-surface-plate)`, `clip-path` with 14–20 teeth on the top edge, `margin-top: -1px`) carrying the reverse lockup at `30px`, one `30ch` sign-off line, and the mark small at the far right. Then a plain rule and a single-line colophon. **Ban:** never combine the torn edge with a photograph; the strip must read as paper. If the hero is D (a torn sheet), the footer may not tear as well — one tear per page.
+
+#### Shape F5 · Plate & receipt — the curated workhorse
+For any case whose hero carries a photograph band: the photograph returns full-width, and the receipt is set underneath it as a real form, not a link row.
+- **The plate.** `height: clamp(230px, 25vw, 350px)`, `object-fit: cover`, `object-position` measured from the asset (`34% 50%` put the hands and the signed tablet in frame), caption as a small chip on the surface colour at the bottom-left, e.g. `Plate 02 · the receipt, signed at the threshold`.
+- **The receipt row.** `grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) auto; gap: 28px; padding-block: 34px 30px`:
+  1. lockup at `22px` + the closing statement on a `22ch` measure;
+  2. a `<dl>` of three real fields (received in / gross weight / signed at), carrying `border-left: 1px solid` at `26%` ink so the gap reads as a ruled form cell — the one place a rule is the material;
+  3. the mark inside a bordered cell with one line of provenance (`1 of 1`).
+- **Alternates from the same family, already shipped:** *plate above a statement* (a `clamp(210px, 26vw, 330px)` full-bleed plate, caption chip, statement below on the ground) and *plate beside the stage* (`.xx-foot__stage { display: flex; gap: clamp(1.5rem, 3vw, 3rem); min-height: clamp(300px, 34vw, 430px) }` with the figure at `flex: 0 0 40%`, the sign-off in the remaining space, stacking under 900px with the photo at `208px`).
+- **The footer photograph is never the hero photograph.** If the hero used the table, the footer uses the dish; if the hero used the handoff, the footer uses the signature. A repeated image reads as a mistake, not a bookend.
+
+**Footer content contract — every footer carries all five, and nothing else:**
+1. The mark or the lockup, one of them, not both.
+2. One closing line that is a *statement*, not a thank-you (`Every parcel leaves a paper trail.`).
+3. Three to four real links, each a real destination on the page or in the brand.
+4. The provenance row: place, year, licence or version.
+5. The back-link to the shelf.
+
+Anything else — a newsletter field, a social icon row, a sitemap — is filler and must be cut. If a cell has nothing real to say, delete it and re-balance the grid; never pad it.
+
+> [!CRITICAL]
+> **ONE CLOSING COMPOSITION PER PAGE.** The footer is the page's only full-bleed closing band. Anything above it that carries a photograph with a lockup on it is a second footer, and the first one wins: the real footer then reads as an afterthought. If the cast, a CTA or an "endcap" band wants that slot, it gives up its photograph or it moves into a section — and if the closing band *is* the design you want, it becomes the footer and the footer's data folds into it.
+
+**Footer house rules.**
+- **A footer is a band, not a strip.** Give it `min-height` or a plate: `220–440px` of composition, not a `52px` bar with two spans.
+- **The statement carries the footer.** `clamp(24px, 2.6vw, 34px)`, two lines at most, in full ink on its own surface.
+- **No mono colophon.** The provenance row is set in the reading face; tabular figures where numbers align.
+- **No gradient on the plate** except one directional scrim in the surface's own colour when the lockup sits on the photograph.
+- **Two consecutive cases in `src/data/cases.ts` never share a footer family**, and no two cases share the family *and* the variation.
+- **The caption names what the picture is** (`Plate 03 · the run`) — never a sentence about where the picture came from.
+
+**Immersive-footer clause (applies to F2–F5).** The footer must survive `prefers-reduced-motion` looking finished, and any animation in it must be a *completion*, not an entrance — the last state is what a screenshot shows. A footer whose lockup only appears after a scroll-triggered fade has no footer in a static capture, which is how it gets judged.
+
+---
+
+### PILLAR VIII: CONVERTIBLE FIGMA / HTML-TO-DESIGN DOCUMENTATION SHEET (`<slug>-figma.html`)
+
+Every design system generated by this skill MUST emit a standalone, 100% self-contained, zero-CDN, pure white (`#FFFFFF` / `#FAFAFA`) **Convertible Figma / HTML-to-Design Documentation Sheet** at `public/brand/<slug>/<slug>-figma.html` (template reference: `templates/figma-doc.html`, automated generator: `scripts/figma-html.mjs`), and link to `/brand/<slug>/<slug>-figma.html` in the showcase page's **Hero** and **Footer** (plus Section `07 / Tokens`).
+
+```bash
+# Generate the 8-sheet Convertible Figma HTML documentation sheet for one case:
+node skills/sunnyside-brand-system/scripts/figma-html.mjs --slug <slug> --root .
+
+# Or regenerate for all cases in a workspace at once:
+node skills/sunnyside-brand-system/scripts/figma-html.mjs --all --root .
+```
+
+#### Why a Dedicated White-Background 8-Sheet HTML Template?
+While the interactive showcase page (`/design-system/<slug>`) uses an atmospheric editorial surface, sticky rails, and custom hero geometry, design tools that convert HTML to editable frames (**Figma `html.to.design`**, **Builder.io**, **Code-to-Design**, **Penpot**, **OpenPencil**) require clean, isolated, pure-white (`#FFFFFF`) `<section class="figma-sheet">` artboards with pre-rendered static DOM and inlined SVG vector paths.
+
+#### Architecture of `<slug>-figma.html` (8 Isolated `<section class="figma-sheet">` Artboards)
+1. **Sheet `01` · Colors (`#section-colors`):**
+   - **Main Color Swatches** (Primary, Secondary, Tertiary with token names, roles, and click-to-copy HEX).
+   - **10-Step OKLCH Color Scales (`10`–`100`)** for Primary, Secondary, and Tertiary derived mathematically from the brand's primitives, plus Neutral (`#FAFAFA`–`#18181B`) and Semantic (`Success`, `Info`, `Warning`, `Danger`) scales.
+   - **Honest Contrast Ledger (`AAA` / `AA` / `FAIL — Non-Text Only`)** pre-rendered directly from `tokens.json` with live foreground/background `Aa` chips and measured WCAG ratios.
+2. **Sheet `02` · Primitives & Physical Foundations (`#section-primitives`):**
+   - Full `tokens.json` primitive swatches with OKLCH & HEX values, 8-step **Spacing Scale (`4px`–`64px`)** with proportional bars, **Border Radius Tokens** (`0px` structural plate through `9999px` pill), and **Elevation / Box-Shadow Tokens** (`shadow-xs` to `shadow-xl`).
+3. **Sheet `03` · Typography (`#section-typography`):**
+   - **Font Family Showcase Cards** (`Display`, `Reading / UI`, `Monospace / Tabular`) with full character sets (`A–Z`, `a–z`, `0–9`) and live specimen lines.
+   - **Complete Type Scale Specimen Table** (`DisplayXL` 56px, `DisplayLG` 48px, `H1`–`H6`, `BodyLg`, `BodyMd`, `BodySm`, `Caption`, `Mono`) across Regular, Medium, SemiBold, and Bold weights.
+4. **Sheet `04` · Logo & Mark Family (`#section-logo`):**
+   - **64×64 Vector Construction Blueprint Grid** with crosshair guides and inlined `mark.svg`.
+   - **Horizontal & Stacked Lockups** on light (`#FFFFFF`), dark (`#0F172A`), and brand-tinted plates, plus **16px Compact Mark (`mark-compact.svg`)** and **1-Ink Glyph (`glyph.svg`)** optical scaling test (`64px`, `32px`, `24px`, `16px`).
+5. **Sheet `05` · Companion Cast & Brand Assets (`#section-assets`):**
+   - All **6 Companion Cast Marks (`cast/*.svg`)** inlined on the 64-unit grid with figure numbers and roles, plus a 3-up **Brand Surface & Card Specimen Grid** (`Primary Brand Surface`, `Dark Ink Plate`, `Tinted Editorial Card`).
+6. **Sheet `06` · UI Components & States (`#section-components`):**
+   - **Buttons Matrix** (`Primary`, `Secondary`, `Outline`, `Ghost`, `Danger` × `Default`, `Hover`, `Focus Ring`, `Disabled`, `Small`), **Form Inputs** (`Default`, `Focused`, `Success`, `Error`, `Disabled`, `Select`, `Textarea`), **Selection Controls** (`Checkbox`, `Radio`, `Toggle Switch`), and **Segmented Tabs & Badges**.
+7. **Sheet `07` · Modals, Alerts & Overlays (`#section-overlays`):**
+   - **Inline Alert Banners** (`Info`, `Success`, `Warning`, `Danger`), **Modal Dialog Variants** (`Standard Confirmation`, `Destructive Action`), and **Toast Notification Bars**.
+8. **Sheet `08` · Patterns, Data Table & Copyable CSS Token Sheets (`#section-patterns`):**
+   - **KPI Metric Summary Cards**, **Token Registry Table** (every `--<ns>-*` token with role, HEX, OKLCH, and status), and **Copyable CSS Token Sheets** (`Primitives` + full `<slug>-tokens.css`).
+
+#### Built-in Figma / HTML-to-Code Ergonomics
+- **Zero Client-Side DOM Injection for Swatches:** Every color swatch, contrast card, spacing bar, and SVG vector is pre-rendered in static HTML so headless importers and browser extensions capture 100% of the nodes.
+- **Sticky Control Bar (Hidden in Clean Export Mode):**
+  - **Section Filter Pills** (`All 8 Sheets`, `01 Colors`, ..., `08 Patterns & Tokens`).
+  - **Spec Inspector (`?spec=1`):** Overlays dashed `#9747FF` Figma component node boundaries and `data-figma-node="❖ ..."` labels on every category block.
+  - **Clean Export Mode (`?clean=1` or `?figma=1`):** Hides the sticky control bar and interactive helper chrome so `html.to.design` imports only the pure white artboard sheets.
+  - **One-Click `Copy Section HTML` Button on Every Sheet Banner:** Copies that sheet's self-contained `<section>` HTML to the clipboard for targeted section-by-section import.
 
 ---
 
 ## 3. TOKEN-EFFICIENCY RULES FOR FAST & NON-FLAGSHIP MODELS
 
 To achieve maximum quality with minimal token consumption on both flagship and fast models:
-1. **Batch Asset Generation in One Node Script (`scripts/build-<slug>.mjs`):** Write a single ~150-line Node script that outputs all mark/wordmark/lockup SVGs, the 6 `cast/*.svg` files, `tokens.json`, `<slug>-tokens.css`, and `DESIGN.md` in one execution, then call `brandkit-board.mjs` to render `<slug>-brandkit.png`.
-2. **Data-Driven Loops in Templates:** In `.astro` or `.tsx` showcase pages, define `NAV`, `STATS`, `PREMISE`, `DECISIONS`, `SURFACES`, `CAST`, and `CODE_BLOCKS` as compact arrays in the frontmatter/data file and `.map()` over them—cutting template token usage by **45%** while guaranteeing zero structural drift.
+1. **Batch Asset Generation in One Node Script (`scripts/build-<slug>.mjs`):** Write a single ~150-line Node script that outputs all mark/wordmark/lockup SVGs, the 6 `cast/*.svg` files, `tokens.json`, `<slug>-tokens.css`, and `DESIGN.md` in one execution, then call `brandkit-board.mjs` to render `<slug>-brandkit.png` and `figma-html.mjs` to generate `public/brand/<slug>/<slug>-figma.html`.
+2. **Data-Driven Loops in Templates:** In `.astro` or `.tsx` showcase pages, define `NAV`, `STATS`, `PREMISE`, `DECISIONS`, `SURFACES`, `CAST`, and `CODE_BLOCKS` as compact arrays in the frontmatter/data file and `.map()` over them—cutting template token usage by **45%** while guaranteeing zero structural drift. Always include a link to `/brand/<slug>/<slug>-figma.html` in the Hero, Tokens section, and Footer.
 3. **Sync Both Repos When Targeting External `design-system`:**
-   - Write the showcase route to `src/pages/design-system/<slug>.astro`, styles/tokens to `src/features/<slug>/`, assets to `public/brand/<slug>/`, and register the case in `src/data/cases.ts`.
+   - Write the showcase route to `src/pages/design-system/<slug>.astro` (or `src/cases/<slug>/page.tsx`), styles/tokens to `src/features/<slug>/`, assets (including `<slug>-figma.html`) to `public/brand/<slug>/`, and register the case in `src/data/cases.ts`.
    - Mirror `public/brand/<slug>/` into `sunnyside`, add the entry to `features/case-library/cases.ts`, `.tone_<slug>` to `features/case-library/case-library.module.css`, and the 4 hex chips to `SYSTEM_SWATCHES` in `features/landing-page/studio/work-gallery/work-gallery-data.ts`.
 
 ---
@@ -237,11 +477,20 @@ To achieve maximum quality with minimal token consumption on both flagship and f
 
 Verify internally before finishing (never print this checklist):
 - [ ] `<slug>-brandkit.png` is a rendered `1500×1125` (`3000×2250` @2x) 6-panel Brand Kit Board—never a raw copied photo.
-- [ ] Hero is **unnumbered**, uses one of the **5 flagship Hero variants** (not a copy-paste of Quieta/Arête), and the sticky navbar links have **zero numbers** (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`).
-- [ ] Section numbers (`01`..`07`) live inside the left rail—either **Vesper's Per-Section Rail** (`.sec > .wrap` wrapping `176px` sticky `.rail` + `.body`) or **Clearing's Sticky Contents Sidebar** (`.shell.layout` wrapping a scroll-spy `<ol>` + content column).
-- [ ] Section `04 / Surfaces` uses **Vesper's Comparative Surface Exploration Grid** (`2-col` grid of 4–6 `.sc` cards with `210px` live `.demo` boxes + `Shipped` / `Rejected` verdicts, no range-slider stage).
+- [ ] Hero is **unnumbered**, uses the **Hero shape chosen in Step 0 Q3** (not the generic two-card hero), and the sticky navbar links have **zero numbers** (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`).
+- [ ] Section numbers (`01`..`07`) live inside the left rail—either the **Per-Section Rail** (`.sec > .wrap` wrapping a `176px` sticky `.rail` + `.body`) or the **Sticky Contents List** (`.shell.layout` wrapping a scroll-spy `<ol>` + content column).
+- [ ] Section `04 / Surfaces` uses the **Comparative Surface Grid** (`2-col` grid of 4, 6 or 8 `.sc` cards — an even count so the last row is never ragged — with `210px` live `.demo` boxes + `Shipped` / `Rejected` verdicts, no range-slider stage).
 - [ ] Mark family includes a separate `16px` compact drawing (`mark-compact.svg`) + 6 companion cast marks (`cast/*.svg`) on the 64-unit grid.
 - [ ] Section `01` includes 4 `Decision / Because / Not when / Breaks next` cards, and Section `03` publishes at least 1–3 failing contrast pairs with a restricted non-text job.
+- [ ] **Scope parity:** the shipped page matches the Step 0 polarity answer exactly. A single scope has no theme toggle in the navbar, no second token sheet, no `[data-<slug>='night']` block, and no dark-mode audit line. A dual scope has all four. Never leave a toggle that does nothing, and never leave a "no dark mode" sentence in a page that has one.
+- [ ] **Count parity:** every stated number matches what renders — the surface intro line ("Eight surfaces were tried. Five survived.") matches the card count and the verdict tags, the token-sheet count matches the scope answer, and the cast is exactly 6.
+- [ ] **Hero relation declared:** the hero section comment names one shape letter and one relation (`below` / `beside` / `inside` / `on` / `around` / `none` / `rhythm`), and the built hero matches it. No hero contains both a rounded text panel *and* a second smaller floating card.
+- [ ] **Hero house rules:** no eyebrow, no mono label outside code, no outlined chip/pill row, no `1px` stat strip or hairline box, no gradient except one directional scrim in the surface's own colour, no shadow or `backdrop-filter` at rest (navbar included), no accent-coloured word in the `<h1>`, and the accent appears on the primary action only.
+- [ ] **Hero measured:** the `<h1>` is two lines or fewer at 1440 / 1024 / 390, the lede is `44–48ch` in full ink, the crop's `object-position` was chosen from the asset (not a default), and `scrollWidth === clientWidth` at all four widths.
+- [ ] **Footer shape declared:** the footer names one of F1–F5 in a comment, that shape is the one Pillar VII pairs with the chosen hero, and it carries all five contract items and no filler. Two consecutive cases in `src/data/cases.ts` do not share a footer family.
+- [ ] **Cast placement:** the 6-mark cast sits inside `02 / The Mark` (or as one mid-page inverted band between 06 and 07), it carries no photograph, no lockup and no caption, and nothing that carries a photograph *and* a lockup sits immediately above the footer.
+- [ ] **Footer is a band, not a strip:** it has real height (`min-height` clamp or a photograph plate), its statement is set at `clamp(24px, 2.6vw, 34px)`, its photograph is a *different* asset from the hero's, and its lockup measures `≈26px` tall (`width: auto; object-fit: contain`) with the rule scoped as `.foot__art > img.foot__lock`.
+- [ ] **Convertible Figma HTML sheet (`<slug>-figma.html`):** `public/brand/<slug>/<slug>-figma.html` is generated via `scripts/figma-html.mjs` with all 8 white-background `.figma-sheet` artboards, inlined SVG marks + 6 cast icons, and linked from the showcase page's Hero and Footer (`/brand/<slug>/<slug>-figma.html`).
 - [ ] Zero emojis (`☀️`, `🌙`) in UI chrome; all 3 fonts load live.
 
 ---
@@ -252,6 +501,6 @@ End every response with this compact 1-keystroke action menu:
 
 > **Next Step — Reply with a code (or combine, e.g., `A + C`):**
 > - **`[A] Tailwind v4 / CSS Token Export`** — Standalone `tokens.css` with OKLCH `@theme` variables and font rules.
-> - **`[B] Figma Variables & SVG Bundle`** — W3C Design Tokens JSON + clean standalone `.svg` files for all lockups and cast marks.
+> - **`[B] Figma Variables, Plugin & HTML Sheet (`/brand/<slug>/<slug>-figma.html`)`** — 8-sheet white-background Convertible Figma HTML template + W3C Design Tokens JSON + standalone `.svg` files.
 > - **`[C] Extract Section 06 Kit Components`** — Package the kit and domain controls into modular `components/ui/` TSX files.
-> - **`[D] Remix Hero Variant / Rail / Archetype`** — Name any shift (e.g., *"Switch to Clearing TOC rail + Variant B Split Hero"*) for a surgical git patch diff.
+> - **`[D] Remix Rail / Hero / Archetype`** — Name any shift (e.g., *"Switch to Rail B + Hero B"*) for a surgical git patch diff.

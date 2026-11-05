@@ -22,8 +22,8 @@ const METHOD = [
   },
   {
     number: '03',
-    title: 'Proof & audit',
-    line: 'Build the page with real states and real copy. Check contrast, keyboard, reduced motion and the smallest width. Then name what is missing.',
+    title: 'Proof, Figma HTML & audit',
+    line: 'Build the page with real states and real copy, emit the 8-sheet white-background Convertible Figma HTML documentation sheet, and check contrast, keyboard, and reduced motion.',
   },
 ] as const
 
@@ -72,6 +72,13 @@ export function CaseLibraryPage({
               Read the method
               <ArrowRight className="size-4" aria-hidden />
             </Link>
+            <a
+              href="/brand/sunnyside/sunnyside-figma.html"
+              className={styles.secondaryLink}
+            >
+              Sunnyside Figma HTML sheet
+              <ArrowUpRight className="size-4" aria-hidden />
+            </a>
             <Link href="/projects" className={styles.secondaryLink}>
               The release shelf
               <ArrowUpRight className="size-4" aria-hidden />

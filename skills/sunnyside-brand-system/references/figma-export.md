@@ -4,8 +4,26 @@ A design system that only exists as HTML is a website. The export to Figma is
 what makes it a system other people can use: variables someone can bind, styles
 someone can apply, components someone can instance.
 
-This file is the contract for `scripts/figma-forge.mjs`. One token source, two
-emitters, and a list of what neither of them can carry.
+This file is the contract for `scripts/figma-html.mjs` and `scripts/figma-forge.mjs`. One token source, three emitters (`figma-html`, `figma` plugin, and `openpencil` `.fig`), and a list of what neither of them can carry.
+
+## 0 · Convertible Figma / HTML-to-Design Documentation Sheet (`figma-html.mjs`)
+
+For instant 1:1 import into Figma (`html.to.design`, Builder.io, Code-to-Design), Penpot, or OpenPencil without running a desktop plugin, `scripts/figma-html.mjs` generates a 100% self-contained, zero-CDN, pure white (`#FFFFFF` / `#FAFAFA`) 8-section HTML file at `public/brand/<slug>/<slug>-figma.html` (template reference: `templates/figma-doc.html`):
+
+```bash
+# Single system
+node scripts/figma-html.mjs --slug <slug> --root .
+
+# All systems in a workspace
+node scripts/figma-html.mjs --all --root .
+```
+
+Why it imports cleanly into HTML-to-Figma tools:
+- **8 isolated `<section class="figma-sheet">` artboards** on a `#FFFFFF` canvas (`01 Colors`, `02 Primitives & Foundations`, `03 Typography`, `04 Logo & Mark Family`, `05 Companion Cast & Assets`, `06 UI Components`, `07 Modals & Overlays`, `08 Patterns & CSS Token Sheets`).
+- **100% static pre-rendered DOM & inlined SVGs:** Every color swatch, 10-step OKLCH scale, contrast card, spacing bar, and SVG vector (`mark.svg`, `mark-reverse.svg`, `mark-compact.svg`, `glyph.svg`, `cast/*.svg`) is rendered directly in the HTML—never injected via client-side `DOMContentLoaded` loops that headless importers miss.
+- **Clean Export Mode (`?clean=1` or `?figma=1`):** Strips the sticky navigation bar and helper buttons so `html.to.design` imports only the pure white documentation sheets.
+- **One-click `Copy Section HTML`:** Every sheet banner has a `Copy Section HTML` button so a designer can paste individual `<section>` artboards into Figma or code tools.
+- **Showcase Page Links:** Always link to `/brand/<slug>/<slug>-figma.html` in the showcase page's Hero and Footer.
 
 ## Why a generator
 

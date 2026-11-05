@@ -32,6 +32,7 @@ import { execFileSync } from 'node:child_process'
 import { spawnSync } from 'node:child_process'
 import * as glyphs from './glyphs.mjs'
 import { buildBoard } from './board.mjs'
+import { generateFigmaHtml } from './figma-html.mjs'
 
 const HERE = new URL('.', import.meta.url).pathname
 const TEMPLATES = resolve(HERE, '..', 'templates')
@@ -1135,6 +1136,14 @@ for (const [voice, f] of Object.entries(fonts)) {
   }
 }
 await put('README.md', readme())
+
+try {
+  const figmaHtmlOut = join(outDir, `${slug}-figma.html`)
+  generateFigmaHtml({ slug, root: dirname(dirname(tokensPath)), outPath: figmaHtmlOut })
+  written.push(`${slug}-figma.html`)
+} catch {
+  /* non-fatal when tokensPath is in a standalone temporary directory */
+}
 
 /* ── optionally build the .fig ───────────────────────────────────────────── */
 

@@ -6,6 +6,13 @@ and an audit that names what it could not verify.
 
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand, Clearing, Porphyry, Jakarta, Bluewater, Vesper, Halation, and Tavola. The method travels; the marks do not.
 
+## v4.9: automated 8-sheet white-background Convertible Figma / HTML-to-Design Documentation Sheet (`<slug>-figma.html`)
+
+- **Convertible Figma HTML Generator (`scripts/figma-html.mjs` + `templates/figma-doc.html`).** Generates a 100% self-contained, zero-CDN, pure white (`#FFFFFF` / `#FAFAFA`) 8-section HTML documentation file (`public/brand/<slug>/<slug>-figma.html`) directly from `tokens.json`, `<slug>-tokens.css`, and SVG marks (`mark.svg`, `mark-reverse.svg`, `mark-compact.svg`, `glyph.svg`, `cast/*.svg`).
+- **8 Isolated `<section class="figma-sheet">` Artboards.** Pre-renders `01 Colors` (Primary/Secondary/Tertiary swatches, 10-step OKLCH scales `10`–`100`, Neutral scale, Semantic scales, and honest Contrast Ledger), `02 Primitives & Foundations` (spacing bars, radius tokens, shadow plates), `03 Typography` (Display/Reading/Mono font showcase cards + full type scale specimen table), `04 Logo & Mark Family` (64×64 construction blueprint grid + lockups + 16px optical scaling), `05 Companion Cast & Brand Assets` (all 6 inlined `cast/*.svg` marks + surface cards), `06 UI Components & States` (buttons matrix, form inputs, selection controls, tabs & badges), `07 Modals, Alerts & Overlays`, and `08 Patterns, Token Registry & Copyable CSS Token Sheets`.
+- **Built-in Figma / HTML-to-Code Ergonomics.** Includes a sticky filter toolbar, `Spec Inspector (?spec=1)` overlaying dashed `#9747FF` Figma component node boundaries (`data-figma-node="❖ ..."`), `Clean Export Mode (?clean=1)` hiding toolbar chrome for 1:1 `html.to.design` / Builder.io / Penpot / OpenPencil import, and one-click `Copy Section HTML` buttons on every sheet banner.
+- **Showcase Page Integration.** Every design-system showcase page (React/TSX and Astro) and the case shelf link directly to `/brand/<slug>/<slug>-figma.html` in the Hero, Tokens section, and Footer.
+
 ## v4.6: eight hero shapes, four footer shapes, and two new audit gates
 
 - **Hero shapes grew from 5 to 8.** Step 0's hero question now offers A · Banner then a number row, B · Text left photo right, C · Live demo on top, D · One giant sheet, E · Full-screen photo, F · One object isolated, G · No photo all type, H · Stacked colour bands. Every option opens by stating where the type sits relative to the image — below, beside, inside, on, around, or in a rhythm — because that relation, not the layout, is what a picker is actually choosing.
@@ -107,8 +114,8 @@ references/logo-system.md     grid, family, favicon
 references/form-theming.md    the form kit every case ships
 references/craft-bar.md       the drawn-track bar and the marks composition
 scripts/                      init, detach, gates, brand-ref, assets, design-md, forge, cast,
-                              score, audit, qa, board, icons, figma, sync-skill.sh
-templates/                    design system page, single page, case page, guidelines, audit
+                              score, audit, qa, board, icons, figma, figma-html, sync-skill.sh
+templates/                    design system page, single page, case page, figma-doc, guidelines, audit
 examples/                     Sunnyside and Vitrine, plus brand-forge configs
 ```
 

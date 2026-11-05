@@ -6,6 +6,29 @@ and an audit that names what it could not verify.
 
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand, Clearing, Porphyry, Jakarta, Bluewater, Vesper, Halation, and Tavola. The method travels; the marks do not.
 
+## v4.9: automated 8-sheet white-background Convertible Figma / HTML-to-Design Documentation Sheet (`<slug>-figma.html`)
+
+- **Convertible Figma HTML Generator (`scripts/figma-html.mjs` + `templates/figma-doc.html`).** Generates a 100% self-contained, zero-CDN, pure white (`#FFFFFF` / `#FAFAFA`) 8-section HTML documentation file (`public/brand/<slug>/<slug>-figma.html`) directly from `tokens.json`, `<slug>-tokens.css`, and SVG marks (`mark.svg`, `mark-reverse.svg`, `mark-compact.svg`, `glyph.svg`, `cast/*.svg`).
+- **8 Isolated `<section class="figma-sheet">` Artboards.** Pre-renders `01 Colors` (Primary/Secondary/Tertiary swatches, 10-step OKLCH scales `10`–`100`, Neutral scale, Semantic scales, and honest Contrast Ledger), `02 Primitives & Foundations` (spacing bars, radius tokens, shadow plates), `03 Typography` (Display/Reading/Mono font showcase cards + full type scale specimen table), `04 Logo & Mark Family` (64×64 construction blueprint grid + lockups + 16px optical scaling), `05 Companion Cast & Brand Assets` (all 6 inlined `cast/*.svg` marks + surface cards), `06 UI Components & States` (buttons matrix, form inputs, selection controls, tabs & badges), `07 Modals, Alerts & Overlays`, and `08 Patterns, Token Registry & Copyable CSS Token Sheets`.
+- **Built-in Figma / HTML-to-Code Ergonomics.** Includes a sticky filter toolbar, `Spec Inspector (?spec=1)` overlaying dashed `#9747FF` Figma component node boundaries (`data-figma-node="❖ ..."`), `Clean Export Mode (?clean=1)` hiding toolbar chrome for 1:1 `html.to.design` / Builder.io / Penpot / OpenPencil import, and one-click `Copy Section HTML` buttons on every sheet banner.
+- **Showcase Page Integration.** Every design-system showcase page (React/TSX and Astro) and the case shelf link directly to `/brand/<slug>/<slug>-figma.html` in the Hero, Tokens section, and Footer.
+
+## v4.6: eight hero shapes, four footer shapes, and two new audit gates
+
+- **Hero shapes grew from 5 to 8.** Step 0's hero question now offers A · Banner then a number row, B · Text left photo right, C · Live demo on top, D · One giant sheet, E · Full-screen photo, F · One object isolated, G · No photo all type, H · Stacked colour bands. Every option opens by stating where the type sits relative to the image — below, beside, inside, on, around, or in a rhythm — because that relation, not the layout, is what a picker is actually choosing.
+- **Pillar V is now a non-template law, not a catalogue.** It opens by naming the hero the library had been drifting into (left reading plate, right floating glass card, 4-cell bottom row) and bans it. Shapes are specified by relation, at most two shapes may contain a rectangular type panel, and no case may pick a shape the two most recent cases already used.
+- **Pillar VII · Footer Shapes is new.** The skill previously had zero footer templates — one doctrine sentence in `references/immersive.md` and three skeletons that were all the same shape. There are now four: F1 Bench echo, F2 Reversed split, F3 Frozen specimen, F4 Torn receipt, with a hero→footer pairing table, a five-item content contract (mark, one closing statement, 3–4 real links, provenance row, back-link — nothing else), and a rule that a footer must look finished under `prefers-reduced-motion`.
+- **Two audit-gate items added.** *Hero relation declared* — one shape letter plus one relation in a comment, and never both a rounded text panel and a second floating card. *Footer shape declared* — F1–F4 named, pairing respected, all five contract items present, and two consecutive cases in `src/data/cases.ts` may not share a footer family.
+- **Applied to the library.** Manifest moved to Shape D (a kraft waybill with the type inside the sheet and an 18-tooth tear), Daybook and Tavola to Shape E done strictly (type directly on the photograph, no plate and no floating readout), Quieta to Shape G, Arête to Shape H. Footers went to F4, F2, F3, F1 and F2 respectively, so no two consecutive cases share a family.
+
+## v4.5: plain-geometry Step 0, 18-surface catalogue, and scope parity
+
+- **Step 0 rewritten as seven plain-English questions.** Every option is now named by what a non-designer already knows — *Cardboard & steel*, *Airport signage*, *Text left, photo right*, *Shape with a hole cut out* — instead of a case codename or a design term. Labels cap at 45 characters; the exact geometry moves into each option's `description`. Rail and Hero are split into two independent questions so a Rail B choice can no longer silently pull in a Hero the user did not pick.
+- **18-surface catalogue (`references/surfaces.md`).** Eight surfaces ship in the question; the other ten are reached through a prompt-mapping table, so a brief that says "I'm building a metro app" resolves to *Transit map* without a second question. Each surface fixes the same nine slots — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion` — plus a "fails loudly if" guardrail, so two agents given the same surface land on the same CSS.
+- **Scope parity is now an audit gate.** A single-scope build has no navbar toggle, no second token sheet, no `[data-<slug>='night']` block and no dark-mode audit line; a dual scope has all four. Previously Pillar III mandated a night block and Pillar VI mandated a toggle regardless of the Step 0 answer, so choosing "Daylight only" still produced a dark mode.
+- **Count parity is now an audit gate.** The surface intro line, the card count, the token-sheet count and the cast size must match what actually renders. The surface grid is locked to 4, 6 or 8 cards so the last row is never ragged.
+- **Case codenames removed from every question, pillar heading and section title.** Codenames survive only in `references/case-evidence.md` and this changelog, where they are evidence rather than labels.
+
 ## v4.4: Vesper / Clearing Rail Architecture, 5 Flagship Non-Template Heroes, and Comparative Surface Exploration Grid
 
 - **Unnumbered Hero & Clean Navbar (`01..07` in Left Rail Only).** The Hero stage is never counted as `01`, and topbar navigation links carry zero numbers (`Idea`, `Mark`, `Colour`, `Surfaces`, `Type`, `Kit`, `Tokens`). Section numbers (`01`..`07`) live inside the left rail, with Step 0 (`ask_question`) letting the user choose between **Vesper's Per-Section Rail** (`176px` sticky `.rail` + `.body` inside each `.sec > .wrap`) and **Clearing's Sticky Contents TOC Sidebar** (`.shell.layout` wrapping a scroll-spy `<ol>` rail + content column).
@@ -91,8 +114,8 @@ references/logo-system.md     grid, family, favicon
 references/form-theming.md    the form kit every case ships
 references/craft-bar.md       the drawn-track bar and the marks composition
 scripts/                      init, detach, gates, brand-ref, assets, design-md, forge, cast,
-                              score, audit, qa, board, icons, figma, sync-skill.sh
-templates/                    design system page, single page, case page, guidelines, audit
+                              score, audit, qa, board, icons, figma, figma-html, sync-skill.sh
+templates/                    design system page, single page, case page, figma-doc, guidelines, audit
 examples/                     Sunnyside and Vitrine, plus brand-forge configs
 ```
 
