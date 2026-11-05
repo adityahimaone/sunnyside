@@ -27,12 +27,12 @@
   },
   "replay": {
     "pages": 8,
-    "nodes": 1449,
-    "adjustedNodes": 1335,
+    "nodes": 1435,
+    "adjustedNodes": 1321,
     "extraWrappers": 114,
     "texts": 652,
-    "solidFills": 1007,
-    "boundFills": 1007,
+    "solidFills": 993,
+    "boundFills": 993,
     "styleBoundTexts": 652,
     "wrappedTexts": 6,
     "actionGroups": [
@@ -106,7 +106,7 @@
   "missingColours": [],
   "report": {
     "pages": 8,
-    "frames": 554,
+    "frames": 574,
     "texts": 705,
     "rects": 69,
     "vectors": 61,
@@ -117,16 +117,16 @@
     "textStyles": 37,
     "effectStyles": 3,
     "gridStyles": 1,
-    "components": 92,
+    "components": 58,
     "componentSets": 7,
     "instances": 34,
-    "componentDescriptions": 68,
+    "componentDescriptions": 34,
     "autoLayout": 187,
-    "layoutBindings": 690,
+    "layoutBindings": 681,
     "textStyleBindings": 715,
-    "stretchedRows": 30,
-    "paintBindings": 1139,
-    "styleBindings": 397,
+    "stretchedRows": 0,
+    "paintBindings": 1125,
+    "styleBindings": 384,
     "replaced": 1,
     "upgradedTexts": 0,
     "upgradedFills": 0,
@@ -137,7 +137,7 @@
     "textBoosted": 0,
     "fontFallbacks": 4,
     "vectorsScaled": 0,
-    "effects": 100,
+    "effects": 99,
     "chips": 119,
     "grown": 0,
     "skippedSheets": 0,
@@ -165,7 +165,7 @@
     },
     {
       "gate": "node count ≤2%",
-      "value": "1335 vs 1335 (+114 wrappers) · 0.00%",
+      "value": "1321 vs 1335 (+114 wrappers) · 1.05%",
       "threshold": "≤2%",
       "pass": true
     },
@@ -245,6 +245,18 @@
       "gate": "one-line labels",
       "value": "6/652 wrapped · 0.9%",
       "threshold": "≤5%",
+      "pass": true
+    },
+    {
+      "gate": "no components in sheet",
+      "value": 0,
+      "threshold": 0,
+      "pass": true
+    },
+    {
+      "gate": "circles stay round",
+      "value": "18/18 round (32×32 r16)",
+      "threshold": "square + r=w/2",
       "pass": true
     }
   ],
