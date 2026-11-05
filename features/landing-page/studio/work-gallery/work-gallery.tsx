@@ -356,6 +356,19 @@ function PaperPiece({
   const reduced = useReducedMotion() ?? false
   const meta = PIECE_META(item)
   const tape = meta.tape
+  /** The print only lifts off the artwork, not off the whole card. */
+  const artRef = useRef<HTMLSpanElement>(null)
+
+  const overArt = (event: PointerEvent<HTMLElement>) => {
+    const box = artRef.current?.getBoundingClientRect()
+    if (!box) return false
+    return (
+      event.clientX >= box.left &&
+      event.clientX <= box.right &&
+      event.clientY >= box.top &&
+      event.clientY <= box.bottom
+    )
+  }
 
   return (
     <article
@@ -371,8 +384,15 @@ function PaperPiece({
           '--cell-drop': `${drop}rem`,
         } as CSSProperties
       }
-      onPointerMove={(event) => onPan(event)}
-      onPointerEnter={(event) => onPeek(item, event.currentTarget)}
+      onPointerMove={(event) => {
+        onPan(event)
+        if (event.pointerType === 'touch') return
+        // The card is clickable edge to edge, so the pointer target is the
+        // overlay button, not the artwork: hit-test the frame's box instead of
+        // trusting `event.target`.
+        if (overArt(event)) onPeek(item, event.currentTarget)
+        else onPeekEnd()
+      }}
       onPointerLeave={(event) => {
         onPan(event, true)
         onPeekEnd()
@@ -418,7 +438,7 @@ function PaperPiece({
         {item.index}
       </span>
 
-      <span className={styles.frame} data-frame>
+      <span className={styles.frame} data-frame ref={artRef}>
         <span className={styles.panTarget} data-pan-target>
           <CoverPlate
             item={item}
@@ -626,6 +646,8 @@ export function WorkGallery({
   const [peek, setPeek] = useState<PeekState | null>(null)
   const boardRef = useRef<HTMLDivElement>(null)
   const peekTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const openPeekId = useRef<string | null>(null)
+  const peekPending = useRef<string | null>(null)
 
   /* ── the corkboard's hardware ───────────────────────────────────────────
      Strings, the waiting pin, the spool in hand, and a remount counter that
@@ -971,20 +993,36 @@ export function WorkGallery({
       surface.height - height - 12,
     )
 
+    openPeekId.current = item.id
     setPeek({ item, x, y, width })
   }
 
   const closePeek = useCallback(() => {
     if (peekTimer.current) clearTimeout(peekTimer.current)
     peekTimer.current = null
+    openPeekId.current = null
+    peekPending.current = null
     setPeek(null)
   }, [])
 
-  /** Hover opens on a short delay, so crossing the board does not flicker. */
+  /**
+   * Hover opens on a short delay, so crossing the board does not flicker.
+   *
+   * Called on every pointer move inside the artwork, so it must be idempotent:
+   * re-arming the timer each move would mean the print never opens while the
+   * pointer is still travelling.
+   */
   const peekLater = useCallback(
     (item: GalleryItem, element: HTMLElement) => {
+      if (openPeekId.current === item.id || peekPending.current === item.id) {
+        return
+      }
       if (peekTimer.current) clearTimeout(peekTimer.current)
-      peekTimer.current = setTimeout(() => openPeek(item, element), 110)
+      peekPending.current = item.id
+      peekTimer.current = setTimeout(() => {
+        peekPending.current = null
+        openPeek(item, element)
+      }, 110)
     },
     // openPeek reads only refs and `reduced`.
     // eslint-disable-next-line react-hooks/exhaustive-deps

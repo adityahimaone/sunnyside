@@ -75,7 +75,10 @@ export function ProjectsPage({
   const project =
     WORK_PROJECTS.find((p) => p.id === selectedId) ?? WORK_PROJECTS[0]
   const index = WORK_PROJECTS.indexOf(project)
-  const repo = repos.find((r) => r.name === featuredProjects[index]?.githubSlug)
+  const repo = repos.find(
+    (r) =>
+      r.name === (project.githubSlug ?? featuredProjects[index]?.githubSlug),
+  )
 
   useEffect(() => {
     if (!playing) return
@@ -141,7 +144,8 @@ export function ProjectsPage({
               className={`${layout.intro} ${layout.rise}`}
               style={{ '--rise-delay': '120ms' } as React.CSSProperties}
             >
-              Seven production systems. Pick one on the shelf to cue it.
+              {WORK_PROJECTS.length} production systems. Pick one on the shelf
+              to cue it.
             </p>
 
             <div

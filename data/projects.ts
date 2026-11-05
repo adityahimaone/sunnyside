@@ -1,6 +1,3 @@
-import type { LucideIcon } from 'lucide-react'
-import { Cpu, Database, Globe, Layers, Zap } from 'lucide-react'
-
 /** Two wash colours plus the accent that drives a project's glass rims. */
 export interface ProjectPalette {
   a: string
@@ -38,6 +35,12 @@ export type WorkProject = {
   /** Liner notes tracklist, and the "lyrics" that light up on the turntable. */
   highlights: string[]
   palette: ProjectPalette
+  /**
+   * Repository name, when the work is public. The shelf reads the star count
+   * off this rather than off a positional guess at `FEATURED_PROJECTS`, which
+   * drifted the moment the two lists stopped having the same length.
+   */
+  githubSlug?: string
 }
 
 /**
@@ -80,6 +83,92 @@ const SEEDS: Seed[] = [
       'Nothing hides in a second tab',
       'The agent stops when the work stops',
     ],
+  },
+  {
+    slug: 'kanon',
+    title: 'Kanon',
+    description:
+      'A studio of six skills that write a brand kit and a design system: marks on one grid, tokens in three layers, and a contrast ledger that publishes its own failures.',
+    cover: '/work/kanon-cover.webp',
+    url: 'https://design-system.adityahimaone.space/',
+    genre: 'Design system',
+    problem: 'Design systems',
+    year: 2026,
+    role: 'Design and build',
+    stack: ['Next.js', 'TypeScript', 'Tailwind CSS', 'SVG'],
+    highlights: [
+      'Marks drawn on one shared grid',
+      'Tokens in three layers, not one',
+      'Contrast measured, failures printed',
+      'Twenty-four cases on the shelf',
+      'Six skills, one output',
+      'A system you can read, not just use',
+    ],
+  },
+  {
+    slug: 'hayoloka',
+    title: 'Hayoloka',
+    description:
+      'A wedding photography studio site built around the gallery: full-bleed frames, honest sequencing, and a booking path that asks three questions instead of twelve.',
+    cover: '/work/hayoloka-cover.webp',
+    url: 'https://hayoloka.vercel.app/',
+    genre: 'Photography',
+    problem: 'Marketing sites',
+    year: 2025,
+    role: 'Design and build',
+    stack: ['Next.js', 'TypeScript', 'Tailwind CSS'],
+    highlights: [
+      'The photographs lead, the copy follows',
+      'Galleries that load before the scroll',
+      'A booking path of three questions',
+      'Type quiet enough for the work',
+      'Readable on a phone at a reception',
+      'One studio, not a template',
+    ],
+  },
+  {
+    slug: 'api-playground',
+    title: 'API Playground',
+    description:
+      'A Postman-like API tester that stays local: workspaces, collections and the last hundred requests live in the browser, with no account to lose access to.',
+    cover: '/work/api-playground-cover.webp',
+    url: 'https://github.com/adityahimaone/api-playground',
+    genre: 'Developer tools',
+    problem: 'Local-first tools',
+    year: 2026,
+    role: 'Design and build',
+    stack: ['Next.js', 'TypeScript', 'Zustand', 'Tailwind CSS'],
+    highlights: [
+      'Every method, every body type',
+      'Variables scoped global to collection',
+      'History of the last hundred calls',
+      'Collections imported and exported as JSON',
+      'Auth off by a switch, data never sent',
+      'Dark and light, both legible',
+    ],
+    githubSlug: 'api-playground',
+  },
+  {
+    slug: 'code-snippet-manager',
+    title: 'Code Snippet Manager',
+    description:
+      'A personal snippet library with a dark console face: save, tag and search code, highlighted on the way in and copied in one click.',
+    cover: '/work/code-snippet-manager-cover.webp',
+    url: 'https://github.com/adityahimaone/code-snippet-manager',
+    genre: 'Developer tools',
+    problem: 'Local-first tools',
+    year: 2025,
+    role: 'Design and build',
+    stack: ['Next.js', 'TypeScript', 'Zustand', 'Prism.js'],
+    highlights: [
+      'Snippets that read like they did in the editor',
+      'Search across title, language and tag',
+      'Copy in one click, no dialog',
+      'Storage in the browser, never a server',
+      'A console palette with real contrast',
+      'Tagging that survives a thousand snippets',
+    ],
+    githubSlug: 'code-snippet-manager',
   },
   {
     slug: 'primarindo-asia',
@@ -226,6 +315,10 @@ const SEEDS: Seed[] = [
  */
 const ORDER: readonly string[] = [
   'switchyard',
+  'kanon',
+  'hayoloka',
+  'api-playground',
+  'code-snippet-manager',
   'primarindo-asia',
   'habit-tracker',
   'fullstack-wannabe',

@@ -47,7 +47,7 @@ const PROJECT_ORDER = [
   'habit-tracker',
   'fullstack-wannabe',
   'seaphantom',
-  'labgrownbeasts',
+  'kanon',
 ] as const
 
 /** The six systems shown on the Everything tab, in board order. */
@@ -91,6 +91,7 @@ const PROJECT_POSITION: Record<string, string> = {
   'habit-tracker': 'left center',
   seaphantom: 'center',
   'fullstack-wannabe': 'top center',
+  kanon: 'top center',
   labgrownbeasts: 'center',
 }
 
