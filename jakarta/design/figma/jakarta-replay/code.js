@@ -19,7 +19,7 @@ const report = {
   pages: 0, frames: 0, texts: 0, rects: 0, vectors: 0,
   variables: 0, paintStyles: 0, textStyles: 0, components: 0,
   autoLayout: 0, replaced: 0, textInk: 0, textBoosted: 0,
-  fontFallbacks: 0, vectorsScaled: 0, effects: 0, chips: 0, grown: 0, errors: [],
+  fontFallbacks: 0, vectorsScaled: 0, effects: 0, chips: 0, grown: 0, skippedSheets: 0, errors: [],
 };
 const fail = (where, e) => report.errors.push(where + ': ' + ((e && e.message) || String(e)));
 
@@ -450,7 +450,10 @@ async function createNode(node, parentBox, byRgb, depth, options) {
 
   const children = Array.isArray(node.children) ? node.children : [];
   if (out.type === 'FRAME' || out.type === 'COMPONENT' || out.type === 'INSTANCE') {
-    applyLayout(out, node.layout, children);
+    /* A chip plate is sized by its CSS width/height and centres its label. If
+     * it went through applyLayout it would hug the text — a 32×32 number badge
+     * collapsed to 14×18 and stopped being a circle. */
+    if (!chip) applyLayout(out, node.layout, children);
     for (const child of children) {
       const made = await createNode(child, box, byRgb, depth + 1, options);
       if (!made) continue;
@@ -499,12 +502,19 @@ async function build(manifest, replace, options) {
   }
   if (!Array.isArray(manifest.sheets) || !manifest.sheets.length) throw new Error('Manifest has no sheets');
 
+  /* The patterns / token-sheet page is mostly copy controls and CSS dumps; it
+   * is off unless asked for. */
+  const includePatterns = !!(options && options.includePatterns);
+  const sheets = manifest.sheets.filter((s) => includePatterns || !/patterns|tokens/i.test(String((s && s.name) || '')));
+  report.skippedSheets = manifest.sheets.length - sheets.length;
+  if (!sheets.length) throw new Error('Every sheet was filtered out — enable the patterns page');
+
   /* Migration: re-running into an existing file used to append a second set of
    * pages. Remove only pages whose names we are about to recreate, so a
    * designer's own pages are never touched. Best-effort: with dynamic-page
    * access Figma may not expose every unloaded page. */
   if (replace) {
-    const wanted = new Set(manifest.sheets.map((s, i) => String(i + 1).padStart(2, '0') + ' · ' + (s.name || 'Sheet')));
+    const wanted = new Set(sheets.map((s, i) => String(i + 1).padStart(2, '0') + ' · ' + (s.name || 'Sheet')));
     try {
       if (typeof figma.loadAllPagesAsync === 'function') await figma.loadAllPagesAsync();
       for (const page of [...figma.root.children]) {
@@ -517,8 +527,8 @@ async function build(manifest, replace, options) {
 
   const byRgb = await buildSystem(manifest.tokens || {});
 
-  for (let i = 0; i < manifest.sheets.length; i++) {
-    const sheet = manifest.sheets[i];
+  for (let i = 0; i < sheets.length; i++) {
+    const sheet = sheets[i];
     const page = figma.createPage();
     page.name = String(i + 1).padStart(2, '0') + ' · ' + (sheet.name || 'Sheet');
     await usePage(page);
@@ -551,7 +561,10 @@ figma.ui.onmessage = async (msg) => {
   if (msg.type !== 'build') return;
   try {
     const manifest = typeof msg.json === 'string' ? JSON.parse(msg.json) : msg.json;
-    const options = { minFontSize: Math.max(0, Number(msg.minFontSize) || 0) };
+    const options = {
+      minFontSize: Math.max(0, Number(msg.minFontSize) || 0),
+      includePatterns: msg.includePatterns === true,
+    };
     await build(manifest, msg.replace !== false, options);
     const summary =
       (manifest.brand || 'Brand') + ': ' + report.pages + ' pages, ' +
@@ -563,6 +576,7 @@ figma.ui.onmessage = async (msg) => {
       report.variables + ' variables, ' + report.paintStyles + ' paint styles, ' +
       report.textStyles + ' text styles, ' + report.components + ' components' +
       (report.replaced ? ' · replaced ' + report.replaced + ' existing page(s)' : '') +
+      (report.skippedSheets ? ' · skipped ' + report.skippedSheets + ' sheet(s)' : '') +
       (report.fontFallbacks ? ' · ' + report.fontFallbacks + ' font fallback(s) — install the brand fonts' : '');
     figma.notify(summary, { timeout: 9000 });
     figma.ui.postMessage({ type: 'done', summary: summary + (report.errors.length ? ' · ' + report.errors.length + ' error(s)' : '') });
