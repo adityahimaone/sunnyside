@@ -3,19 +3,22 @@
   "plugin": "/Users/adityahimawan/WorkBuddy AI/sunnyside/wildflower-wind/design/figma/wildflower-wind-replay/code.js",
   "brand": "Wildflower Wind",
   "dsId": "wildflower-wind@2.0.0",
-  "checksum": "8b278b7c",
+  "checksum": "6de41162",
   "signature": {
     "valid": true,
-    "expected": "8b278b7c",
-    "actual": "8b278b7c"
+    "expected": "6de41162",
+    "actual": "6de41162"
   },
   "spec": {
     "sheets": 8,
     "nodes": 974,
     "texts": 438,
     "colours": 74,
-    "componentRefs": 16,
+    "componentRefs": 34,
     "components": [
+      "Cast Mark",
+      "System Icon",
+      "Spot Illustration",
       "Button",
       "Input",
       "Badge",
@@ -31,9 +34,16 @@
     "solidFills": 714,
     "boundFills": 714,
     "styleBoundTexts": 438,
-    "instances": 16,
-    "componentSets": 4,
-    "variables": 129
+    "wrappedTexts": 9,
+    "actionGroups": [
+      622,
+      444
+    ],
+    "detachedFrames": 0,
+    "librariesAbove": 3,
+    "instances": 34,
+    "componentSets": 7,
+    "variables": 131
   },
   "geometry": [
     {
@@ -66,8 +76,8 @@
     },
     {
       "sheet": "assets",
-      "spec": "1440×1086",
-      "replay": "1440×1086",
+      "spec": "1440×1074",
+      "replay": "1440×1074",
       "dw": 0,
       "dh": 0
     },
@@ -96,38 +106,38 @@
   "missingColours": [],
   "report": {
     "pages": 8,
-    "frames": 410,
-    "texts": 438,
-    "rects": 57,
-    "vectors": 43,
-    "variables": 129,
+    "frames": 415,
+    "texts": 491,
+    "rects": 61,
+    "vectors": 61,
+    "variables": 131,
     "variablesReused": 0,
-    "autoVariables": 23,
+    "autoVariables": 25,
     "paintStyles": 89,
-    "textStyles": 46,
+    "textStyles": 48,
     "effectStyles": 3,
     "gridStyles": 1,
-    "components": 40,
-    "componentSets": 4,
-    "instances": 16,
-    "componentDescriptions": 16,
-    "autoLayout": 184,
-    "layoutBindings": 188,
-    "textStyleBindings": 438,
-    "paintBindings": 714,
-    "styleBindings": 255,
+    "components": 92,
+    "componentSets": 7,
+    "instances": 34,
+    "componentDescriptions": 68,
+    "autoLayout": 217,
+    "layoutBindings": 245,
+    "textStyleBindings": 501,
+    "paintBindings": 846,
+    "styleBindings": 312,
     "replaced": 1,
     "upgradedTexts": 0,
     "upgradedFills": 0,
     "upgradedLayouts": 0,
     "upgradedPages": 0,
     "skippedPages": 0,
-    "textInk": 438,
+    "textInk": 491,
     "textBoosted": 0,
     "fontFallbacks": 0,
     "vectorsScaled": 0,
-    "effects": 59,
-    "chips": 63,
+    "effects": 63,
+    "chips": 82,
     "grown": 0,
     "skippedSheets": 0,
     "errors": []
@@ -190,7 +200,7 @@
     },
     {
       "gate": "instances ≥ components",
-      "value": "16 instances / 4 components",
+      "value": "34 instances / 7 components",
       "threshold": "≥1 each",
       "pass": true
     },
@@ -210,6 +220,30 @@
       "gate": "no console errors",
       "value": 0,
       "threshold": 0,
+      "pass": true
+    },
+    {
+      "gate": "action groups full width",
+      "value": "622/444 vs 622/444",
+      "threshold": "≤2px each",
+      "pass": true
+    },
+    {
+      "gate": "no detached sheet frames",
+      "value": 0,
+      "threshold": 0,
+      "pass": true
+    },
+    {
+      "gate": "library above sheet",
+      "value": "3 boards / 3 pages",
+      "threshold": "one per component page",
+      "pass": true
+    },
+    {
+      "gate": "one-line labels",
+      "value": "9/438 wrapped · 2.1%",
+      "threshold": "≤5%",
       "pass": true
     }
   ],

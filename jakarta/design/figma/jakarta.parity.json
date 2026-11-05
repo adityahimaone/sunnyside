@@ -3,19 +3,22 @@
   "plugin": "/Users/adityahimawan/WorkBuddy AI/sunnyside/jakarta/design/figma/jakarta-replay/code.js",
   "brand": "Jakarta",
   "dsId": "jakarta@1.0",
-  "checksum": "835e484a",
+  "checksum": "e30c837d",
   "signature": {
     "valid": true,
-    "expected": "835e484a",
-    "actual": "835e484a"
+    "expected": "e30c837d",
+    "actual": "e30c837d"
   },
   "spec": {
     "sheets": 8,
     "nodes": 1335,
     "texts": 652,
     "colours": 104,
-    "componentRefs": 16,
+    "componentRefs": 34,
     "components": [
+      "Cast Mark",
+      "System Icon",
+      "Spot Illustration",
       "Button",
       "Input",
       "Badge",
@@ -31,9 +34,16 @@
     "solidFills": 1007,
     "boundFills": 1007,
     "styleBoundTexts": 652,
-    "instances": 16,
-    "componentSets": 4,
-    "variables": 134
+    "wrappedTexts": 6,
+    "actionGroups": [
+      622,
+      444
+    ],
+    "detachedFrames": 0,
+    "librariesAbove": 3,
+    "instances": 34,
+    "componentSets": 7,
+    "variables": 136
   },
   "geometry": [
     {
@@ -66,8 +76,8 @@
     },
     {
       "sheet": "assets",
-      "spec": "1440×1086",
-      "replay": "1440×1086",
+      "spec": "1440×1074",
+      "replay": "1440×1074",
       "dw": 0,
       "dh": 0
     },
@@ -96,38 +106,38 @@
   "missingColours": [],
   "report": {
     "pages": 8,
-    "frames": 549,
-    "texts": 652,
-    "rects": 65,
-    "vectors": 43,
-    "variables": 134,
+    "frames": 554,
+    "texts": 705,
+    "rects": 69,
+    "vectors": 61,
+    "variables": 136,
     "variablesReused": 0,
-    "autoVariables": 17,
+    "autoVariables": 19,
     "paintStyles": 100,
-    "textStyles": 36,
+    "textStyles": 37,
     "effectStyles": 3,
     "gridStyles": 1,
-    "components": 40,
-    "componentSets": 4,
-    "instances": 16,
-    "componentDescriptions": 16,
-    "autoLayout": 154,
-    "layoutBindings": 521,
-    "textStyleBindings": 652,
-    "paintBindings": 1007,
-    "styleBindings": 340,
+    "components": 92,
+    "componentSets": 7,
+    "instances": 34,
+    "componentDescriptions": 68,
+    "autoLayout": 187,
+    "layoutBindings": 690,
+    "textStyleBindings": 715,
+    "paintBindings": 1139,
+    "styleBindings": 397,
     "replaced": 1,
     "upgradedTexts": 0,
     "upgradedFills": 0,
     "upgradedLayouts": 0,
     "upgradedPages": 0,
     "skippedPages": 0,
-    "textInk": 652,
+    "textInk": 705,
     "textBoosted": 0,
     "fontFallbacks": 4,
     "vectorsScaled": 0,
-    "effects": 96,
-    "chips": 100,
+    "effects": 100,
+    "chips": 119,
     "grown": 0,
     "skippedSheets": 0,
     "errors": []
@@ -190,7 +200,7 @@
     },
     {
       "gate": "instances ≥ components",
-      "value": "16 instances / 4 components",
+      "value": "34 instances / 7 components",
       "threshold": "≥1 each",
       "pass": true
     },
@@ -210,6 +220,30 @@
       "gate": "no console errors",
       "value": 0,
       "threshold": 0,
+      "pass": true
+    },
+    {
+      "gate": "action groups full width",
+      "value": "622/444 vs 622/444",
+      "threshold": "≤2px each",
+      "pass": true
+    },
+    {
+      "gate": "no detached sheet frames",
+      "value": 0,
+      "threshold": 0,
+      "pass": true
+    },
+    {
+      "gate": "library above sheet",
+      "value": "3 boards / 3 pages",
+      "threshold": "one per component page",
+      "pass": true
+    },
+    {
+      "gate": "one-line labels",
+      "value": "6/652 wrapped · 0.9%",
+      "threshold": "≤5%",
       "pass": true
     }
   ],

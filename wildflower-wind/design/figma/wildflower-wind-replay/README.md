@@ -34,7 +34,7 @@ up by name and updated in place — re-running never leaves a second
 `Brand / Colour` collection behind. Every generated `NN · …` page is removed
 and rebuilt; pages you made yourself are untouched.
 
-A seed manifest is embedded (8 sheets, 974 nodes, 824,756 chars), so the textarea is pre-filled — just click Build.
+A seed manifest is embedded (8 sheets, 974 nodes, 870,024 chars), so the textarea is pre-filled — just click Build.
 
 ## Fonts
 
