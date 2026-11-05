@@ -14,6 +14,19 @@ const report = { built: [], errors: [] };
 const fail = (where, e) => report.errors.push(where + ': ' + ((e && e.message) || String(e)));
 const say = (what) => report.built.push(what);
 
+/* With "documentAccess": "dynamic-page" figma.currentPage is READ ONLY.
+ * Assigning to it throws: "Cannot call with documentAccess: dynamic-page. Use
+ * figma.setCurrentPageAsync instead." The async call also loads that page's
+ * children on demand. Fall back to the synchronous setter only for runtimes
+ * (OpenPencil, older editors) that do not have the async method. */
+async function usePage(page) {
+  if (typeof figma.setCurrentPageAsync === 'function') {
+    await figma.setCurrentPageAsync(page);
+  } else {
+    await usePage(page);
+  }
+}
+
 /* ── colour ─────────────────────────────────────────────────────────────── */
 
 function hexToRgb(hex) {
@@ -291,7 +304,7 @@ const GUTTER = 40;
 async function coverPage() {
   const page = figma.createPage();
   page.name = '00 · Cover';
-  figma.currentPage = page;
+  await usePage(page);
   const W = 1600;
   const H = 1000;
   const f = frame(page, 'Cover', 0, 0, W, H, DATA.colours.paper);
@@ -347,7 +360,7 @@ async function coverPage() {
 async function colourPage() {
   const page = figma.createPage();
   page.name = '01 · Colour';
-  figma.currentPage = page;
+  await usePage(page);
   const pad = 64;
   const cell = 200;
   const cols = 5;
@@ -378,7 +391,7 @@ async function colourPage() {
 async function typePage() {
   const page = figma.createPage();
   page.name = '02 · Type';
-  figma.currentPage = page;
+  await usePage(page);
   const pad = 64;
   const W = 1280;
   let H = pad * 2 + 80;
@@ -412,7 +425,7 @@ async function typePage() {
 async function spacePage() {
   const page = figma.createPage();
   page.name = '03 · Space & radius';
-  figma.currentPage = page;
+  await usePage(page);
   const pad = 64;
   const W = 1200;
   const H = pad * 2 + 120 + DATA.space.length * 44 + DATA.radius.length * 90;
@@ -449,7 +462,7 @@ async function marksPage() {
   if (!DATA.assets || !DATA.assets.length) return null;
   const page = figma.createPage();
   page.name = '04 · Marks';
-  figma.currentPage = page;
+  await usePage(page);
   const pad = 64;
   const cell = 320;
   const cols = 3;
@@ -489,7 +502,7 @@ async function marksPage() {
 async function componentPage() {
   const page = figma.createPage();
   page.name = '05 · Components';
-  figma.currentPage = page;
+  await usePage(page);
   const pad = 64;
   const f = frame(page, 'Components', 0, 0, 1440, 1200, DATA.colours.paper);
   await text(f, 'Components', pad, pad, { size: 48, weight: 'Bold', colour: DATA.colours.ink });
@@ -648,10 +661,16 @@ async function main() {
   }
 
   /* Figma opens a new file on an empty "Page 1"; leaving it makes the export
-   * look like a draft. Remove it only when nothing was built into it. */
+   * look like a draft. Remove it only when nothing was built into it. Under
+   * dynamic-page an unloaded page has no readable children, so load first. */
   try {
+    if (typeof figma.loadAllPagesAsync === 'function') await figma.loadAllPagesAsync()
     for (const page of figma.root.children) {
-      if (/^Page \d+$/.test(page.name) && page.children.length === 0) page.remove()
+      try {
+        if (/^Page \d+$/.test(page.name) && page.children.length === 0) page.remove()
+      } catch (e) {
+        fail('page cleanup/' + page.name, e)
+      }
     }
   } catch (e) {
     fail('page cleanup', e)

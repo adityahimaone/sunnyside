@@ -22,6 +22,18 @@ const report = {
 };
 const fail = (where, e) => report.errors.push(where + ': ' + ((e && e.message) || String(e)));
 
+/* The replay manifest declares "documentAccess": "dynamic-page", which makes
+ * figma.currentPage read-only. Assigning to it throws "Cannot call with
+ * documentAccess: dynamic-page. Use figma.setCurrentPageAsync instead."
+ * The async method also loads the page's children on demand. */
+async function usePage(page) {
+  if (typeof figma.setCurrentPageAsync === 'function') {
+    await figma.setCurrentPageAsync(page);
+  } else {
+    figma.currentPage = page;
+  }
+}
+
 /* ── colour ─────────────────────────────────────────────────────────────── */
 
 function parseColor(str) {
@@ -340,6 +352,7 @@ async function build(manifest, replace) {
   if (replace) {
     const wanted = new Set(manifest.sheets.map((s, i) => String(i + 1).padStart(2, '0') + ' · ' + (s.name || 'Sheet')));
     try {
+      if (typeof figma.loadAllPagesAsync === 'function') await figma.loadAllPagesAsync();
       for (const page of [...figma.root.children]) {
         if (page.type === 'PAGE' && wanted.has(page.name)) {
           try { page.remove(); report.replaced++; } catch (e) { fail('replace/' + page.name, e); }
@@ -354,7 +367,7 @@ async function build(manifest, replace) {
     const sheet = manifest.sheets[i];
     const page = figma.createPage();
     page.name = String(i + 1).padStart(2, '0') + ' · ' + (sheet.name || 'Sheet');
-    figma.currentPage = page;
+    await usePage(page);
     const root = await createNode(sheet.node, { x: 0, y: 0 }, byRgb, 0);
     if (root) {
       root.x = 0;
@@ -365,8 +378,11 @@ async function build(manifest, replace) {
   }
 
   try {
-    for (const page of figma.root.children) {
-      if (/^Page \d+$/.test(page.name) && page.children.length === 0) page.remove();
+    if (typeof figma.loadAllPagesAsync === 'function') await figma.loadAllPagesAsync();
+    for (const page of [...figma.root.children]) {
+      try {
+        if (/^Page \d+$/.test(page.name) && page.children.length === 0) page.remove();
+      } catch (e) { fail('page cleanup/' + page.name, e); }
     }
   } catch (e) { fail('page cleanup', e); }
 }
