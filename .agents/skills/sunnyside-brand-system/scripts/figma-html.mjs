@@ -13,11 +13,191 @@
  */
 
 import { existsSync, readdirSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { findTokens, readTokens, familyOf } from './lib/tokens.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+const TEMPLATES_DIR = resolve(__dirname, '..', 'templates')
+
+/* ── Downloadable Figma plugin bundle ──────────────────────────────────────
+   The sheet already measures itself into a `sunnyside/figma-manifest`. The
+   replay plugin (templates/figma-replay-plugin.js + figma-replay-ui.html) turns
+   that manifest into native Figma Auto Layout, variables, paint/text styles and
+   components. Embedding the plugin's bytes in the page lets one toolbar button
+   hand a designer a ready-to-import plugin, with the page's own manifest baked
+   in as the seed — no copy/paste, no third-party importer. */
+function buildReplayAssets(brandName, slug) {
+  const b64 = (s) => Buffer.from(String(s), 'utf8').toString('base64')
+  try {
+    const code = readFileSync(join(TEMPLATES_DIR, 'figma-replay-plugin.js'), 'utf8')
+    const ui = readFileSync(join(TEMPLATES_DIR, 'figma-replay-ui.html'), 'utf8')
+    const pluginManifest = JSON.stringify({
+      name: `${brandName} — replay`,
+      id: `${slug}-replay`,
+      api: '1.0.0',
+      main: 'code.js',
+      ui: 'ui.html',
+      editorType: ['figma'],
+      networkAccess: { allowedDomains: ['none'] },
+      documentAccess: 'dynamic-page',
+    })
+    return [
+      `var REPLAY_CODE_B64=${JSON.stringify(b64(code))};`,
+      `var REPLAY_UI_B64=${JSON.stringify(b64(ui))};`,
+      `var REPLAY_MANIFEST_B64=${JSON.stringify(b64(pluginManifest))};`,
+    ].join('\n')
+  } catch (e) {
+    return 'var REPLAY_CODE_B64="";var REPLAY_UI_B64="";var REPLAY_MANIFEST_B64="";'
+  }
+}
+
+/* Injected into every generated sheet. Kept dependency-free: base64-decode the
+   embedded plugin bytes, build a store-only ZIP in memory, hand it to the
+   browser. `buildFigmaManifest()` is defined earlier in the same script. */
+const FIGMA_DOWNLOAD_JS = String.raw`
+    /* ---- Download the manifest or a ready-to-import Figma plugin -------- */
+    function b64ToBytes(b64) {
+      var bin = atob(b64 || '');
+      var out = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+    function b64ToText(b64) {
+      try { return new TextDecoder('utf-8').decode(b64ToBytes(b64)); }
+      catch (e) { return ''; }
+    }
+    function triggerDownload(blob, filename) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); if (a.parentNode) a.parentNode.removeChild(a); }, 1200);
+    }
+    function slugifyName(s) {
+      return String(s || 'brand').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'brand';
+    }
+    function downloadFigmaManifest() {
+      try {
+        var m = buildFigmaManifest();
+        var json = JSON.stringify(m, null, 2);
+        triggerDownload(new Blob([json], { type: 'application/json' }), slugifyName(m.brand) + '-figma-manifest.json');
+        showToast('Manifest downloaded · ' + m.sheets.length + ' sheets · ' + m.nodes + ' nodes');
+      } catch (e) { showToast('Manifest failed: ' + ((e && e.message) || e)); }
+    }
+    function buildStoreZip(files) {
+      var table = (function () {
+        var t = new Uint32Array(256);
+        for (var n = 0; n < 256; n++) {
+          var c = n;
+          for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+          t[n] = c >>> 0;
+        }
+        return t;
+      })();
+      function crc32(buf) {
+        var c = 0xFFFFFFFF;
+        for (var i = 0; i < buf.length; i++) c = (c >>> 8) ^ table[(c ^ buf[i]) & 0xFF];
+        return (c ^ 0xFFFFFFFF) >>> 0;
+      }
+      var enc = new TextEncoder();
+      var parts = [];
+      var central = [];
+      var offset = 0;
+      for (var f = 0; f < files.length; f++) {
+        var nameBytes = enc.encode(files[f].name);
+        var data = files[f].data;
+        var crc = crc32(data);
+        var size = data.length;
+        var lh = new DataView(new ArrayBuffer(30));
+        lh.setUint32(0, 0x04034b50, true);
+        lh.setUint16(4, 20, true);
+        lh.setUint16(6, 0, true);
+        lh.setUint16(8, 0, true);
+        lh.setUint16(10, 0, true);
+        lh.setUint16(12, 0, true);
+        lh.setUint32(14, crc, true);
+        lh.setUint32(18, size, true);
+        lh.setUint32(22, size, true);
+        lh.setUint16(26, nameBytes.length, true);
+        lh.setUint16(28, 0, true);
+        parts.push(new Uint8Array(lh.buffer), nameBytes, data);
+        var ch = new DataView(new ArrayBuffer(46));
+        ch.setUint32(0, 0x02014b50, true);
+        ch.setUint16(4, 20, true);
+        ch.setUint16(6, 20, true);
+        ch.setUint16(8, 0, true);
+        ch.setUint16(10, 0, true);
+        ch.setUint16(12, 0, true);
+        ch.setUint16(14, 0, true);
+        ch.setUint32(16, crc, true);
+        ch.setUint32(20, size, true);
+        ch.setUint32(24, size, true);
+        ch.setUint16(28, nameBytes.length, true);
+        ch.setUint16(30, 0, true);
+        ch.setUint16(32, 0, true);
+        ch.setUint16(34, 0, true);
+        ch.setUint16(36, 0, true);
+        ch.setUint32(38, 0, true);
+        ch.setUint32(42, offset, true);
+        central.push(new Uint8Array(ch.buffer), nameBytes);
+        offset += 30 + nameBytes.length + size;
+      }
+      var centralSize = 0;
+      for (var c2 = 0; c2 < central.length; c2++) centralSize += central[c2].length;
+      var eo = new DataView(new ArrayBuffer(22));
+      eo.setUint32(0, 0x06054b50, true);
+      eo.setUint16(4, 0, true);
+      eo.setUint16(6, 0, true);
+      eo.setUint16(8, files.length, true);
+      eo.setUint16(10, files.length, true);
+      eo.setUint32(12, centralSize, true);
+      eo.setUint32(16, offset, true);
+      eo.setUint16(20, 0, true);
+      return new Blob(parts.concat(central, [new Uint8Array(eo.buffer)]), { type: 'application/zip' });
+    }
+    function downloadFigmaPlugin() {
+      try {
+        if (!REPLAY_CODE_B64 || !REPLAY_UI_B64 || !REPLAY_MANIFEST_B64) {
+          showToast('Plugin bundle not embedded in this build — regenerate the sheet.');
+          return;
+        }
+        var m = buildFigmaManifest();
+        var seed = JSON.stringify(m).replace(/</g, '\\u003c');
+        var uiHtml = b64ToText(REPLAY_UI_B64)
+          .replace('__BRAND__', function () { return m.brand || 'Brand'; })
+          .replace('__MANIFEST__', function () { return seed; });
+        var pluginManifest = b64ToText(REPLAY_MANIFEST_B64);
+        var files = [
+          { name: 'manifest.json', data: new TextEncoder().encode(pluginManifest) },
+          { name: 'code.js', data: b64ToBytes(REPLAY_CODE_B64) },
+          { name: 'ui.html', data: new TextEncoder().encode(uiHtml) }
+        ];
+        triggerDownload(buildStoreZip(files), slugifyName(m.brand) + '-figma-plugin.zip');
+        showToast('Figma plugin downloaded · manifest.json + code.js + ui.html');
+      } catch (e) { showToast('Plugin failed: ' + ((e && e.message) || e)); }
+    }
+`
+
+/**
+ * Workspace layouts do not all put tokens.json in features/<slug>/. Accept an
+ * explicit --tokens path, then try the per-case roots before the shared reader.
+ * Detection stays by key, never by case name.
+ */
+function locateTokens(root, slug, explicit) {
+  if (explicit) {
+    const p = resolve(explicit)
+    if (!existsSync(p)) throw new Error(`--tokens path does not exist: ${p}`)
+    return p
+  }
+  const extra = [
+    join(root, 'src', 'tokens.json'),
+    join(root, slug, 'src', 'tokens.json'),
+    join(root, 'src', slug, 'tokens.json'),
+    join(root, 'features', 'design-system', `${slug}-tokens.json`),
+  ]
+  return extra.find(existsSync) ?? findTokens(root, slug)
+}
 
 /* ── Color Math Helpers (Hex ↔ RGB ↔ OKLCH) ─────────────────────────────── */
 
@@ -281,15 +461,15 @@ function buildGoogleFontsUrl(fonts) {
 
 /* ── Main Generator Function ────────────────────────────────────────────── */
 
-export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
+export function generateFigmaHtml({ slug, root = '.', outPath = null, tokensPath = null }) {
   const resolvedRoot = resolve(root)
-  const tokensPath = findTokens(resolvedRoot, slug)
-  if (!tokensPath) {
-    throw new Error(`Could not find tokens.json for slug "${slug}" under ${resolvedRoot}`)
+  const tokensFile = locateTokens(resolvedRoot, slug, tokensPath)
+  if (!tokensFile) {
+    throw new Error(`Could not find tokens.json for slug "${slug}" under ${resolvedRoot} — pass --tokens <path>`)
   }
 
-  const parsed = readTokens(tokensPath)
-  const rawJson = JSON.parse(readFileSync(tokensPath, 'utf8'))
+  const parsed = readTokens(tokensFile)
+  const rawJson = JSON.parse(readFileSync(tokensFile, 'utf8'))
   const meta = rawJson.meta ?? rawJson.$meta ?? {}
 
   // Locate optional CSS file
@@ -465,7 +645,30 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
     cssText.trim() ||
     `/* 2 · Semantic & Typography Scope */\n:root {\n  --${ns}-surface-page: ${primitives[0]?.token || '#FFFFFF'};\n  --${ns}-text-primary: ${darkSorted[0]?.token || '#111827'};\n  --${ns}-signal: ${primaryColor.token};\n  --${ns}-font-display: '${fonts.display}', sans-serif;\n  --${ns}-font-reading: '${fonts.reading}', sans-serif;\n  --${ns}-font-mono: '${fonts.mono}', monospace;\n}`
 
-  const html = `<!DOCTYPE html>
+  /* Machine-readable token payload for the Figma replay plugin. The page itself
+   * measures DOM geometry at click time; this is the one source of truth for
+   * colours, type, space and radius that both emitters agree on. */
+  const tokenPayload = JSON.stringify({
+    brand: brandName,
+    slug,
+    version,
+    namespace: ns,
+    palette: primitives.map((p) => ({ name: p.name, hex: p.hex })),
+    type: (parsed.type || [])
+      .map((t) => ({
+        name: t.name,
+        family: t.family || familyOf(t.value),
+        size: t.size,
+        leading: t.leading,
+        tracking: t.tracking,
+        weight: t.weight,
+      }))
+      .filter((t) => t.size != null),
+    space: (parsed.space || []).map((s) => ({ name: s.name, value: s.value })),
+    radius: (parsed.radius || []).map((r) => ({ name: r.name, value: r.value })),
+  }).replace(/</g, '\\u003c')
+
+  const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -494,9 +697,12 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
       --bg-banner: #FAFAFA;
       --border-subtle: #F1F5F9;
       --border-default: #E2E8F0;
-      --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      /* The sheet is brand documentation, so it is set in the brand's faces.
+       * The old defaults stay in the stack: a kit whose tokens name a face the
+       * browser or Figma cannot load still renders, and still reads. */
+      --font-sans: '${escapeHtml(fonts.reading)}', 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: '${escapeHtml(fonts.reading)}', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: '${escapeHtml(fonts.mono)}', 'JetBrains Mono', monospace;
       --brand-display: '${escapeHtml(fonts.display)}', var(--font-sans);
       --brand-reading: '${escapeHtml(fonts.reading)}', var(--font-body);
       --brand-mono: '${escapeHtml(fonts.mono)}', var(--font-mono);
@@ -703,6 +909,25 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
       box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     }
 
+    /* Auto Layout inspector. Outlines only — no position, display or geometry
+       changes, so the inspected layout is the layout that gets imported. */
+    body.al-mode [data-figma-layout] {
+      outline: 2px solid #2563EB;
+      outline-offset: 1px;
+    }
+    body.al-mode [data-figma-warn] {
+      outline: 2px dashed #DC2626;
+      outline-offset: 1px;
+    }
+    body.al-mode [data-figma-layout][data-figma-warn] {
+      outline-color: #F59E0B;
+    }
+    button.active-al {
+      background: #DBEAFE;
+      border-color: #93C5FD;
+      color: #1D4ED8;
+    }
+
     /* =========================================================================
        3. FIGMA DOCUMENTATION SHEET ANATOMY
        ========================================================================= */
@@ -748,7 +973,7 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
       justify-content: center;
       width: 32px;
       height: 32px;
-      border-radius: 8px;
+      border-radius: 50%;
       background: #111827;
       color: #FFFFFF;
       font-family: var(--font-mono);
@@ -1410,6 +1635,8 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
 </head>
 <body id="top">
 
+  <script type="application/json" id="figma-tokens">${tokenPayload}</script>
+
   <!-- =========================================================================
        STICKY WORKSPACE CONTROL BAR (Hidden in Clean Export Mode / ?clean=1)
        ========================================================================= -->
@@ -1444,6 +1671,18 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
       <div class="topbar-actions">
         <button id="btn-spec" class="btn-tool" onclick="toggleSpecMode()" title="Toggle Figma component bounds">
           <span>❖ Figma Specs</span>
+        </button>
+        <button id="btn-autolayout" class="btn-tool" onclick="toggleAutoLayoutMode()" title="Inspect CSS flex/grid flow containers and flag absolute, transform or backdrop layers that will not import as Auto Layout">
+          <span>⇄ Auto Layout</span>
+        </button>
+        <button class="btn-tool" onclick="copyFigmaManifest()" title="Copy a machine-readable layout + token manifest for the Sunnyside replay plugin">
+          <span>⤓ Copy for Figma</span>
+        </button>
+        <button class="btn-tool" onclick="downloadFigmaManifest()" title="Download the layout + token manifest as JSON">
+          <span>⤓ Manifest</span>
+        </button>
+        <button class="btn-tool" onclick="downloadFigmaPlugin()" title="Download a ready-to-import Figma plugin (manifest.json + code.js + ui.html) with this sheet's manifest baked in">
+          <span>⤓ Plugin</span>
         </button>
         <button id="btn-grid" class="btn-tool" onclick="toggleGridMode()" title="Toggle 2-column Canvas Grid Mode (&lt; 10,000px for Doop / Figma)">
           <span>⊞ Canvas Grid</span>
@@ -1510,7 +1749,7 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
               (item) => `
             <div class="swatch-card" onclick="copyHex('${item.hex}', '${escapeHtml(item.name)} (${escapeHtml(item.token)})')">
               <div class="swatch-rect" style="background-color: ${item.hex};">
-                <span class="swatch-copy-pill">Copy</span>
+                <span class="swatch-copy-pill" data-figma-ignore>Copy</span>
               </div>
               <p class="swatch-title">${escapeHtml(item.name)}</p>
               <p class="swatch-sub">${escapeHtml(item.token)}</p>
@@ -1534,7 +1773,7 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
                 (p) => `
             <div class="swatch-card" onclick="copyHex('${p.hex}', '${escapeHtml(p.token)}')">
               <div class="swatch-rect" style="background-color: ${p.hex}; height: 112px;">
-                <span class="swatch-copy-pill">Copy</span>
+                <span class="swatch-copy-pill" data-figma-ignore>Copy</span>
               </div>
               <p class="swatch-title">${escapeHtml(p.name)}</p>
               <p class="swatch-sub">${escapeHtml(p.role)}</p>
@@ -1553,7 +1792,7 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
               (item) => `
             <div class="swatch-card" onclick="copyHex('${item.hex}', '${item.name}')">
               <div class="swatch-rect" style="background-color: ${item.hex};">
-                <span class="swatch-copy-pill">Copy</span>
+                <span class="swatch-copy-pill" data-figma-ignore>Copy</span>
               </div>
               <p class="swatch-title">${item.name}</p>
               <p class="swatch-hex">${item.hex}</p>
@@ -1570,7 +1809,7 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
               (item) => `
             <div class="swatch-card" onclick="copyHex('${item.hex}', '${item.name}')">
               <div class="swatch-rect" style="background-color: ${item.hex};">
-                <span class="swatch-copy-pill">Copy</span>
+                <span class="swatch-copy-pill" data-figma-ignore>Copy</span>
               </div>
               <p class="swatch-title">${item.name}</p>
               <p class="swatch-hex">${item.hex}</p>
@@ -1587,7 +1826,7 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
               (item) => `
             <div class="swatch-card" onclick="copyHex('${item.hex}', '${item.name}')">
               <div class="swatch-rect" style="background-color: ${item.hex};">
-                <span class="swatch-copy-pill">Copy</span>
+                <span class="swatch-copy-pill" data-figma-ignore>Copy</span>
               </div>
               <p class="swatch-title">${item.name}</p>
               <p class="swatch-hex">${item.hex}</p>
@@ -2783,6 +3022,171 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
       toastTimer = setTimeout(() => toast.classList.remove('visible'), 2400);
     }
 
+    /* ---- Auto Layout inspector + Figma manifest --------------------------
+       No HTML attribute can give Figma variables, components or auto layout.
+       An importer infers flow from computed CSS. These two controls do the only
+       two useful things a page can do: show where flow exists, and emit a
+       deterministic manifest the Sunnyside replay plugin rebuilds natively. */
+    function figmaNum(v) {
+      var n = parseFloat(v);
+      return isFinite(n) ? n : 0;
+    }
+
+    function figmaLayoutOf(el) {
+      var cs = window.getComputedStyle(el);
+      var d = String(cs.display || '').toLowerCase();
+      var mode = 'NONE';
+      if (d.indexOf('flex') !== -1) {
+        mode = String(cs.flexDirection || 'row').indexOf('row') === 0 ? 'HORIZONTAL' : 'VERTICAL';
+      } else if (d.indexOf('grid') !== -1) {
+        mode = 'GRID';
+      }
+      return {
+        mode: mode,
+        spacing: figmaNum(cs.columnGap || cs.gap),
+        counterSpacing: figmaNum(cs.rowGap || cs.gap),
+        padding: [figmaNum(cs.paddingTop), figmaNum(cs.paddingRight), figmaNum(cs.paddingBottom), figmaNum(cs.paddingLeft)],
+        align: cs.alignItems || 'stretch',
+        justify: cs.justifyContent || 'flex-start',
+        wrap: String(cs.flexWrap || 'nowrap') === 'nowrap' ? 'NO_WRAP' : 'WRAP',
+        grow: figmaNum(cs.flexGrow),
+        columns: cs.gridTemplateColumns || '',
+        positioning: (cs.position === 'absolute' || cs.position === 'fixed') ? 'ABSOLUTE' : 'AUTO'
+      };
+    }
+
+    function figmaStyleOf(el) {
+      var cs = window.getComputedStyle(el);
+      return {
+        fill: cs.backgroundColor,
+        color: cs.color,
+        radius: figmaNum(cs.borderTopLeftRadius),
+        stroke: figmaNum(cs.borderTopWidth) > 0 ? cs.borderTopColor : null,
+        strokeWidth: figmaNum(cs.borderTopWidth),
+        fontFamily: cs.fontFamily,
+        fontSize: figmaNum(cs.fontSize),
+        fontWeight: cs.fontWeight,
+        lineHeight: cs.lineHeight,
+        letterSpacing: cs.letterSpacing,
+        shadow: cs.boxShadow || 'none',
+        opacity: figmaNum(cs.opacity) || 1
+      };
+    }
+
+    function figmaSkip(el) {
+      if (!el || !el.tagName) return true;
+      var tag = el.tagName.toLowerCase();
+      if (tag === 'script' || tag === 'style' || tag === 'br') return true;
+      if (tag === 'button' && String(el.getAttribute('onclick') || '').indexOf('copy') !== -1) return true;
+      /* Browser-only chrome: copy pills, hover-only controls, the top bar and
+       * overlays. Anything marked data-figma-ignore never reaches Figma. */
+      if (el.closest && el.closest('[data-figma-ignore], .swatch-copy-pill, .section-copy-btn, .copy-btn, .workspace-topbar, .modal, .modal-overlay, .toast-notification')) return true;
+      var cs = window.getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return true;
+      if (parseFloat(cs.opacity) === 0) return true;
+      return false;
+    }
+
+    function buildFigmaManifest() {
+      var tokens = {};
+      var tokenEl = document.getElementById('figma-tokens');
+      if (tokenEl) { try { tokens = JSON.parse(tokenEl.textContent || '{}'); } catch (e) {} }
+      /* A shipped 8-sheet doc has ~1,150 elements across all sheets. The cap is
+         a guard against a runaway DOM, not a fidelity limit — leave headroom. */
+      var MAX_DEPTH = 9;
+      var MAX_NODES = 2000;
+      var count = 0;
+
+      function walk(el, depth) {
+        if (count >= MAX_NODES || figmaSkip(el)) return null;
+        var tag = el.tagName.toLowerCase();
+        var r = el.getBoundingClientRect();
+        var box = { x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) };
+        if (tag === 'svg') {
+          count++;
+          return { name: el.getAttribute('aria-label') || 'vector', type: 'VECTOR', svg: el.outerHTML, box: box, children: [] };
+        }
+        count++;
+        var layout = figmaLayoutOf(el);
+        var style = figmaStyleOf(el);
+        var rawText = el.children.length === 0 ? String(el.textContent || '').trim() : '';
+        var isText = rawText.length > 0;
+        var label = el.getAttribute('data-figma-node') || (typeof el.className === 'string' && el.className.split(' ')[0]) || tag;
+        var node = {
+          name: label,
+          type: isText ? 'TEXT' : (layout.mode !== 'NONE' || el.children.length ? 'FRAME' : 'RECTANGLE'),
+          layout: layout,
+          style: style,
+          box: box,
+          component: el.getAttribute('data-figma-node'),
+          text: isText ? rawText.slice(0, 240) : null,
+          children: []
+        };
+        if (depth < MAX_DEPTH && !isText) {
+          for (var i = 0; i < el.children.length && count < MAX_NODES; i++) {
+            var child = walk(el.children[i], depth + 1);
+            if (child) node.children.push(child);
+          }
+        }
+        return node;
+      }
+
+      var sheets = [];
+      var sections = document.querySelectorAll('.figma-sheet');
+      for (var s = 0; s < sections.length; s++) {
+        var sec = sections[s];
+        if (sec.classList.contains('hidden-sheet')) continue;
+        var root = walk(sec, 0);
+        if (root) sheets.push({ name: sec.getAttribute('data-section') || sec.id, label: sec.id, node: root });
+      }
+      return {
+        version: 1,
+        kind: 'sunnyside/figma-manifest',
+        brand: tokens.brand || document.title.split(' ')[0],
+        slug: tokens.slug || '',
+        source: window.location.href,
+        viewport: window.innerWidth,
+        tokens: tokens,
+        sheets: sheets,
+        nodes: count
+      };
+    }
+
+    function toggleAutoLayoutMode(forceState) {
+      var on = forceState !== undefined ? forceState : !document.body.classList.contains('al-mode');
+      document.body.classList.toggle('al-mode', on);
+      var btn = document.getElementById('btn-autolayout');
+      if (btn) btn.classList.toggle('active-al', on);
+      var flow = 0;
+      var flagged = 0;
+      var all = document.querySelectorAll('.figma-sheet *');
+      for (var i = 0; i < all.length; i++) {
+        var el = all[i];
+        var cs = window.getComputedStyle(el);
+        var d = String(cs.display || '').toLowerCase();
+        var isFlow = d.indexOf('flex') !== -1 || d.indexOf('grid') !== -1;
+        if (isFlow && on) { el.setAttribute('data-figma-layout', d); flow++; } else { el.removeAttribute('data-figma-layout'); }
+        var risky = cs.position === 'absolute' || cs.position === 'fixed' || String(cs.transform || 'none') !== 'none' || String(cs.backdropFilter || 'none') !== 'none';
+        if (risky && on) { el.setAttribute('data-figma-warn', '1'); flagged++; } else { el.removeAttribute('data-figma-warn'); }
+      }
+      try {
+        var url = new URL(window.location.href);
+        if (on) url.searchParams.set('autolayout', '1'); else url.searchParams.delete('autolayout');
+        window.history.replaceState({}, '', url.toString());
+      } catch (e) {}
+      showToast((on ? 'Auto Layout inspector on' : 'Auto Layout inspector off') + ' · ' + flow + ' flow containers · ' + flagged + ' to review');
+    }
+
+    function copyFigmaManifest() {
+      var m = buildFigmaManifest();
+      copyToClipboard(JSON.stringify(m), 'Copied Figma manifest · ' + m.sheets.length + ' sheets · ' + m.nodes + ' nodes');
+      return m;
+    }
+
+    /*__REPLAY_ASSETS__*/
+
+    /*__FIGMA_DOWNLOAD__*/
+
     // Auto-enable Clean Export Mode, Canvas Grid, and Single Sheet Filter from URL
     function initExportControls() {
       const params = new URLSearchParams(window.location.search);
@@ -2795,6 +3199,9 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
         document.body.classList.add('spec-mode');
         const specBtn = document.getElementById('btn-spec');
         if (specBtn) specBtn.classList.add('active-spec');
+      }
+      if (params.get('autolayout') === '1') {
+        toggleAutoLayoutMode(true);
       }
       if (params.get('grid') === '1' || params.get('canvas') === '1' || params.get('layout') === 'grid') {
         document.body.classList.add('canvas-grid-mode');
@@ -2831,6 +3238,13 @@ export function generateFigmaHtml({ slug, root = '.', outPath = null }) {
 </html>
 `
 
+  /* Bake the replay plugin bytes + download handlers into the sheet so the
+   * toolbar can hand a designer a ready-to-import plugin without any network. */
+  const replayAssets = buildReplayAssets(brandName, slug)
+  const html = htmlTemplate
+    .replace('/*__REPLAY_ASSETS__*/', () => replayAssets)
+    .replace('/*__FIGMA_DOWNLOAD__*/', () => FIGMA_DOWNLOAD_JS)
+
   const targetOut =
     outPath ||
     (slug === 'sunnyside' && !existsSync(join(resolvedRoot, 'public', 'brand', 'sunnyside'))
@@ -2864,36 +3278,69 @@ if (isMain) {
   const root = resolve(one('root', '.'))
   const slug = one('slug', '')
   const out = one('out', null)
+  const tokens = one('tokens', null)
   const all = has('all')
+  const check = has('check')
 
   if (!slug && !all) {
     console.error(`Usage:
-  node skills/sunnyside-brand-system/scripts/figma-html.mjs --slug <slug> [--root .] [--out <path>]
-  node skills/sunnyside-brand-system/scripts/figma-html.mjs --all [--root .]`)
+  node scripts/figma-html.mjs --slug <slug> [--root .] [--tokens <path>] [--out <path>] [--check]
+  node scripts/figma-html.mjs --all [--root .] [--check]`)
     process.exit(1)
   }
 
-  if (all) {
-    const slugs = new Set()
+  /* One brand per case folder is as common here as features/<slug>/ at a root.
+   * Record the base beside the slug so CSS, SVGs and the output resolve in the
+   * case that owns the tokens, not in the workspace root. */
+  const found = new Map()
+  const addFrom = (base) => {
     for (const dir of ['features', 'src/features', 'public/brand']) {
-      const full = join(root, dir)
+      const full = join(root, base, dir)
       if (!existsSync(full)) continue
       for (const entry of readdirSync(full, { withFileTypes: true })) {
-        if (entry.isDirectory()) {
-          const s = entry.name === 'design-system' ? 'sunnyside' : entry.name
-          if (findTokens(root, s)) slugs.add(s)
-        }
+        if (!entry.isDirectory()) continue
+        const s = entry.name === 'design-system' ? 'sunnyside' : entry.name
+        const caseRoot = join(root, base)
+        if (locateTokens(caseRoot, s, null) && !found.has(s)) found.set(s, caseRoot)
       }
     }
+    const caseRoot = join(root, base)
+    const caseSlug = base || basename(root)
+    if (existsSync(join(caseRoot, 'src', 'tokens.json')) && !found.has(caseSlug)) {
+      found.set(caseSlug, caseRoot)
+    }
+  }
+  if (existsSync(root)) {
+    for (const entry of readdirSync(root, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name.startsWith('.') || entry.name === 'node_modules') continue
+      if (['scripts', 'templates', 'references', 'examples', 'assets', 'fonts', 'cast', 'docs', 'tokens', 'lib', 'types', 'design', 'components', 'src', 'public', 'features'].includes(entry.name)) continue
+      addFrom(entry.name)
+    }
+  }
+
+  if (check) {
+    if (all) {
+      for (const [s, base] of [...found].sort()) {
+        const p = locateTokens(base, s, s === slug ? tokens : null)
+        console.log(`  ${s.padEnd(18)} root=${base} tokens=${p || 'MISSING'}`)
+      }
+      console.log(`\n  ${found.size} brand(s) resolved. Nothing written.`)
+    } else {
+      const p = locateTokens(root, slug, tokens)
+      const parsed = p ? readTokens(p) : null
+      console.log(JSON.stringify({ slug, root, tokens: p, name: parsed?.name, shape: parsed?.shape, primitives: parsed?.primitives.length, contrast: parsed?.contrast.length }, null, 2))
+      console.log('\n  Nothing written.')
+    }
+  } else if (all) {
     let count = 0
-    for (const s of [...slugs].sort()) {
-      const res = generateFigmaHtml({ slug: s, root })
-      console.log(`  ✓ ${res.slug.padEnd(16)} → ${res.outPath} (${res.primitives} primitives, ${res.contrast} contrast pairs)`)
+    for (const [s, base] of [...found].sort()) {
+      const res = generateFigmaHtml({ slug: s, root: base })
+      console.log(`  ✓ ${res.slug.padEnd(18)} → ${res.outPath} (${res.primitives} primitives, ${res.contrast} contrast pairs)`)
       count++
     }
-    console.log(`\n  Generated ${count} Figma HTML documentation sheets.`)
+    console.log(`\n  Generated ${count} Figma HTML documentation sheet(s).`)
   } else {
-    const res = generateFigmaHtml({ slug, root, outPath: out })
+    const res = generateFigmaHtml({ slug, root, outPath: out, tokensPath: tokens })
     console.log(`  ✓ ${res.slug} → ${res.outPath} (${res.primitives} primitives, ${res.contrast} contrast pairs)`)
   }
 }

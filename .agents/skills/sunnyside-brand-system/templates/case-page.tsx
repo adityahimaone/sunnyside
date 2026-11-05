@@ -72,9 +72,6 @@ export default function CasePage() {
               <a className="vt-more" href="#tokens">
                 Read the tokens
               </a>
-              <a className="vt-more" href={`/brand/${SLUG}/${SLUG}-figma.html`}>
-                Figma HTML sheet
-              </a>
             </div>
             <dl className="vt-facts">
               <div>
@@ -312,8 +309,6 @@ export default function CasePage() {
             </div>
           </dl>
           <p className="vt-footer__back">
-            <a href={`/brand/${SLUG}/${SLUG}-figma.html`}>Figma HTML sheet</a>
-            {' · '}
             <a href="/design-system">Back to the shelf</a>
           </p>
         </div>

@@ -6,14 +6,83 @@ and an audit that names what it could not verify.
 
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand, Clearing, Porphyry, Jakarta, Bluewater, Vesper, Halation, and Tavola. The method travels; the marks do not.
 
-## v4.9: automated 8-sheet white-background Convertible Figma / HTML-to-Design Documentation Sheet (`<slug>-figma.html`)
+## v4.9.6: no copy chrome, round badges, no patterns page
 
-- **Convertible Figma HTML Generator (`scripts/figma-html.mjs` + `templates/figma-doc.html`).** Generates a 100% self-contained, zero-CDN, pure white (`#FFFFFF` / `#FAFAFA`) 8-section HTML documentation file (`public/brand/<slug>/<slug>-figma.html`) directly from `tokens.json`, `<slug>-tokens.css`, and SVG marks (`mark.svg`, `mark-reverse.svg`, `mark-compact.svg`, `glyph.svg`, `cast/*.svg`).
-- **8 Isolated `<section class="figma-sheet">` Artboards.** Pre-renders `01 Colors` (Primary/Secondary/Tertiary swatches, 10-step OKLCH scales `10`–`100`, Neutral scale, Semantic scales, and honest Contrast Ledger), `02 Primitives & Foundations` (spacing bars, radius tokens, shadow plates), `03 Typography` (Display/Reading/Mono font showcase cards + full type scale specimen table), `04 Logo & Mark Family` (64×64 construction blueprint grid + lockups + 16px optical scaling), `05 Companion Cast & Brand Assets` (all 6 inlined `cast/*.svg` marks + surface cards), `06 UI Components & States` (buttons matrix, form inputs, selection controls, tabs & badges), `07 Modals, Alerts & Overlays`, and `08 Patterns, Token Registry & Copyable CSS Token Sheets`.
-- **Built-in Figma / HTML-to-Code Ergonomics.** Includes a sticky filter toolbar, `Spec Inspector (?spec=1)` overlaying dashed `#9747FF` Figma component node boundaries (`data-figma-node="❖ ..."`), `Clean Export Mode (?clean=1)` hiding toolbar chrome for 1:1 `html.to.design` / Builder.io / Penpot / OpenPencil import, and one-click `Copy Section HTML` buttons on every sheet banner.
-- **Showcase Page Integration.** Every design-system showcase page (React/TSX and Astro) and the case shelf link directly to `/brand/<slug>/<slug>-figma.html` in the Hero, Tokens section, and Footer.
+Diagnosed from a second exported `.fig` (9 pages, 1242 nodes).
+
+- **Copy pills never reach Figma.** The 41 `swatch-copy-pill` "Copy" controls were browser chrome: a `position:absolute` span with `opacity: 0` until hover, which the manifest happily captured. They now carry `data-figma-ignore`, and the manifest builder skips that attribute, the known copy classes, and any element whose computed `opacity` is 0. Text nodes per brand dropped 469 → 369.
+- **Badges keep their size.** A chip plate was still going through `applyLayout()`, so a 32×32 number badge hugged its 14×18 label and stopped being a circle. Chips now skip layout entirely; the plate stays at its CSS size and centres the label.
+- **The number badge is a circle.** `.sheet-num-badge` was `border-radius: 8px` on a 32×32 box — a rounded square. It is now `50%`, so Figma receives `cornerRadius: 50` and clamps to a true 16px radius.
+- **The patterns page is off by default.** It is mostly CSS token dumps and copy buttons. `build()` filters sheets matching `/patterns|tokens/i`; a new **Include the patterns / token-sheet page** checkbox turns it back on. Vesper now builds 7 pages instead of 8, and the summary reports `skipped 1 sheet(s)`.
+- Smoke fixture grew a `patterns` sheet and a chip, and now asserts the chip plate keeps its 72×24 box, that one page is filtered, and that the skip is reported.
+
+## v4.9.5: rows stop overflowing, and chips keep their plate
+
+Diagnosed from a real exported `.fig` (8 pages, 1139 nodes): **37 text nodes spilled out of their parent**, starting with `sheet-title-row`, where "Vesper Color System" wrapped to two lines inside a row sized for one.
+
+- **One-line text stays one line.** A label whose measured height is within one line (`box.h <= fontSize × 1.6`) is created `WIDTH_AND_HEIGHT`; only genuinely wrapped copy gets `HEIGHT` + the measured column. A 1–3% font-metric difference used to tip a heading into a second line the row could not hold.
+- **`space-between` keeps its length.** Hugging a frame with `SPACE_BETWEEN` collapses the distribution — the banner's right block sat next to the title instead of at the far edge. Distributed justification now forces the primary axis to `FIXED`.
+- **Horizontal rows hug their height.** `counterAxisSizingMode` is `AUTO` for HORIZONTAL and `FIXED` for VERTICAL, so a taller-than-measured line grows its row instead of overflowing it.
+- **Text with a background becomes a chip frame.** A leaf that carried both text and a plate (badges, pills, PASS/FAIL tags) was flattened to a TEXT node and lost its background. It is now a frame with the plate plus a centred text child — 103 / 105 / 179 chips per brand, and 236 auto-layout frames for Vesper instead of 182.
+- **Absolute boxes grow to fit.** Frames with `layoutMode: NONE` cannot hug, so a post-pass grows them to their children's union. Never shrinks — the browser height is still the intent.
+- **Verified against the exported file:** applying the new rules to `test ds.fig` in openpencil took vertical overflow from **37 → 3**, and the fit pass took it to **0**. The smoke fixture now also asserts a chip frame, a one-line label at `WIDTH_AND_HEIGHT`, and a paragraph at `HEIGHT`.
+
+## v4.9.4: the replay actually looks like the sheet
+
+- **Invisible text, fixed at the root.** `applyStyle()` writes the CSS *background* into `fills`. For text, the visible ink is CSS `color`, and 366 of 469 Vesper labels have a transparent background — so the overwrite blanked 78% of all type. Text ink is now applied after the style pass. Every text node reports `inked` in the summary (469/469, 480/480, 731/731).
+- **Text wraps instead of running off.** Text nodes now get `textAutoResize: HEIGHT` and the measured column width, plus `lineHeight` from computed CSS. Before, Figma's default auto-width turned long labels into single lines.
+- **Fixed-height frames no longer leave voids.** Auto-layout frames hug the primary axis unless a child actually needs FILL. A CSS `min-height` box used to become a 3,000px frame with everything stacked at the top.
+- **Shadows survive.** `boxShadow` is captured per node and mapped to `DROP_SHADOW` / `INNER_SHADOW` (first shadow only, colour parsed from either end of the string). Cards no longer render flat — 57 / 58 / 95 shadows per brand.
+- **Brand faces are the sheet's faces.** `--font-sans` / `--font-body` / `--font-mono` were hardcoded to Plus Jakarta Sans / Inter / JetBrains Mono; they now lead with the brand's reading and mono faces, keeping the old defaults as fallbacks. Vesper's manifest went from 222 JetBrains Mono + 212 Plus Jakarta Sans nodes to 237 Archivo + 224 DM Mono, and font fallbacks dropped to **0**.
+- **Font matching is spelling-aware.** `SemiBold` vs `Semi Bold` is a different string in Figma and a miss silently falls back to Inter. `loadFont` now tries every spelling, skips CSS generics, and reports any real fallback in the summary.
+- **Vectors scale to their box** instead of keeping the SVG's intrinsic size.
+- **New UI option:** *Raise text below 12px to 12px* (on by default) — 133 / 135 / 209 labels per brand. Turn it off for exact type sizes.
+- **Installable fonts ship with the plugin.** `figma-replay.mjs` copies `.ttf`/`.otf` from the brand's `assets/fonts` into `<out>/fonts/` for a one-drag Font Book install; woff2 is skipped because Font Book will not take it.
+- Smoke tests now fail on any text node without a fill, assert the caption is boosted and `HEIGHT`-sized, and the stub accepts Figma's Google Fonts roster so the fallback count is realistic. All suites and 32 unit tests pass.
+
+## v4.9.3: dynamic-page compatibility fix
+
+- **Fixed a real Figma runtime error:** `set_currentPage: Cannot call with documentAccess: dynamic-page. Use figma.setCurrentPageAsync instead.` The replay manifest declares `documentAccess: "dynamic-page"`, which makes `figma.currentPage` read-only. Both Figma plugin templates now go through a `usePage()` helper that awaits `figma.setCurrentPageAsync(page)` and only falls back to the synchronous setter on runtimes without it (OpenPencil, older editors).
+- Page cleanup and replace-mode loops now call `figma.loadAllPagesAsync()` when available and guard each page individually, so an unloaded page's `children` cannot throw a false "failed" report.
+- **Regression guards:** `figma-smoke.mjs` reads the sibling `manifest.json` and fails any `documentAccess: dynamic-page` plugin that still writes `figma.currentPage`; `figma-replay-smoke.mjs` always fails on a sync write. Verified that an old generated plugin now fails with exactly that message.
+- `figma-forge.mjs` now reuses the existing `manifest.json` `id` on regeneration instead of minting one from `Date.now()`. A changing id made Figma treat the local plugin as new and forced a re-import after every token edit. All three brand plugin IDs are stable again.
+- All six affected `code.js` files regenerated for vesper, wildflower-wind and jakarta. Every smoke suite and all 32 unit tests pass; `syncPageWrites: 0`.
+
+## v4.9.2: Auto Layout from the HTML page, and a native replay path
+
+- **The generated sheet now has an `⇄ Auto Layout` toggle.** `?autolayout=1` outlines CSS flex/grid flow containers and flags absolute/transform/`backdrop-filter` layers that an importer cannot infer. Non-invasive: outlines only, no geometry changes, so the inspected layout is the imported layout.
+- **`⤓ Copy for Figma` emits a `sunnyside/figma-manifest`.** The page measures its own DOM (`getComputedStyle` + `getBoundingClientRect`) and serialises the layout tree, colours, type, token payload, inline SVG and `data-figma-node` component names. A compact token payload is embedded in the sheet from `tokens.json`, so both emitters read one source.
+- **New `scripts/figma-manifest.mjs`** runs that function in headless Chrome (`playwright-core` + Chrome are optional; a missing browser degrades to the paste-in-UI flow instead of failing the handoff). Real Vesper sheet: 8 sheets, 994 nodes, 561 KB.
+- **New `scripts/figma-replay.mjs` + `templates/figma-replay-plugin.js` + `templates/figma-replay-ui.html`.** One Figma plugin rebuilds the manifest natively: HORIZONTAL / VERTICAL / GRID auto layout with padding, spacing, alignment, wrap, `layoutGrow`, absolute children; variable collections; paint styles bound to variables; text styles; live text; rectangles; SVG vectors; named components. Not a general CSS parser — a replay of a known schema.
+- **New `scripts/figma-replay-smoke.mjs`.** Executes the plugin against a Figma API stub with a fixture and, optionally, a real sheet manifest; asserts auto-layout modes, variables, bound paints, text and vector nodes, components and a clean close.
+- **`figma-handoff.mjs --with-replay`** chains sheet → manifest → replay plugin → all three smoke tests, and prints both Figma paths. Verified on vesper (182 auto layouts), wildflower-wind (184) and jakarta (154).
+- Why this is not the converter ruled out in v4.9.1: the HTML page we generate does the measurement and emits a typed manifest; the plugin replays it. No arbitrary CSS, no heuristics, no third-party importer.
+- **Idempotent migration.** The replay UI has a **Replace existing generated pages** checkbox (on by default). Re-running into an existing file removes only the `NN · <sheet>` pages about to be recreated, so a designer's own pages are untouched. `figma-replay-smoke.mjs` pre-seeds a duplicate page and asserts it is replaced. `references/figma-export.md` now has a full Import & migration step-by-step (desktop-app requirement, both paths, in-place upgrade of legacy files, verification checklist, troubleshooting).
+
+## v4.9.1: Figma handoff without a new converter
+
+- **Synced the upstream Figma HTML sheet into this build.** `scripts/figma-html.mjs` + `templates/figma-doc.html` generate an 8-sheet white `<slug>-figma.html` for `html.to.design`, Builder.io, Stitch to Figma, Penpot and OpenPencil. Added `--tokens <path>`, `--check`, and `--all` discovery that also finds per-case roots (`<case>/src/tokens.json`, `<case>/features/<slug>/tokens.json`). Verified against all three token shapes in the workspace: `primitives[]` (vesper, wildflower-wind) and `color{}` (jakarta, 46 primitives).
+- **New `scripts/figma-bind.mjs` + `templates/figma-bind-plugin.js`.** A thin post-processor, not a second HTML-to-Figma converter. It binds SOLID fills/strokes to local COLOR variables by measured RGB, applies local text styles by font size + family, and optionally re-applies Figma's `inferredAutoLayout` to flat imports (`--infer-layout`, off by default). Falls back to creating the primitive colour collection when no system exists yet.
+- **New `scripts/figma-bind-smoke.mjs`.** Runs the generated plugin against a Figma API stub twice — with a system present and on an empty file — and fails on unbound paints, unstyled text, modified frames that already had auto layout, swallowed exceptions, or a success message after doing nothing.
+- **New `scripts/figma-handoff.mjs`.** One command runs the sheet, the build plugin, the binder and both smoke tests, deriving CSS / brand / name from the token file. `--check` is a dry run; `--skip-*` and `--no-smoke` allow single-step regeneration.
+- **Two real bugs fixed in `scripts/figma-forge.mjs`.** `byName()` was called at four colour fallbacks but never defined, so `--check` crashed for any brand without a matching semantic token. `collectTypeRoles()` passed array-shaped `type[]` rows through `entries()`, which drops `size`/`leading`/`tracking` — every role was skipped and the exported file had zero text styles. Vesper now exports 11 text styles instead of 0.
+- **The decision behind it.** Figma's Plugin API can set auto layout (`layoutMode`, `itemSpacing`, `padding*`, `HUG`/`FILL`, `GRID`), but rebuilding a general HTML→Figma converter duplicates a mature category. Doop's Copy for Figma is documented as "a snapshot, not a sync: auto layout, variables, and components aren't recreated", so HTML now goes straight to an importer. `figma-forge.mjs` owns the system; the binder owns the page.
+- **`SKILL.md` gained a FIGMA HANDOFF section** with the three commands, the order of operations in Figma, the `--infer-layout` warning, honest limits and an audit gate. The post-build `[B]` option now names the full handoff.
+- All 32 existing unit tests still pass.
+
+## v4.9: one Surface & Style selector, 28-contract style library, and scoped modern overrides
+
+- **Q1 is now one `Surface & Style` question, not a second style question.** Step 0 stays at seven questions and shows **Auto + 7 named picks**: Paper & ink (#1), Cardboard & steel (#5), Liquid glass (#19), Frosted glass (#15), Boxes of different sizes (#20 + R4), Blueprint grid (#4) and Cockpit panel (#13). A freeform `Other` word resolves through aliases to a contract, composition recipe, behaviour or "out of scope"; there is no Q8.
+- **New `references/styles.md`.** It indexes the 18 canonical contracts, defines 10 modern contracts (#19–#28) on the same nine slots, and adds 8 composition recipes, 5 behaviours, an alias table, recency flags, modern prompt signals and scoped house-rule overrides. Determinism law: a style name is not implementable until it resolves to all nine slots, and unknown or out-of-scope words fall back to Auto with a one-line explanation.
+- **`references/surfaces.md` repositioned** as the canonical #1–#18 implementation shelf. Its prompt map now carries modern signals, and the old "eight materials in the question" rationale has been rewritten around the 28-contract library and the freeform `Other` input.
+- **`references/form-theming.md` extended** with exact field recipes for every named Q1 contract and modern style #19–#28, a one-row-per-contract rule, and a scoped glass / mesh / hard-offset contrast clause.
+- **Pillar V and the silent audit gate updated.** Scoped overrides allow `backdrop-filter` only for #15 / #19 / #21 / #27 panes and nav chrome, one glow or mesh gradient for #21 / #22, and one hard offset shadow at rest for #26 / #28. Every other hero house rule remains absolute; reading copy stays on solid plates or measured scrims, and pane / mesh contrast failures must be published in §03.
+- **Section 04 can now explore modern idioms** such as Frosted plate — Rejected or Scroll-reactive glass — Shipped — navbar. A rejected modern idiom still counts toward the stated "tried" number, and its reason must name the house rule or contrast pair it broke.
+- **Historical note.** The v4.5 and v4.6 entries below are retained as changelog history. Where they say "eight surfaces in the question" or "four footer shapes", the current engine uses the v4.9 selector and five footer shapes.
 
 ## v4.6: eight hero shapes, four footer shapes, and two new audit gates
+
+> Historical: v4.9 ships five footer shapes. This entry records when the fourth was added.
 
 - **Hero shapes grew from 5 to 8.** Step 0's hero question now offers A · Banner then a number row, B · Text left photo right, C · Live demo on top, D · One giant sheet, E · Full-screen photo, F · One object isolated, G · No photo all type, H · Stacked colour bands. Every option opens by stating where the type sits relative to the image — below, beside, inside, on, around, or in a rhythm — because that relation, not the layout, is what a picker is actually choosing.
 - **Pillar V is now a non-template law, not a catalogue.** It opens by naming the hero the library had been drifting into (left reading plate, right floating glass card, 4-cell bottom row) and bans it. Shapes are specified by relation, at most two shapes may contain a rectangular type panel, and no case may pick a shape the two most recent cases already used.
@@ -22,6 +91,8 @@ Built from shipped cases (listed in `references/case-evidence.md`), starting wit
 - **Applied to the library.** Manifest moved to Shape D (a kraft waybill with the type inside the sheet and an 18-tooth tear), Daybook and Tavola to Shape E done strictly (type directly on the photograph, no plate and no floating readout), Quieta to Shape G, Arête to Shape H. Footers went to F4, F2, F3, F1 and F2 respectively, so no two consecutive cases share a family.
 
 ## v4.5: plain-geometry Step 0, 18-surface catalogue, and scope parity
+
+> Historical: v4.9 replaces the eight-material Q1 with one `Surface & Style` selector and a 28-contract library. This entry records the original 18-surface catalogue.
 
 - **Step 0 rewritten as seven plain-English questions.** Every option is now named by what a non-designer already knows — *Cardboard & steel*, *Airport signage*, *Text left, photo right*, *Shape with a hole cut out* — instead of a case codename or a design term. Labels cap at 45 characters; the exact geometry moves into each option's `description`. Rail and Hero are split into two independent questions so a Rail B choice can no longer silently pull in a Hero the user did not pick.
 - **18-surface catalogue (`references/surfaces.md`).** Eight surfaces ship in the question; the other ten are reached through a prompt-mapping table, so a brief that says "I'm building a metro app" resolves to *Transit map* without a second question. Each surface fixes the same nine slots — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion` — plus a "fails loudly if" guardrail, so two agents given the same surface land on the same CSS.
@@ -106,6 +177,8 @@ repo. Adopted what held up, rejected what would have cost more than it saved.
 SKILL.md                      the whole method in one read
 references/research.md        studying a category, DESIGN.md, free-asset licences
 references/case-evidence.md   every case, their numbers, the recurring decisions
+references/surfaces.md       18 canonical nine-slot contracts (#1-#18)
+references/styles.md         28-contract library, aliases, recipes, behaviours, overrides
 references/gates.md           the gate checks and the QA checklist
 references/immersive.md       the seven recipes with code
 references/tokens-and-docs.md token layers and the llms twin
@@ -114,8 +187,8 @@ references/logo-system.md     grid, family, favicon
 references/form-theming.md    the form kit every case ships
 references/craft-bar.md       the drawn-track bar and the marks composition
 scripts/                      init, detach, gates, brand-ref, assets, design-md, forge, cast,
-                              score, audit, qa, board, icons, figma, figma-html, sync-skill.sh
-templates/                    design system page, single page, case page, figma-doc, guidelines, audit
+                              score, audit, qa, board, icons, figma, sync-skill.sh
+templates/                    design system page, single page, case page, guidelines, audit
 examples/                     Sunnyside and Vitrine, plus brand-forge configs
 ```
 

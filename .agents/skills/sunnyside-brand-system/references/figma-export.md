@@ -4,26 +4,8 @@ A design system that only exists as HTML is a website. The export to Figma is
 what makes it a system other people can use: variables someone can bind, styles
 someone can apply, components someone can instance.
 
-This file is the contract for `scripts/figma-html.mjs` and `scripts/figma-forge.mjs`. One token source, three emitters (`figma-html`, `figma` plugin, and `openpencil` `.fig`), and a list of what neither of them can carry.
-
-## 0 · Convertible Figma / HTML-to-Design Documentation Sheet (`figma-html.mjs`)
-
-For instant 1:1 import into Figma (`html.to.design`, Builder.io, Code-to-Design), Penpot, or OpenPencil without running a desktop plugin, `scripts/figma-html.mjs` generates a 100% self-contained, zero-CDN, pure white (`#FFFFFF` / `#FAFAFA`) 8-section HTML file at `public/brand/<slug>/<slug>-figma.html` (template reference: `templates/figma-doc.html`):
-
-```bash
-# Single system
-node scripts/figma-html.mjs --slug <slug> --root .
-
-# All systems in a workspace
-node scripts/figma-html.mjs --all --root .
-```
-
-Why it imports cleanly into HTML-to-Figma tools:
-- **8 isolated `<section class="figma-sheet">` artboards** on a `#FFFFFF` canvas (`01 Colors`, `02 Primitives & Foundations`, `03 Typography`, `04 Logo & Mark Family`, `05 Companion Cast & Assets`, `06 UI Components`, `07 Modals & Overlays`, `08 Patterns & CSS Token Sheets`).
-- **100% static pre-rendered DOM & inlined SVGs:** Every color swatch, 10-step OKLCH scale, contrast card, spacing bar, and SVG vector (`mark.svg`, `mark-reverse.svg`, `mark-compact.svg`, `glyph.svg`, `cast/*.svg`) is rendered directly in the HTML—never injected via client-side `DOMContentLoaded` loops that headless importers miss.
-- **Clean Export Mode (`?clean=1` or `?figma=1`):** Strips the sticky navigation bar and helper buttons so `html.to.design` imports only the pure white documentation sheets.
-- **One-click `Copy Section HTML`:** Every sheet banner has a `Copy Section HTML` button so a designer can paste individual `<section>` artboards into Figma or code tools.
-- **Showcase Page Links:** Always link to `/brand/<slug>/<slug>-figma.html` in the showcase page's Hero and Footer.
+This file is the contract for `scripts/figma-forge.mjs`. One token source, two
+emitters, and a list of what neither of them can carry.
 
 ## Why a generator
 
@@ -254,3 +236,225 @@ advances rather than on the fallback's metrics.
 | A mark sits on a white tile | `createNodeFromSvg` returns a frame with a white fill; clear it |
 | A flipped group imports as dashes | Fold `scale(1,-1)` into the coordinates, and only when it is the file's only transform |
 | The default `Page 1` survives | The plugin removes an empty `Page N` at the end. A file whose first page is empty reads as unfinished |
+
+## The third emitter: an HTML sheet, and a binder
+
+The two emitters above rebuild the *system* from tokens. Neither one imports the
+*page*. That job belongs to an HTML importer, and the repo now ships the input
+for it plus the plugin that reconnects the result.
+
+```
+tokens.json ─┬─ figma-html.mjs   → <slug>-figma.html ─→ html.to.design / Stitch ─┐
+             ├─ figma-forge.mjs  → build plugin (variables, styles, variants) ──┼→ Figma
+             └─ figma-bind.mjs   → bind plugin  (measured RGB → variables) ─────┘
+```
+
+`scripts/figma-html.mjs` writes one self-contained white-background HTML file
+with eight sheets — colours, primitives, typography, logo, cast, components,
+overlays, patterns — inlined SVG marks, `data-figma-node` labels, `?clean=1` for
+a chrome-free capture, and a 1440px two-column canvas-grid mode sized for Doop
+and Figma import limits. It is **not** a Figma file and emits **no** auto-layout
+metadata; standard CSS flex/grid is what the importer reads.
+
+```bash
+node scripts/figma-html.mjs --slug <slug> --root . --check
+node scripts/figma-html.mjs --slug <slug> --root .
+```
+
+`--tokens <path>` overrides discovery for repos that keep tokens at
+`<case>/src/tokens.json`. `--all` scans both root-level `features/` and per-case
+folders. Both `primitives[]` and `color{}` token shapes are supported; a case
+with no `contrast` array simply gets an empty ledger.
+
+`templates/figma-doc.html` is the shipped reference output for Setout (Case 24).
+The generator builds its HTML inline, so that file is documentation, not an
+input — do not wire it into the build.
+
+### Why a binder and not another converter
+
+Figma's Plugin API can set `layoutMode`, `itemSpacing`, `padding*`, HUG/FILL,
+`GRID` tracks and `layoutPositioning` programmatically, so auto layout during
+generation is entirely possible. It is also already done: html.to.design,
+Stitch to Figma, Builder.io and Web to Design all map DOM + computed CSS to
+native Figma Auto Layout. A home-grown converter would duplicate that category
+and lose on fidelity — a July 2026 comparison put html.to.design at ~65% on a
+grid dashboard with imperfect Auto Layout grouping.
+
+What no importer does is bind your OKLCH tokens to Figma variables. That is the
+one honest gap, and it is ~one screen of API:
+
+```bash
+node scripts/figma-bind.mjs --slug <slug> --root . --out design/figma/<slug>-bind
+node scripts/figma-bind-smoke.mjs design/figma/<slug>-bind/code.js
+```
+
+The generated plugin walks the selection (or the whole page), matches each SOLID
+fill and stroke to a local COLOR variable by **measured RGB**, and each text node
+to a local text style by font size + family. Nothing is guessed by name. If no
+local COLOR variables exist it creates the primitive collection from the token
+file and reports that it did — colours only, not modes, aliases or styles.
+
+`--infer-layout` turns on `FrameNode.inferredAutoLayout`, Figma's own heuristic,
+for flat imports such as **Doop's Copy for Figma**. Doop's docs are explicit:
+*"It's a snapshot, not a sync: auto layout, variables, and components aren't
+recreated."* Use the heuristic only there. Applying `layoutMode` to frames that
+an HTML importer already laid out reflows their children and wrecks the import,
+so the option is off by default and the smoke test asserts untouched frames stay
+untouched.
+
+### Auto Layout straight from the page
+
+No HTML attribute can give Figma variables, components or auto layout.
+`data-figma-node="❖ …"` is a human label shown in Figma Specs mode, not an
+import directive. An importer infers flow only from computed CSS, so the sheet
+ships two controls that do what a page actually can:
+
+- **⇄ Auto Layout** (`?autolayout=1`) outlines every flex/grid container and
+  flags absolute, transform and `backdrop-filter` layers. The Setout reference
+  has 49 flex rules, 16 grid rules, 50 gaps and only 2 absolute layers — a good
+  import surface, with the two absolute layers to fix by hand.
+- **⤓ Copy for Figma** walks the live DOM and emits a
+  `sunnyside/figma-manifest`: layout tree, colours, type, tokens, inline SVG and
+  component names. `scripts/figma-manifest.mjs` does the same in headless
+  Chrome; `scripts/figma-replay.mjs` seeds that JSON into a Figma plugin that
+  builds HORIZONTAL / VERTICAL / GRID auto layout, variables, bound paint
+  styles, text styles, live text, vectors and components in one pass.
+
+```bash
+node scripts/figma-handoff.mjs --slug <slug> --root . --with-replay
+```
+
+That is the only case here where a plugin was built, and it is **not** a general
+HTML-to-Figma converter: a page we generate measures itself and emits a typed
+manifest; the plugin replays it. No CSS parsing, no guessing, no heuristic. It
+also removes the third-party importer, which is why `--with-replay` is a
+separate path rather than the default.
+
+### One command
+
+`scripts/figma-handoff.mjs` runs all three emitters and both smoke tests,
+deriving CSS, brand folder, name and essence from the token file:
+
+```bash
+node scripts/figma-handoff.mjs --slug <slug> --root . --check
+node scripts/figma-handoff.mjs --slug <slug> --root .
+```
+
+`--skip-sheet`, `--skip-forge`, `--skip-bind` and `--no-smoke` let one step be
+regenerated alone; `--infer-layout` passes through to the binder.
+
+### Why a replay can look empty, and what to check
+
+A sheet that imports as coloured rectangles with blank space is almost always
+one of four things, in this order:
+
+1. **Text has no fill.** `applyStyle()` sets `fills` from CSS `background-color`.
+   Text ink is CSS `color`, and most labels have a transparent background — so
+   the style pass blanks them. Ink must be applied *after* the style pass. The
+   summary reports `N texts (N inked)`; if those numbers differ, this regressed.
+2. **Text is auto-width.** Without `textAutoResize: HEIGHT` and a measured
+   column width, Figma turns long labels into one very wide line.
+3. **A frame kept its CSS height.** `min-height` and grid tracks become a tall
+   fixed frame with children stacked at the top. Hug the primary axis unless a
+   child needs FILL.
+4. **The font never loaded.** A missing family falls back to Inter silently.
+   `SemiBold` and `Semi Bold` are different strings. The summary names the
+   fallback count; `fonts/` next to the plugin holds the installable faces.
+5. **A text node spilled out of its row.** A heading measured as one line in the
+   browser can wrap to two in Figma — a 1–3% metric difference is enough — while
+   the row keeps the browser's one-line height. One-line labels must be
+   `WIDTH_AND_HEIGHT`, genuinely wrapped copy `HEIGHT` + the measured column,
+   horizontal rows must hug their height, and a `layoutMode: NONE` box must grow
+   to its children. `sheet-title-row` was the first casualty of getting this
+   wrong; the exported `.fig` showed 37 such overflows.
+6. **A badge lost its plate.** A leaf that carries both text and a background is
+   a chip. Flattening it to a TEXT node keeps the ink and drops the plate, so it
+   has to be a frame with the plate plus a centred text child. The plate must
+   then skip auto layout: a 32×32 badge that hugs a 14×18 label is no longer a
+   circle.
+7. **Browser chrome shipped into the file.** Copy pills are absolutely
+   positioned, `opacity: 0` until hover, and still land in the manifest — 41 of
+   them per brand. Mark them `data-figma-ignore` in the sheet, and have the
+   builder skip that attribute, the copy classes and any zero-opacity element.
+8. **A page nobody needs.** The patterns / token-sheet page is a CSS dump; it is
+   filtered by default and the UI has an opt-in checkbox.
+
+To check an exported file rather than guess: `openpencil info <file>.fig`, then
+`openpencil eval <file>.fig --stdin` with a walk that compares each child's
+`y + height` against its parent's `height`. That is how the 37 overflows were
+found, and the same walk proves the fix (37 → 0).
+
+### Order of operations in Figma
+
+1. Run the **build** plugin from `figma-forge.mjs` in a new file.
+2. Import `<slug>-figma.html` with an HTML-to-Figma importer.
+3. Select the imported frames and run **`<Name>` — bind**.
+
+Do not insert Doop between steps 1 and 2 for the Figma deliverable. The skill
+writes HTML directly; Doop is a multiplayer canvas and MCP surface, and its
+export discards the structure you just built.
+
+## Import & migration, step by step
+
+Local plugins require the **Figma desktop app** (browser Figma cannot import a
+local `manifest.json`). A Figma **Design** file must be open — not FigJam,
+Slides or Buzz. Install the brand `.ttf` files first; a `.fig` stores family
+names, not font data.
+
+**Path B · native replay (one plugin, everything)**
+
+1. `node scripts/figma-handoff.mjs --slug <slug> --root . --with-replay`
+2. Figma desktop → open/create the Design file → Figma menu → **Plugins →
+   Development → Import plugin from manifest…** →
+   `design/figma/<slug>-replay/manifest.json`
+3. **Plugins → Development → `<Name>` — replay**. The textarea is pre-filled
+   from the seed manifest; click **Build in Figma**.
+4. Leave **Replace existing generated pages** checked when re-importing. It
+   removes only the `NN · <sheet>` pages about to be recreated, so your own
+   pages are never touched. Uncheck it to deliberately append a second set.
+
+Without headless Chrome there is no seed: open the sheet, click
+**⤓ Copy for Figma**, paste into the textarea, then build.
+
+**Path A · importer + bind**
+
+1. Import `design/figma/<slug>/manifest.json` (the build plugin) and run it, so
+   variables, paint styles and text styles exist *before* anything is bound.
+2. Serve the sheet if the capture extension will not read `file://`:
+   `python3 -m http.server 8080 --directory public/brand/<slug>` then open
+   `http://localhost:8080/<slug>-figma.html?clean=1&grid=1`.
+3. Capture with html.to.design / Stitch to Figma → import into the file.
+4. Import `design/figma/<slug>-bind/manifest.json`, select the imported frames
+   (or nothing for the whole page), run **`<Name>` — bind**.
+
+**Migrating an existing Figma file without re-importing**
+
+Run the build plugin on that file, then select the existing frames and run the
+bind plugin. Colours bind by measured RGB and text by font size + family, so
+legacy layers are upgraded in place. If those layers are flat, regenerate the
+binder with `--infer-layout` to add Figma's heuristic auto layout. For the
+reverse direction (Figma → HTML/tokens), Doop's Figma import takes a file link
+plus a `figd_` personal access token with `file_content:read`; for tokens only,
+the Figma REST variables endpoint is the machine-readable source.
+
+**Verify after import:** variables panel shows `<Name> / Colour` (Light),
+`/ Spacing`, `/ Radius`; paint styles `Colour/*` and text styles `Type/*` exist;
+frames show the auto-layout badge and reflow when resized; components carry the
+`❖` names. A substituted font means the `.ttf` files are not installed.
+Figma's 10,000px frame limit is why the sheet offers `?grid=1` (2-column
+canvas) and `?sheet=N` (one sheet at a time).
+
+**Troubleshooting:** no *Import plugin from manifest* entry → you are in browser
+Figma; use the desktop app and right-click the canvas → Plugins → Development.
+`set_currentPage: Cannot call with documentAccess: dynamic-page` → the plugin
+was generated before v4.9.3. Regenerate with `figma-handoff.mjs --with-replay`
+(or `figma-replay.mjs`); local dev plugins re-read `code.js` on every run, so no
+re-import is needed. The generated code must call `await
+figma.setCurrentPageAsync(page)` — assigning `figma.currentPage` is read-only
+under dynamic-page, and the smoke tests now fail on any such write.
+Manifest rejected → delete the `id` line (local plugins do not need a published
+ID) or generate one with **New Plugin…**. `Loading n pages for plugin` → our
+manifests already set `documentAccess: dynamic-page`. Nothing bound → the build
+plugin was not run first, or a colour is not in the token file. Re-running the
+replay with Replace unchecked adds a second set of 8 pages — it is a build, not
+a sync.

@@ -1,15 +1,21 @@
-# Surface Catalogue — 18 materials, each with an implementation contract
+# Surface Catalogue — 18 canonical contracts in a 28-contract style library
 
-Step 0 asks one Surface question. These are the 18 surfaces it can resolve to. Eight are in the
-question itself; the other ten live here so an agent can reach for them when the theme clearly
-implies one, without inventing a material nobody can build.
+Step 0 asks one `Surface & Style` question. This file owns the **18 canonical nine-slot contracts**
+(#1–#18): print, industrial, editorial, screen and public materials. `references/styles.md` is the
+front door and the rest of the library: it indexes these 18, defines the **10 modern contracts**
+(#19–#28), and carries the alias table, 8 composition recipes, 5 behaviours, recency flags and
+scoped house-rule overrides.
 
-Every surface is **universal**: it is a material, not an industry. Paper & ink works for a bank, a
+Q1 shows **Auto + 7 named picks**, not just these 18 materials. Auto can resolve to any of the 28
+contracts through the prompt maps; a freeform `Other` word resolves through the alias table to a
+contract, a recipe, a behaviour or "out of scope". No second style question is added.
+
+Every contract is **universal**: it is a material, not an industry. Paper & ink works for a bank, a
 record label, a shipping network and a hospital. If an option only makes sense for one kind of
 brand, it is a theme, not a surface — put it in the archetype, not here.
 
-Every surface is **implementable from a prompt** because it is defined by the same nine slots. Two
-agents given the same surface and the same brand hue must land on the same CSS. That is the test:
+Every contract is **implementable from a prompt** because it is defined by the same nine slots. Two
+agents given the same contract and the same brand hue must land on the same CSS. That is the test:
 if a slot can be filled two different ways by two careful agents, the slot is underspecified.
 
 ---
@@ -31,6 +37,9 @@ if a slot can be filled two different ways by two careful agents, the slot is un
 `demo` is not a slot — it is the consequence. The 210px live demo box in Section 04 must show the
 surface doing its job: a card, a rule, a table row, a scanline. If the demo would look identical
 under two surfaces, the surfaces are not different enough to both be options.
+
+The 10 modern contracts in `references/styles.md` §19–§28 use **exactly these nine slots**. They add
+no tenth slot and no special-case CSS vocabulary; that is what makes a trend word deterministic.
 
 ---
 
@@ -242,7 +251,11 @@ under two surfaces, the surfaces are not different enough to both be options.
 
 ## Choosing one from a prompt
 
-Do not ask a second question. Read the theme and pick, then say which and why in one line.
+Do not ask a second question. Read the theme, the photographs and — for a freeform style word — the
+alias table in `styles.md` §5, then say which contract and why in one line. The first table maps the
+canonical materials; the second mirrors the modern signals from `styles.md` §9.
+
+### Canonical signals (#1–#18)
 
 | Prompt signals | Surface |
 |---|---|
@@ -260,26 +273,59 @@ Do not ask a second question. Read the theme and pick, then say which and why in
 | railway, station, enamel, heritage, signage | **Enamel sign** |
 | studio, craft, ceramics, atelier, plaster | **Chalk plaster** |
 
+### Modern signals (#19–#28, plus #15 frosted glass)
+
+`R1–R8` are composition recipes and `B1–B5` are behaviours in `styles.md` §6–§7; they do not
+replace the nine slots. Q5 polarity stays explicitly binding.
+
+| Prompt signals | Resolution |
+|---|---|
+| glass tower, refraction, mullion, liquid glass, specular pane | **#19 Liquid glass** |
+| AI platform, integration, automation, API, scroll blur, vertical gridlines, live counters | **#21 Scroll-reactive glass** + R3 |
+| app gallery, icon wall, design library, screenshot index | **#1** or **#23** + R1 / R2 (composition, not a material) |
+| bento, bento box, modular cards, feature grid, uneven compartments | **#20 Bento** + R4 |
+| grid, modular grid, unqualified "grid" | Auto → **#20** (modular spans), **#4** (technical drawing) or **#13** (data-dense rows), chosen from the brief and photographs |
+| blueprint, engineering, survey, technical grid | **#4 Blueprint** |
+| aurora, mesh, ambient glow, atmospheric gradient | **#22 Aurora** |
+| dark-first, OLED, true black, developer tool at night | **#23 OLED** + B4; Q5 stays explicit and binding |
+| one line of type, oversized headline, anti-template, no images | **#24 Exaggerated minimalism** + Hero G |
+| meadow, field journal, biophilic, painted ridges, anti-AI, human-made print | **#25 Organic biophilic** |
+| layered sheets, stacked plates, tactile depth without blur | **#26 Dimensional layering** |
+| 3D, spatial, visionOS, floating object, parallax product | **#27 Spatial** + R6 |
+| neo-brutalist, hard offset, thick black borders | **#28 Neubrutalism** (archival — say so) |
+| glass, audio, photography, optics, lens, frosted panel, frosted glass, glassmorphism 2.0, blurred panel | **#15 Glass & light** (= frosted glass / glassmorphism 2.0) |
+| hero-centric, conversion-optimized, storytelling, interactive demo, feature showcase | **composition R1–R8**, material stays on Auto |
+| motion-driven, micro-interactions, kinetic typography, parallax storytelling | **behaviour B1–B3**, material stays on Auto |
+| zero interface, AI-native UI, generative UI, adaptive UI | **out of scope** — changes content, not material. Say so in one line. |
+
 If two signals collide (e.g. "freight + editorial"), pick the one the **photographs** support, not the
 one the words support. A photograph of kraft cartons against brick cannot carry a Linen & daylight
-page; it will look like a photo pasted onto a magazine.
+page; it will look like a photo pasted onto a magazine. A kraft photograph cannot carry a refracting
+pane either, even if the brief says "liquid glass".
 
 ---
 
-## Why not more than eight in the question
+## Why the selector stays at eight
 
-Eight is the ceiling for one selector before it stops being a choice and becomes a list. The eight
-that ship in Step 0 are the ones with the widest distance between them:
+Eight is the ceiling for one selector before it stops being a choice and becomes a list. Step 0 keeps
+**one** `Surface & Style` question — no second style question, no Q8. It shows **Auto plus seven named
+picks** chosen for the widest distance between them, mixing materials and modern idioms without
+making the user choose between two taxonomies:
 
-1. Paper & ink — flat, reflected light, no radius
-2. Cardboard & steel — kraft, industrial, zero radius
-3. Linen & daylight — soft, editorial, 12px radius
-4. Cockpit panel — dark, dense, tabular
-5. Airport signage — bold colour blocks, oversized numerals
-6. Concrete & rebar — grey, matte, structural
-7. Phosphor terminal — black, mono, scanlines
-8. Marble & brass — material, warm, veined
+1. **Auto — decide from my brief** · the default; resolves to any of the 28 contracts.
+2. **Paper & ink** · #1, flat print, 0px radius.
+3. **Cardboard & steel** · #5, kraft industrial, 0px radius.
+4. **Liquid glass** · #19, refracting pane, 22px squircle, 1px mullions.
+5. **Frosted glass** · #15, glassmorphism 2.0, 18px blur, 16px radius.
+6. **Boxes of different sizes** · #20 + R4, bento / modular grid, uneven spans.
+7. **Blueprint grid** · #4, technical drawing grid, 0px radius.
+8. **Cockpit panel** · #13, dark dense rows, tabular figures.
 
-The remaining ten are not second-class. They are reached through the prompt-mapping table above,
-which is how most real briefs arrive anyway — a user says "I'm building a metro app", not "I want
-Transit map, please".
+The remaining **21 contracts** are not second-class. They are reached through the two prompt maps
+above, the alias table and the freeform `Other` input — which is how most real briefs arrive anyway: a
+user says "I'm building an AI integration platform with a dark grid", not "I want #21, please". The
+same freeform input resolves layout words to composition recipes R1–R8, motion words to behaviours
+B1–B5, and out-of-scope words to a one-line explanation. See `styles.md` §10 for the full rationale.
+
+This supersedes the v4.5 list of eight canonical materials in Step 0. The 18 contracts in this file
+remain the canonical implementation shelf; `styles.md` is the resolution layer around them.

@@ -20,7 +20,8 @@
  * discovering a typo by hand.
  */
 import { readFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
 import vm from 'node:vm'
 
 const file = resolve(process.argv[2] || '')
@@ -33,7 +34,7 @@ const source = await readFile(file, 'utf8')
 
 /* ── the stub ────────────────────────────────────────────────────────────── */
 
-const log = { collections: [], variables: [], paintStyles: [], textStyles: [], effectStyles: [], gridStyles: [], pages: [], components: [], vectors: [], errors: [] }
+const log = { collections: [], variables: [], paintStyles: [], textStyles: [], effectStyles: [], gridStyles: [], pages: [], components: [], vectors: [], syncPageWrites: [], errors: [] }
 let nextId = 1
 const id = () => 'n' + nextId++
 
@@ -143,10 +144,20 @@ const figma = {
     return current || pages[0]
   },
   set currentPage(page) {
-    /* Figma does not reorder pages when the current page changes; neither does this. */
+    /* With "documentAccess": "dynamic-page" Figma makes this read-only and
+     * throws. Record the write; the report fails it when the sibling manifest
+     * declares dynamic-page, so a regression cannot hide behind a stub that
+     * silently allows it. */
+    log.syncPageWrites.push(page && page.name)
     if (!pages.includes(page)) pages.push(page)
     current = page
   },
+  async setCurrentPageAsync(page) {
+    if (!page) throw new Error('setCurrentPageAsync needs a page')
+    if (!pages.includes(page)) pages.push(page)
+    current = page
+  },
+  async loadAllPagesAsync() {},
   createPage() {
     const p = nodeBase('PAGE', 'Page')
     p.type = 'PAGE'
@@ -329,6 +340,12 @@ try {
 
 /* ── report ──────────────────────────────────────────────────────────────── */
 
+const manifestFile = join(dirname(file), 'manifest.json')
+let dynamicPage = false
+if (existsSync(manifestFile)) {
+  try { dynamicPage = JSON.parse(await readFile(manifestFile, 'utf8')).documentAccess === 'dynamic-page' } catch (e) { /* ignore */ }
+}
+
 const report = {
   file,
   thrown: thrown ? thrown.message : null,
@@ -344,10 +361,15 @@ const report = {
   pages: pages.map((p) => p.name),
   components: log.components.map((c) => c.name),
   vectors: log.vectors,
+  dynamicPage,
+  syncPageWrites: log.syncPageWrites.length,
 }
 
 const problems = []
 if (thrown) problems.push('the plugin threw: ' + thrown.message)
+if (dynamicPage && log.syncPageWrites.length) {
+  problems.push('plugin writes figma.currentPage under dynamic-page — use figma.setCurrentPageAsync (' + log.syncPageWrites.length + ' writes: ' + log.syncPageWrites.join(', ') + ')')
+}
 if (!log.collections.length) problems.push('no variable collection was created')
 if (!log.textStyles.length) problems.push('no text style was created')
 if (!pages.length) problems.push('no page was created')

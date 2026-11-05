@@ -23,14 +23,8 @@ import { join } from 'node:path'
 export function findTokens(root, slug) {
   const candidates = [
     join(root, 'features', slug, 'tokens.json'),
-    join(root, 'src', 'features', slug, 'tokens.json'),
     join(root, 'public', 'brand', slug, `${slug}-tokens.json`),
-    ...(slug === 'sunnyside'
-      ? [
-          join(root, 'features', 'design-system', 'tokens.json'),
-          join(root, 'src', 'features', 'design-system', 'tokens.json'),
-        ]
-      : []),
+    ...(slug === 'sunnyside' ? [join(root, 'features', 'design-system', 'tokens.json')] : []),
   ]
   return candidates.find(existsSync) ?? null
 }
@@ -58,36 +52,23 @@ function scale(x) {
 }
 
 function parseContrast(c, primitives) {
-  const byName = new Map(primitives.map((p) => [p.name.toLowerCase(), p.hex]))
-  const resolveHex = (str) => {
-    if (!str) return null
-    const m = String(str).match(/#[0-9a-f]{3,6}/i)
-    if (m) return m[0]
-    const direct = byName.get(String(str).toLowerCase())
-    if (direct) return direct
-    for (const [k, hex] of byName) if (hex && String(str).toLowerCase().includes(k)) return hex
-    return null
-  }
   if (Array.isArray(c)) {
-    return c.map((p) => {
-      const rawFg = p.fg ?? p.a
-      const rawBg = p.bg ?? p.b
-      const ratio =
-        typeof p.ratio === 'number'
-          ? p.ratio
-          : p.ratio
-            ? Number(String(p.ratio).replace(',', '.').replace(/:1$/, ''))
-            : null
-      return {
-        label: p.label ?? p.pair ?? p.text ?? p.note ?? (rawFg && rawBg ? `${rawFg} on ${rawBg}` : ''),
-        fg: rawFg,
-        bg: rawBg,
-        ratio,
-      }
-    })
+    return c.map((p) => ({
+      label: p.label ?? p.pair ?? p.text ?? '',
+      fg: p.fg ?? p.a,
+      bg: p.bg ?? p.b,
+      ratio: typeof p.ratio === 'number' ? p.ratio : p.ratio ? Number(String(p.ratio).replace(',', '.').replace(/:1$/, '')) : null,
+    }))
   }
   if (c && typeof c === 'object') {
     const out = []
+    const byName = new Map(primitives.map((p) => [p.name.toLowerCase(), p.hex]))
+    const resolveHex = (str) => {
+      const m = String(str ?? '').match(/#[0-9a-f]{3,6}/i)
+      if (m) return m[0]
+      for (const [k, hex] of byName) if (hex && String(str).toLowerCase().includes(k)) return hex
+      return null
+    }
     for (const scope of ['light', 'dark']) {
       if (c[scope] && typeof c[scope] === 'object') {
         for (const [label, r] of Object.entries(c[scope])) {
@@ -140,14 +121,6 @@ export function readTokens(path) {
     type = entries
       .filter(([, v]) => typeof v === 'string')
       .map(([name, value]) => ({ name, value, family: familyOf(value) }))
-  } else if ((t.fonts ?? meta.fonts) && typeof (t.fonts ?? meta.fonts) === 'object') {
-    type = Object.entries(t.fonts ?? meta.fonts)
-      .filter(([, v]) => typeof v === 'string')
-      .map(([name, value]) => ({
-        name: name.startsWith('font-') ? name : `font-${name}`,
-        value: String(value),
-        family: familyOf(value),
-      }))
   }
 
   const rawRadius = t.radius

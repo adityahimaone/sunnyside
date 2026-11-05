@@ -26,7 +26,6 @@ import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
-import { generateFigmaHtml } from './figma-html.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -764,7 +763,6 @@ export const OUTPUT_CONTRACT = [
   { path: \`public/brand/${S}/mark.svg\`, role: 'Primary mark' },
   { path: \`public/brand/${S}/mark-compact.svg\`, role: 'Compact drawing' },
   { path: \`public/brand/${S}/wordmark.svg\`, role: 'Outlined wordmark' },
-  { path: \`public/brand/${S}/${S}-figma.html\`, role: 'Convertible Figma / HTML-to-Design sheet' },
   { path: \`features/${S}/tokens.json\`, role: 'Token source' },
   { path: \`features/${S}/${S}-tokens.css\`, role: 'Generated tokens' },
 ]
@@ -863,10 +861,6 @@ export default function ${N.replace(/[^A-Za-z]/g, '')}Page() {
           <span className={styles.sectionLabel}>${TITLE} · ${prefix}</span>
           <h1 className={styles.heroTitle}>TODO — the one sentence, as a headline.</h1>
           <p className={styles.heroDeck}>{tokens.meta.oneSentence}</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem' }}>
-            <a href="/brand/${S}/${S}-figma.html" className={styles.navLink}>Figma HTML Sheet ↗</a>
-            <a href="/design-system/${S}/llms.txt" className={styles.navLink}>llms.txt</a>
-          </div>
         </section>
 
         <section id="foundation" className={styles.section}>
@@ -1053,10 +1047,7 @@ export default function ${N.replace(/[^A-Za-z]/g, '')}Page() {
       </main>
 
       <footer className={styles.footer}>
-        <div className={styles.shell} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <span>${N} · ${TITLE} · {STORY_BEATS.length} story beats recorded</span>
-          <a href="/brand/${S}/${S}-figma.html" className={styles.navLink}>Convertible Figma HTML Documentation Sheet ↗</a>
-        </div>
+        <div className={styles.shell}>${N} · ${TITLE} · {STORY_BEATS.length} story beats recorded</div>
       </footer>
     </div>
   )
@@ -1162,7 +1153,7 @@ const files = {
   [`brand/${S}/brief.md`]: briefMd,
 }
 
-const tree = [...Object.keys(files), `public/brand/${S}/${S}-figma.html`].sort()
+const tree = Object.keys(files).sort()
 
 if (peek || dry) {
   console.log(`\n  ${N} · ${TITLE} · namespace ${prefix} · hue ${hue}° · ${mode}\n`)
@@ -1231,8 +1222,6 @@ if (!dry) {
       { stdio: 'inherit' },
     )
   }
-
-  generateFigmaHtml({ slug: S, root })
 }
 
 /* ── report ──────────────────────────────────────────────────────────────── */

@@ -32,7 +32,6 @@ import { execFileSync } from 'node:child_process'
 import { spawnSync } from 'node:child_process'
 import * as glyphs from './glyphs.mjs'
 import { buildBoard } from './board.mjs'
-import { generateFigmaHtml } from './figma-html.mjs'
 
 const HERE = new URL('.', import.meta.url).pathname
 const TEMPLATES = resolve(HERE, '..', 'templates')
@@ -505,12 +504,22 @@ function collectTypeRoles() {
   const source = tokens.type || tokens.typography || tokens.font
   if (!source) return []
   const scale = isGroup(source) && isGroup(source.scale) ? source.scale : source
-  const list = entries(scale)
+  /* An array of roles carries size/leading/tracking/weight on the row itself.
+   * `entries()` keeps only name+value+note, which used to drop every role of
+   * this shape and emit a Figma file with zero text styles. */
+  const list = Array.isArray(scale)
+    ? scale.map((r, i) => ({
+        name: String((r && (r.name ?? r.role)) ?? i + 1),
+        value: (r && (r.value ?? r.face ?? r.family)) ?? '',
+        note: (r && (r.note ?? r.use)) ?? '',
+        raw: r && typeof r === 'object' ? r : {},
+      }))
+    : entries(scale)
   const roles = []
   for (const e of list) {
     const raw = e.raw && typeof e.raw === 'object' ? e.raw : {}
     let size = toPx(e.value)
-    let lh = raw.$lineHeight ?? raw.lineHeight ?? 0
+    let lh = raw.$lineHeight ?? raw.lineHeight ?? raw.leading ?? 0
     let tracking = raw.$tracking ?? raw.tracking ?? raw.letterSpacing ?? 0
     if (size == null && raw.size != null) size = toPx(raw.size)
     if (size == null) continue
@@ -547,6 +556,11 @@ const pick = (patterns, exclude) => {
   }
   return ''
 }
+
+/* The last-resort lookups below used to call an undefined `byName`, which only
+ * surfaced when a brand had no semantic token matching the pattern — i.e. most
+ * of them. Resolve against the primitive table built at line 458. */
+const byName = (name) => (primitiveByName[name] ? { hex: primitiveByName[name] } : null)
 
 const ground =
   pick([/^(surface-page|surface|paper|ground|bg|background|canvas)$/i]) ||
@@ -1087,12 +1101,24 @@ const put = async (name, body) => {
 }
 
 if (opt.target === 'figma' || opt.target === 'both') {
+  /* Keep the plugin id stable across regenerations. A fresh id on every build
+   * makes Figma treat the local plugin as a different one and forces the user
+   * to re-import the manifest after each token change. */
+  let pluginId = 'brand-forge-' + slug + '-' + Date.now().toString(36)
+  const priorManifest = join(outDir, 'manifest.json')
+  if (existsSync(priorManifest)) {
+    try {
+      const prior = JSON.parse(await readFile(priorManifest, 'utf8'))
+      if (prior && prior.id) pluginId = prior.id
+    } catch (e) { /* fall back to a fresh id */ }
+  }
+
   await put(
     'manifest.json',
     JSON.stringify(
       {
         name: DATA.name + ' design system',
-        id: 'brand-forge-' + slug + '-' + Date.now().toString(36),
+        id: pluginId,
         api: '1.0.0',
         main: 'code.js',
         editorType: ['figma'],
@@ -1136,14 +1162,6 @@ for (const [voice, f] of Object.entries(fonts)) {
   }
 }
 await put('README.md', readme())
-
-try {
-  const figmaHtmlOut = join(outDir, `${slug}-figma.html`)
-  generateFigmaHtml({ slug, root: dirname(dirname(tokensPath)), outPath: figmaHtmlOut })
-  written.push(`${slug}-figma.html`)
-} catch {
-  /* non-fatal when tokensPath is in a standalone temporary directory */
-}
 
 /* ── optionally build the .fig ───────────────────────────────────────────── */
 

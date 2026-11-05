@@ -1,18 +1,18 @@
 ---
 name: sunnyside-brand-system
 version: 4.9.0
-description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with a 7-question Step 0 ask_question scope gate written in plain geometry, not case names: surface material, rail (2 shapes), hero (8 shapes), mark construction, colour polarity (1 or 2 scopes, binding on the toggle and token sheets), build scope, and add-ons. Then synthesizes a custom archetype, Kuwayama-grade parametric SVG marks + a 6-mark companion cast, a 6-panel 1500x1125 brandkit board, a comparative surface exploration grid, OKLCH tokens in the chosen polarity, an unnumbered-hero 7-section interactive showcase page, an automated 8-sheet white-background Convertible Figma / HTML-to-Design Documentation Sheet (<slug>-figma.html) linked in the hero and footer, a cast that belongs to the mark argument rather than to the end of the page, and a footer shape derived from the hero rather than copied from the last case. Pillars V and VII carry a house-rules layer curated from shipped builds: no eyebrow, no monospace labels outside code, no outlined chips or 1px stat boxes, no gradient except one directional scrim drawn in the surface’s own colour, one accent on the action, a two-line headline cap, and a footer that is a band with a real photograph rather than a colophon strip.'
+description: 'Unbounded, single-pass brand identity and interactive design system generator. Starts with a 7-question Step 0 ask_question scope gate written in plain geometry, not case names: surface/style (Auto + 7 picks resolving into a 28-contract style library), rail (2 shapes), hero (8 shapes plus 8 composition recipes), mark construction, colour polarity (1 or 2 scopes, binding on the toggle and token sheets), build scope, and add-ons. Then synthesizes a custom archetype, Kuwayama-grade parametric SVG marks + a 6-mark companion cast, a 6-panel 1500x1125 brandkit board, a comparative surface exploration grid, OKLCH tokens in the chosen polarity, an unnumbered-hero 7-section interactive showcase page, a cast that belongs to the mark argument rather than to the end of the page, and a footer shape derived from the hero rather than copied from the last case. Pillars V and VII carry a house-rules layer curated from shipped builds: no eyebrow, no monospace labels outside code, no outlined chips or 1px stat boxes, no gradient except one directional scrim drawn in the surface’s own colour or a scoped glass/mesh/hard-offset override from the style library, one accent on the action, a two-line headline cap, and a footer that is a band with a real photograph rather than a colophon strip.'
 metadata:
   author: adityahimaone
   source: https://github.com/adityahimaone/sunnyside
   version: '4.9.0'
 ---
 
-# SUNNYSIDE BRAND SYSTEM ENGINE (v4.9 · Two Rails + 8 Hero Shapes + 5 Footer Shapes + Surface Grid + Convertible Figma HTML Sheet)
+# SUNNYSIDE BRAND SYSTEM ENGINE (v4.9 · Two Rails + 8 Hero Shapes + 5 Footer Shapes + 28-Contract Style Library)
 
 You are a Principal Design Engineer & Brand Architect. Execute with zero looping tasks, zero placeholder copy (`Lorem ipsum` or generic `Acme` filler), zero emoji UI chrome, and flagship-grade visual engineering.
 
-**One idea → one mark + cast → one 6-panel board → one non-template hero → one comparative surface grid → one honest contrast ledger → one 8-sheet Convertible Figma HTML documentation sheet (`<slug>-figma.html`).**
+**One idea → one mark + cast → one 6-panel board → one non-template hero → one comparative surface grid → one honest contrast ledger.**
 
 ---
 
@@ -34,18 +34,18 @@ Call `ask_question` with these 7 questions, verbatim. The JSON below is already 
   "questions": [
     {
       "id": "surface",
-      "header": "Material",
-      "question": "1. Surface & Material — if this brand were a physical object, what would it be made of? Eight of the eighteen surfaces are here; the rest are reached through references/surfaces.md.",
+      "header": "Material / Style",
+      "question": "1. Surface & Style — pick a material (what the page is made of) or a style (the idiom it reads as). Both resolve to the same kind of nine-slot contract; all 28 are indexed in references/styles.md. Leave it on Auto and the brief and photographs decide, or type any style name in Other.",
       "multi_select": false,
       "options": [
-        { "label": "(Recommended) Paper & ink", "description": "Like a book page or a screen-printed poster. Warm uncoated stock, flat solid colour, no glow, no blur, no gradient, 0px corners." },
-        { "label": "Cardboard & steel", "description": "Like a warehouse or a shipping container. Kraft and cold grey, sharp rectangular grid, 1px rules, 0px corners, plain sans type." },
-        { "label": "Linen & daylight", "description": "Like an interior magazine. Sunlit warm background, editorial serif headlines, soft panels with real blur, 12px corners." },
-        { "label": "Cockpit panel", "description": "Like an aircraft dashboard. Near-black ground, dense table rows, 1px hairlines, very high contrast, monospace numbers everywhere." },
-        { "label": "Airport signage", "description": "Like a terminal direction sign. Bold signal colour blocks, oversized numerals, heavy structural lines, no cards, no rules." },
-        { "label": "Concrete & rebar", "description": "Like a poured concrete wall. Cool mid-grey, matte, fine grain, 2px rules, 2px corners, heavy grotesque type." },
-        { "label": "Phosphor terminal", "description": "Like a CRT monitor. True black, green or amber text, scanlines, mono only, 80ms snap, 0px corners." },
-        { "label": "Marble & brass", "description": "Like a hotel lobby. Off-white marble with faint veining, warm brass as the plate, high-contrast serif, small-caps labels." }
+        { "label": "(Recommended) Auto — decide from my brief", "description": "The model reads the theme and photographs and picks any of the 28 contracts through the prompt map. Nothing is forced onto the page; the choice is stated in one line." },
+        { "label": "Paper & ink", "description": "Like a book page or a screen-printed poster. Warm uncoated stock, flat solid colour, no glow, no blur, no gradient, 0px corners. Contract #1." },
+        { "label": "Cardboard & steel", "description": "Like a warehouse or a shipping container. Kraft and cold grey, sharp rectangular grid, 1px rules, 0px corners, plain sans type. Contract #5." },
+        { "label": "Liquid glass", "description": "Like looking up through a glass tower floor. A 26px refracting pane, 22px corners, 1px mullions and one lit top edge; reading copy sits on a solid plate. Contract #19." },
+        { "label": "Frosted glass", "description": "Also called glassmorphism. A soft 8-12% white panel with an 18px blur over a photograph, a 1px light edge and 16px corners; no coloured bloom. Contract #15." },
+        { "label": "Boxes of different sizes", "description": "Also called bento or a modular grid. Uneven compartments on a 12-column grid, one corner radius, 1px hairlines, one real object in a compartment - never equal spans. Contract #20." },
+        { "label": "Blueprint grid", "description": "Like an architect's drawing. Deep blue ground with a 24px repeating grid, white dimension ticks, monospace figures, 0px corners. Contract #4." },
+        { "label": "Cockpit panel", "description": "Like an aircraft dashboard. Near-black ground, dense table rows, 1px hairlines, very high contrast, monospace numbers everywhere. Contract #13." }
       ]
     },
     {
@@ -105,8 +105,8 @@ Call `ask_question` with these 7 questions, verbatim. The JSON below is already 
       "question": "6. Deliverables — what should be built?",
       "multi_select": false,
       "options": [
-        { "label": "(Recommended) Full page + board + Figma HTML", "description": "The unnumbered hero with 7 sections, the 6-panel 3000×2250 brandkit board, the 6-mark companion cast, and the 8-sheet white-background Convertible Figma HTML sheet (<slug>-figma.html)." },
-        { "label": "Board + Figma HTML only, no web page", "description": "Token CSS, the parametric SVG kit, the 6-panel board, and the 8-sheet Convertible Figma HTML sheet (<slug>-figma.html). No showcase route." }
+        { "label": "(Recommended) Full page + board + icons", "description": "The unnumbered hero with 7 sections, the 6-panel 3000×2250 brandkit board, and the 6-mark companion cast." },
+        { "label": "Board only, no web page", "description": "Token CSS, the parametric SVG kit and the 6-panel board. No showcase route, no rail, no hero." }
       ]
     },
     {
@@ -117,17 +117,37 @@ Call `ask_question` with these 7 questions, verbatim. The JSON below is already 
       "options": [
         { "label": "Skip browser tests", "description": "Compute the honest contrast table in one pass instead of running headless QA loops." },
         { "label": "List it on the site", "description": "Add the case to the design-system index and the landing case library." },
-        { "label": "Export spec files", "description": "A standalone DESIGN.md agent spec, W3C tokens.json, 3-layer CSS bundle, and Figma plugin bundle." }
+        { "label": "Export spec files", "description": "A standalone DESIGN.md agent spec, W3C tokens.json and the 3-layer CSS bundle." }
       ]
     }
   ]
 }
 ```
 
+### Step 0.1 · Style resolution (read before Step 1)
+
+`references/styles.md` is the depth behind Q1: **28 surface contracts** (the 18 canonical ones in
+`references/surfaces.md` §1–§18 plus the 10 modern ones §19–§28), **8 composition recipes** that bind
+to the hero, and **5 behaviours** that bind to motion or polarity. Q1 shows only Auto + 7.
+
+| Q1 answer | Engine behaviour |
+|---|---|
+| `Auto — decide from my brief` | Brief + photographs → prompt map (`surfaces.md` §Choosing one + `styles.md` §9) → any of the 28. State the contract number, name and one-line reason. |
+| A named option | Use that exact contract. No second question, no substitution. |
+| Freeform `Other` | Resolve through `styles.md` §5 alias table. A word that maps to a **contract** uses that exact contract; a **composition recipe** R1–R8 or **behaviour** B1–B5 keeps Auto for the material and binds to the hero, motion or scope; an **unknown** or **out-of-scope** word falls back to Auto. State the resolution in one line. |
+| Words and photographs disagree | The **photographs** win. A kraft-carton photograph cannot carry a refracting pane. |
+| A style hint and an explicit Q5 polarity answer disagree | The explicit Q5 answer stays binding; the style line says so. A `dark-first` hint becomes behaviour B4, never a second palette. |
+
+- **Never** blend two contracts. A hard-offset field next to a glass card is two brands.
+- **Never** add a second style question. Step 0 stays at seven questions; the freeform `Other` input is what makes the vocabulary unbounded.
+- **Every** style name must resolve to nine slots before a component is written. A bare trend word is not a contract.
+- **Scoped overrides** for glass, mesh and hard-offset contracts live in `styles.md` §8. They waive only the three named Pillar V bans (blur / `backdrop-filter`, one gradient, one hard offset shadow) for the contracts listed there; every other hero house rule stays in force.
+- **Recency:** `archival` trend labels (soft UI, Y2K, skeuomorphism, neubrutalism and their aliases) stay reachable but are never presented as "latest 2026". An archival label describes the trend, not the canonical material it resolves to.
+
 ### Step 1 · Single-Pass Deterministic Execution (Immediately after `ask_question` is answered)
 Once the user answers the `ask_question` prompt (or immediately on Turn 1 if the user explicitly wrote `"skip questions"`):
 1. State your **3-Axis Synthesis** in a tight 2-line architectural header summary at the top of your response:
-   > **`[BRAND NAME] (Case XX)` — 3-Axis Synthesis:** Surface: *[Tactility]* · Rail: *[A 176px per-section / B 200px contents list]* · Hero: *[A–H shape · relation `<relation>`]* · Physics: *[Corner/Stroke]*  
+   > **`[BRAND NAME] (Case XX)` — 3-Axis Synthesis:** Surface: *[Tactility]* · Style: *[contract # + name from references/styles.md]* · Rail: *[A 176px per-section / B 200px contents list]* · Hero: *[A–H shape · relation `<relation>` · recipe R1–R8 if any]* · Physics: *[Corner/Stroke]* 
    > **DNA:** Archetype: *[Seed Fusion]* · Mark: *[Kuwayama Primitive + 6-Cast]* · Stack: *[Display + UI Sans + Mono]* · Polarity: *[Theme Scope]*
 2. Build the batch asset script (`scripts/build-<slug>.mjs`), 6-panel `<slug>-brandkit.png` board (`brandkit-board.mjs`), and `/design-system/[slug]` showcase route in **one deterministic pass**.
 
@@ -135,7 +155,7 @@ Once the user answers the `ask_question` prompt (or immediately on Turn 1 if the
 
 | Answer | What it decides |
 |---|---|
-| `surface` | The nine slots in `references/surfaces.md` — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion`. Fill all nine before writing a component; two agents given the same surface must land on the same CSS |
+| `surface` | The nine slots in `references/surfaces.md` (§1–§18) or `references/styles.md` (§19–§28) — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion`. Fill all nine before writing a component; two agents given the same contract must land on the same CSS. Auto resolves through the prompt map; a freeform word resolves through the alias table. The chosen contract number is declared in the 3-Axis Synthesis |
 | `rail` | `176px` per-section column **or** `200px` contents list — the two layouts are not interchangeable; do not build both |
 | `hero` | Exactly one of A–H for the opening stage, and it also decides the footer shape (Pillar VII pairing table). The rail never changes which hero you pick |
 | `mark` | The geometric primitive set for `mark.svg`, and the cast must share its cut-line weight |
@@ -151,7 +171,7 @@ If an answer changes nothing you build, say which answer it changed and where �
 
 ### Pillar I: Unbounded Archetype Synthesis Engine
 Never force a project into a rigid template. Synthesize the visual language dynamically across **3 continuous axes**:
-1. **Surface Tactility — one of the eighteen catalogued materials (`references/surfaces.md`), never a blend:** *Paper & ink* (uncoated stock, flat ink, stipple or register ghost) · *Cardboard & steel* (kraft, grey metal, 1px rules, 0px corners) · *Linen & daylight* (warm sunlit ground, editorial serif, real-blur glass) · *Cockpit panel* (dense tabular rows, hairlines, monospace, clinical contrast) · *Airport signage* (signal colour blocks, oversized numerals, heavy structural lines) · *Concrete & rebar* (cool mid-grey, matte grain, 2px rules, 2px corners) · *Phosphor terminal* (true black, green or amber, scanlines, mono only) · *Marble & brass* (off-white veined ground, brass plate, high-contrast serif, small caps). Whichever was chosen sets the nine slots in `references/surfaces.md` — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion` — and those nine must be filled before any component is written. A second material may appear only as a one-off accent, never as a competing system. If the brief's theme implies a surface that is not one of the eight in Step 0, use the prompt-mapping table in `references/surfaces.md` and state the choice in one line.
+1. **Surface Tactility — one of the 28 catalogued contracts, never a blend:** the 18 canonical materials in `references/surfaces.md` (*Paper & ink*, *Newsprint*, *Risograph*, *Blueprint*, *Cardboard & steel*, *Concrete & rebar*, *Enamel sign*, *Transit map*, *Linen & daylight*, *Marble & brass*, *Chalk plaster*, *Museum wall label*, *Cockpit panel*, *Phosphor terminal*, *Glass & light*, *Pixel grid*, *Airport signage*, *Civic document*) and the 10 modern ones in `references/styles.md` (*Liquid glass*, *Bento / modular grid*, *Scroll-reactive glass*, *Aurora / mesh glow*, *OLED dark-first*, *Exaggerated minimalism*, *Organic biophilic*, *Dimensional layering*, *Spatial / VisionOS depth*, *Neubrutalism*). The Q1 answer fixes the nine slots — `ground`, `plate`, `text`, `text2`, `rule`, `radius`, `texture`, `type`, `motion` — in `surfaces.md` (§1–§18) or `styles.md` (§19–§28), and those nine must be filled before any component is written. A second material may appear only as a one-off accent, never as a competing system. Auto and freeform style words resolve through **Step 0.1**; state the contract number and the reason in one line.
 2. **Spatial Density:** *Gallery Airy (`p-12`, wide leading)* ↔ *Editorial Balanced (`60ch–66ch` reading measure)* ↔ *Terminal/Instrument High-Density (`1px` exposed hairlines, `tabular-nums` rows)*
 3. **Corner & Stroke Physics:** *Razor Printed (`0px` radius, `1px` exposed hairlines)* ↔ *Precision Organic (`10px` inner / `18px` outer concentric radii)* ↔ *Soft Squircle (`22px`)*
 
@@ -223,13 +243,31 @@ These are the laws the shapes below are already shaped by. They were written aft
 | **No monospace in the hero**, and no tiny uppercase letter-spaced labels anywhere. | The reading face, sentence case, at a size someone reads. Mono is legal in exactly four places on the whole page: the rail number, tabular figures in a ledger, a code sheet, and one data stamp on a photograph. Never a hero label, a nav link or a colophon. |
 | **No outlined chips, pill rows, `1px` stat strips or hairline boxes.** | A plain `2×2` `<dl>`: labels at `62%` ink at `13px`, values at `15px/600` with `font-variant-numeric: tabular-nums`, separated by space only. A boundary, if one is truly needed, is a step in tone — never a stroke. |
 | **Rules are material, not decoration.** A paper or cardboard surface may print `1px` rules as its own grain (the rail, a ledger row). | A rule may never box a chip, a stat cell or a button, and never separates two blocks that space could separate. |
-| **No gradients.** | One exception, and it is compositional: a *directional scrim* that lets type sit on a photograph. It is drawn in the surface's own colour (paper falling away, not black laid on), and it is described in the hero comment as `scrim 96deg paper → transparent`. |
-| **No shadows on anything at rest.** No glow, no blur, no glass, no `backdrop-filter` — including the navbar. | A tone step between surfaces; the navbar is a plain bar on the page ground with no border. |
+| **No gradients.** | One compositional exception: a *directional scrim* that lets type sit on a photograph, drawn in the surface's own colour (paper falling away, not black laid on) and described in the hero comment as `scrim 96deg paper → transparent`. The only other exception is the single `#21` / `#22` glow or mesh override in `references/styles.md` §8. |
+| **No shadows on anything at rest.** No glow, no blur, no glass, no `backdrop-filter` — including the navbar. Scoped exceptions for glass / mesh / hard-offset contracts are listed in `references/styles.md` §8 and in the table below; nothing else is waived. | A tone step between surfaces; the navbar is a plain bar on the page ground with no border. |
 | **No styled accent word.** No italic, coloured, underlined or serif-swapped word inside the headline. | One face, one colour. The words carry the emphasis. |
 | **One accent, on the action.** | The accent fill appears on the primary button and nowhere else in the first screen. A second link is plain ink with ` →`. |
 | **One dominant image, at least ~45% of the first screen** whenever the brief supplies photographs. | Not a framed thumbnail beside six chips. The photo bleeds to a viewport edge or fills a full column. |
 | **The `<h1>` is two lines or fewer at every width** (1440 / 1024 / 390), measured, not assumed. | Cap it in `ch` (`max-width: 18ch`), then shrink the `clamp()`. 33 characters at `15ch` renders as three lines — one character-width of `ch` is the difference between composed and cramped. |
 | **A statement is a paragraph.** The lede is `16.5–18px` at `1.55` leading, `44–48ch` wide, in full ink, right under the headline. | Not a `58ch` grey block, not a sentence set at display size. |
+
+#### Scoped overrides for modern contracts
+
+The bans above are waived **only** for the contracts named in `references/styles.md` §8, and only
+inside the scope listed there. Everything else — no eyebrow, no monospace hero label, no outlined chip
+or `1px` stat box, no styled accent word, one accent on the action, `<h1>` ≤ 2 lines, one dominant
+image ≥ 45% when photographs are supplied — is **never** waived.
+
+| Contract | Allowed | Still banned |
+|---|---|---|
+| `#15` `#19` `#21` `#27` | `backdrop-filter` on panes and nav chrome only | Blur behind reading copy, a coloured bloom, a second blur radius, a frosted hero card |
+| `#19` | 1px mullions and one specular top highlight | Gaps plus opaque filler between panes, more than one highlight |
+| `#21` `#22` | exactly **one** directional glow or mesh gradient | Text on the mesh, stacked scrims, a gradient behind the `<h1>` |
+| `#26` `#28` | exactly **one** hard offset shadow at rest, no blur | A soft shadow, a second lifted element, a second light source |
+
+Every reading surface stays a **solid plate** or a measured scrim. Compute the pane or mesh contrast
+and **publish the failing pair in §03** with the job it may not do. Reduced motion keeps the finished
+state for every scroll-linked and parallax behaviour.
 
 #### Variant A · Full-Width Field + Overlapping Stat Bench · relation `below`
 - **Top Field (`.xx-field`):** full-width `height: min(78vh, 720px)` stage holding the artwork edge-to-edge with a minimal bottom-aligned `.xx-stamp` (`Brand · material · year`). **No headline sits on the artwork.**
@@ -274,6 +312,22 @@ These are the laws the shapes below are already shaped by. They were written aft
 - **3–5 full-bleed horizontal bands** of different colour or material, each holding exactly one line of the argument, separated by `1px` rules or by nothing at all. The `<h1>` lands in the widest band; the mark in the narrowest.
 - **Why it works:** the eye reads the page as a printed chart rather than a layout, and the bands are made of the brand's own primitives, so it cannot drift toward another case's look.
 - **Trap:** the bands must carry the argument, not the palette. Five bands of five colours with no sentence in them is a swatch test.
+
+#### Composition recipes (from `references/styles.md` §6)
+
+A style word that names a **layout** does not change the surface. It binds to one of the eight hero
+shapes above and to a section. Declare it in the hero comment as `recipe: R1` etc.
+
+| Recipe | Binds to | One-line contract |
+|---|---|---|
+| R1 · Icon mosaic wall | G / A | A dense grid of *real* app icons with one giant type line threaded through it; no invented logos, no icon library, no card shadows. |
+| R2 · Gallery / index grid | §04 / §06 | 12-column thumbnail grid, minimal chrome, one radius, no card shadows, one caption per card. |
+| R3 · Live counter band | A bench | Tabular figures bound to real data only; a fake live dashboard is the tell that a hero was assembled. |
+| R4 · Bento wall | `#20` + A | Uneven spans, one radius family, one real object per compartment. |
+| R5 · Kinetic type cover | `#24` + G | One enormous line, one rule, no eyebrow, two lines or fewer. |
+| R6 · Storytelling scroll | H / C, `#27` | 3–5 bands, one line of the argument per band; reduced motion freezes the final frame. |
+| R7 · Interactive product demo | C | The stage must be the brand's own object; with no real object, take G. |
+| R8 · Full-bleed atmospheric plate | E | One dominant image, one directional scrim in the surface's own colour, no panel. |
 
 #### The composition clause — read this before drawing any hero
 1. **State the relation in one line** in the hero section comment: `hero: E · relation on · scrim 96deg paper → transparent · type on image`.
@@ -333,6 +387,7 @@ node skills/sunnyside-brand-system/scripts/brandkit-board.mjs \
    - Each card has:
      1. A `210px` live visual `.demo` box at the top demonstrating that exact surface treatment in real CSS/SVG/imagery (e.g., *Stipple / Artwork field*, *Ordered Bayer dither band*, *Register ghost type*, *Ruled ledger rows*, *Frosted pane that smudges the texture*, *Torn/cut clip-path edge*, or *Lifted paper seam*).
      2. A `.txt` body below with a flex header (`<b>Surface Title</b>` + monospace verdict tag `Shipped — the hero`, `Shipped — section dividers`, or `Rejected`) and a concise paragraph explaining *why* it survived or *why* it was rejected so nobody re-proposes it in six months. Cards with `rejected: true` get `.rej` (`filter: saturate(0.55)` on `.demo` and muted verdict tag).
+   - Explored cards may include modern idioms from `references/styles.md` (e.g. *Frosted plate — Rejected*, *Scroll-reactive glass — Shipped — navbar*). A rejected modern idiom still counts toward the stated "tried" number, and its reason must name the house rule or the contrast pair it broke.
 5. **`05 / Type (or Voice)`**
    - Live rendered type scale rows (`.tscale`: `132px` metadata column with role/font/weight/size/leading/tracking + live sample rendered at its real CSS size) + **2-column domain specimens** (`Display` multi-line specimen + `Reading` 66ch paragraphs + `Figures` tabular right-aligned table + `Labels` tracking rule).
 6. **`06 / The Kit (or Domain Workbench)`**
@@ -415,60 +470,13 @@ Anything else — a newsletter field, a social icon row, a sitemap — is filler
 
 ---
 
-### PILLAR VIII: CONVERTIBLE FIGMA / HTML-TO-DESIGN DOCUMENTATION SHEET (`<slug>-figma.html`)
-
-Every design system generated by this skill MUST emit a standalone, 100% self-contained, zero-CDN, pure white (`#FFFFFF` / `#FAFAFA`) **Convertible Figma / HTML-to-Design Documentation Sheet** at `public/brand/<slug>/<slug>-figma.html` (template reference: `templates/figma-doc.html`, automated generator: `scripts/figma-html.mjs`), and link to `/brand/<slug>/<slug>-figma.html` in the showcase page's **Hero** and **Footer** (plus Section `07 / Tokens`).
-
-```bash
-# Generate the 8-sheet Convertible Figma HTML documentation sheet for one case:
-node skills/sunnyside-brand-system/scripts/figma-html.mjs --slug <slug> --root .
-
-# Or regenerate for all cases in a workspace at once:
-node skills/sunnyside-brand-system/scripts/figma-html.mjs --all --root .
-```
-
-#### Why a Dedicated White-Background 8-Sheet HTML Template?
-While the interactive showcase page (`/design-system/<slug>`) uses an atmospheric editorial surface, sticky rails, and custom hero geometry, design tools that convert HTML to editable frames (**Figma `html.to.design`**, **Builder.io**, **Code-to-Design**, **Penpot**, **OpenPencil**) require clean, isolated, pure-white (`#FFFFFF`) `<section class="figma-sheet">` artboards with pre-rendered static DOM and inlined SVG vector paths.
-
-#### Architecture of `<slug>-figma.html` (8 Isolated `<section class="figma-sheet">` Artboards)
-1. **Sheet `01` · Colors (`#section-colors`):**
-   - **Main Color Swatches** (Primary, Secondary, Tertiary with token names, roles, and click-to-copy HEX).
-   - **10-Step OKLCH Color Scales (`10`–`100`)** for Primary, Secondary, and Tertiary derived mathematically from the brand's primitives, plus Neutral (`#FAFAFA`–`#18181B`) and Semantic (`Success`, `Info`, `Warning`, `Danger`) scales.
-   - **Honest Contrast Ledger (`AAA` / `AA` / `FAIL — Non-Text Only`)** pre-rendered directly from `tokens.json` with live foreground/background `Aa` chips and measured WCAG ratios.
-2. **Sheet `02` · Primitives & Physical Foundations (`#section-primitives`):**
-   - Full `tokens.json` primitive swatches with OKLCH & HEX values, 8-step **Spacing Scale (`4px`–`64px`)** with proportional bars, **Border Radius Tokens** (`0px` structural plate through `9999px` pill), and **Elevation / Box-Shadow Tokens** (`shadow-xs` to `shadow-xl`).
-3. **Sheet `03` · Typography (`#section-typography`):**
-   - **Font Family Showcase Cards** (`Display`, `Reading / UI`, `Monospace / Tabular`) with full character sets (`A–Z`, `a–z`, `0–9`) and live specimen lines.
-   - **Complete Type Scale Specimen Table** (`DisplayXL` 56px, `DisplayLG` 48px, `H1`–`H6`, `BodyLg`, `BodyMd`, `BodySm`, `Caption`, `Mono`) across Regular, Medium, SemiBold, and Bold weights.
-4. **Sheet `04` · Logo & Mark Family (`#section-logo`):**
-   - **64×64 Vector Construction Blueprint Grid** with crosshair guides and inlined `mark.svg`.
-   - **Horizontal & Stacked Lockups** on light (`#FFFFFF`), dark (`#0F172A`), and brand-tinted plates, plus **16px Compact Mark (`mark-compact.svg`)** and **1-Ink Glyph (`glyph.svg`)** optical scaling test (`64px`, `32px`, `24px`, `16px`).
-5. **Sheet `05` · Companion Cast & Brand Assets (`#section-assets`):**
-   - All **6 Companion Cast Marks (`cast/*.svg`)** inlined on the 64-unit grid with figure numbers and roles, plus a 3-up **Brand Surface & Card Specimen Grid** (`Primary Brand Surface`, `Dark Ink Plate`, `Tinted Editorial Card`).
-6. **Sheet `06` · UI Components & States (`#section-components`):**
-   - **Buttons Matrix** (`Primary`, `Secondary`, `Outline`, `Ghost`, `Danger` × `Default`, `Hover`, `Focus Ring`, `Disabled`, `Small`), **Form Inputs** (`Default`, `Focused`, `Success`, `Error`, `Disabled`, `Select`, `Textarea`), **Selection Controls** (`Checkbox`, `Radio`, `Toggle Switch`), and **Segmented Tabs & Badges**.
-7. **Sheet `07` · Modals, Alerts & Overlays (`#section-overlays`):**
-   - **Inline Alert Banners** (`Info`, `Success`, `Warning`, `Danger`), **Modal Dialog Variants** (`Standard Confirmation`, `Destructive Action`), and **Toast Notification Bars**.
-8. **Sheet `08` · Patterns, Data Table & Copyable CSS Token Sheets (`#section-patterns`):**
-   - **KPI Metric Summary Cards**, **Token Registry Table** (every `--<ns>-*` token with role, HEX, OKLCH, and status), and **Copyable CSS Token Sheets** (`Primitives` + full `<slug>-tokens.css`).
-
-#### Built-in Figma / HTML-to-Code Ergonomics
-- **Zero Client-Side DOM Injection for Swatches:** Every color swatch, contrast card, spacing bar, and SVG vector is pre-rendered in static HTML so headless importers and browser extensions capture 100% of the nodes.
-- **Sticky Control Bar (Hidden in Clean Export Mode):**
-  - **Section Filter Pills** (`All 8 Sheets`, `01 Colors`, ..., `08 Patterns & Tokens`).
-  - **Spec Inspector (`?spec=1`):** Overlays dashed `#9747FF` Figma component node boundaries and `data-figma-node="❖ ..."` labels on every category block.
-  - **Clean Export Mode (`?clean=1` or `?figma=1`):** Hides the sticky control bar and interactive helper chrome so `html.to.design` imports only the pure white artboard sheets.
-  - **One-Click `Copy Section HTML` Button on Every Sheet Banner:** Copies that sheet's self-contained `<section>` HTML to the clipboard for targeted section-by-section import.
-
----
-
 ## 3. TOKEN-EFFICIENCY RULES FOR FAST & NON-FLAGSHIP MODELS
 
 To achieve maximum quality with minimal token consumption on both flagship and fast models:
-1. **Batch Asset Generation in One Node Script (`scripts/build-<slug>.mjs`):** Write a single ~150-line Node script that outputs all mark/wordmark/lockup SVGs, the 6 `cast/*.svg` files, `tokens.json`, `<slug>-tokens.css`, and `DESIGN.md` in one execution, then call `brandkit-board.mjs` to render `<slug>-brandkit.png` and `figma-html.mjs` to generate `public/brand/<slug>/<slug>-figma.html`.
-2. **Data-Driven Loops in Templates:** In `.astro` or `.tsx` showcase pages, define `NAV`, `STATS`, `PREMISE`, `DECISIONS`, `SURFACES`, `CAST`, and `CODE_BLOCKS` as compact arrays in the frontmatter/data file and `.map()` over them—cutting template token usage by **45%** while guaranteeing zero structural drift. Always include a link to `/brand/<slug>/<slug>-figma.html` in the Hero, Tokens section, and Footer.
+1. **Batch Asset Generation in One Node Script (`scripts/build-<slug>.mjs`):** Write a single ~150-line Node script that outputs all mark/wordmark/lockup SVGs, the 6 `cast/*.svg` files, `tokens.json`, `<slug>-tokens.css`, and `DESIGN.md` in one execution, then call `brandkit-board.mjs` to render `<slug>-brandkit.png`.
+2. **Data-Driven Loops in Templates:** In `.astro` or `.tsx` showcase pages, define `NAV`, `STATS`, `PREMISE`, `DECISIONS`, `SURFACES`, `CAST`, and `CODE_BLOCKS` as compact arrays in the frontmatter/data file and `.map()` over them—cutting template token usage by **45%** while guaranteeing zero structural drift.
 3. **Sync Both Repos When Targeting External `design-system`:**
-   - Write the showcase route to `src/pages/design-system/<slug>.astro` (or `src/cases/<slug>/page.tsx`), styles/tokens to `src/features/<slug>/`, assets (including `<slug>-figma.html`) to `public/brand/<slug>/`, and register the case in `src/data/cases.ts`.
+   - Write the showcase route to `src/pages/design-system/<slug>.astro`, styles/tokens to `src/features/<slug>/`, assets to `public/brand/<slug>/`, and register the case in `src/data/cases.ts`.
    - Mirror `public/brand/<slug>/` into `sunnyside`, add the entry to `features/case-library/cases.ts`, `.tone_<slug>` to `features/case-library/case-library.module.css`, and the 4 hex chips to `SYSTEM_SWATCHES` in `features/landing-page/studio/work-gallery/work-gallery-data.ts`.
 
 ---
@@ -483,15 +491,124 @@ Verify internally before finishing (never print this checklist):
 - [ ] Mark family includes a separate `16px` compact drawing (`mark-compact.svg`) + 6 companion cast marks (`cast/*.svg`) on the 64-unit grid.
 - [ ] Section `01` includes 4 `Decision / Because / Not when / Breaks next` cards, and Section `03` publishes at least 1–3 failing contrast pairs with a restricted non-text job.
 - [ ] **Scope parity:** the shipped page matches the Step 0 polarity answer exactly. A single scope has no theme toggle in the navbar, no second token sheet, no `[data-<slug>='night']` block, and no dark-mode audit line. A dual scope has all four. Never leave a toggle that does nothing, and never leave a "no dark mode" sentence in a page that has one.
-- [ ] **Count parity:** every stated number matches what renders — the surface intro line ("Eight surfaces were tried. Five survived.") matches the card count and the verdict tags, the token-sheet count matches the scope answer, and the cast is exactly 6.
+- [ ] **Count parity:** every stated number matches what renders — the surface intro line ("Eight surfaces were tried. Five survived.") matches the card count and the verdict tags, the token-sheet count matches the scope answer, the Q1 selector has 8 options (Auto + 7 named picks), and the cast is exactly 6.
+- [ ] **Style contract declared:** the 3-Axis Synthesis names exactly one of the 28 contracts, all nine slots are filled, and no two contracts are blended. A freeform style word resolves through `references/styles.md` §5 as a contract, recipe R1–R8, behaviour B1–B5, or out of scope; an `archival` style is never called a 2026 trend.
 - [ ] **Hero relation declared:** the hero section comment names one shape letter and one relation (`below` / `beside` / `inside` / `on` / `around` / `none` / `rhythm`), and the built hero matches it. No hero contains both a rounded text panel *and* a second smaller floating card.
-- [ ] **Hero house rules:** no eyebrow, no mono label outside code, no outlined chip/pill row, no `1px` stat strip or hairline box, no gradient except one directional scrim in the surface's own colour, no shadow or `backdrop-filter` at rest (navbar included), no accent-coloured word in the `<h1>`, and the accent appears on the primary action only.
+- [ ] **Hero house rules:** no eyebrow, no mono label outside code, no outlined chip/pill row, no `1px` stat strip or hairline box, no gradient except one directional scrim in the surface's own colour or one scoped `#21` / `#22` mesh override, no shadow or `backdrop-filter` at rest except the `references/styles.md` §8 contracts (panes / nav chrome only, plus one hard offset for `#26` / `#28`), no accent-coloured word in the `<h1>`, and the accent appears on the primary action only. Reading copy stays on solid plates or measured scrims, and any pane / mesh contrast failure is published in §03.
 - [ ] **Hero measured:** the `<h1>` is two lines or fewer at 1440 / 1024 / 390, the lede is `44–48ch` in full ink, the crop's `object-position` was chosen from the asset (not a default), and `scrollWidth === clientWidth` at all four widths.
 - [ ] **Footer shape declared:** the footer names one of F1–F5 in a comment, that shape is the one Pillar VII pairs with the chosen hero, and it carries all five contract items and no filler. Two consecutive cases in `src/data/cases.ts` do not share a footer family.
 - [ ] **Cast placement:** the 6-mark cast sits inside `02 / The Mark` (or as one mid-page inverted band between 06 and 07), it carries no photograph, no lockup and no caption, and nothing that carries a photograph *and* a lockup sits immediately above the footer.
 - [ ] **Footer is a band, not a strip:** it has real height (`min-height` clamp or a photograph plate), its statement is set at `clamp(24px, 2.6vw, 34px)`, its photograph is a *different* asset from the hero's, and its lockup measures `≈26px` tall (`width: auto; object-fit: contain`) with the rule scoped as `.foot__art > img.foot__lock`.
-- [ ] **Convertible Figma HTML sheet (`<slug>-figma.html`):** `public/brand/<slug>/<slug>-figma.html` is generated via `scripts/figma-html.mjs` with all 8 white-background `.figma-sheet` artboards, inlined SVG marks + 6 cast icons, and linked from the showcase page's Hero and Footer (`/brand/<slug>/<slug>-figma.html`).
 - [ ] Zero emojis (`☀️`, `🌙`) in UI chrome; all 3 fonts load live.
+
+---
+
+## FIGMA HANDOFF · HTML SHEET → IMPORTER → BIND
+
+A design system that only exists as HTML is a website. The Figma handoff is three
+steps, and **none of them requires writing a new HTML-to-Figma converter**.
+`html.to.design`, Stitch to Figma, Builder.io and Web to Design already parse DOM +
+computed CSS into native Figma Auto Layout. Doop's *Copy for Figma* does not: its
+own docs call the result "a snapshot, not a sync: auto layout, variables, and
+components aren't recreated." Doop is a multiplayer canvas and MCP surface, not
+a conversion step — never route HTML through it just to reach Figma.
+
+**One source, three emitters — all regenerated from the same `tokens.json`:**
+
+| Script | Output | What it owns |
+| --- | --- | --- |
+| `scripts/figma-html.mjs` | `public/brand/<slug>/<slug>-figma.html` | 8 white sheets, inlined SVG, `data-figma-node` labels, `?clean=1`, 1440px canvas-grid mode |
+| `scripts/figma-forge.mjs` | `manifest.json` + `code.js` | variables (Light/Dark + aliases), paint/text/effect/grid styles, component variants |
+| `scripts/figma-bind.mjs` | `manifest.json` + `code.js` | binds imported layers back to those variables and styles by measured value |
+
+One command runs all three emitters, derives CSS / brand / name from the token
+file, and executes both smoke tests. `--check` is a dry run; `--infer-layout`
+passes through to the binder for flat Doop imports.
+
+```bash
+node scripts/figma-handoff.mjs --slug <slug> --root . --check
+node scripts/figma-handoff.mjs --slug <slug> --root .
+```
+
+Or run the emitters individually:
+
+```bash
+# 1 · the sheet (accepts --tokens for layouts that keep tokens outside features/)
+node scripts/figma-html.mjs --slug <slug> --root . --check
+node scripts/figma-html.mjs --slug <slug> --root .
+
+# 2 · the system (see references/figma-export.md for the full forge contract)
+node scripts/figma-forge.mjs --tokens <tokens.json> --css <tokens.css> \
+  --brand <brand dir> --html <page.html> --slug <slug> --name "<Name>" \
+  --out design/figma/<slug> --target figma
+
+# 3 · the binder (post-processor, ~one screen of Figma API)
+node scripts/figma-bind.mjs --slug <slug> --root . --check
+node scripts/figma-bind.mjs --slug <slug> --root . --out design/figma/<slug>-bind
+node scripts/figma-bind-smoke.mjs design/figma/<slug>-bind/code.js
+```
+
+### Auto Layout, from the page itself
+
+The generated sheet has two extra controls in its top bar:
+
+- **⇄ Auto Layout** (`?autolayout=1`) — outlines every CSS flex/grid flow
+  container in blue and flags absolute, transform and `backdrop-filter` layers
+  in red/amber. It changes nothing about geometry; it shows exactly what an
+  importer can infer. The Setout reference sheet has 49 flex rules, 16 grid
+  rules, 50 gaps and 2 absolute layers.
+- **⤓ Copy for Figma** — measures the live DOM (`getComputedStyle` +
+  `getBoundingClientRect`), serialises a `sunnyside/figma-manifest` with the
+  layout tree, colours, type, tokens, SVG marks and `data-figma-node` component
+  names, and copies it to the clipboard.
+
+`scripts/figma-manifest.mjs` runs that same function in headless Chrome and
+writes the JSON to disk. `scripts/figma-replay.mjs` embeds it as a seed in a
+Figma plugin that rebuilds **everything natively in one pass** — HORIZONTAL /
+VERTICAL / GRID auto layout with padding, spacing, alignment, wrap, `layoutGrow`
+and absolute children; variable collections; paint styles bound to variables;
+text styles; live text; rectangles; SVG vectors; named components.
+
+```bash
+node scripts/figma-handoff.mjs --slug <slug> --root . --with-replay
+node scripts/figma-replay-smoke.mjs design/figma/<slug>-replay/code.js \
+  --manifest design/figma/<slug>.manifest.json
+```
+
+This is **not** a general HTML-to-Figma converter: the page we generate emits a
+known schema and the plugin replays it, so there is no CSS parsing and no
+guessing. It is the one case where building a plugin is justified, because it
+removes the third-party importer entirely and makes the output deterministic.
+Without headless Chrome the plugin still works — paste the JSON from
+**Copy for Figma** into its UI.
+
+Two paths, then:
+
+- **A · importer** — build plugin → import the sheet with html.to.design /
+  Stitch to Figma → select frames → bind plugin.
+- **B · native replay** — `--with-replay` → one plugin builds auto layout +
+  variables + styles + components. No importer, no clipboard.
+
+For path A, in Figma: run the **build** plugin → import `<slug>-figma.html` →
+select the imported frames → run **`<Name>` — bind**.
+
+`--infer-layout` on the binder opts into Figma's `inferredAutoLayout` heuristic
+for flat imports (Doop, screenshots, hand-drawn frames). **Leave it off** after
+an HTML importer: re-applying `layoutMode` to a frame that already reflows
+correctly moves its children. The binder always binds SOLID fills/strokes by
+measured RGB and text nodes by font size + family; it never guesses a colour by
+name. If no local COLOR variables exist it creates the primitive colour
+collection from the token file and says so on close — colours only, not styles.
+
+**Honest limits:** CSS gradients/scrims, `clip-path` edges, grain/dither,
+pseudo-elements, `backdrop-filter`, transforms, `object-position` crops and
+responsive breakpoints do not survive. A `.fig` stores font family names, not
+font data — ship the `.ttf` files and outline the display face. One viewport per
+frame; 390px is a separate frame someone has to draw.
+
+**Audit gate:** a Figma handoff is not done until `figma-smoke.mjs` passes on the
+build plugin, `figma-bind-smoke.mjs` passes on the binder, the sheet opens in a
+browser with all 8 sections, and the counts in both reports match the token file.
 
 ---
 
@@ -501,6 +618,6 @@ End every response with this compact 1-keystroke action menu:
 
 > **Next Step — Reply with a code (or combine, e.g., `A + C`):**
 > - **`[A] Tailwind v4 / CSS Token Export`** — Standalone `tokens.css` with OKLCH `@theme` variables and font rules.
-> - **`[B] Figma Variables, Plugin & HTML Sheet (`/brand/<slug>/<slug>-figma.html`)`** — 8-sheet white-background Convertible Figma HTML template + W3C Design Tokens JSON + standalone `.svg` files.
+> - **`[B] Figma Handoff`** — `<slug>-figma.html` 8-sheet import doc, the generated variables/styles/components build plugin, and the bind plugin that reconnects imported layers. See *FIGMA HANDOFF* above.
 > - **`[C] Extract Section 06 Kit Components`** — Package the kit and domain controls into modular `components/ui/` TSX files.
 > - **`[D] Remix Rail / Hero / Archetype`** — Name any shift (e.g., *"Switch to Rail B + Hero B"*) for a surgical git patch diff.
