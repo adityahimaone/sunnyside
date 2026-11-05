@@ -35,13 +35,13 @@ export type SystemGalleryItem = BaseGalleryItem & {
 export type GalleryItem = ProjectGalleryItem | SystemGalleryItem
 
 /**
- * The board is curated, not derived from the year. Switchyard leads because it
- * is the strongest release. The systems are split in two: the six carried beside
- * the releases on the Everything tab, and seven more revealed by the Systems tab.
- * Together they are the thirteen systems the board shows; `/projects` and
- * `/design-system` hold the rest.
+ * The board is curated, not derived strictly from the year. Switchyard leads
+ * because it is the strongest release. Each tab is capped at a maximum of 12:
+ * - Everything: 6 pinned releases + 6 pinned design systems (12 items)
+ * - Releases: 6 pinned releases + max 6 latest projects (max 12 items)
+ * - Systems: 6 pinned design systems + max 6 latest design systems (max 12 items)
  */
-const PROJECT_ORDER = [
+export const FEATURED_PROJECT_SLUGS = [
   'switchyard',
   'primarindo-asia',
   'habit-tracker',
@@ -61,20 +61,19 @@ export const FEATURED_SYSTEM_SLUGS = [
 ] as const
 
 /**
- * The seven more the Systems tab adds: the newest case, then Wildflower Wind,
- * Cove, and the recent cases not already on the Everything tab.
+ * The six more the Systems tab adds: the latest design systems outside the
+ * featured six (Arête, Tavola, Wildflower Wind, Bluewater, Porphyry, Strand).
  */
 export const MORE_SYSTEM_SLUGS = [
   'arete',
-  'wildflower-wind',
-  'cove',
   'tavola',
+  'wildflower-wind',
   'bluewater',
   'porphyry',
   'strand',
 ] as const
 
-/** Every system the board can show, Everything six first. */
+/** Every system the board can show, Everything six first. Total max 12. */
 export const SYSTEM_SLUGS = [
   ...FEATURED_SYSTEM_SLUGS,
   ...MORE_SYSTEM_SLUGS,
@@ -87,11 +86,15 @@ export const SYSTEM_SLUGS = [
  */
 const PROJECT_POSITION: Record<string, string> = {
   switchyard: 'top center',
+  kanon: 'top center',
+  hayoloka: 'center',
+  'api-playground': 'top center',
+  'code-snippet-manager': 'top center',
   'primarindo-asia': 'center',
   'habit-tracker': 'left center',
-  seaphantom: 'center',
   'fullstack-wannabe': 'top center',
-  kanon: 'top center',
+  seaphantom: 'center',
+  'seaphantom-p2p': 'center',
   labgrownbeasts: 'center',
 }
 
@@ -125,65 +128,111 @@ const slugify = (value: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
 
-export const PROJECT_GALLERY_ITEMS: readonly ProjectGalleryItem[] =
-  PROJECT_ORDER.map((slug, order) => {
-    const project = WORK_PROJECTS.find((candidate) => candidate.slug === slug)
+/**
+ * Builds the project gallery items:
+ * - `featured`: 6 pinned releases shown on the Everything tab
+ * - `all`: 6 pinned releases + max 6 latest releases (sorted by recency, max 12 total)
+ */
+export function buildProjectGalleryItems(): {
+  featured: readonly ProjectGalleryItem[]
+  all: readonly ProjectGalleryItem[]
+} {
+  const pinnedSlugs = new Set<string>(FEATURED_PROJECT_SLUGS)
 
-    if (!project) {
-      throw new Error(
-        `The work gallery lists "${slug}", which is not in WORK_PROJECTS`,
-      )
-    }
+  // 1. Pinned projects for Everything tab (preserving FEATURED_PROJECT_SLUGS order)
+  const pinnedProjects: WorkProject[] = []
+  for (const slug of FEATURED_PROJECT_SLUGS) {
+    const project = WORK_PROJECTS.find((p) => p.slug === slug)
+    if (project) pinnedProjects.push(project)
+  }
 
-    return {
-      id: project.slug,
-      kind: 'project',
-      index: `P${String(order + 1).padStart(2, '0')}`,
-      title: project.title,
-      categoryLabel: project.genre,
-      year: String(project.year),
-      description: project.description,
-      // The lead gets one more pill; the rest keep the bottom drawer compact.
-      tags: project.stack.slice(0, order === 0 ? 4 : 3),
-      href: `/projects/${project.slug}`,
-      cta: 'Read the notes',
-      project,
-      featured: order === 0,
-      position: PROJECT_POSITION[project.slug] ?? 'center',
-    }
+  // 2. Max 6 latest projects from WORK_PROJECTS outside the pinned set
+  const remaining = WORK_PROJECTS.filter((p) => !pinnedSlugs.has(p.slug)).sort(
+    (a, b) => b.year - a.year || a.id - b.id,
+  )
+  const latestProjects = remaining.slice(0, 6)
+
+  const toGalleryItem = (
+    project: WorkProject,
+    order: number,
+  ): ProjectGalleryItem => ({
+    id: project.slug,
+    kind: 'project' as const,
+    index: `P${String(order + 1).padStart(2, '0')}`,
+    title: project.title,
+    categoryLabel: project.genre,
+    year: String(project.year),
+    description: project.description,
+    // The lead gets one more pill; the rest keep the bottom drawer compact.
+    tags: project.stack.slice(0, order === 0 ? 4 : 3),
+    href: `/projects/${project.slug}`,
+    cta: 'Read the notes',
+    project,
+    featured: order === 0,
+    position: PROJECT_POSITION[project.slug] ?? 'center',
   })
 
+  const featured = pinnedProjects.map((p, i) => toGalleryItem(p, i))
+  const all = [
+    ...featured,
+    ...latestProjects.map((p, i) =>
+      toGalleryItem(p, pinnedProjects.length + i),
+    ),
+  ]
+
+  return { featured, all }
+}
+
+const { featured: FEATURED_PROJECT_ITEMS, all: ALL_PROJECT_GALLERY_ITEMS } =
+  buildProjectGalleryItems()
+
+export { FEATURED_PROJECT_ITEMS }
+export const PROJECT_GALLERY_ITEMS: readonly ProjectGalleryItem[] =
+  ALL_PROJECT_GALLERY_ITEMS
+
 /**
- * The thirteen documented systems the board shows, in `SYSTEM_SLUGS` order — the
- * same source of truth `/design-system` renders, so a case can never appear on
- * the board with a name, path or cover the case page does not have. A slug the
- * live API no longer returns is skipped rather than invented.
+ * Builds the system gallery items:
+ * - 6 pinned design systems from the Everything tab (`FEATURED_SYSTEM_SLUGS`)
+ * - max 6 latest design systems from the catalogue (sorted by recency, max 12 total)
  */
 export function buildSystemGalleryItems(
   cases: readonly DesignCase[] = DESIGN_CASES,
 ): readonly SystemGalleryItem[] {
-  return SYSTEM_SLUGS.flatMap((slug, order) => {
-    const item = cases.find((candidate) => slugify(candidate.slug) === slug)
-    if (!item) return []
+  const pinnedSlugs = new Set<string>(FEATURED_SYSTEM_SLUGS)
 
-    return [
-      {
-        id: slug,
-        kind: 'design-system' as const,
-        index: `S${String(order + 1).padStart(2, '0')}`,
-        title: item.name,
-        categoryLabel: 'Design system',
-        year: item.status.match(/\d{4}/)?.[0] ?? '2026',
-        description: item.description,
-        tags: item.tags,
-        href: item.href,
-        cta: 'Open the case',
-        cover: item.cover,
-        coverAlt: item.coverAlt,
-        position: 'top center',
-        swatches: SYSTEM_SWATCHES[slug] ?? [],
-      },
-    ]
+  // 1. Pinned design systems from Everything tab (in FEATURED_SYSTEM_SLUGS order)
+  const pinned: DesignCase[] = []
+  for (const slug of FEATURED_SYSTEM_SLUGS) {
+    const item = cases.find((c) => slugify(c.slug) === slug)
+    if (item) pinned.push(item)
+  }
+
+  // 2. Max 6 latest design systems outside the pinned set (sorted by number descending)
+  const remaining = cases
+    .filter((c) => !pinnedSlugs.has(slugify(c.slug)))
+    .sort((a, b) => Number(b.number || 0) - Number(a.number || 0))
+    .slice(0, 6)
+
+  const activeSystems = [...pinned, ...remaining]
+
+  return activeSystems.map((item, order) => {
+    const slug = slugify(item.slug)
+    return {
+      id: slug,
+      kind: 'design-system' as const,
+      index: `S${String(order + 1).padStart(2, '0')}`,
+      title: item.name,
+      categoryLabel: 'Design system',
+      year: item.status.match(/\d{4}/)?.[0] ?? '2026',
+      description: item.description,
+      tags: item.tags,
+      href: item.href,
+      cta: 'Open the case',
+      cover: item.cover,
+      coverAlt: item.coverAlt,
+      position: 'top center',
+      swatches: SYSTEM_SWATCHES[slug] ?? [],
+    }
   })
 }
 

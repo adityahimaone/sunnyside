@@ -26,12 +26,14 @@ import { Reveal } from '../reveal'
 import {
   ARCHIVE_LINKS,
   DEFAULT_YARN,
+  FEATURED_PROJECT_ITEMS,
   FEATURED_SYSTEM_SLUGS,
   GALLERY_ITEMS,
   PROJECT_GALLERY_ITEMS,
   SYSTEM_GALLERY_ITEMS,
   YARN_HEX,
   YARN_SPOOLS,
+  buildProjectGalleryItems,
   buildSystemGalleryItems,
   pinFor,
   PIECE_TAPE,
@@ -48,9 +50,10 @@ import styles from './work-gallery.module.css'
 /**
  * The selected-work chapter is a cutting mat with paper taped to it.
  *
- * The board is curated. Everything shows the six releases and six featured
- * systems; Systems reveals thirteen (the featured six plus the newest case,
- * Wildflower, Cove and the recent cases). Pieces hang in a hand-placed wall: four
+ * The board is curated. Everything shows the six pinned releases and six featured
+ * systems (twelve pieces); Releases shows the six pinned releases plus up to six
+ * latest projects (max twelve); Systems reveals the six pinned systems plus up to
+ * six latest design systems (max twelve). Pieces hang in a hand-placed wall: four
  * columns, each card dropped a little lower than the last so the board reads
  * pinned rather than gridded. Below the desktop split the same DOM becomes one
  * horizontal snap run instead, because four columns of paper on a phone is a
@@ -664,6 +667,11 @@ export function WorkGallery({
   const pinEls = useRef<Record<string, HTMLElement | null>>({})
   const pinFrame = useRef(0)
 
+  const { featured: featuredProjectItems, all: projectItems } = useMemo(
+    () => buildProjectGalleryItems(),
+    [],
+  )
+
   const systemItems = useMemo(
     () =>
       designCases ? buildSystemGalleryItems(designCases) : SYSTEM_GALLERY_ITEMS,
@@ -675,12 +683,12 @@ export function WorkGallery({
     [systemItems],
   )
 
-  /** The full catalogue, not just the thirteen the board shows. */
+  /** The full catalogue, not just the twelve the board shows. */
   const caseCount = designCases?.length ?? DESIGN_CASES.length
 
   const allItems = useMemo(
-    () => [...PROJECT_GALLERY_ITEMS, ...featuredSystemItems],
-    [featuredSystemItems],
+    () => [...featuredProjectItems, ...featuredSystemItems],
+    [featuredProjectItems, featuredSystemItems],
   )
 
   const visible =
@@ -688,7 +696,7 @@ export function WorkGallery({
       ? allItems
       : filter === 'design-system'
         ? systemItems
-        : PROJECT_GALLERY_ITEMS
+        : projectItems
 
   const drawn = useMemo(
     () =>
@@ -1103,11 +1111,11 @@ export function WorkGallery({
                   {FILTERS.map((option) => {
                     const count =
                       option.id === 'all'
-                        ? PROJECT_GALLERY_ITEMS.length +
+                        ? featuredProjectItems.length +
                           featuredSystemItems.length
                         : option.id === 'design-system'
                           ? systemItems.length
-                          : PROJECT_GALLERY_ITEMS.length
+                          : projectItems.length
 
                     return (
                       <button
