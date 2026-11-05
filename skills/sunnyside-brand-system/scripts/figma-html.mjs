@@ -3311,6 +3311,11 @@ if (isMain) {
     }
   }
   if (existsSync(root)) {
+    /* A repo that keeps every case inside `src/features/` or `public/brand/`
+     * has no top-level case folders, so the loop below would find nothing —
+     * a 25-case design-system repo resolved 0 brands. Scan those conventional
+     * roots directly first; they are skipped by the loop's deny list. */
+    addFrom('')
     for (const entry of readdirSync(root, { withFileTypes: true })) {
       if (!entry.isDirectory() || entry.name.startsWith('.') || entry.name === 'node_modules') continue
       if (['scripts', 'templates', 'references', 'examples', 'assets', 'fonts', 'cast', 'docs', 'tokens', 'lib', 'types', 'design', 'components', 'src', 'public', 'features'].includes(entry.name)) continue

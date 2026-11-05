@@ -21,9 +21,15 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 export function findTokens(root, slug) {
+  /* Next.js repos keep cases under `src/features/<slug>/`, and some Astro repos
+   * ship the token file unprefixed at `public/brand/<slug>/tokens.json`. Both
+   * were invisible to the first version of this lookup, which is why a
+   * design-system repo with 25 cases resolved only 9 of them. */
   const candidates = [
     join(root, 'features', slug, 'tokens.json'),
+    join(root, 'src', 'features', slug, 'tokens.json'),
     join(root, 'public', 'brand', slug, `${slug}-tokens.json`),
+    join(root, 'public', 'brand', slug, 'tokens.json'),
     ...(slug === 'sunnyside' ? [join(root, 'features', 'design-system', 'tokens.json')] : []),
   ]
   return candidates.find(existsSync) ?? null
