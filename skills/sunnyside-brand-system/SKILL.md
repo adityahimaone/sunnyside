@@ -503,21 +503,29 @@ Verify internally before finishing (never print this checklist):
 
 ---
 
-## FIGMA HANDOFF · HTML SHEET → IMPORTER → BIND
+## FIGMA HANDOFF · ONE CANONICAL SPEC → NATIVE PLUGIN
 
-A design system that only exists as HTML is a website. The Figma handoff is three
-steps, and **none of them requires writing a new HTML-to-Figma converter**.
-`html.to.design`, Stitch to Figma, Builder.io and Web to Design already parse DOM +
-computed CSS into native Figma Auto Layout. Doop's *Copy for Figma* does not: its
-own docs call the result "a snapshot, not a sync: auto layout, variables, and
-components aren't recreated." Doop is a multiplayer canvas and MCP surface, not
-a conversion step — never route HTML through it just to reach Figma.
+A design system that only exists as HTML is a website. Since **v5.0.0** the
+handoff is **plugin-only**: the HTML sheet emits one signed canonical spec, and
+the native replay plugin is the only Figma import. Doop / html.to.design become
+**preview and reference only** — their docs call the result "a snapshot, not a
+sync: auto layout, variables, and components aren't recreated." A migration
+action upgrades an existing flat import in place instead of asking for a
+re-import.
+
+Why: the audit of `test ds 3.fig` measured a Doop page at 1575 nodes with
+**0** auto layout / **0** variables / **0** bound styles, against plugin pages
+that had 127 auto layouts but only 998 nodes — the two flows were measuring
+different documents. Root causes: the live window was captured at 2504px while
+headless used 1440px; Canvas Grid equalised row heights; the token payload was
+empty for kits that only ship `meta/primitives/contrast`; and re-running left
+stray collections behind. All four are fixed below.
 
 **One source, three emitters — all regenerated from the same `tokens.json`:**
 
 | Script | Output | What it owns |
 | --- | --- | --- |
-| `scripts/figma-html.mjs` | `public/brand/<slug>/<slug>-figma.html` | 8 white sheets, inlined SVG, `data-figma-node` labels, `?clean=1`, 1440px canvas-grid mode |
+| `scripts/figma-html.mjs` | `public/brand/<slug>/<slug>-figma.html` | 8 white sheets, inlined SVG, canonical 1440px v2 manifest + embedded Plugin ZIP, `data-figma-component` variants, `?clean=1`, canvas-grid preview |
 | `scripts/figma-forge.mjs` | `manifest.json` + `code.js` | variables (Light/Dark + aliases), paint/text/effect/grid styles, component variants |
 | `scripts/figma-bind.mjs` | `manifest.json` + `code.js` | binds imported layers back to those variables and styles by measured value |
 
@@ -548,46 +556,57 @@ node scripts/figma-bind.mjs --slug <slug> --root . --out design/figma/<slug>-bin
 node scripts/figma-bind-smoke.mjs design/figma/<slug>-bind/code.js
 ```
 
-### Auto Layout, from the page itself
+### Canonical capture (v2 manifest)
 
-The generated sheet has two extra controls in its top bar:
+`scripts/lib/canonical.mjs` is the shared contract. `buildSystemSpec()` folds
+tokens.json **plus** the sheet's own scales, CSS custom properties, canonical
+type roles, spacing/radius scales, elevation effects, fonts, grid and component
+definitions into one `system` object — a Mullion-style kit with only
+`meta/primitives/contrast` still ships 60–90 colours and 10+ type roles.
 
-- **⇄ Auto Layout** (`?autolayout=1`) — outlines every CSS flex/grid flow
-  container in blue and flags absolute, transform and `backdrop-filter` layers
-  in red/amber. It changes nothing about geometry; it shows exactly what an
-  importer can infer. The Setout reference sheet has 49 flex rules, 16 grid
-  rules, 50 gaps and 2 absolute layers.
-- **⤓ Copy for Figma** — measures the live DOM (`getComputedStyle` +
-  `getBoundingClientRect`), serialises a `sunnyside/figma-manifest` with the
-  layout tree, colours, type, tokens, SVG marks and `data-figma-node` component
-  names, and copies it to the clipboard.
+The page's `buildFigmaManifest()` clones the document into a **fixed 1440px
+iframe** with all body modes cleared, all 8 sheets visible, and coordinates
+relative to each sheet root. The toolbar buttons, the Plugin ZIP seed and
+`figma-manifest.mjs` all call that same async function, so a 2504px Canvas Grid
+window, an 820px window, `?sheet=3` and headless Chrome produce the **same
+checksum and the same geometry**. Every node carries `id`, `role`, `tokenRef`,
+`styleRef` and `componentRef`; the manifest is signed with an FNV-1a checksum
+(`CHECKSUM_JS` is injected verbatim, so browser and Node cannot drift).
 
-`scripts/figma-manifest.mjs` runs that same function in headless Chrome and
-writes the JSON to disk. `scripts/figma-replay.mjs` embeds it as a seed in a
-Figma plugin that rebuilds **everything natively in one pass** — HORIZONTAL /
-VERTICAL / GRID auto layout with padding, spacing, alignment, wrap, `layoutGrow`
-and absolute children; variable collections; paint styles bound to variables;
-text styles; live text; rectangles; SVG vectors; named components.
+Top-bar controls: **⇄ Auto Layout** (inspector), **⤓ Copy for Figma**,
+**⤓ Manifest**, **⤓ Plugin** (a self-contained ZIP with the canonical manifest
+baked in). **Sheet 08 · Patterns & Tokens is always in the spec but stays
+optional in Figma** — the checkbox defaults off.
+
+The plugin builds a complete, **idempotent** library: colour collections (primitives
++ three 10-step ramps + semantic surfaces + on-demand `Auto/#RRGGBB` for any
+colour the token file omits), spacing/radius FLOAT variables, paint / text /
+effect / grid styles, all upserted by name. Every SOLID fill — including text
+ink — is bound to a variable; every TEXT node is bound to a text style (minted
+from its own metrics when no token role matches, so binding never changes
+appearance). Components become real variant sets with descriptions and live
+instances in a `◆ Component Library` frame. **Upgrade existing pages** binds a
+flat Doop import in place; re-running reports zero changes.
 
 ```bash
 node scripts/figma-handoff.mjs --slug <slug> --root . --with-replay
 node scripts/figma-replay-smoke.mjs design/figma/<slug>-replay/code.js \
   --manifest design/figma/<slug>.manifest.json
+node scripts/figma-parity.mjs --manifest design/figma/<slug>.manifest.json \
+  --plugin design/figma/<slug>-replay/code.js --fig "test ds 3.fig"
 ```
 
-This is **not** a general HTML-to-Figma converter: the page we generate emits a
-known schema and the plugin replays it, so there is no CSS parsing and no
-guessing. It is the one case where building a plugin is justified, because it
-removes the third-party importer entirely and makes the output deterministic.
-Without headless Chrome the plugin still works — paste the JSON from
-**Copy for Figma** into its UI.
+`figma-parity.mjs` gates the handoff: node/text counts within 2%, sheet geometry
+within 2px, exact colours, ≥95% text bound to styles, ≥90% fills bound to
+variables, ≥1 instance per component, zero duplicate collections, and a safe
+re-run. The `.fig` delta is reported as an informational reference — Doop is a
+snapshot importer, not a contract.
 
-Two paths, then:
+Paths:
 
-- **A · importer** — build plugin → import the sheet with html.to.design /
-  Stitch to Figma → select frames → bind plugin.
-- **B · native replay** — `--with-replay` → one plugin builds auto layout +
-  variables + styles + components. No importer, no clipboard.
+- **B · native replay (default)** — `--with-replay` → one plugin, no importer.
+- **A · legacy importer** — build plugin → import with html.to.design / Stitch →
+  bind plugin. Kept for reference, not the recommended handoff.
 
 For path A, in Figma: run the **build** plugin → import `<slug>-figma.html` →
 select the imported frames → run **`<Name>` — bind**.
@@ -607,8 +626,9 @@ font data — ship the `.ttf` files and outline the display face. One viewport p
 frame; 390px is a separate frame someone has to draw.
 
 **Audit gate:** a Figma handoff is not done until `figma-smoke.mjs` passes on the
-build plugin, `figma-bind-smoke.mjs` passes on the binder, the sheet opens in a
-browser with all 8 sections, and the counts in both reports match the token file.
+build plugin, `figma-bind-smoke.mjs` passes on the binder, `figma-replay-smoke.mjs`
+passes on the native plugin (including the upgrader), `figma-parity.mjs` reports
+all gates green, and the sheet opens in a browser with all 8 sections.
 
 ---
 

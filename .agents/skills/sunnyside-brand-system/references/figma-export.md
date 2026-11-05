@@ -458,3 +458,88 @@ manifests already set `documentAccess: dynamic-page`. Nothing bound → the buil
 plugin was not run first, or a colour is not in the token file. Re-running the
 replay with Replace unchecked adds a second set of 8 pages — it is a build, not
 a sync.
+
+## Canonical handoff v2 (v5.0.0, plugin-only)
+
+The older Path A / Path B choice above is superseded. **The HTML sheet's Plugin
+ZIP is the only Figma import**; Doop and html.to.design are preview/reference,
+and existing flat imports are upgraded in place.
+
+### The contract
+
+`scripts/lib/canonical.mjs` owns the spec. `buildSystemSpec()` returns:
+
+| Field | Contents |
+| --- | --- |
+| `colours` | primitives, three 10-step ramps, 23 semantic surfaces, CSS custom properties |
+| `type` | token roles + 10 canonical sheet roles (family, size, leading, tracking, weight) |
+| `space` / `radius` | token values, or the sheet's own scales when tokens.json has none |
+| `effects` / `grid` | three elevation shadows and the 12-column house grid |
+| `fonts` / `components` | display / reading / mono; Button, Badge, Input, Modal with variants |
+| `sheets` | the canonical 8; only `patterns` is `optional: true` |
+
+`finalizeManifest()` signs the envelope with an 8-char FNV-1a checksum over
+`{dsId, version, viewport, sheets, mode, generator, system, tokens, sheetsTree,
+nodes}`. `source` is deliberately excluded so a `file://` path cannot change the
+signature. `CHECKSUM_JS` is injected verbatim into the page — one algorithm, two
+runtimes, no drift.
+
+### Capture
+
+`buildFigmaManifest()` is async. It clones `document.documentElement` into a
+`DOMParser` document, strips scripts (including the ~600 KB embedded plugin
+bundle), clears body classes, removes `hidden-sheet`, appends a capture
+stylesheet, and writes the result into a 1440px iframe parked offscreen. It
+awaits `document.fonts.ready` with a 1.5s timeout race, then walks each
+`.figma-sheet` with `getComputedStyle` / `getBoundingClientRect` relative to
+that sheet's own origin. `MAX_DEPTH = 12`, `MAX_NODES = 4000`.
+
+Result: the same checksum and the same 8 sheet heights at 1440, 2504
+(`?grid=1`), 820 (`?clean=1`) and 1920 (`?sheet=3`) px. If DOMParser or the
+iframe is unavailable it falls back to the live document and marks
+`capture.mode = 'live-window-fallback'`; `figma-manifest.mjs` rejects that
+rather than silently shipping a non-canonical seed.
+
+### Replay
+
+`templates/figma-replay-plugin.js` reads `manifest.system` (v1 `tokens` still
+works). `buildSystem()` is idempotent: `getLocalVariableCollectionsAsync`,
+`getLocalVariablesAsync` and the four `getLocal*StylesAsync` getters are used to
+upsert by name. Colours the DOM uses but the token file omits get an
+`Auto/#RRGGBB` variable, so binding reaches 100% without inventing a colour.
+`textStyleFor()` mints a style from the text node's own metrics when no token
+role matches, so `textStyleId` never changes the look.
+
+`data-figma-component` / `data-figma-variant` / `data-figma-description` become
+COMPONENT nodes (leaf specimens get a component host). Clones are combined with
+`figma.combineAsVariants()` into sets named `Component / <Name>`, and each
+variant gets an `INSTANCE` in a `◆ Component Library` frame placed beside the
+sheet root. Original specimens stay exactly where the sheet put them.
+
+### Upgrade in place
+
+The UI's **Upgrade existing pages** sends `{type:'upgrade', allPages,
+inferLayout}`. The plugin walks flat pages, rebinds SOLID fills to colour
+variables and TEXT nodes to text styles, optionally applies
+`inferredAutoLayout`, and skips every `NN · …` generated page. A second run
+reports zero changes.
+
+### Parity gate
+
+```bash
+node scripts/figma-parity.mjs \
+  --manifest design/figma/<slug>.manifest.json \
+  --plugin design/figma/<slug>-replay/code.js \
+  --fig "test ds 3.fig" --out design/figma/<slug>.parity.json
+```
+
+Thirteen gates: signature, capture mode, 8 sheets, node count ≤2%, text count
+≤2%, sheet geometry ≤2px, exact colours, ≥95% text→styles, ≥90% fills→variables,
+≥1 instance per component, 0 duplicate collections, safe re-run, 0 console
+errors. Node counts are adjusted for intentional wrappers (chip plates + leaf
+component hosts), which is why Vesper reports `953 vs 953 (+76 wrappers)`.
+`--fig` uses `openpencil info --json` to report the Doop delta as information,
+not a gate: Doop imports invisible chrome and cannot reconstruct a system.
+
+`figma-handoff.mjs --with-replay` runs the gate automatically after the replay
+smoke test and writes `<slug>.parity.json`.

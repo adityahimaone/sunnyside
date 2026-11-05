@@ -13,6 +13,7 @@
  *   4. figma-smoke.mjs + figma-bind-smoke.mjs → both plugins executed
  *   5. with --with-replay: figma-manifest.mjs (headless Chrome) → seed manifest
  *      → figma-replay.mjs → replay plugin → figma-replay-smoke.mjs
+ *      → figma-parity.mjs (canonical spec ↔ plugin output gate)
  *
  * Two Figma paths:
  *   A. build plugin → import the HTML sheet with html.to.design → bind plugin
@@ -186,6 +187,9 @@ if (!check && !has('no-smoke')) {
     const argv = [join(replayOut, 'code.js')]
     if (hasSeed) argv.push('--manifest', manifestOut)
     run('5/5  replay smoke', 'figma-replay-smoke.mjs', argv)
+    if (hasSeed) {
+      run('5/5  parity gate', 'figma-parity.mjs', ['--manifest', manifestOut, '--plugin', join(replayOut, 'code.js'), '--out', join(outBase, `${slug}.parity.json`)])
+    }
   }
 }
 

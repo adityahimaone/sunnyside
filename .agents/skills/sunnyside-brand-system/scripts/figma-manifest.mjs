@@ -69,16 +69,27 @@ if (!executablePath) {
 let browser = null
 try {
   browser = await chromium.launch({ executablePath, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
+  /* The page runs the SAME capture function as its own toolbar buttons, in a
+   * fixed-width iframe. The outer viewport is pinned too, so a headless extract
+   * and a designer clicking "Plugin" produce byte-identical geometry. */
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
   await page.goto(pathToFileURL(htmlPath).href, { waitUntil: 'load' })
   await page.waitForFunction(() => typeof window.buildFigmaManifest === 'function', { timeout: 10000 })
-  const manifest = await page.evaluate(() => window.buildFigmaManifest())
+  await page.evaluate(() => document.fonts && document.fonts.ready)
+  const manifest = await page.evaluate(async () => await window.buildFigmaManifest())
   if (!manifest || manifest.kind !== 'sunnyside/figma-manifest') throw new Error('the page did not return a Sunnyside manifest')
   if (!manifest.sheets || !manifest.sheets.length) throw new Error('the manifest has no sheets (are all sheets filtered out?)')
+  if (manifest.version < 2 || !manifest.capture || !manifest.capture.checksum) {
+    throw new Error('the sheet does not emit a v2 canonical manifest — regenerate it with figma-html.mjs v5')
+  }
+  if (manifest.capture.mode !== 'canonical-v2') {
+    throw new Error(`capture fell back to "${manifest.capture.mode}": ${manifest.capture.fallback || 'unknown error'}`)
+  }
+  if (manifest.capture.viewport !== 1440) throw new Error(`unexpected capture viewport ${manifest.capture.viewport}`)
   await mkdir(dirname(outPath), { recursive: true })
   await writeFile(outPath, JSON.stringify(manifest), 'utf8')
   console.log(`  ✓ ${outPath}`)
-  console.log(`    ${manifest.brand} · ${manifest.sheets.length} sheets · ${manifest.nodes} nodes · ${JSON.stringify(manifest).length.toLocaleString()} chars`)
+  console.log(`    ${manifest.brand} · ${manifest.capture.sheets} sheets · ${manifest.nodes} nodes · ${manifest.system?.colours?.length || 0} colours · ${manifest.capture.checksum} · ${JSON.stringify(manifest).length.toLocaleString()} chars`)
 } catch (e) {
   console.error('  ✗ manifest extraction failed: ' + ((e && e.message) || String(e)))
   process.exitCode = 1

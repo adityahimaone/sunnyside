@@ -6,6 +6,51 @@ and an audit that names what it could not verify.
 
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand, Clearing, Porphyry, Jakarta, Bluewater, Vesper, Halation, and Tavola. The method travels; the marks do not.
 
+## v5.0.0: one canonical spec, plugin-only handoff, real component library
+
+Rebuilt around the audit of `test ds 3.fig` (Mullion). The Doop page had 1575
+nodes / **0** auto layout / **0** variables / **0** bound styles; the plugin
+pages had 127 auto layouts but only 998 nodes. The two flows were describing
+different documents. Strategy chosen: **plugin-only + upgrader**; Doop becomes
+preview/reference; sheet 08 stays optional in Figma.
+
+- **Deterministic capture.** `buildFigmaManifest()` now clones the document into
+  a fixed 1440px iframe, clears every body mode, reveals all 8 sheets and
+  records coordinates relative to each sheet root. Verified byte-identical
+  checksums and sheet heights at 1440 / 2504 (Canvas Grid) / 820 / 1920 px and
+  with `?sheet=3`. No more equalised grid row heights (logo 1189 vs 842,
+  overlays 3052 vs 708). Toolbar, Plugin ZIP and `figma-manifest.mjs` all call
+  the same async function.
+- **Complete system spec.** New `scripts/lib/canonical.mjs` folds tokens.json +
+  the sheet's ramps, CSS custom properties, canonical type roles, spacing,
+  radius, elevation, fonts, grid and component definitions into one `system`
+  object. A kit whose tokens.json has only `meta/primitives/contrast` now ships
+  82 colours and 21 type roles instead of 12 colours and zero roles.
+- **Signed manifest.** v2 carries `dsId`, `capture{viewport:1440, sheets:8,
+  mode:'canonical-v2', checksum}` and per-node `id / role / tokenRef / styleRef
+  / componentRef`. `CHECKSUM_JS` is injected verbatim from the Node module so
+  browser and Node compute the same FNV-1a signature.
+- **Idempotent system.** Collections, variables and paint/text/effect/grid styles
+  are looked up by name and updated in place. Re-running a Vesper build reuses
+  97 variables and leaves **zero** duplicate collections. Every generated
+  `NN · …` page is replaced; designer pages are untouched.
+- **Everything bound.** All 589 solid fills (including text ink) bind to a
+  colour variable; all 369 text nodes bind to a text style — 100% on both.
+  Auto-layout spacing/padding bind to FLOAT variables (184 bindings).
+- **Real component library.** `data-figma-component` / `data-figma-variant` /
+  `data-figma-description` on buttons, badges, inputs and modals produce 4
+  variant sets, 16 described components and 16 live instances in a
+  `◆ Component Library` frame beside the sheet.
+- **Upgrader.** New **Upgrade existing pages** action rebinds flat Doop /
+  html.to.design layers in place, with optional `inferredAutoLayout`. In-place,
+  idempotent, and never touches generated pages.
+- **Parity gate.** New `scripts/figma-parity.mjs` asserts the 13 gates below and
+  is wired into `figma-handoff.mjs --with-replay`. Vesper: 13/13 green —
+  953/953 nodes, 428/428 texts, 0px geometry delta, 68/68 colours, 100% text
+  styles, 100% fill bindings, 16 instances / 4 components, 0 duplicates.
+- **Tests.** 39/39 unit tests (7 new canonical tests), replay smoke extended
+  with binding/component/upgrade/idempotency assertions.
+
 ## v4.9.6: no copy chrome, round badges, no patterns page
 
 Diagnosed from a second exported `.fig` (9 pages, 1242 nodes).
