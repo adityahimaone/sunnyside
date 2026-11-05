@@ -1,0 +1,14 @@
+{
+  "name": "Vesper design system",
+  "id": "brand-forge-vesper-mw3bfxen",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "networkAccess": {
+    "allowedDomains": [
+      "none"
+    ]
+  }
+}

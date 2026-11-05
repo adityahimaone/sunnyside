@@ -1,0 +1,89 @@
+{
+  "rows": [
+    {
+      "check": "No horizontal overflow at 1440",
+      "pass": true,
+      "detail": "1440px of 1440px"
+    },
+    {
+      "check": "No console or page errors at 1440",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "check": "No failed requests at 1440",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "check": "Three faces loaded from disk",
+      "pass": true,
+      "detail": "Instrument Serif, Instrument Sans, IBM Plex Mono"
+    },
+    {
+      "check": "Every section is a pane",
+      "pass": true,
+      "detail": "8 panes"
+    },
+    {
+      "check": "Panes carry a backdrop blur",
+      "pass": true,
+      "detail": "blur(28px) saturate(1.5)"
+    },
+    {
+      "check": "Panes are rounded",
+      "pass": true,
+      "detail": "40px"
+    },
+    {
+      "check": "Contrast table renders from the tokens",
+      "pass": true,
+      "detail": "15 pairs"
+    },
+    {
+      "check": "The failing pairs are published",
+      "pass": true,
+      "detail": "2 rows marked"
+    },
+    {
+      "check": "Signal is the token value",
+      "pass": true,
+      "detail": "#8f2a90"
+    },
+    {
+      "check": "Type scale renders every role",
+      "pass": true,
+      "detail": "11 rows"
+    },
+    {
+      "check": "Dusk swaps the primitives, not the names",
+      "pass": true,
+      "detail": "#141019"
+    },
+    {
+      "check": "Swatches keep the light-scope material in dusk",
+      "pass": true,
+      "detail": "rgb(231, 227, 238)"
+    },
+    {
+      "check": "No horizontal overflow at 390",
+      "pass": true,
+      "detail": "390px of 390px"
+    },
+    {
+      "check": "No console errors at 390",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "check": "Compact at 16px is a different drawing",
+      "pass": true,
+      "detail": "33% of pixels differ from the primary"
+    },
+    {
+      "check": "Reduced motion stills the surfaces",
+      "pass": true,
+      "detail": "1e-06s"
+    }
+  ]
+}

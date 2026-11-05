@@ -1,0 +1,502 @@
+{
+  "collections": [
+    {
+      "name": "Colour",
+      "modes": [
+        {
+          "modeId": "light",
+          "name": "Light"
+        },
+        {
+          "modeId": "dark",
+          "name": "Dark"
+        }
+      ],
+      "variables": [
+        {
+          "name": "haze",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.9059,
+              "g": 0.8902,
+              "b": 0.9333,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.9059,
+              "g": 0.8902,
+              "b": 0.9333,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "glass",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.9843,
+              "g": 0.9765,
+              "b": 1,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.9843,
+              "g": 0.9765,
+              "b": 1,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "ink",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.1647,
+              "g": 0.1176,
+              "b": 0.2,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.1647,
+              "g": 0.1176,
+              "b": 0.2,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "muted",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.4196,
+              "g": 0.3686,
+              "b": 0.4667,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.4196,
+              "g": 0.3686,
+              "b": 0.4667,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "petal",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.9569,
+              "g": 0.851,
+              "b": 0.9098,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.9569,
+              "g": 0.851,
+              "b": 0.9098,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "signal",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.5608,
+              "g": 0.1647,
+              "b": 0.5647,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.5608,
+              "g": 0.1647,
+              "b": 0.5647,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "leaf",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.3059,
+              "g": 0.4196,
+              "b": 0.3216,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.3059,
+              "g": 0.4196,
+              "b": 0.3216,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "gold",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.7843,
+              "g": 0.5686,
+              "b": 0.2471,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.7843,
+              "g": 0.5686,
+              "b": 0.2471,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "sky",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.6196,
+              "g": 0.7647,
+              "b": 0.8784,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.6196,
+              "g": 0.7647,
+              "b": 0.8784,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "surface-page",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.9059,
+              "g": 0.8902,
+              "b": 0.9333,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.0784,
+              "g": 0.0627,
+              "b": 0.098,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "surface-loud",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.5608,
+              "g": 0.1647,
+              "b": 0.5647,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.851,
+              "g": 0.5412,
+              "b": 0.8471,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "text-primary",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.1647,
+              "g": 0.1176,
+              "b": 0.2,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.9529,
+              "g": 0.9255,
+              "b": 0.9647,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "text-secondary",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.4196,
+              "g": 0.3686,
+              "b": 0.4667,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.6902,
+              "g": 0.6392,
+              "b": 0.7412,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "text-accent",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.5608,
+              "g": 0.1647,
+              "b": 0.5647,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.851,
+              "g": 0.5412,
+              "b": 0.8471,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "edge-lit",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 1,
+              "g": 1,
+              "b": 1,
+              "a": 0.72
+            },
+            "Dark": {
+              "r": 1,
+              "g": 1,
+              "b": 1,
+              "a": 0.72
+            }
+          }
+        },
+        {
+          "name": "graphic-leaf",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.3059,
+              "g": 0.4196,
+              "b": 0.3216,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.5608,
+              "g": 0.6824,
+              "b": 0.5647,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "graphic-gold",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.7843,
+              "g": 0.5686,
+              "b": 0.2471,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.8784,
+              "g": 0.698,
+              "b": 0.4431,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "graphic-sky",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.6196,
+              "g": 0.7647,
+              "b": 0.8784,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.4353,
+              "g": 0.5765,
+              "b": 0.7059,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "focus-ring",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.5608,
+              "g": 0.1647,
+              "b": 0.5647,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.851,
+              "g": 0.5412,
+              "b": 0.8471,
+              "a": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Spacing",
+      "modes": [
+        {
+          "modeId": "default",
+          "name": "Default"
+        }
+      ],
+      "variables": [
+        {
+          "name": "1",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 2
+          }
+        },
+        {
+          "name": "2",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 4
+          }
+        },
+        {
+          "name": "3",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 8
+          }
+        },
+        {
+          "name": "4",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 12
+          }
+        },
+        {
+          "name": "5",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 16
+          }
+        },
+        {
+          "name": "6",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 24
+          }
+        },
+        {
+          "name": "7",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 32
+          }
+        },
+        {
+          "name": "8",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 48
+          }
+        },
+        {
+          "name": "9",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 64
+          }
+        },
+        {
+          "name": "10",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 96
+          }
+        },
+        {
+          "name": "11",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 128
+          }
+        }
+      ]
+    },
+    {
+      "name": "Radius",
+      "modes": [
+        {
+          "modeId": "default",
+          "name": "Default"
+        }
+      ],
+      "variables": [
+        {
+          "name": "xs",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 6
+          }
+        },
+        {
+          "name": "sm",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 12
+          }
+        },
+        {
+          "name": "md",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 20
+          }
+        },
+        {
+          "name": "lg",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 28
+          }
+        },
+        {
+          "name": "xl",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 40
+          }
+        },
+        {
+          "name": "pill",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 999
+          }
+        }
+      ]
+    }
+  ]
+}

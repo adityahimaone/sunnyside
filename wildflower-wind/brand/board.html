@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wildflower Wind — board</title>
+<style>
+@font-face{font-family:'Instrument Serif';src:url('../assets/fonts/InstrumentSerif-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:'Instrument Serif';src:url('../assets/fonts/InstrumentSerif-400-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:block}
+@font-face{font-family:'Instrument Sans';src:url('../assets/fonts/InstrumentSans-Variable.woff2') format('woff2');font-weight:400 700;font-display:block}
+@font-face{font-family:'IBM Plex Mono';src:url('../assets/fonts/IBMPlexMono-400-normal.woff2') format('woff2');font-weight:400;font-display:block}
+
+:root{
+  --haze:#e7e3ee; --glass:#fbf9ff; --ink:#2a1e33; --muted:#6b5e77;
+  --petal:#f4d9e8; --signal:#8f2a90; --leaf:#4e6b52; --gold:#c8913f; --sky:#9ec3e0;
+  --line:rgb(42 30 51 / .14);
+}
+*{box-sizing:border-box;margin:0}
+#board{width:1500px;height:1125px;position:relative;overflow:hidden;background:var(--haze);
+  font-family:'Instrument Sans',sans-serif;color:var(--ink)}
+#board .bg{position:absolute;inset:-8%;width:116%;height:116%;object-fit:cover;
+  filter:blur(38px) saturate(145%) brightness(1.03)}
+#board .tint{position:absolute;inset:0;background:
+  radial-gradient(110% 80% at 14% 2%,rgb(255 255 255/.34),transparent 58%),
+  radial-gradient(80% 64% at 92% 100%,rgb(143 42 144/.20),transparent 62%),
+  linear-gradient(180deg,rgb(231 227 238/.30),rgb(231 227 238/.56))}
+.pane{position:absolute;left:40px;top:40px;right:40px;bottom:40px;border-radius:40px;
+  background:rgb(251 249 255 / .58);border:1px solid rgb(255 255 255/.72);
+  box-shadow:0 1px 0 0 rgb(255 255 255/.72) inset,0 -1px 0 0 rgb(255 255 255/.18) inset,
+             0 40px 90px -40px rgb(42 30 51/.45),0 3px 10px -5px rgb(42 30 51/.18);
+  backdrop-filter:blur(30px) saturate(150%);padding:52px 54px 40px;display:flex;flex-direction:column}
+.top{display:flex;align-items:flex-start;gap:36px}
+.top .mk{width:188px;height:188px;flex:0 0 auto}
+.nm{font-family:'Instrument Serif',serif;font-size:84px;line-height:.9;letter-spacing:-.042em;margin-top:4px}
+.nm em{font-style:italic}
+.eb{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:14px}
+.lead{font-size:15.5px;line-height:1.5;color:var(--muted);max-width:34ch;margin-top:12px}
+.badge{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  background:rgb(251 249 255/.7);border:1px solid rgb(255 255 255/.75);border-radius:999px;padding:8px 14px;
+  box-shadow:0 1px 0 0 rgb(255 255 255/.8) inset}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--signal);display:block}
+
+.sizes{display:flex;align-items:center;gap:30px;margin-top:30px;padding:20px 24px;border-radius:28px;
+  background:rgb(251 249 255/.46);border:1px solid rgb(255 255 255/.6);box-shadow:0 1px 0 0 rgb(255 255 255/.7) inset}
+.sizes figure{display:flex;flex-direction:column;align-items:center;gap:9px}
+.sizes figcaption{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--muted)}
+
+.mid{display:flex;gap:30px;margin-top:26px;align-items:flex-start}
+.type{flex:0 0 auto;width:330px}
+.type .d{font-family:'Instrument Serif',serif;font-size:60px;line-height:1;letter-spacing:-.03em}
+.type .r{font-size:12.5px;line-height:1.5;color:var(--muted);margin-top:10px}
+.type .m{font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.7;color:var(--muted);margin-top:12px}
+
+.pal{flex:1;display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
+.pal div{display:flex;flex-direction:column;gap:7px}
+.pal .chip{height:64px;border-radius:16px;box-shadow:0 1px 0 0 rgb(255 255 255/.6) inset,0 6px 16px -10px rgb(42 30 51/.4)}
+.pal b{font-size:10.5px;font-weight:600}
+.pal code{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted)}
+
+.quote{margin-top:auto;padding-top:18px}
+.quote p{font-family:'Instrument Serif',serif;font-size:34px;line-height:1.08;letter-spacing:-.028em;max-width:30ch}
+.quote span{display:block;margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.plates{display:flex;gap:10px;margin-top:24px;height:212px}
+.plates figure{flex:1;position:relative;overflow:hidden;border-radius:20px}
+.plates img{width:100%;height:100%;object-fit:cover;display:block}
+.plates figcaption{position:absolute;left:10px;bottom:10px;padding:6px 10px;border-radius:999px;
+  background:rgb(20 16 25/.42);backdrop-filter:blur(14px);color:#fff;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div id="board">
+  <img class="bg" src="../assets/photos/field-main.webp" alt="">
+  <div class="tint"></div>
+  <div class="pane">
+    <div class="top">
+      <img class="mk" src="../public/brand/wildflower-wind/mark.svg" alt="" width="188" height="188">
+      <div>
+        <div class="nm">Wildflower <em>Wind</em></div>
+        <div class="eb">Seed house · est. 2026 · 41°N</div>
+        <p class="lead">A meadow, seen through a pane of glass. Five translucent petals; the crossing is the ink.</p>
+      </div>
+      <span class="badge"><i></i>Case 13</span>
+    </div>
+
+    <div class="sizes">
+      <figure><img src="../public/brand/wildflower-wind/mark.svg" width="96" height="96" alt=""><figcaption>96</figcaption></figure>
+      <figure><img src="../public/brand/wildflower-wind/mark.svg" width="48" height="48" alt=""><figcaption>48</figcaption></figure>
+      <figure><img src="../public/brand/wildflower-wind/mark-compact.svg" width="32" height="32" alt=""><figcaption>32 · compact</figcaption></figure>
+      <figure><img src="../public/brand/wildflower-wind/mark-compact.svg" width="16" height="16" alt=""><figcaption>16 · compact</figcaption></figure>
+      <figure><img src="../public/brand/wildflower-wind/glyph.svg" width="28" height="28" alt=""><figcaption>glyph</figcaption></figure>
+      <figure><img src="../public/brand/wildflower-wind/mark-mono.svg" width="44" height="44" alt=""><figcaption>one ink</figcaption></figure>
+      <figure><img src="../public/brand/wildflower-wind/icon.svg" width="44" height="44" alt=""><figcaption>icon</figcaption></figure>
+      <figure style="margin-left:auto"><img src="../public/brand/wildflower-wind/lockup.svg" height="40" alt=""><figcaption>lockup</figcaption></figure>
+    </div>
+
+    <div class="mid">
+      <div class="type">
+        <div class="d">Aa</div>
+        <p class="r">Instrument Serif for the name, Instrument Sans for the reading, IBM Plex Mono for every measurement.</p>
+        <p class="m">5 petals · 1 taken<br>134° gap<br>radius 6 / 12 / 20 / 28 / 40</p>
+      </div>
+      <div class="pal">
+        <div><div class="chip" style="background:#e7e3ee"></div><b>haze</b><code>#e7e3ee</code></div>
+        <div><div class="chip" style="background:#fbf9ff"></div><b>glass</b><code>#fbf9ff</code></div>
+        <div><div class="chip" style="background:#2a1e33"></div><b>ink</b><code>#2a1e33</code></div>
+        <div><div class="chip" style="background:#6b5e77"></div><b>muted</b><code>#6b5e77</code></div>
+        <div><div class="chip" style="background:#f4d9e8"></div><b>petal</b><code>#f4d9e8</code></div>
+        <div><div class="chip" style="background:#8f2a90"></div><b>signal</b><code>#8f2a90</code></div>
+        <div><div class="chip" style="background:#4e6b52"></div><b>leaf</b><code>#4e6b52</code></div>
+        <div><div class="chip" style="background:#c8913f"></div><b>gold</b><code>#c8913f</code></div>
+        <div><div class="chip" style="background:#9ec3e0"></div><b>sky</b><code>#9ec3e0</code></div>
+      </div>
+    </div>
+
+    <div class="quote"><p>A flower that has lost a petal is still a flower. That is the whole licence.</p><span>The premise, in one line</span></div>
+
+    <div class="plates">
+      <figure><img src="../assets/photos/field-left.webp" alt=""><figcaption>Plate 01 · first light · 06:10</figcaption></figure>
+      <figure><img src="../assets/photos/field-center.webp" alt=""><figcaption>Plate 03 · last light · 19:35</figcaption></figure>
+    </div>
+  </div>
+</div>
+</body>
+</html>

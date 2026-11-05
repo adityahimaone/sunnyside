@@ -1,0 +1,14 @@
+{
+  "name": "Wildflower Wind design system",
+  "id": "brand-forge-wildflower-wind-mw3bg2cz",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "networkAccess": {
+    "allowedDomains": [
+      "none"
+    ]
+  }
+}

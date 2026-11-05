@@ -2,7 +2,7 @@
   "name": "huginn",
   "version": "2.0.0",
   "private": true,
-  "description": "Brand kit and design system for Huginn — a studio for slow software.",
+  "description": "Brand kit and design system for Huginn \u2014 a studio for slow software.",
   "type": "module",
   "license": "UNLICENSED",
   "scripts": {

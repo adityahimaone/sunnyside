@@ -1,0 +1,506 @@
+{
+  "collections": [
+    {
+      "name": "Colour",
+      "modes": [
+        {
+          "modeId": "light",
+          "name": "Light"
+        },
+        {
+          "modeId": "dark",
+          "name": "Dark"
+        }
+      ],
+      "variables": [
+        {
+          "name": "chalk",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.9647,
+              "g": 0.9373,
+              "b": 0.8824,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.9647,
+              "g": 0.9373,
+              "b": 0.8824,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "plate",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.9882,
+              "g": 0.9725,
+              "b": 0.9373,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.9882,
+              "g": 0.9725,
+              "b": 0.9373,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "stock",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.902,
+              "g": 0.8118,
+              "b": 0.6588,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.902,
+              "g": 0.8118,
+              "b": 0.6588,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "dusk",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.7882,
+              "g": 0.8235,
+              "b": 0.8941,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.7882,
+              "g": 0.8235,
+              "b": 0.8941,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "cobalt",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.1059,
+              "g": 0.2471,
+              "b": 0.6353,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.1059,
+              "g": 0.2471,
+              "b": 0.6353,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "night",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.0392,
+              "g": 0.1647,
+              "b": 0.4196,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.0392,
+              "g": 0.1647,
+              "b": 0.4196,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "lampblack",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.051,
+              "g": 0.0824,
+              "b": 0.149,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.051,
+              "g": 0.0824,
+              "b": 0.149,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "muted",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.3373,
+              "g": 0.3647,
+              "b": 0.451,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.3373,
+              "g": 0.3647,
+              "b": 0.451,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "surface-page",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.9647,
+              "g": 0.9373,
+              "b": 0.8824,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.0392,
+              "g": 0.1647,
+              "b": 0.4196,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "surface-plate",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.9882,
+              "g": 0.9725,
+              "b": 0.9373,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.0549,
+              "g": 0.1961,
+              "b": 0.4784,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "surface-wash",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.902,
+              "g": 0.8118,
+              "b": 0.6588,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.1059,
+              "g": 0.2471,
+              "b": 0.6353,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "surface-loud",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.1059,
+              "g": 0.2471,
+              "b": 0.6353,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.902,
+              "g": 0.8118,
+              "b": 0.6588,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "surface-night",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.0392,
+              "g": 0.1647,
+              "b": 0.4196,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.0392,
+              "g": 0.1647,
+              "b": 0.4196,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "text-primary",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.051,
+              "g": 0.0824,
+              "b": 0.149,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.9647,
+              "g": 0.9373,
+              "b": 0.8824,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "text-secondary",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.3373,
+              "g": 0.3647,
+              "b": 0.451,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.7882,
+              "g": 0.8235,
+              "b": 0.8941,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "text-accent",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.1059,
+              "g": 0.2471,
+              "b": 0.6353,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.902,
+              "g": 0.8118,
+              "b": 0.6588,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "text-on-loud",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.9647,
+              "g": 0.9373,
+              "b": 0.8824,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.051,
+              "g": 0.0824,
+              "b": 0.149,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "line-subtle",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.051,
+              "g": 0.0824,
+              "b": 0.149,
+              "a": 0.14
+            },
+            "Dark": {
+              "r": 0.9647,
+              "g": 0.9373,
+              "b": 0.8824,
+              "a": 0.16
+            }
+          }
+        },
+        {
+          "name": "line-strong",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.051,
+              "g": 0.0824,
+              "b": 0.149,
+              "a": 0.34
+            },
+            "Dark": {
+              "r": 0.9647,
+              "g": 0.9373,
+              "b": 0.8824,
+              "a": 0.38
+            }
+          }
+        },
+        {
+          "name": "focus-ring",
+          "type": "COLOR",
+          "valuesByMode": {
+            "Light": {
+              "r": 0.1059,
+              "g": 0.2471,
+              "b": 0.6353,
+              "a": 1
+            },
+            "Dark": {
+              "r": 0.902,
+              "g": 0.8118,
+              "b": 0.6588,
+              "a": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Spacing",
+      "modes": [
+        {
+          "modeId": "default",
+          "name": "Default"
+        }
+      ],
+      "variables": [
+        {
+          "name": "1",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 4
+          }
+        },
+        {
+          "name": "2",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 8
+          }
+        },
+        {
+          "name": "3",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 12
+          }
+        },
+        {
+          "name": "4",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 16
+          }
+        },
+        {
+          "name": "5",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 24
+          }
+        },
+        {
+          "name": "6",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 32
+          }
+        },
+        {
+          "name": "7",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 48
+          }
+        },
+        {
+          "name": "8",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 64
+          }
+        },
+        {
+          "name": "9",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 96
+          }
+        },
+        {
+          "name": "10",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 128
+          }
+        },
+        {
+          "name": "11",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 160
+          }
+        }
+      ]
+    },
+    {
+      "name": "Radius",
+      "modes": [
+        {
+          "modeId": "default",
+          "name": "Default"
+        }
+      ],
+      "variables": [
+        {
+          "name": "none",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 0
+          }
+        },
+        {
+          "name": "hair",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 2
+          }
+        },
+        {
+          "name": "chip",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 4
+          }
+        },
+        {
+          "name": "pill",
+          "type": "FLOAT",
+          "valuesByMode": {
+            "Default": 999
+          }
+        }
+      ]
+    }
+  ]
+}

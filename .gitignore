@@ -11,5 +11,14 @@ node_modules/
 out/
 dist/
 
-# Jakarta design-system QA screenshots (regenerable via scripts/shots.mjs).
+# QA screenshots for every case (regenerable via scripts/shots.mjs).
 jakarta/docs/shots/
+**/docs/shots/
+**/.shots/
+
+# System fallback fonts copied beside exported Figma plugins. These are
+# Apple/Microsoft licensed faces already present on every Mac; the brand's own
+# OFL fonts in assets/fonts/ are the ones worth shipping.
+**/design/figma/*/fonts/Arial.ttf
+**/design/figma/*/fonts/Georgia.ttf
+**/design/figma/*/fonts/Andale Mono.ttf
