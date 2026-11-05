@@ -73,6 +73,9 @@ const fixture = {
             { name: 'badge', type: 'TEXT', box: B(32, 120, 72, 24), layout: L({ padding: [8, 12, 8, 12] }), style: S({ fontSize: 11, color: 'rgb(255, 255, 255)', fill: 'rgb(17, 24, 39)', radius: 999, whiteSpace: 'nowrap', lineHeight: '14px' }), component: null, text: 'PASS', children: [] },
             { name: 'paragraph', type: 'TEXT', box: B(32, 156, 300, 120), layout: L(), style: S({ fontSize: 14, color: 'rgb(71, 85, 105)' }), component: null, text: 'A longer paragraph that wrapped across several lines in the browser and must keep wrapping inside its measured column.', children: [] },
             { name: 'swatch', type: 'RECTANGLE', box: B(648, 32, 200, 60), layout: L({ grow: 1 }), style: S({ fill: 'rgb(247, 245, 240)', radius: 8 }), component: null, text: null, children: [] },
+            /* 52×52 logo badge with border-radius:9999px. Auto-layout used to
+             * stretch it to 52×30 and the 9999 radius was rejected. */
+            { name: 'tnd-logo-circle', type: 'FRAME', box: B(648, 110, 52, 52), layout: L({ mode: 'HORIZONTAL', align: 'center', justify: 'center' }), style: S({ fill: 'rgb(255, 255, 255)', radius: 9999 }), component: null, text: null, children: [] },
           ],
         },
         {
@@ -92,6 +95,16 @@ const fixture = {
               ],
             },
             { name: 'vector', type: 'VECTOR', box: B(120, 260, 64, 64), svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#101820"/></svg>', component: null, text: null, children: [] },
+          ],
+        },
+        /* Same action row, but as a child of the VERTICAL sheet root — this is
+         * the shape that `stretchRows()` has to force to full width. */
+        {
+          name: 'action-group', type: 'FRAME', box: B(32, 700, 1136, 48), role: 'action-group',
+          layout: L({ mode: 'HORIZONTAL', justify: 'flex-end', spacing: 10, padding: [10, 20, 10, 20] }),
+          style: S({ fill: 'rgb(250, 250, 250)' }), component: null, text: null,
+          children: [
+            { name: 'Keep', type: 'TEXT', box: B(900, 710, 80, 28), layout: L({ padding: [7, 14, 7, 14] }), style: S({ fontSize: 12, whiteSpace: 'nowrap', lineHeight: 'normal' }), component: null, text: 'Keep', children: [] },
           ],
         },
       ],
@@ -323,7 +336,7 @@ export async function runReplay({ source, manifest, messages }) {
 
 /* ── report + assertions ────────────────────────────────────────────────── */
 
-export function summarise(log, thrown, manifestPath) {
+export function summarise(log, thrown, manifestPath, pages) {
   const summary = log.closed.at(-1) || log.notified.at(-1) || ''
   const autoLayouts = log.frames.concat(log.components).filter((n) => n.layoutMode && n.layoutMode !== 'NONE')
   const boundPaints = log.frames.concat(log.rects, log.texts).filter((n) => (n.fills || []).some((p) => p && p.boundVariables))
@@ -357,6 +370,20 @@ export function summarise(log, thrown, manifestPath) {
     actionGroupWidth: (() => { const f = log.frames.find((x) => x.name === 'action-group'); return f ? Math.round(f.width) : null })(),
     paddedLabelResize: (() => { const t = log.texts.find((x) => x.name === 'badge'); return t ? t.textAutoResize : null })(),
     libraryY: (() => { const f = log.frames.find((x) => x.name === '◆ Component Library'); return f ? Math.round(f.y) : null })(),
+    logoCircle: (() => {
+      const f = log.frames.find((x) => x.name === 'tnd-logo-circle')
+      return f ? { w: Math.round(f.width), h: Math.round(f.height), r: Math.round(f.cornerRadius || 0) } : null
+    })(),
+    componentsInSheet: (() => {
+      let n = 0
+      const walk = (node) => { if (!node) return; if (node.type === 'COMPONENT') n++; for (const c of node.children || []) walk(c) }
+      for (const p of pages || []) {
+        if (!/^\d{2} · /.test(p.name)) continue
+        const root = (p.children || []).find((c) => c.name === 'figma-sheet')
+        walk(root)
+      }
+      return n
+    })(),
     sheetY: (() => { const f = log.frames.find((x) => x.name === 'figma-sheet'); return f ? Math.round(f.y) : null })(),
     stretchedRows: log.frames.concat(log.components).filter((n) => n.layoutAlign === 'STRETCH').length,
     skippedSheets: Number((/skipped (\d+) sheet/.exec(summary) || [])[1] || 0),
@@ -413,6 +440,10 @@ export function smokeProblems(report, manifestPath) {
       problems.push('component library is not above the sheet (library y=' + report.libraryY + ', sheet y=' + report.sheetY + ')')
     }
     if (report.stretchedRows < 1) problems.push('no horizontal row was stretched to full width')
+    if (report.componentsInSheet > 0) problems.push(report.componentsInSheet + ' COMPONENT node(s) inside the sheet — Figma will detach their containers')
+    if (!report.logoCircle) problems.push('logo circle fixture was not created')
+    else if (report.logoCircle.w !== 52 || report.logoCircle.h !== 52) problems.push('logo circle was stretched to ' + report.logoCircle.w + '×' + report.logoCircle.h + ' instead of 52×52')
+    else if (Math.abs(report.logoCircle.r - 26) > 1) problems.push('logo circle radius is ' + report.logoCircle.r + ' instead of 26')
     const caption = report.textSizes.find((t) => t.name === 'caption')
     if (!caption) problems.push('caption fixture text was not created')
     else if (Number(caption.size) < 12) problems.push('minFontSize did not raise the 10px caption (got ' + caption.size + ')')
@@ -449,7 +480,7 @@ if (isMain) {
   }
 
   const run = await runReplay({ source, manifest, messages: [buildMsg] })
-  const report = summarise(run.log, run.thrown, manifestPath)
+  const report = summarise(run.log, run.thrown, manifestPath, run.pages)
   report.file = file
   report.duplicateGeneratedPages = run.pages.filter((p) => p.name === '01 · colors').length
 

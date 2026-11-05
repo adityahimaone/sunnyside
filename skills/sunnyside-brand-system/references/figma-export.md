@@ -571,3 +571,33 @@ Four extra parity gates lock this in: action groups within 2px of their measured
 width, zero detached sheet frames, one library board above each component page,
 and ≤5% of TEXT nodes using `HEIGHT`. Thirteen gates became **17**; all 25
 design-system cases and 3 workspace kits pass.
+
+### v5.2.0 — `test ds 5.fig` (sheets detached, library clipped, circles oval)
+
+Three defects measured on a real export:
+
+1. **Pages 05/06/07 were blank again**, and `07 · overlays` existed twice. Any
+   `COMPONENT` node created *inside* the sheet tree makes Figma promote its
+   container (`surface-box`, `grid-2-cols`, `modal-stage`, `cast-grid-6`,
+   `icon-grid-8`, `grid-4-cols`) to the page root. **Never create COMPONENTs in
+   a sheet** — build plain FRAMEs there and reserve COMPONENT for library
+   masters. A final pass also removes duplicate generated pages by name, because
+   `replace` can miss an unloaded page under `dynamic-page`.
+2. **The library was clipped to 120px.** `resize(1440,120)` plus
+   `primaryAxisSizingMode: AUTO` never grew, while sections measured 196 / 338 /
+   441px. The board and sections now use `layoutMode: NONE`, explicit sizes
+   computed from the sets and instance rows, and `clipsContent = false`.
+   Component sets live at page level (Figma's safest place) and are positioned
+   over their section; instances sit inside the section.
+3. **Circles were not round.** `border-radius: 9999px` was assigned directly to
+   `cornerRadius` (rejected, leaving a mixed value) and auto-layout stretched the
+   52×52 logo to 52×30. Radius is clamped to `min(w,h)/2`, and `pinChild()`
+   re-asserts `layoutAlign: INHERIT` plus `layoutSizing*: FIXED` and re-resizes
+   every appended child to its measured box.
+
+`?clean=1&doop=1` is the importer mode: one 1440px column, no sticky bar, no
+2-column grid, no shadows/transforms, 28px slack on one-line labels. The Doop
+Helper copies that URL first.
+
+Parity is now **19 gates** — added *no components in sheet* (must be 0) and
+*circles stay round* (square, radius = width/2). 30/30 sheets pass.

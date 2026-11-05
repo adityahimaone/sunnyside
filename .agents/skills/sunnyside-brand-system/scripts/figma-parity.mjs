@@ -119,16 +119,24 @@ const buildMsg = {
 const run = await runReplay({ source, manifest, messages: [buildMsg] })
 const rerun = await runReplay({ source, manifest, messages: [buildMsg, { ...buildMsg }] })
 
+/* Component sets live at page level (Figma's safest place for them) and are
+ * positioned over the library board, so they are expected page children — not
+ * evidence that a sheet frame was detached. */
+const isLibraryNode = (n) => n.name === '◆ Component Library' || /^Component \/ /.test(n.name)
 function sheetRoots(r) {
   return r.pages
     .filter((p) => /^\d{2} · /.test(p.name))
-    .map((p) => (p.children || []).filter((c) => c.name !== '◆ Component Library')[0])
+    .map((p) => {
+      const kids = p.children || []
+      return kids.find((c) => c.name === 'figma-sheet') || kids.find((c) => !isLibraryNode(c))
+    })
     .filter(Boolean)
 }
 const roots = sheetRoots(run)
 const replay = {
   nodes: 0, texts: 0, solidFills: 0, boundFills: 0, colours: new Set(),
   styleBoundTexts: 0, wrappedTexts: 0, actionGroups: [],
+  componentsInSheet: 0, circles: [],
 }
 function walkReplay(n) {
   replay.nodes++
@@ -138,6 +146,10 @@ function walkReplay(n) {
     if (n.textAutoResize === 'HEIGHT') replay.wrappedTexts++
   }
   if (n.name === 'action-group') replay.actionGroups.push(Number(n.width))
+  if (n.type === 'COMPONENT') replay.componentsInSheet++
+  if (/^(tnd-logo-circle|sheet-num-badge)$/.test(n.name) && Number(n.width) > 0) {
+    replay.circles.push({ name: n.name, w: Math.round(Number(n.width)), h: Math.round(Number(n.height)), r: Math.round(Number(n.cornerRadius) || 0) })
+  }
   for (const p of n.fills || []) {
     if (!p || p.type !== 'SOLID' || !p.color) continue
     replay.solidFills++
@@ -181,10 +193,11 @@ const rerunReport = rerun.log.uiMessages.at(-1)?.report || {}
 const pageMeta = run.pages.filter((p) => /^\d{2} · /.test(p.name)).map((p) => {
   const kids = p.children || []
   const lib = kids.find((c) => c.name === '◆ Component Library')
-  const root = kids.find((c) => c.name !== '◆ Component Library')
+  const root = kids.find((c) => c.name === 'figma-sheet') || kids.find((c) => !isLibraryNode(c))
+  const expected = kids.filter((c) => isLibraryNode(c)).length
   return {
     name: p.name,
-    extra: Math.max(0, kids.length - (lib ? 2 : 1)),
+    extra: Math.max(0, kids.length - 1 - expected),
     libraryY: lib ? Number(lib.y) : null,
     rootY: root ? Number(root.y) : null,
   }
@@ -247,6 +260,13 @@ const gates = [
   { gate: 'no detached sheet frames', value: detachedFrames, threshold: 0, pass: detachedFrames === 0 },
   { gate: 'library above sheet', value: `${librariesAbove} boards / ${spec.componentPages.size} pages`, threshold: 'one per component page', pass: spec.componentPages.size > 0 ? librariesAbove >= spec.componentPages.size : true },
   { gate: 'one-line labels', value: `${replay.wrappedTexts}/${replay.texts} wrapped · ${(wrappedRatio * 100).toFixed(1)}%`, threshold: '≤5%', pass: spec.nowrap > 0 ? wrappedRatio <= 0.05 : true },
+  { gate: 'no components in sheet', value: replay.componentsInSheet, threshold: 0, pass: replay.componentsInSheet === 0 },
+  {
+    gate: 'circles stay round',
+    value: replay.circles.length ? `${replay.circles.filter((c) => c.w === c.h && c.r === Math.round(c.w / 2)).length}/${replay.circles.length} round (${replay.circles[0].w}×${replay.circles[0].h} r${replay.circles[0].r})` : 'n/a',
+    threshold: 'square + r=w/2',
+    pass: replay.circles.every((c) => c.w === c.h && Math.abs(c.r - c.w / 2) <= 1),
+  },
 ]
 
 const report = {

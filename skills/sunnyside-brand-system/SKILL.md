@@ -644,6 +644,18 @@ does not substitute a wider font and wrap them. Assets icons are now real
 components (7 families, 34 refs, 7 sets, 34 instances per kit). Parity added
 four structural gates; all 25 cases + 3 kits pass.
 
+**v5.2.0** (from `test ds 5.fig`): **never put a COMPONENT node inside a sheet**
+— Figma promotes its container to the page root, which blanked pages 05/06/07.
+Sheets are plain FRAMEs; only library masters are COMPONENTs. Duplicate generated
+pages are removed in a final pass (a stale page survived `replace` under
+dynamic-page). The library board uses explicit geometry with `clipsContent=false`
+(auto-layout height stayed 120px and clipped 1036px of sections). Circles clamp
+`cornerRadius` to `min(w,h)/2` and every appended child is re-pinned to its
+measured box (a 52×52 logo had become 52×30). `?clean=1&doop=1` renders a
+single-column, chrome-free, shadow-free sheet for Doop / html.to.design imports,
+with slack on one-line labels so a substituted font cannot clip them. Parity is
+now **19 gates** (added *no components in sheet*, *circles stay round*).
+
 **v5.1.1 hardening** (after a real Figma run still hugged a footer): every
 HORIZONTAL frame is re-pinned to its measured width *after* children are
 appended, and `stretchRows()` sets `layoutAlign = STRETCH` on horizontal

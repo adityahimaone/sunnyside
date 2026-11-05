@@ -6,6 +6,35 @@ and an audit that names what it could not verify.
 
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand, Clearing, Porphyry, Jakarta, Bluewater, Vesper, Halation, and Tavola. The method travels; the marks do not.
 
+## v5.2.0: sheets that stay whole, a library that fits, round circles, Doop mode
+
+Diagnosed from `test ds 5.fig` (9 pages, 6218 nodes) plus page renders.
+
+- **Sheet bodies were still being detached.** Two `07 · overlays` pages existed
+  and pages 05/06/07 had `surface-box`, `grid-2-cols`, `modal-stage`,
+  `cast-grid-6`, `icon-grid-8`, `grid-4-cols` promoted to the page root, leaving
+  the sheet body blank. Root cause: **any COMPONENT node inside the sheet** makes
+  Figma promote its container. Sheets are now built from plain FRAMEs; only the
+  library masters are COMPONENTs. Parity gate: *no components in sheet = 0*.
+- **Duplicate generated pages.** `replace` missed an unloaded page under
+  `dynamic-page`. A final pass now keeps only the last page per generated name,
+  so a stale v5.0 board can no longer sit next to the new one.
+- **Library board clipped to 120px.** `resize(1440,120)` + `AUTO` height never
+  grew, so 196/338/441px sections were cut off. The board and its sections now
+  use explicit geometry with `clipsContent = false`, heights computed from the
+  sets and instance rows. Verified heights 1036 / 1036 / 420px.
+- **Circles were not round.** `border-radius: 9999px` was written straight into
+  `cornerRadius` (rejected → mixed), and auto-layout stretched the 52×52 logo to
+  52×30. Radius is now clamped to `min(w,h)/2` and every appended child is
+  re-pinned to its measured box. Gate: *circles stay round*, 18/18 at 32×32 r16
+  and 52×52 r26.
+- **Doop mode for the HTML template.** `?clean=1&doop=1` renders one 1440px
+  column with no sticky bar, no grid, no shadows/transforms, and 28px of slack
+  on one-line labels so a substituted font cannot clip them. The Doop Helper now
+  copies that URL first (2-column grid kept as a secondary option).
+- **19 parity gates** (added *no components in sheet* and *circles stay round*).
+  **30/30 sheets green**, 39/39 unit tests.
+
 ## v5.1.1: rows that cannot collapse, chrome that cannot disappear
 
 A real run of the v5.1.0 plugin still showed two defects on canvas: modal
