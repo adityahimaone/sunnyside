@@ -165,11 +165,14 @@ let hasSeed = false
 if (has('with-replay')) {
   if (check) {
     run('4/5  replay plugin (dry run)', 'figma-replay.mjs',
-      ['--slug', slug, '--brand', name, '--out', replayOut, '--check'], true)
+      ['--slug', slug, '--brand', name, '--root', root, '--out', replayOut, '--check'], true)
   } else {
     hasSeed = runTolerant('4/5  extract manifest', 'figma-manifest.mjs',
       ['--html', sheetOut, '--out', manifestOut])
-    const argv = ['--slug', slug, '--brand', name, '--out', replayOut]
+    /* --root matters: figma-replay.mjs looks for installable .ttf/.otf faces
+     * under <root>/assets/fonts and <root>/public/brand/<slug>. Without it the
+     * generated README wrongly claims the brand ships no fonts. */
+    const argv = ['--slug', slug, '--brand', name, '--root', root, '--out', replayOut]
     if (hasSeed) argv.push('--manifest', manifestOut)
     run('4/5  replay plugin', 'figma-replay.mjs', argv)
   }
