@@ -27,9 +27,12 @@
       --bg-banner: #FAFAFA;
       --border-subtle: #F1F5F9;
       --border-default: #E2E8F0;
-      --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      /* The sheet is brand documentation, so it is set in the brand's faces.
+       * The old defaults stay in the stack: a kit whose tokens name a face the
+       * browser or Figma cannot load still renders, and still reads. */
+      --font-sans: 'Inter', 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Inter', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'JetBrains Mono', monospace;
       --brand-display: 'Plus Jakarta Sans', var(--font-sans);
       --brand-reading: 'Inter', var(--font-body);
       --brand-mono: 'JetBrains Mono', var(--font-mono);
@@ -3343,6 +3346,7 @@
         fontWeight: cs.fontWeight,
         lineHeight: cs.lineHeight,
         letterSpacing: cs.letterSpacing,
+        shadow: cs.boxShadow || 'none',
         opacity: figmaNum(cs.opacity) || 1
       };
     }

@@ -18,7 +18,8 @@
 const report = {
   pages: 0, frames: 0, texts: 0, rects: 0, vectors: 0,
   variables: 0, paintStyles: 0, textStyles: 0, components: 0,
-  autoLayout: 0, replaced: 0, errors: [],
+  autoLayout: 0, replaced: 0, textInk: 0, textBoosted: 0,
+  fontFallbacks: 0, vectorsScaled: 0, effects: 0, errors: [],
 };
 const fail = (where, e) => report.errors.push(where + ': ' + ((e && e.message) || String(e)));
 
@@ -65,9 +66,14 @@ const key = (c) => [c.r, c.g, c.b].map((v) => Math.round(v * 1000)).join(',');
 
 /* ── fonts ──────────────────────────────────────────────────────────────── */
 
+const GENERIC_FAMILY = /^(monospace|sans-serif|serif|system-ui|ui-[a-z-]+|-apple-system|inherit|initial)$/i;
+
 function firstFamily(stack) {
-  const s = String(stack || 'Inter').split(',')[0].replace(/["']/g, '').trim();
-  return s || 'Inter';
+  const parts = String(stack || '')
+    .split(',')
+    .map((p) => p.replace(/["']/g, '').trim())
+    .filter(Boolean);
+  return parts.find((p) => !GENERIC_FAMILY.test(p)) || 'Inter';
 }
 
 function weightStyle(w) {
@@ -80,13 +86,29 @@ function weightStyle(w) {
   return 'Bold';
 }
 
+/* Google Fonts ship with Figma, so Archivo / DM Mono / Fraunces resolve by name
+ * without installing anything — but only under the style spelling Figma uses.
+ * "Semi Bold" and "SemiBold" are different strings, and a miss falls back to
+ * Inter silently. Try every spelling before giving up. */
+function styleCandidates(style) {
+  const map = {
+    'Semi Bold': ['SemiBold', 'Semi Bold', 'DemiBold', 'Demi Bold', 'Medium', 'Bold'],
+    'Extra Bold': ['ExtraBold', 'Extra Bold', 'Bold'],
+    'Extra Light': ['ExtraLight', 'Extra Light', 'Light'],
+    'Ultra Light': ['UltraLight', 'Ultra Light', 'Thin'],
+    'Hairline': ['Thin', 'ExtraLight', 'Light'],
+  };
+  const out = map[style] || [];
+  return [...out, style, 'Regular', 'Medium', 'Bold'].filter((s, i, a) => s && a.indexOf(s) === i);
+}
+
 const fontCache = new Map();
 async function loadFont(family, weight) {
   const fam = firstFamily(family);
   const style = weightStyle(weight);
   const k = fam + '|' + style;
   if (fontCache.has(k)) return fontCache.get(k);
-  const tries = [style, 'Regular', 'Medium', 'Bold'];
+  const tries = styleCandidates(style);
   for (const s of tries) {
     try {
       const f = { family: fam, style: s };
@@ -95,6 +117,7 @@ async function loadFont(family, weight) {
       return f;
     } catch (e) { /* try the next weight */ }
   }
+  report.fontFallbacks++;
   try { await figma.loadFontAsync({ family: 'Inter', style: 'Regular' }); } catch (e) { /* bundled */ }
   const fallback = { family: 'Inter', style: 'Regular' };
   fontCache.set(k, fallback);
@@ -189,11 +212,18 @@ function padding(L, i) {
   return Number.isFinite(v) && v > 0 ? v : 0;
 }
 
-function applyLayout(frame, L, childCount) {
+function applyLayout(frame, L, children) {
   if (!L || !L.mode || L.mode === 'NONE') return;
+  const childCount = Array.isArray(children) ? children.length : 0;
   if (L.mode === 'HORIZONTAL' || L.mode === 'VERTICAL') {
+    /* A FIXED primary axis keeps the browser's full box height. In CSS that
+     * height often comes from min-height or grid tracks; in Figma flow it just
+     * leaves a huge blank area under the stacked children. Hug the primary
+     * axis unless a child actually needs FILL. */
+    const hasFillChild = Array.isArray(children) &&
+      children.some((c) => c && c.layout && Number(c.layout.grow) > 0);
     frame.layoutMode = L.mode;
-    frame.primaryAxisSizingMode = 'FIXED';
+    frame.primaryAxisSizingMode = hasFillChild ? 'FIXED' : 'AUTO';
     frame.counterAxisSizingMode = 'FIXED';
     frame.itemSpacing = Number(L.spacing) || 0;
     frame.paddingTop = padding(L, 0);
@@ -230,6 +260,30 @@ function applyLayout(frame, L, childCount) {
   }
 }
 
+/* "rgba(0, 0, 0, 0.06) 0px 4px 20px 0px" → a Figma DROP_SHADOW.
+ * Chrome puts the colour first, Safari sometimes last, and `inset` becomes an
+ * INNER_SHADOW. Only the first shadow in a stack is kept: Figma can hold many,
+ * but a CSS stack of five is usually one real elevation plus fallbacks. */
+function parseShadow(str) {
+  if (!str || str === 'none') return null;
+  const first = String(str).split(/,(?![^(]*\))/)[0];
+  if (!first || first === 'none') return null;
+  const colourMatch = first.match(/rgba?\([^)]+\)|#[0-9a-fA-F]{3,8}/);
+  const nums = first.replace(colourMatch ? colourMatch[0] : '', '').match(/-?[\d.]+px/g) || [];
+  if (nums.length < 2) return null;
+  const [x, y, blur, spread] = nums.map((n) => parseFloat(n));
+  const c = parseColor(colourMatch ? colourMatch[0] : 'rgba(0,0,0,0.15)') || { r: 0, g: 0, b: 0, a: 0.15 };
+  return {
+    type: /\binset\b/.test(first) ? 'INNER_SHADOW' : 'DROP_SHADOW',
+    color: { r: c.r, g: c.g, b: c.b, a: c.a },
+    offset: { x: Number.isFinite(x) ? x : 0, y: Number.isFinite(y) ? y : 0 },
+    radius: Math.max(0, Number.isFinite(blur) ? blur : 0),
+    spread: Number.isFinite(spread) ? spread : 0,
+    visible: true,
+    blendMode: 'NORMAL',
+  };
+}
+
 function applyStyle(node, style, byRgb) {
   if (!style) return;
   try {
@@ -253,6 +307,13 @@ function applyStyle(node, style, byRgb) {
     if (Number.isFinite(r) && r > 0) node.cornerRadius = r;
   } catch (e) { /* not every node has a radius */ }
   try {
+    const shadow = parseShadow(style.shadow);
+    if (shadow) {
+      node.effects = [shadow];
+      report.effects++;
+    }
+  } catch (e) { /* effects are not available on every node type */ }
+  try {
     const o = Number(style.opacity);
     if (Number.isFinite(o) && o < 1) node.opacity = o;
   } catch (e) { /* ignore */ }
@@ -268,22 +329,31 @@ function safeBox(node) {
 
 /* ── node tree ──────────────────────────────────────────────────────────── */
 
-async function createNode(node, parentBox, byRgb, depth) {
+async function createNode(node, parentBox, byRgb, depth, options) {
   if (!node || depth > 12) return null;
   const box = safeBox(node);
   let out = null;
+  let textInk = null;
 
   if (node.type === 'TEXT') {
     const t = figma.createText();
     t.name = String(node.name || 'Text');
     t.fontName = await loadFont(node.style && node.style.fontFamily, node.style && node.style.fontWeight);
     t.characters = String(node.text || '');
-    const size = Number(node.style && node.style.fontSize) || 14;
-    t.fontSize = size;
-    const ink = parseColor(node.style && node.style.color) || { r: 0, g: 0, b: 0, a: 1 };
-    t.fills = [solid(ink)];
+    const rawSize = Number(node.style && node.style.fontSize) || 14;
+    const minSize = Number(options && options.minFontSize) || 0;
+    t.fontSize = Math.max(rawSize, minSize);
+    if (t.fontSize > rawSize) report.textBoosted++;
+    textInk = parseColor(node.style && node.style.color) || { r: 0.07, g: 0.09, b: 0.15, a: 1 };
+    const lh = node.style && node.style.lineHeight;
+    if (lh && lh !== 'normal') {
+      const px = parseFloat(lh);
+      if (Number.isFinite(px) && px > 0) t.lineHeight = { unit: 'PIXELS', value: px };
+    }
     const ls = parseFloat(node.style && node.style.letterSpacing);
     if (Number.isFinite(ls) && ls !== 0) t.letterSpacing = { unit: 'PIXELS', value: ls };
+    /* Wrap inside the measured column instead of running off as one line. */
+    t.textAutoResize = 'HEIGHT';
     out = t;
     report.texts++;
   } else if (node.type === 'VECTOR') {
@@ -291,6 +361,14 @@ async function createNode(node, parentBox, byRgb, depth) {
       out = figma.createNodeFromSvg(String(node.svg || ''));
       out.name = String(node.name || 'Vector');
       out.fills = [];
+      const sw = Number(out.width) || box.w;
+      const sh = Number(out.height) || box.h;
+      if (sw > 0 && sh > 0 && box.w > 0 && box.h > 0) {
+        const scale = Math.min(box.w / sw, box.h / sh, 12);
+        if (Number.isFinite(scale) && scale > 0 && Math.abs(scale - 1) > 0.02) {
+          try { out.rescale(scale); report.vectorsScaled++; } catch (e) { /* keep intrinsic size */ }
+        }
+      }
       report.vectors++;
     } catch (e) {
       const r = figma.createRectangle();
@@ -313,15 +391,26 @@ async function createNode(node, parentBox, byRgb, depth) {
   }
 
   applyStyle(out, node.style, byRgb);
-  try { out.resize(box.w, box.h); } catch (e) { fail('resize/' + node.name, e); }
+
+  /* applyStyle writes the CSS *background* into fills. Text ink comes from
+   * CSS `color`, which is transparent-as-background for 78% of labels — that
+   * overwrite made almost every text layer invisible. Re-apply it last. */
+  if (node.type === 'TEXT' && textInk) {
+    try { out.fills = [solid(textInk)]; report.textInk++; } catch (e) { fail('textInk/' + node.name, e); }
+  }
+
+  try {
+    if (node.type === 'TEXT') out.resize(Math.max(box.w, 32), box.h);
+    else out.resize(box.w, box.h);
+  } catch (e) { fail('resize/' + node.name, e); }
   out.x = box.x - parentBox.x;
   out.y = box.y - parentBox.y;
 
   const children = Array.isArray(node.children) ? node.children : [];
   if (out.type === 'FRAME' || out.type === 'COMPONENT' || out.type === 'INSTANCE') {
-    applyLayout(out, node.layout, children.length);
+    applyLayout(out, node.layout, children);
     for (const child of children) {
-      const made = await createNode(child, box, byRgb, depth + 1);
+      const made = await createNode(child, box, byRgb, depth + 1, options);
       if (!made) continue;
       try { out.appendChild(made); } catch (e) { fail('append/' + child.name, e); continue; }
       const L = child.layout || {};
@@ -339,7 +428,7 @@ async function createNode(node, parentBox, byRgb, depth) {
 
 /* ── build ──────────────────────────────────────────────────────────────── */
 
-async function build(manifest, replace) {
+async function build(manifest, replace, options) {
   if (!manifest || manifest.kind !== 'sunnyside/figma-manifest') {
     throw new Error('Not a Sunnyside Figma manifest (kind must be sunnyside/figma-manifest)');
   }
@@ -368,7 +457,7 @@ async function build(manifest, replace) {
     const page = figma.createPage();
     page.name = String(i + 1).padStart(2, '0') + ' · ' + (sheet.name || 'Sheet');
     await usePage(page);
-    const root = await createNode(sheet.node, { x: 0, y: 0 }, byRgb, 0);
+    const root = await createNode(sheet.node, { x: 0, y: 0 }, byRgb, 0, options);
     if (root) {
       root.x = 0;
       root.y = 0;
@@ -396,14 +485,18 @@ figma.ui.onmessage = async (msg) => {
   if (msg.type !== 'build') return;
   try {
     const manifest = typeof msg.json === 'string' ? JSON.parse(msg.json) : msg.json;
-    await build(manifest, msg.replace !== false);
+    const options = { minFontSize: Math.max(0, Number(msg.minFontSize) || 0) };
+    await build(manifest, msg.replace !== false, options);
     const summary =
       (manifest.brand || 'Brand') + ': ' + report.pages + ' pages, ' +
       report.autoLayout + ' auto layouts, ' + report.frames + ' frames, ' +
-      report.texts + ' texts, ' + report.rects + ' rects, ' + report.vectors + ' vectors, ' +
+      report.texts + ' texts (' + report.textInk + ' inked' +
+      (report.textBoosted ? ', ' + report.textBoosted + ' boosted to ' + options.minFontSize + 'px' : '') + '), ' +
+      report.rects + ' rects, ' + report.vectors + ' vectors, ' + report.effects + ' shadows, ' +
       report.variables + ' variables, ' + report.paintStyles + ' paint styles, ' +
       report.textStyles + ' text styles, ' + report.components + ' components' +
-      (report.replaced ? ' · replaced ' + report.replaced + ' existing page(s)' : '');
+      (report.replaced ? ' · replaced ' + report.replaced + ' existing page(s)' : '') +
+      (report.fontFallbacks ? ' · ' + report.fontFallbacks + ' font fallback(s) — install the brand fonts' : '');
     figma.notify(summary, { timeout: 9000 });
     figma.ui.postMessage({ type: 'done', summary: summary + (report.errors.length ? ' · ' + report.errors.length + ' error(s)' : '') });
     if (report.errors.length) for (const e of report.errors) console.error('[replay] ' + e);
