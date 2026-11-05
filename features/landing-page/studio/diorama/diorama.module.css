@@ -72,20 +72,9 @@
 }
 
 .stage {
-  --nudge: -14.5;
   position: relative;
   width: 100%;
   aspect-ratio: 813 / 467;
-}
-
-.stage::before {
-  content: '';
-  position: absolute;
-  inset: calc(var(--u) * 12) calc(var(--u) * 14);
-  z-index: 0;
-  box-shadow:
-    0 calc(var(--u) * 24) calc(var(--u) * 46) rgb(0 0 0 / 0.6),
-    0 calc(var(--u) * 4) calc(var(--u) * 10) rgb(0 0 0 / 0.5);
 }
 
 .defs {
@@ -99,18 +88,20 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  overflow: clip;
   isolation: isolate;
 }
 
-/* paper tooth and a soft vignette over everything inside the frame */
+/* Paper tooth over everything inside the frame. It is a multiply layer, so it
+   only has a sheet to sit on once the book is open: while the book is shut the
+   stage's left half is empty background, and painting noise there read as a
+   grey rectangle hanging off the cover. Fade it in with the turn. */
 .scene::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 9;
   pointer-events: none;
-  opacity: 0.1;
+  opacity: calc(var(--open, 1) * 0.1);
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: calc(var(--u) * 160);
@@ -140,30 +131,6 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  transition:
-    scale 0.6s var(--ease),
-    filter 0.6s var(--ease),
-    opacity 0.6s var(--ease);
-}
-
-.layer[data-id] {
-  /* The drawn machinery sits about 14.5u right of the frame's centre, which
-     leaves a wide gap on the left and none on the right. Nudge the whole
-     composition back so both margins match. The wall and the frame stay put:
-     only the pieces move inside the box. Phones set --nudge to 0 because their
-     crops are already measured from the frame corner. */
-  translate: calc(var(--u) * var(--nudge)) 0;
-  transition:
-    scale 0.6s var(--ease),
-    filter 0.6s var(--ease),
-    opacity 0.8s var(--ease) calc(var(--n, 0) * 0.12s),
-    transform 0.9s var(--ease) calc(var(--n, 0) * 0.12s);
-}
-
-/* Not yet arrived: below the fold, waiting. Above the fold nothing is hidden. */
-.stageWrap[data-armed='true']:not([data-in='true']) .layer[data-id] {
-  opacity: 0;
-  transform: translateY(calc(var(--u) * 26));
 }
 
 .layer > * {
@@ -181,22 +148,6 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-}
-
-/* The controller picks a station; the others recede, the chosen one steps forward. */
-.stage[data-station='build'] .layer[data-id]:not([data-id='build']),
-.stage[data-station='motion'] .layer[data-id]:not([data-id='motion']),
-.stage[data-station='systems'] .layer[data-id]:not([data-id='systems']),
-.stage[data-station='rest'] .layer[data-id]:not([data-id='rest']) {
-  filter: saturate(0.45) brightness(0.62);
-}
-
-.stage[data-station='build'] .layer[data-id='build'],
-.stage[data-station='motion'] .layer[data-id='motion'],
-.stage[data-station='systems'] .layer[data-id='systems'],
-.stage[data-station='rest'] .layer[data-id='rest'] {
-  scale: 1.012;
-  filter: brightness(1.06) saturate(1.08);
 }
 
 /* ── Controller ────────────────────────────────────────────────────────── */
@@ -897,23 +848,6 @@
     inset 0 calc(var(--u) * 1) 0 rgb(255 255 255 / 0.55);
 }
 
-/* ── Caption under the frame ───────────────────────────────────────────── */
-
-.note {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1.5rem;
-  margin-top: 1.1rem;
-  /* the reference sets the caption on the content edge, not inside the shell's padding */
-  margin-inline: calc(-1 * clamp(1.1rem, 4vw, 3.5rem));
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
 /* ── Animation (SVG parts) ─────────────────────────────────────────────── */
 
 .spinCW,
@@ -1310,16 +1244,295 @@
     transition-duration: 0.01ms !important;
   }
 
-  .stageWrap[data-armed='true']:not([data-in='true']) .layer[data-id] {
-    opacity: 1;
-    transform: none;
-  }
-
   .curveRow[data-playing]::after,
   .lever,
   .tag,
   .ribbons li {
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Desktop: a pop-up book that opens as you scroll ───────────────────── */
+
+.book {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 813 / 467;
+}
+
+.leaf,
+.layerBase,
+.shade {
+  position: absolute;
+}
+
+.layerBase {
+  inset: 0;
+}
+
+.leaf {
+  /* the spine is the vertical middle of the spread; the leaf is its right half */
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+  transform: rotateY(calc(var(--open, 1) * -180deg));
+}
+
+.leafFace {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.leafBack {
+  transform: rotateY(180deg);
+}
+
+/* the turning cover shades itself as it passes edge-on */
+.leafFace::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgb(8 12 40 / calc(var(--hump, 0) * 0.4));
+}
+
+/* and throws a shadow across the page it is leaving */
+.shade {
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgb(20 14 6 / calc(var(--hump, 0) * 0.5)),
+    transparent 75%
+  );
+}
+
+.coverKicker,
+.coverTitle,
+.coverSub {
+  position: absolute;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.coverKicker {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #f2c23a;
+}
+
+.coverTitle {
+  font-family: var(--font-syne), system-ui, sans-serif;
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  color: #f4eedf;
+  text-shadow:
+    0 calc(var(--u) * 1.2) 0 #1c2872,
+    calc(var(--u) * 1.4) calc(var(--u) * 2.6) calc(var(--u) * 3)
+      rgb(0 0 0 / 0.5);
+}
+
+.coverSub {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  color: rgb(244 238 223 / 0.82);
+}
+
+.coverSun {
+  position: absolute;
+  right: 11%;
+  bottom: 9%;
+  width: 36%;
+  height: auto;
+  filter: drop-shadow(0 calc(var(--u) * 3) calc(var(--u) * 3) rgb(0 0 0 / 0.4));
+  animation: spin 70s linear infinite;
+}
+
+.coverSpark {
+  position: absolute;
+  top: 17%;
+  right: 17%;
+  width: 7%;
+  color: #f2c23a;
+  animation: twinkleHtml 3s ease-in-out infinite;
+}
+
+.coverDaisy {
+  position: absolute;
+  left: 11%;
+  bottom: 10%;
+  width: 17%;
+  filter: drop-shadow(0 calc(var(--u) * 2) calc(var(--u) * 2) rgb(0 0 0 / 0.4));
+}
+
+.coverCue {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--u) * 5);
+  margin: 0;
+  padding: calc(var(--u) * 4) calc(var(--u) * 10);
+  border: calc(var(--u) * 1) solid #f2c23a;
+  border-radius: 999px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #f2c23a;
+}
+
+.coverCue span {
+  display: inline-block;
+  animation: cueBob 1.6s ease-in-out infinite;
+}
+
+@keyframes twinkleHtml {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(0.85) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(20deg);
+  }
+}
+
+@keyframes cueBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+/* The controller is for the phone layout; the book has no station filter. */
+@media (min-width: 861px) {
+  .controller {
+    display: none;
+  }
+
+  .room {
+    --stage-w: min(95rem, calc(100vw - 2rem), calc((100vh - 6.5rem) * 1.741));
+  }
+
+  /* panels fold up off the page about their own base edge */
+  .layer[data-id] {
+    --pop: 1;
+    --base: 64%;
+    transform-origin: 50% var(--base);
+    transform: rotateX(calc((1 - var(--pop)) * 86deg));
+    opacity: clamp(0, calc(var(--pop) * 4), 1);
+    will-change: transform, opacity;
+  }
+
+  .layer[data-id='build'] {
+    --pop: var(--pop-build, 1);
+    --base: 64.2%;
+  }
+  .layer[data-id='motion'] {
+    --pop: var(--pop-motion, 1);
+    --base: 64%;
+  }
+  .layer[data-id='rest'] {
+    --pop: var(--pop-rest, 1);
+    --base: 95.3%;
+  }
+  .layer[data-id='systems'] {
+    --pop: var(--pop-systems, 1);
+    --base: 96.8%;
+  }
+
+  .scene {
+    perspective: 1900px;
+    perspective-origin: 50% 18%;
+  }
+
+  .stageWrap {
+    perspective: 2400px;
+    perspective-origin: 50% 40%;
+  }
+}
+
+/* Motion allowed: the section becomes a tall rail with a sticky stage, and
+   the book starts shut. The script writes --open and --pop-* as you scroll. */
+@media (min-width: 861px) and (prefers-reduced-motion: no-preference) {
+  .rail {
+    position: relative;
+    height: 340vh;
+  }
+
+  .pinned {
+    position: sticky;
+    top: 0;
+    display: grid;
+    place-items: center;
+    height: 100vh;
+    padding-top: 3.5rem;
+  }
+
+  .room {
+    margin-top: 0;
+  }
+
+  .stage {
+    --open: 0;
+    --hump: 0;
+    --pop-build: 0;
+    --pop-motion: 0;
+    --pop-rest: 0;
+    --pop-systems: 0;
+  }
+
+  .book {
+    /* shut: centred on its own half, tilted toward you; open: flat and centred */
+    translate: calc((1 - var(--open)) * var(--stage-w) * -0.25) 0;
+    scale: calc(1 + (1 - var(--open)) * 0.1);
+    transform: rotateX(calc((1 - var(--open)) * 14deg))
+      rotateY(calc((1 - var(--open)) * -12deg));
+    transform-origin: 50% 60%;
+    will-change: transform, translate, scale;
+  }
+
+  /* A panel answers for itself: while its own flag says it is still folding
+     down, its controls are out of reach. Gating the whole stage instead meant a
+     panel that had long since stood up stayed dead until the last one landed. */
+  .stage:not([data-up-build='true'])
+    .layer[data-id='build']
+    :is(button, input, a, .tag, li),
+  .stage:not([data-up-motion='true'])
+    .layer[data-id='motion']
+    :is(button, input, a, .tag, li),
+  .stage:not([data-up-rest='true'])
+    .layer[data-id='rest']
+    :is(button, input, a, .tag, li),
+  .stage:not([data-up-systems='true'])
+    .layer[data-id='systems']
+    :is(button, input, a, .tag, li) {
+    pointer-events: none;
+  }
+}
+
+/* Reduced motion, desktop: no rail, no turning: the book is simply open. */
+@media (min-width: 861px) and (prefers-reduced-motion: reduce) {
+  .shade {
+    display: none;
   }
 }
 
@@ -1341,15 +1554,18 @@
 
   .stage {
     --tz: 1.5;
-    --nudge: 0;
     aspect-ratio: auto;
   }
 
-  .stage::before,
   .scene::after,
-  .wall,
-  .front {
+  .leaf,
+  .layerBase,
+  .shade {
     display: none;
+  }
+
+  .book {
+    display: contents;
   }
 
   .scene {
@@ -1500,11 +1716,5 @@
     font-size: 0.95rem;
     line-height: 1.5;
     color: rgb(243 236 223 / 0.84);
-  }
-
-  .note {
-    flex-direction: column;
-    gap: 0.4rem;
-    margin-inline: 0;
   }
 }

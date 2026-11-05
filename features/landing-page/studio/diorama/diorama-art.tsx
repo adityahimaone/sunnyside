@@ -94,44 +94,52 @@ export function DioramaDefs() {
           <stop offset="0.6" stopColor="#4561c4" />
           <stop offset="1" stopColor="#2f48a4" />
         </radialGradient>
-        <radialGradient id="dg-cavity" cx="0.5" cy="0.55" r="0.75">
-          <stop offset="0" stopColor="#5b3e27" />
-          <stop offset="1" stopColor="#2c1a0e" />
-        </radialGradient>
-        <linearGradient id="dg-wood-h" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#d3b184" />
-          <stop offset="1" stopColor="#a98660" />
+        <linearGradient id="bk-cloth" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#3f55d4" />
+          <stop offset="0.6" stopColor="#3347bd" />
+          <stop offset="1" stopColor="#27379a" />
         </linearGradient>
-        <linearGradient id="dg-wood-v" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#c7a47a" />
-          <stop offset="1" stopColor="#a58059" />
+        <linearGradient id="bk-cloth-in" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#2c3da6" />
+          <stop offset="1" stopColor="#202e86" />
         </linearGradient>
         <pattern
-          id="dg-grain-h"
-          width="40"
+          id="bk-weave"
+          width="3"
           height="3"
           patternUnits="userSpaceOnUse"
         >
           <path
-            d="M0 1.2H40"
-            stroke="#5a3d22"
-            strokeOpacity="0.14"
-            strokeWidth="0.5"
+            d="M0 0L3 3M3 0L0 3"
+            stroke="#0e1650"
+            strokeOpacity="0.35"
+            strokeWidth="0.4"
           />
         </pattern>
         <pattern
-          id="dg-grain-v"
-          width="3"
-          height="40"
+          id="bk-dots"
+          width="9"
+          height="9"
           patternUnits="userSpaceOnUse"
         >
-          <path
-            d="M1.2 0V40"
-            stroke="#5a3d22"
-            strokeOpacity="0.14"
-            strokeWidth="0.5"
+          <circle
+            cx="1.5"
+            cy="1.5"
+            r="0.55"
+            fill="#8c7a55"
+            fillOpacity="0.22"
           />
         </pattern>
+        <linearGradient id="bk-gutter-r" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#3a2a10" stopOpacity="0.34" />
+          <stop offset="0.35" stopColor="#3a2a10" stopOpacity="0.1" />
+          <stop offset="1" stopColor="#3a2a10" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="bk-gutter-l" x1="1" y1="0" x2="0" y2="0">
+          <stop offset="0" stopColor="#3a2a10" stopOpacity="0.34" />
+          <stop offset="0.35" stopColor="#3a2a10" stopOpacity="0.1" />
+          <stop offset="1" stopColor="#3a2a10" stopOpacity="0" />
+        </linearGradient>
         <pattern
           id="dg-corrugate"
           width="3"
@@ -340,93 +348,6 @@ function Gear({
         strokeWidth="0.7"
       />
     </g>
-  )
-}
-
-/* ── the room and the frame ──────────────────────────────────────────────── */
-
-export function BackWall() {
-  return (
-    <Layer label="wall">
-      <rect x="100" y="76" width="823" height="476" fill="url(#dg-cavity)" />
-      {/* the wall's own paper seams */}
-      <path
-        d="M520 92V535"
-        stroke="#000"
-        strokeOpacity="0.12"
-        strokeWidth="1"
-      />
-      <rect
-        x="118"
-        y="92"
-        width="787"
-        height="30"
-        fill="#1a0e06"
-        opacity="0.2"
-      />
-      {/* the cardboard floor of the box */}
-      <rect x="118" y="522" width="787" height="14" fill="url(#dg-cardboard)" />
-      <rect
-        x="118"
-        y="522"
-        width="787"
-        height="1.2"
-        fill="#e0c49a"
-        opacity="0.7"
-      />
-    </Layer>
-  )
-}
-
-export function FrameFront() {
-  return (
-    <Layer label="frame">
-      {/* four mitred bars */}
-      <path d="M105 80H918L905 92H118Z" fill="url(#dg-wood-h)" />
-      <path
-        d="M105 547H918L905 535H118Z"
-        fill="url(#dg-wood-h)"
-        opacity="0.92"
-      />
-      <path d="M105 80L118 92V535L105 547Z" fill="url(#dg-wood-v)" />
-      <path
-        d="M918 80L905 92V535L918 547Z"
-        fill="url(#dg-wood-v)"
-        opacity="0.9"
-      />
-      <path d="M105 80H918L905 92H118Z" fill="url(#dg-grain-h)" />
-      <path d="M105 547H918L905 535H118Z" fill="url(#dg-grain-h)" />
-      <path d="M105 80L118 92V535L105 547Z" fill="url(#dg-grain-v)" />
-      <path d="M918 80L905 92V535L918 547Z" fill="url(#dg-grain-v)" />
-      {/* bevels: light on the outer lip, dark where the wood meets the dark */}
-      <path
-        d="M105.5 547V80.5H918"
-        fill="none"
-        stroke="#f0dcb8"
-        strokeOpacity="0.7"
-        strokeWidth="1"
-      />
-      <path
-        d="M918 80V547H105"
-        fill="none"
-        stroke="#5b3f25"
-        strokeOpacity="0.8"
-        strokeWidth="1"
-      />
-      <path
-        d="M118 92H905V535H118Z"
-        fill="none"
-        stroke="#2a190d"
-        strokeOpacity="0.9"
-        strokeWidth="1.4"
-      />
-      <path
-        d="M105 80L118 92M918 80L905 92M105 547L118 535M918 547L905 535"
-        stroke="#6b4b2e"
-        strokeOpacity="0.8"
-        strokeWidth="0.8"
-      />
-    </Layer>
   )
 }
 

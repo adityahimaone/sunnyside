@@ -1,0 +1,2250 @@
+From 8f333a151b78b357cd984f02cdfc65743bc73524 Mon Sep 17 00:00:00 2001
+From: Adit <adit@example.com>
+Date: Wed, 4 Nov 2026 21:52:34 +0000
+Subject: [PATCH] feat(skills): pop-up book that opens on scroll, replacing the
+ wooden box (desktop)
+
+The section pins and a scroll-driven timeline turns a cloth cover about the
+spine, glides the book to centre, then folds the four panels up off the pages
+one after another with a little spring. Scroll is eased by elapsed time, so a
+fast flick glides and a slow drag is followed closely. Removes the frame, the
+desktop controller and the entrance/dimming code that only served the box.
+Phones keep the vertical card layout; reduced motion gets a static open book.
+---
+ .../studio/diorama/book-scroll.ts             | 165 +++
+ features/landing-page/studio/diorama/book.tsx | 303 ++++++
+ .../studio/diorama/diorama-art.tsx            | 143 +--
+ .../studio/diorama/diorama.module.css         | 338 ++++--
+ features/landing-page/studio/skills.tsx       | 968 +++++++++---------
+ tests/book-scroll.test.ts                     | 132 +++
+ 6 files changed, 1407 insertions(+), 642 deletions(-)
+ create mode 100644 features/landing-page/studio/diorama/book-scroll.ts
+ create mode 100644 features/landing-page/studio/diorama/book.tsx
+ create mode 100644 tests/book-scroll.test.ts
+
+diff --git a/features/landing-page/studio/diorama/book-scroll.ts b/features/landing-page/studio/diorama/book-scroll.ts
+new file mode 100644
+index 0000000..4e159da
+--- /dev/null
++++ b/features/landing-page/studio/diorama/book-scroll.ts
+@@ -0,0 +1,165 @@
++import { useEffect, type RefObject } from 'react'
++
++/**
++ * Scroll drives a pop-up book. The section is a tall rail with a sticky stage;
++ * how far the rail has scrolled is `p`, 0 to 1, and everything on the stage is
++ * a pure function of it:
++ *
++ *   0.00 – 0.04  the closed book sits still, so the page has a beat to arrive
++ *   0.04 – 0.40  the cover swings open about the spine, the book glides to centre
++ *   0.40 – 0.92  the four panels fold up off the pages, one after another
++ *
++ * The pure part is exported on its own so it can be tested without a browser.
++ */
++
++export type BookStage = readonly [start: number, end: number]
++
++export const BOOK_STAGES = {
++  open: [0.04, 0.4],
++  build: [0.4, 0.66],
++  motion: [0.47, 0.73],
++  rest: [0.54, 0.8],
++  systems: [0.62, 0.92],
++} as const satisfies Record<string, BookStage>
++
++export type PopId = 'build' | 'motion' | 'rest' | 'systems'
++export const POP_IDS: readonly PopId[] = ['build', 'motion', 'rest', 'systems']
++
++/** Fraction of the way through [start, end], held at 0 before and 1 after. */
++export function progressWithin(p: number, [start, end]: BookStage) {
++  return Math.min(1, Math.max(0, (p - start) / (end - start)))
++}
++
++/** Slow out of the closed book, slow into the open one. */
++export const easeInOutCubic = (t: number) =>
++  t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
++
++/** Overshoots a little and settles, like paper snapping upright. */
++export const easeOutBack = (t: number, overshoot = 1.5) =>
++  1 + (overshoot + 1) * (t - 1) ** 3 + overshoot * (t - 1) ** 2
++
++export type BookState = {
++  /** 0 closed, 1 fully open. Eased. */
++  open: number
++  /** Peaks mid-turn: drives the shadow the turning cover throws. */
++  hump: number
++  pops: Record<PopId, number>
++  /** True once every panel is standing, so the controls can be used. */
++  settled: boolean
++}
++
++export function bookState(p: number): BookState {
++  const open = easeInOutCubic(progressWithin(p, BOOK_STAGES.open))
++  const pops = Object.fromEntries(
++    POP_IDS.map((id) => [id, easeOutBack(progressWithin(p, BOOK_STAGES[id]))]),
++  ) as Record<PopId, number>
++
++  return {
++    open,
++    hump: Math.sin(Math.PI * open),
++    pops,
++    settled: progressWithin(p, BOOK_STAGES.systems) >= 0.97,
++  }
++}
++
++const QUERY = '(min-width: 861px) and (prefers-reduced-motion: no-preference)'
++const VARS = [
++  '--open',
++  '--hump',
++  '--pop-build',
++  '--pop-motion',
++  '--pop-rest',
++  '--pop-systems',
++] as const
++
++/**
++ * Writes the book's state to CSS custom properties on `stage` as the rail
++ * scrolls. No React state: nothing re-renders per frame.
++ *
++ * The target is the scroll position; the value actually shown chases it with an
++ * exponential ease that depends on elapsed time, not on frames, so a fast wheel
++ * flick glides to rest and a slow drag is followed closely. On phones and with
++ * reduced motion it does nothing, and the stylesheet's own defaults apply.
++ */
++export function useBookScroll(
++  rail: RefObject<HTMLElement | null>,
++  stage: RefObject<HTMLElement | null>,
++) {
++  useEffect(() => {
++    const railEl = rail.current
++    const stageEl = stage.current
++    if (!railEl || !stageEl) return
++
++    const query = window.matchMedia(QUERY)
++    let target = 0
++    let current = 0
++    let frame = 0
++    let last = 0
++    let listening = false
++
++    const apply = (p: number) => {
++      const state = bookState(p)
++      stageEl.style.setProperty('--open', state.open.toFixed(4))
++      stageEl.style.setProperty('--hump', state.hump.toFixed(4))
++      for (const id of POP_IDS) {
++        stageEl.style.setProperty(`--pop-${id}`, state.pops[id].toFixed(4))
++      }
++      stageEl.dataset.bookOpen = String(state.settled)
++    }
++
++    const measure = () => {
++      const box = railEl.getBoundingClientRect()
++      const run = box.height - window.innerHeight
++      target = run > 0 ? Math.min(1, Math.max(0, -box.top / run)) : 1
++    }
++
++    const tick = (now: number) => {
++      const dt = Math.min(0.05, (now - last) / 1000 || 1 / 60)
++      last = now
++      current += (target - current) * (1 - Math.exp(-dt * 9))
++      if (Math.abs(target - current) < 0.0004) current = target
++      apply(current)
++      frame = current === target ? 0 : requestAnimationFrame(tick)
++    }
++
++    const kick = () => {
++      measure()
++      if (!frame) {
++        last = performance.now()
++        frame = requestAnimationFrame(tick)
++      }
++    }
++
++    const stop = () => {
++      cancelAnimationFrame(frame)
++      frame = 0
++      if (listening) {
++        window.removeEventListener('scroll', kick)
++        window.removeEventListener('resize', kick)
++        listening = false
++      }
++      for (const name of VARS) stageEl.style.removeProperty(name)
++      delete stageEl.dataset.bookOpen
++    }
++
++    const start = () => {
++      stop()
++      measure()
++      // Arriving mid-page (a reload, a #skills link) shows the right page at once.
++      current = target
++      apply(current)
++      window.addEventListener('scroll', kick, { passive: true })
++      window.addEventListener('resize', kick)
++      listening = true
++    }
++
++    const sync = () => (query.matches ? start() : stop())
++    sync()
++    query.addEventListener('change', sync)
++
++    return () => {
++      query.removeEventListener('change', sync)
++      stop()
++    }
++  }, [rail, stage])
++}
+diff --git a/features/landing-page/studio/diorama/book.tsx b/features/landing-page/studio/diorama/book.tsx
+new file mode 100644
+index 0000000..91b7b92
+--- /dev/null
++++ b/features/landing-page/studio/diorama/book.tsx
+@@ -0,0 +1,303 @@
++import { Daisy, Sparkle, Sun } from '../doodles'
++import s from './diorama.module.css'
++import { u } from './geometry'
++
++/**
++ * The pop-up book the diorama stands up out of.
++ *
++ * It is drawn in the same pixel space as the panels (see geometry.ts): an open
++ * spread whose spine is the vertical line x = 511.5, 406.5 units either side.
++ * Two pieces make it:
++ *
++ *   BookBase  the right-hand page and the back cover under it. It never moves.
++ *   Leaf      the front cover and, on its back, the left-hand page. It turns
++ *             180° about the spine, so what is the cover when the book is shut
++ *             is the left page when it is open.
++ *
++ * Everything here is decoration; the section's real heading sits above it.
++ */
++
++const SPINE = 511.5
++const HALF = 406.5
++const TOP = 80
++const HEIGHT = 467
++
++const GOLD = '#f2c23a'
++
++/** Position inside the leaf, in the leaf's own units, as percentages. */
++const leaf = (x: number, y: number) => ({
++  left: `${((x / HALF) * 100).toFixed(2)}%`,
++  top: `${((y / HEIGHT) * 100).toFixed(2)}%`,
++})
++
++function Corner({ x, y, flip }: { x: number; y: number; flip: number }) {
++  // a paper photo-corner, the kind that holds a page flat
++  return (
++    <path
++      d={`M${x} ${y}L${x - 22 * flip} ${y}L${x} ${y - 22}Z`}
++      fill="#c9a46a"
++      stroke="#7c5c34"
++      strokeWidth="0.8"
++      opacity="0.95"
++    />
++  )
++}
++
++/** The right-hand page, the back cover under it, and the block of pages beside them. */
++export function BookBase() {
++  return (
++    <svg
++      viewBox="105 80 813 467"
++      preserveAspectRatio="none"
++      className={s.art}
++      data-art="book-base"
++      aria-hidden
++      focusable="false"
++    >
++      {/* a block of pages showing under the right and bottom edges */}
++      <g filter="url(#dg-s3)">
++        <rect
++          x={SPINE}
++          y="86"
++          width="411"
++          height="468"
++          rx="7"
++          fill="#e9e1cd"
++          stroke="#8c7a55"
++          strokeWidth="0.8"
++        />
++      </g>
++      <path
++        d="M918 92V546M920.5 94V548M923 96V550"
++        stroke="#a89873"
++        strokeWidth="0.7"
++      />
++      <path
++        d="M520 547H915M522 549.5H917M524 552H919"
++        stroke="#a89873"
++        strokeWidth="0.7"
++      />
++
++      {/* the cloth back cover */}
++      <path
++        d={`M${SPINE} ${TOP}H908a10 10 0 0 1 10 10V537a10 10 0 0 1-10 10H${SPINE}Z`}
++        fill="url(#bk-cloth-in)"
++        stroke="#1b2670"
++        strokeWidth="1"
++      />
++
++      {/* the page */}
++      <path
++        d={`M${SPINE} 92H902a3 3 0 0 1 3 3V532a3 3 0 0 1-3 3H${SPINE}Z`}
++        fill="#f4eee0"
++      />
++      <path
++        d={`M${SPINE} 92H902a3 3 0 0 1 3 3V532a3 3 0 0 1-3 3H${SPINE}Z`}
++        fill="url(#bk-dots)"
++      />
++      <rect x={SPINE} y="92" width="60" height="443" fill="url(#bk-gutter-r)" />
++      <path
++        d={`M${SPINE} 92H905V535H${SPINE}`}
++        fill="none"
++        stroke="#b9a981"
++        strokeWidth="0.6"
++      />
++
++      <g
++        fill="#8c7a55"
++        fontSize="5.2"
++        style={{ fontFamily: 'var(--font-geist-mono), monospace' }}
++        letterSpacing="0.9"
++      >
++        <text x="895" y="105" textAnchor="end">
++          A POP-UP BOOK OF TOOLS
++        </text>
++        <text x="893" y="529" textAnchor="end">
++          09
++        </text>
++      </g>
++      <Corner x={905} y={535} flip={1} />
++    </svg>
++  )
++}
++
++/** The turning leaf: cloth cover on its front, left-hand page on its back. */
++export function Leaf() {
++  return (
++    <div className={s.leaf} aria-hidden>
++      <div className={`${s.leafFace} ${s.leafFront}`}>
++        <svg
++          viewBox={`${SPINE} ${TOP} ${HALF} ${HEIGHT}`}
++          preserveAspectRatio="none"
++          className={s.art}
++          focusable="false"
++        >
++          <g filter="url(#dg-s3)">
++            <path
++              d={`M${SPINE} ${TOP}H908a10 10 0 0 1 10 10V537a10 10 0 0 1-10 10H${SPINE}Z`}
++              fill="url(#bk-cloth)"
++              stroke="#1b2670"
++              strokeWidth="1"
++            />
++          </g>
++          <path
++            d={`M${SPINE} ${TOP}H908a10 10 0 0 1 10 10V537a10 10 0 0 1-10 10H${SPINE}Z`}
++            fill="url(#bk-weave)"
++            opacity="0.5"
++          />
++          {/* the hinge, where the cover bends */}
++          <rect
++            x={SPINE}
++            y={TOP}
++            width="19"
++            height={HEIGHT}
++            fill="#000"
++            opacity="0.2"
++          />
++          <path
++            d={`M${SPINE + 19} ${TOP}V${TOP + HEIGHT}`}
++            stroke="#fff"
++            strokeOpacity="0.22"
++            strokeWidth="1"
++          />
++          <path
++            d={`M${SPINE + 21} ${TOP}V${TOP + HEIGHT}`}
++            stroke="#000"
++            strokeOpacity="0.28"
++            strokeWidth="1"
++          />
++          {/* gold foil: a stitched line and a plain one */}
++          <rect
++            x={SPINE + 36}
++            y={TOP + 20}
++            width={HALF - 58}
++            height={HEIGHT - 40}
++            rx="4"
++            fill="none"
++            stroke={GOLD}
++            strokeWidth="1.3"
++            strokeDasharray="5 3.4"
++          />
++          <rect
++            x={SPINE + 43}
++            y={TOP + 27}
++            width={HALF - 72}
++            height={HEIGHT - 54}
++            rx="2"
++            fill="none"
++            stroke={GOLD}
++            strokeWidth="0.7"
++            opacity="0.8"
++          />
++          {/* a ribbon bookmark hanging off the bottom */}
++          <path
++            d={`M${SPINE + 300} ${TOP + HEIGHT - 2}V${TOP + HEIGHT + 22}L${SPINE + 308} ${TOP + HEIGHT + 15}L${SPINE + 316} ${TOP + HEIGHT + 22}V${TOP + HEIGHT - 2}Z`}
++            fill="#ff6a2b"
++            stroke="#a63d0e"
++            strokeWidth="0.8"
++          />
++        </svg>
++
++        <p
++          className={s.coverKicker}
++          style={{ ...leaf(56, 52), fontSize: u(8.4) }}
++        >
++          04 &nbsp;·&nbsp; Skills
++        </p>
++        <p
++          className={s.coverTitle}
++          style={{ ...leaf(54, 104), fontSize: u(46) }}
++        >
++          What I
++          <br />
++          reach for.
++        </p>
++        <p
++          className={s.coverSub}
++          style={{ ...leaf(56, 262), fontSize: u(9.4) }}
++        >
++          a pop-up book of
++          <br />
++          what is in the bag
++        </p>
++        <p
++          className={s.coverCue}
++          style={{ ...leaf(56, 326), fontSize: u(8.2) }}
++        >
++          Scroll to open <span aria-hidden>↓</span>
++        </p>
++        <Sun className={s.coverSun} />
++        <Sparkle className={s.coverSpark} />
++        <Daisy className={s.coverDaisy} />
++      </div>
++
++      <div className={`${s.leafFace} ${s.leafBack}`}>
++        <svg
++          viewBox={`105 ${TOP} ${HALF} ${HEIGHT}`}
++          preserveAspectRatio="none"
++          className={s.art}
++          focusable="false"
++        >
++          <g filter="url(#dg-s3)">
++            <rect
++              x="97"
++              y="86"
++              width="415"
++              height="468"
++              rx="7"
++              fill="#e9e1cd"
++              stroke="#8c7a55"
++              strokeWidth="0.8"
++            />
++          </g>
++          <path
++            d="M104 92V546M101.5 94V548M99 96V550"
++            stroke="#a89873"
++            strokeWidth="0.7"
++          />
++          <path
++            d={`M105 ${TOP + 10}a10 10 0 0 1 10-10H${SPINE}V${TOP + HEIGHT}H115a10 10 0 0 1-10-10Z`}
++            fill="url(#bk-cloth-in)"
++            stroke="#1b2670"
++            strokeWidth="1"
++          />
++          <path
++            d={`M118 95a3 3 0 0 1 3-3H${SPINE}V535H121a3 3 0 0 1-3-3Z`}
++            fill="#f4eee0"
++          />
++          <path
++            d={`M118 95a3 3 0 0 1 3-3H${SPINE}V535H121a3 3 0 0 1-3-3Z`}
++            fill="url(#bk-dots)"
++          />
++          <rect
++            x={SPINE - 60}
++            y="92"
++            width="60"
++            height="443"
++            fill="url(#bk-gutter-l)"
++          />
++          <path
++            d={`M${SPINE} 92H118V535H${SPINE}`}
++            fill="none"
++            stroke="#b9a981"
++            strokeWidth="0.6"
++          />
++          <g
++            fill="#8c7a55"
++            fontSize="5.2"
++            style={{ fontFamily: 'var(--font-geist-mono), monospace' }}
++            letterSpacing="0.9"
++          >
++            <text x="130" y="105">
++              NO PERCENTAGES. JUST WHAT I REACH FOR.
++            </text>
++            <text x="130" y="529">
++              08
++            </text>
++          </g>
++          <Corner x={118} y={535} flip={-1} />
++        </svg>
++      </div>
++    </div>
++  )
++}
+diff --git a/features/landing-page/studio/diorama/diorama-art.tsx b/features/landing-page/studio/diorama/diorama-art.tsx
+index acdebb5..d6f8609 100644
+--- a/features/landing-page/studio/diorama/diorama-art.tsx
++++ b/features/landing-page/studio/diorama/diorama-art.tsx
+@@ -94,44 +94,52 @@ export function DioramaDefs() {
+           <stop offset="0.6" stopColor="#4561c4" />
+           <stop offset="1" stopColor="#2f48a4" />
+         </radialGradient>
+-        <radialGradient id="dg-cavity" cx="0.5" cy="0.55" r="0.75">
+-          <stop offset="0" stopColor="#5b3e27" />
+-          <stop offset="1" stopColor="#2c1a0e" />
+-        </radialGradient>
+-        <linearGradient id="dg-wood-h" x1="0" y1="0" x2="0" y2="1">
+-          <stop offset="0" stopColor="#d3b184" />
+-          <stop offset="1" stopColor="#a98660" />
++        <linearGradient id="bk-cloth" x1="0" y1="0" x2="1" y2="1">
++          <stop offset="0" stopColor="#3f55d4" />
++          <stop offset="0.6" stopColor="#3347bd" />
++          <stop offset="1" stopColor="#27379a" />
+         </linearGradient>
+-        <linearGradient id="dg-wood-v" x1="0" y1="0" x2="1" y2="0">
+-          <stop offset="0" stopColor="#c7a47a" />
+-          <stop offset="1" stopColor="#a58059" />
++        <linearGradient id="bk-cloth-in" x1="0" y1="0" x2="1" y2="1">
++          <stop offset="0" stopColor="#2c3da6" />
++          <stop offset="1" stopColor="#202e86" />
+         </linearGradient>
+         <pattern
+-          id="dg-grain-h"
+-          width="40"
++          id="bk-weave"
++          width="3"
+           height="3"
+           patternUnits="userSpaceOnUse"
+         >
+           <path
+-            d="M0 1.2H40"
+-            stroke="#5a3d22"
+-            strokeOpacity="0.14"
+-            strokeWidth="0.5"
++            d="M0 0L3 3M3 0L0 3"
++            stroke="#0e1650"
++            strokeOpacity="0.35"
++            strokeWidth="0.4"
+           />
+         </pattern>
+         <pattern
+-          id="dg-grain-v"
+-          width="3"
+-          height="40"
++          id="bk-dots"
++          width="9"
++          height="9"
+           patternUnits="userSpaceOnUse"
+         >
+-          <path
+-            d="M1.2 0V40"
+-            stroke="#5a3d22"
+-            strokeOpacity="0.14"
+-            strokeWidth="0.5"
++          <circle
++            cx="1.5"
++            cy="1.5"
++            r="0.55"
++            fill="#8c7a55"
++            fillOpacity="0.22"
+           />
+         </pattern>
++        <linearGradient id="bk-gutter-r" x1="0" y1="0" x2="1" y2="0">
++          <stop offset="0" stopColor="#3a2a10" stopOpacity="0.34" />
++          <stop offset="0.35" stopColor="#3a2a10" stopOpacity="0.1" />
++          <stop offset="1" stopColor="#3a2a10" stopOpacity="0" />
++        </linearGradient>
++        <linearGradient id="bk-gutter-l" x1="1" y1="0" x2="0" y2="0">
++          <stop offset="0" stopColor="#3a2a10" stopOpacity="0.34" />
++          <stop offset="0.35" stopColor="#3a2a10" stopOpacity="0.1" />
++          <stop offset="1" stopColor="#3a2a10" stopOpacity="0" />
++        </linearGradient>
+         <pattern
+           id="dg-corrugate"
+           width="3"
+@@ -343,93 +351,6 @@ function Gear({
+   )
+ }
+ 
+-/* ── the room and the frame ──────────────────────────────────────────────── */
+-
+-export function BackWall() {
+-  return (
+-    <Layer label="wall">
+-      <rect x="100" y="76" width="823" height="476" fill="url(#dg-cavity)" />
+-      {/* the wall's own paper seams */}
+-      <path
+-        d="M520 92V535"
+-        stroke="#000"
+-        strokeOpacity="0.12"
+-        strokeWidth="1"
+-      />
+-      <rect
+-        x="118"
+-        y="92"
+-        width="787"
+-        height="30"
+-        fill="#1a0e06"
+-        opacity="0.2"
+-      />
+-      {/* the cardboard floor of the box */}
+-      <rect x="118" y="522" width="787" height="14" fill="url(#dg-cardboard)" />
+-      <rect
+-        x="118"
+-        y="522"
+-        width="787"
+-        height="1.2"
+-        fill="#e0c49a"
+-        opacity="0.7"
+-      />
+-    </Layer>
+-  )
+-}
+-
+-export function FrameFront() {
+-  return (
+-    <Layer label="frame">
+-      {/* four mitred bars */}
+-      <path d="M105 80H918L905 92H118Z" fill="url(#dg-wood-h)" />
+-      <path
+-        d="M105 547H918L905 535H118Z"
+-        fill="url(#dg-wood-h)"
+-        opacity="0.92"
+-      />
+-      <path d="M105 80L118 92V535L105 547Z" fill="url(#dg-wood-v)" />
+-      <path
+-        d="M918 80L905 92V535L918 547Z"
+-        fill="url(#dg-wood-v)"
+-        opacity="0.9"
+-      />
+-      <path d="M105 80H918L905 92H118Z" fill="url(#dg-grain-h)" />
+-      <path d="M105 547H918L905 535H118Z" fill="url(#dg-grain-h)" />
+-      <path d="M105 80L118 92V535L105 547Z" fill="url(#dg-grain-v)" />
+-      <path d="M918 80L905 92V535L918 547Z" fill="url(#dg-grain-v)" />
+-      {/* bevels: light on the outer lip, dark where the wood meets the dark */}
+-      <path
+-        d="M105.5 547V80.5H918"
+-        fill="none"
+-        stroke="#f0dcb8"
+-        strokeOpacity="0.7"
+-        strokeWidth="1"
+-      />
+-      <path
+-        d="M918 80V547H105"
+-        fill="none"
+-        stroke="#5b3f25"
+-        strokeOpacity="0.8"
+-        strokeWidth="1"
+-      />
+-      <path
+-        d="M118 92H905V535H118Z"
+-        fill="none"
+-        stroke="#2a190d"
+-        strokeOpacity="0.9"
+-        strokeWidth="1.4"
+-      />
+-      <path
+-        d="M105 80L118 92M918 80L905 92M105 547L118 535M918 547L905 535"
+-        stroke="#6b4b2e"
+-        strokeOpacity="0.8"
+-        strokeWidth="0.8"
+-      />
+-    </Layer>
+-  )
+-}
+-
+ /* ── Build ───────────────────────────────────────────────────────────────── */
+ 
+ const TAG_X = [166, 220, 278, 340, 402]
+diff --git a/features/landing-page/studio/diorama/diorama.module.css b/features/landing-page/studio/diorama/diorama.module.css
+index 46db9a5..961ad25 100644
+--- a/features/landing-page/studio/diorama/diorama.module.css
++++ b/features/landing-page/studio/diorama/diorama.module.css
+@@ -56,8 +56,6 @@
+ .stageWrap {
+   width: var(--stage-w);
+   flex: none;
+-  /* room for the controller, which hangs above the frame */
+-  padding-top: calc(var(--u) * 52);
+ }
+ 
+ .stage {
+@@ -69,16 +67,6 @@
+   aspect-ratio: 813 / 467;
+ }
+ 
+-.stage::before {
+-  content: '';
+-  position: absolute;
+-  inset: calc(var(--u) * 12) calc(var(--u) * 14);
+-  z-index: 0;
+-  box-shadow:
+-    0 calc(var(--u) * 24) calc(var(--u) * 46) rgb(0 0 0 / 0.6),
+-    0 calc(var(--u) * 4) calc(var(--u) * 10) rgb(0 0 0 / 0.5);
+-}
+-
+ .defs {
+   position: absolute;
+   width: 0;
+@@ -90,7 +78,6 @@
+   position: absolute;
+   inset: 0;
+   z-index: 1;
+-  overflow: clip;
+   isolation: isolate;
+ }
+ 
+@@ -134,26 +121,7 @@
+   /* nearer layers slide further, against the pointer: that is the depth */
+   translate: calc(var(--px, 0) * var(--depth, 0) * var(--u) * -6)
+     calc(var(--py, 0) * var(--depth, 0) * var(--u) * -4);
+-  transition:
+-    translate 0.35s var(--ease),
+-    scale 0.6s var(--ease),
+-    filter 0.6s var(--ease),
+-    opacity 0.6s var(--ease);
+-}
+-
+-.layer[data-id] {
+-  transition:
+-    translate 0.35s var(--ease),
+-    scale 0.6s var(--ease),
+-    filter 0.6s var(--ease),
+-    opacity 0.8s var(--ease) calc(var(--n, 0) * 0.12s),
+-    transform 0.9s var(--ease) calc(var(--n, 0) * 0.12s);
+-}
+-
+-/* Not yet arrived: below the fold, waiting. Above the fold nothing is hidden. */
+-.stageWrap[data-armed='true']:not([data-in='true']) .layer[data-id] {
+-  opacity: 0;
+-  transform: translateY(calc(var(--u) * 26));
++  transition: translate 0.35s var(--ease);
+ }
+ 
+ .layer > * {
+@@ -173,22 +141,6 @@
+   overflow: visible;
+ }
+ 
+-/* The controller picks a station; the others recede, the chosen one steps forward. */
+-.stage[data-station='build'] .layer[data-id]:not([data-id='build']),
+-.stage[data-station='motion'] .layer[data-id]:not([data-id='motion']),
+-.stage[data-station='systems'] .layer[data-id]:not([data-id='systems']),
+-.stage[data-station='rest'] .layer[data-id]:not([data-id='rest']) {
+-  filter: saturate(0.45) brightness(0.62);
+-}
+-
+-.stage[data-station='build'] .layer[data-id='build'],
+-.stage[data-station='motion'] .layer[data-id='motion'],
+-.stage[data-station='systems'] .layer[data-id='systems'],
+-.stage[data-station='rest'] .layer[data-id='rest'] {
+-  scale: 1.012;
+-  filter: brightness(1.06) saturate(1.08);
+-}
+-
+ /* ── Controller ────────────────────────────────────────────────────────── */
+ 
+ .controller {
+@@ -1263,11 +1215,6 @@
+     transition-duration: 0.01ms !important;
+   }
+ 
+-  .stageWrap[data-armed='true']:not([data-in='true']) .layer[data-id] {
+-    opacity: 1;
+-    transform: none;
+-  }
+-
+   .curveRow[data-playing]::after,
+   .lever,
+   .tag,
+@@ -1276,6 +1223,279 @@
+   }
+ }
+ 
++/* ── Desktop: a pop-up book that opens as you scroll ───────────────────── */
++
++.book {
++  position: relative;
++  width: 100%;
++  aspect-ratio: 813 / 467;
++}
++
++.leaf,
++.layerBase,
++.shade {
++  position: absolute;
++}
++
++.layerBase {
++  inset: 0;
++}
++
++.leaf {
++  /* the spine is the vertical middle of the spread; the leaf is its right half */
++  top: 0;
++  left: 50%;
++  width: 50%;
++  height: 100%;
++  transform-origin: 0 50%;
++  transform-style: preserve-3d;
++  transform: rotateY(calc(var(--open, 1) * -180deg));
++}
++
++.leafFace {
++  position: absolute;
++  inset: 0;
++  backface-visibility: hidden;
++  -webkit-backface-visibility: hidden;
++}
++
++.leafBack {
++  transform: rotateY(180deg);
++}
++
++/* the turning cover shades itself as it passes edge-on */
++.leafFace::after {
++  content: '';
++  position: absolute;
++  inset: 0;
++  pointer-events: none;
++  background: rgb(8 12 40 / calc(var(--hump, 0) * 0.4));
++}
++
++/* and throws a shadow across the page it is leaving */
++.shade {
++  top: 0;
++  left: 50%;
++  width: 50%;
++  height: 100%;
++  pointer-events: none;
++  background: linear-gradient(
++    90deg,
++    rgb(20 14 6 / calc(var(--hump, 0) * 0.5)),
++    transparent 75%
++  );
++}
++
++.coverKicker,
++.coverTitle,
++.coverSub {
++  position: absolute;
++  margin: 0;
++  white-space: nowrap;
++}
++
++.coverKicker {
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 600;
++  letter-spacing: 0.22em;
++  text-transform: uppercase;
++  color: #f2c23a;
++}
++
++.coverTitle {
++  font-family: var(--font-syne), system-ui, sans-serif;
++  font-weight: 800;
++  line-height: 0.98;
++  letter-spacing: -0.04em;
++  color: #f4eedf;
++  text-shadow:
++    0 calc(var(--u) * 1.2) 0 #1c2872,
++    calc(var(--u) * 1.4) calc(var(--u) * 2.6) calc(var(--u) * 3)
++      rgb(0 0 0 / 0.5);
++}
++
++.coverSub {
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 500;
++  line-height: 1.5;
++  letter-spacing: 0.06em;
++  color: rgb(244 238 223 / 0.82);
++}
++
++.coverSun {
++  position: absolute;
++  right: 11%;
++  bottom: 9%;
++  width: 36%;
++  height: auto;
++  filter: drop-shadow(0 calc(var(--u) * 3) calc(var(--u) * 3) rgb(0 0 0 / 0.4));
++  animation: spin 70s linear infinite;
++}
++
++.coverSpark {
++  position: absolute;
++  top: 17%;
++  right: 17%;
++  width: 7%;
++  color: #f2c23a;
++  animation: twinkleHtml 3s ease-in-out infinite;
++}
++
++.coverDaisy {
++  position: absolute;
++  left: 11%;
++  bottom: 10%;
++  width: 17%;
++  filter: drop-shadow(0 calc(var(--u) * 2) calc(var(--u) * 2) rgb(0 0 0 / 0.4));
++}
++
++.coverCue {
++  position: absolute;
++  display: inline-flex;
++  align-items: center;
++  gap: calc(var(--u) * 5);
++  margin: 0;
++  padding: calc(var(--u) * 4) calc(var(--u) * 10);
++  border: calc(var(--u) * 1) solid #f2c23a;
++  border-radius: 999px;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-weight: 600;
++  letter-spacing: 0.16em;
++  text-transform: uppercase;
++  white-space: nowrap;
++  color: #f2c23a;
++}
++
++.coverCue span {
++  display: inline-block;
++  animation: cueBob 1.6s ease-in-out infinite;
++}
++
++@keyframes twinkleHtml {
++  0%,
++  100% {
++    opacity: 0.6;
++    transform: scale(0.85) rotate(0deg);
++  }
++  50% {
++    opacity: 1;
++    transform: scale(1.15) rotate(20deg);
++  }
++}
++
++@keyframes cueBob {
++  0%,
++  100% {
++    transform: translateY(0);
++  }
++  50% {
++    transform: translateY(5px);
++  }
++}
++
++/* The controller is for the phone layout; the book has no station filter. */
++@media (min-width: 861px) {
++  .controller {
++    display: none;
++  }
++
++  .room {
++    --stage-w: min(95rem, calc(100vw - 2rem), calc((100vh - 6.5rem) * 1.741));
++  }
++
++  /* panels fold up off the page about their own base edge */
++  .layer[data-id] {
++    --pop: 1;
++    --base: 64%;
++    transform-origin: 50% var(--base);
++    transform: rotateX(calc((1 - var(--pop)) * 86deg));
++    opacity: clamp(0, calc(var(--pop) * 4), 1);
++    will-change: transform, opacity;
++  }
++
++  .layer[data-id='build'] {
++    --pop: var(--pop-build, 1);
++    --base: 64.2%;
++  }
++  .layer[data-id='motion'] {
++    --pop: var(--pop-motion, 1);
++    --base: 64%;
++  }
++  .layer[data-id='rest'] {
++    --pop: var(--pop-rest, 1);
++    --base: 95.3%;
++  }
++  .layer[data-id='systems'] {
++    --pop: var(--pop-systems, 1);
++    --base: 96.8%;
++  }
++
++  .scene {
++    perspective: 1900px;
++    perspective-origin: 50% 18%;
++  }
++
++  .stageWrap {
++    perspective: 2400px;
++    perspective-origin: 50% 40%;
++  }
++}
++
++/* Motion allowed: the section becomes a tall rail with a sticky stage, and
++   the book starts shut. The script writes --open and --pop-* as you scroll. */
++@media (min-width: 861px) and (prefers-reduced-motion: no-preference) {
++  .rail {
++    position: relative;
++    height: 340vh;
++  }
++
++  .pinned {
++    position: sticky;
++    top: 0;
++    display: grid;
++    place-items: center;
++    height: 100vh;
++    padding-top: 3.5rem;
++  }
++
++  .room {
++    margin-top: 0;
++  }
++
++  .stage {
++    --open: 0;
++    --hump: 0;
++    --pop-build: 0;
++    --pop-motion: 0;
++    --pop-rest: 0;
++    --pop-systems: 0;
++  }
++
++  .book {
++    /* shut: centred on its own half, tilted toward you; open: flat and centred */
++    translate: calc((1 - var(--open)) * var(--stage-w) * -0.25) 0;
++    scale: calc(1 + (1 - var(--open)) * 0.1);
++    transform: rotateX(calc((1 - var(--open)) * 14deg))
++      rotateY(calc((1 - var(--open)) * -12deg));
++    transform-origin: 50% 60%;
++    will-change: transform, translate, scale;
++  }
++
++  /* shut or half-open, the panels are not there to be used */
++  .stage:not([data-book-open='true'])
++    .layer
++    :is(button, input, a, .tag, .drawerTools li, .ribbons li, .windTags li) {
++    pointer-events: none;
++  }
++}
++
++/* Reduced motion, desktop: no rail, no turning: the book is simply open. */
++@media (min-width: 861px) and (prefers-reduced-motion: reduce) {
++  .shade {
++    display: none;
++  }
++}
++
+ /* ── Phones: one framed card per station, stacked ──────────────────────── */
+ 
+ @media (max-width: 860px) {
+@@ -1297,13 +1517,17 @@
+     aspect-ratio: auto;
+   }
+ 
+-  .stage::before,
+   .scene::after,
+-  .wall,
+-  .front {
++  .leaf,
++  .layerBase,
++  .shade {
+     display: none;
+   }
+ 
++  .book {
++    display: contents;
++  }
++
+   .scene {
+     position: static;
+     display: flex;
+diff --git a/features/landing-page/studio/skills.tsx b/features/landing-page/studio/skills.tsx
+index da21a62..8786b94 100644
+--- a/features/landing-page/studio/skills.tsx
++++ b/features/landing-page/studio/skills.tsx
+@@ -12,19 +12,18 @@ import {
+ import { cn } from '@/lib/utils'
+ 
+ import {
+-  BackWall,
+   BuildArt,
+   DioramaDefs,
+-  FrameFront,
+   MotionArt,
+   RestArt,
+   SystemsArt,
+ } from './diorama/diorama-art'
++import { BookBase, Leaf } from './diorama/book'
++import { useBookScroll } from './diorama/book-scroll'
+ import styles from './diorama/diorama.module.css'
+ import { at, atRight, fs, u, vars } from './diorama/geometry'
+ import { SectionHead, SectionNext } from './section-head'
+ import { SKILL_GROUPS } from './studio-data'
+-import { useInView } from './use-in-view'
+ 
+ type StationId = 'all' | 'build' | 'motion' | 'systems' | 'rest'
+ 
+@@ -166,7 +165,8 @@ export function Skills() {
+   const mobile = useMobile()
+   const art = mobile ? ({ inert: true, 'aria-hidden': true } as const) : {}
+   const stage = useRef<HTMLDivElement>(null)
+-  const { ref, inView, armed } = useInView<HTMLDivElement>(0.12)
++  const rail = useRef<HTMLDivElement>(null)
++  useBookScroll(rail, stage)
+ 
+   const build = SKILL_GROUPS.find((group) => group.id === 'build')!
+   const motionGroup = SKILL_GROUPS.find((group) => group.id === 'motion')!
+@@ -245,501 +245,521 @@ export function Skills() {
+         />
+       </div>
+ 
+-      <div className={styles.room}>
+-        <div
+-          ref={ref}
+-          className={styles.stageWrap}
+-          data-armed={armed}
+-          data-in={inView}
+-        >
+-          <div
+-            ref={stage}
+-            className={styles.stage}
+-            data-station={station}
+-            data-running={running}
+-            style={vars({ '--lever': `${lever.toFixed(1)}deg` })}
+-          >
+-            <DioramaDefs />
+-
+-            <div className={styles.controller}>
+-              <div className={styles.controllerTop}>
+-                <span>Automation Controller</span>
+-                <button
+-                  type="button"
+-                  className={styles.kinetic}
+-                  aria-pressed={running}
+-                  aria-label="Run the machinery"
+-                  onClick={() => setRunning((value) => !value)}
+-                >
+-                  <span className={styles.knob} aria-hidden />
+-                </button>
+-              </div>
+-              <div className={styles.pills} role="group" aria-label="Stations">
+-                {STATIONS.map((item) => (
+-                  <button
+-                    key={item.id}
+-                    type="button"
+-                    className={styles.pill}
+-                    aria-pressed={station === item.id}
+-                    onClick={() => setStation(item.id)}
+-                  >
+-                    {item.label}
+-                  </button>
+-                ))}
+-              </div>
+-            </div>
+-
+-            <div className={styles.scene}>
++      <div ref={rail} className={styles.rail}>
++        <div className={styles.pinned}>
++          <div className={styles.room}>
++            <div className={styles.stageWrap}>
+               <div
+-                className={cn(styles.layer, styles.wall)}
+-                style={vars({ '--depth': 0.15 })}
+-              >
+-                <BackWall />
+-              </div>
+-
+-              {/* 04 · The rest */}
+-              <Card
+-                id="rest"
+-                below={
+-                  <>
+-                    <p className={styles.belowLine}>{also.line}</p>
+-                    <Chips items={[...tools, ...folders]} hot={HOT_TOOLS} />
+-                    <p className={styles.belowNote}>
+-                      currently poking: <strong>view transitions</strong>
+-                    </p>
+-                  </>
+-                }
++                ref={stage}
++                className={styles.stage}
++                data-station={station}
++                data-running={running}
++                style={vars({ '--lever': `${lever.toFixed(1)}deg` })}
+               >
+-                <div
+-                  className={styles.layer}
+-                  data-id="rest"
+-                  style={vars({ '--depth': 0.45, '--n': 0 })}
+-                >
+-                  <RestArt folderCount={folders.length} />
+-                  <Eyebrow
+-                    x={610}
+-                    y={401}
+-                    text={also.eyebrow}
+-                    index="04 / 04"
+-                    xr={879}
+-                  />
+-                  <h3
+-                    className={cn(styles.title, styles.titleInk)}
+-                    style={{ ...at(610, 416), fontSize: u(26.5) }}
+-                  >
+-                    {also.title}
+-                  </h3>
+-                  <p className={styles.deskLine}>{also.line}</p>
++                <DioramaDefs />
+ 
+-                  <div
+-                    className={styles.sticky}
+-                    {...art}
+-                    style={{ ...at(808, 411, 80, 37), fontSize: u(6.3) }}
+-                  >
+-                    currently poking:
+-                    <br />
+-                    <span>view transitions</span>
++                <div className={styles.controller}>
++                  <div className={styles.controllerTop}>
++                    <span>Automation Controller</span>
++                    <button
++                      type="button"
++                      className={styles.kinetic}
++                      aria-pressed={running}
++                      aria-label="Run the machinery"
++                      onClick={() => setRunning((value) => !value)}
++                    >
++                      <span className={styles.knob} aria-hidden />
++                    </button>
+                   </div>
+-
+-                  <ul
+-                    className={styles.folderLabels}
+-                    {...art}
+-                    aria-label="Also in the drawer"
+-                  >
+-                    {folders.map((name, i) => (
+-                      <li
+-                        key={name}
+-                        style={{ ...at(FOLDER_X[i], 452.5), fontSize: u(5.6) }}
+-                      >
+-                        {name}
+-                      </li>
+-                    ))}
+-                  </ul>
+-
+-                  <ul
+-                    className={styles.drawerTools}
+-                    {...art}
+-                    style={{ ...at(630, 478, 255, 19), fontSize: u(7.2) }}
+-                  >
+-                    {tools.map((tool) => (
+-                      <li
+-                        key={tool}
+-                        data-hot={HOT_TOOLS.has(tool) || undefined}
+-                      >
+-                        {tool}
+-                      </li>
+-                    ))}
+-                  </ul>
+-                </div>
+-              </Card>
+-
+-              {/* 01 · Build */}
+-              <Card
+-                id="build"
+-                below={
+-                  <>
+-                    <p className={styles.belowLine}>{build.line}</p>
+-                    <Chips items={build.skills} />
+-                  </>
+-                }
+-              >
+-                <div
+-                  className={styles.layer}
+-                  data-id="build"
+-                  style={vars({ '--depth': 0.8, '--n': 1 })}
+-                >
+-                  <BuildArt />
+-                  <Eyebrow
+-                    x={172}
+-                    y={129}
+-                    text={build.eyebrow}
+-                    index="01 / 04"
+-                    xr={527}
+-                  />
+-                  <h3
+-                    className={cn(styles.title, styles.titleCream)}
+-                    style={{ ...at(172, 148), fontSize: u(24.5) }}
+-                  >
+-                    {build.title}
+-                  </h3>
+-                  <p className={styles.deskLine}>{build.line}</p>
+-
+-                  <span
+-                    className={styles.cloudText}
+-                    style={{ ...at(159, 183), fontSize: u(4.8) }}
+-                    aria-hidden
+-                  >
+-                    space atmosphere
+-                  </span>
+-                  <span
+-                    className={styles.cloudText}
+-                    style={{ ...at(478, 156), fontSize: u(4.8) }}
+-                    aria-hidden
++                  <div
++                    className={styles.pills}
++                    role="group"
++                    aria-label="Stations"
+                   >
+-                    stratosphere
+-                  </span>
+-
+-                  <ul className={styles.tags} {...art} aria-label="Build tools">
+-                    {build.skills.slice(0, TAGS.length).map((skill, i) => (
+-                      <li
+-                        key={skill}
+-                        className={styles.tag}
+-                        data-skill={skill}
+-                        style={{
+-                          ...at(TAGS[i].x, 283, TAGS[i].w, 17),
+-                          fontSize: u(6.7),
+-                          ...vars({ '--delay': `${i * 0.4}s` }),
+-                        }}
+-                      >
+-                        {skill}
+-                      </li>
+-                    ))}
+-                  </ul>
+-                </div>
+-              </Card>
+-
+-              {/* 02 · Motion */}
+-              <Card
+-                id="motion"
+-                below={
+-                  <>
+-                    <p className={styles.belowLine}>{motionGroup.line}</p>
+-                    <Chips items={motionGroup.skills} />
+-                    <div className={styles.mWeather}>
+-                      <h4>Weather &amp; current machine</h4>
+-                      {CURVES.map((curve) => (
+-                        <label key={curve.id} className={styles.mCurve}>
+-                          <span>
+-                            <i style={{ background: curve.dot }} aria-hidden />{' '}
+-                            {curve.label}
+-                          </span>
+-                          <input
+-                            type="range"
+-                            min={0}
+-                            max={100}
+-                            value={curves[curve.id]}
+-                            aria-label={`${curve.label} curve`}
+-                            aria-valuetext={`${curve.label}: stiffness ${curve.stiffness}, damping ${curve.damping}`}
+-                            onPointerDown={() => setPlaying(false)}
+-                            onChange={(event) => {
+-                              setPlaying(false)
+-                              setCurves((values) => ({
+-                                ...values,
+-                                [curve.id]: Number(event.target.value),
+-                              }))
+-                            }}
+-                          />
+-                          <output>
+-                            {curve.stiffness}/{curve.damping}
+-                          </output>
+-                        </label>
+-                      ))}
++                    {STATIONS.map((item) => (
+                       <button
++                        key={item.id}
+                         type="button"
+-                        className={styles.mPlay}
+-                        onClick={playCurves}
++                        className={styles.pill}
++                        aria-pressed={station === item.id}
++                        onClick={() => setStation(item.id)}
+                       >
+-                        {run > 0 ? 'Play again' : 'Play the curves'}{' '}
+-                        <span aria-hidden>→</span>
++                        {item.label}
+                       </button>
+-                    </div>
+-                  </>
+-                }
+-              >
+-                <div
+-                  className={styles.layer}
+-                  data-id="motion"
+-                  style={vars({ '--depth': 0.8, '--n': 2 })}
+-                >
+-                  <MotionArt />
+-                  <Eyebrow
+-                    x={565}
+-                    y={129}
+-                    text={motionGroup.eyebrow}
+-                    index="02 / 04"
+-                    xr={858}
+-                  />
+-                  <h3
+-                    className={cn(styles.title, styles.titleInk)}
+-                    style={{ ...at(565, 146), fontSize: u(27) }}
+-                  >
+-                    {motionGroup.title}
+-                  </h3>
+-                  <p className={styles.deskLine}>{motionGroup.line}</p>
+-
+-                  <ul
+-                    className={styles.windTags}
+-                    {...art}
+-                    aria-label="Motion tools"
+-                  >
+-                    {motionGroup.skills.map((skill, i) => (
+-                      <li
+-                        key={skill}
+-                        data-slot={i}
+-                        style={{
+-                          ...at(
+-                            [833, 840, 588, 592][i] ?? 588,
+-                            [165, 216, 343, 358][i] ?? 343,
+-                          ),
+-                          fontSize: u(i < 2 ? 5.6 : 5.8),
+-                        }}
+-                      >
+-                        {skill}
+-                      </li>
+                     ))}
+-                  </ul>
++                  </div>
++                </div>
+ 
+-                  <div
+-                    className={styles.weather}
+-                    {...art}
+-                    style={{ ...at(764, 237, 100, 70), fontSize: u(6.2) }}
+-                  >
+-                    <span className={styles.weatherHead}>
+-                      Weather &amp; current machine
+-                    </span>
+-                    {CURVES.map((curve, i) => (
+-                      <label
+-                        key={curve.id}
+-                        className={styles.curveRow}
+-                        data-curve={curve.id}
+-                        data-playing={playing || undefined}
+-                        style={{
+-                          top: u(25.5 + i * 18.5),
+-                          ...vars({ '--pct': curves[curve.id] }),
+-                        }}
++                <div className={styles.book}>
++                  <div className={styles.scene}>
++                    <div className={styles.layerBase}>
++                      <BookBase />
++                    </div>
++                    <div className={styles.shade} />
++                    <Leaf />
++
++                    {/* 04 · The rest */}
++                    <Card
++                      id="rest"
++                      below={
++                        <>
++                          <p className={styles.belowLine}>{also.line}</p>
++                          <Chips
++                            items={[...tools, ...folders]}
++                            hot={HOT_TOOLS}
++                          />
++                          <p className={styles.belowNote}>
++                            currently poking: <strong>view transitions</strong>
++                          </p>
++                        </>
++                      }
++                    >
++                      <div
++                        className={styles.layer}
++                        data-id="rest"
++                        style={vars({ '--depth': 0.45, '--n': 0 })}
+                       >
+-                        <span className={styles.curveLabel}>{curve.label}</span>
+-                        <i
+-                          className={styles.curveDot}
+-                          style={{ background: curve.dot }}
+-                          aria-hidden
++                        <RestArt folderCount={folders.length} />
++                        <Eyebrow
++                          x={610}
++                          y={401}
++                          text={also.eyebrow}
++                          index="04 / 04"
++                          xr={879}
+                         />
+-                        <input
+-                          type="range"
+-                          min={0}
+-                          max={100}
+-                          value={curves[curve.id]}
+-                          className={styles.curveInput}
+-                          aria-label={`${curve.label} curve`}
+-                          aria-valuetext={`${curve.label}: stiffness ${curve.stiffness}, damping ${curve.damping}`}
+-                          onPointerDown={() => setPlaying(false)}
+-                          onChange={(event) => {
+-                            setPlaying(false)
+-                            setCurves((values) => ({
+-                              ...values,
+-                              [curve.id]: Number(event.target.value),
+-                            }))
+-                          }}
+-                        />
+-                        <span className={styles.srOnly}>
+-                          {curve.stiffness} / {curve.damping}
+-                        </span>
+-                      </label>
+-                    ))}
+-                  </div>
+-
+-                  <button
+-                    type="button"
+-                    className={styles.play}
+-                    {...art}
+-                    style={{ ...at(742, 342, 86, 22), fontSize: u(6.6) }}
+-                    onClick={playCurves}
+-                  >
+-                    {run > 0 ? 'Play again' : 'Play the curves'}{' '}
+-                    <span aria-hidden>→</span>
+-                  </button>
+-                </div>
+-              </Card>
+-
+-              {/* 03 · Systems */}
+-              <Card
+-                id="systems"
+-                below={
+-                  <>
+-                    <p className={styles.belowLine}>{systems.line}</p>
+-                    <div className={styles.mConsole}>
+-                      <button type="button" className={styles.mBtn}>
+-                        Hover me
+-                      </button>
+-                      <button
+-                        type="button"
+-                        className={styles.mBtn}
+-                        aria-pressed={pressed}
+-                        onClick={() => setPressed((value) => !value)}
++                        <h3
++                          className={cn(styles.title, styles.titleInk)}
++                          style={{ ...at(610, 416), fontSize: u(26.5) }}
++                        >
++                          {also.title}
++                        </h3>
++                        <p className={styles.deskLine}>{also.line}</p>
++
++                        <div
++                          className={styles.sticky}
++                          {...art}
++                          style={{ ...at(808, 411, 80, 37), fontSize: u(6.3) }}
++                        >
++                          currently poking:
++                          <br />
++                          <span>view transitions</span>
++                        </div>
++
++                        <ul
++                          className={styles.folderLabels}
++                          {...art}
++                          aria-label="Also in the drawer"
++                        >
++                          {folders.map((name, i) => (
++                            <li
++                              key={name}
++                              style={{
++                                ...at(FOLDER_X[i], 452.5),
++                                fontSize: u(5.6),
++                              }}
++                            >
++                              {name}
++                            </li>
++                          ))}
++                        </ul>
++
++                        <ul
++                          className={styles.drawerTools}
++                          {...art}
++                          style={{ ...at(630, 478, 255, 19), fontSize: u(7.2) }}
++                        >
++                          {tools.map((tool) => (
++                            <li
++                              key={tool}
++                              data-hot={HOT_TOOLS.has(tool) || undefined}
++                            >
++                              {tool}
++                            </li>
++                          ))}
++                        </ul>
++                      </div>
++                    </Card>
++
++                    {/* 01 · Build */}
++                    <Card
++                      id="build"
++                      below={
++                        <>
++                          <p className={styles.belowLine}>{build.line}</p>
++                          <Chips items={build.skills} />
++                        </>
++                      }
++                    >
++                      <div
++                        className={styles.layer}
++                        data-id="build"
++                        style={vars({ '--depth': 0.8, '--n': 1 })}
+                       >
+-                        Press me <span aria-hidden>{pressed ? '✓' : ''}</span>
+-                      </button>
+-                    </div>
+-                    <ul className={styles.chips} aria-label="Systems practices">
+-                      {systems.skills.map((item, i) => (
+-                        <li key={item}>
+-                          <button
+-                            type="button"
+-                            className={styles.chipBtn}
+-                            aria-pressed={ribbon === i}
+-                            onClick={() => setRibbon(i)}
+-                          >
+-                            {item}
+-                          </button>
+-                        </li>
+-                      ))}
+-                    </ul>
+-                  </>
+-                }
+-              >
+-                <div
+-                  className={styles.layer}
+-                  data-id="systems"
+-                  style={vars({ '--depth': 1.35, '--n': 3 })}
+-                >
+-                  <SystemsArt />
+-                  <Eyebrow
+-                    x={357}
+-                    y={334}
+-                    text={systems.eyebrow}
+-                    index="03 / 04"
+-                    xr={563}
+-                  />
+-                  <h3
+-                    className={cn(styles.title, styles.titleInk)}
+-                    style={{ ...at(357, 348), fontSize: u(27) }}
+-                  >
+-                    {systems.title}
+-                  </h3>
+-                  <p className={styles.deskLine}>{systems.line}</p>
+-
+-                  <span
+-                    className={styles.deck}
+-                    aria-hidden
+-                    style={{ ...at(357, 388, 116, 17), fontSize: u(6.8) }}
+-                  >
+-                    Barometric Control Deck
+-                  </span>
++                        <BuildArt />
++                        <Eyebrow
++                          x={172}
++                          y={129}
++                          text={build.eyebrow}
++                          index="01 / 04"
++                          xr={527}
++                        />
++                        <h3
++                          className={cn(styles.title, styles.titleCream)}
++                          style={{ ...at(172, 148), fontSize: u(24.5) }}
++                        >
++                          {build.title}
++                        </h3>
++                        <p className={styles.deskLine}>{build.line}</p>
+ 
+-                  <span
+-                    className={styles.gateTitle}
+-                    style={{ ...at(367, 451), fontSize: u(15) }}
+-                    aria-hidden
+-                  >
+-                    Systems
+-                  </span>
++                        <span
++                          className={styles.cloudText}
++                          style={{ ...at(159, 183), fontSize: u(4.8) }}
++                          aria-hidden
++                        >
++                          space atmosphere
++                        </span>
++                        <span
++                          className={styles.cloudText}
++                          style={{ ...at(478, 156), fontSize: u(4.8) }}
++                          aria-hidden
++                        >
++                          stratosphere
++                        </span>
+ 
+-                  <div
+-                    className={styles.consoleRow}
+-                    {...art}
+-                    style={at(356, 409, 116, 31)}
+-                  >
+-                    <button
+-                      type="button"
+-                      className={cn(styles.consoleBtn, styles.hoverBtn)}
+-                      style={{ fontSize: u(7) }}
+-                    >
+-                      Hover me
+-                    </button>
+-                    <button
+-                      type="button"
+-                      className={cn(styles.consoleBtn, styles.pressBtn)}
+-                      style={{ fontSize: u(7) }}
+-                      aria-pressed={pressed}
+-                      onClick={() => setPressed((value) => !value)}
++                        <ul
++                          className={styles.tags}
++                          {...art}
++                          aria-label="Build tools"
++                        >
++                          {build.skills
++                            .slice(0, TAGS.length)
++                            .map((skill, i) => (
++                              <li
++                                key={skill}
++                                className={styles.tag}
++                                data-skill={skill}
++                                style={{
++                                  ...at(TAGS[i].x, 283, TAGS[i].w, 17),
++                                  fontSize: u(6.7),
++                                  ...vars({ '--delay': `${i * 0.4}s` }),
++                                }}
++                              >
++                                {skill}
++                              </li>
++                            ))}
++                        </ul>
++                      </div>
++                    </Card>
++
++                    {/* 02 · Motion */}
++                    <Card
++                      id="motion"
++                      below={
++                        <>
++                          <p className={styles.belowLine}>{motionGroup.line}</p>
++                          <Chips items={motionGroup.skills} />
++                          <div className={styles.mWeather}>
++                            <h4>Weather &amp; current machine</h4>
++                            {CURVES.map((curve) => (
++                              <label key={curve.id} className={styles.mCurve}>
++                                <span>
++                                  <i
++                                    style={{ background: curve.dot }}
++                                    aria-hidden
++                                  />{' '}
++                                  {curve.label}
++                                </span>
++                                <input
++                                  type="range"
++                                  min={0}
++                                  max={100}
++                                  value={curves[curve.id]}
++                                  aria-label={`${curve.label} curve`}
++                                  aria-valuetext={`${curve.label}: stiffness ${curve.stiffness}, damping ${curve.damping}`}
++                                  onPointerDown={() => setPlaying(false)}
++                                  onChange={(event) => {
++                                    setPlaying(false)
++                                    setCurves((values) => ({
++                                      ...values,
++                                      [curve.id]: Number(event.target.value),
++                                    }))
++                                  }}
++                                />
++                                <output>
++                                  {curve.stiffness}/{curve.damping}
++                                </output>
++                              </label>
++                            ))}
++                            <button
++                              type="button"
++                              className={styles.mPlay}
++                              onClick={playCurves}
++                            >
++                              {run > 0 ? 'Play again' : 'Play the curves'}{' '}
++                              <span aria-hidden>→</span>
++                            </button>
++                          </div>
++                        </>
++                      }
+                     >
+-                      Press me
+-                      <svg
+-                        viewBox="0 0 10 8"
+-                        aria-hidden
+-                        className={styles.tick}
++                      <div
++                        className={styles.layer}
++                        data-id="motion"
++                        style={vars({ '--depth': 0.8, '--n': 2 })}
+                       >
+-                        <path
+-                          d="M1 4.2L3.8 7L9 1"
+-                          fill="none"
+-                          stroke="currentColor"
+-                          strokeWidth="1.8"
+-                          strokeLinecap="round"
+-                          strokeLinejoin="round"
++                        <MotionArt />
++                        <Eyebrow
++                          x={565}
++                          y={129}
++                          text={motionGroup.eyebrow}
++                          index="02 / 04"
++                          xr={858}
+                         />
+-                      </svg>
+-                    </button>
+-                  </div>
++                        <h3
++                          className={cn(styles.title, styles.titleInk)}
++                          style={{ ...at(565, 146), fontSize: u(27) }}
++                        >
++                          {motionGroup.title}
++                        </h3>
++                        <p className={styles.deskLine}>{motionGroup.line}</p>
++
++                        <ul
++                          className={styles.windTags}
++                          {...art}
++                          aria-label="Motion tools"
++                        >
++                          {motionGroup.skills.map((skill, i) => (
++                            <li
++                              key={skill}
++                              data-slot={i}
++                              style={{
++                                ...at(
++                                  [833, 840, 588, 592][i] ?? 588,
++                                  [165, 216, 343, 358][i] ?? 343,
++                                ),
++                                fontSize: u(i < 2 ? 5.6 : 5.8),
++                              }}
++                            >
++                              {skill}
++                            </li>
++                          ))}
++                        </ul>
++
++                        <div
++                          className={styles.weather}
++                          {...art}
++                          style={{ ...at(764, 237, 100, 70), fontSize: u(6.2) }}
++                        >
++                          <span className={styles.weatherHead}>
++                            Weather &amp; current machine
++                          </span>
++                          {CURVES.map((curve, i) => (
++                            <label
++                              key={curve.id}
++                              className={styles.curveRow}
++                              data-curve={curve.id}
++                              data-playing={playing || undefined}
++                              style={{
++                                top: u(25.5 + i * 18.5),
++                                ...vars({ '--pct': curves[curve.id] }),
++                              }}
++                            >
++                              <span className={styles.curveLabel}>
++                                {curve.label}
++                              </span>
++                              <i
++                                className={styles.curveDot}
++                                style={{ background: curve.dot }}
++                                aria-hidden
++                              />
++                              <input
++                                type="range"
++                                min={0}
++                                max={100}
++                                value={curves[curve.id]}
++                                className={styles.curveInput}
++                                aria-label={`${curve.label} curve`}
++                                aria-valuetext={`${curve.label}: stiffness ${curve.stiffness}, damping ${curve.damping}`}
++                                onPointerDown={() => setPlaying(false)}
++                                onChange={(event) => {
++                                  setPlaying(false)
++                                  setCurves((values) => ({
++                                    ...values,
++                                    [curve.id]: Number(event.target.value),
++                                  }))
++                                }}
++                              />
++                              <span className={styles.srOnly}>
++                                {curve.stiffness} / {curve.damping}
++                              </span>
++                            </label>
++                          ))}
++                        </div>
+ 
+-                  <ul
+-                    className={styles.ribbons}
+-                    {...art}
+-                    aria-label="Systems practices"
+-                  >
+-                    {systems.skills.slice(0, RIBBONS.length).map((item, i) => (
+-                      <li
+-                        key={item}
+-                        style={{
+-                          ...at(
+-                            RIBBONS[i].x,
+-                            RIBBONS[i].y,
+-                            RIBBONS[i].w,
+-                            RIBBONS[i].h,
+-                          ),
+-                          ...vars({ '--delay': `${i * 0.45}s` }),
+-                        }}
+-                      >
+                         <button
+                           type="button"
+-                          className={styles.ribbon}
+-                          data-tone={RIBBONS[i].tone}
+-                          aria-pressed={ribbon === i}
+-                          onClick={() => setRibbon(i)}
+-                          style={{ fontSize: u(6.6) }}
++                          className={styles.play}
++                          {...art}
++                          style={{ ...at(742, 342, 86, 22), fontSize: u(6.6) }}
++                          onClick={playCurves}
+                         >
+-                          {item}
++                          {run > 0 ? 'Play again' : 'Play the curves'}{' '}
++                          <span aria-hidden>→</span>
+                         </button>
+-                      </li>
+-                    ))}
+-                  </ul>
+-                </div>
+-              </Card>
++                      </div>
++                    </Card>
++
++                    {/* 03 · Systems */}
++                    <Card
++                      id="systems"
++                      below={
++                        <>
++                          <p className={styles.belowLine}>{systems.line}</p>
++                          <div className={styles.mConsole}>
++                            <button type="button" className={styles.mBtn}>
++                              Hover me
++                            </button>
++                            <button
++                              type="button"
++                              className={styles.mBtn}
++                              aria-pressed={pressed}
++                              onClick={() => setPressed((value) => !value)}
++                            >
++                              Press me{' '}
++                              <span aria-hidden>{pressed ? '✓' : ''}</span>
++                            </button>
++                          </div>
++                          <ul
++                            className={styles.chips}
++                            aria-label="Systems practices"
++                          >
++                            {systems.skills.map((item, i) => (
++                              <li key={item}>
++                                <button
++                                  type="button"
++                                  className={styles.chipBtn}
++                                  aria-pressed={ribbon === i}
++                                  onClick={() => setRibbon(i)}
++                                >
++                                  {item}
++                                </button>
++                              </li>
++                            ))}
++                          </ul>
++                        </>
++                      }
++                    >
++                      <div
++                        className={styles.layer}
++                        data-id="systems"
++                        style={vars({ '--depth': 1.35, '--n': 3 })}
++                      >
++                        <SystemsArt />
++                        <Eyebrow
++                          x={357}
++                          y={334}
++                          text={systems.eyebrow}
++                          index="03 / 04"
++                          xr={563}
++                        />
++                        <h3
++                          className={cn(styles.title, styles.titleInk)}
++                          style={{ ...at(357, 348), fontSize: u(27) }}
++                        >
++                          {systems.title}
++                        </h3>
++                        <p className={styles.deskLine}>{systems.line}</p>
+ 
+-              <div
+-                className={cn(styles.layer, styles.front)}
+-                style={vars({ '--depth': 0 })}
+-              >
+-                <FrameFront />
++                        <span
++                          className={styles.deck}
++                          aria-hidden
++                          style={{ ...at(357, 388, 116, 17), fontSize: u(6.8) }}
++                        >
++                          Barometric Control Deck
++                        </span>
++
++                        <span
++                          className={styles.gateTitle}
++                          style={{ ...at(367, 451), fontSize: u(15) }}
++                          aria-hidden
++                        >
++                          Systems
++                        </span>
++
++                        <div
++                          className={styles.consoleRow}
++                          {...art}
++                          style={at(356, 409, 116, 31)}
++                        >
++                          <button
++                            type="button"
++                            className={cn(styles.consoleBtn, styles.hoverBtn)}
++                            style={{ fontSize: u(7) }}
++                          >
++                            Hover me
++                          </button>
++                          <button
++                            type="button"
++                            className={cn(styles.consoleBtn, styles.pressBtn)}
++                            style={{ fontSize: u(7) }}
++                            aria-pressed={pressed}
++                            onClick={() => setPressed((value) => !value)}
++                          >
++                            Press me
++                            <svg
++                              viewBox="0 0 10 8"
++                              aria-hidden
++                              className={styles.tick}
++                            >
++                              <path
++                                d="M1 4.2L3.8 7L9 1"
++                                fill="none"
++                                stroke="currentColor"
++                                strokeWidth="1.8"
++                                strokeLinecap="round"
++                                strokeLinejoin="round"
++                              />
++                            </svg>
++                          </button>
++                        </div>
++
++                        <ul
++                          className={styles.ribbons}
++                          {...art}
++                          aria-label="Systems practices"
++                        >
++                          {systems.skills
++                            .slice(0, RIBBONS.length)
++                            .map((item, i) => (
++                              <li
++                                key={item}
++                                style={{
++                                  ...at(
++                                    RIBBONS[i].x,
++                                    RIBBONS[i].y,
++                                    RIBBONS[i].w,
++                                    RIBBONS[i].h,
++                                  ),
++                                  ...vars({ '--delay': `${i * 0.45}s` }),
++                                }}
++                              >
++                                <button
++                                  type="button"
++                                  className={styles.ribbon}
++                                  data-tone={RIBBONS[i].tone}
++                                  aria-pressed={ribbon === i}
++                                  onClick={() => setRibbon(i)}
++                                  style={{ fontSize: u(6.6) }}
++                                >
++                                  {item}
++                                </button>
++                              </li>
++                            ))}
++                        </ul>
++                      </div>
++                    </Card>
++                  </div>
++                </div>
+               </div>
+             </div>
+           </div>
+diff --git a/tests/book-scroll.test.ts b/tests/book-scroll.test.ts
+new file mode 100644
+index 0000000..6299462
+--- /dev/null
++++ b/tests/book-scroll.test.ts
+@@ -0,0 +1,132 @@
++import {
++  BOOK_STAGES,
++  POP_IDS,
++  bookState,
++  easeInOutCubic,
++  easeOutBack,
++  progressWithin,
++} from '@/features/landing-page/studio/diorama/book-scroll'
++
++/**
++ * The pop-up book is a pure function of scroll progress. These pin down the
++ * promises the animation makes: it starts shut and ends open, it only ever
++ * moves forward as you scroll forward, the panels stand up in order, and a
++ * little overshoot never leaves them off the page.
++ */
++describe('book scroll', () => {
++  const sweep = Array.from({ length: 1001 }, (_, i) => i / 1000)
++
++  describe('easing', () => {
++    it('starts at 0 and ends at 1', () => {
++      for (const ease of [easeInOutCubic, easeOutBack]) {
++        expect(ease(0)).toBeCloseTo(0, 10)
++        expect(ease(1)).toBeCloseTo(1, 10)
++      }
++    })
++
++    it('eases in and out of the cover turn without ever leaving [0, 1]', () => {
++      for (const t of sweep) {
++        const v = easeInOutCubic(t)
++        expect(v).toBeGreaterThanOrEqual(0)
++        expect(v).toBeLessThanOrEqual(1)
++      }
++      expect(easeInOutCubic(0.5)).toBeCloseTo(0.5, 10)
++    })
++
++    it('overshoots on the way up and settles on 1', () => {
++      const peak = Math.max(...sweep.map((t) => easeOutBack(t)))
++      expect(peak).toBeGreaterThan(1)
++      expect(peak).toBeLessThan(1.2)
++    })
++  })
++
++  describe('progressWithin', () => {
++    it('holds at 0 before the stage and at 1 after it', () => {
++      expect(progressWithin(0, [0.2, 0.6])).toBe(0)
++      expect(progressWithin(0.2, [0.2, 0.6])).toBe(0)
++      expect(progressWithin(0.4, [0.2, 0.6])).toBeCloseTo(0.5, 10)
++      expect(progressWithin(0.6, [0.2, 0.6])).toBe(1)
++      expect(progressWithin(1, [0.2, 0.6])).toBe(1)
++    })
++  })
++
++  describe('bookState', () => {
++    it('is a shut book with nothing standing at the top of the rail', () => {
++      const s = bookState(0)
++      expect(s.open).toBe(0)
++      expect(s.hump).toBeCloseTo(0, 10)
++      expect(POP_IDS.every((id) => s.pops[id] === 0)).toBe(true)
++      expect(s.settled).toBe(false)
++    })
++
++    it('is fully open, every panel standing and settled, at the bottom', () => {
++      const s = bookState(1)
++      expect(s.open).toBe(1)
++      expect(s.hump).toBeCloseTo(0, 10)
++      for (const id of POP_IDS) expect(s.pops[id]).toBeCloseTo(1, 10)
++      expect(s.settled).toBe(true)
++    })
++
++    it('never opens backwards as you scroll forwards', () => {
++      let previous = -1
++      for (const p of sweep) {
++        const { open } = bookState(p)
++        expect(open).toBeGreaterThanOrEqual(previous)
++        previous = open
++      }
++    })
++
++    it('holds the book shut for a beat before the cover moves', () => {
++      expect(bookState(BOOK_STAGES.open[0]).open).toBe(0)
++      expect(bookState(BOOK_STAGES.open[0] + 0.05).open).toBeGreaterThan(0)
++    })
++
++    it('has the cover fully open before the first panel starts to rise', () => {
++      expect(BOOK_STAGES.open[1]).toBeLessThanOrEqual(BOOK_STAGES.build[0])
++      const justBefore = bookState(BOOK_STAGES.build[0])
++      expect(justBefore.open).toBe(1)
++      expect(justBefore.pops.build).toBe(0)
++    })
++
++    it('stands the panels up in order: build, motion, rest, systems', () => {
++      const starts = POP_IDS.map((id) => BOOK_STAGES[id][0])
++      expect([...starts].sort((a, b) => a - b)).toEqual(starts)
++      const ends = POP_IDS.map((id) => BOOK_STAGES[id][1])
++      expect([...ends].sort((a, b) => a - b)).toEqual(ends)
++      // while the first is half up, the last has not begun
++      const mid = bookState((BOOK_STAGES.build[0] + BOOK_STAGES.build[1]) / 2)
++      expect(mid.pops.build).toBeGreaterThan(0.5)
++      expect(mid.pops.systems).toBe(0)
++    })
++
++    it('finishes before the end of the rail, so there is a moment of rest', () => {
++      expect(BOOK_STAGES.systems[1]).toBeLessThan(1)
++      expect(bookState(BOOK_STAGES.systems[1]).settled).toBe(true)
++    })
++
++    it('peaks the turning shadow mid-turn and never goes negative', () => {
++      const humps = sweep.map((p) => bookState(p).hump)
++      expect(Math.min(...humps)).toBeGreaterThanOrEqual(0)
++      const peak = Math.max(...humps)
++      expect(peak).toBeCloseTo(1, 2)
++      const at = sweep[humps.indexOf(peak)]
++      const [start, end] = BOOK_STAGES.open
++      expect(at).toBeGreaterThan(start)
++      expect(at).toBeLessThan(end)
++    })
++
++    it('keeps every panel within a small overshoot of upright', () => {
++      for (const p of sweep) {
++        for (const id of POP_IDS) {
++          const v = bookState(p).pops[id]
++          expect(v).toBeGreaterThanOrEqual(0)
++          expect(v).toBeLessThan(1.2)
++        }
++      }
++    })
++
++    it('is not settled until the last panel has all but landed', () => {
++      expect(bookState(BOOK_STAGES.systems[0] + 0.01).settled).toBe(false)
++    })
++  })
++})
+-- 
+2.43.0
+
