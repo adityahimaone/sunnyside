@@ -644,6 +644,16 @@ does not substitute a wider font and wrap them. Assets icons are now real
 components (7 families, 34 refs, 7 sets, 34 instances per kit). Parity added
 four structural gates; all 25 cases + 3 kits pass.
 
+**v5.1.1 hardening** (after a real Figma run still hugged a footer): every
+HORIZONTAL frame is re-pinned to its measured width *after* children are
+appended, and `stretchRows()` sets `layoutAlign = STRETCH` on horizontal
+children of VERTICAL frames — rows can no longer collapse. `boundFill()` falls
+back to a plain SOLID paint when a variable binding is rejected, so library
+chrome can never render as an empty fill. The board sits at the page origin and
+the sheet is offset below it. The toast/UI are stamped `v5.1.1` and the plugin is
+named `<Brand> — replay v5.1.1`; if the toast does not start with that, Figma is
+running an older imported build — re-import the Plugin ZIP.
+
 ---
 
 ## 5. POST-BUILD OPEN DIALOGUE PROTOCOL

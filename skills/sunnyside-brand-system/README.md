@@ -6,6 +6,31 @@ and an audit that names what it could not verify.
 
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand, Clearing, Porphyry, Jakarta, Bluewater, Vesper, Halation, and Tavola. The method travels; the marks do not.
 
+## v5.1.1: rows that cannot collapse, chrome that cannot disappear
+
+A real run of the v5.1.0 plugin still showed two defects on canvas: modal
+action buttons left-aligned in a footer that hugged its content, and a component
+library that read as dark-on-dark with no section chrome.
+
+- **Rows are forced, not inferred.** After children are appended, every
+  HORIZONTAL frame is re-pinned to the browser's measured width
+  (`primaryAxisSizingMode/layoutSizingHorizontal = FIXED` + `resize`) and its
+  alignment re-applied. A new `stretchRows()` pass walks every VERTICAL
+  auto-layout frame and sets `layoutAlign = STRETCH` on horizontal children.
+  Causeway: **30 full-width rows**, action groups at 622/444 px.
+- **Chrome cannot vanish.** `boundFill()` now falls back to a plain SOLID paint
+  if a variable binding throws or comes back without a colour — a rejected
+  binding previously produced an empty fill, so the board disappeared against a
+  dark canvas. Library and section frames also gained strokes and a radius.
+- **Library is in page space.** Board sits at the page origin and the sheet is
+  pushed below it (`root.y = boardHeight + 96`), so both are positive-coordinate
+  siblings on the same page instead of a frame floating at negative Y.
+- **Version stamp.** The toast and UI now read `v5.1.1`, and the plugin is named
+  `<Brand> — replay v5.1.1`. If the toast does not start with `v5.1.1`, Figma is
+  running a previously imported build — re-import the sheet's Plugin ZIP.
+- **Verified:** 30 sheets (25 design-system + 2 app + 3 workspace) at **17/17
+  parity gates**, 39/39 unit tests.
+
 ## v5.1.0: excellent layers — nothing blank, nothing wrapped, nothing off-canvas
 
 Fixed the defects measured from `test ds 4.fig` (Causeway + Mullion export) and

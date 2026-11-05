@@ -68,11 +68,15 @@ if (has('check')) {
 
 const plugin = await readFile(join(TEMPLATES, 'figma-replay-plugin.js'), 'utf8')
 const ui = await readFile(join(TEMPLATES, 'figma-replay-ui.html'), 'utf8')
+const pluginVersion = (/const PLUGIN_VERSION = '([^']+)'/.exec(plugin) || [, '0'])[1]
 const safeSeed = seed.replace(/</g, '\\u003c')
-const uiHtml = ui.replace('__BRAND__', () => brand).replace('__MANIFEST__', () => safeSeed)
+const uiHtml = ui
+  .replace('__VERSION__', () => pluginVersion)
+  .replace('__BRAND__', () => brand)
+  .replace('__MANIFEST__', () => safeSeed)
 
 const figmaManifest = {
-  name: `${brand} — replay`,
+  name: `${brand} — replay v${pluginVersion}`,
   id: `${slug}-replay`,
   api: '1.0.0',
   main: 'code.js',

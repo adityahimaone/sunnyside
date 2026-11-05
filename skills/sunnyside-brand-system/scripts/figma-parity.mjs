@@ -181,10 +181,16 @@ const rerunReport = rerun.log.uiMessages.at(-1)?.report || {}
 const pageMeta = run.pages.filter((p) => /^\d{2} · /.test(p.name)).map((p) => {
   const kids = p.children || []
   const lib = kids.find((c) => c.name === '◆ Component Library')
-  return { name: p.name, extra: Math.max(0, kids.length - (lib ? 2 : 1)), libraryY: lib ? Number(lib.y) : null }
+  const root = kids.find((c) => c.name !== '◆ Component Library')
+  return {
+    name: p.name,
+    extra: Math.max(0, kids.length - (lib ? 2 : 1)),
+    libraryY: lib ? Number(lib.y) : null,
+    rootY: root ? Number(root.y) : null,
+  }
 })
 const detachedFrames = pageMeta.reduce((a, p) => a + p.extra, 0)
-const librariesAbove = pageMeta.filter((p) => p.libraryY !== null && p.libraryY < 0).length
+const librariesAbove = pageMeta.filter((p) => p.libraryY !== null && p.rootY !== null && p.libraryY < p.rootY).length
 const wrappedRatio = replay.texts ? replay.wrappedTexts / replay.texts : 0
 const actionWidthOk = spec.actionGroups.length > 0 &&
   spec.actionGroups.every((w, i) => Math.abs((replay.actionGroups[i] ?? 0) - w) <= 2)

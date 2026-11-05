@@ -357,6 +357,8 @@ export function summarise(log, thrown, manifestPath) {
     actionGroupWidth: (() => { const f = log.frames.find((x) => x.name === 'action-group'); return f ? Math.round(f.width) : null })(),
     paddedLabelResize: (() => { const t = log.texts.find((x) => x.name === 'badge'); return t ? t.textAutoResize : null })(),
     libraryY: (() => { const f = log.frames.find((x) => x.name === '◆ Component Library'); return f ? Math.round(f.y) : null })(),
+    sheetY: (() => { const f = log.frames.find((x) => x.name === 'figma-sheet'); return f ? Math.round(f.y) : null })(),
+    stretchedRows: log.frames.concat(log.components).filter((n) => n.layoutAlign === 'STRETCH').length,
     skippedSheets: Number((/skipped (\d+) sheet/.exec(summary) || [])[1] || 0),
     vectors: log.vectors.length,
     variables: log.variables.length,
@@ -406,7 +408,11 @@ export function smokeProblems(report, manifestPath) {
     if (report.componentDescriptions < 1) problems.push('components have no descriptions')
     if (report.actionGroupWidth !== 1136) problems.push('horizontal action group hugged its width (' + report.actionGroupWidth + ' instead of 1136) — modal footers will not span the card')
     if (report.paddedLabelResize !== 'WIDTH_AND_HEIGHT') problems.push('a padded one-line label was treated as wrapped (' + report.paddedLabelResize + ') — button/badge text will break onto two lines')
-    if (report.libraryY === null || report.libraryY >= 0) problems.push('component library is not placed above the sheet (y=' + report.libraryY + ')')
+    if (report.libraryY === null) problems.push('no component library board was created')
+    else if (report.sheetY !== null && report.libraryY >= report.sheetY) {
+      problems.push('component library is not above the sheet (library y=' + report.libraryY + ', sheet y=' + report.sheetY + ')')
+    }
+    if (report.stretchedRows < 1) problems.push('no horizontal row was stretched to full width')
     const caption = report.textSizes.find((t) => t.name === 'caption')
     if (!caption) problems.push('caption fixture text was not created')
     else if (Number(caption.size) < 12) problems.push('minFontSize did not raise the 10px caption (got ' + caption.size + ')')
