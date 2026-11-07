@@ -163,6 +163,8 @@ export function readTokens(path) {
     idea: meta.idea ?? meta.essence ?? meta.oneSentence ?? t.idea ?? t.claim ?? t.description ?? '',
     oneSentence: meta.oneSentence ?? t.oneSentence ?? meta.promise ?? meta.essence ?? meta.idea ?? t.idea ?? t.claim ?? t.description ?? '',
     archetype: meta.archetype ?? t.archetype ?? (Array.isArray(t.ramps) && t.ramps.length > 2 ? 'multi-ramp' : t.ramp ? 'ui-ramp' : 'minimal'),
+    meta,
+    raw: t,
     theme,
     sections: t.sections ?? meta.sections ?? [],
     primitives,

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
  * field-forge.mjs — Generate token-locked SVG hero backgrounds, gradient meshes,
- * dither/grain/grid overlays, and scrim/duotone CSS recipes from tokens.json.
+ * dither/grain/grid overlays, risograph registration, and scrim/duotone CSS recipes from tokens.json.
  *
  * Zero dependencies. Runs in <100ms.
  *
  * Usage:
- *   node scripts/field-forge.mjs --slug porphyry [--recipe mesh|bands|grain|dither|glass|grid|all] [--root .]
+ *   node scripts/field-forge.mjs --slug porphyry [--recipe mesh|bands|grain|dither|glass|grid|riso|bayer|scrim|anatomy|all] [--root .]
  *   node scripts/field-forge.mjs --tokens features/jakarta/tokens.json --recipe bands --out public/brand/jakarta
  *   node scripts/field-forge.mjs --list
  */
@@ -16,7 +16,7 @@ import { join, resolve } from 'node:path'
 
 import { findTokens, readTokens } from './lib/tokens.mjs'
 
-const RECIPES = ['mesh', 'bands', 'grain', 'dither', 'glass', 'grid']
+const RECIPES = ['mesh', 'bands', 'grain', 'dither', 'glass', 'grid', 'riso', 'bayer', 'scrim', 'anatomy']
 
 const args = process.argv.slice(2)
 const flag = (name, fallback) => {
@@ -37,7 +37,7 @@ const recipeArg = flag('recipe', 'all')
 
 if (!slugArg && !tokensArg) {
   console.error(`Usage:
-  node scripts/field-forge.mjs --slug <slug> [--recipe mesh|bands|grain|dither|glass|grid|all] [--root .]
+  node scripts/field-forge.mjs --slug <slug> [--recipe mesh|bands|grain|dither|glass|grid|riso|bayer|scrim|anatomy|all] [--root .]
   node scripts/field-forge.mjs --tokens <path/to/tokens.json> [--recipe all] [--out public/brand/<slug>]`)
   process.exit(1)
 }
@@ -172,7 +172,7 @@ const generators = {
   },
 
   /**
-   * 4. DITHER — Ordered 4×4 Bayer dither dissolve matrix (Huginn / Hachure / Vitrine style)
+   * 4. DITHER — Ordered 4×4 Bayer dither dissolve matrix (Huginn / Vitrine style)
    */
   dither() {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${norm.name} ordered Bayer dither field">
@@ -199,7 +199,7 @@ const generators = {
   },
 
   /**
-   * 5. GLASS — 158deg sea-glass / painted-glass pane + specular top edge (Strand / Clearing style)
+   * 5. GLASS — 158deg sea-glass pane + specular top edge (Strand / Clearing style)
    */
   glass() {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${norm.name} glass and atmospheric horizon field">
@@ -223,7 +223,7 @@ const generators = {
   },
 
   /**
-   * 6. GRID — Architectural / harbor survey hairline grid + crosshair registration ticks (Ledger / Hachure style)
+   * 6. GRID — Architectural hairline survey grid + registration ticks (Ledger style)
    */
   grid() {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${norm.name} architectural survey grid field">
@@ -240,6 +240,106 @@ const generators = {
   <rect width="1600" height="1000" fill="${ground}"/>
   <rect width="1600" height="1000" fill="url(#${slug}-majgrid)"/>
   <line x1="0" y1="200" x2="1600" y2="200" stroke="${signal}" stroke-width="1" stroke-opacity="0.35"/>
+</svg>\n`
+  },
+
+  /**
+   * 7. RISO — Dual-drum misregistration plate (Riso Co. style)
+   */
+  riso() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${norm.name} dual-drum risograph field">
+  <defs>
+    <filter id="${slug}-riso-grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.05 0" in="noise" result="grain"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="${ground}"/>
+  <g transform="translate(-2, 1.5)" opacity="0.88">
+    <circle cx="800" cy="500" r="380" fill="${signal}" fill-opacity="0.22"/>
+    <rect x="240" y="160" width="1120" height="680" rx="12" fill="none" stroke="${signal}" stroke-width="3" stroke-dasharray="12 6"/>
+  </g>
+  <g transform="translate(2, -1.5)" opacity="0.92" style="mix-blend-mode: multiply;">
+    <circle cx="800" cy="500" r="380" fill="none" stroke="${ink}" stroke-width="3"/>
+    <rect x="240" y="160" width="1120" height="680" rx="12" fill="none" stroke="${ink}" stroke-width="3"/>
+  </g>
+  <rect width="1600" height="1000" filter="url(#${slug}-riso-grain)"/>
+</svg>\n`
+  },
+
+  /**
+   * 8. BAYER — Crisp 4x4 / 8x8 ordered Bayer matrix + halftone dot screen
+   */
+  bayer() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${norm.name} crisp ordered Bayer matrix field">
+  <defs>
+    <pattern id="${slug}-bayer-4x4" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="${ground}"/>
+      <rect x="0" y="0" width="2" height="2" fill="${ink}" fill-opacity="0.16"/>
+      <rect x="4" y="0" width="2" height="2" fill="${signal}" fill-opacity="0.24"/>
+      <rect x="2" y="2" width="2" height="2" fill="${ink}" fill-opacity="0.10"/>
+      <rect x="6" y="2" width="2" height="2" fill="${wash}" fill-opacity="0.30"/>
+      <rect x="0" y="4" width="2" height="2" fill="${wash}" fill-opacity="0.30"/>
+      <rect x="4" y="4" width="2" height="2" fill="${ink}" fill-opacity="0.14"/>
+      <rect x="2" y="6" width="2" height="2" fill="${signal}" fill-opacity="0.20"/>
+      <rect x="6" y="6" width="2" height="2" fill="${ink}" fill-opacity="0.18"/>
+    </pattern>
+    <pattern id="${slug}-halftone-dots" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="1.75" fill="${signal}" fill-opacity="0.14"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="${ground}"/>
+  <rect width="1600" height="1000" fill="url(#${slug}-bayer-4x4)"/>
+  <rect width="1600" height="1000" fill="url(#${slug}-halftone-dots)"/>
+</svg>\n`
+  },
+
+  /**
+   * 9. SCRIM — Luminance-adaptive directional scrim
+   */
+  scrim() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${norm.name} luminance adaptive directional scrim">
+  <defs>
+    <linearGradient id="${slug}-directional-scrim" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="${ground}" stop-opacity="0.98"/>
+      <stop offset="38%" stop-color="${ground}" stop-opacity="0.90"/>
+      <stop offset="68%" stop-color="${ground}" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="${ground}" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="${slug}-vertical-scrim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="${plate}" stop-opacity="0.80"/>
+      <stop offset="65%" stop-color="${ground}" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="${ground}" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="${ground}"/>
+  <rect width="1600" height="1000" fill="url(#${slug}-vertical-scrim)"/>
+  <rect width="1600" height="1000" fill="url(#${slug}-directional-scrim)"/>
+</svg>\n`
+  },
+
+  /**
+   * 10. ANATOMY — Technical dimensional grid + registration crosshairs
+   */
+  anatomy() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${norm.name} technical dimensional grid and crosshair registration field">
+  <defs>
+    <pattern id="${slug}-tech-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="${ink}" stroke-width="0.55" stroke-opacity="0.08"/>
+      <circle cx="0" cy="0" r="0.75" fill="${signal}" fill-opacity="0.45"/>
+    </pattern>
+    <pattern id="${slug}-tech-major" width="160" height="160" patternUnits="userSpaceOnUse">
+      <rect width="160" height="160" fill="url(#${slug}-tech-grid)"/>
+      <path d="M 160 0 L 0 0 0 160" fill="none" stroke="${ink}" stroke-width="0.85" stroke-opacity="0.18"/>
+      <path d="M -8 0 L 8 0 M 0 -8 L 0 8" fill="none" stroke="${signal}" stroke-width="1.2" stroke-opacity="0.6"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="${ground}"/>
+  <rect width="1600" height="1000" fill="url(#${slug}-tech-major)"/>
+  <line x1="80" y1="0" x2="80" y2="1000" stroke="${signal}" stroke-width="0.55" stroke-dasharray="4 4" stroke-opacity="0.4"/>
+  <line x1="1520" y1="0" x2="1520" y2="1000" stroke="${signal}" stroke-width="0.55" stroke-dasharray="4 4" stroke-opacity="0.4"/>
+  <line x1="0" y1="120" x2="1600" y2="120" stroke="${signal}" stroke-width="0.55" stroke-dasharray="4 4" stroke-opacity="0.4"/>
+  <line x1="0" y1="880" x2="1600" y2="880" stroke="${signal}" stroke-width="0.55" stroke-dasharray="4 4" stroke-opacity="0.4"/>
 </svg>\n`
   },
 }
@@ -260,7 +360,7 @@ for (const r of selected) {
   written.push(file)
 }
 
-// Also write a ready-to-use CSS helper file with scrim, duotone photo filter, and background utility classes
+// Write ready-to-use CSS helper file with scrim, duotone, and background utility classes
 const defaultRecipe = selected[0] || 'mesh'
 const cssContent = `/* ${norm.name} — Field, Gradient, Scrim & Duotone Surface Recipes
    Generated by scripts/field-forge.mjs from tokens.json (${ns}). */
@@ -284,6 +384,16 @@ const cssContent = `/* ${norm.name} — Field, Gradient, Scrim & Duotone Surface
   );
 }
 
+/* Luminance-adaptive directional hero scrim */
+.heroScrimDirectional {
+  background: linear-gradient(
+    96deg,
+    var(${ns}surface-page, ${ground}) 96%,
+    color-mix(in oklab, var(${ns}surface-page, ${ground}) 90%, transparent) 45%,
+    transparent 72%
+  );
+}
+
 /* Solid reading plate — paragraphs >= 3 lines must sit on an opaque plate */
 .readingPlate {
   background: var(${ns}surface-plate, ${plate});
@@ -291,7 +401,7 @@ const cssContent = `/* ${norm.name} — Field, Gradient, Scrim & Duotone Surface
   border: 1px solid color-mix(in oklab, var(${ns}text-primary, ${ink}) 12%, transparent);
 }
 
-/* Token-locked duotone photo treatment (use on stock photography from assets.mjs) */
+/* Token-locked duotone photo treatment */
 .photoDuotone {
   position: relative;
   isolation: isolate;

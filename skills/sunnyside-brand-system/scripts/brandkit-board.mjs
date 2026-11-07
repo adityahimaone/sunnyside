@@ -254,7 +254,7 @@ const html = `<!doctype html>
     <div class="panel p-rules">
       <div style="display:flex;justify-content:space-between;opacity:0.5;" class="mono">
         <span>ARCHITECTURAL LAWS</span>
-        <span>GATE V4.2</span>
+        <span>GATE V6.0</span>
       </div>
       <ul>
         <li><b>Field + Reading Plate.</b> Imagery carries display &amp; mark; body copy sits on solid/blurred plates.</li>
@@ -264,7 +264,7 @@ const html = `<!doctype html>
       </ul>
       <div style="display:flex;justify-content:space-between;opacity:0.45;" class="mono">
         <span>${(meta.name || slug).toUpperCase()}</span>
-        <span>SUNNYSIDE ENGINE V4.2</span>
+        <span>SUNNYSIDE ENGINE V6.0</span>
       </div>
     </div>
   </div>

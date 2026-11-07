@@ -1,0 +1,178 @@
+/* ─────────────────────────────────────────────────────────────
+   <Name> — <one line about the material>
+   Replace <slug> and the values. Keep the three layers in this order.
+
+   Scoped, never :root: the host app already owns the shadcn role tokens, and a
+   dashboard case must not repaint the site around it.
+   ───────────────────────────────────────────────────────────── */
+
+[data-<slug>] {
+  /* Layer 1 — primitive. The material, named once. */
+  --xx-000: oklch(1 0 0);
+  --xx-050: oklch(0.977 0.003 260);
+  --xx-100: oklch(0.962 0.004 258);
+  --xx-150: oklch(0.944 0.005 260);
+  --xx-200: oklch(0.885 0.006 264);
+  --xx-300: oklch(0.812 0.007 264);
+  --xx-400: oklch(0.705 0.008 264);
+  --xx-500: oklch(0.532 0.011 264);
+  --xx-700: oklch(0.372 0.008 264);
+  --xx-900: oklch(0.205 0.006 285.9);
+  --xx-950: oklch(0.145 0.006 265);
+  --xx-signal: oklch(0.548 0.216 262.4);
+
+  /* Layer 2 — semantic. The job, never the material. */
+  --radius: 0.75rem;
+
+  --background: var(--xx-100);
+  --foreground: var(--xx-900);
+  --card: var(--xx-000);
+  --card-foreground: var(--xx-900);
+  --popover: var(--xx-050);
+  --popover-foreground: var(--xx-900);
+  --primary: var(--xx-900);
+  --primary-foreground: var(--xx-050);
+  --secondary: var(--xx-150);
+  --secondary-foreground: var(--xx-700);
+  --muted: var(--xx-150);
+  --muted-foreground: var(--xx-500);
+  --accent: var(--xx-150);
+  --accent-foreground: var(--xx-700);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: var(--xx-200);
+  --input: var(--xx-200);
+  --ring: var(--xx-500);
+
+  /* One signal colour. State only. */
+  --signal: var(--xx-signal);
+  --signal-ink: oklch(0.472 0.19 262);
+
+  /* Monochrome data ramp: light surface reads dark → light. */
+  --chart-1: oklch(0.272 0.007 264);
+  --chart-2: oklch(0.442 0.01 264);
+  --chart-3: oklch(0.612 0.009 264);
+  --chart-4: oklch(0.762 0.008 264);
+  --chart-5: oklch(0.885 0.006 264);
+
+  --ambient: oklch(0.62 0.03 258 / 0.16);
+
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  color-scheme: light;
+}
+
+/* next-themes puts .dark on <html>; answer to both an ancestor and own class. */
+.dark [data-<slug>],
+[data-<slug>].dark {
+  --background: oklch(0.155 0.006 265);
+  --foreground: var(--xx-100);
+  --card: oklch(0.215 0.006 265);
+  --card-foreground: var(--xx-100);
+  --popover: oklch(0.195 0.006 265);
+  --popover-foreground: var(--xx-100);
+  --primary: var(--xx-100);
+  --primary-foreground: var(--xx-900);
+  --secondary: oklch(0.262 0.007 265);
+  --secondary-foreground: var(--xx-100);
+  --muted: oklch(0.262 0.007 265);
+  --muted-foreground: oklch(0.702 0.009 264);
+  --accent: oklch(0.272 0.007 265);
+  --accent-foreground: var(--xx-100);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: var(--xx-400);
+
+  --chart-1: oklch(0.962 0.004 258);
+  --chart-2: oklch(0.802 0.007 264);
+  --chart-3: oklch(0.632 0.009 264);
+  --chart-4: oklch(0.472 0.008 264);
+  --chart-5: oklch(0.342 0.007 264);
+
+  --ambient: oklch(0.62 0.05 258 / 0.22);
+  --signal-ink: oklch(0.74 0.15 262);
+
+  color-scheme: dark;
+}
+
+@layer base {
+  /* Tailwind v4 defaults `border` to currentColor; inside the scope it means the hairline. */
+  [data-<slug>] *,
+  [data-<slug>] *::before,
+  [data-<slug>] *::after {
+    border-color: var(--border);
+  }
+}
+
+@layer components {
+  /* Layer 3 — the surface recipe. One panel, one float. */
+  [data-<slug>] .glass-panel {
+    background-color: color-mix(in oklab, var(--card) 65%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgb(0 0 0 / 0.06);
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.15);
+  }
+
+  .dark [data-<slug>] .glass-panel,
+  [data-<slug>].dark .glass-panel {
+    border-color: rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  }
+
+  [data-<slug>] .glass-float {
+    background-color: color-mix(in oklab, var(--popover) 82%, transparent);
+    backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgb(0 0 0 / 0.07);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.18),
+      0 18px 40px -24px rgb(9 9 11 / 0.35);
+  }
+
+  /* Hover is a 2% ink veil, never a background swap. */
+  [data-<slug>] .panel-hover {
+    position: relative;
+    isolation: isolate;
+  }
+  [data-<slug>] .panel-hover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: transparent;
+    transition: background-color 200ms ease;
+    pointer-events: none;
+  }
+  [data-<slug>] .panel-hover:hover::after {
+    background-color: color-mix(in oklab, var(--foreground) 2%, transparent);
+  }
+
+  /* The crisp grid: 1px rules at 96px, barely there. */
+  [data-<slug>] .grid-field {
+    background-image:
+      linear-gradient(to right, var(--border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+    background-size: 96px 96px;
+    opacity: 0.22;
+    mask-image: radial-gradient(70% 60% at 100% 0%, #000 0%, transparent 78%);
+  }
+}
+
+@layer utilities {
+  [data-<slug>] .fig {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-<slug>] *,
+  [data-<slug>] *::before,
+  [data-<slug>] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

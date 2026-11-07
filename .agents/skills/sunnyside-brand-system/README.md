@@ -1,10 +1,19 @@
 # sunnyside-brand-system
 
-An installable agent skill for shipping **brand kits** and **design systems** from a brief:
-one idea, a mark family, tokens, a board, an immersive proof page, Figma and DESIGN.md exports,
-and an audit that names what it could not verify.
+An installable agent skill for shipping **brand kits**, **design systems**, and **multi-effect procedural surfaces** from a brief:
+one idea, one mechanism, a mark family, tokens, a 6-panel board, an unnumbered-hero showcase page, Figma and DESIGN.md exports,
+and static quality gates.
 
 Built from shipped cases (listed in `references/case-evidence.md`), starting with Sunnyside, Vitrine, Huginn, Riso Co., Hachure, Cove, Strand, Clearing, Porphyry, Jakarta, Bluewater, Vesper, Halation, and Tavola. The method travels; the marks do not.
+
+## v6.0.0: Unified Declarative Forge, Multi-Effect Engine, CVD & Anti-AI Reflex Gates
+
+- **Unified Declarative Forge (`scripts/forge.mjs`)**: Consolidates ad-hoc scripting into a deterministic, single-pass pipeline reading `<slug>.brand.json` and emitting tokens, CSS, SVGs, 6-mark companion cast, DESIGN.md, and 3000×2250 6-panel boards in under 2 seconds.
+- **Multi-Effect Surface Engine (`scripts/field-forge.mjs`)**: Adds 4 new procedural visual surface recipes (`riso` dual-drum misregistration, `bayer` ordered matrix + halftone, `scrim` luminance-adaptive directional wash, and `anatomy` Apple-style technical dimensional grids) alongside `mesh`, `bands`, `grain`, `dither`, `glass`, and `grid`.
+- **CVD (Color Vision Deficiency) Safety Gate (`scripts/gates.mjs`)**: Mathematically simulates Deuteranopia & Protanopia in OKLab space, requiring $\Delta E_{\text{OK}} \ge 0.045$ across chromatic accent, danger, and status pairs.
+- **Reflex Anti-AI-Default & Scope Parity Gate**: Enforces single- vs dual-scope parity (rejecting phantom night blocks or broken toggles), rejects generic AI-default display fonts (`Inter`, `Roboto`, `Arial`), and ensures vector marks are text-free.
+- **Static Gate `--self-test`**: Built-in synthetic test verifying that all static quality gates reliably catch target violations.
+- **Downstream Skill Suite Handoff**: Connects directly to `sunnyside-taste-ui` (landing pages & web apps), `sunnyside-components` (8-state UI kit & dimensional specs), and `sunnyside-review` (purpose-first token mapping & anti-slop review).
 
 ## v5.2.0: sheets that stay whole, a library that fits, round circles, Doop mode
 

@@ -80,19 +80,24 @@ test('brand-forge supports all new constructed & drawn archetypes cleanly', () =
   }
 })
 
-test('field-forge generates all 6 SVG background fields + CSS helper from tokens.json', () => {
+test('field-forge generates all 10 SVG background fields + CSS helper from tokens.json', () => {
   const r = tmp()
   const tf = put(r, 'features/tidewater/tokens.json', sampleTokens)
   const outDir = join(r, 'public/brand/tidewater')
   const res = run('field-forge.mjs', ['--tokens', tf, '--recipe', 'all', '--out', outDir])
   assert.equal(res.code, 0, res.err || res.out)
 
-  for (const recipe of ['mesh', 'bands', 'grain', 'dither', 'glass', 'grid']) {
+  const allRecipes = ['mesh', 'bands', 'grain', 'dither', 'glass', 'grid', 'riso', 'bayer', 'scrim', 'anatomy']
+  for (const recipe of allRecipes) {
     const svgPath = join(outDir, `field-${recipe}.svg`)
     assert.ok(existsSync(svgPath), `missing field-${recipe}.svg`)
     const content = readFileSync(svgPath, 'utf8')
     assert.match(content, /viewBox="0 0 1600 1000"/)
-    assert.match(content, /#c84b28/i)
+    if (recipe === 'scrim') {
+      assert.match(content, /#f6f1e7/i)
+    } else {
+      assert.match(content, /#c84b28/i)
+    }
   }
 
   const cssPath = join(outDir, 'tidewater-field.css')
@@ -100,4 +105,54 @@ test('field-forge generates all 6 SVG background fields + CSS helper from tokens
   const css = readFileSync(cssPath, 'utf8')
   assert.match(css, /\.fieldScrim/)
   assert.match(css, /\.photoDuotone/)
+})
+
+test('forge.mjs declarative pipeline executes single-pass from a brand.json spec', () => {
+  const r = tmp()
+  const specObj = {
+    name: 'Tavola',
+    slug: 'tavola',
+    namespace: 'tv',
+    polarity: 'light',
+    synthesis: {
+      surface: 'Paper & ink',
+      essence: 'Coastal lunch',
+      track: 'constructed',
+    },
+    primitives: [
+      { name: 'ivory', value: '#FAF6EE', role: 'ground' },
+      { name: 'terrace', value: '#F2ECE0', role: 'plate' },
+      { name: 'espresso', value: '#221A15', role: 'ink' },
+      { name: 'terracotta', value: '#D85A38', role: 'accent' },
+    ],
+    cast: [
+      { id: 'arc', name: 'Arc', d: 'M12 44a20 20 0 0 1 40 0h-8a12 12 0 0 0-24 0h-8z' },
+      { id: 'spark', name: 'Spark', d: 'M32 10l5 17 17 5-17 5-5 17-5-17-17-5 17-5 5-17z' },
+      { id: 'slab', name: 'Slab', d: 'M10 40h44v8H10z' },
+      { id: 'beam', name: 'Beam', d: 'M14 14l36 36-6 6L8 20z' },
+      { id: 'keystone', name: 'Keystone', d: 'M32 12l18 20-18 20-18-20z' },
+      { id: 'dish', name: 'Dish', d: 'M8 20h20v20H8zm28 0h20v20H36zm-14 24h20v16H22z' },
+    ],
+  }
+  const specFile = put(r, 'brand/tavola.brand.json', specObj)
+  const res = run('forge.mjs', ['--spec', specFile, '--root', r])
+  assert.equal(res.code, 0, res.err || res.out)
+
+  // Verify marks exist
+  assert.ok(existsSync(join(r, 'public/brand/tavola/mark.svg')))
+  assert.ok(existsSync(join(r, 'public/brand/tavola/mark-compact.svg')))
+  assert.ok(existsSync(join(r, 'public/brand/tavola/wordmark.svg')))
+  assert.ok(existsSync(join(r, 'public/brand/tavola/cast/arc.svg')))
+  assert.ok(existsSync(join(r, 'public/brand/tavola/cast/dish.svg')))
+
+  // Verify tokens & CSS
+  assert.ok(existsSync(join(r, 'features/tavola/tokens.json')))
+  assert.ok(existsSync(join(r, 'features/tavola/tavola-tokens.css')))
+  const css = readFileSync(join(r, 'features/tavola/tavola-tokens.css'), 'utf8')
+  assert.match(css, /--tv-ivory/)
+  assert.match(css, /--tv-terracotta/)
+  assert.match(css, /--tv-text-primary:\s*var\(--tv-espresso\)/)
+  assert.match(css, /--tv-accent:\s*var\(--tv-terracotta\)/)
+  // Polarity was single light -> no night block
+  assert.ok(!css.includes('night'))
 })

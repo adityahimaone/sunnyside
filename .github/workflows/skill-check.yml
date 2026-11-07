@@ -1,21 +1,20 @@
 name: skill-check
 
-# Guards the sunnyside-brand-system skill: the .agents/ mirror must match, the scripts' tests must
-# pass, and one known-good case must still clear every gate (so a change to a gate that silently
-# breaks it is caught on real data, not just on fixtures).
+# Guards the sunnyside-* skill suite: the .agents/ mirror must match, the scripts' tests must
+# pass, static gates must clear self-test, and one known-good case must still clear every gate.
 
 on:
   push:
     paths:
-      - 'skills/sunnyside-brand-system/**'
-      - '.agents/skills/sunnyside-brand-system/**'
+      - 'skills/**'
+      - '.agents/skills/**'
       - 'features/**'
       - 'public/brand/**'
       - '.github/workflows/skill-check.yml'
   pull_request:
     paths:
-      - 'skills/sunnyside-brand-system/**'
-      - '.agents/skills/sunnyside-brand-system/**'
+      - 'skills/**'
+      - '.agents/skills/**'
       - 'features/**'
       - 'public/brand/**'
       - '.github/workflows/skill-check.yml'
@@ -28,12 +27,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Mirror is in sync (fix with skills/sunnyside-brand-system/scripts/sync-skill.sh)
-        run: diff -rq skills/sunnyside-brand-system .agents/skills/sunnyside-brand-system
+      - name: Mirrors are in sync (fix with scripts/sync-all-skills.sh)
+        run: |
+          diff -rq skills/sunnyside-brand-system .agents/skills/sunnyside-brand-system
+          diff -rq skills/sunnyside-taste-ui .agents/skills/sunnyside-taste-ui
+          diff -rq skills/sunnyside-components .agents/skills/sunnyside-components
+          diff -rq skills/sunnyside-review .agents/skills/sunnyside-review
+          diff -rq skills/sunnyside-dashboard-system .agents/skills/sunnyside-dashboard-system
+          diff -rq skills/sunnyside-print .agents/skills/sunnyside-print
+          diff -rq skills/sunnyside-thumbnail .agents/skills/sunnyside-thumbnail
+          diff -rq skills/implement-brand-system .agents/skills/implement-brand-system
       - name: Unit tests
         run: node --test "skills/sunnyside-brand-system/scripts/test/*.test.mjs"
-      # Porphyry and the other generated systems live in the separate
-      # design-system repo now; sunnyside is the known-good case that still
-      # ships here, so it is the one this guard measures.
+      - name: Static gates self-test
+        run: node skills/sunnyside-brand-system/scripts/gates.mjs --self-test
+      # Sunnyside is the known-good case that ships in this repo
       - name: Known-good case still clears every gate
         run: node skills/sunnyside-brand-system/scripts/gates.mjs --slug sunnyside

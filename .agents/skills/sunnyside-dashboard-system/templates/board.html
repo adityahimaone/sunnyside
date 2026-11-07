@@ -1,0 +1,192 @@
+<!doctype html>
+<!--
+  The board — 1500 × 1125, the case thumbnail.
+
+  Three edits: {{NAME}} / {{SYSTEM}} / {{STATEMENT}} in the markup, the --xx-*
+  ramp in :root, and the <img> src. Then render at 2× and downscale:
+
+    node -e "…"  (or any screenshot tool)
+    sips -Z 1500 board.png
+
+  Why 1500 × 1125: it is the size every other case board uses, so the library
+  grid crops them identically.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --xx-000: oklch(1 0 0);
+    --xx-050: oklch(0.977 0.003 260);
+    --xx-100: oklch(0.962 0.004 258);
+    --xx-150: oklch(0.944 0.005 260);
+    --xx-200: oklch(0.885 0.006 264);
+    --xx-300: oklch(0.812 0.007 264);
+    --xx-400: oklch(0.705 0.008 264);
+    --xx-500: oklch(0.532 0.011 264);
+    --xx-700: oklch(0.372 0.008 264);
+    --xx-900: oklch(0.205 0.006 285.9);
+    --xx-signal: oklch(0.548 0.216 262.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1500px; height: 1125px; }
+  body {
+    font-family: 'Geist', system-ui, sans-serif;
+    background: var(--xx-100);
+    color: var(--xx-900);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    position: relative;
+  }
+  /* One static ambient wash, top-right. */
+  body::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(46rem 30rem at 100% 0%, oklch(0.62 0.03 258 / 0.20), transparent 68%),
+      radial-gradient(30rem 22rem at 88% 6%, color-mix(in oklab, var(--xx-signal) 9%, transparent), transparent 72%);
+  }
+  .sheet { position: relative; padding: 56px 64px 48px; height: 100%; display: flex; flex-direction: column; }
+  .eyebrow { font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--xx-500); }
+
+  header { display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .tile { width: 44px; height: 44px; border-radius: 10px; background: var(--xx-900); color: var(--xx-050); display: grid; place-items: center; }
+  .wordmark { font-size: 26px; font-weight: 500; letter-spacing: -.02em; }
+  .sys { font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--xx-500); }
+
+  .statement { margin-top: 34px; font-size: 58px; line-height: 1.02; letter-spacing: -.035em; font-weight: 600; max-width: 1180px; }
+  .statement span { color: var(--xx-500); }
+
+  .grid { margin-top: 36px; display: grid; grid-template-columns: 1.35fr 1fr; gap: 26px; flex: 1; min-height: 0; }
+
+  .panel {
+    background: color-mix(in oklab, var(--xx-000) 65%, transparent);
+    backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgb(0 0 0 / 0.06);
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.15);
+    border-radius: 14px;
+  }
+
+  .shot { overflow: hidden; display: flex; flex-direction: column; }
+  .shot img { width: 100%; flex: 1; min-height: 0; object-fit: cover; object-position: top center; display: block; }
+  .shot .cap { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-top: 1px solid rgb(0 0 0 / .07); font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--xx-500); }
+
+  .right { display: flex; flex-direction: column; justify-content: space-between; gap: 16px; min-height: 0; }
+
+  .marks { display: flex; align-items: flex-end; gap: 26px; padding: 18px 20px; }
+  .marks .item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .marks .item span { font-family: 'Geist Mono', monospace; font-size: 9px; color: var(--xx-500); }
+  .marks .note { margin-left: 8px; font-size: 12px; line-height: 1.5; color: var(--xx-500); max-width: 220px; }
+
+  .ramp { padding: 18px 20px; }
+  .ramp .row { display: flex; gap: 6px; margin-top: 12px; }
+  .swatch { flex: 1; height: 46px; border-radius: 7px; border: 1px solid var(--xx-200); }
+  .ramp .labels { display: flex; gap: 6px; margin-top: 8px; }
+  .ramp .labels span { flex: 1; font-family: 'Geist Mono', monospace; font-size: 8.5px; color: var(--xx-500); text-align: center; }
+
+  .type { padding: 18px 20px; display: flex; align-items: flex-end; gap: 22px; }
+  .type .aa { font-size: 62px; line-height: .82; letter-spacing: -.045em; font-weight: 600; }
+  .type .spec { font-family: 'Geist Mono', monospace; font-size: 9.5px; line-height: 1.9; color: var(--xx-500); }
+  .type .spec b { color: var(--xx-900); font-weight: 500; }
+
+  .recipe { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .recipe pre { font-family: 'Geist Mono', monospace; font-size: 10.5px; line-height: 1.85; color: var(--xx-700); white-space: pre-wrap; }
+  .recipe .ratios { display: flex; gap: 18px; font-family: 'Geist Mono', monospace; font-size: 9.5px; letter-spacing: .08em; color: var(--xx-500); }
+
+  footer { margin-top: 24px; display: flex; align-items: baseline; justify-content: space-between; border-top: 1px solid rgb(0 0 0 / .10); padding-top: 14px; }
+  footer .note { font-size: 11px; color: var(--xx-500); }
+  footer .url { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: .12em; color: var(--xx-500); text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <header>
+      <div class="brand">
+        <span class="tile">
+          <!-- {{MARK}} — 22px, currentColor -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="1" y="1" width="8" height="8" rx="2" fill="currentColor"/>
+            <rect x="15" y="1" width="8" height="8" rx="2" fill="currentColor"/>
+            <rect x="1" y="15" width="8" height="8" rx="2" fill="currentColor"/>
+            <rect x="15.5" y="15.5" width="7" height="7" rx="1.75" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </span>
+        <span class="wordmark">{{NAME}}</span>
+      </div>
+      <div class="sys">{{SYSTEM}}</div>
+    </header>
+
+    <h1 class="statement">{{STATEMENT}}</h1>
+
+    <div class="grid">
+      <div class="panel shot">
+        <img src="{{SCREENSHOT}}" alt="{{NAME}} dashboard" />
+        <div class="cap"><span>fig. 01 · {{CAPTION}}</span><span>light / dark</span></div>
+      </div>
+
+      <div class="right">
+        <div class="panel marks">
+          <div class="item">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" style="color: var(--xx-900)"><rect x="1" y="1" width="8" height="8" rx="2" fill="currentColor"/><rect x="15" y="1" width="8" height="8" rx="2" fill="currentColor"/><rect x="1" y="15" width="8" height="8" rx="2" fill="currentColor"/><rect x="15.5" y="15.5" width="7" height="7" rx="1.75" stroke="currentColor" stroke-width="1.5"/></svg>
+            <span>64</span>
+          </div>
+          <div class="item">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color: var(--xx-900)"><rect x="1" y="1" width="8" height="8" rx="2" fill="currentColor"/><rect x="15" y="1" width="8" height="8" rx="2" fill="currentColor"/><rect x="1" y="15" width="8" height="8" rx="2" fill="currentColor"/><rect x="15.5" y="15.5" width="7" height="7" rx="1.75" stroke="currentColor" stroke-width="1.5"/></svg>
+            <span>24</span>
+          </div>
+          <div class="item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color: var(--xx-900)"><rect x="1" y="1" width="8" height="8" rx="2" fill="currentColor"/><rect x="15" y="1" width="8" height="8" rx="2" fill="currentColor"/><rect x="1" y="15" width="8" height="8" rx="2" fill="currentColor"/><rect x="15.5" y="15.5" width="7" height="7" rx="1.75" stroke="currentColor" stroke-width="1.5"/></svg>
+            <span>16</span>
+          </div>
+          <div class="note">{{MARK_NOTE}}</div>
+        </div>
+
+        <div class="panel ramp">
+          <div class="eyebrow">{{RAMP_LABEL}}</div>
+          <div class="row">
+            <div class="swatch" style="background: var(--xx-000)"></div>
+            <div class="swatch" style="background: var(--xx-100)"></div>
+            <div class="swatch" style="background: var(--xx-200)"></div>
+            <div class="swatch" style="background: var(--xx-300)"></div>
+            <div class="swatch" style="background: var(--xx-400)"></div>
+            <div class="swatch" style="background: var(--xx-500)"></div>
+            <div class="swatch" style="background: var(--xx-700)"></div>
+            <div class="swatch" style="background: var(--xx-900)"></div>
+            <div class="swatch" style="background: var(--xx-signal); border-color: var(--xx-signal)"></div>
+          </div>
+          <div class="labels">
+            <span>000</span><span>100</span><span>200</span><span>300</span><span>400</span><span>500</span><span>700</span><span>900</span><span>SIG</span>
+          </div>
+        </div>
+
+        <div class="panel type">
+          <div class="aa">Aa</div>
+          <div class="spec">
+            <b>{{DISPLAY_FACE}}</b> · headings<br />
+            <b>{{MONO_FACE}}</b> · labels, axes<br />
+            <b>0.75rem</b> radius · tabular figures
+          </div>
+        </div>
+
+        <div class="panel recipe">
+          <div class="eyebrow">The glass</div>
+          <pre>background: color-mix(in oklab, var(--card) 65%, transparent);
+backdrop-filter: blur(24px) saturate(140%);
+border: 1px solid rgb(0 0 0 / .06);
+box-shadow: inset 0 1px 0 0 rgb(255 255 255 / .15);</pre>
+          <div class="ratios"><span>FG {{RATIO_FG}}</span><span>MUTED {{RATIO_MUTED}}</span><span>SIGNAL {{RATIO_SIGNAL}}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <span class="note">{{FOOTNOTE}}</span>
+      <span class="url">{{URL}}</span>
+    </footer>
+  </div>
+</body>
+</html>

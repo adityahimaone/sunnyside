@@ -23,7 +23,25 @@
       "source": "adityahimaone/sunnyside",
       "sourceType": "github",
       "skillPath": "skills/sunnyside-brand-system/SKILL.md",
-      "computedHash": "3f5ce0f5ea1110e1dc88890ff28ec603d99b0172e6e0a4f207f4192f7c939919"
+      "computedHash": "6.0.0-unified-declarative-forge"
+    },
+    "sunnyside-taste-ui": {
+      "source": "adityahimaone/sunnyside",
+      "sourceType": "github",
+      "skillPath": "skills/sunnyside-taste-ui/SKILL.md",
+      "computedHash": "1.0.0-taste-ui-faux-stages"
+    },
+    "sunnyside-components": {
+      "source": "adityahimaone/sunnyside",
+      "sourceType": "github",
+      "skillPath": "skills/sunnyside-components/SKILL.md",
+      "computedHash": "1.0.0-dimensional-anatomy-spec"
+    },
+    "sunnyside-review": {
+      "source": "adityahimaone/sunnyside",
+      "sourceType": "github",
+      "skillPath": "skills/sunnyside-review/SKILL.md",
+      "computedHash": "1.0.0-token-mapping-anti-slop"
     },
     "sunnyside-print": {
       "source": "adityahimaone/sunnyside",

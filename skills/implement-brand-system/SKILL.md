@@ -17,8 +17,14 @@ It is the execution half of the flow, built from the same
 [ui-skills audit](../sunnyside-brand-system/references/ui-skills-fusion.md):
 
 ```
-brief → sunnyside-brand-system → approved kit → implement-brand-system → proof page
+brief → sunnyside-brand-system → approved kit → sunnyside-taste-ui / implement-brand-system → proof page
 ```
+
+> [!NOTE]
+> **Sunnyside v6.0 Modular Suite:**
+> - For full landing pages, marketing sites, and product screens with faux-UI stages, see **[`sunnyside-taste-ui`](../sunnyside-taste-ui/SKILL.md)**.
+> - For UI component kits (8-state primitives), Apple-style dimensional anatomy drawings, and component docs, see **[`sunnyside-components`](../sunnyside-components/SKILL.md)**.
+> - `implement-brand-system` remains active as a unified single-page execution reference.
 
 ## Inputs
 

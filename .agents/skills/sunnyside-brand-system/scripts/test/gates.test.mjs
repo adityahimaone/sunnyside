@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { gates, goodCase, put, tmp } from './helpers.mjs'
+import { gates, goodCase, put, run, tmp } from './helpers.mjs'
 
 test('a sound case passes every gate that can run, and exits 0', () => {
   const r = tmp()
@@ -9,6 +9,8 @@ test('a sound case passes every gate that can run, and exits 0', () => {
   assert.equal(g.status('palette'), 'PASS')
   assert.equal(g.status('contrast'), 'PASS')
   assert.equal(g.status('font'), 'PASS')
+  assert.equal(g.status('cvd'), 'PASS')
+  assert.equal(g.status('reflex'), 'PASS')
   assert.equal(g.status('detach'), 'SKIP') // no siblings is a skip with a reason, not a pass
   assert.equal(g.code, 0)
 })
@@ -93,6 +95,78 @@ test('font: a --font-* alias no layout declares fails; declaring it passes', () 
   assert.equal(gates(r, 'x').status('font'), 'FAIL')
   put(r, 'app/layout.tsx', "const z = Zed({ variable: '--font-zed' })")
   assert.equal(gates(r, 'x').status('font'), 'PASS')
+})
+
+test('cvd: collapsing accent and danger under deuteranopia fails', () => {
+  const r = tmp()
+  goodCase(r, 'x', {
+    tokens: {
+      primitives: [
+        { name: 'ink', value: '#111111', role: 'text' },
+        { name: 'paper', value: '#f5f0e6', role: 'ground' },
+        { name: 'accent', value: '#d32f2f', role: 'accent' },
+        { name: 'danger', value: '#388e3c', role: 'danger' },
+      ],
+      contrast: [
+        { label: 'ink on paper', fg: '#111111', bg: '#f5f0e6', ratio: 16.63 },
+        { label: 'accent on paper', fg: '#d32f2f', bg: '#f5f0e6', ratio: 3.2 },
+      ],
+    },
+    css: ':root{--xx-ink:#111111;--xx-paper:#f5f0e6;--xx-accent:#d32f2f;--xx-danger:#388e3c;}',
+  })
+  const d = gates(r, 'x').row('cvd')
+  assert.equal(d.status, 'FAIL')
+  assert.match(d.detail, /collapses under CVD/)
+})
+
+test('reflex: banned AI-default display font fails', () => {
+  const r = tmp()
+  goodCase(r, 'x', {
+    tokens: {
+      type: [{ name: 'display', value: 'Inter, sans-serif' }],
+    },
+  })
+  const d = gates(r, 'x').row('reflex')
+  assert.equal(d.status, 'FAIL')
+  assert.match(d.detail, /AI-default display face/i)
+})
+
+test('reflex: single-scope polarity with night CSS block fails', () => {
+  const r = tmp()
+  goodCase(r, 'x', {
+    tokens: {
+      meta: { name: 'X', namespace: 'xx', polarity: 'light' },
+    },
+    css: ':root{--xx-ink:#111111;--xx-paper:#f5f0e6;--xx-glow:#d9ff43;}\n[data-xx="night"]{--xx-surface-page:#000;}',
+  })
+  const d = gates(r, 'x').row('reflex')
+  assert.equal(d.status, 'FAIL')
+  assert.match(d.detail, /single-scope polarity declared in meta, but night scope block found/i)
+})
+
+test('reflex: banned <text> element in mark-compact.svg fails', () => {
+  const r = tmp()
+  goodCase(r, 'x')
+  put(r, 'public/brand/x/mark-compact.svg', '<svg viewBox="0 0 64 64"><text x="10" y="20">X</text></svg>')
+  const d = gates(r, 'x').row('reflex')
+  assert.equal(d.status, 'FAIL')
+  assert.match(d.detail, /mark-compact\.svg contains banned <text>/i)
+})
+
+test('reflex: incomplete companion cast count fails', () => {
+  const r = tmp()
+  goodCase(r, 'x')
+  put(r, 'public/brand/x/cast/m1.svg', '<svg viewBox="0 0 64 64"><path d="M0 0h64v64H0z"/></svg>')
+  put(r, 'public/brand/x/cast/m2.svg', '<svg viewBox="0 0 64 64"><path d="M0 0h64v64H0z"/></svg>')
+  const d = gates(r, 'x').row('reflex')
+  assert.equal(d.status, 'FAIL')
+  assert.match(d.detail, /cast folder has 2 SVGs; exactly 6 companion marks required/i)
+})
+
+test('self-test flag executes without crashing and exits 0', () => {
+  const res = run('gates.mjs', ['--self-test'])
+  assert.equal(res.code, 0)
+  assert.match(res.out, /Self-test passed/i)
 })
 
 test('a typo in the slug runs nothing and exits 1', () => {

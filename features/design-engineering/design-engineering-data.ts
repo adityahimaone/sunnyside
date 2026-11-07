@@ -501,18 +501,18 @@ export const VITRINE_CASE = {
 export const BRAND_SKILL = {
   name: 'sunnyside-brand-system',
   description:
-    'v3.1 — a fast, evidence-led skill for brand kits and design systems, written from eight shipped cases: one idea, a mark family, a board, tokens, an immersive proof page and an honest audit. One file to read, four references, and the gates that actually failed something.',
+    'v6.0 — unified declarative brand forge, multi-effect procedural surfaces, CVD color-blindness safety gates, anti-AI reflex audits, and downstream taste UI integration. One spec, zero drift, and under 2 seconds execution.',
   install:
     'npx skills add adityahimaone/sunnyside --skill sunnyside-brand-system --full-depth',
   folder: 'skills/sunnyside-brand-system',
   repo: 'https://github.com/adityahimaone/sunnyside/tree/main/skills/sunnyside-brand-system',
   file: 'https://github.com/adityahimaone/sunnyside/blob/main/skills/sunnyside-brand-system/SKILL.md',
   includes: [
-    'SKILL.md — the whole method in one read: fast path, gates, immersive recipes, output contract',
-    '4 references — case evidence from the eight, immersive surfaces, the gates, tokens and docs',
-    'Scripts that earned their place — init, mark forge, cast, score, detach, audit, QA, board',
-    'Templates — specimen, board, marks composition, case page, audit manifest',
-    'Evidence from eight shipped cases, including the two failures the gate caught',
+    'SKILL.md — unified v6.0 declarative pipeline, 28 surface contracts, 8 hero shapes, 5 footer shapes',
+    'scripts/forge.mjs — zero-dependency single-pass declarative brand forge (<2s)',
+    'scripts/field-forge.mjs — 10 procedural surface recipes (riso, bayer, glass, mesh, scrim, anatomy)',
+    'scripts/gates.mjs — static verification suite with CVD ΔE_OK and Anti-AI-default reflex gates',
+    'Downstream suite: sunnyside-taste-ui, sunnyside-components, sunnyside-review',
   ],
 }
 
@@ -680,6 +680,26 @@ export const GAPS = [
 ]
 
 export const AGENT_SKILLS: AgentSkill[] = [
+  {
+    name: 'sunnyside-brand-system',
+    use: 'v6.0 — unified declarative forge, multi-effect surfaces, CVD safety, anti-AI reflex gates.',
+    note: 'Running in this workspace',
+  },
+  {
+    name: 'sunnyside-taste-ui',
+    use: 'Post-brand flagship landing pages, web apps, and living faux-UI product stages.',
+    note: 'Running in this workspace',
+  },
+  {
+    name: 'sunnyside-components',
+    use: '8-state UI component kits, Apple-style dimensional drawings, and sourced docs.',
+    note: 'Running in this workspace',
+  },
+  {
+    name: 'sunnyside-review',
+    use: 'Purpose-first OKLCH token mapping, anti-slop Floor lint, and multi-viewport critique.',
+    note: 'Running in this workspace',
+  },
   {
     name: 'brandkit',
     use: 'Identity boards and symbol systems from a written brief.',

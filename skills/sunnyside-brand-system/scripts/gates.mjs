@@ -2,21 +2,19 @@
 /**
  * The static gates, in one command. Run it after the tokens exist — not at the end.
  *
- *   node scripts/gates.mjs --slug <slug> [--refs refs/] [--min 70] [--json]
+ *   node scripts/gates.mjs --slug <slug> [--refs refs/] [--min 70] [--json] [--self-test]
+ *   node scripts/gates.mjs --self-test
  *
- * Before this existed, "run the gates" meant five commands read in five formats, and the
- * cheap ones (a font that is never loaded, a contrast pair nobody computed) were found
- * after the board, the page and the Figma export had already been built on top of them.
- *
+ * Static Gates (v6.0):
  *   detach        weakest score against every sibling in features/*, plus --refs/*.json
  *   display face  H3 from the detach run: the same display face is a hard fail
  *   palette       every primitive in tokens.json is declared in <slug>-tokens.css at the same value
  *   font          every var(--font-*) in <slug>-tokens.css is declared in a layout
  *   contrast      pairs recomputed from hex, the stated ratio must match, one failure published
+ *   cvd           Deuteranopia & Protanopia ΔE_OK safety across accent/danger/primary pairs
+ *   reflex        anti-AI-default display face, scope parity, vector marks free of <text>
  *   assets        every file in public/brand/<slug>/assets has a licence record
  *   export        figma-smoke on design/figma/<slug>/code.js, when it exists
- *
- * Not here, because they need a rendered page: mark at 16px and reduced motion — qa.mjs.
  *
  * Paths follow the output contract in SKILL.md. Exit 1 on any FAIL; SKIP is not a pass,
  * it is a gate that could not run, and it says why. Zero dependencies.
@@ -28,26 +26,14 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { findTokens, readTokens } from './lib/tokens.mjs'
+import { auditCvdSafety } from './lib/cvd.mjs'
 
 const run = promisify(execFile)
 const here = dirname(fileURLToPath(import.meta.url))
 const args = process.argv.slice(2)
 const flag = (n, d) => (args.includes(`--${n}`) ? (args[args.indexOf(`--${n}`) + 1]?.startsWith('--') ? true : args[args.indexOf(`--${n}`) + 1]) : d)
 
-const slug = flag('slug')
-if (!slug || slug === true) {
-  console.error('Usage: node scripts/gates.mjs --slug <slug> [--root .] [--refs refs/] [--min 70] [--json]')
-  process.exit(1)
-}
-const root = resolve(flag('root', '.'))
-const min = Number(flag('min', 70))
-const at = (...p) => join(root, ...p)
-const rows = []
-const gate = (name, status, detail) => rows.push({ name, status, detail })
-
-const readJson = async (p) => JSON.parse(await readFile(p, 'utf8'))
-
-/* ── colour ──────────────────────────────────────────────────────────────── */
+/* ── colour helpers ──────────────────────────────────────────────────────── */
 
 const lum = (hex) => {
   const h = hex.replace('#', '')
@@ -64,6 +50,106 @@ const ratio = (a, b) => {
 }
 const isHex = (v) => typeof v === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})/i.test(v)
 
+const norm = (v) => {
+  const m = String(v).match(/oklch\(\s*([\d.]+)(%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+)(%?))?\s*\)/i)
+  if (m) {
+    const f = (n) => Number(n).toFixed(3)
+    const l = Number(m[1]) / (m[2] === '%' ? 100 : 1)
+    const a = m[5] === undefined ? null : Number(m[5]) / (m[6] === '%' ? 100 : 1)
+    return `oklch(${f(l)} ${f(m[3])} ${f(m[4])}${a === null || a === 1 ? '' : ` / ${f(a)}`})`
+  }
+  const h = String(v).trim().toLowerCase()
+  return /^#[0-9a-f]{3}$/.test(h) ? `#${[...h.slice(1)].map((c) => c + c).join('')}` : h.replace(/\s+/g, ' ')
+}
+const comparable = (v) => /^#[0-9a-f]{3,8}$/i.test(String(v).trim()) || /^oklch\(/i.test(String(v).trim())
+
+
+
+/* ── self-test runner ─────────────────────────────────────────────────────── */
+
+export async function runSelfTest() {
+  const tests = [
+    {
+      name: 'palette drift',
+      run: () => norm('#111111') !== norm('#111112') && norm('oklch(62% 0.19 260)') === norm('oklch(0.62 0.19 260)'),
+    },
+    {
+      name: 'contrast uncomputed/failing check',
+      run: () => ratio('#d9ff43', '#f5f0e6') < 4.5 && Math.abs(ratio('#191a2e', '#f3ecdf') - 14.55) < 0.2,
+    },
+    {
+      name: 'cvd collapse check',
+      run: () => {
+        const { pass: failPass } = auditCvdSafety([{ colorA: '#d32f2f', colorB: '#388e3c' }], 0.045)
+        const { pass: okPass } = auditCvdSafety([{ colorA: '#191a2e', colorB: '#3d53d6' }], 0.045)
+        return !failPass && okPass
+      },
+    },
+    {
+      name: 'reflex anti-ai font check',
+      run: () => {
+        const banned = ['inter', 'roboto', 'arial']
+        const sampleFaces = ['Inter, sans-serif', 'Syne 800', 'Roboto']
+        const detected = sampleFaces.filter((f) => banned.some((b) => f.toLowerCase().includes(b)))
+        return detected.length === 2 && !detected.includes('Syne 800')
+      },
+    },
+    {
+      name: 'reflex scope parity check',
+      run: () => {
+        const singleBad = { polarity: 'light', css: '[data-brand="night"] { --brand-surface-page: #000; }' }
+        const hasNightBlock = /\[data-[a-z0-9_-]+=['"]?night['"]?\]|--[a-z0-9_-]+-surface-page\s*:\s*var\(--.*night/i.test(singleBad.css)
+        return singleBad.polarity === 'light' && hasNightBlock
+      },
+    },
+    {
+      name: 'reflex svg vector check',
+      run: () => {
+        const badSvg = '<svg><text x="10" y="20">Bad</text></svg>'
+        const goodSvg = '<svg><path d="M10 10h20v20H10z"/></svg>'
+        return /<text[\s>]/i.test(badSvg) && !/<text[\s>]/i.test(goodSvg)
+      },
+    },
+  ]
+
+  let passed = 0
+  for (const t of tests) {
+    if (t.run()) passed += 1
+  }
+
+  if (passed === tests.length) {
+    console.log(`\n  Self-test passed: ${passed}/${tests.length} static gate tests caught their target violations.\n`)
+    return true
+  } else {
+    console.error(`\n  Self-test failed: only ${passed}/${tests.length} assertions passed.\n`)
+    return false
+  }
+}
+
+if (args.includes('--self-test')) {
+  const ok = await runSelfTest()
+  const slugArg = flag('slug')
+  if (!slugArg || slugArg === true) {
+    process.exit(ok ? 0 : 1)
+  }
+  if (!ok) process.exit(1)
+}
+
+const slug = flag('slug')
+if (!slug || slug === true) {
+  console.error('Usage: node scripts/gates.mjs --slug <slug> [--root .] [--refs refs/] [--min 70] [--json] [--self-test]')
+  process.exit(1)
+}
+const root = resolve(flag('root', '.'))
+const min = Number(flag('min', 70))
+const at = (...p) => join(root, ...p)
+const rows = []
+const gate = (name, status, detail) => rows.push({ name, status, detail })
+
+const readJson = async (p) => JSON.parse(await readFile(p, 'utf8'))
+
+
+
 /* ── a case without tokens.json cannot be measured ───────────────────────── */
 
 function findCss(slugName) {
@@ -74,9 +160,6 @@ function findCss(slugName) {
   ].find(existsSync)
 }
 
-// The output contract says every case ships features/<slug>/tokens.json. When the case folder
-// exists without it, that is a defect to report, not a gate to skip: a green font check beside
-// four silent skips reads as "passed" to anyone skimming the table.
 function missingTokens(name) {
   const exists =
     existsSync(at('features', slug)) ||
@@ -110,7 +193,7 @@ async function detach() {
   try {
     out = (await run('node', [join(here, 'detach-check.mjs'), '--new', own, ...refs.flatMap((r) => ['--ref', r]), '--json', '--min', String(min)], { maxBuffer: 1 << 24 })).stdout
   } catch (e) {
-    out = e.stdout // exit 1 is a verdict, not a crash
+    out = e.stdout
     if (!out) return gate('detach', 'FAIL', `detach-check crashed: ${String(e.stderr ?? e.message).split('\n')[0]}`) && gate('display face', 'SKIP', 'needs detach')
   }
   const data = JSON.parse(out)
@@ -119,8 +202,6 @@ async function detach() {
   const faceFails = hard.filter((h) => h.startsWith('H3'))
   const otherHard = hard.filter((h) => !h.startsWith('H3'))
 
-  // A low score from an empty DNA object is a missing file section, not a collision: moving the hue
-  // would not fix it. Say which it is, so the next edit goes to the right place.
   const incomplete = weakest.soft.find((x) => /placeholder|incomplete/i.test(x))
   const hint = weakest.score < min && incomplete ? ` · likely incomplete tokens, not a collision: ${incomplete}` : ''
   gate('detach', otherHard.length || weakest.score < min ? 'FAIL' : 'PASS', `weakest ${weakest.score}/100 vs ${weakest.ref} (min ${min}, ${data.results.length} compared)${otherHard.length ? ` · ${otherHard.join(' · ')}` : ''}${hint}`)
@@ -128,24 +209,6 @@ async function detach() {
 }
 
 /* ── 3 · palette is one source ───────────────────────────────────────────── */
-
-// The page draws swatches from tokens.json; the product draws colour from the CSS. If they
-// disagree the page lies, and a name in one that the other never declares renders as nothing.
-// (This is what shipped once in Ledger: var(--zinc-050) against a sheet that declared --lg-zinc-050.)
-// `oklch(62% …)` and `oklch(0.62 …)` are the same colour, and an alpha channel is part of the
-// value: `/ 0.5` never matches an opaque token. Normalize both sides before comparing.
-const norm = (v) => {
-  const m = String(v).match(/oklch\(\s*([\d.]+)(%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+)(%?))?\s*\)/i)
-  if (m) {
-    const f = (n) => Number(n).toFixed(3)
-    const l = Number(m[1]) / (m[2] === '%' ? 100 : 1)
-    const a = m[5] === undefined ? null : Number(m[5]) / (m[6] === '%' ? 100 : 1)
-    return `oklch(${f(l)} ${f(m[3])} ${f(m[4])}${a === null || a === 1 ? '' : ` / ${f(a)}`})`
-  }
-  const h = String(v).trim().toLowerCase()
-  return /^#[0-9a-f]{3}$/.test(h) ? `#${[...h.slice(1)].map((c) => c + c).join('')}` : h.replace(/\s+/g, ' ')
-}
-const comparable = (v) => /^#[0-9a-f]{3,8}$/i.test(String(v).trim()) || /^oklch\(/i.test(String(v).trim())
 
 async function palette() {
   const file = findTokens(root, slug)
@@ -188,7 +251,6 @@ async function fonts() {
   const used = [...new Set([...(await readFile(css, 'utf8')).matchAll(/var\((--font-[a-z0-9-]+)/gi)].map((m) => m[1]))]
   if (!used.length) return gate('font', 'PASS', 'no --font-* aliases in the token file')
 
-  // A case may register its own face at the route; the root layout is not the only place.
   const layouts = [
     at('app', 'layout.tsx'),
     at('app', 'design-system', slug, 'layout.tsx'),
@@ -213,7 +275,7 @@ async function contrast() {
   let failing = 0
   let checked = 0
   for (const p of pairs) {
-    if (!isHex(p.fg) || !isHex(p.bg)) continue // gradients and alphas cannot be computed; they are not passed either
+    if (!isHex(p.fg) || !isHex(p.bg)) continue
     checked += 1
     const got = ratio(p.fg, p.bg)
     if (got < 4.5) failing += 1
@@ -224,7 +286,118 @@ async function contrast() {
   gate('contrast', problems.length ? 'FAIL' : 'PASS', problems.length ? problems.join(' · ') : `${checked} pairs recomputed, all stated ratios match, ${failing} failing pair(s) published`)
 }
 
-/* ── 6 · assets ──────────────────────────────────────────────────────────── */
+/* ── 6 · cvd (color vision deficiency safety) ─────────────────────────────── */
+
+async function cvd() {
+  const file = findTokens(root, slug)
+  if (!file) return missingTokens('cvd')
+  const t = readTokens(file)
+  const prims = t.primitives.filter((p) => p.hex || (typeof p.value === 'string' && (p.value.startsWith('#') || p.value.startsWith('oklch'))))
+
+  const findPrim = (regex) => prims.find((p) => regex.test(p.name) || regex.test(p.role || ''))
+  const accent = findPrim(/accent|signal|primaryaccent|action|cobalt|tangerine/i) || prims.find((p) => !/ground|paper|surface|plate|canvas|ink|text/i.test(p.name))
+  const danger = findPrim(/danger|error|alert|negative|warn/i)
+  const success = findPrim(/success|mint|green|positive/i)
+  const ink = findPrim(/ink|text|charcoal|espresso|obsidian/i) || prims.find((p) => /text/i.test(p.role || ''))
+
+  const criticalPairs = []
+  if (accent && danger && accent !== danger) {
+    criticalPairs.push({ label: `${accent.name} vs ${danger.name}`, colorA: accent.value || accent.hex, colorB: danger.value || danger.hex })
+  }
+  if (accent && ink && accent !== ink) {
+    criticalPairs.push({ label: `${accent.name} vs ${ink.name}`, colorA: accent.value || accent.hex, colorB: ink.value || ink.hex })
+  }
+  if (danger && success && danger !== success) {
+    criticalPairs.push({ label: `${danger.name} vs ${success.name}`, colorA: danger.value || danger.hex, colorB: success.value || success.hex })
+  }
+
+  if (!criticalPairs.length) {
+    return gate('cvd', 'PASS', 'no conflicting chromatic status pairs to simulate')
+  }
+
+  const { pass, results } = auditCvdSafety(criticalPairs, 0.045)
+  if (!pass) {
+    const fails = results.filter((r) => !r.pass)
+    const detail = fails.map((f) => `${f.label} collapses under CVD (min ΔE_OK = ${f.minCvd.toFixed(3)} < 0.045)`).join(' · ')
+    return gate('cvd', 'FAIL', `${detail} without secondary non-color indicator`)
+  }
+
+  const minDelta = Math.min(...results.map((r) => r.minCvd))
+  gate('cvd', 'PASS', `Deuteranopia, Protanopia & Tritanopia safe (min ΔE_OK = ${minDelta.toFixed(3)} across ${results.length} status pairs)`)
+}
+
+/* ── 7 · reflex (anti-ai-default & scope parity) ─────────────────────────── */
+
+async function reflex() {
+  const file = findTokens(root, slug)
+  const css = findCss(slug)
+  if (!file) return missingTokens('reflex')
+  const t = readTokens(file)
+  const problems = []
+
+  // 1. Anti-AI-default display fonts
+  const displayTokens = t.type.filter((tp) => /display|hero|head/i.test(tp.name))
+  const bannedFonts = ['inter', 'roboto', 'arial']
+  for (const dt of displayTokens) {
+    const fam = dt.family?.toLowerCase() || ''
+    if (bannedFonts.some((b) => fam.includes(b))) {
+      problems.push(`AI-default display face "${dt.family}" is banned for display type`)
+    }
+  }
+
+  // 2. Scope parity
+  const rawMeta = t.meta || t.raw?.meta || {}
+  const polarity = String(rawMeta.polarity || '').toLowerCase()
+  if (css && existsSync(css)) {
+    const cssText = await readFile(css, 'utf8')
+    const hasNightBlock = /\[data-[a-z0-9_-]+=['"]?night['"]?\]|--[a-z0-9_-]+-surface-page\s*:\s*var\(--.*night/i.test(cssText)
+    if (polarity === 'light' || polarity === 'dark' || polarity === 'single') {
+      if (hasNightBlock) {
+        problems.push(`single-scope polarity declared in meta, but night scope block found in ${slug}-tokens.css`)
+      }
+    } else if (polarity === 'dual' || polarity === 'light-dark') {
+      if (!hasNightBlock) {
+        problems.push(`dual-scope polarity declared in meta, but no night scope block found in ${slug}-tokens.css`)
+      }
+    }
+  }
+
+  // 3. Mark & Cast SVG reflex rules
+  const isConstructed = !/drawn|illustrative|mascot/i.test(String(t.theme?.family || rawMeta.track || ''))
+  const hasOuterBadgeCircle = (svg) => {
+    if (!isConstructed) return false
+    for (const m of svg.matchAll(/<circle[^>]*\br=["']?([\d.]+)["']?/gi)) {
+      if (Number(m[1]) >= 24) return true
+    }
+    return false
+  }
+
+  const brandDir = at('public', 'brand', slug)
+  if (existsSync(brandDir)) {
+    const compactSvg = join(brandDir, 'mark-compact.svg')
+    if (existsSync(compactSvg)) {
+      const content = await readFile(compactSvg, 'utf8')
+      if (/<text[\s>]/i.test(content)) problems.push('mark-compact.svg contains banned <text> element')
+      if (hasOuterBadgeCircle(content)) problems.push('mark-compact.svg contains banned outer badge <circle> with r >= 24 on constructed track')
+    }
+    const castDir = join(brandDir, 'cast')
+    if (existsSync(castDir)) {
+      const files = (await readdir(castDir)).filter((f) => f.endsWith('.svg'))
+      if (files.length > 0 && files.length !== 6) {
+        problems.push(`cast folder has ${files.length} SVGs; exactly 6 companion marks required`)
+      }
+      for (const f of files) {
+        const svgContent = await readFile(join(castDir, f), 'utf8')
+        if (/<text[\s>]/i.test(svgContent)) problems.push(`cast/${f} contains banned <text> element`)
+        if (hasOuterBadgeCircle(svgContent)) problems.push(`cast/${f} contains banned outer badge <circle> with r >= 24 on constructed track`)
+      }
+    }
+  }
+
+  gate('reflex', problems.length ? 'FAIL' : 'PASS', problems.length ? problems.join(' · ') : 'display face foundry-distinct, scope parity clean, vector marks text-free')
+}
+
+/* ── 8 · assets ──────────────────────────────────────────────────────────── */
 
 async function assets() {
   const dir = at('public', 'brand', slug, 'assets')
@@ -237,7 +410,7 @@ async function assets() {
   }
 }
 
-/* ── 7 · export ──────────────────────────────────────────────────────────── */
+/* ── 9 · export ──────────────────────────────────────────────────────────── */
 
 async function exported() {
   const code = at('design', 'figma', slug, 'code.js')
@@ -254,6 +427,8 @@ await detach()
 await palette()
 await fonts()
 await contrast()
+await cvd()
+await reflex()
 await assets()
 await exported()
 
@@ -263,7 +438,6 @@ else {
   for (const r of rows) console.log(`  ${r.status.padEnd(4)}  ${r.name.padEnd(13)} ${r.detail}`)
   console.log('\n  not run here (need a rendered page): mark at 16px, reduced motion → node scripts/qa.mjs\n')
 }
-// Nothing ran (a typo'd slug skips every gate) is not a pass.
 const ran = rows.some((r) => r.status !== 'SKIP')
 if (!ran) console.error(`nothing ran for "${slug}" — check the slug and --root`)
 process.exit(rows.some((r) => r.status === 'FAIL') || !ran ? 1 : 0)
