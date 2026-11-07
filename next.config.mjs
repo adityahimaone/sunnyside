@@ -135,8 +135,7 @@ const nextConfig = {
       { source: '/notes/:slug*', destination: '/blog', permanent: true },
 
       // Common URL variants & feeds
-      { source: '/resume', destination: '/resume.pdf', permanent: true },
-      { source: '/cv', destination: '/resume.pdf', permanent: true },
+      { source: '/cv', destination: '/resume', permanent: true },
       { source: '/feed', destination: '/rss.xml', permanent: true },
       { source: '/rss', destination: '/rss.xml', permanent: true },
       { source: '/sitemap', destination: '/sitemap.xml', permanent: true },

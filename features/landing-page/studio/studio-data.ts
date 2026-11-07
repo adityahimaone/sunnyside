@@ -29,6 +29,8 @@ export const CONTACT = {
   location: 'Jakarta, Indonesia',
   timezone: 'GMT+7',
   resume: '/resume.pdf',
+  resumeFallback:
+    'https://drive.google.com/file/d/1Vq0a4tlHm4N0BVWSjitHHcppUvX5J_09/view?usp=sharing',
 } as const
 
 export const SOCIALS = [

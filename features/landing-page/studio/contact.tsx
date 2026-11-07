@@ -12,6 +12,25 @@ import styles from './studio.module.css'
 
 export function Contact() {
   const [copied, setCopied] = useState(false)
+  const [resumeHref, setResumeHref] = useState<string>(CONTACT.resume)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(CONTACT.resume, { method: 'HEAD' })
+      .then((res) => {
+        if (!res.ok && !cancelled) {
+          setResumeHref(CONTACT.resumeFallback)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setResumeHref(CONTACT.resumeFallback)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (!copied) return
@@ -109,7 +128,7 @@ export function Contact() {
                 ))}
                 <a
                   className={styles.socialLink}
-                  href={CONTACT.resume}
+                  href={resumeHref}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
