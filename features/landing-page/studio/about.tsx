@@ -58,7 +58,7 @@ export function About() {
               </span>
             </span>
           }
-          intro="Six years of product work, one habit: decide in the browser, then leave enough structure that the next person can disagree with me."
+          intro="4+ years of professional product work — 6 hands-on — one habit: decide in the browser, then leave enough structure that the next person can disagree with me."
         />
 
         <StickerPit />
@@ -68,9 +68,9 @@ export function About() {
             <Reveal>
               <p className={styles.aboutBody}>
                 I&apos;m Aditya Himawan, a design engineer based in Jakarta. For
-                six years I&apos;ve built product interfaces for teams in
-                manufacturing, developer tools and finance, usually the part
-                where a design has to survive{' '}
+                six years hands-on — 4+ professionally — I&apos;ve built product
+                interfaces for teams in manufacturing, developer tools and
+                finance, usually the part where a design has to survive{' '}
                 <strong>real data, real browsers and a real deadline.</strong>
               </p>
               <p className={styles.aboutBody}>

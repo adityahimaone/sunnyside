@@ -54,7 +54,7 @@ export type ChapterId = (typeof CHAPTERS)[number]['id']
 export const CATALOGUE_SIDES = WORK_PROJECTS.length + DESIGN_CASES.length
 
 export const HERO_FACTS = [
-  { value: '6+', label: 'years crafting interfaces' },
+  { value: '4+', label: 'years professional experience' },
   { value: '15k+', label: 'people using the work' },
   { value: String(CATALOGUE_SIDES), label: 'sides in the catalogue' },
 ] as const
@@ -66,7 +66,7 @@ export const HERO_FACTS = [
  */
 export const JOBS = [
   {
-    company: 'PT Fatiha Sakti',
+    company: 'Fast 8 Group (PT Fatiha Sakti)',
     role: 'Frontend SaaS Developer',
     place: 'Jakarta',
     period: 'Oct 2022 to now',
@@ -78,7 +78,7 @@ export const JOBS = [
     period: 'Apr to Sep 2024',
   },
   {
-    company: 'PT Unzyp',
+    company: 'PT Unzyp Solusi Teknologi',
     role: 'Frontend ReactJS Developer',
     place: 'Jakarta',
     period: 'Jun to Sep 2022',
@@ -88,12 +88,13 @@ export const JOBS = [
 export const ABOUT_FACTS = [
   {
     key: 'Day job',
-    value: 'Frontend Engineer at Fast 8 Group, working on product interfaces.',
+    value:
+      'Frontend SaaS Developer at Fast 8 Group (PT Fatiha Sakti), working on product interfaces.',
   },
   {
     key: 'Practice',
     value:
-      'Six years in React and TypeScript. Design systems, interactive motion, interface architecture. I settle the calls in the browser.',
+      'Six years hands-on with React and TypeScript — 4+ of them professional. Design systems, interactive motion, interface architecture. I settle the calls in the browser.',
   },
   {
     key: 'Home',
