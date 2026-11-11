@@ -431,14 +431,182 @@
 
 /* Sunrise: the cobalt sky is the page's one loud field. The three variables
    below place the sun, and the paper ground it rises from, for the scene. */
+.hero {
+  /* The sun is centred now and the type crosses it, so it is sized to the
+     lower half of the stage rather than to the sky. */
+  --sun-size: clamp(15rem, min(46vw, 62vh), 38rem);
+  --sun-x: 50%;
+  --ground: clamp(2.6rem, 5.2vh, 3.6rem);
+  /* The disc drops behind the cobalt hill: two thirds of it clears the crest,
+     the rest is buried, so the hill reads as being in front of it. */
+  --sun-lift: 0.67;
+  /* Where the sticker cluster sits, frozen at this lift. */
+  --items-lift: 0.62;
+  /* Distance from the hero's bottom edge to the top of the disc. */
+  --sun-top: calc(var(--sun-lift) + 0.5);
+
+  position: relative;
+  display: flex;
+  min-height: max(100svh, 40rem);
+  flex-direction: column;
+  padding-block: clamp(4.6rem, 5.4vw, 5.6rem) calc(var(--ground) + 1.5rem);
+  isolation: isolate;
+  background: var(--cobalt);
+  color: var(--paper);
+}
+
+.hero :focus-visible {
+  outline-color: var(--butter);
+}
+
+.heroStage {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(0.8rem, 1.6vw, 1.4rem);
+}
 
 /* Live pointer readout. Decorative but honest: it prints the last drag. */
+.heroTelemetry {
+  align-self: center;
+  margin-top: -0.35rem;
+  /* Offset only: a margin here would eat the stage's free space and drag the
+     canopy down with it. */
+  position: relative;
+  top: 0.95rem;
+  padding: 0.24rem 0.7rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper-hi);
+  color: var(--ink);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.heroCanopy {
+  position: relative;
+  margin-top: clamp(0.2rem, 1.4vw, 1.2rem);
+  text-align: center;
+}
 
 /* The name tag is pinned to the first letter and can be peeled off. */
+.heroSticker {
+  position: absolute;
+  z-index: 4;
+  left: 2%;
+  top: -0.6em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 0.4rem;
+  background: #ff5a1f;
+  color: var(--ink);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: clamp(8px, 0.72vw, 10px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(-8deg);
+  box-shadow: 4px 4px 0 var(--ink);
+  cursor: grab;
+  touch-action: none;
+}
+
+.heroSticker:active {
+  cursor: grabbing;
+}
 
 /* Cut from the same cardboard as the sun: paper face, stepped ink edge. */
+.heroDisplay {
+  margin: 0;
+  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  /* Sized off the narrowest phone we support: INTERFACES is 10.2× its own
+     font-size in Syne 800, so 8.4vw still overran a 324px shell at 360. */
+  font-size: clamp(1.9rem, 8.2vw, 3.4rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.058em;
+  text-transform: uppercase;
+  color: var(--paper-hi);
+  text-shadow:
+    1px 1px 0 var(--ink),
+    2px 2px 0 var(--ink),
+    3px 3px 0 var(--ink),
+    4px 4px 0 var(--ink),
+    5px 5px 0 var(--ink);
+}
+
+@media (min-width: 1024px) {
+  .heroDisplay {
+    font-size: clamp(4rem, 8vw, 7.2rem);
+    text-shadow:
+      1px 1px 0 var(--ink),
+      2px 2px 0 var(--ink),
+      3px 3px 0 var(--ink),
+      4px 4px 0 var(--ink),
+      5px 5px 0 var(--ink),
+      6px 6px 0 var(--ink),
+      7px 7px 0 var(--ink);
+  }
+}
 
 /* Lower band: dock left, worked word right. */
+.heroLower {
+  display: grid;
+  grid-template-columns: minmax(0, 20.5rem) minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(1rem, 3vw, 3rem);
+  margin-top: auto;
+  padding-bottom: clamp(0.4rem, 1.6vw, 1.4rem);
+}
+
+.heroDock {
+  padding: 1.1rem 1.2rem 1rem;
+  border: 2px solid rgb(255 250 241 / 0.38);
+  border-radius: 1.3rem;
+  background: rgb(255 250 241 / 0.12);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  backdrop-filter: blur(14px) saturate(1.25);
+  box-shadow: 0 18px 44px rgb(9 14 32 / 0.34);
+}
+
+.heroDockInner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.heroDockHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+
+.heroLede {
+  max-width: 34ch;
+  font-size: clamp(0.9rem, 1vw, 0.98rem);
+  line-height: 1.62;
+  color: var(--paper);
+  text-wrap: pretty;
+}
+
+.heroLede strong {
+  color: var(--paper-hi);
+  font-weight: 650;
+}
 
 .ghostLink {
   display: inline-flex;
@@ -472,6 +640,14 @@
 
 .ghostLink:hover svg {
   transform: translate(2px, -2px);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.15rem;
 }
 
 .primaryBtn {
@@ -513,10 +689,187 @@
 }
 
 /* On the sky the primary action is the butter tape. */
+.hero .primaryBtn {
+  background: var(--butter);
+}
+
+.hero .primaryBtn:hover {
+  background: var(--paper-hi);
+}
+
+.heroFacts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+  padding-top: 0.7rem;
+  border-top: 1.5px solid rgb(255 250 241 / 0.35);
+}
+
+.heroFact b {
+  display: block;
+  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--paper-hi);
+}
+
+.heroFact span {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 8px;
+  line-height: 1.3;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
 
 /* Right column: the second half of the headline, framed as a selection. */
+.heroPulseBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  justify-self: end;
+}
+
+.heroWithRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem 0.8rem;
+}
+
+.heroWithA {
+  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  font-size: clamp(1.35rem, 3.1vw, 2.9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--paper-hi);
+  text-shadow:
+    1px 1px 0 var(--ink),
+    2px 2px 0 var(--ink),
+    3px 3px 0 var(--ink),
+    4px 4px 0 var(--ink);
+}
+
+.heroChip {
+  padding: 0.24rem 0.55rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper-hi);
+  color: var(--ink);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 3px 3px 0 var(--ink);
+}
 
 /* A frame you can shove: dashed rule, eight grips, one orange loop. */
+.heroPulseBox {
+  position: relative;
+  margin-top: 0.3rem;
+  padding: 0.15rem 0.5rem 0.35rem;
+  border: 1px dashed rgb(255 250 241 / 0.6);
+  cursor: grab;
+  touch-action: none;
+}
+
+.heroPulseBox:active {
+  cursor: grabbing;
+}
+
+.heroPulse {
+  position: relative;
+  z-index: 1;
+  display: block;
+  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  font-size: clamp(2.2rem, 5.8vw, 5.6rem);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.052em;
+  text-transform: uppercase;
+  color: var(--butter);
+  text-shadow:
+    1px 1px 0 var(--ink),
+    2px 2px 0 var(--ink),
+    3px 3px 0 var(--ink),
+    4px 4px 0 var(--ink),
+    5px 5px 0 var(--ink),
+    6px 6px 0 var(--ink),
+    7px 7px 0 var(--ink);
+}
+
+.heroPulseDot {
+  color: var(--paper-hi);
+}
+
+.heroScribble {
+  position: absolute;
+  inset: -32% -12% -34% -12%;
+  z-index: 0;
+  width: 124%;
+  height: 166%;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+.heroHandle {
+  position: absolute;
+  z-index: 2;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--ink);
+  background: #fff;
+  pointer-events: none;
+}
+
+.heroHandle[data-handle='tl'] {
+  left: -5px;
+  top: -5px;
+}
+
+.heroHandle[data-handle='tc'] {
+  left: calc(50% - 4.5px);
+  top: -5px;
+}
+
+.heroHandle[data-handle='tr'] {
+  right: -5px;
+  top: -5px;
+}
+
+.heroHandle[data-handle='ml'] {
+  left: -5px;
+  top: calc(50% - 4.5px);
+}
+
+.heroHandle[data-handle='mr'] {
+  right: -5px;
+  top: calc(50% - 4.5px);
+}
+
+.heroHandle[data-handle='bl'] {
+  left: -5px;
+  bottom: -5px;
+}
+
+.heroHandle[data-handle='bc'] {
+  left: calc(50% - 4.5px);
+  bottom: -5px;
+}
+
+.heroHandle[data-handle='br'] {
+  right: -5px;
+  bottom: -5px;
+}
 
 .tape {
   position: absolute;
@@ -531,13 +884,87 @@
 /* Below the desktop split there is no room to cross the type over the sun, so
    the disc drops to the horizon and the stage stacks: canopy, dock, word. */
 @media (max-width: 1023px) {
+  .hero {
+    --sun-size: min(64vw, 16rem);
+    /* The dock sits on the hill below the sun, so the lift is measured from a
+       taller stage: the disc clears the card by a hair instead of landing on
+       it, and the hill behind the card is stretched to wrap it. */
+    --sun-lift: 2.1;
+    --items-lift: var(--sun-lift);
+    --dock-space: 0rem;
+    /* A phone hero is taller than the glass: the extra band goes between the
+       word and the disc, so the crown of the sun never crowds the type and the
+       card still lands on the paper line. */
+    min-height: calc(100svh + 4.5rem);
+    padding-bottom: calc(var(--ground) + var(--dock-space) + 0.75rem);
+  }
+
   /* The stage drops its own positioning so the card can anchor to the hero and
      sit under the sun; it keeps z-index because a flex child with z-index
      stacks whether or not it is positioned. */
+  .heroStage {
+    position: static;
+  }
 
   /* The card stays in flow and is ordered after the worked word: absolutely
      positioning it here anchored it to the parallax copy block, whose transform
      made it the containing block, so the card floated up into the sun. */
+  .heroDock {
+    order: 2;
+    padding: 0.95rem 1rem 0.9rem;
+    border-radius: 1.1rem;
+  }
+
+  .heroDockInner {
+    gap: 0.7rem;
+  }
+
+  .heroLower {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.05rem;
+  }
+
+  .heroPulseBlock {
+    order: 1;
+    align-items: flex-start;
+    justify-self: stretch;
+  }
+
+  .heroWithRow {
+    justify-content: flex-start;
+    gap: 0.5rem 0.9rem;
+  }
+
+  .heroChip {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+  }
+
+  .heroSticker {
+    left: 0;
+    top: -1.5em;
+  }
+}
+
+@media (max-width: 639px) {
+  .heroTelemetry {
+    display: none;
+  }
+
+  .heroSticker {
+    position: static;
+    display: inline-flex;
+    margin-bottom: 0.7rem;
+    transform: rotate(-4deg);
+  }
+
+  .heroCanopy {
+    text-align: left;
+  }
+
+  .heroDisplay {
+    text-align: left;
+  }
 }
 
 /* ── Marquee ────────────────────────────────────────────────────────────── */
@@ -2123,6 +2550,15 @@
 
 /* Under 380 the disc is small enough that the fixed lift leaves its lower edge
    behind the card, so it climbs a little more. */
+@media (max-width: 379px) {
+  .hero {
+    /* The card wraps to more lines down here, so the disc climbs to keep clear
+       of it; the hill is stretched by the same amount in hero-scene.module.css
+       so the sun still sits *in* it rather than floating above the crest. */
+    --sun-lift: 2.17;
+    --items-lift: var(--sun-lift);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .marquee,

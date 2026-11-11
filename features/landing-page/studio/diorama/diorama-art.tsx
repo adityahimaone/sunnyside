@@ -322,8 +322,8 @@ function Gear({
         return (
           <circle
             key={i}
-            cx={Number((cx + Math.cos(a) * rr).toFixed(2))}
-            cy={Number((cy + Math.sin(a) * rr).toFixed(2))}
+            cx={cx + Math.cos(a) * rr}
+            cy={cy + Math.sin(a) * rr}
             r={holeRadius}
             fill={holeFill}
             stroke={stroke}
