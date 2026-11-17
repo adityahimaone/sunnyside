@@ -17,6 +17,7 @@ import {
 import archive from '@/features/archive/archive.module.css'
 import { cn } from '@/lib/utils'
 
+import type { HeroSurface } from './hero'
 import { CHAPTERS, SOCIALS, scrollToSection } from './studio-data'
 import styles from './studio.module.css'
 
@@ -24,6 +25,7 @@ type Props = {
   active: string
   scrolled: boolean
   footerVisible: boolean
+  heroSurface?: HeroSurface
 }
 
 const NAV = CHAPTERS.filter((chapter) => chapter.id !== 'home')
@@ -61,7 +63,12 @@ const DESTINATIONS = [
   },
 ] as const
 
-export function SiteHeader({ active, scrolled, footerVisible }: Props) {
+export function SiteHeader({
+  active,
+  scrolled,
+  footerVisible,
+  heroSurface = 'cobalt',
+}: Props) {
   const reduced = useReducedMotion() ?? false
   const { scrollYProgress } = useScroll()
   const [open, setOpen] = useState(false)
@@ -131,7 +138,7 @@ export function SiteHeader({ active, scrolled, footerVisible }: Props) {
           className={cn(
             archive.bar,
             scrolled && archive.barScrolled,
-            active === 'home' && archive.barHero,
+            active === 'home' && heroSurface === 'cobalt' && archive.barHero,
           )}
         >
           <div className={archive.inner}>
