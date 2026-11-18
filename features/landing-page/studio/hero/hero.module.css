@@ -217,14 +217,15 @@
   inset: 0;
 }
 
-/* Hanging star bunting (top-left corner) */
+/* Hanging star bunting (top-left corner). The string and the stars are one SVG,
+   so a star can never drift off its own thread. */
 .buntingWrap {
   position: absolute;
   left: clamp(2.2rem, 4.8vw, 4.4rem);
   top: 0;
   width: clamp(16rem, 31vw, 28rem);
-  aspect-ratio: 420 / 140;
-  transform-origin: top center;
+  aspect-ratio: 420 / 150;
+  overflow: visible;
 }
 
 .buntingSvg {
@@ -232,40 +233,6 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-}
-
-.buntingStar1,
-.buntingStar2,
-.buntingStar3,
-.buntingStar4 {
-  position: absolute;
-  width: clamp(2.1rem, 3.6vw, 3.3rem);
-  filter: drop-shadow(0 5px 6px rgb(12 21 56 / 0.35));
-  transform-origin: top center;
-}
-
-.buntingStar1 {
-  left: 11%;
-  top: 22%;
-  transform: rotate(-10deg);
-}
-
-.buntingStar2 {
-  left: 33%;
-  top: 34%;
-  transform: rotate(6deg);
-}
-
-.buntingStar3 {
-  left: 55%;
-  top: 24%;
-  transform: rotate(-8deg);
-}
-
-.buntingStar4 {
-  left: 77%;
-  top: 4%;
-  transform: rotate(12deg);
 }
 
 /* Smiling Sun behind white cloud (top-right above Aditya) */
@@ -312,7 +279,10 @@
   overflow: visible;
 }
 
-/* White Stage Balustrade / Railing behind lower half of Aditya */
+/* White Stage Balustrade / Railing behind lower half of Aditya.
+   Read as one cut sheet: capped top rail, turned balusters, bottom rail, and a
+   newel at each end. The earlier version had no bottom rail, so the slats ended
+   in mid-air and the whole thing read as a fence. */
 .balustrade {
   position: absolute;
   /* Ends land on the window's inner edge (234 / 1206 of the 1440 stage) so the
@@ -321,34 +291,54 @@
   right: 16.25%;
   bottom: clamp(27.5%, 31vh, 34%);
   height: clamp(2.8rem, 5.8vh, 4rem);
-  border-bottom: 8px solid #e5e0d5;
   filter: drop-shadow(0 5px 8px rgb(12 21 56 / 0.3));
 }
 
 .balustradeTopRail {
+  position: relative;
   width: 100%;
-  height: 9px;
-  border-radius: 3px;
+  height: 10px;
+  border-radius: 3px 3px 2px 2px;
   background: var(--diorama-paper);
-  box-shadow: 0 3px 0 rgb(17 24 39 / 0.14);
+  box-shadow:
+    inset 0 -3px 0 rgb(17 24 39 / 0.1),
+    0 2px 0 rgb(17 24 39 / 0.16);
 }
 
 .balustradeSpindles {
-  display: grid;
-  grid-template-columns: repeat(18, 1fr);
+  display: flex;
   align-items: stretch;
-  justify-items: center;
-  height: calc(100% - 9px);
-  padding-inline: 1rem;
+  justify-content: space-between;
+  height: calc(100% - 18px);
+  padding-inline: 0.9rem;
 }
 
+/* A baluster: narrow waist between two shoulders, softly rounded so the stack
+   still reads as cut paper rather than milled metal. */
 .balustradePost {
   display: block;
-  width: clamp(7px, 0.75vw, 11px);
+  flex: 0 0 auto;
+  width: clamp(8px, 0.8vw, 12px);
   height: 100%;
-  border-radius: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #e6e1d6 0%,
+    var(--diorama-paper) 42%,
+    #f3efe6 100%
+  );
+}
+
+.balustradeBottomRail {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 8px;
+  border-radius: 2px 2px 3px 3px;
   background: var(--diorama-paper);
-  box-shadow: 3px 0 0 #d5cfc2;
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.7),
+    0 2px 0 rgb(17 24 39 / 0.12);
 }
 
 /* Scattered Cutout Stars + Preserved data-hero-sticker Hooks */
@@ -361,6 +351,7 @@
   position: absolute;
   width: clamp(1.4rem, 2.2vw, 2.1rem);
   filter: drop-shadow(0 3px 4px rgb(12 21 56 / 0.3));
+  rotate: var(--tilt, 0deg);
   transition: opacity 0.3s ease;
 }
 
@@ -383,65 +374,67 @@
   pointer-events: none;
 }
 
+/* Each sparkle's resting tilt lives in a custom property so the entrance and the
+   float can compose with it instead of overwriting it. */
 .starPos1 {
   left: 9.8%;
   top: 27%;
-  transform: rotate(-8deg);
+  --tilt: -8deg;
 }
 
 .starPos2 {
   left: 17.8%;
   top: 41%;
   width: clamp(1.6rem, 2.5vw, 2.3rem);
-  transform: rotate(11deg);
+  --tilt: 11deg;
 }
 
 .starPos3 {
   left: 28.5%;
   top: 59%;
-  transform: rotate(6deg);
+  --tilt: 6deg;
 }
 
 .starPos4 {
   right: 23.5%;
   top: 41.5%;
   width: clamp(1.6rem, 2.5vw, 2.2rem);
-  transform: rotate(-12deg);
+  --tilt: -12deg;
 }
 
 .starPos5 {
   right: 19.2%;
   top: 48.5%;
   width: clamp(1.5rem, 2.3vw, 2.1rem);
-  transform: rotate(10deg);
+  --tilt: 10deg;
 }
 
 .starPos6 {
   right: 9.2%;
   top: 37%;
   width: clamp(1.5rem, 2.3vw, 2.1rem);
-  transform: rotate(-9deg);
+  --tilt: -9deg;
 }
 
 .starPos7 {
   right: 23%;
   top: 57.5%;
   width: clamp(1.1rem, 1.6vw, 1.5rem);
-  transform: rotate(5deg);
+  --tilt: 5deg;
 }
 
 .starPos8 {
   left: 22.5%;
   top: 32.5%;
   width: clamp(1.3rem, 2vw, 1.85rem);
-  transform: rotate(-6deg);
+  --tilt: -6deg;
 }
 
 .starPos9 {
   right: 21.5%;
   top: 29%;
   width: clamp(1.2rem, 1.8vw, 1.7rem);
-  transform: rotate(8deg);
+  --tilt: 8deg;
 }
 
 /* ── Depth Plane 5: Elevated 3D `Aditya` Cutout Main Title ───────────────── */
@@ -481,14 +474,7 @@
   overflow: visible;
 }
 
-/* ── Upper-Right Stage CTA Tab (`Say hi ↗`) ─────────────────────────────── */
-
-.upperRightAction {
-  position: absolute;
-  top: clamp(1.35rem, 3.4vh, 2.2rem);
-  right: clamp(2.8rem, 5.8vw, 5.4rem);
-  z-index: 24;
-}
+/* ── Paper pill buttons (`See work →`) ──────────────────────────────────── */
 
 .paperPillBtn {
   display: inline-flex;
@@ -526,24 +512,6 @@
 .paperPillBtn:active {
   transform: translate(0, 2px);
   box-shadow: 0 2px 0 var(--diorama-ink);
-}
-
-.upperRightAction .paperPillBtn {
-  min-height: 3.35rem;
-  padding: 0.65rem 1.65rem 0.65rem 1.75rem;
-  border: 2px solid var(--diorama-ink);
-  border-right: 0;
-  border-radius: 999px 0 0 999px;
-  font-size: clamp(1.1rem, 1.5vw, 1.4rem);
-  box-shadow:
-    -3px 5px 0 var(--diorama-ink),
-    0 10px 20px rgb(12 21 56 / 0.32);
-}
-
-.upperRightAction .paperPillBtn:hover {
-  box-shadow:
-    -4px 6px 0 var(--diorama-ink),
-    0 14px 24px rgb(12 21 56 / 0.36);
 }
 
 /* ── Depth Plane 6: Overlapping Bottom Paper Clouds ──────────────────────── */
@@ -606,6 +574,24 @@
   gap: 0.38rem;
 }
 
+/* The copy is the last thing to land: the clouds it sits on are already down. */
+@keyframes copyRise {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .foregroundContent:not([data-still='true']) .foregroundRow {
+    animation: copyRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.86s both;
+  }
+}
+
 .headlineRow {
   display: flex;
   flex-wrap: wrap;
@@ -646,7 +632,6 @@
     0 4px 10px rgb(17 24 39 / 0.18),
     0 2px 0 rgb(217 164 18 / 0.85);
   cursor: pointer;
-  overflow: hidden;
   transition:
     transform 0.18s cubic-bezier(0.2, 1.5, 0.3, 1),
     background-color 0.18s ease,
@@ -666,16 +651,42 @@
   box-shadow: 0 2px 6px rgb(17 24 39 / 0.16);
 }
 
-.swapPillInner {
+/* The widest candidate, drawn invisibly: it holds the pill's box open so a
+   swap never reflows the sentence around it. */
+.swapSizer {
   display: inline-flex;
   align-items: center;
   gap: 0.42rem;
+  visibility: hidden;
+}
+
+/* The one-word tape. Clipping here is what makes the swap read as a mechanism:
+   the retiring word slides out through the top edge while the next rises from
+   below, both on the same curve, so they meet edge-to-edge and never share the
+   pill. A crossfade in this box turned into a ghost of two words at once. */
+.swapWindow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.swapPillInner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  padding: 0 0.62em;
+  will-change: transform;
 }
 
 .pillIcon {
   display: inline-block;
   font-size: 0.88em;
   line-height: 1;
+  opacity: 0.72;
 }
 
 .lowerRightAction {
@@ -697,67 +708,109 @@
 
 /* ── Ambient Physics Animations (only when physics=on & motion allowed) ── */
 
-@keyframes swayGentle {
-  0%,
-  100% {
-    transform: rotate(-4deg) translateY(0);
-  }
-  50% {
-    transform: rotate(4deg) translateY(2px);
-  }
-}
-
 @keyframes sunBob {
   0%,
   100% {
-    transform: translateY(0) rotate(-2deg);
+    translate: 0 0;
+    rotate: -2deg;
   }
   50% {
-    transform: translateY(-6px) rotate(3deg);
+    translate: 0 -6px;
+    rotate: 3deg;
   }
 }
 
 @keyframes twinkleFloat {
   0%,
   100% {
-    transform: translateY(0) scale(1);
+    translate: 0 0;
+    scale: 1;
   }
   50% {
-    transform: translateY(-4px) scale(1.06);
+    translate: 0 -4px;
+    scale: 1.06;
   }
 }
 
+/* The sparkles settle onto the finished stage, one scrap at a time. These use
+   the independent transform properties so they compose with each star's own
+   resting tilt rather than overwriting it. */
+@keyframes scrapSettle {
+  from {
+    opacity: 0;
+    translate: 0 -10px;
+    scale: 0.72;
+    rotate: calc(var(--tilt, 0deg) - 14deg);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    rotate: var(--tilt, 0deg);
+  }
+}
+
+.starScatter .cutoutStar {
+  opacity: 0;
+}
+
+.starScatter[data-still='true'] .cutoutStar {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .hero[data-physics='on'] .buntingStar1 {
-    animation: swayGentle 3.8s ease-in-out infinite;
+  .starScatter:not([data-still='true']) .cutoutStar {
+    animation: scrapSettle 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
-  .hero[data-physics='on'] .buntingStar2 {
-    animation: swayGentle 4.3s ease-in-out infinite -0.9s;
+  .starScatter:not([data-still='true']) .starPos1 {
+    animation-delay: 0.92s;
   }
-
-  .hero[data-physics='on'] .buntingStar3 {
-    animation: swayGentle 3.5s ease-in-out infinite -1.7s;
+  .starScatter:not([data-still='true']) .starPos2 {
+    animation-delay: 1s;
   }
-
-  .hero[data-physics='on'] .buntingStar4 {
-    animation: swayGentle 4.1s ease-in-out infinite -0.4s;
+  .starScatter:not([data-still='true']) .starPos3 {
+    animation-delay: 1.08s;
+  }
+  .starScatter:not([data-still='true']) .starPos4 {
+    animation-delay: 1.04s;
+  }
+  .starScatter:not([data-still='true']) .starPos5 {
+    animation-delay: 1.16s;
+  }
+  .starScatter:not([data-still='true']) .starPos6 {
+    animation-delay: 1.12s;
+  }
+  .starScatter:not([data-still='true']) .starPos7 {
+    animation-delay: 1.24s;
+  }
+  .starScatter:not([data-still='true']) .starPos8 {
+    animation-delay: 1.2s;
+  }
+  .starScatter:not([data-still='true']) .starPos9 {
+    animation-delay: 1.28s;
   }
 
   .hero[data-physics='on'] .sunDisc {
     animation: sunBob 5.2s ease-in-out infinite;
   }
 
-  .hero[data-physics='on'] .starPos1,
-  .hero[data-physics='on'] .starPos3,
-  .hero[data-physics='on'] .starPos5 {
-    animation: twinkleFloat 4.2s ease-in-out infinite;
+  .hero[data-physics='on'] .starPos1 svg,
+  .hero[data-physics='on'] .starPos3 svg,
+  .hero[data-physics='on'] .starPos5 svg {
+    animation: twinkleFloat 4.2s ease-in-out 1.8s infinite;
   }
 
-  .hero[data-physics='on'] .starPos2,
-  .hero[data-physics='on'] .starPos4,
-  .hero[data-physics='on'] .starPos6 {
-    animation: twinkleFloat 4.8s ease-in-out infinite -1.6s;
+  .hero[data-physics='on'] .starPos2 svg,
+  .hero[data-physics='on'] .starPos4 svg,
+  .hero[data-physics='on'] .starPos6 svg {
+    animation: twinkleFloat 4.8s ease-in-out 2.4s infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starScatter .cutoutStar {
+    opacity: 1;
   }
 }
 
@@ -815,14 +868,7 @@
     width: 12.5rem;
   }
 
-  .upperRightAction {
-    top: 0.9rem;
-    right: 1.1rem;
-  }
-
-  .upperRightAction .paperPillBtn,
-  .lowerRightAction .paperPillBtn,
-  .paperPillBtn {
+  .lowerRightAction .paperPillBtn {
     min-height: 2.75rem;
     padding: 0.48rem 1.05rem;
     font-size: 0.9rem;
