@@ -12,7 +12,9 @@ import {
   useTransform,
 } from 'motion/react'
 import {
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useMemo,
@@ -120,6 +122,7 @@ const MADLIB_SLOTS = {
 } as const
 
 const PAPER_EASE = [0.22, 1, 0.36, 1] as const
+const PAPER_EASE_IN = [0.55, 0, 0.9, 0.4] as const
 
 function FivePointStar({
   className,
@@ -309,6 +312,49 @@ function SculptedCloud({
   return <path className={className} d={d} fill={fill} filter={filter} />
 }
 
+/* While a scene swap is under way the stage planes share one "fold" flag, so
+   every sheet they own tips back down in the same breath — the front apron, the
+   rail and the title stay put above it. */
+const FoldCtx = createContext(false)
+
+/* Two palettes, one diorama: the night act is the same paper under moonlight.
+   Every slot keeps its hue but cools and dims — the geometry, shadows and
+   paper edges are untouched, so the swap stays legible as "same theater,
+   different light" rather than a different illustration. */
+const DAY_PAPER = {
+  backdrop: '#1B42CC',
+  ringGold: '#F5C227',
+  ringOrange: '#E59018',
+  paperWhite: '#FAF9F6',
+  cloudAmber: '#EA9316',
+  wedgeGold: '#E5B122',
+  matBlue: '#A1C5E8',
+  shoulderGold: '#EEB826',
+  ringPale: '#F4C129',
+  deepBlue: '#1F44D6',
+  paleBlue: '#D9E7F5',
+  sunCream: '#F1E2B3',
+  fgAmber: '#EE9617',
+  fgCream: '#F2E2AA',
+} as const
+
+const NIGHT_PAPER = {
+  backdrop: '#101C4A',
+  ringGold: '#2E3C80',
+  ringOrange: '#1E2E6E',
+  paperWhite: '#E4E6F2',
+  cloudAmber: '#4F6AB4',
+  wedgeGold: '#223A88',
+  matBlue: '#34509E',
+  shoulderGold: '#3D5AAE',
+  ringPale: '#22347E',
+  deepBlue: '#0E1840',
+  paleBlue: '#7E92C8',
+  sunCream: '#C3C7D6',
+  fgAmber: '#5670BC',
+  fgCream: '#C9CBD8',
+} as const
+
 function PaperLayer({
   delay = 0,
   from = 42,
@@ -322,17 +368,36 @@ function PaperLayer({
   className?: string
   children: ReactNode
 }) {
+  const folded = useContext(FoldCtx)
+  /* The swap reads as the sheets closing themselves down again, deepest first,
+     which is the entrance played backwards — no new motion vocabulary. */
+  const exitDelay = Math.max(0, 0.6 - delay)
   return (
     <motion.g
       className={className}
-      initial={still ? false : { y: from, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
+      /* A diorama layer does not fade in — it swings up out of the stage floor.
+         The sheet starts edge-on (rotateX 90), hinged along its own bottom edge,
+         and tips forward to flat (0deg), which is what a cut paper plane does
+         when the proscenium is opened. Perspective keeps the far edge smaller
+         than the near one, so it reads as paper in depth, not a scaleY squash. */
+      style={{ originY: 1, transformPerspective: 1400 }}
+      initial={still ? false : { y: from, rotateX: 90, opacity: 0 }}
+      animate={
+        folded ? { y: from, rotateX: 90, opacity: 0 } : { y: 0, rotateX: 0, opacity: 1 }
+      }
       transition={
         still
           ? undefined
           : {
-              y: { duration: 0.82, delay, ease: PAPER_EASE },
-              opacity: { duration: 0.18, delay },
+              y: folded
+                ? { duration: 0.55, delay: exitDelay, ease: PAPER_EASE_IN }
+                : { duration: 0.92, delay, ease: PAPER_EASE },
+              rotateX: folded
+                ? { duration: 0.55, delay: exitDelay, ease: PAPER_EASE_IN }
+                : { duration: 0.92, delay, ease: PAPER_EASE },
+              opacity: folded
+                ? { duration: 0.24, delay: exitDelay }
+                : { duration: 0.26, delay },
             }
       }
     >
@@ -388,12 +453,20 @@ const BUNTING_STARS = BUNTING.anchors.map((t, i) => {
     span: [25, 27, 24, 26][i],
     tilt: [-14, 6, -10, 14][i],
     sway: 3.2 + (i % 3) * 0.5,
-    delay: 0.45 + i * 0.1,
+    delay: 0.78 + i * 0.08,
     fill: ['#F59E1B', '#FAF9F6', '#F59E1B', '#F7C627'][i],
   }
 })
 
-function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
+function Bunting({
+  still,
+  shadowId,
+  pin,
+}: {
+  still: boolean
+  shadowId: string
+  pin: string
+}) {
   return (
     <div className={styles.buntingWrap} aria-hidden>
       {/* Same viewBox and projection as the stage planes, so the pins sit on
@@ -412,7 +485,11 @@ function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
             strokeLinecap="round"
             initial={still ? false : { pathLength: 0, opacity: 0.2 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.05, ease: [0.4, 0, 0.2, 1] }}
+            transition={{
+              duration: 0.8,
+              delay: still ? 0 : 0.5,
+              ease: [0.4, 0, 0.2, 1],
+            }}
           />
           {/* Both ends are pinned on the blue rail band, so the swag reads as
               tied rather than cut. */}
@@ -420,9 +497,9 @@ function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
             cx={BUNTING.from.x}
             cy={BUNTING.from.y}
             r="3.4"
-            fill="#FAF9F6"
+            fill={pin}
           />
-          <circle cx={BUNTING.to.x} cy={BUNTING.to.y} r="3.4" fill="#FAF9F6" />
+          <circle cx={BUNTING.to.x} cy={BUNTING.to.y} r="3.4" fill={pin} />
         </g>
 
         {BUNTING_STARS.map((star, i) => (
@@ -432,7 +509,7 @@ function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
             initial={still ? false : { y: -18, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{
-              duration: 0.68,
+              duration: 0.62,
               delay: still ? 0 : star.delay,
               ease: PAPER_EASE,
             }}
@@ -628,6 +705,60 @@ function PaperSun({ className }: { className?: string }) {
   )
 }
 
+/** The night act's disc: a sleepy crescent with closed eyes, parked where the
+ *  sun sits. Both discs stack in the sun cluster and CSS crossfades between
+ *  them, so the swap happens on paper, not with new motion. */
+function PaperMoon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 200 200"
+      className={className}
+      aria-hidden
+      focusable="false"
+    >
+      {/* crescent bite */}
+      <path
+        d="M100 44 A56 56 0 1 0 100 156 A44 44 0 1 1 100 44 Z"
+        fill="#EFE9D6"
+        stroke="#D9D0B4"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+      />
+      <circle cx="118" cy="96" r="7" fill="#DAD2B8" />
+      <circle cx="128" cy="122" r="4.6" fill="#DAD2B8" />
+      <circle cx="106" cy="132" r="3.2" fill="#DAD2B8" />
+      {/* closed sleepy eyes + small smile */}
+      <path
+        d="M74 92 Q81 97 88 92"
+        fill="none"
+        stroke="#111827"
+        strokeWidth="3.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M112 92 Q119 97 126 92"
+        fill="none"
+        stroke="#111827"
+        strokeWidth="3.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M94 106 Q100 111 106 106"
+        fill="none"
+        stroke="#111827"
+        strokeWidth="3.2"
+        strokeLinecap="round"
+      />
+      {/* crumb stars the moon sheds */}
+      <path
+        d="M152 64 L156 74 L166 76 L157 82 L159 92 L152 86 L145 92 L147 82 L138 76 L148 74 Z"
+        fill="#F7C627"
+      />
+      <circle cx="64" cy="52" r="3.4" fill="#F7C627" />
+    </svg>
+  )
+}
+
 type ScriptLayerProps = {
   word: ScriptWord
   reduced: boolean
@@ -804,13 +935,34 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
   const stageClipId = useId()
 
   const [physicsOn, setPhysicsOn] = useState(true)
+  const [act, setAct] = useState<'day' | 'night'>('day')
+  const [folding, setFolding] = useState(false)
   const [writeKey, setWriteKey] = useState(0)
   const [phrase, setPhrase] = useState(0)
   const [phraseHeld, setPhraseHeld] = useState(false)
 
+  const P = act === 'night' ? NIGHT_PAPER : DAY_PAPER
   const physicsActive = physicsOn && !reduced
   // A reduced-motion visit gets the finished diorama, not a slow build of it.
   const still = reduced
+
+  // "Pull me" plays the whole diorama in reverse: the stage sheets fold down,
+  // the paper swaps to the night palette while everything is edge-on, then the
+  // sheets tip back up. Reduced motion just crossfades the lighting.
+  const foldTimer = useRef<number | undefined>(undefined)
+  useEffect(() => () => window.clearTimeout(foldTimer.current), [])
+  const pullScene = useCallback(() => {
+    if (folding) return
+    if (still) {
+      setAct((a) => (a === 'day' ? 'night' : 'day'))
+      return
+    }
+    setFolding(true)
+    foldTimer.current = window.setTimeout(() => {
+      setAct((a) => (a === 'day' ? 'night' : 'day'))
+      setFolding(false)
+    }, 1180)
+  }, [folding, still])
 
   // Normalized pointer offset in [-1, 1] for the paper parallax
   const pointerX = useMotionValue(0)
@@ -950,6 +1102,8 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
       ref={sectionRef}
       className={styles.hero}
       data-surface={surface}
+      data-act={act}
+      data-folding={folding ? 'true' : 'false'}
       data-physics={physicsActive ? 'on' : 'off'}
       aria-labelledby="hero-title"
       onPointerMove={handleStageMove}
@@ -1052,6 +1206,11 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
 
         {/* Sky-blue recessed diorama viewport */}
         <div className={styles.dioramaViewport}>
+          {/* Night lighting: a screen-blend moonbeam under the disc plus one
+              shooting star. The palette swap does the rest. */}
+          <div className={styles.shootingStar} aria-hidden />
+          {/* Planes 1–3 fold during a scene swap; the apron, rail and title stay */}
+          <FoldCtx.Provider value={folding}>
           {/* Plane 1: blueprint grid and arch rings */}
           <motion.div
             className={styles.planeCurtains}
@@ -1064,13 +1223,13 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               className={styles.stageSvg}
             >
               <g clipPath={`url(#${stageClipId})`}>
-                <PaperLayer still={still} from={-18}>
+                <PaperLayer still={still} delay={0.8} from={-18}>
                   <rect
                     x="130"
                     y="60"
                     width="1180"
                     height="796"
-                    fill="#1B42CC"
+                    fill={P.backdrop}
                   />
                   <rect
                     x="130"
@@ -1081,46 +1240,46 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                   />
                 </PaperLayer>
 
-                <PaperLayer still={still} delay={0.08} from={26}>
+                <PaperLayer still={still} delay={0.56} from={26}>
                   <path
                     d="M130 60 H1310 V860 H1085 C1085 270 935 90 710 90 C485 90 335 270 335 860 H130 Z"
-                    fill="#F5C227"
+                    fill={P.ringGold}
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
 
-                <PaperLayer still={still} delay={0.14} from={28}>
+                <PaperLayer still={still} delay={0.58} from={28}>
                   <path
                     d="M130 60 H1310 V860 H1038 C1038 298 900 126 710 126 C520 126 382 298 382 860 H130 Z"
-                    fill="#E59018"
+                    fill={P.ringOrange}
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
 
-                <PaperLayer still={still} delay={0.2} from={30}>
+                <PaperLayer still={still} delay={0.6} from={30}>
                   <g filter={`url(#${shadowFilterId})`}>
                     <path
                       d="M382 860 C382 298 520 126 710 126 C900 126 1038 298 1038 860 H1016 C1016 314 884 150 710 150 C536 150 404 314 404 860 Z"
-                      fill="#FAF9F6"
+                      fill={P.paperWhite}
                     />
                     <path
                       d="M495 70 H765 C762 128 722 154 682 128 C654 164 594 164 566 128 C528 152 496 126 495 70 Z"
-                      fill="#FAF9F6"
+                      fill={P.paperWhite}
                     />
                   </g>
                 </PaperLayer>
 
-                <PaperLayer still={still} delay={0.28} from={36}>
+                <PaperLayer still={still} delay={0.62} from={36}>
                   <SculptedCloud
                     lobes={STAGE_CLOUDS.amberMidLeft}
                     baseY={680}
-                    fill="#EA9316"
+                    fill={P.cloudAmber}
                     filter={`url(#${shadowFilterId})`}
                   />
                   <SculptedCloud
                     lobes={STAGE_CLOUDS.amberMidRight}
                     baseY={680}
-                    fill="#EA9316"
+                    fill={P.cloudAmber}
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
@@ -1140,15 +1299,15 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               className={styles.stageSvg}
             >
               <g clipPath={`url(#${stageClipId})`}>
-                <PaperLayer still={still} delay={0.18} from={-24}>
+                <PaperLayer still={still} delay={0.64} from={-24}>
                   <path
                     d="M148 70 H435 C420 177 358 257 275 317 C242 330 196 341 148 347 Z"
-                    fill="#E5B122"
+                    fill={P.wedgeGold}
                     filter={`url(#${shadowFilterId})`}
                   />
                   <path
                     d="M148 70 H410 C395 154 342 216 264 238 C226 243 186 248 148 250 Z"
-                    fill="#A1C5E8"
+                    fill={P.matBlue}
                     filter={`url(#${shadowFilterId})`}
                   />
                   {/* The gold shoulder behind the sun used to stop at x 1080
@@ -1156,15 +1315,15 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                       and tucks into the right frame leg instead. */}
                   <path
                     d="M720 70 H1272 V318 C1236 250 1160 196 1060 168 C940 136 800 108 720 70 Z"
-                    fill="#EEB826"
+                    fill={P.shoulderGold}
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
 
-                <PaperLayer still={still} delay={0.28} from={32}>
+                <PaperLayer still={still} delay={0.66} from={32}>
                   <path
                     d="M312 310 C302 280 326 252 356 260 C378 226 428 228 446 262 C474 258 494 282 484 310 Z"
-                    fill="#FAF9F6"
+                    fill={P.paperWhite}
                     filter={`url(#${shadowFilterId})`}
                   />
                   {/* The right-hand white cloud used to crowd the sun's own
@@ -1172,39 +1331,39 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                       shrunken blue bank opened up. */}
                   <path
                     d="M1020 428 C1008 392 1040 360 1076 370 C1102 330 1162 334 1184 372 C1218 368 1240 396 1230 428 Z"
-                    fill="#FAF9F6"
+                    fill={P.paperWhite}
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
 
-                <PaperLayer still={still} delay={0.34} from={36}>
+                <PaperLayer still={still} delay={0.68} from={36}>
                   <path
                     d="M148 340 C284 340 312 380 296 430 C312 458 292 500 248 512 C214 512 178 505 148 492 Z"
-                    fill="#FAF9F6"
+                    fill={P.paperWhite}
                     filter={`url(#${shadowFilterId})`}
                   />
                   <path
                     d="M1292 344 C1228 344 1178 384 1192 434 C1150 448 1140 504 1182 534 C1208 550 1250 547 1292 538 Z"
-                    fill="#FAF9F6"
+                    fill={P.paperWhite}
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
 
-                <PaperLayer still={still} delay={0.38} from={38}>
+                <PaperLayer still={still} delay={0.7} from={38}>
                   <path
                     d="M148 474 C310 466 368 508 376 568 C428 568 472 610 478 672 C406 676 276 680 148 680 Z"
-                    fill="#A1C5E8"
+                    fill={P.matBlue}
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
 
-                <PaperLayer still={still} delay={0.44} from={42}>
+                <PaperLayer still={still} delay={0.72} from={42}>
                   <SculptedCloud
                     lobes={STAGE_CLOUDS.balustradeBackAmber}
                     baseY={680}
                     leftX={410}
                     rightX={830}
-                    fill="#EA9316"
+                    fill={P.cloudAmber}
                     filter={`url(#${shadowFilterId})`}
                   />
                   <SculptedCloud
@@ -1212,16 +1371,16 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                     baseY={680}
                     leftX={830}
                     rightX={1310}
-                    fill="#F4C129"
+                    fill={P.ringPale}
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
               </g>
 
-              <PaperLayer still={still} delay={0.04} from={-14}>
+              <PaperLayer still={still} delay={0.4} from={-14}>
                 <path
                   d="M118 860 V70 C118 44 138 26 164 26 H1276 C1302 26 1322 44 1322 70 V860 H1272 V94 C1272 80 1260 70 1246 70 H194 C180 70 168 80 168 94 V860 Z"
-                  fill="#1F44D6"
+                  fill={P.deepBlue}
                   filter={`url(#${deepShadowId})`}
                 />
                 <path
@@ -1232,15 +1391,15 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                 />
               </PaperLayer>
 
-              <PaperLayer still={still} delay={0.22} from={-20}>
+              <PaperLayer still={still} delay={0.46} from={-20}>
                 <path
                   d="M846 0 H1018 C1012 40 972 58 934 40 C912 30 902 16 896 0 Z"
-                  fill="#D9E7F5"
+                  fill={P.paleBlue}
                   filter={`url(#${shadowFilterId})`}
                 />
                 <path
                   d="M1030 0 H1330 C1330 46 1298 74 1258 66 C1236 96 1188 106 1152 86 C1116 110 1064 104 1040 72 C1024 50 1022 22 1030 0 Z"
-                  fill="#FAF9F6"
+                  fill={P.paperWhite}
                   filter={`url(#${shadowFilterId})`}
                 />
               </PaperLayer>
@@ -1252,7 +1411,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
             className={styles.planeStageProps}
             style={physicsActive ? { x: sunX, y: sunY } : undefined}
           >
-            <Bunting still={still} shadowId={softShadowId} />
+            <Bunting still={still} shadowId={softShadowId} pin={P.paperWhite} />
 
             <div className={styles.sunCluster} aria-hidden>
               <motion.div
@@ -1263,17 +1422,18 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                   still
                     ? undefined
                     : {
-                        y: { duration: 0.88, delay: 0.46, ease: PAPER_EASE },
+                        y: { duration: 0.88, delay: 0.52, ease: PAPER_EASE },
                         scale: {
                           duration: 0.88,
-                          delay: 0.46,
+                          delay: 0.52,
                           ease: PAPER_EASE,
                         },
-                        opacity: { duration: 0.16, delay: 0.46 },
+                        opacity: { duration: 0.16, delay: 0.52 },
                       }
                 }
               >
                 <PaperSun className={styles.sunSvg} />
+                <PaperMoon className={styles.moonSvg} />
               </motion.div>
               <motion.svg
                 viewBox="0 0 380 155"
@@ -1292,12 +1452,12 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               >
                 <path
                   d="M18 112 C12 76 44 52 80 62 C114 22 180 22 214 58 C250 36 300 46 320 80 C352 82 366 106 356 128 H18 Z"
-                  fill="#F1E2B3"
+                  fill={P.sunCream}
                   filter={`url(#${shadowFilterId})`}
                 />
                 <path
                   d="M34 128 C28 94 58 72 92 80 C124 44 188 44 218 76 C252 56 298 66 314 96 C342 98 354 116 344 134 H34 Z"
-                  fill="#FAF9F6"
+                  fill={P.paperWhite}
                   filter={`url(#${shadowFilterId})`}
                 />
               </motion.svg>
@@ -1338,7 +1498,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                 data-hero-sticker="daisy"
                 data-slot="daisy"
               >
-                <FourPointSparkle fill="#FAF9F6" innerFill="#8AB8EE" />
+                <FourPointSparkle fill={P.paperWhite} innerFill="#8AB8EE" />
                 <span className={styles.hiddenHook}>
                   <Daisy />
                 </span>
@@ -1361,20 +1521,20 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               </div>
 
               <div className={cn(styles.cutoutStar, styles.starPos5)}>
-                <FourPointSparkle fill="#FAF9F6" innerFill="#7EB0EC" />
+                <FourPointSparkle fill={P.paperWhite} innerFill="#7EB0EC" />
               </div>
 
               <div className={cn(styles.cutoutStar, styles.starPos6)}>
-                <EightPointBurst fill="#FAF9F6" />
+                <EightPointBurst fill={P.paperWhite} />
               </div>
 
               <div className={cn(styles.cutoutStar, styles.starPos7)}>
-                <FourPointSparkle fill="#FAF9F6" innerFill="#F5A623" />
+                <FourPointSparkle fill={P.paperWhite} innerFill="#F5A623" />
               </div>
 
               <div className={cn(styles.cutoutStar, styles.starPos8)}>
                 <FivePointStar
-                  fill="#FAF9F6"
+                  fill={P.paperWhite}
                   stroke="#111827"
                   strokeWidth={2.6}
                 />
@@ -1382,20 +1542,27 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
             </div>
           </motion.div>
 
+          </FoldCtx.Provider>
+
           {/* Plane 4: the thick off-white Aditya cutout */}
           <motion.div
             className={styles.planeTitle}
             style={physicsActive ? { x: titleX, y: titleY } : undefined}
           >
             <motion.div
-              initial={still ? false : { y: 28, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+              /* Same diorama hinge as the stage planes: the cutout tips up from
+                 its baseline instead of sliding, so the title reads as another
+                 sheet of paper in the stack. */
+              style={{ originY: 1, transformPerspective: 1400 }}
+              initial={still ? false : { y: 28, rotateX: 90, opacity: 0 }}
+              animate={{ y: 0, rotateX: 0, opacity: 1 }}
               transition={
                 still
                   ? undefined
                   : {
-                      y: { duration: 0.8, delay: 0.72, ease: PAPER_EASE },
-                      opacity: { duration: 0.16, delay: 0.72 },
+                      y: { duration: 0.9, delay: 0.3, ease: PAPER_EASE },
+                      rotateX: { duration: 0.9, delay: 0.3, ease: PAPER_EASE },
+                      opacity: { duration: 0.22, delay: 0.3 },
                     }
               }
             >
@@ -1483,9 +1650,11 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
             <button
               type="button"
               className={styles.paperPillBtn}
-              onClick={() => scrollToSection('contact', reduced)}
+              aria-pressed={act === 'night'}
+              disabled={folding}
+              onClick={pullScene}
             >
-              <span>Say hi</span>
+              <span>{act === 'day' ? 'Pull me' : 'Push back'}</span>
               <ArrowUpRight size={20} strokeWidth={2.5} aria-hidden />
             </button>
           </div>
@@ -1503,46 +1672,46 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               preserveAspectRatio="xMidYMin slice"
               className={styles.cloudsSvg}
             >
-              <PaperLayer still={still} delay={0.54} from={52}>
+              <PaperLayer still={still} delay={0.26} from={52}>
                 <SculptedCloud
                   lobes={FOREGROUND_CLOUDS.amberWave}
                   baseY={430}
                   leftX={380}
                   rightX={1440}
-                  fill="#EE9617"
+                  fill={P.fgAmber}
                   filter={`url(#${shadowFilterId})`}
                 />
               </PaperLayer>
 
-              <PaperLayer still={still} delay={0.62} from={54}>
+              <PaperLayer still={still} delay={0.22} from={54}>
                 <SculptedCloud
                   lobes={FOREGROUND_CLOUDS.creamWave}
                   baseY={430}
                   leftX={450}
                   rightX={1460}
-                  fill="#F2E2AA"
+                  fill={P.fgCream}
                   filter={`url(#${deepShadowId})`}
                 />
               </PaperLayer>
 
-              <PaperLayer still={still} delay={0.68} from={58}>
+              <PaperLayer still={still} delay={0.18} from={58}>
                 <SculptedCloud
                   lobes={FOREGROUND_CLOUDS.rightWhiteBank}
                   baseY={430}
                   leftX={850}
                   rightX={1480}
-                  fill="#FAF9F6"
+                  fill={P.paperWhite}
                   filter={`url(#${deepShadowId})`}
                 />
               </PaperLayer>
 
-              <PaperLayer still={still} delay={0.72} from={60}>
+              <PaperLayer still={still} delay={0.14} from={60}>
                 <SculptedCloud
                   lobes={FOREGROUND_CLOUDS.leftHeroMound}
                   baseY={430}
                   leftX={-120}
                   rightX={880}
-                  fill="#FAF9F6"
+                  fill={P.paperWhite}
                   filter={`url(#${deepShadowId})`}
                 />
               </PaperLayer>
