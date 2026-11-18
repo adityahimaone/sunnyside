@@ -1,17 +1,7 @@
 'use client'
 
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Atom,
-  Circle,
-  Diamond,
-  Pencil,
-  Rows,
-  Sparkles,
-  Sun,
-  Terminal,
-} from 'kubai-icons-react'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { Circle, Diamond, Sparkles, Sun } from 'kubai-icons-react'
 import {
   AnimatePresence,
   MotionConfig,
@@ -102,26 +92,29 @@ function layoutAdityaWord(): ScriptWord {
   return { main, extra, width, top, bottom, boxes: [] }
 }
 
-/* Icons ride at 0.62em of the pill's own font, which lands them at the ink
-   height the old text glyphs had, and scales with the headline at every
-   breakpoint. The `⚡` slots keep their glyph: Kubai has no standalone bolt. */
+/* The "I BRING" row uses Kubai icons with a palette accent each. They act
+   themselves out on every word change — driven by the controlled `hover`
+   prop with `trigger="none"`, so no pointer is needed. The "&" and "TO" rows
+   keep their original text glyphs. */
+const CRAFT_ICONS = [
+  { Icon: Sparkles, color: '#3d53d6', word: 'SYSTEMS' },
+  { Icon: Sun, color: '#ff6a2b', word: 'CRAFT' },
+  { Icon: Circle, color: '#ff6a2b', word: 'WARMTH' },
+  { Icon: Diamond, color: '#3d53d6', word: 'CLARITY' },
+] as const
+
 const MADLIB_SLOTS = {
-  craft: [
-    { icon: <Sparkles size="0.62em" />, word: 'SYSTEMS' },
-    { icon: <Sun size="0.62em" />, word: 'CRAFT' },
-    { icon: <Circle size="0.62em" />, word: 'WARMTH' },
-    { icon: <Diamond size="0.62em" />, word: 'CLARITY' },
-  ],
+  craft: CRAFT_ICONS,
   taste: [
-    { icon: <Diamond size="0.62em" />, word: 'MOTION' },
-    { icon: <Pencil size="0.62em" />, word: 'TASTE' },
-    { icon: <Diamond size="0.62em" />, word: 'DETAIL' },
+    { icon: '❖', word: 'MOTION' },
+    { icon: '✏', word: 'TASTE' },
+    { icon: '◈', word: 'DETAIL' },
     { icon: '⚡', word: 'FEEL' },
   ],
   products: [
-    { icon: <Rows size="0.62em" />, word: 'DIGITAL WORK' },
-    { icon: <Atom size="0.62em" />, word: 'REACT APPS' },
-    { icon: <Terminal size="0.62em" />, word: 'WEB SYSTEMS' },
+    { icon: '▤', word: 'DIGITAL WORK' },
+    { icon: '⚛', word: 'REACT APPS' },
+    { icon: '>_', word: 'WEB SYSTEMS' },
     { icon: '⚡', word: 'PRODUCT UI' },
   ],
 } as const
@@ -681,6 +674,21 @@ function ScriptStrokeLayer({
  * retiring word leaves through the top edge while the next rises from below —
  * so the pill is never empty and the two never share the frame.
  */
+type PillIcon = (typeof CRAFT_ICONS)[number]
+
+/** A row's item is either a Kubai icon reference or a plain text glyph. */
+type KubaiItem = { Icon: PillIcon['Icon']; color: string; word: string }
+type GlyphItem = { icon: string; word: string }
+type PillItem = KubaiItem | GlyphItem
+
+function hasIcon(it: PillItem): it is KubaiItem {
+  return 'Icon' in it
+}
+
+/**
+ * Kubai icons get a controlled `hover` pulse on every word change, so they
+ * act themselves out without a pointer. Reduced motion keeps the rest pose.
+ */
 function HeadlineSwapRow({
   lead,
   items,
@@ -690,7 +698,7 @@ function HeadlineSwapRow({
   onHoverChange,
 }: {
   lead: string
-  items: readonly { icon: ReactNode; word: string }[]
+  items: readonly PillItem[]
   index: number
   reduced: boolean
   onAdvance: () => void
@@ -698,6 +706,31 @@ function HeadlineSwapRow({
 }) {
   const current = items[index % items.length]
   const widest = items.reduce((a, b) => (b.word.length > a.word.length ? b : a))
+
+  const [acting, setActing] = useState(false)
+  useEffect(() => {
+    if (reduced) return
+    // Scheduled rather than set in the effect body — one frame nobody can see,
+    // and the compiler lint stays happy. Same trick as use-in-view.
+    const frame = requestAnimationFrame(() => setActing(true))
+    const timer = window.setTimeout(() => setActing(false), 1200)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.clearTimeout(timer)
+    }
+  }, [current.word, reduced])
+
+  const renderIcon = (it: PillItem, animated: boolean) =>
+    hasIcon(it) ? (
+      <it.Icon
+        size="1em"
+        color={it.color}
+        trigger="none"
+        hover={animated ? acting : undefined}
+      />
+    ) : (
+      it.icon
+    )
 
   return (
     <div className={styles.headlineRow}>
@@ -713,7 +746,7 @@ function HeadlineSwapRow({
         aria-label={`${lead} ${current.word}. Choose the next word`}
       >
         <span className={styles.swapSizer} aria-hidden>
-          <span className={styles.pillIcon}>{widest.icon}</span>
+          <span className={styles.pillIcon}>{renderIcon(widest, false)}</span>
           <span>{widest.word}</span>
         </span>
         <span className={styles.swapWindow} aria-hidden>
@@ -726,7 +759,9 @@ function HeadlineSwapRow({
               exit={reduced ? undefined : { y: '-100%' }}
               transition={{ duration: 0.42, ease: PAPER_EASE }}
             >
-              <span className={styles.pillIcon}>{current.icon}</span>
+              <span className={styles.pillIcon}>
+                {renderIcon(current, true)}
+              </span>
               <span>{current.word}</span>
             </motion.span>
           </AnimatePresence>
@@ -1010,7 +1045,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
           >
             <svg
               viewBox="0 0 1440 860"
-              preserveAspectRatio="xMidYMid slice"
+              preserveAspectRatio="xMidYMin slice"
               className={styles.stageSvg}
             >
               <g clipPath={`url(#${stageClipId})`}>
@@ -1086,7 +1121,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
           >
             <svg
               viewBox="0 0 1440 860"
-              preserveAspectRatio="xMidYMid slice"
+              preserveAspectRatio="xMidYMin slice"
               className={styles.stageSvg}
             >
               <g clipPath={`url(#${stageClipId})`}>
@@ -1441,7 +1476,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               onClick={() => scrollToSection('contact', reduced)}
             >
               <span>Say hi</span>
-              <ArrowUpRight size={20} />
+              <ArrowUpRight size={20} strokeWidth={2.5} aria-hidden />
             </button>
           </div>
 
@@ -1555,7 +1590,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                     onClick={() => scrollToSection('work', reduced)}
                   >
                     <span>See work</span>
-                    <ArrowRight size={20} />
+                    <ArrowRight size={20} strokeWidth={2.5} aria-hidden />
                   </button>
                 </div>
               </div>

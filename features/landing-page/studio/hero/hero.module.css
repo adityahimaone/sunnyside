@@ -654,11 +654,14 @@
   white-space: nowrap;
 }
 
+/* Holds a Kubai icon at the pill's own type size, or a text glyph. The icons
+   are set at 1em of this, so they sit at ink height beside the word. */
 .pillIcon {
-  display: inline-block;
-  font-size: 0.88em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
   line-height: 1;
-  opacity: 0.72;
 }
 
 .lowerRightAction {
