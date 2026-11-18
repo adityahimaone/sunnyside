@@ -341,11 +341,15 @@ function PaperLayer({
   )
 }
 
+/* The bunting is drawn in the stage's own 1440 × 860 space so both pins land
+   on the proscenium's top rail band (y 26–70) at every width — a CSS-positioned
+   div drifts off the frame the moment the stage scale changes. The sag stays
+   shallow and left of the arch so the hanging stars never touch it. */
 const BUNTING = {
-  from: { x: -12, y: 40 },
-  control: { x: 205, y: 132 },
-  to: { x: 442, y: 52 },
-  anchors: [0.14, 0.37, 0.6, 0.84],
+  from: { x: 215, y: 50 },
+  control: { x: 345, y: 128 },
+  to: { x: 472, y: 46 },
+  anchors: [0.16, 0.42, 0.68, 0.92],
 } as const
 
 function buntingPoint(t: number) {
@@ -362,14 +366,16 @@ function buntingPoint(t: number) {
   }
 }
 
-/** A star whose top vertex sits just below the origin, so it hangs from (0,0). */
+/** A star whose top vertex sits exactly on the origin, so it hangs from (0,0)
+ *  and a rotation about that point swings it from the string instead of
+ *  letting its tip drift off the cord. */
 function starPoints(outer: number, inner = outer * 0.48) {
   const points: string[] = []
   for (let i = 0; i < 10; i += 1) {
     const radius = i % 2 === 0 ? outer : inner
     const angle = (Math.PI / 5) * i - Math.PI / 2
     const x = Math.cos(angle) * radius
-    const y = Math.sin(angle) * radius + outer * 0.85
+    const y = Math.sin(angle) * radius + outer
     points.push(`${round(x)},${round(y)}`)
   }
   return points.join(' ')
@@ -379,7 +385,7 @@ const BUNTING_STARS = BUNTING.anchors.map((t, i) => {
   const point = buntingPoint(t)
   return {
     ...point,
-    span: [33, 35, 32, 34][i],
+    span: [25, 27, 24, 26][i],
     tilt: [-14, 6, -10, 14][i],
     sway: 3.2 + (i % 3) * 0.5,
     delay: 0.45 + i * 0.1,
@@ -390,7 +396,13 @@ const BUNTING_STARS = BUNTING.anchors.map((t, i) => {
 function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
   return (
     <div className={styles.buntingWrap} aria-hidden>
-      <svg viewBox="0 0 450 165" className={styles.buntingSvg}>
+      {/* Same viewBox and projection as the stage planes, so the pins sit on
+          the blue rail band wherever the stage scale puts it. */}
+      <svg
+        viewBox="0 0 1440 860"
+        preserveAspectRatio="xMidYMin slice"
+        className={styles.stageSvg}
+      >
         <g filter={`url(#${shadowId})`}>
           <motion.path
             d={`M${BUNTING.from.x} ${BUNTING.from.y} Q${BUNTING.control.x} ${BUNTING.control.y} ${BUNTING.to.x} ${BUNTING.to.y}`}
@@ -402,7 +414,8 @@ function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
             animate={{ pathLength: 1, opacity: 1 }}
             transition={{ duration: 1.05, ease: [0.4, 0, 0.2, 1] }}
           />
-          {/* Both ends are pinned, so the swag reads as tied rather than cut. */}
+          {/* Both ends are pinned on the blue rail band, so the swag reads as
+              tied rather than cut. */}
           <circle
             cx={BUNTING.from.x}
             cy={BUNTING.from.y}
@@ -425,9 +438,11 @@ function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
             }}
           >
             <motion.g
-              style={{
-                transformOrigin: `${round(star.x)}px ${round(star.y)}px`,
-              }}
+              /* Framer overrides inline transformOrigin on SVG targets and
+                 pivots at the viewBox centre, which lifts the tip off the
+                 cord. Its originX/originY are relative to the element's own
+                 box, so 0.5 / 0 pivots the sway exactly at the top vertex. */
+              style={{ originX: 0.5, originY: 0 }}
               animate={
                 still
                   ? undefined
@@ -451,7 +466,7 @@ function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
             >
               <polygon
                 points={starPoints(star.span)}
-                transform={`translate(${round(star.x)} ${round(star.y - 4)})`}
+                transform={`translate(${round(star.x)} ${round(star.y)})`}
                 fill={star.fill}
               />
             </motion.g>
@@ -1089,7 +1104,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                       fill="#FAF9F6"
                     />
                     <path
-                      d="M495 96 H765 C762 154 722 180 682 154 C654 190 594 190 566 154 C528 178 496 152 495 96 Z"
+                      d="M495 70 H765 C762 128 722 154 682 128 C654 164 594 164 566 128 C528 152 496 126 495 70 Z"
                       fill="#FAF9F6"
                     />
                   </g>
@@ -1127,33 +1142,21 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               <g clipPath={`url(#${stageClipId})`}>
                 <PaperLayer still={still} delay={0.18} from={-24}>
                   <path
-                    d="M148 70 H435 C420 177 358 257 275 317 L148 347 Z"
+                    d="M148 70 H435 C420 177 358 257 275 317 C242 330 196 341 148 347 Z"
                     fill="#E5B122"
                     filter={`url(#${shadowFilterId})`}
                   />
                   <path
-                    d="M148 70 H410 C395 154 342 216 264 238 L148 250 Z"
+                    d="M148 70 H410 C395 154 342 216 264 238 C226 243 186 248 148 250 Z"
                     fill="#A1C5E8"
                     filter={`url(#${shadowFilterId})`}
                   />
+                  {/* The gold shoulder behind the sun used to stop at x 1080
+                      with a hard vertical cut in mid-sky; it now sweeps down
+                      and tucks into the right frame leg instead. */}
                   <path
-                    d="M720 70 H1080 V242 C1025 184 955 144 865 138 C795 134 745 110 720 70 Z"
+                    d="M720 70 H1272 V318 C1236 250 1160 196 1060 168 C940 136 800 108 720 70 Z"
                     fill="#EEB826"
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                  <SculptedCloud
-                    lobes={[
-                      { cx: 1140, cy: 148, r: 92 },
-                      { cx: 1252, cy: 116, r: 102 },
-                      { cx: 1336, cy: 168, r: 92 },
-                      { cx: 1310, cy: 268, r: 96 },
-                      { cx: 1206, cy: 240, r: 90 },
-                      { cx: 1300, cy: 356, r: 84 },
-                    ]}
-                    baseY={452}
-                    leftX={1052}
-                    rightX={1348}
-                    fill="#A1C5E8"
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
@@ -1164,8 +1167,11 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                     fill="#FAF9F6"
                     filter={`url(#${shadowFilterId})`}
                   />
+                  {/* The right-hand white cloud used to crowd the sun's own
+                      cloud stack; it sits down-right now, filling the sky the
+                      shrunken blue bank opened up. */}
                   <path
-                    d="M956 308 C944 272 976 240 1012 250 C1038 210 1098 214 1120 252 C1154 248 1176 276 1166 308 Z"
+                    d="M1020 428 C1008 392 1040 360 1076 370 C1102 330 1162 334 1184 372 C1218 368 1240 396 1230 428 Z"
                     fill="#FAF9F6"
                     filter={`url(#${shadowFilterId})`}
                   />
@@ -1173,7 +1179,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
 
                 <PaperLayer still={still} delay={0.34} from={36}>
                   <path
-                    d="M148 340 C284 340 312 380 296 430 C312 458 292 500 248 512 H148 Z"
+                    d="M148 340 C284 340 312 380 296 430 C312 458 292 500 248 512 C214 512 178 505 148 492 Z"
                     fill="#FAF9F6"
                     filter={`url(#${shadowFilterId})`}
                   />
@@ -1186,7 +1192,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
 
                 <PaperLayer still={still} delay={0.38} from={38}>
                   <path
-                    d="M148 474 C310 466 368 508 376 568 C428 568 472 610 478 672 H148 Z"
+                    d="M148 474 C310 466 368 508 376 568 C428 568 472 610 478 672 C406 676 276 680 148 680 Z"
                     fill="#A1C5E8"
                     filter={`url(#${shadowFilterId})`}
                   />

@@ -134,11 +134,13 @@
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(0.95rem, 1.25vw, 1.2rem);
+  font-size: clamp(0.8rem, 1vw, 0.95rem);
   font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 1;
   white-space: nowrap;
+  /* The ascender/descender ink used to poke past the tab's rounded borders at
+     tight sizes; a one-notch-down size keeps the full string clear of the edge. */
 }
 
 /* ── Sky-blue recessed diorama viewport ──────────────────────────────────── */
@@ -184,13 +186,13 @@
 
 /* ── Hanging bunting: string and stars in one SVG ─────────────────────────── */
 
+/* Full-stage box on purpose: the bunting's own SVG carries the stage's viewBox
+   and projection, so its pins stay on the blue rail band at any scale. */
 .buntingWrap {
   position: absolute;
-  left: clamp(2.2rem, 4.8vw, 4.4rem);
-  top: 0;
-  width: clamp(16rem, 31vw, 28rem);
-  aspect-ratio: 450 / 165;
+  inset: 0;
   overflow: visible;
+  pointer-events: none;
 }
 
 .buntingSvg {
@@ -240,19 +242,30 @@
   position: absolute;
   left: 10.4%;
   right: 10.4%;
-  bottom: clamp(28%, 31vh, 34%);
+  bottom: clamp(23%, 26vh, 29%);
   height: clamp(3.4rem, 6.8vh, 4.7rem);
   filter: drop-shadow(0 4px 6px rgb(9 18 50 / 0.26));
 }
 
-/* The rail lives in its own plane above the foreground apron (16), so its
-   ends stay visible where they land on the blue legs — if the apron covered
-   them, the anchor would read as floating mid-stage. */
+/* Behind the foreground apron (16): the cloud banks swallow the rail's ends, so
+   it reads as a railing sitting behind the clouds instead of a ladder pasted
+   over them mid-stage. */
 .planeBalustrade {
   position: absolute;
   inset: 0;
-  z-index: 18;
+  z-index: 15;
   pointer-events: none;
+}
+
+/* Narrow viewports crop the stage (preserveAspectRatio slice), which pushes the
+   frame's legs and the bunting's pins off-screen: the rail turns into a
+   floating white grid over the amber bank and the swag gets cut at the viewport
+   edge. Both props only read while the whole frame is in frame. */
+@media (max-width: 1199px) {
+  .planeBalustrade,
+  .buntingWrap {
+    display: none;
+  }
 }
 
 /* End brackets: chunkier than the spindles, sitting on the blue legs so the
@@ -426,14 +439,16 @@
   height: 64%;
   z-index: 14;
   display: flex;
-  align-items: center;
+  /* Top-anchored, not centred: the title hangs from an explicit offset so its
+     lower edge lands just above the balustrade at every viewport height. */
+  align-items: flex-start;
   justify-content: center;
   pointer-events: none;
 }
 
 .planeTitle > * {
   width: clamp(22rem, 52vw, 49rem);
-  margin-top: clamp(2rem, 9.5vh, 6rem);
+  margin-top: clamp(3.4rem, 26vh, 14.5rem);
   pointer-events: auto;
 }
 
