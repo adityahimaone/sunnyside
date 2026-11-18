@@ -6,7 +6,7 @@ import {
   useReducedMotion,
   useScroll,
 } from 'motion/react'
-import { ArrowUpRight, Menu, X } from 'lucide-react'
+import { ArrowUpRight, CircleX, Menu } from 'kubai-icons-react'
 import Link from 'next/link'
 import { type CSSProperties, useEffect, useRef, useState } from 'react'
 
@@ -179,7 +179,7 @@ export function SiteHeader({
                 onClick={() => go('contact')}
               >
                 <span className={archive.ctaLabel}>Say hi</span>
-                <ArrowUpRight size={15} strokeWidth={2} aria-hidden />
+                <ArrowUpRight size={15} />
               </button>
               <button
                 ref={triggerRef}
@@ -190,7 +190,7 @@ export function SiteHeader({
                 aria-controls="chapter-menu"
                 onClick={() => setOpen(true)}
               >
-                <Menu size={17} strokeWidth={2} aria-hidden />
+                <Menu size={17} />
               </button>
             </div>
           </div>
@@ -223,7 +223,7 @@ export function SiteHeader({
                   onClick={() => setOpen(false)}
                   aria-label="Close the menu"
                 >
-                  <X size={19} aria-hidden />
+                  <CircleX size={19} />
                 </button>
               </div>
 

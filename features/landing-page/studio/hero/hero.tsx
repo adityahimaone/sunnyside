@@ -1,6 +1,17 @@
 'use client'
 
-import { ArrowRight } from 'lucide-react'
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Atom,
+  Circle,
+  Diamond,
+  Pencil,
+  Rows,
+  Sparkles,
+  Sun,
+  Terminal,
+} from 'kubai-icons-react'
 import {
   AnimatePresence,
   MotionConfig,
@@ -41,32 +52,20 @@ type Props = {
   onSurfaceChange?: (surface: HeroSurface) => void
 }
 
-const SCRIPT_STROKE = 3.3
+const SCRIPT_STROKE = 3.45
 const SCRIPT_SLANT = 0.1584
 
-/**
- * Capital 'A' majuscule for single-stroke script.
- * Sign-painter anatomy with rising left arch, rounded apex (y = -19),
- * descending right stem chaining cleanly into 'd' at (advance, -1), and
- * crisp calligraphic waist crossbar drawn after the main stroke.
- */
 const SCRIPT_A_CAPITAL: [number, string, string?] = [
   15.2,
   'M1.5 -1C3 -3.8 5.6 -11.5 8.4 -19C9 -19.6 9.4 -19.6 9.8 -19C11.6 -12 13 -5.5 13.8 -1C14.1 -0.2 14.6 -0.6 15.2 -1',
   'M4.6 -8.2C7.2 -8.5 10.2 -8.5 12.8 -8.2',
 ]
 
-/**
- * Final 'a' with a restrained calligraphic tail curving upward at the end.
- */
 const SCRIPT_A_TAIL: [number, string] = [
   13.2,
   'M0 -1C1.4 -1.4 1.4 -9.6 4.3 -10C2.5 -10 1 -7.8 1 -5C1 -2.2 2.5 0 4.3 0C6.1 0 7.6 -2.2 7.6 -5L7.8 -10L7.8 -3C7.8 -0.6 8.6 0.2 10.2 0.2C11.8 0.2 13.5 -0.2 14.8 -1C15.8 -1.5 16.8 -2 17.5 -2.6',
 ]
 
-/**
- * Lays out `Aditya` with Capital 'A' and tailed final 'a' in one continuous path.
- */
 function layoutAdityaWord(): ScriptWord {
   const letters: [number, string, string?, number?][] = [
     SCRIPT_A_CAPITAL,
@@ -103,37 +102,44 @@ function layoutAdityaWord(): ScriptWord {
   return { main, extra, width, top, bottom, boxes: [] }
 }
 
+/* Icons ride at 0.62em of the pill's own font, which lands them at the ink
+   height the old text glyphs had, and scales with the headline at every
+   breakpoint. The `⚡` slots keep their glyph: Kubai has no standalone bolt. */
 const MADLIB_SLOTS = {
   craft: [
-    { icon: '✦', word: 'SYSTEMS' },
-    { icon: '☀', word: 'CRAFT' },
-    { icon: '◉', word: 'WARMTH' },
-    { icon: '◈', word: 'CLARITY' },
+    { icon: <Sparkles size="0.62em" />, word: 'SYSTEMS' },
+    { icon: <Sun size="0.62em" />, word: 'CRAFT' },
+    { icon: <Circle size="0.62em" />, word: 'WARMTH' },
+    { icon: <Diamond size="0.62em" />, word: 'CLARITY' },
   ],
   taste: [
-    { icon: '❖', word: 'MOTION' },
-    { icon: '✏', word: 'TASTE' },
-    { icon: '◈', word: 'DETAIL' },
+    { icon: <Diamond size="0.62em" />, word: 'MOTION' },
+    { icon: <Pencil size="0.62em" />, word: 'TASTE' },
+    { icon: <Diamond size="0.62em" />, word: 'DETAIL' },
     { icon: '⚡', word: 'FEEL' },
   ],
   products: [
-    { icon: '▤', word: 'DIGITAL WORK' },
-    { icon: '⚛', word: 'REACT APPS' },
-    { icon: '>_', word: 'WEB SYSTEMS' },
+    { icon: <Rows size="0.62em" />, word: 'DIGITAL WORK' },
+    { icon: <Atom size="0.62em" />, word: 'REACT APPS' },
+    { icon: <Terminal size="0.62em" />, word: 'WEB SYSTEMS' },
     { icon: '⚡', word: 'PRODUCT UI' },
   ],
 } as const
+
+const PAPER_EASE = [0.22, 1, 0.36, 1] as const
 
 function FivePointStar({
   className,
   fill = '#FFD12E',
   stroke = '#111827',
-  strokeWidth = 3,
+  strokeWidth = 2.6,
+  innerFill,
 }: {
   className?: string
   fill?: string
   stroke?: string
   strokeWidth?: number
+  innerFill?: string
 }) {
   return (
     <svg
@@ -149,6 +155,15 @@ function FivePointStar({
         strokeWidth={strokeWidth}
         strokeLinejoin="round"
       />
+      {innerFill ? (
+        <polygon
+          points="32,15 36.4,25.4 47.6,26.3 39,33.7 41.6,44.7 32,38.8 22.4,44.7 25,33.7 16.4,26.3 27.6,25.4"
+          fill={innerFill}
+          stroke={stroke}
+          strokeWidth={Math.max(1.4, strokeWidth * 0.65)}
+          strokeLinejoin="round"
+        />
+      ) : null}
     </svg>
   )
 }
@@ -156,7 +171,7 @@ function FivePointStar({
 function FourPointSparkle({
   className,
   fill = '#FAF9F6',
-  innerFill = '#A7C7E7',
+  innerFill = '#5E97E8',
 }: {
   className?: string
   fill?: string
@@ -184,135 +199,109 @@ function FourPointSparkle({
   )
 }
 
-/* ── Paper-cut cloud geometry ───────────────────────────────────────────────
-   Every cloud in the diorama is built from overlapping puffs that union into
-   one silhouette, so a single drop shadow traces the whole cut edge. Banks
-   share a puff radius, which is what keeps a stack of five layers reading as
-   one hand-cut scene instead of five unrelated blobs. */
+function EightPointBurst({
+  className,
+  fill = '#FAF9F6',
+}: {
+  className?: string
+  fill?: string
+}) {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className={className}
+      aria-hidden
+      focusable="false"
+    >
+      <polygon
+        points="24,3 28.5,14.8 40,9 34.2,20.5 45,24 34.2,27.5 40,39 28.5,33.2 24,45 19.5,33.2 8,39 13.8,27.5 3,24 13.8,20.5 8,9 19.5,14.8"
+        fill={fill}
+        stroke="#111827"
+        strokeWidth="2.3"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
 
-type CloudBankSpec = {
-  x: number
-  w: number
-  /** y of the crest */
-  top: number
-  /** puff radius — the scallop size. Shared radii keep the stack in rhythm. */
+/* ── Sculpted paper clouds ─────────────────────────────────────────────────
+   A cloud is a list of lobes — circles with their own centre and radius —
+   unioned over a base. The silhouettes are authored rather than generated,
+   which is what lets a bank rise and settle the way a hand-cut paper cloud
+   does: a big shoulder, a few middling swells, a low tail. Puffs that all
+   share one radius can only ever read as a scalloped edge. */
+
+type LobeSpec = {
+  cx: number
+  cy: number
   r: number
-  /** how far down the solid fill reaches */
-  base: number
-  seed: number
-  /** >1 packs more, shallower puffs (cleaner field for type) */
-  density?: number
-  /**
-   * How strongly the lobes vary in size, 0–1. At 0 it is the old even scallop
-   * run; near 1 it billows — big lobes with small puffs tucked between them and
-   * deep notches where they meet.
-   */
-  billow?: number
 }
 
-/** The one curve every layer in this hero arrives on. */
-const PAPER_EASE = [0.22, 1, 0.36, 1] as const
-
-function seededRandom(seed: number) {
-  let state = seed >>> 0
-  return () => {
-    state = (state * 1664525 + 1013904223) >>> 0
-    return state / 4294967296
-  }
-}
-
-/**
- * A paper-cut cloud bank.
- *
- * With `billow` at 0 this is a tidy run of near-identical puffs — a scalloped
- * edge, good for narrow bands that sit behind type. As `billow` rises two
- * things happen, and both are needed to make a cloud rather than a bumpy line:
- *
- *  1. The puffs spread out. Two circles of radius r whose centres are 1.5r
- *     apart only notch ~0.34r deep, so the edge stays soft. At 1.85r apart the
- *     notch is ~0.58r — a real valley between two lobes.
- *  2. The lobes stop being identical. Radii and crest heights wander, so the
- *     silhouette swells and settles instead of repeating.
- *
- * The outline is one path: an arc over each lobe, handed off at the exact point
- * where it meets its neighbour, then closed straight down to the base. Drawing
- * it this way — rather than unioning circles over a rectangle — is what keeps
- * the valleys as clean cusps with no slivers of the layer behind leaking
- * through underneath them.
- */
-function CloudBank({
-  x,
-  w,
-  top,
-  r,
-  base,
-  seed,
-  density = 1,
-  billow = 0,
+function SculptedCloud({
+  lobes,
+  baseY,
+  leftX,
+  rightX,
   fill,
   filter,
   className,
-}: CloudBankSpec & { fill: string; filter?: string; className?: string }) {
-  const rand = seededRandom(seed)
-
-  // Deeper notches come from spacing the lobes further apart — but only up to
-  // just under 2r, where neighbouring circles still touch. Past that they come
-  // apart and the outline gains a vertical gap instead of a valley.
-  const maxStep = r * 1.92
-  const spacing = Math.min(maxStep, (r * (1.5 + billow * 0.42)) / density)
-  // ceil, not round: rounding down can overshoot maxStep and open a gap.
-  const count = Math.max(2, Math.ceil(w / spacing))
-  const step = w / count
-
-  const lobes: { cx: number; cy: number; r: number }[] = []
-  for (let i = 0; i <= count; i += 1) {
-    const size = 1 + (rand() - 0.5) * 0.3 * billow
-    const radius = r * size
-    const lift = (rand() - 0.5) * r * 0.16 * billow
-    lobes.push({ cx: x + step * i, cy: top + radius + lift, r: radius })
-  }
+}: {
+  lobes: readonly LobeSpec[]
+  baseY: number
+  leftX?: number
+  rightX?: number
+  fill: string
+  filter?: string
+  className?: string
+}) {
+  const minX = leftX ?? Math.min(...lobes.map((l) => l.cx - l.r))
+  const maxX = rightX ?? Math.max(...lobes.map((l) => l.cx + l.r))
 
   /**
-   * Where the outline hands off from lobe `a` to lobe `b`: the lower of their
-   * two crossings, which is the bottom of the valley between them. Falls back
-   * to a's right extreme when the two do not meet.
+   * Where the silhouettes of two neighbouring lobes cross — the floor of the
+   * valley between them. Undefined when the lobes do not touch.
    */
-  const handoff = (
-    a: { cx: number; cy: number; r: number },
-    b: { cx: number; cy: number; r: number },
-  ) => {
+  const valley = (a: LobeSpec, b: LobeSpec) => {
     const d = Math.hypot(b.cx - a.cx, b.cy - a.cy)
-    if (d === 0 || d >= a.r + b.r) return { x: a.cx + a.r, y: a.cy }
+    if (d === 0 || d >= a.r + b.r) return undefined
     const along = (a.r * a.r - b.r * b.r + d * d) / (2 * d)
     const half = Math.sqrt(Math.max(0, a.r * a.r - along * along))
     const ux = (b.cx - a.cx) / d
     const uy = (b.cy - a.cy) / d
-    // Both crossings share an x; the lower one is the valley floor.
+    // Both crossings share a y; the lower one is the valley floor.
     const y = a.cy + uy * along + Math.abs(ux) * half
     const dy = y - a.cy
     const dx = Math.sqrt(Math.max(0, a.r * a.r - dy * dy))
     return { x: a.cx + Math.sign(b.cx - a.cx) * dx, y }
   }
 
-  /** Angle of a point on a circle, in SVG's y-down frame. */
-  const angleOf = (
-    lobe: { cx: number; cy: number },
-    point: { x: number; y: number },
-  ) => Math.atan2(point.y - lobe.cy, point.x - lobe.cx)
+  /** Angle of a point on a lobe, in SVG's y-down frame. */
+  const angleOf = (lobe: LobeSpec, point: { x: number; y: number }) =>
+    Math.atan2(point.y - lobe.cy, point.x - lobe.cx)
 
-  // The outline enters each lobe at the valley it shares with the lobe before
-  // it and leaves at the valley it shares with the one after, so the seam is
-  // drawn once, exactly where the two arcs cross.
-  let cursor = { x: lobes[0].cx - lobes[0].r, y: lobes[0].cy }
-  let d = `M ${round(cursor.x)} ${round(cursor.y)}`
+  /**
+   * The outline as one path: enter each lobe at the valley it shares with the
+   * lobe before it, arc over the top, leave at the valley it shares with the
+   * lobe after it, then close down to the base.
+   *
+   * Drawing the true union — rather than unioning circles over a rectangle — is
+   * what keeps the apron solid. A rect has to start below every valley to fill
+   * them, which for lobes of very different heights means it reaches far above
+   * the low ones and shows as a flat block in the sky.
+   */
+  const start = { x: lobes[0].cx - lobes[0].r, y: lobes[0].cy }
+  let d = `M ${round(start.x)} ${round(start.y)}`
+  let cursor = start
 
   for (let i = 0; i < lobes.length; i += 1) {
     const lobe = lobes[i]
     const next = lobes[i + 1]
-    const end = next ? handoff(lobe, next) : { x: lobe.cx + lobe.r, y: lobe.cy }
+    const end = next
+      ? (valley(lobe, next) ?? { x: lobe.cx + lobe.r, y: lobe.cy })
+      : { x: lobe.cx + lobe.r, y: lobe.cy }
 
     // Travelling rightwards over a lobe is clockwise in a y-down frame, so the
-    // sweep flag is 1. Whether that arc passes the half-circle depends on where
+    // sweep flag is 1. Whether the arc passes half a circle depends on where
     // the valley sits, so large-arc has to be derived rather than assumed.
     const swept =
       (angleOf(lobe, end) - angleOf(lobe, cursor) + Math.PI * 2) % (Math.PI * 2)
@@ -322,45 +311,14 @@ function CloudBank({
     cursor = end
   }
 
-  d += ` L ${round(x + w)} ${round(base)} L ${round(x)} ${round(base)} Z`
+  d += ` L ${round(maxX)} ${round(baseY)} L ${round(minX)} ${round(baseY)} Z`
 
-  /**
-   * The scalloped edge is a real hole at every valley, and whatever sits behind
-   * shows through it — often the balustrade, which then reads as white slivers
-   * floating between the clouds.
-   *
-   * A rect whose top sits at 0.62r plugs every valley. That line is above the
-   * lobe centres (which are at `top + r`), so the rect's own top edge stays
-   * buried inside the lobes and never shows as a straight line across the
-   * silhouette — it only ever fills the valleys.
-   */
-  const plugTop = top + r * 0.62
-
-  return (
-    <g className={className} fill={fill} filter={filter}>
-      <rect
-        x={round(x)}
-        y={round(plugTop)}
-        width={round(w)}
-        height={round(Math.max(2, base - plugTop + 10))}
-      />
-      <path d={d} />
-    </g>
-  )
+  return <path className={className} d={d} fill={fill} filter={filter} />
 }
 
-/**
- * One sheet of the diorama arriving.
- *
- * Every plane in the stage is a stack of these, each a beat later than the one
- * behind it, which is what makes the scene assemble as cut paper set down one
- * layer at a time rather than a single crossfade. `from` is the depth of the
- * drop: the further back the sheet, the smaller the rise, so the stack settles
- * from the back forwards.
- */
 function PaperLayer({
   delay = 0,
-  from = 46,
+  from = 42,
   still,
   className,
   children,
@@ -380,8 +338,8 @@ function PaperLayer({
         still
           ? undefined
           : {
-              y: { duration: 0.85, delay, ease: PAPER_EASE },
-              opacity: { duration: 0.16, delay },
+              y: { duration: 0.82, delay, ease: PAPER_EASE },
+              opacity: { duration: 0.18, delay },
             }
       }
     >
@@ -390,115 +348,11 @@ function PaperLayer({
   )
 }
 
-type Point = { x: number; y: number }
-
-function cubicPoint(a: Point, b: Point, c: Point, d: Point, t: number): Point {
-  const mt = 1 - t
-  const k0 = mt * mt * mt
-  const k1 = 3 * mt * mt * t
-  const k2 = 3 * mt * t * t
-  const k3 = t * t * t
-  return {
-    x: k0 * a.x + k1 * b.x + k2 * c.x + k3 * d.x,
-    y: k0 * a.y + k1 * b.y + k2 * c.y + k3 * d.y,
-  }
-}
-
-/**
- * Points spaced evenly along the paper window's inner arch, measured by arc
- * length. Sampling the real curve — rather than an ellipse that only resembles
- * it — is what keeps every scallop the same size and on the cut line.
- */
-function archEdgePoints(spacing: number) {
-  const segments: [Point, Point, Point, Point][] = [
-    [
-      { x: 383, y: 860 },
-      { x: 383, y: 300 },
-      { x: 513, y: 162 },
-      { x: 700, y: 162 },
-    ],
-    [
-      { x: 700, y: 162 },
-      { x: 887, y: 162 },
-      { x: 1017, y: 300 },
-      { x: 1017, y: 860 },
-    ],
-  ]
-
-  const raw: Point[] = []
-  for (const [a, b, c, d] of segments) {
-    for (let i = 0; i <= 240; i += 1) {
-      if (raw.length > 0 && i === 0) continue
-      raw.push(cubicPoint(a, b, c, d, i / 240))
-    }
-  }
-
-  const cum = [0]
-  for (let i = 1; i < raw.length; i += 1) {
-    cum.push(
-      cum[i - 1] + Math.hypot(raw[i].x - raw[i - 1].x, raw[i].y - raw[i - 1].y),
-    )
-  }
-
-  const total = cum[cum.length - 1]
-  const count = Math.max(4, Math.round(total / spacing))
-  const points: Point[] = []
-  let cursor = 0
-
-  for (let i = 0; i <= count; i += 1) {
-    const target = (total * i) / count
-    while (cursor < cum.length - 2 && cum[cursor + 1] < target) cursor += 1
-    const span = cum[cursor + 1] - cum[cursor] || 1
-    const t = (target - cum[cursor]) / span
-    points.push({
-      x: raw[cursor].x + (raw[cursor + 1].x - raw[cursor].x) * t,
-      y: raw[cursor].y + (raw[cursor + 1].y - raw[cursor].y) * t,
-    })
-  }
-
-  return points
-}
-
-/* Only the top of the arch is scalloped — below this the edge is the straight
-   side of the window, where the big side clouds already cover the cut. */
-const ARCH_SCALLOPS = archEdgePoints(84).filter((p) => p.y < 650)
-
-/**
- * The paper window's top edge is cut as a cloud, not an arc: a run of puffs
- * laid on the cut line so only their inner halves scallop into the blueprint.
- * Drawn inside the rim's filter group, so the two pieces share one shadow and
- * read as a single sheet of paper.
- */
-function ArchScallops({
-  points,
-  r,
-  fill,
-}: {
-  points: Point[]
-  r: number
-  fill: string
-}) {
-  return (
-    <g fill={fill}>
-      {points.map((p, i) => (
-        <circle key={i} cx={round(p.x)} cy={round(p.y)} r={r} />
-      ))}
-    </g>
-  )
-}
-
-/* ── Hanging bunting ────────────────────────────────────────────────────────
-   The string is a quadratic curve and the stars are hung on it by solving that
-   same curve, so a star can never drift off its own line the way four
-   hand-placed `top` values always eventually do. Each star pivots at its knot,
-   which is what a paper star on a thread actually does. */
-
 const BUNTING = {
-  from: { x: 0, y: 26 },
-  control: { x: 190, y: 96 },
-  to: { x: 385, y: 2 },
-  /** Where along the string each star hangs, as a 0–1 fraction. */
-  anchors: [0.14, 0.4, 0.65, 0.88],
+  from: { x: -12, y: 40 },
+  control: { x: 205, y: 132 },
+  to: { x: 442, y: 52 },
+  anchors: [0.14, 0.37, 0.6, 0.84],
 } as const
 
 function buntingPoint(t: number) {
@@ -515,14 +369,14 @@ function buntingPoint(t: number) {
   }
 }
 
-/** A five-point star whose top vertex sits at the origin, so it hangs from (0,0). */
-function starPoints(outer: number, inner = outer * 0.46) {
+/** A star whose top vertex sits just below the origin, so it hangs from (0,0). */
+function starPoints(outer: number, inner = outer * 0.48) {
   const points: string[] = []
   for (let i = 0; i < 10; i += 1) {
     const radius = i % 2 === 0 ? outer : inner
     const angle = (Math.PI / 5) * i - Math.PI / 2
     const x = Math.cos(angle) * radius
-    const y = Math.sin(angle) * radius + outer
+    const y = Math.sin(angle) * radius + outer * 0.85
     points.push(`${round(x)},${round(y)}`)
   }
   return points.join(' ')
@@ -532,38 +386,47 @@ const BUNTING_STARS = BUNTING.anchors.map((t, i) => {
   const point = buntingPoint(t)
   return {
     ...point,
-    span: 22 + (i % 2) * 5,
-    tilt: [-9, 5, -6, 10][i],
-    sway: 3.4 + (i % 3) * 0.5,
-    delay: 0.5 + i * 0.11,
-    fill: ['#F5A623', '#FAF9F6', '#F5A623', '#FFD12E'][i],
+    span: [33, 35, 32, 34][i],
+    tilt: [-14, 6, -10, 14][i],
+    sway: 3.2 + (i % 3) * 0.5,
+    delay: 0.45 + i * 0.1,
+    fill: ['#F59E1B', '#FAF9F6', '#F59E1B', '#F7C627'][i],
   }
 })
 
 function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
   return (
     <div className={styles.buntingWrap} aria-hidden>
-      <svg viewBox="0 0 420 150" className={styles.buntingSvg}>
+      <svg viewBox="0 0 450 165" className={styles.buntingSvg}>
         <g filter={`url(#${shadowId})`}>
           <motion.path
             d={`M${BUNTING.from.x} ${BUNTING.from.y} Q${BUNTING.control.x} ${BUNTING.control.y} ${BUNTING.to.x} ${BUNTING.to.y}`}
             fill="none"
             stroke="#FAF9F6"
-            strokeWidth="4"
+            strokeWidth="4.5"
             strokeLinecap="round"
             initial={still ? false : { pathLength: 0, opacity: 0.2 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 1.05, ease: [0.4, 0, 0.2, 1] }}
           />
+          {/* Both ends are pinned, so the swag reads as tied rather than cut. */}
+          <circle
+            cx={BUNTING.from.x}
+            cy={BUNTING.from.y}
+            r="3.4"
+            fill="#FAF9F6"
+          />
+          <circle cx={BUNTING.to.x} cy={BUNTING.to.y} r="3.4" fill="#FAF9F6" />
         </g>
 
         {BUNTING_STARS.map((star, i) => (
           <motion.g
             key={i}
+            filter={`url(#${shadowId})`}
             initial={still ? false : { y: -18, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{
-              duration: 0.7,
+              duration: 0.68,
               delay: still ? 0 : star.delay,
               ease: PAPER_EASE,
             }}
@@ -587,25 +450,16 @@ function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
                 still
                   ? undefined
                   : {
-                      duration: 4.6 + (i % 3) * 0.8,
+                      duration: 4.4 + (i % 3) * 0.7,
                       repeat: Infinity,
                       ease: 'easeInOut',
                     }
               }
             >
-              <circle
-                cx={round(star.x)}
-                cy={round(star.y)}
-                r="2.4"
-                fill="#FAF9F6"
-              />
               <polygon
                 points={starPoints(star.span)}
-                transform={`translate(${round(star.x)} ${round(star.y)})`}
+                transform={`translate(${round(star.x)} ${round(star.y - 4)})`}
                 fill={star.fill}
-                stroke="#111827"
-                strokeWidth="1.6"
-                strokeLinejoin="round"
               />
             </motion.g>
           </motion.g>
@@ -615,133 +469,92 @@ function Bunting({ still, shadowId }: { still: boolean; shadowId: string }) {
   )
 }
 
-const CLOUDS = {
-  /* Amber banks shouldering the arch, just outside the paper window */
-  bankLeft: {
-    x: 118,
-    w: 436,
-    top: 344,
-    r: 96,
-    base: 640,
-    seed: 4201,
-    billow: 0.8,
-  },
-  bankRight: {
-    x: 892,
-    w: 436,
-    top: 334,
-    r: 96,
-    base: 650,
-    seed: 4219,
-    billow: 0.8,
-  },
-  /* Pale band sitting inside the window, right behind the railing */
-  shelfCream: { x: 214, w: 1012, top: 516, r: 62, base: 660, seed: 5303 },
-  shelfWhite: { x: 268, w: 904, top: 536, r: 58, base: 660, seed: 5321 },
-  /* Two-tone cloud sea rolling in front of the shelf, under the railing.
-     Even scallops, not billows: these crests stand right in front of the
-     balustrade, and a deep valley lets the rail show through. */
-  seaAmber: { x: 168, w: 1104, top: 560, r: 92, base: 800, seed: 9103 },
-  seaGold: { x: 168, w: 1104, top: 606, r: 80, base: 820, seed: 9127 },
-}
+/* Stage clouds: the amber shoulders beside the arch, and the banks behind the
+   balustrade. */
+const STAGE_CLOUDS = {
+  /* The outermost lobes reach past the proscenium legs (168 / 1272), so the
+     vertical closing edges sit behind the frame instead of slicing the amber. */
+  amberMidLeft: [
+    { cx: 255, cy: 445, r: 95 },
+    { cx: 360, cy: 425, r: 85 },
+    { cx: 462, cy: 448, r: 80 },
+  ],
+  amberMidRight: [
+    { cx: 1000, cy: 448, r: 85 },
+    { cx: 1095, cy: 420, r: 90 },
+    { cx: 1180, cy: 428, r: 95 },
+  ],
+  balustradeBackAmber: [
+    { cx: 455, cy: 556, r: 44 },
+    { cx: 520, cy: 540, r: 52 },
+    { cx: 595, cy: 548, r: 48 },
+    { cx: 675, cy: 542, r: 50 },
+    { cx: 760, cy: 550, r: 48 },
+    { cx: 830, cy: 540, r: 52 },
+  ],
+  balustradeBackGold: [
+    { cx: 872, cy: 560, r: 50 },
+    { cx: 965, cy: 534, r: 66 },
+    { cx: 1055, cy: 518, r: 76 },
+    { cx: 1145, cy: 538, r: 68 },
+  ],
+} as const
 
-/* Foreground stack, drawn in a 1440 × 380 box stretched to the plane height.
-   Back to front: amber lip, cream, then the crisp white banks the headline and
-   the CTA sit on, closed by a cream base ridge.
-
-   The white banks carry the billow. They are the largest sheets and the ones
-   the eye reads as cloud, so they get wide lobes with deep valleys between
-   them — that alternating swell is what turns a run of bumps into a cloud.
-
-   The sheets behind them keep their even, shallow scallop. Wherever a scalloped
-   edge dips, whatever is behind shows through, and behind these is the
-   balustrade — deep notches there leave the rail poking out as fragments. */
+/* Foreground apron, drawn in a 1440 × 420 box. Back to front: the amber lip on
+   the horizon, the cream sheet that shows as a paper edge beneath it, then the
+   two white banks the headline and the CTA rest on. */
 const FOREGROUND_CLOUDS = {
-  amber: {
-    x: -46,
-    w: 1532,
-    top: 54,
-    r: 140,
-    base: 392,
-    seed: 7701,
-  },
-  cream: {
-    x: -46,
-    w: 1532,
-    top: 96,
-    r: 138,
-    base: 392,
-    seed: 7717,
-  },
-  left: {
-    x: -120,
-    w: 1040,
-    top: 96,
-    r: 168,
-    base: 392,
-    seed: 7741,
-    billow: 0.95,
-  },
-  right: {
-    x: 560,
-    w: 1000,
-    top: 116,
-    r: 156,
-    base: 392,
-    seed: 7753,
-    billow: 0.9,
-  },
-  base: {
-    x: -46,
-    w: 1532,
-    top: 336,
-    r: 92,
-    base: 392,
-    seed: 7763,
-  },
-}
-
-/* Narrow screens get their own stack rather than a 3× squashed version of the
-   wide one: a 480-wide box matches the mobile plane's aspect almost exactly. */
-const NARROW_CLOUDS = {
-  left: {
-    x: -70,
-    w: 420,
-    top: 84,
-    r: 104,
-    base: 392,
-    seed: 8741,
-    billow: 0.9,
-  },
-  right: {
-    x: 130,
-    w: 420,
-    top: 110,
-    r: 98,
-    base: 392,
-    seed: 8753,
-    billow: 0.85,
-  },
-  base: {
-    x: -30,
-    w: 540,
-    top: 344,
-    r: 88,
-    base: 392,
-    seed: 8763,
-    billow: 0.5,
-  },
-}
+  amberWave: [
+    { cx: 480, cy: 235, r: 72 },
+    { cx: 585, cy: 218, r: 78 },
+    { cx: 695, cy: 205, r: 84 },
+    { cx: 810, cy: 222, r: 76 },
+    { cx: 935, cy: 200, r: 88 },
+    { cx: 1045, cy: 175, r: 96 },
+    { cx: 1165, cy: 168, r: 94 },
+    { cx: 1280, cy: 190, r: 86 },
+  ],
+  creamWave: [
+    { cx: 540, cy: 278, r: 74 },
+    { cx: 650, cy: 252, r: 84 },
+    { cx: 760, cy: 276, r: 72 },
+    { cx: 865, cy: 262, r: 82 },
+    { cx: 985, cy: 230, r: 96 },
+    { cx: 1105, cy: 208, r: 104 },
+    { cx: 1225, cy: 185, r: 108 },
+    { cx: 1345, cy: 145, r: 115 },
+    { cx: 1435, cy: 195, r: 98 },
+  ],
+  leftHeroMound: [
+    { cx: -25, cy: 268, r: 115 },
+    { cx: 82, cy: 205, r: 118 },
+    { cx: 175, cy: 128, r: 92 },
+    { cx: 282, cy: 112, r: 110 },
+    { cx: 388, cy: 158, r: 102 },
+    { cx: 492, cy: 215, r: 98 },
+    { cx: 598, cy: 265, r: 96 },
+    { cx: 685, cy: 332, r: 88 },
+    { cx: 795, cy: 382, r: 86 },
+  ],
+  rightWhiteBank: [
+    { cx: 930, cy: 392, r: 76 },
+    { cx: 1035, cy: 332, r: 94 },
+    { cx: 1148, cy: 296, r: 104 },
+    { cx: 1265, cy: 278, r: 108 },
+    { cx: 1385, cy: 265, r: 112 },
+    { cx: 1475, cy: 305, r: 96 },
+  ],
+} as const
 
 function PaperSun({ className }: { className?: string }) {
   const rays = useMemo(
     () =>
-      Array.from({ length: 12 }, (_, i) => {
-        const angle = (i / 12) * Math.PI * 2
-        const aLeft = angle - 0.14
-        const aRight = angle + 0.14
-        const rInner = 56
-        const rOuter = i % 2 === 0 ? 88 : 80
+      Array.from({ length: 14 }, (_, i) => {
+        const angle = (i / 14) * Math.PI * 2
+        const aLeft = angle - 0.15
+        const aRight = angle + 0.15
+        const rInner = 55
+        const rOuter = i % 2 === 0 ? 86 : 79
         const x1 = round(100 + Math.cos(aLeft) * rInner)
         const y1 = round(100 + Math.sin(aLeft) * rInner)
         const x2 = round(100 + Math.cos(angle) * rOuter)
@@ -764,9 +577,9 @@ function PaperSun({ className }: { className?: string }) {
         <polygon
           key={i}
           points={points}
-          fill={i % 2 === 0 ? '#FFD12E' : '#F5A623'}
-          stroke="#E08E1B"
-          strokeWidth="1.2"
+          fill={i % 2 === 0 ? '#FFD12E' : '#F59E1B'}
+          stroke="#E08612"
+          strokeWidth="1"
           strokeLinejoin="round"
         />
       ))}
@@ -774,19 +587,33 @@ function PaperSun({ className }: { className?: string }) {
         cx="100"
         cy="100"
         r="56"
-        fill="#FFD12E"
+        fill="#FFD438"
         stroke="#F5A623"
-        strokeWidth="3"
+        strokeWidth="2.5"
       />
-      <circle cx="80" cy="92" r="5" fill="#111827" />
-      <circle cx="120" cy="92" r="5" fill="#111827" />
-      <ellipse cx="69" cy="105" rx="7" ry="4" fill="#F5A623" opacity="0.7" />
-      <ellipse cx="131" cy="105" rx="7" ry="4" fill="#F5A623" opacity="0.7" />
+      <circle cx="81" cy="91" r="5.2" fill="#111827" />
+      <circle cx="119" cy="91" r="5.2" fill="#111827" />
+      <ellipse
+        cx="69"
+        cy="103"
+        rx="7.5"
+        ry="4.5"
+        fill="#F59E1B"
+        opacity="0.78"
+      />
+      <ellipse
+        cx="131"
+        cy="103"
+        rx="7.5"
+        ry="4.5"
+        fill="#F59E1B"
+        opacity="0.78"
+      />
       <path
-        d="M82 108Q100 128 118 108"
+        d="M84 106 Q100 124 116 106"
         fill="none"
         stroke="#111827"
-        strokeWidth="4.8"
+        strokeWidth="4.6"
         strokeLinecap="round"
       />
     </svg>
@@ -846,14 +673,13 @@ function ScriptStrokeLayer({
 }
 
 /**
- * One row of the headline: a fixed lead word and a yellow paper pill holding the
- * word that changes.
+ * One row of the headline: a fixed lead word and a gold pill holding the word
+ * that changes.
  *
- * The pill reserves the width of its longest candidate behind an invisible
- * sizer, so a swap never nudges the layout. The words ride a tape behind a
- * clipped window — the outgoing word leaves through the top edge while the next
- * one comes up from below — so the pill is never empty and the two never sit
- * on top of each other.
+ * The pill keeps its width behind an invisible sizer, so a swap never reflows
+ * the sentence around it. The words ride a tape behind a clipped window — the
+ * retiring word leaves through the top edge while the next rises from below —
+ * so the pill is never empty and the two never share the frame.
  */
 function HeadlineSwapRow({
   lead,
@@ -864,7 +690,7 @@ function HeadlineSwapRow({
   onHoverChange,
 }: {
   lead: string
-  items: readonly { icon: string; word: string }[]
+  items: readonly { icon: ReactNode; word: string }[]
   index: number
   reduced: boolean
   onAdvance: () => void
@@ -913,17 +739,17 @@ function HeadlineSwapRow({
 /**
  * Pop-Up Theatre Diorama Hero.
  *
- * Layered 3D paper-cut stage with royal-blue proscenium wings, blueprint grid
- * backdrop, hanging star bunting, smiling yellow paper sun peeking above a
- * stage cloud, balustrade railing, thick off-white `Aditya` script cutout,
- * triple-layer bottom paper clouds, left-aligned word-swapper headline, and
- * tactile yellow CTA controls.
+ * A paper-cut stage in five depth planes: the blueprint grid and arch rings,
+ * the royal-blue proscenium with its screen-printed curtains, the sun and
+ * balustrade, the thick off-white `Aditya` cutout, and the foreground cloud
+ * apron the headline sits on.
  */
 export function Hero({ surface = 'cobalt' }: Props = {}) {
   const sectionRef = useRef<HTMLElement>(null)
   const reduced = useReducedMotion() ?? false
   const gridId = useId()
   const shadowFilterId = useId()
+  const softShadowId = useId()
   const deepShadowId = useId()
   const stageClipId = useId()
 
@@ -936,7 +762,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
   // A reduced-motion visit gets the finished diorama, not a slow build of it.
   const still = reduced
 
-  // Normalized pointer offset in [-1, 1] for 3D paper parallax
+  // Normalized pointer offset in [-1, 1] for the paper parallax
   const pointerX = useMotionValue(0)
   const pointerY = useMotionValue(0)
   const springConfig = { stiffness: 110, damping: 22, mass: 0.7 }
@@ -956,12 +782,12 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
 
   const word = useMemo(() => layoutAdityaWord(), [])
   const scriptBox = useMemo(() => {
-    const pad = SCRIPT_STROKE / 2 + 2.4
-    const vbX = -1.6 - pad
+    const pad = SCRIPT_STROKE / 2 + 2.8
+    const vbX = -1.8 - pad
     const vbY = word.top - pad
     const vbW =
-      Math.max(word.width, 1) + 4.4 + pad * 2 - word.top * SCRIPT_SLANT
-    const vbH = word.bottom + pad - vbY + 2.5
+      Math.max(word.width, 1) + 4.8 + pad * 2 - word.top * SCRIPT_SLANT
+    const vbH = word.bottom + pad - vbY + 3.2
     return [vbX, vbY, vbW, vbH].map(round).join(' ')
   }, [word])
 
@@ -1010,9 +836,8 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
    * The headline writes itself.
    *
    * All three rows turn over on one beat, so what changes is a whole sentence
-   * ("I bring systems & craft to digital work") rather than three separate
-   * widgets each doing their own thing. The three candidate lists have
-   * different lengths, so the combinations still keep moving.
+   * rather than three separate widgets each doing their own thing. The lists
+   * differ in length, so the pairings still keep moving.
    *
    * It holds whenever a visitor takes over — pointer over the stack, focus in
    * it, the tab hidden, the hero scrolled past — and never starts under reduced
@@ -1081,66 +906,83 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
       onPointerLeave={handleStageLeave}
     >
       <MotionConfig reducedMotion="user">
-        {/* Global SVG filter & stage clip/pattern defs for 4-layer shadow-box */}
+        {/* Global filters, grid pattern and stage clip for the shadow-box */}
         <svg className={styles.svgDefs} aria-hidden focusable="false">
           <defs>
             <filter
               id={shadowFilterId}
-              x="-14%"
-              y="-14%"
-              width="128%"
-              height="134%"
+              x="-16%"
+              y="-16%"
+              width="132%"
+              height="138%"
             >
               <feDropShadow
                 dx="0"
                 dy="7"
-                stdDeviation="4.5"
-                floodColor="#0c1538"
-                floodOpacity="0.42"
+                stdDeviation="5"
+                floodColor="#091232"
+                floodOpacity="0.44"
               />
             </filter>
-            {/* Deeper cast shadow for the foreground banks that sit nearest the viewer */}
             <filter
               id={deepShadowId}
-              x="-14%"
-              y="-14%"
-              width="128%"
-              height="134%"
+              x="-16%"
+              y="-18%"
+              width="132%"
+              height="142%"
             >
               <feDropShadow
                 dx="0"
-                dy="11"
-                stdDeviation="7"
-                floodColor="#0c1538"
-                floodOpacity="0.4"
+                dy="10"
+                stdDeviation="7.5"
+                floodColor="#091232"
+                floodOpacity="0.46"
+              />
+            </filter>
+            {/* Light touch for the small hanging pieces — the bunting string
+                and its stars. The stage shadow paints a second line under the
+                string and a tail under every star at this scale. */}
+            <filter
+              id={softShadowId}
+              x="-20%"
+              y="-20%"
+              width="140%"
+              height="150%"
+            >
+              <feDropShadow
+                dx="0"
+                dy="2.5"
+                stdDeviation="2.2"
+                floodColor="#091232"
+                floodOpacity="0.26"
               />
             </filter>
             <pattern
               id={gridId}
-              width="48"
-              height="48"
+              width="44"
+              height="44"
               patternUnits="userSpaceOnUse"
             >
               <path
-                d="M 48 0 L 0 0 0 48"
+                d="M 44 0 L 0 0 0 44"
                 fill="none"
-                stroke="rgb(250 249 246 / 0.14)"
+                stroke="rgb(250 249 246 / 0.16)"
                 strokeWidth="1"
               />
               <path
-                d="M 12 0 V 48 M 24 0 V 48 M 36 0 V 48 M 0 12 H 48 M 0 24 H 48 M 0 36 H 48"
+                d="M 11 0 V 44 M 22 0 V 44 M 33 0 V 44 M 0 11 H 44 M 0 22 H 44 M 0 33 H 44"
                 fill="none"
-                stroke="rgb(250 249 246 / 0.055)"
+                stroke="rgb(250 249 246 / 0.06)"
                 strokeWidth="0.75"
               />
             </pattern>
             <clipPath id={stageClipId}>
-              <rect x="208" y="48" width="1024" height="812" rx="22" />
+              <rect x="146" y="74" width="1148" height="778" rx="18" />
             </clipPath>
           </defs>
         </svg>
 
-        {/* Left Edge Interactive Tab: physics on/off */}
+        {/* Left edge cardstock tab: physics on/off */}
         <button
           type="button"
           className={styles.physicsTab}
@@ -1150,7 +992,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
           <span className={styles.physicsLabel}>physics on/off</span>
         </button>
 
-        {/* Layer 1: Outer Proscenium Royal-Blue Side Walls (behind physics tab & right rail) */}
+        {/* Outer proscenium royal-blue side walls */}
         <div className={styles.wingLeftOuter} aria-hidden>
           <div className={styles.wingFoldLeft} />
         </div>
@@ -1158,9 +1000,9 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
           <div className={styles.wingFoldRight} />
         </div>
 
-        {/* Layer 2: Sky-Blue Recessed Rectangle (#AFC8E6) extending cleanly to navbar */}
+        {/* Sky-blue recessed diorama viewport */}
         <div className={styles.dioramaViewport}>
-          {/* Layer 4a: Clipped Blueprint Grid, Concentric Curtains & Lowered Amber Clouds */}
+          {/* Plane 1: blueprint grid and arch rings */}
           <motion.div
             className={styles.planeCurtains}
             style={physicsActive ? { x: curtainX, y: curtainY } : undefined}
@@ -1172,88 +1014,63 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               className={styles.stageSvg}
             >
               <g clipPath={`url(#${stageClipId})`}>
-                {/* Recessed Royal Blue Blueprint Backdrop */}
                 <PaperLayer still={still} from={-18}>
                   <rect
-                    x="200"
-                    y="44"
-                    width="1040"
-                    height="820"
-                    fill="#1E3EC4"
+                    x="130"
+                    y="60"
+                    width="1180"
+                    height="796"
+                    fill="#1B42CC"
                   />
                   <rect
-                    x="200"
-                    y="44"
-                    width="1040"
-                    height="820"
+                    x="130"
+                    y="60"
+                    width="1180"
+                    height="796"
                     fill={`url(#${gridId})`}
                   />
                 </PaperLayer>
 
-                {/* Outer sunburst-yellow arch curtain ring */}
-                <PaperLayer still={still} delay={0.1} from={30}>
+                <PaperLayer still={still} delay={0.08} from={26}>
                   <path
-                    d="M205 45 H1235 V860 H1115 C1115 245 955 92 700 92 C445 92 285 245 285 860 H205 Z"
-                    fill="#F7C627"
+                    d="M130 60 H1310 V860 H1085 C1085 270 935 90 710 90 C485 90 335 270 335 860 H130 Z"
+                    fill="#F5C227"
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
-                {/* Warm-amber arch ring tucked inside the yellow */}
-                <PaperLayer still={still} delay={0.16} from={30}>
+
+                <PaperLayer still={still} delay={0.14} from={28}>
                   <path
-                    d="M205 45 H1235 V860 H1065 C1065 275 915 118 700 118 C485 118 335 275 335 860 H205 Z"
-                    fill="#E89418"
+                    d="M130 60 H1310 V860 H1038 C1038 298 900 126 710 126 C520 126 382 298 382 860 H130 Z"
+                    fill="#E59018"
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
-                {/* Thick off-white paper rim framing the blueprint window.
-                    Rim and scallops share one filter so the shadow traces a
-                    single cut edge instead of stacking two. */}
-                <PaperLayer still={still} delay={0.24} from={34}>
+
+                <PaperLayer still={still} delay={0.2} from={30}>
                   <g filter={`url(#${shadowFilterId})`}>
                     <path
-                      d="M335 860 C335 275 485 118 700 118 C915 118 1065 275 1065 860 H1017 C1017 300 887 162 700 162 C513 162 383 300 383 860 Z"
+                      d="M382 860 C382 298 520 126 710 126 C900 126 1038 298 1038 860 H1016 C1016 314 884 150 710 150 C536 150 404 314 404 860 Z"
                       fill="#FAF9F6"
                     />
-                    <ArchScallops
-                      points={ARCH_SCALLOPS}
-                      r={52}
+                    <path
+                      d="M495 96 H765 C762 154 722 180 682 154 C654 190 594 190 566 154 C528 178 496 152 495 96 Z"
                       fill="#FAF9F6"
                     />
                   </g>
                 </PaperLayer>
 
-                {/* Warm amber cloud banks shouldering the arch, left & right */}
-                <PaperLayer
-                  still={still}
-                  delay={0.34}
-                  from={40}
-                  className={styles.cloudSideBanks}
-                >
-                  <CloudBank
-                    {...CLOUDS.bankLeft}
-                    fill="#EB9619"
+                <PaperLayer still={still} delay={0.28} from={36}>
+                  <SculptedCloud
+                    lobes={STAGE_CLOUDS.amberMidLeft}
+                    baseY={680}
+                    fill="#EA9316"
                     filter={`url(#${shadowFilterId})`}
                   />
-                  <CloudBank
-                    {...CLOUDS.bankRight}
-                    fill="#EB9619"
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-
-                {/* Pale cloud band sitting inside the window, behind the railing */}
-                <PaperLayer still={still} delay={0.42} from={44}>
-                  <CloudBank
-                    {...CLOUDS.shelfCream}
-                    fill="#F2E3BE"
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-                <PaperLayer still={still} delay={0.48} from={44}>
-                  <CloudBank
-                    {...CLOUDS.shelfWhite}
-                    fill="#FAF9F6"
+                  <SculptedCloud
+                    lobes={STAGE_CLOUDS.amberMidRight}
+                    baseY={680}
+                    fill="#EA9316"
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
@@ -1261,7 +1078,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
             </svg>
           </motion.div>
 
-          {/* Layer 3 & 4b: Sky-Blue Curtains + Stage Clouds (clipped) & Inner Royal-Blue Rectangle */}
+          {/* Plane 2: proscenium frame and screen-printed curtains */}
           <motion.div
             className={styles.planeProscenium}
             style={physicsActive ? { x: midX, y: midY } : undefined}
@@ -1273,181 +1090,116 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               className={styles.stageSvg}
             >
               <g clipPath={`url(#${stageClipId})`}>
-                {/* Curtains and swags: the painted sky pieces that hang in
-                    front of the blueprint, so they land after the backdrop. */}
-                <PaperLayer still={still} delay={0.18} from={-26}>
-                  {/* Top-left sky-blue curved curtain swag */}
+                <PaperLayer still={still} delay={0.18} from={-24}>
                   <path
-                    d="M225 68 H465 C445 148 395 208 325 225 C302 230 278 222 262 205 L225 245 Z"
-                    fill="#9CC0E6"
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                  {/* Top-center scalloped ice-white cloud valance */}
-                  <path
-                    d="M455 68 H715 C708 112 672 128 640 105 C612 135 562 135 535 105 C502 128 462 112 455 68 Z"
-                    fill="#EBF1F8"
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                  {/* Top-right small sky-blue cloud tuck */}
-                  <path
-                    d="M815 68 H945 C935 105 895 118 860 98 C840 108 820 92 815 68 Z"
-                    fill="#9CC0E6"
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                  {/* Right sky-blue scalloped curtain wing */}
-                  <path
-                    d="M995 68 H1215 V560 H1135 C1105 495 1110 420 1152 370 C1102 330 1098 265 1142 220 C1055 205 1002 148 995 68 Z"
-                    fill="#9CC0E6"
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-
-                {/* Upper-left & upper-right white clouds framing Aditya.
-                    Both close on a rounded underside — a straight chord here
-                    reads as a cloud sliced with a ruler. */}
-                <PaperLayer still={still} delay={0.3} from={34}>
-                  <path
-                    d="M275 288 C268 252 298 225 332 235 C355 198 408 202 428 238 C458 234 478 260 470 288 C450 316 418 330 372 330 C326 330 292 316 275 288 Z"
-                    fill="#FAF9F6"
+                    d="M148 70 H435 C420 177 358 257 275 317 L148 347 Z"
+                    fill="#E5B122"
                     filter={`url(#${shadowFilterId})`}
                   />
                   <path
-                    d="M945 285 C938 248 970 220 1004 230 C1030 194 1086 198 1108 234 C1140 230 1162 256 1154 285 C1134 313 1102 327 1050 327 C998 327 962 313 945 285 Z"
-                    fill="#FAF9F6"
+                    d="M148 70 H410 C395 154 342 216 264 238 L148 250 Z"
+                    fill="#A1C5E8"
+                    filter={`url(#${shadowFilterId})`}
+                  />
+                  <path
+                    d="M720 70 H1080 V242 C1025 184 955 144 865 138 C795 134 745 110 720 70 Z"
+                    fill="#EEB826"
+                    filter={`url(#${shadowFilterId})`}
+                  />
+                  <SculptedCloud
+                    lobes={[
+                      { cx: 1090, cy: 168, r: 104 },
+                      { cx: 1225, cy: 128, r: 116 },
+                      { cx: 1330, cy: 196, r: 100 },
+                      { cx: 1268, cy: 330, r: 102 },
+                      { cx: 1146, cy: 298, r: 96 },
+                      { cx: 1062, cy: 424, r: 92 },
+                      { cx: 1204, cy: 466, r: 96 },
+                    ]}
+                    baseY={566}
+                    leftX={1018}
+                    rightX={1344}
+                    fill="#A1C5E8"
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
 
-                {/* Left mid-wing & right lower-wing white cloud poufs. Their
-                    flat sides run past the frame so the cut is never on show. */}
-                <PaperLayer still={still} delay={0.36} from={38}>
+                <PaperLayer still={still} delay={0.28} from={32}>
                   <path
-                    d="M188 315 C278 315 308 352 295 402 C312 428 295 472 252 482 H188 Z"
+                    d="M312 310 C302 280 326 252 356 260 C378 226 428 228 446 262 C474 258 494 282 484 310 Z"
                     fill="#FAF9F6"
                     filter={`url(#${shadowFilterId})`}
                   />
                   <path
-                    d="M1252 322 C1180 322 1112 358 1125 405 C1082 418 1072 472 1112 502 C1135 518 1180 515 1252 505 Z"
+                    d="M956 308 C944 272 976 240 1012 250 C1038 210 1098 214 1120 252 C1154 248 1176 276 1166 308 Z"
                     fill="#FAF9F6"
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
 
-                {/* Lower-left sky-blue cloud puff behind white foreground dome */}
-                <PaperLayer still={still} delay={0.4} from={40}>
+                <PaperLayer still={still} delay={0.34} from={36}>
                   <path
-                    d="M188 465 C285 455 338 492 345 545 C395 545 438 585 445 645 H188 Z"
-                    fill="#9CC0E6"
+                    d="M148 340 C284 340 312 380 296 430 C312 458 292 500 248 512 H148 Z"
+                    fill="#FAF9F6"
+                    filter={`url(#${shadowFilterId})`}
+                  />
+                  <path
+                    d="M1292 344 C1228 344 1178 384 1192 434 C1150 448 1140 504 1182 534 C1208 550 1250 547 1292 538 Z"
+                    fill="#FAF9F6"
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
 
-                {/* Two-tone cloud sea rolling in front of the shelf, under the railing */}
-                <PaperLayer still={still} delay={0.5} from={46}>
-                  <CloudBank
-                    {...CLOUDS.seaAmber}
-                    fill="#EE9B1B"
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-                <PaperLayer still={still} delay={0.56} from={48}>
-                  <CloudBank
-                    {...CLOUDS.seaGold}
-                    fill="#F5C42C"
+                <PaperLayer still={still} delay={0.38} from={38}>
+                  <path
+                    d="M148 474 C310 466 368 508 376 568 C428 568 472 610 478 672 H148 Z"
+                    fill="#A1C5E8"
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
 
-                {/* Tall narrow stages crop to the centre of this 1440-wide
-                    drawing, so the arch banks and the cloud sea are cut away
-                    and the stage's middle is left as bare sky. These three
-                    banks fill that gap.
-
-                    Each base runs well below the next bank's crest, so the flat
-                    bottom of a bank is never visible above the lobes in front
-                    of it — the only edges on show are scallops. */}
-                <PaperLayer
-                  still={still}
-                  delay={0.44}
-                  from={42}
-                  className={styles.cloudNarrowOnly}
-                >
-                  <CloudBank
-                    x={250}
-                    w={960}
-                    top={300}
-                    r={68}
-                    base={470}
-                    seed={6113}
-                    billow={0.85}
-                    fill="#9CC0E6"
+                <PaperLayer still={still} delay={0.44} from={42}>
+                  <SculptedCloud
+                    lobes={STAGE_CLOUDS.balustradeBackAmber}
+                    baseY={680}
+                    leftX={410}
+                    rightX={830}
+                    fill="#EA9316"
                     filter={`url(#${shadowFilterId})`}
                   />
-                </PaperLayer>
-                <PaperLayer
-                  still={still}
-                  delay={0.5}
-                  from={44}
-                  className={styles.cloudNarrowOnly}
-                >
-                  <CloudBank
-                    x={222}
-                    w={1010}
-                    top={404}
-                    r={74}
-                    base={578}
-                    seed={6121}
-                    billow={0.75}
-                    fill="#A7C7E7"
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-                <PaperLayer
-                  still={still}
-                  delay={0.56}
-                  from={46}
-                  className={styles.cloudNarrowOnly}
-                >
-                  <CloudBank
-                    x={250}
-                    w={960}
-                    top={520}
-                    r={66}
-                    base={700}
-                    seed={6131}
-                    billow={0.65}
-                    fill="#C3D8EF"
+                  <SculptedCloud
+                    lobes={STAGE_CLOUDS.balustradeBackGold}
+                    baseY={680}
+                    leftX={830}
+                    rightX={1310}
+                    fill="#F4C129"
                     filter={`url(#${shadowFilterId})`}
                   />
                 </PaperLayer>
               </g>
 
-              {/* Layer 3: Inner Royal-Blue 3D Rounded Rectangular Proscenium Frame (#2242D6) */}
               <PaperLayer still={still} delay={0.04} from={-14}>
                 <path
-                  d="M182 860 V72 C182 46 202 28 228 28 H1212 C1238 28 1258 46 1258 72 V860 H1206 V96 C1206 82 1194 72 1180 72 H260 C246 72 234 82 234 96 V860 Z"
-                  fill="#2242D6"
-                  filter={`url(#${shadowFilterId})`}
+                  d="M118 860 V70 C118 44 138 26 164 26 H1276 C1302 26 1322 44 1322 70 V860 H1272 V94 C1272 80 1260 70 1246 70 H194 C180 70 168 80 168 94 V860 Z"
+                  fill="#1F44D6"
+                  filter={`url(#${deepShadowId})`}
                 />
-              </PaperLayer>
-              <PaperLayer still={still} delay={0.08} from={-14}>
                 <path
-                  d="M184 855 V72 C184 48 203 30 228 30 H1212 C1237 30 1256 48 1256 72 V855"
+                  d="M120 855 V70 C120 46 139 28 164 28 H1276 C1301 28 1320 46 1320 70 V855"
                   fill="none"
-                  stroke="rgb(250 249 246 / 0.22)"
+                  stroke="rgb(250 249 246 / 0.24)"
                   strokeWidth="2"
                 />
               </PaperLayer>
 
-              {/* Top-right white cloud swags over sky-blue mat */}
-              <PaperLayer still={still} delay={0.2} from={-22}>
+              <PaperLayer still={still} delay={0.22} from={-20}>
                 <path
-                  d="M905 0 H1005 C998 36 962 48 932 32 C915 24 908 12 905 0 Z"
-                  fill="#FAF9F6"
+                  d="M846 0 H1018 C1012 40 972 58 934 40 C912 30 902 16 896 0 Z"
+                  fill="#D9E7F5"
                   filter={`url(#${shadowFilterId})`}
                 />
                 <path
-                  d="M1070 0 H1440 V105 H1345 C1295 115 1255 95 1230 68 C1185 95 1130 82 1105 45 C1082 52 1072 28 1070 0 Z"
+                  d="M1030 0 H1330 C1330 46 1298 74 1258 66 C1236 96 1188 106 1152 86 C1116 110 1064 104 1040 72 C1024 50 1022 22 1030 0 Z"
                   fill="#FAF9F6"
                   filter={`url(#${shadowFilterId})`}
                 />
@@ -1455,15 +1207,13 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
             </svg>
           </motion.div>
 
-          {/* Depth Plane 4: Smiling Paper Sun behind white stage cloud + Balustrade + Bunting + Stars */}
+          {/* Plane 3: sun, balustrade and bunting */}
           <motion.div
             className={styles.planeStageProps}
             style={physicsActive ? { x: sunX, y: sunY } : undefined}
           >
-            {/* Hanging Star Bunting (Top-Left Corner) */}
-            <Bunting still={still} shadowId={shadowFilterId} />
+            <Bunting still={still} shadowId={softShadowId} />
 
-            {/* Smiling Paper Sun peeking over a white stage cloud */}
             <div className={styles.sunCluster} aria-hidden>
               <motion.div
                 className={styles.sunDisc}
@@ -1473,16 +1223,20 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                   still
                     ? undefined
                     : {
-                        y: { duration: 0.9, delay: 0.5, ease: PAPER_EASE },
-                        scale: { duration: 0.9, delay: 0.5, ease: PAPER_EASE },
-                        opacity: { duration: 0.16, delay: 0.5 },
+                        y: { duration: 0.88, delay: 0.46, ease: PAPER_EASE },
+                        scale: {
+                          duration: 0.88,
+                          delay: 0.46,
+                          ease: PAPER_EASE,
+                        },
+                        opacity: { duration: 0.16, delay: 0.46 },
                       }
                 }
               >
                 <PaperSun className={styles.sunSvg} />
               </motion.div>
               <motion.svg
-                viewBox="0 0 380 150"
+                viewBox="0 0 380 155"
                 className={styles.sunCloudCover}
                 focusable="false"
                 initial={still ? false : { y: 26, opacity: 0 }}
@@ -1491,70 +1245,56 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                   still
                     ? undefined
                     : {
-                        y: { duration: 0.85, delay: 0.64, ease: PAPER_EASE },
-                        opacity: { duration: 0.16, delay: 0.64 },
+                        y: { duration: 0.82, delay: 0.58, ease: PAPER_EASE },
+                        opacity: { duration: 0.16, delay: 0.58 },
                       }
                 }
               >
-                {/* One sheet. A second cream copy offset below the silhouette
-                    showed as a flat slab, because the cloud closes on a chord —
-                    the die-cut shadow is the paper edge here. */}
                 <path
-                  d="M12 118 C8 82 42 58 78 68 C112 28 178 28 212 64 C248 42 298 52 318 86 C352 86 368 112 358 136 C315 146 245 144 185 142 C115 144 45 142 12 118 Z"
+                  d="M18 112 C12 76 44 52 80 62 C114 22 180 22 214 58 C250 36 300 46 320 80 C352 82 366 106 356 128 H18 Z"
+                  fill="#F1E2B3"
+                  filter={`url(#${shadowFilterId})`}
+                />
+                <path
+                  d="M34 128 C28 94 58 72 92 80 C124 44 188 44 218 76 C252 56 298 66 314 96 C342 98 354 116 344 134 H34 Z"
                   fill="#FAF9F6"
                   filter={`url(#${shadowFilterId})`}
                 />
               </motion.svg>
             </div>
 
-            {/* Right stage cloud accent behind upper-right CTA */}
-            <div className={styles.rightStageCloud} aria-hidden>
-              <svg viewBox="0 0 260 120" focusable="false">
-                <path
-                  d="M20 98 Q42 42 104 56 Q146 16 206 48 Q248 56 246 98 Z"
-                  fill="#FAF9F6"
-                  filter={`url(#${shadowFilterId})`}
-                />
-              </svg>
-            </div>
-
-            {/* White Paper Stage Balustrade / Railing behind lower half of Aditya.
-                The rail is drawn as one sheet: top rail, turned balusters and a
-                bottom rail, so it reads as a cut balustrade rather than a fence
-                of loose slats. */}
             <motion.div
               className={styles.balustrade}
               aria-hidden
-              initial={still ? false : { y: 30, opacity: 0 }}
+              initial={still ? false : { y: 28, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={
                 still
                   ? undefined
                   : {
-                      y: { duration: 0.8, delay: 0.72, ease: PAPER_EASE },
-                      opacity: { duration: 0.16, delay: 0.72 },
+                      y: { duration: 0.78, delay: 0.64, ease: PAPER_EASE },
+                      opacity: { duration: 0.16, delay: 0.64 },
                     }
               }
             >
               <div className={styles.balustradeTopRail} />
               <div className={styles.balustradeSpindles}>
-                {Array.from({ length: 18 }).map((_, i) => (
+                {Array.from({ length: 15 }).map((_, i) => (
                   <span key={i} className={styles.balustradePost} />
                 ))}
               </div>
               <div className={styles.balustradeBottomRail} />
             </motion.div>
 
-            {/* Scattered Cutout Stars + Preserved data-hero-sticker Hooks for About Gravity Pit.
-                Each sparkle is a scrap dropped onto the finished stage, so they
-                settle last, one after another (see the CSS stagger). */}
+            {/* Cut-out stars, plus the data-hero-sticker hooks the About
+                gravity pit peels from. */}
             <div className={styles.starScatter} data-still={still} aria-hidden>
               <div
                 className={cn(styles.cutoutStar, styles.starPos1)}
                 data-hero-sticker="smiley"
                 data-slot="smiley"
               >
-                <FourPointSparkle fill="#FAF9F6" innerFill="#2948E8" />
+                <FourPointSparkle fill="#2647D8" innerFill="#74A9F0" />
                 <span className={styles.hiddenHook}>
                   <Smiley />
                 </span>
@@ -1567,8 +1307,9 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               >
                 <FivePointStar
                   fill="#FFD12E"
+                  innerFill="#FAF9F6"
                   stroke="#111827"
-                  strokeWidth={2.5}
+                  strokeWidth={2.6}
                 />
                 <span className={styles.hiddenHook}>
                   <Burst text="hi!" />
@@ -1580,7 +1321,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                 data-hero-sticker="daisy"
                 data-slot="daisy"
               >
-                <FourPointSparkle fill="#FAF9F6" innerFill="#A7C7E7" />
+                <FourPointSparkle fill="#FAF9F6" innerFill="#8AB8EE" />
                 <span className={styles.hiddenHook}>
                   <Daisy />
                 </span>
@@ -1593,8 +1334,9 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               >
                 <FivePointStar
                   fill="#F5A623"
+                  innerFill="#FFD12E"
                   stroke="#111827"
-                  strokeWidth={2.5}
+                  strokeWidth={2.6}
                 />
                 <span className={styles.hiddenHook}>
                   <Bolt />
@@ -1602,34 +1344,28 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               </div>
 
               <div className={cn(styles.cutoutStar, styles.starPos5)}>
-                <FourPointSparkle fill="#FAF9F6" innerFill="#A7C7E7" />
+                <FourPointSparkle fill="#FAF9F6" innerFill="#7EB0EC" />
               </div>
+
               <div className={cn(styles.cutoutStar, styles.starPos6)}>
-                <FivePointStar
-                  fill="#FAF9F6"
-                  stroke="#111827"
-                  strokeWidth={2.5}
-                />
+                <EightPointBurst fill="#FAF9F6" />
               </div>
+
               <div className={cn(styles.cutoutStar, styles.starPos7)}>
-                <FourPointSparkle fill="#FAF9F6" innerFill="#A7C7E7" />
-              </div>
-              <div className={cn(styles.cutoutStar, styles.starPos8)}>
                 <FourPointSparkle fill="#FAF9F6" innerFill="#F5A623" />
               </div>
-              <div className={cn(styles.cutoutStar, styles.starPos9)}>
+
+              <div className={cn(styles.cutoutStar, styles.starPos8)}>
                 <FivePointStar
                   fill="#FAF9F6"
                   stroke="#111827"
-                  strokeWidth={2.5}
+                  strokeWidth={2.6}
                 />
               </div>
             </div>
           </motion.div>
 
-          {/* Depth Plane 5: Elevated 3D Off-White Paper Cutout `Aditya` Main Title.
-              The entrance lives on the inner button: the outer plane's `y` is
-              already owned by the pointer parallax spring. */}
+          {/* Plane 4: the thick off-white Aditya cutout */}
           <motion.div
             className={styles.planeTitle}
             style={physicsActive ? { x: titleX, y: titleY } : undefined}
@@ -1641,8 +1377,8 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                 still
                   ? undefined
                   : {
-                      y: { duration: 0.8, delay: 0.78, ease: PAPER_EASE },
-                      opacity: { duration: 0.16, delay: 0.78 },
+                      y: { duration: 0.8, delay: 0.72, ease: PAPER_EASE },
+                      opacity: { duration: 0.16, delay: 0.72 },
                     }
               }
             >
@@ -1662,26 +1398,26 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                   <ScriptStrokeLayer
                     word={word}
                     reduced={reduced}
-                    delay={0.34}
-                    transform="translate(1.8 2.6) skewX(-9)"
-                    stroke="rgb(17 24 39 / 0.34)"
-                    strokeWidth={SCRIPT_STROKE + 2.1}
+                    delay={0.32}
+                    transform="translate(2.1 3.1) skewX(-9)"
+                    stroke="rgb(9 18 50 / 0.38)"
+                    strokeWidth={SCRIPT_STROKE + 2.4}
                   />
                   <ScriptStrokeLayer
                     word={word}
                     reduced={reduced}
                     delay={0.22}
-                    transform="translate(0.95 1.35) skewX(-9)"
-                    stroke="#111827"
-                    strokeWidth={SCRIPT_STROKE + 1.85}
+                    transform="translate(1.15 1.65) skewX(-9)"
+                    stroke="#0F1B4C"
+                    strokeWidth={SCRIPT_STROKE + 2.1}
                   />
                   <ScriptStrokeLayer
                     word={word}
                     reduced={reduced}
                     delay={0.1}
                     transform="skewX(-9)"
-                    stroke="#172554"
-                    strokeWidth={SCRIPT_STROKE + 1.25}
+                    stroke="#16296B"
+                    strokeWidth={SCRIPT_STROKE + 1.45}
                   />
                   <ScriptStrokeLayer
                     word={word}
@@ -1695,11 +1431,21 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
             </motion.div>
           </motion.div>
 
-          {/* Upper-Right Stage CTA Pill: Say hi ↗ — deliberately not repeated
-              here; the fixed header already carries this exact action a few
-              pixels above, and two identical pills read as a mistake. */}
+          {/* Upper-right docked stage CTA tab.
+              Kept off the narrow breakpoints: the fixed header already carries
+              this exact action, and below 900px the two pills collide. */}
+          <div className={styles.upperRightAction}>
+            <button
+              type="button"
+              className={styles.paperPillBtn}
+              onClick={() => scrollToSection('contact', reduced)}
+            >
+              <span>Say hi</span>
+              <ArrowUpRight size={20} />
+            </button>
+          </div>
 
-          {/* Depth Plane 6: Overlapping Bottom Paper Clouds (#F5A623 -> #F5ECCD -> #FAF9F6) */}
+          {/* Plane 5: foreground cloud apron */}
           <motion.div
             className={styles.planeForegroundClouds}
             style={
@@ -1708,82 +1454,57 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
             aria-hidden
           >
             <svg
-              viewBox="0 0 1440 380"
-              preserveAspectRatio="none"
-              className={cn(styles.cloudsSvg, styles.cloudsWide)}
+              viewBox="0 0 1440 420"
+              preserveAspectRatio="xMidYMin slice"
+              className={styles.cloudsSvg}
             >
-              {/* Layer 1 — Warm amber back bank (#F5A623) */}
-              <PaperLayer still={still} delay={0.56} from={54}>
-                <CloudBank
-                  {...FOREGROUND_CLOUDS.amber}
-                  fill="#F2A22A"
+              <PaperLayer still={still} delay={0.54} from={52}>
+                <SculptedCloud
+                  lobes={FOREGROUND_CLOUDS.amberWave}
+                  baseY={430}
+                  leftX={380}
+                  rightX={1440}
+                  fill="#EE9617"
                   filter={`url(#${shadowFilterId})`}
                 />
               </PaperLayer>
-              {/* Layer 2 — Soft cream bank (#F5ECCD) */}
-              <PaperLayer still={still} delay={0.63} from={54}>
-                <CloudBank
-                  {...FOREGROUND_CLOUDS.cream}
-                  fill="#F0DDB0"
-                  filter={`url(#${shadowFilterId})`}
-                />
-              </PaperLayer>
-              {/* Layer 3 — Bottom-left white bank the headline sits on (#FAF9F6) */}
-              <PaperLayer still={still} delay={0.7} from={58}>
-                <CloudBank
-                  {...FOREGROUND_CLOUDS.left}
-                  fill="#FAF9F6"
-                  filter={`url(#${deepShadowId})`}
-                />
-              </PaperLayer>
-              {/* Layer 4 — Bottom-right crisp white bank (#FAF9F6) */}
-              <PaperLayer still={still} delay={0.7} from={58}>
-                <CloudBank
-                  {...FOREGROUND_CLOUDS.right}
-                  fill="#FAF9F6"
-                  filter={`url(#${deepShadowId})`}
-                />
-              </PaperLayer>
-              {/* Layer 5 — Cream base ridge closing the bottom edge */}
-              <PaperLayer still={still} delay={0.78} from={62}>
-                <CloudBank
-                  {...FOREGROUND_CLOUDS.base}
-                  fill="#F0DDB0"
-                  filter={`url(#${deepShadowId})`}
-                />
-              </PaperLayer>
-            </svg>
 
-            <svg
-              viewBox="0 0 480 380"
-              preserveAspectRatio="none"
-              className={cn(styles.cloudsSvg, styles.cloudsNarrow)}
-            >
-              <PaperLayer still={still} delay={0.6} from={54}>
-                <CloudBank
-                  {...NARROW_CLOUDS.left}
+              <PaperLayer still={still} delay={0.62} from={54}>
+                <SculptedCloud
+                  lobes={FOREGROUND_CLOUDS.creamWave}
+                  baseY={430}
+                  leftX={450}
+                  rightX={1460}
+                  fill="#F2E2AA"
+                  filter={`url(#${deepShadowId})`}
+                />
+              </PaperLayer>
+
+              <PaperLayer still={still} delay={0.68} from={58}>
+                <SculptedCloud
+                  lobes={FOREGROUND_CLOUDS.rightWhiteBank}
+                  baseY={430}
+                  leftX={850}
+                  rightX={1480}
                   fill="#FAF9F6"
                   filter={`url(#${deepShadowId})`}
                 />
               </PaperLayer>
-              <PaperLayer still={still} delay={0.6} from={54}>
-                <CloudBank
-                  {...NARROW_CLOUDS.right}
-                  fill="#FAF9F6"
-                  filter={`url(#${deepShadowId})`}
-                />
-              </PaperLayer>
+
               <PaperLayer still={still} delay={0.72} from={60}>
-                <CloudBank
-                  {...NARROW_CLOUDS.base}
-                  fill="#F0DDB0"
+                <SculptedCloud
+                  lobes={FOREGROUND_CLOUDS.leftHeroMound}
+                  baseY={430}
+                  leftX={-120}
+                  rightX={880}
+                  fill="#FAF9F6"
                   filter={`url(#${deepShadowId})`}
                 />
               </PaperLayer>
             </svg>
           </motion.div>
 
-          {/* Depth Plane 7: Foreground Left Typography Stack & Lower-Right CTA */}
+          {/* Plane 6: foreground typography stack and lower-right CTA */}
           <div
             className={styles.foregroundContent}
             data-hero-copy
@@ -1791,7 +1512,6 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
           >
             <div className={styles.shell}>
               <div className={styles.foregroundRow}>
-                {/* Left-Aligned Typography Stack anchored on white cloud bank */}
                 <div
                   id="hero-title"
                   className={styles.headlineStack}
@@ -1828,7 +1548,6 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                   />
                 </div>
 
-                {/* Lower-Right Foreground CTA: See work → */}
                 <div className={styles.lowerRightAction}>
                   <button
                     type="button"
@@ -1836,7 +1555,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                     onClick={() => scrollToSection('work', reduced)}
                   >
                     <span>See work</span>
-                    <ArrowRight size={17} strokeWidth={2.3} aria-hidden />
+                    <ArrowRight size={20} />
                   </button>
                 </div>
               </div>
