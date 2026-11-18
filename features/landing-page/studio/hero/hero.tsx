@@ -1143,17 +1143,16 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                   />
                   <SculptedCloud
                     lobes={[
-                      { cx: 1090, cy: 168, r: 104 },
-                      { cx: 1225, cy: 128, r: 116 },
-                      { cx: 1330, cy: 196, r: 100 },
-                      { cx: 1268, cy: 330, r: 102 },
-                      { cx: 1146, cy: 298, r: 96 },
-                      { cx: 1062, cy: 424, r: 92 },
-                      { cx: 1204, cy: 466, r: 96 },
+                      { cx: 1140, cy: 148, r: 92 },
+                      { cx: 1252, cy: 116, r: 102 },
+                      { cx: 1336, cy: 168, r: 92 },
+                      { cx: 1310, cy: 268, r: 96 },
+                      { cx: 1206, cy: 240, r: 90 },
+                      { cx: 1300, cy: 356, r: 84 },
                     ]}
-                    baseY={566}
-                    leftX={1018}
-                    rightX={1344}
+                    baseY={452}
+                    leftX={1052}
+                    rightX={1348}
                     fill="#A1C5E8"
                     filter={`url(#${shadowFilterId})`}
                   />
@@ -1297,29 +1296,6 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                 />
               </motion.svg>
             </div>
-
-            <motion.div
-              className={styles.balustrade}
-              aria-hidden
-              initial={still ? false : { y: 28, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={
-                still
-                  ? undefined
-                  : {
-                      y: { duration: 0.78, delay: 0.64, ease: PAPER_EASE },
-                      opacity: { duration: 0.16, delay: 0.64 },
-                    }
-              }
-            >
-              <div className={styles.balustradeTopRail} />
-              <div className={styles.balustradeSpindles}>
-                {Array.from({ length: 15 }).map((_, i) => (
-                  <span key={i} className={styles.balustradePost} />
-                ))}
-              </div>
-              <div className={styles.balustradeBottomRail} />
-            </motion.div>
 
             {/* Cut-out stars, plus the data-hero-sticker hooks the About
                 gravity pit peels from. */}
@@ -1465,6 +1441,34 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               </button>
             </motion.div>
           </motion.div>
+
+          {/* Plane 5b: the balustrade, above the foreground apron. Its ends
+              land on the proscenium legs — if the apron covered them, the rail
+              would read as floating mid-stage with no anchor. */}
+          <div className={styles.planeBalustrade} aria-hidden>
+            <motion.div
+              className={styles.balustrade}
+              aria-hidden
+              initial={still ? false : { y: 28, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={
+                still
+                  ? undefined
+                  : {
+                      y: { duration: 0.78, delay: 0.64, ease: PAPER_EASE },
+                      opacity: { duration: 0.16, delay: 0.64 },
+                    }
+              }
+            >
+              <div className={styles.balustradeTopRail} />
+              <div className={styles.balustradeSpindles}>
+                {Array.from({ length: 15 }).map((_, i) => (
+                  <span key={i} className={styles.balustradePost} />
+                ))}
+              </div>
+              <div className={styles.balustradeBottomRail} />
+            </motion.div>
+          </div>
 
           {/* Upper-right docked stage CTA tab.
               Kept off the narrow breakpoints: the fixed header already carries

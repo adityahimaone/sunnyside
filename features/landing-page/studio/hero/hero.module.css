@@ -243,7 +243,16 @@
   bottom: clamp(28%, 31vh, 34%);
   height: clamp(3.4rem, 6.8vh, 4.7rem);
   filter: drop-shadow(0 4px 6px rgb(9 18 50 / 0.26));
-  z-index: 7;
+}
+
+/* The rail lives in its own plane above the foreground apron (16), so its
+   ends stay visible where they land on the blue legs — if the apron covered
+   them, the anchor would read as floating mid-stage. */
+.planeBalustrade {
+  position: absolute;
+  inset: 0;
+  z-index: 18;
+  pointer-events: none;
 }
 
 /* End brackets: chunkier than the spindles, sitting on the blue legs so the
