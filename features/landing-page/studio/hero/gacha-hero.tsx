@@ -1,7 +1,12 @@
 'use client'
 
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
-import { AnimatePresence, MotionConfig, motion, useReducedMotion } from 'motion/react'
+import {
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  useReducedMotion,
+} from 'motion/react'
 import Image from 'next/image'
 import {
   useCallback,
@@ -206,8 +211,8 @@ export function Hero() {
                 I&apos;m Aditya, a design engineer working in React and
                 TypeScript. I bridge design and code: prototyping in the
                 browser, building the design system under the screens, and
-                sweating the <strong>motion and type</strong> that make
-                software feel alive.
+                sweating the <strong>motion and type</strong> that make software
+                feel alive.
               </p>
 
               <div className={styles.actions}>
@@ -244,7 +249,11 @@ export function Hero() {
           <div className={styles.machineWrap}>
             <Stickers />
 
-            <div className={styles.machine} role="group" aria-label="Capsule machine: pull a project">
+            <div
+              className={styles.machine}
+              role="group"
+              aria-label="Capsule machine: pull a project"
+            >
               <div className={styles.sign}>
                 <span aria-hidden>✳</span>
                 Capsule club
@@ -269,7 +278,9 @@ export function Hero() {
                           '--i': index,
                         } as CSSProperties
                       }
-                      data-shaking={busy && index % 2 === 0 ? 'true' : undefined}
+                      data-shaking={
+                        busy && index % 2 === 0 ? 'true' : undefined
+                      }
                     />
                   )
                 })}

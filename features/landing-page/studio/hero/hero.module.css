@@ -10,6 +10,7 @@
    the ones `--t` moves, so the two never fight over a property. */
 
 .hero {
+  --t: 0;
   --h-ink: var(--ink, #191a2e);
   --h-paper: var(--paper-hi, #fffaf1);
   --h-butter: var(--butter, #ffd23f);
@@ -24,8 +25,8 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: clamp(700px, calc(100svh - 2.5rem), 980px);
-  padding: clamp(4.5rem, 9vh, 5.8rem) clamp(1rem, 2.8vw, 2.6rem)
+  min-height: clamp(640px, calc(100svh - 2.5rem), 980px);
+  padding: clamp(5.4rem, 10vh, 6.4rem) clamp(3.2rem, 4.4vw, 4.4rem)
     clamp(1rem, 2.6vh, 1.8rem);
   background: radial-gradient(
     120% 90% at 50% 40%,
@@ -66,38 +67,52 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: clamp(2.3rem, 3vw, 2.8rem);
-  height: clamp(8rem, 18vh, 10.5rem);
-  padding: 0;
-  border: 2px solid rgb(255 250 241 / 0.75);
+  width: clamp(2.2rem, 2.7vw, 2.6rem);
+  min-height: clamp(9.2rem, 18vh, 10.8rem);
+  padding: 1.05rem 0;
+  border: 2px solid var(--h-ink);
   border-left: 0;
-  border-radius: 0 999px 999px 0;
-  background: var(--h-cobalt-ink);
-  color: var(--h-paper);
-  box-shadow: 0 8px 18px rgb(9 18 50 / 0.4);
+  border-radius: 0 18px 18px 0;
+  background: linear-gradient(180deg, #ffe066 0%, var(--h-butter) 100%);
+  color: var(--h-ink);
+  box-shadow:
+    3px 4px 0 var(--h-ink),
+    inset 0 2px 0 rgb(255 255 255 / 0.55);
   cursor: pointer;
   transition:
-    background-color 0.2s ease,
-    translate 0.2s var(--h-ease);
+    background 0.2s ease,
+    color 0.2s ease,
+    translate 0.18s var(--h-ease),
+    box-shadow 0.18s var(--h-ease);
 }
 
 .physicsTab:hover {
   translate: 3px -50%;
+  box-shadow:
+    4px 5px 0 var(--h-ink),
+    inset 0 2px 0 rgb(255 255 255 / 0.55);
+}
+
+.physicsTab:active {
+  translate: 1px -50%;
+  box-shadow: 1px 2px 0 var(--h-ink);
 }
 
 .physicsTab[aria-pressed='false'] {
-  background: transparent;
-  color: rgb(255 250 241 / 0.7);
+  background: #e9dfcf;
+  color: #5f5b6e;
+  box-shadow: 2px 3px 0 var(--h-ink);
 }
 
 .physicsLabel {
   writing-mode: vertical-rl;
   rotate: 180deg;
   font-family: var(--h-display);
-  font-size: clamp(0.72rem, 0.9vw, 0.85rem);
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  font-size: clamp(0.72rem, 0.88vw, 0.84rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
   line-height: 1;
+  white-space: nowrap;
 }
 
 /* ── The frame ───────────────────────────────────────────────────────────── */
@@ -112,28 +127,13 @@
   display: flex;
   flex: 1;
   min-height: 28rem;
-  padding: 1.7rem clamp(0.65rem, 1.2vw, 1rem) clamp(0.65rem, 1.2vw, 1rem);
+  padding: clamp(0.65rem, 1.2vw, 1rem);
   border-radius: 46px;
   background: linear-gradient(160deg, #5069f0 0%, #3a50d8 45%, #2c3cae 100%);
   box-shadow:
     inset 0 2px 0 rgb(255 255 255 / 0.32),
     inset 0 -8px 16px rgb(9 18 50 / 0.34),
     0 22px 44px rgb(9 18 50 / 0.5);
-}
-
-.figure {
-  position: absolute;
-  top: 0.55rem;
-  left: 50%;
-  translate: -50% 0;
-  font-family: var(--h-mono);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  line-height: 1;
-  text-transform: uppercase;
-  color: rgb(255 250 241 / 0.85);
-  white-space: nowrap;
 }
 
 .window {
@@ -172,10 +172,35 @@
   z-index: 1;
 }
 
-/* The iris opens from the pull side as `--t` runs 0 → 0.8. */
+/* The iris opens from the top-right pull corner as `--t` runs 0 → 0.8. */
 .sceneB {
   z-index: 2;
-  clip-path: circle(calc(clamp(0, var(--t) * 1.25, 1) * 150%) at 100% 50%);
+  clip-path: circle(calc(clamp(0, var(--t) * 1.25, 1) * 155%) at 96% 4%);
+}
+
+/* The town's foreground sits above the shared tool, so the sun arch rises
+   from behind its hills while the bare sky stays beneath it. */
+.sceneFront {
+  z-index: 4;
+}
+
+/* One protractor, both acts: a drafting tool on the table at t = 0, the
+   town's sun arch at t = 1. It turns a full revolution on the way. */
+.shared {
+  z-index: 3;
+  pointer-events: none;
+}
+
+.sharedTool {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  translate: calc(230px + var(--t) * 490px) 716px;
+  rotate: calc(-26deg - var(--t) * 334deg);
+  scale: calc(1 + var(--t) * 0.8);
+}
+
+.sharedCore {
+  opacity: clamp(0, calc((var(--t) - 0.3) * 1.6), 1);
 }
 
 .svg {
@@ -230,13 +255,19 @@
 .spinCcw,
 .spinSlow,
 .drift,
-.drive {
+.drive,
+.sway,
+.bob {
   transform-box: fill-box;
   transform-origin: center;
 }
 
 .sweep {
   transform-origin: 50% 100%;
+}
+
+.sway {
+  transform-origin: var(--origin, 50% 0%);
 }
 
 /* The compass legs hinge about the user-space origin, which is its hinge. */
@@ -325,6 +356,26 @@
   }
   to {
     translate: var(--amp, 80px) 0;
+  }
+}
+
+@keyframes kSway {
+  from {
+    rotate: -7deg;
+  }
+
+  to {
+    rotate: 7deg;
+  }
+}
+
+@keyframes kBob {
+  from {
+    translate: 0 -4px;
+  }
+
+  to {
+    translate: 0 5px;
   }
 }
 
@@ -427,6 +478,14 @@
     animation: kDrive var(--dur, 9s) ease-in-out infinite alternate;
   }
 
+  .sway {
+    animation: kSway 5.5s ease-in-out infinite alternate;
+  }
+
+  .bob {
+    animation: kBob 4.2s ease-in-out infinite alternate;
+  }
+
   .titleWrap {
     animation: kRise 0.8s var(--h-ease) 0.8s backwards;
   }
@@ -440,7 +499,6 @@
   }
 
   .pillRow,
-  .label,
   .seeWork {
     animation: kRise 0.8s var(--h-ease) 1.5s backwards;
   }
@@ -455,10 +513,109 @@
 
   /* Only the visible scene, and only on screen, should be running. */
   .box[data-act='technic'] .sceneB *,
+  .box[data-act='technic'] .sceneFront *,
+  .box[data-act='technic'] .ornB *,
   .box[data-act='town'] .sceneA *,
+  .box[data-act='town'] .ornA *,
   .box[data-idle='true'] * {
     animation-play-state: paused !important;
   }
+}
+
+/* ── Ornaments that spill over the bezel ─────────────────────────────────── */
+
+.orn {
+  position: absolute;
+  z-index: 9;
+  display: block;
+  pointer-events: none;
+  translate: calc(var(--px) * var(--orn-depth, 1) * -16px)
+    calc(var(--py) * var(--orn-depth, 1) * -10px);
+}
+
+.ornSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 6px 5px rgb(9 18 50 / 0.34));
+}
+
+.ornA {
+  opacity: clamp(0, calc(1 - var(--t) * 3), 1);
+  scale: calc(1 - var(--t) * 0.4);
+}
+
+.ornB {
+  opacity: clamp(0, calc((var(--t) - 0.55) * 3), 1);
+  scale: calc(0.6 + 0.4 * clamp(0, (var(--t) - 0.5) * 2, 1));
+}
+
+.ornGear {
+  --orn-depth: 1.4;
+
+  top: -1.4rem;
+  left: -2.2rem;
+  width: clamp(4.4rem, 7vw, 6.4rem);
+}
+
+.ornGearSm {
+  --orn-depth: 1.8;
+
+  top: 3.6rem;
+  left: -1.7rem;
+  width: clamp(2.6rem, 4vw, 3.6rem);
+}
+
+.ornPencil {
+  --orn-depth: 1.2;
+
+  top: -0.5rem;
+  left: clamp(5.5rem, 16vw, 14rem);
+  width: clamp(8rem, 13vw, 11.5rem);
+  rotate: -5deg;
+}
+
+.ornScrew {
+  --orn-depth: 1.6;
+
+  right: -1.1rem;
+  bottom: 18%;
+  width: clamp(2.2rem, 3.4vw, 3rem);
+}
+
+.ornCloud {
+  --orn-depth: 1.4;
+
+  top: -2.2rem;
+  left: -2.6rem;
+  width: clamp(5.5rem, 9vw, 8rem);
+  transform-origin: 20% 80%;
+}
+
+.ornStar {
+  --orn-depth: 1.2;
+
+  top: -0.6rem;
+  right: 34%;
+  width: clamp(2.4rem, 3.6vw, 3.2rem);
+}
+
+.ornBird {
+  --orn-depth: 2;
+
+  top: -0.7rem;
+  left: 24%;
+  width: clamp(2.6rem, 4vw, 3.4rem);
+}
+
+.ornTree {
+  --orn-depth: 1.5;
+
+  bottom: 0.2rem;
+  left: -1.7rem;
+  width: clamp(2.8rem, 4.4vw, 4rem);
+  transform-origin: 50% 100%;
 }
 
 /* ── The name ────────────────────────────────────────────────────────────── */
@@ -466,10 +623,10 @@
 .titleStage {
   position: absolute;
   inset: 0;
-  z-index: 4;
+  z-index: 5;
   display: grid;
   place-items: center;
-  padding: 4.2rem 1rem 3.6rem;
+  padding: 2.2rem 1rem 5.4rem;
   pointer-events: none;
 }
 
@@ -505,7 +662,7 @@
    with it. */
 .select {
   position: absolute;
-  inset: -16% -5% -20% -4%;
+  inset: -14% -5% -16% -4%;
   border: 2px dashed var(--h-cobalt);
   opacity: clamp(0, calc(1 - var(--t) * 4), 1);
   pointer-events: none;
@@ -597,35 +754,34 @@
 
 .pillRow {
   position: absolute;
-  top: clamp(0.8rem, 2vh, 1.3rem);
+  bottom: clamp(0.9rem, 2.4vh, 1.5rem);
   left: clamp(1rem, 2vw, 1.6rem);
-  right: clamp(1rem, 2vw, 1.6rem);
   z-index: 8;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.5rem 0.7rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.42rem;
   pointer-events: none;
 }
 
 .pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.62rem 1.1rem;
-  border: 0;
+  gap: 0.55rem;
+  padding: 0.22rem 0.26rem 0.22rem 0.85rem;
+  border: 1.5px solid rgb(25 26 46 / 0.14);
   border-radius: 999px;
-  background: rgb(255 250 241 / 0.97);
+  background: rgb(255 250 241 / 0.96);
   color: var(--h-ink);
   font-family: var(--h-display);
-  font-size: clamp(0.88rem, 1.25vw, 1.12rem);
+  font-size: clamp(0.84rem, 1.15vw, 1.04rem);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.02em;
   text-transform: uppercase;
   white-space: nowrap;
   box-shadow:
-    0 6px 14px rgb(9 18 50 / 0.28),
+    0 6px 14px rgb(9 18 50 / 0.24),
     inset 0 -2px 0 rgb(25 26 46 / 0.08);
   cursor: pointer;
   pointer-events: auto;
@@ -637,7 +793,7 @@
 .pill:hover {
   translate: 0 -2px;
   box-shadow:
-    0 9px 18px rgb(9 18 50 / 0.32),
+    0 9px 18px rgb(9 18 50 / 0.28),
     inset 0 -2px 0 rgb(25 26 46 / 0.08);
 }
 
@@ -645,25 +801,35 @@
   display: inline-block;
 }
 
-/* The widest candidate, drawn invisibly: it holds the pill open so a swap
-   never reflows its neighbours. */
+/* All candidates stacked invisibly in one grid cell so the pill always fits
+   the true widest rendered string without clipping or neighbour reflow. */
 .pillBody {
   position: relative;
   display: inline-flex;
+  padding: 0.36rem 0.82rem;
+  border-radius: 999px;
+  background: var(--h-butter);
+  box-shadow: inset 0 -2px 0 rgb(25 26 46 / 0.14);
   overflow: hidden;
 }
 
 .swapSizer {
+  display: inline-grid;
+  visibility: hidden;
+  white-space: nowrap;
+}
+
+.swapSizerItem {
+  grid-area: 1 / 1;
   display: inline-flex;
   align-items: center;
   gap: 0.42rem;
-  visibility: hidden;
   white-space: nowrap;
 }
 
 .swapWindow {
   position: absolute;
-  inset: 0;
+  inset: 0.36rem 0.82rem;
   overflow: hidden;
 }
 
@@ -685,46 +851,11 @@
   line-height: 1;
 }
 
-.label,
 .seeWork {
   position: absolute;
   bottom: clamp(0.9rem, 2.4vh, 1.5rem);
-  z-index: 8;
-}
-
-.label {
-  left: clamp(1rem, 2vw, 1.6rem);
-  display: inline-grid;
-  padding: 0.7rem 1.2rem;
-  border-radius: 999px;
-  background: rgb(255 250 241 / 0.97);
-  color: var(--h-ink);
-  font-family: var(--h-display);
-  font-size: clamp(0.85rem, 1.1vw, 1rem);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-  box-shadow:
-    0 6px 14px rgb(9 18 50 / 0.28),
-    inset 0 -2px 0 rgb(25 26 46 / 0.08);
-}
-
-.labelA,
-.labelB {
-  grid-area: 1 / 1;
-  white-space: nowrap;
-}
-
-.labelA {
-  opacity: clamp(0, calc(1 - var(--t) * 3), 1);
-}
-
-.labelB {
-  opacity: clamp(0, calc((var(--t) - 0.5) * 3), 1);
-}
-
-.seeWork {
   right: clamp(1rem, 2vw, 1.6rem);
+  z-index: 8;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -766,39 +897,104 @@
   pointer-events: none;
 }
 
-/* ── The touch pill ──────────────────────────────────────────────────────── */
+/* ── Screen-right pull tab ─────────────────────────────────────────────── */
 
-/* A vertical pill docked on the right of the frame, like a touch handle. Its
-   position follows `--t`: pulling it down pulls the town up. */
-.pull {
+.pullWrap {
   position: absolute;
+  top: clamp(5.8rem, 11vh, 6.8rem);
+  right: 0;
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Striped paper pull-ribbon emerging from the right screen edge behind the tab. */
+.pullRibbon {
+  position: absolute;
+  right: 0;
   top: 50%;
-  right: calc(-1 * clamp(0.5rem, 0.9vw, 0.8rem));
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
+  width: 3.8rem;
+  height: 1.55rem;
+  translate: 0 -50%;
+  border: 2px solid var(--h-ink);
+  border-right: 0;
+  border-radius: 0;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--h-paper) 0 6px,
+    var(--h-tangerine) 6px 12px
+  );
+  box-shadow: 0 3px 0 var(--h-ink);
+  transform-origin: 100% 50%;
+  scale: clamp(0, var(--t), 1) 1;
+  opacity: clamp(0, calc(var(--t) * 4), 1);
+  pointer-events: none;
+}
+
+.pullBurst {
+  position: absolute;
+  inset: -6px 0 -6px -6px;
+  border-radius: 999px 0 0 999px;
+  border: 2px solid var(--h-butter);
+  border-right: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes kPullBurst {
+  0% {
+    opacity: 0.9;
+    scale: 0.88;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.24;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pullBurst {
+    animation: kPullBurst 0.55s var(--h-ease) both;
+  }
+}
+
+/* Horizontal butter-yellow pull tab flush against and cut by the right screen edge. */
+.pull {
+  position: relative;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.7rem;
-  width: clamp(3rem, 3.6vw, 3.5rem);
-  height: 9.8rem;
-  margin-top: -4.9rem;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
+  gap: 0.55rem;
+  padding: 0.68rem 1.35rem 0.68rem 1.3rem;
+  border: 2px solid var(--h-ink);
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
   background: linear-gradient(180deg, #ffe066 0%, var(--h-butter) 100%);
   color: var(--h-ink);
   box-shadow:
-    0 12px 22px rgb(9 18 50 / 0.42),
-    inset 0 2px 0 rgb(255 255 255 / 0.6),
-    inset 0 -3px 0 rgb(0 0 0 / 0.12);
+    -3px 4px 0 var(--h-ink),
+    inset 0 2px 0 rgb(255 255 255 / 0.55);
   cursor: grab;
   touch-action: none;
-  translate: 0 calc(clamp(0, var(--t), 1) * 3.5rem);
+  translate: calc(clamp(0, var(--t), 1) * -1.75rem) 0;
+  transition:
+    translate 0.16s var(--h-ease),
+    box-shadow 0.16s var(--h-ease);
+}
+
+.pull:hover {
+  translate: calc(clamp(0, var(--t), 1) * -1.75rem - 2px) -2px;
+  box-shadow:
+    -4px 6px 0 var(--h-ink),
+    inset 0 2px 0 rgb(255 255 255 / 0.55);
 }
 
 .pull:active {
   cursor: grabbing;
+  translate: calc(clamp(0, var(--t), 1) * -1.75rem) 2px;
+  box-shadow:
+    -2px 2px 0 var(--h-ink),
+    inset 0 2px 0 rgb(255 255 255 / 0.55);
 }
 
 /* A little paper fold on the pill's face, so the wiggle hint has something
@@ -806,19 +1002,34 @@
 .pull::before {
   content: '';
   position: absolute;
-  inset: 5px;
+  inset: 3px 0 3px 3px;
   border-radius: inherit;
-  border: 1.5px solid rgb(25 26 46 / 0.14);
+  border: 1px solid rgb(25 26 46 / 0.12);
+  border-right: 0;
   pointer-events: none;
 }
 
 .pullText {
-  writing-mode: vertical-rl;
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
   font-family: var(--h-display);
-  font-size: 1.02rem;
+  font-size: clamp(0.86rem, 1.05vw, 1rem);
   font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 1;
+}
+
+.pullLabel {
+  display: inline-block;
+}
+
+.pullIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  rotate: calc(clamp(0, var(--t), 1) * 180deg);
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
@@ -830,8 +1041,11 @@
 }
 
 @media (max-width: 900px) {
+  .hero {
+    padding-inline: clamp(2.4rem, 5vw, 3rem);
+  }
+
   .box {
-    padding-top: 1.5rem;
     border-radius: 34px;
   }
 
@@ -840,43 +1054,72 @@
   }
 
   .titleStage {
-    padding: 6.4rem 0.8rem 4.8rem;
+    padding: 2.6rem 0.8rem 7.8rem;
   }
 
   .titleWrap {
     width: clamp(15rem, 78%, 30rem);
   }
 
+  .physicsTab {
+    width: 2rem;
+    min-height: 8.6rem;
+    padding: 0.95rem 0;
+  }
+
+  .pullWrap {
+    top: 5.5rem;
+    right: 0;
+  }
+
   .pull {
-    width: 2.8rem;
-    height: 7.6rem;
-    margin-top: -3.8rem;
-    gap: 0.5rem;
+    padding: 0.52rem 1.1rem 0.52rem 1rem;
+    gap: 0.38rem;
   }
 
   .pullText {
-    font-size: 0.9rem;
+    font-size: 0.82rem;
   }
 }
 
 @media (max-width: 700px) {
   .pillRow {
-    gap: 0.4rem;
+    bottom: 4rem;
+    gap: 0.36rem;
   }
 
   .pill {
     gap: 0.35rem;
-    padding: 0.5rem 0.8rem;
-    font-size: 0.78rem;
+    padding: 0.18rem 0.22rem 0.18rem 0.65rem;
+    font-size: 0.72rem;
   }
 
-  .label {
-    display: none;
+  .pillBody {
+    padding: 0.28rem 0.64rem;
+  }
+
+  .swapWindow {
+    inset: 0.28rem 0.64rem;
   }
 
   .seeWork {
     padding: 0.62rem 1.1rem;
     font-size: 0.9rem;
+  }
+
+  .ornCloud {
+    top: -1.8rem;
+    left: -1.8rem;
+    width: 4.8rem;
+  }
+
+  .ornPencil {
+    display: none;
+  }
+
+  .ornStar {
+    left: 46%;
+    right: auto;
   }
 
   .select {

@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, Hand } from 'lucide-react'
+import { ArrowUpRight, Zap } from 'lucide-react'
 import { Circle, Diamond, Sparkles, Sun } from 'kubai-icons-react'
 import {
   AnimatePresence,
@@ -33,6 +33,9 @@ import {
 } from '@/components/ui/sticker-slap-footer'
 import { cn } from '@/lib/utils'
 
+import { gearPath, starPath } from '../diorama/geometry'
+import { Protractor } from './paper-protractor'
+
 import { scrollToSection } from '../studio-data'
 import styles from './hero.module.css'
 
@@ -44,9 +47,11 @@ type Props = {
 }
 
 /* ── The marker wordmark ──────────────────────────────────────────────────
-   The site's single-stroke marker alphabet, laid out as one word. */
+   The site's single-stroke marker alphabet, with a capital A and a
+   trailing tail on the final a, matching the footer's marker hand. */
 
 const SCRIPT_STROKE = 3.45
+const SCRIPT_OUTLINE = 2.4
 const SCRIPT_SLANT = 0.1584
 
 const SCRIPT_A_CAPITAL: [number, string, string?] = [
@@ -56,8 +61,8 @@ const SCRIPT_A_CAPITAL: [number, string, string?] = [
 ]
 
 const SCRIPT_A_TAIL: [number, string] = [
-  13.2,
-  'M0 -1C1.4 -1.4 1.4 -9.6 4.3 -10C2.5 -10 1 -7.8 1 -5C1 -2.2 2.5 0 4.3 0C6.1 0 7.6 -2.2 7.6 -5L7.8 -10L7.8 -3C7.8 -0.6 8.6 0.2 10.2 0.2C11.8 0.2 13.5 -0.2 14.8 -1C15.8 -1.5 16.8 -2 17.5 -2.6',
+  14.2,
+  'M0 -1C1.4 -1.4 1.4 -9.6 4.3 -10C2.5 -10 1 -7.8 1 -5C1 -2.2 2.5 0 4.3 0C6.1 0 7.6 -2.2 7.6 -5L7.8 -10L7.8 -3C7.8 -0.4 8.6 0.4 10.4 0.3C12.2 0.2 14.2 -0.4 15.8 -1.4C16.8 -2 17.6 -2.8 18.2 -3.4',
 ]
 
 function layoutAdityaWord(): ScriptWord {
@@ -98,27 +103,27 @@ function layoutAdityaWord(): ScriptWord {
 
 /* The three headline pills. The first row's icons are Kubai icons that act
    themselves out on every word change (controlled `hover`, `trigger="none"`);
-   the others keep their text glyphs. */
+   the others keep crisp monochrome glyphs/icons on butter yellow. */
 const CRAFT_ICONS = [
-  { Icon: Sparkles, color: '#3d53d6', word: 'SYSTEMS' },
-  { Icon: Sun, color: '#ff6a2b', word: 'CRAFT' },
-  { Icon: Circle, color: '#ff6a2b', word: 'WARMTH' },
-  { Icon: Diamond, color: '#3d53d6', word: 'CLARITY' },
+  { Icon: Sparkles, color: '#2c3cae', word: 'SYSTEMS' },
+  { Icon: Sun, color: '#191a2e', word: 'CRAFT' },
+  { Icon: Circle, color: '#191a2e', word: 'WARMTH' },
+  { Icon: Diamond, color: '#2c3cae', word: 'CLARITY' },
 ] as const
 
 const MADLIB_SLOTS = {
   craft: CRAFT_ICONS,
   taste: [
     { icon: '❖', word: 'MOTION' },
-    { icon: '✏', word: 'TASTE' },
+    { icon: '✎', word: 'TASTE' },
     { icon: '◈', word: 'DETAIL' },
-    { icon: '⚡', word: 'FEEL' },
+    { icon: 'bolt', word: 'FEEL' },
   ],
   products: [
     { icon: '▤', word: 'DIGITAL WORK' },
     { icon: '⚛', word: 'REACT APPS' },
     { icon: '>_', word: 'WEB SYSTEMS' },
-    { icon: '⚡', word: 'PRODUCT UI' },
+    { icon: 'bolt', word: 'PRODUCT UI' },
   ],
 } as const
 
@@ -140,8 +145,10 @@ const vars = (values: Record<string, string | number>) =>
 const INK = '#191a2e'
 const PAPER = '#fffaf1'
 const PAPER_LO = '#f3ecdf'
+const PAPER_UNDER = '#e9dfcf'
 const COBALT = '#3d53d6'
 const COBALT_INK = '#2c3cae'
+const COBALT_WASH = '#e8ebff'
 const TANGERINE = '#ff6a2b'
 const BUTTER = '#ffd23f'
 const PINK = '#ffb6e1'
@@ -153,6 +160,7 @@ const SKY = '#a9c8ff'
 const SOFT = 'sunnyside-hero-soft'
 const SOFT_S = 'sunnyside-hero-soft-s'
 const GRID = 'sunnyside-hero-grid'
+const GRID_LIGHT = 'sunnyside-hero-grid-light'
 
 /** Fades and moves a technic piece away as `t` passes its own threshold. */
 function Out({
@@ -247,18 +255,6 @@ function Enter({
 
 /* ── Technic parts ────────────────────────────────────────────────────── */
 
-function gearPath(outer: number, root: number, teeth: number) {
-  const step = (Math.PI * 2) / teeth
-  const at = (angle: number, radius: number) =>
-    `${round(Math.cos(angle) * radius)} ${round(Math.sin(angle) * radius)}`
-  let d = ''
-  for (let i = 0; i < teeth; i += 1) {
-    const a = i * step - Math.PI / 2
-    d += `${i === 0 ? 'M' : 'L'}${at(a - step * 0.3, root)} L${at(a - step * 0.17, outer)} L${at(a + step * 0.17, outer)} L${at(a + step * 0.3, root)} A${root} ${root} 0 0 1 ${at(a + step - step * 0.3, root)} `
-  }
-  return `${d}Z`
-}
-
 type GearSpec = {
   x: number
   y: number
@@ -279,7 +275,7 @@ const GEARS: readonly GearSpec[] = [
     y: 150,
     r: 74,
     teeth: 14,
-    fill: MINT,
+    fill: COBALT,
     dir: 1,
     dur: 40,
     delay: 0.55,
@@ -305,7 +301,7 @@ const GEARS: readonly GearSpec[] = [
     y: 262,
     r: 40,
     teeth: 8,
-    fill: PINK,
+    fill: TANGERINE,
     dir: -1,
     dur: 24,
     delay: 0.8,
@@ -318,7 +314,7 @@ const GEARS: readonly GearSpec[] = [
     y: 92,
     r: 48,
     teeth: 10,
-    fill: MINT,
+    fill: SKY,
     dir: 1,
     dur: 32,
     delay: 0.92,
@@ -343,7 +339,7 @@ const GEARS: readonly GearSpec[] = [
 
 function Gear({ spec }: { spec: GearSpec }) {
   const d = useMemo(
-    () => gearPath(spec.r, spec.r * 0.8, spec.teeth),
+    () => gearPath(0, 0, spec.r, spec.r * 0.8, spec.teeth),
     [spec.r, spec.teeth],
   )
   return (
@@ -357,6 +353,18 @@ function Gear({ spec }: { spec: GearSpec }) {
             <circle r={spec.r} fill="none" />
             <path d={d} fill={spec.fill} />
             <circle r={spec.r * 0.56} fill="rgb(255 250 241 / 0.55)" />
+            {Array.from({ length: 6 }, (_, i) => {
+              const a = (i / 6) * Math.PI * 2
+              return (
+                <circle
+                  key={i}
+                  cx={round(Math.cos(a) * spec.r * 0.38)}
+                  cy={round(Math.sin(a) * spec.r * 0.38)}
+                  r={round(spec.r * 0.085)}
+                  fill={spec.fill}
+                />
+              )
+            })}
             <circle r={spec.r * 0.2} fill={INK} opacity={0.82} />
           </g>
         </Enter>
@@ -365,63 +373,144 @@ function Gear({ spec }: { spec: GearSpec }) {
   )
 }
 
-/** A half-ring protractor, flat edge on y = 0, hub at the origin. */
-function Protractor({
-  radius,
-  inner,
-  fill,
-}: {
-  radius: number
-  inner: number
-  fill: string
-}) {
-  const ticks = useMemo(
-    () =>
-      Array.from({ length: 37 }, (_, i) => {
-        const deg = i * 5
-        const a = (deg * Math.PI) / 180
-        const len = deg % 10 === 0 ? 24 : 14
-        const r1 = radius - 6
-        const r2 = radius - 6 - len
-        return {
-          key: deg,
-          x1: round(-Math.cos(a) * r1),
-          y1: round(-Math.sin(a) * r1),
-          x2: round(-Math.cos(a) * r2),
-          y2: round(-Math.sin(a) * r2),
-        }
-      }),
-    [radius],
-  )
+/* ── Pieces that spill out of the frame ───────────────────────────────── */
+
+/** Cut-paper props that hang over the bezel, so the box reads as a shadow
+ *  box with things leaning into the room. Technic props go as the town
+ *  arrives, and the town's come in after them. */
+function Ornaments() {
+  const gear = useMemo(() => gearPath(0, 0, 54, 43, 12), [])
+  const gearSm = useMemo(() => gearPath(0, 0, 30, 24, 9), [])
   return (
-    <g>
-      <path
-        d={`M${-radius} 0 A${radius} ${radius} 0 0 1 ${radius} 0 L${inner} 0 A${inner} ${inner} 0 0 0 ${-inner} 0 Z`}
-        fill={fill}
-      />
-      <rect
-        x={-radius}
-        y={0}
-        width={radius * 2}
-        height={24}
-        rx={6}
-        fill={fill}
-      />
-      {ticks.map((t) => (
-        <line
-          key={t.key}
-          x1={t.x1}
-          y1={t.y1}
-          x2={t.x2}
-          y2={t.y2}
-          stroke={INK}
-          strokeOpacity={0.55}
-          strokeWidth={2}
-          strokeLinecap="round"
-        />
-      ))}
-      <circle cy={12} r={5} fill={INK} opacity={0.5} />
-    </g>
+    <>
+      <span className={cn(styles.orn, styles.ornA, styles.ornGear)} aria-hidden>
+        <svg viewBox="-60 -60 120 120" className={styles.ornSvg}>
+          <g className={styles.spinCw} style={vars({ '--dur': '36s' })}>
+            <path
+              d={gear}
+              fill="#091232"
+              opacity={0.25}
+              transform="translate(0 6)"
+            />
+            <path d={gear} fill={BUTTER} />
+            <circle r={30} fill="rgb(255 250 241 / 0.6)" />
+            <circle r={9} fill={INK} opacity={0.82} />
+          </g>
+        </svg>
+      </span>
+      <span
+        className={cn(styles.orn, styles.ornA, styles.ornGearSm)}
+        aria-hidden
+      >
+        <svg viewBox="-34 -34 68 68" className={styles.ornSvg}>
+          <g className={styles.spinCcw} style={vars({ '--dur': '22s' })}>
+            <path
+              d={gearSm}
+              fill="#091232"
+              opacity={0.25}
+              transform="translate(0 4)"
+            />
+            <path d={gearSm} fill={TANGERINE} />
+            <circle r={16} fill="rgb(255 250 241 / 0.6)" />
+            <circle r={5} fill={INK} opacity={0.82} />
+          </g>
+        </svg>
+      </span>
+      <span
+        className={cn(styles.orn, styles.ornA, styles.ornPencil)}
+        aria-hidden
+      >
+        <svg viewBox="0 0 220 40" className={styles.ornSvg}>
+          <g className={styles.bob}>
+            <rect x={6} y={8} width={150} height={24} rx={3} fill={BUTTER} />
+            <rect x={6} y={8} width={150} height={7} rx={3} fill={TANGERINE} />
+            <rect x={150} y={8} width={14} height={24} fill={PAPER_LO} />
+            <path d="M164 8 L212 20 L164 32 Z" fill={PAPER_UNDER} />
+            <path d="M196 16 L212 20 L196 24 Z" fill={INK} />
+            <rect x={0} y={8} width={12} height={24} rx={4} fill={TANGERINE} />
+          </g>
+        </svg>
+      </span>
+      <span
+        className={cn(styles.orn, styles.ornA, styles.ornScrew)}
+        aria-hidden
+      >
+        <svg viewBox="-30 -30 60 60" className={styles.ornSvg}>
+          <g className={styles.spinCw} style={vars({ '--dur': '30s' })}>
+            <circle r={24} fill="#091232" opacity={0.25} cy={4} />
+            <circle r={24} fill={PAPER} />
+            <circle r={19} fill={PAPER_LO} />
+            <path
+              d="M-13 -13 L13 13"
+              stroke={INK}
+              strokeWidth={5}
+              strokeLinecap="round"
+              opacity={0.7}
+            />
+          </g>
+        </svg>
+      </span>
+
+      <span
+        className={cn(styles.orn, styles.ornB, styles.ornCloud)}
+        aria-hidden
+      >
+        <svg viewBox="126 108 170 90" className={styles.ornSvg}>
+          <g
+            className={styles.drift}
+            style={vars({ '--amp': '10px', '--dur': '9s' })}
+          >
+            <path
+              d={cloudPath(CLOUD_LOBES.left, 186)}
+              fill="#091232"
+              opacity={0.22}
+              transform="translate(0 6)"
+            />
+            <path d={cloudPath(CLOUD_LOBES.left, 186)} fill={PAPER} />
+          </g>
+        </svg>
+      </span>
+      <span className={cn(styles.orn, styles.ornB, styles.ornStar)} aria-hidden>
+        <svg viewBox="-60 0 120 190" className={styles.ornSvg}>
+          <g className={styles.sway}>
+            <path d="M0 0 V104" stroke={PAPER} strokeWidth={3} />
+            <path
+              d={starPath(0, 140, 40, 18, 5)}
+              fill="#091232"
+              opacity={0.25}
+              transform="translate(0 6)"
+            />
+            <path d={starPath(0, 140, 40, 18, 5)} fill={BUTTER} />
+            <path d={starPath(0, 140, 22, 10, 5)} fill="#ffe27a" />
+          </g>
+        </svg>
+      </span>
+      <span className={cn(styles.orn, styles.ornB, styles.ornBird)} aria-hidden>
+        <svg viewBox="0 0 80 50" className={styles.ornSvg}>
+          <g className={styles.bob}>
+            <path
+              d="M6 30 C20 8 34 10 42 26 C48 12 62 8 74 24 C60 22 52 32 42 44 C34 34 20 30 6 30 Z"
+              fill={PINK}
+            />
+            <path
+              d="M42 26 C48 12 62 8 74 24 C60 22 52 32 42 44 Z"
+              fill={TANGERINE}
+            />
+            <circle cx={42} cy={27} r={2.4} fill={INK} />
+          </g>
+        </svg>
+      </span>
+      <span className={cn(styles.orn, styles.ornB, styles.ornTree)} aria-hidden>
+        <svg viewBox="-40 -150 80 150" className={styles.ornSvg}>
+          <g className={styles.sway} style={vars({ '--origin': '50% 100%' })}>
+            <rect x={-6} y={-46} width={12} height={46} rx={3} fill="#3b3f63" />
+            <circle cy={-92} r={44} fill="#091232" opacity={0.2} />
+            <circle cy={-96} r={44} fill={GREEN} />
+            <circle cx={-12} cy={-110} r={14} fill={MINT} opacity={0.7} />
+          </g>
+        </svg>
+      </span>
+    </>
   )
 }
 
@@ -478,6 +567,31 @@ function Dial() {
   )
   return (
     <g>
+      <g className={styles.spinSlow} style={vars({ '--dur': '40s' })}>
+        <path
+          d="M-146 0 A146 146 0 0 1 0 -146"
+          fill="none"
+          stroke={COBALT}
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
+        <path
+          d="M-8 -158 L6 -146 L-8 -134"
+          fill="none"
+          stroke={COBALT}
+          strokeWidth={5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M146 0 A146 146 0 0 1 0 146"
+          fill="none"
+          stroke={COBALT}
+          strokeWidth={5}
+          strokeLinecap="round"
+          strokeDasharray="1 14"
+        />
+      </g>
       {ticks.map((t) => (
         <line
           key={t.key}
@@ -597,7 +711,11 @@ function TownCloud({
   x,
   amp,
   dur,
+  dx = 0,
+  dy = 0,
 }: {
+  dx?: number
+  dy?: number
   lobes: readonly Lobe[]
   base: number
   x: number
@@ -611,7 +729,7 @@ function TownCloud({
         className={styles.drift}
         style={vars({ '--amp': `${amp}px`, '--dur': `${dur}s` })}
       >
-        <path d={d} fill={PAPER} />
+        <path d={d} fill={PAPER} transform={`translate(${dx} ${dy})`} />
       </g>
     </In>
   )
@@ -624,6 +742,7 @@ function Cottage({
   h,
   wall,
   roof,
+  chimney = true,
 }: {
   x: number
   y: number
@@ -631,39 +750,64 @@ function Cottage({
   h: number
   wall: string
   roof: string
+  chimney?: boolean
 }) {
-  const roofH = Math.round(w * 0.5)
+  const roofH = Math.round(w * 0.55)
   const pane = round(w * 0.2)
+  const over = 8
   return (
     <In x={x} dy={90} filter={SOFT_S}>
       <g transform={`translate(${x} ${y})`}>
-        <rect x={-w / 2} y={-h} width={w} height={h} fill={wall} />
+        {chimney ? (
+          <rect
+            x={round(w * 0.16)}
+            y={-h - roofH + 4}
+            width={round(w * 0.16)}
+            height={round(roofH * 0.7)}
+            fill={INK}
+            opacity={0.78}
+          />
+        ) : null}
+        <rect x={-w / 2} y={-h} width={w} height={h + 6} fill={wall} />
+        <rect
+          x={-w / 2}
+          y={-h}
+          width={w}
+          height={7}
+          fill="#091232"
+          opacity={0.1}
+        />
         <path
-          d={`M${-w / 2 - 7} ${-h} L0 ${-h - roofH} L${w / 2 + 7} ${-h} Z`}
+          d={`M${-w / 2 - over} ${-h + 2} L0 ${-h - roofH} L${w / 2 + over} ${-h + 2} Z`}
           fill={roof}
         />
-        <rect
-          x={round(-w * 0.34)}
-          y={round(-h * 0.7)}
-          width={pane}
-          height={pane}
-          rx={2}
-          fill={COBALT}
+        <path
+          d={`M${-w / 2 - over} ${-h + 2} L${w / 2 + over} ${-h + 2} L${w / 2 + over - 5} ${-h - 4} L${-w / 2 - over + 5} ${-h - 4} Z`}
+          fill="#091232"
+          opacity={0.14}
         />
-        <rect
-          x={round(w * 0.14)}
-          y={round(-h * 0.7)}
-          width={pane}
-          height={pane}
-          rx={2}
-          fill={COBALT}
-        />
-        <rect
-          x={round(-w * 0.11)}
-          y={round(-h * 0.36)}
-          width={round(w * 0.22)}
-          height={round(h * 0.36)}
-          rx={2}
+        {[round(-w * 0.34), round(w * 0.14)].map((px) => (
+          <g key={px}>
+            <rect
+              x={px - 2}
+              y={round(-h * 0.7) - 2}
+              width={pane + 4}
+              height={pane + 4}
+              rx={3}
+              fill={PAPER}
+            />
+            <rect
+              x={px}
+              y={round(-h * 0.7)}
+              width={pane}
+              height={pane}
+              rx={2}
+              fill={COBALT}
+            />
+          </g>
+        ))}
+        <path
+          d={`M${round(-w * 0.11)} 6 V${round(-h * 0.26)} Q0 ${round(-h * 0.42)} ${round(w * 0.11)} ${round(-h * 0.26)} V6 Z`}
           fill={TANGERINE}
         />
       </g>
@@ -697,10 +841,127 @@ function Pine({ x, y, s }: { x: number; y: number; s: number }) {
   return (
     <In x={x} dy={80} filter={SOFT_S}>
       <g transform={`translate(${x} ${y}) scale(${s})`}>
-        <rect x={-4} y={-14} width={8} height={14} fill="#c9692f" />
-        <path d="M0 -92 L26 -48 H-26 Z" fill="#3ea06f" />
-        <path d="M0 -70 L32 -22 H-32 Z" fill={GREEN} />
+        <rect x={-5} y={-18} width={10} height={22} fill="#b8602a" />
+        <path d="M0 -112 L24 -70 H-24 Z" fill="#3ea06f" />
+        <path d="M0 -88 L30 -42 H-30 Z" fill={GREEN} />
+        <path d="M0 -62 L38 -14 H-38 Z" fill="#3ea06f" />
+        <path d="M0 -62 L38 -14 H0 Z" fill="#091232" opacity={0.1} />
       </g>
+    </In>
+  )
+}
+
+/** A cut-paper mobile piece: hangs from the frame's top edge by a string, so
+ *  nothing in the sky floats free. `top` is where the shape begins. */
+function Hung({
+  x,
+  top,
+  children,
+}: {
+  x: number
+  top: number
+  children: ReactNode
+}) {
+  return (
+    <In x={x} dy={-150} filter={SOFT_S}>
+      <path
+        d={`M${x} -40 V${top + 2}`}
+        stroke={PAPER}
+        strokeOpacity={0.75}
+        strokeWidth={2.4}
+        fill="none"
+      />
+      {children}
+    </In>
+  )
+}
+
+/** A mountain whose snow cap follows both slopes exactly, with a shaded
+ *  side. The base runs below the ground line so layers never show a gap. */
+function Mountain({
+  left,
+  peakX,
+  peakY,
+  right,
+  base,
+  fill,
+  shade = '#091232',
+}: {
+  left: number
+  peakX: number
+  peakY: number
+  right: number
+  base: number
+  fill: string
+  shade?: string
+}) {
+  const f = 0.22
+  const lx = peakX + (left - peakX) * f
+  const rx = peakX + (right - peakX) * f
+  const ly = peakY + (base - peakY) * f
+  const step = (rx - lx) / 4
+  const snow = `M${peakX} ${peakY} L${lx} ${ly} L${round(lx + step)} ${ly + 22} L${round(lx + step * 2)} ${ly + 4} L${round(lx + step * 3)} ${ly + 24} L${rx} ${ly} Z`
+  return (
+    <In x={peakX} dy={170} filter={SOFT_S}>
+      <path
+        d={`M${left} ${base} L${peakX} ${peakY} L${right} ${base} Z`}
+        fill={fill}
+      />
+      <path
+        d={`M${peakX} ${peakY} L${right} ${base} H${peakX} Z`}
+        fill={shade}
+        opacity={0.09}
+      />
+      <path d={snow} fill={PAPER} />
+    </In>
+  )
+}
+
+/** Solar panel on a post that reaches the ground. */
+function Solar({ x, top, ground }: { x: number; top: number; ground: number }) {
+  const P = [
+    [x - 96, top + 30],
+    [x + 54, top],
+    [x + 96, top + 78],
+    [x - 54, top + 112],
+  ]
+  const at = (u: number, v: number) => {
+    const ax = P[0][0] + (P[1][0] - P[0][0]) * u
+    const ay = P[0][1] + (P[1][1] - P[0][1]) * u
+    const bx = P[3][0] + (P[2][0] - P[3][0]) * u
+    const by = P[3][1] + (P[2][1] - P[3][1]) * u
+    return `${round(ax + (bx - ax) * v)} ${round(ay + (by - ay) * v)}`
+  }
+  const lines: string[] = []
+  for (let i = 1; i < 4; i += 1) {
+    lines.push(`M${at(i / 4, 0)} L${at(i / 4, 1)}`)
+    lines.push(`M${at(0, i / 3.2)} L${at(1, i / 3.2)}`)
+  }
+  const mid = at(0.5, 1).split(' ').map(Number)
+  return (
+    <In x={x} dy={150} filter={SOFT_S}>
+      <path
+        d={`M${x - 7} ${mid[1] - 4} H${x + 7} V${ground} H${x - 7} Z`}
+        fill={PAPER}
+      />
+      <path
+        d={`M${x - 30} ${ground} L${x - 7} ${ground - 40} H${x + 7} L${x + 30} ${ground} Z`}
+        fill={PAPER_LO}
+      />
+      <path
+        d={`M${P.map((p) => p.join(' ')).join(' L')} Z`}
+        fill="#5f7cf0"
+        stroke={PAPER}
+        strokeWidth={6}
+        strokeLinejoin="round"
+      />
+      <path
+        d={lines.join(' ')}
+        stroke={PAPER}
+        strokeOpacity={0.8}
+        strokeWidth={2}
+        fill="none"
+      />
     </In>
   )
 }
@@ -745,30 +1006,42 @@ function Car({
   color,
   amp,
   dur,
+  flip = false,
 }: {
   x: number
   y: number
   color: string
   amp: number
   dur: number
+  flip?: boolean
 }) {
   return (
     <In x={x} dy={60} filter={SOFT_S}>
-      <g transform={`translate(${x} ${y})`}>
+      <g transform={`translate(${x} ${y}) scale(${flip ? -1.2 : 1.2} 1.2)`}>
         <g
           className={styles.drive}
           style={vars({ '--amp': `${amp}px`, '--dur': `${dur}s` })}
         >
+          <ellipse
+            cx={4}
+            cy={11}
+            rx={54}
+            ry={6}
+            fill="#091232"
+            opacity={0.28}
+          />
           <path
-            d="M-40 0 V-14 Q-40 -22 -30 -22 H-20 L-9 -40 H22 L33 -22 H42 Q50 -22 50 -14 V0 Z"
+            d="M-44 4 V-12 Q-44 -22 -33 -22 H-22 L-10 -42 H22 L35 -22 H46 Q54 -22 54 -12 V4 Z"
             fill={color}
           />
-          <path d="M-5 -34 H8 V-22 H-13 Z" fill={SKY} />
-          <path d="M12 -34 H20 L27 -22 H12 Z" fill={SKY} />
-          <circle cx={-22} cy={0} r={10} fill={INK} />
-          <circle cx={30} cy={0} r={10} fill={INK} />
-          <circle cx={-22} cy={0} r={4} fill={PAPER} />
-          <circle cx={30} cy={0} r={4} fill={PAPER} />
+          <path d="M-44 -2 H54 V4 H-44 Z" fill="#091232" opacity={0.18} />
+          <path d="M-6 -37 H8 V-23 H-15 Z" fill={SKY} />
+          <path d="M13 -37 H21 L29 -23 H13 Z" fill={SKY} />
+          <circle cx={50} cy={-10} r={3.4} fill={BUTTER} />
+          <circle cx={-22} cy={4} r={11} fill={INK} />
+          <circle cx={32} cy={4} r={11} fill={INK} />
+          <circle cx={-22} cy={4} r={4.5} fill={PAPER} />
+          <circle cx={32} cy={4} r={4.5} fill={PAPER} />
         </g>
       </g>
     </In>
@@ -805,28 +1078,37 @@ function ScriptStrokeLayer({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
-        initial={reduced ? false : { pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.05, delay, ease: PAPER_EASE }}
+        initial={reduced ? false : { pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={{
+          pathLength: { duration: 1.05, delay, ease: PAPER_EASE },
+          opacity: { duration: 0.01, delay },
+        }}
       />
-      {word.extra.map((d, index) => (
-        <motion.path
-          key={index}
-          d={d}
-          fill="none"
-          stroke={stroke}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          initial={reduced ? false : { pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{
-            duration: 0.25,
-            delay: delay + 0.95 + index * 0.12,
-            ease: 'easeOut',
-          }}
-        />
-      ))}
+      {word.extra.map((d, index) => {
+        const extraDelay = delay + 0.95 + index * 0.12
+        return (
+          <motion.path
+            key={index}
+            d={d}
+            fill="none"
+            stroke={stroke}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            initial={reduced ? false : { pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{
+              pathLength: {
+                duration: 0.25,
+                delay: extraDelay,
+                ease: 'easeOut',
+              },
+              opacity: { duration: 0.01, delay: extraDelay },
+            }}
+          />
+        )
+      })}
     </g>
   )
 }
@@ -864,7 +1146,6 @@ function SwapPill({
   onHoverChange: (hovering: boolean) => void
 }) {
   const current = items[index % items.length]
-  const widest = items.reduce((a, b) => (b.word.length > a.word.length ? b : a))
 
   const [acting, setActing] = useState(false)
   useEffect(() => {
@@ -887,6 +1168,8 @@ function SwapPill({
         trigger="none"
         hover={animated ? acting : undefined}
       />
+    ) : it.icon === 'bolt' ? (
+      <Zap size={14} strokeWidth={2.6} aria-hidden />
     ) : (
       it.icon
     )
@@ -905,8 +1188,12 @@ function SwapPill({
       <span className={styles.pillLead}>{lead}</span>
       <span className={styles.pillBody}>
         <span className={styles.swapSizer} aria-hidden>
-          <span className={styles.pillIcon}>{renderIcon(widest, false)}</span>
-          <span>{widest.word}</span>
+          {items.map((it) => (
+            <span key={it.word} className={styles.swapSizerItem}>
+              <span className={styles.pillIcon}>{renderIcon(it, false)}</span>
+              <span>{it.word}</span>
+            </span>
+          ))}
         </span>
         <span className={styles.swapWindow} aria-hidden>
           <AnimatePresence initial={false}>
@@ -960,7 +1247,9 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
   const actRef = useRef<'technic' | 'town'>('technic')
 
   useMotionValueEvent(progress, 'change', (t) => {
-    stageRef.current?.style.setProperty('--t', t.toFixed(4))
+    const val = t.toFixed(4)
+    sectionRef.current?.style.setProperty('--t', val)
+    stageRef.current?.style.setProperty('--t', val)
   })
 
   const goTo = useCallback(
@@ -987,6 +1276,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
   useEffect(() => () => tween.current?.stop(), [])
 
   const dragRef = useRef<{
+    startX: number
     startY: number
     startT: number
     moved: boolean
@@ -1003,6 +1293,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
     event.currentTarget.setPointerCapture(event.pointerId)
     tween.current?.stop()
     dragRef.current = {
+      startX: event.clientX,
       startY: event.clientY,
       startT: progress.get(),
       moved: false,
@@ -1012,10 +1303,12 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
   const onPillMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const drag = dragRef.current
     if (!drag) return
+    const dx = drag.startX - event.clientX
     const dy = event.clientY - drag.startY
-    if (!drag.moved && Math.abs(dy) < 5) return
+    const delta = Math.abs(dx) > Math.abs(dy) ? dx : dy
+    if (!drag.moved && Math.abs(delta) < 5) return
     drag.moved = true
-    progress.set(clamp(drag.startT + dy / PULL_RANGE, 0, 1))
+    progress.set(clamp(drag.startT + delta / PULL_RANGE, 0, 1))
   }
 
   const onPillUp = () => {
@@ -1037,10 +1330,10 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
   }
 
   const onPillKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (event.key === 'ArrowDown') {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
       event.preventDefault()
       goTo(1)
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === 'ArrowUp' || event.key === 'ArrowRight') {
       event.preventDefault()
       goTo(0)
     }
@@ -1124,12 +1417,12 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
   // ── Title ─────────────────────────────────────────────────────────────
   const word = useMemo(() => layoutAdityaWord(), [])
   const scriptBox = useMemo(() => {
-    const pad = SCRIPT_STROKE / 2 + 4.6
-    const vbX = -1.8 - pad
+    const pad = (SCRIPT_STROKE + SCRIPT_OUTLINE) / 2 + 2.2
+    const vbX = -1.6 - pad
     const vbY = word.top - pad
     const vbW =
-      Math.max(word.width, 1) + 4.8 + pad * 2 - word.top * SCRIPT_SLANT
-    const vbH = word.bottom + pad - vbY + 3.2
+      Math.max(word.width, 1) + 3.6 + pad * 2 - word.top * SCRIPT_SLANT
+    const vbH = word.bottom + pad - vbY + 2.2
     return [vbX, vbY, vbW, vbH].map(round).join(' ')
   }, [word])
 
@@ -1202,7 +1495,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
       onPointerLeave={handleLeave}
     >
       <MotionConfig reducedMotion="user">
-        {/* Left edge tab: parallax on / off */}
+        {/* Left screen edge tab: parallax on / off */}
         <button
           type="button"
           className={styles.physicsTab}
@@ -1213,17 +1506,13 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
         </button>
 
         <div ref={stageRef} className={styles.box} data-act={act}>
-          <span className={styles.figure} aria-hidden>
-            {act === 'technic' ? 'Fig. 01 — Technic' : 'Fig. 02 — Paper town'}
-          </span>
-
           <div className={styles.window}>
             {/* ── Technic: the drafting table ─────────────────────────── */}
             <div className={cn(styles.layer, styles.sceneA)}>
               <svg
                 className={styles.svg}
                 viewBox="0 0 1440 800"
-                preserveAspectRatio="xMidYMid slice"
+                preserveAspectRatio="xMidYMax slice"
                 aria-hidden
                 focusable="false"
               >
@@ -1268,14 +1557,35 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                       d="M48 0H0V48"
                       fill="none"
                       stroke={COBALT}
-                      strokeOpacity="0.2"
+                      strokeOpacity="0.18"
                       strokeWidth="1.2"
                     />
                     <path
                       d="M12 0V48M24 0V48M36 0V48M0 12H48M0 24H48M0 36H48"
                       fill="none"
                       stroke={COBALT}
-                      strokeOpacity="0.07"
+                      strokeOpacity="0.06"
+                      strokeWidth="0.8"
+                    />
+                  </pattern>
+                  <pattern
+                    id={GRID_LIGHT}
+                    width="48"
+                    height="48"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d="M48 0H0V48"
+                      fill="none"
+                      stroke={PAPER}
+                      strokeOpacity="0.16"
+                      strokeWidth="1.2"
+                    />
+                    <path
+                      d="M24 0V48M0 24H48"
+                      fill="none"
+                      stroke={PAPER}
+                      strokeOpacity="0.06"
                       strokeWidth="0.8"
                     />
                   </pattern>
@@ -1303,26 +1613,40 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                 <g className={styles.px} style={vars({ '--depth': 0.25 })}>
                   <Out at={0.04} dx={-620} dy={0} rot={0}>
                     <Enter kind="fly" delay={0.15} fx={-640}>
+                      <path d="M-80 -80 H852 L540 880 H-80 Z" fill={BUTTER} />
                       <path
                         d="M-80 -80 H800 L470 880 H-80 Z"
-                        fill={TANGERINE}
+                        fill={COBALT_WASH}
                       />
                       <path
                         d="M-80 -80 H800 L470 880 H-80 Z"
                         fill={`url(#${GRID})`}
-                        opacity={0.6}
+                        opacity={0.7}
                       />
+                    </Enter>
+                  </Out>
+                  <Out at={0.1} dx={-300} dy={300} rot={0}>
+                    <Enter kind="fly" delay={0.4} fy={320}>
+                      <circle cx={470} cy={858} r={170} fill={PAPER} />
+                      <circle cx={470} cy={858} r={120} fill={PAPER_UNDER} />
                     </Enter>
                   </Out>
                   <Out at={0.12} dx={420} dy={260} rot={0}>
                     <Enter kind="fly" delay={0.3} fy={320}>
+                      <path
+                        d="M820 880 L1040 560 H1520 V880 Z"
+                        fill={PAPER_UNDER}
+                      />
                       <rect
                         x={1010}
                         y={500}
                         width={470}
                         height={330}
                         rx={46}
-                        fill={MINT}
+                        fill={PAPER}
+                        stroke={INK}
+                        strokeOpacity={0.1}
+                        strokeWidth={2}
                       />
                     </Enter>
                   </Out>
@@ -1353,13 +1677,6 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                 </g>
 
                 <g className={styles.px} style={vars({ '--depth': 0.6 })}>
-                  <g transform="translate(230 700) rotate(-26)">
-                    <Out at={0.1} dx={-420} dy={120} rot={-30}>
-                      <Enter kind="sweep" delay={0.75}>
-                        <Protractor radius={200} inner={118} fill={BUTTER} />
-                      </Enter>
-                    </Out>
-                  </g>
                   <g transform="translate(1330 70) rotate(58)">
                     <Out at={0.08} dx={420} dy={-160} rot={36}>
                       <Enter kind="sweep" delay={0.85}>
@@ -1381,20 +1698,48 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                       <Enter kind="draw" delay={1.15}>
                         <path
                           d="M420 668 C520 612 600 724 720 690 S900 640 960 704"
-                          stroke={MINT_DEEP}
+                          stroke={COBALT}
                           pathLength={1}
                         />
                       </Enter>
                       <Enter kind="draw" delay={1.3}>
                         <path
                           d="M400 700 C500 668 640 760 760 722 S920 690 1000 736"
-                          stroke={PINK}
+                          stroke={TANGERINE}
                           pathLength={1}
                         />
                       </Enter>
                     </g>
-                    <circle cx={420} cy={668} r={9} fill={PAPER} />
-                    <circle cx={960} cy={704} r={9} fill={PAPER} />
+                    <g
+                      fill="none"
+                      stroke={COBALT}
+                      strokeWidth={2}
+                      strokeDasharray="6 6"
+                    >
+                      <path d="M420 668 L520 612 M960 704 L900 640" />
+                    </g>
+                    <circle cx={520} cy={612} r={6} fill={COBALT} />
+                    <circle cx={900} cy={640} r={6} fill={COBALT} />
+                    <rect
+                      x={411}
+                      y={659}
+                      width={18}
+                      height={18}
+                      rx={3}
+                      fill={PAPER}
+                      stroke={COBALT}
+                      strokeWidth={3}
+                    />
+                    <rect
+                      x={951}
+                      y={695}
+                      width={18}
+                      height={18}
+                      rx={3}
+                      fill={PAPER}
+                      stroke={COBALT}
+                      strokeWidth={3}
+                    />
                   </Out>
                   <g transform="translate(420 748)">
                     <Out at={0.16} dx={-260} dy={200} rot={0}>
@@ -1419,7 +1764,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               <svg
                 className={styles.svg}
                 viewBox="0 0 1440 800"
-                preserveAspectRatio="xMidYMid slice"
+                preserveAspectRatio="xMidYMax slice"
                 aria-hidden
                 focusable="false"
               >
@@ -1436,58 +1781,83 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                     y={-80}
                     width={1600}
                     height={960}
-                    fill={`url(#${GRID})`}
-                    opacity={0.5}
+                    fill={`url(#${GRID_LIGHT})`}
                   />
                 </g>
+              </svg>
+            </div>
 
-                {/* The sun arch, with its stitched tick ring. */}
-                <g className={styles.px} style={vars({ '--depth': 0.2 })}>
-                  <g transform="translate(720 660)">
-                    <In at={0.3} dy={200}>
-                      <circle r={360} fill={BUTTER} />
-                      <circle r={326} fill="#ffe27a" />
-                      <circle r={262} fill={BUTTER} />
-                      <circle r={150} fill="#fff1b8" />
-                      <g className={styles.spinSlow}>
-                        <circle
-                          r={344}
-                          fill="none"
-                          stroke={TANGERINE}
-                          strokeOpacity={0.55}
-                          strokeWidth={7}
-                          strokeDasharray="2 11"
+            {/* ── The one tool both scenes share ──────────────────────── */}
+            <div className={cn(styles.layer, styles.shared)}>
+              <svg
+                className={styles.svg}
+                viewBox="0 0 1440 800"
+                preserveAspectRatio="xMidYMax slice"
+                aria-hidden
+                focusable="false"
+              >
+                <g className={styles.px} style={vars({ '--depth': 0.6 })}>
+                  <g className={styles.sharedTool}>
+                    <Enter kind="sweep" delay={0.75}>
+                      <g filter={`url(#${SOFT})`}>
+                        <Protractor
+                          radius={200}
+                          inner={118}
+                          fill={BUTTER}
+                          core="#ffe27a"
+                          coreClassName={styles.sharedCore}
                         />
                       </g>
-                    </In>
+                    </Enter>
                   </g>
-                  {[
-                    [330, 170],
-                    [1290, 120],
-                  ].map(([x, y]) => (
-                    <In key={x} x={x} dy={-120} filter={SOFT_S}>
-                      <path
-                        d={`M${x} ${y - 20} l6 14 15 1 -11 10 4 15 -14 -8 -14 8 4 -15 -11 -10 15 -1 z`}
-                        fill={BUTTER}
-                      />
-                    </In>
-                  ))}
-                  <In x={360} dy={-140} filter={SOFT_S}>
+                </g>
+              </svg>
+            </div>
+
+            <div className={cn(styles.layer, styles.sceneB, styles.sceneFront)}>
+              <svg
+                className={styles.svg}
+                viewBox="0 0 1440 800"
+                preserveAspectRatio="xMidYMax slice"
+                aria-hidden
+                focusable="false"
+              >
+                {/* Mobile pieces hang from the top edge on strings. */}
+                <g className={styles.px} style={vars({ '--depth': 0.2 })}>
+                  <Hung x={330} top={166}>
+                    <path d={starPath(330, 192, 28, 13, 5)} fill={BUTTER} />
+                  </Hung>
+                  <Hung x={1290} top={96}>
+                    <path d={starPath(1290, 120, 26, 12, 5)} fill={BUTTER} />
+                  </Hung>
+                  <Hung x={384} top={214}>
                     <path
-                      d="M360 224 l24 -14 24 14 v28 l-24 14 -24 -14 z"
+                      d="M384 214 l26 15 v30 l-26 15 -26 -15 v-30 z"
                       fill={PINK}
                     />
-                  </In>
-                  <In x={250} dy={-120} filter={SOFT_S}>
+                  </Hung>
+                  <Hung x={250} top={296}>
                     <circle
                       cx={250}
-                      cy={330}
-                      r={26}
+                      cy={324}
+                      r={28}
                       fill="none"
                       stroke={MINT}
                       strokeWidth={13}
                     />
-                  </In>
+                  </Hung>
+                  <Hung x={150} top={388}>
+                    <circle cx={150} cy={430} r={42} fill={GREEN} />
+                    <circle cx={150} cy={430} r={28} fill={BUTTER} />
+                    <circle cx={150} cy={430} r={14} fill={PAPER} />
+                  </Hung>
+                  <Hung x={1350} top={256}>
+                    <path
+                      d={starPath(1350, 300, 44, 20, 5, 8)}
+                      fill={TANGERINE}
+                    />
+                    <path d={starPath(1350, 300, 25, 11, 5, 8)} fill={PINK} />
+                  </Hung>
                 </g>
 
                 <g className={styles.px} style={vars({ '--depth': 0.35 })}>
@@ -1501,7 +1871,9 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                   <TownCloud
                     lobes={CLOUD_LOBES.mid}
                     base={286}
-                    x={560}
+                    x={860}
+                    dx={300}
+                    dy={-130}
                     amp={16}
                     dur={29}
                   />
@@ -1509,139 +1881,152 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                     lobes={CLOUD_LOBES.right}
                     base={354}
                     x={1270}
+                    dy={-30}
                     amp={22}
                     dur={38}
                   />
-                  {/* Solar panel on its post */}
-                  <In x={1120} dy={130} filter={SOFT_S}>
-                    <rect
-                      x={1114}
-                      y={262}
-                      width={12}
-                      height={150}
-                      fill={PAPER}
-                    />
-                    <path
-                      d="M1030 250 L1180 218 L1220 296 L1070 330 Z"
-                      fill={COBALT_INK}
-                    />
-                    <path
-                      d="M1050 246 L1200 214 M1058 262 L1208 230 M1066 278 L1216 246 M1074 294 L1224 262 M1080 240 L1118 322 M1112 232 L1150 314 M1144 224 L1182 306"
-                      stroke={SKY}
-                      strokeOpacity={0.7}
-                      strokeWidth={1.8}
-                    />
-                  </In>
                 </g>
 
-                <g className={styles.px} style={vars({ '--depth': 0.5 })}>
-                  <In x={140} dy={160}>
-                    <path
-                      d="M-40 640 L100 470 L160 530 L240 444 L380 640 Z"
-                      fill="#8fd0b0"
-                    />
-                    <path
-                      d="M100 470 L72 504 L100 496 L124 510 Z M240 444 L216 478 L240 470 L262 484 Z"
-                      fill={PAPER}
-                    />
-                  </In>
-                  <In x={1290} dy={160}>
-                    <path
-                      d="M1060 640 L1200 450 L1264 520 L1336 430 L1480 640 Z"
-                      fill="#8fd0b0"
-                    />
-                    <path
-                      d="M1200 450 L1176 486 L1200 478 L1224 492 Z M1336 430 L1312 466 L1336 458 L1360 472 Z"
-                      fill={PAPER}
-                    />
-                  </In>
-                  <Turbine x={430} y={640} h={190} dur={7} />
-                  <Turbine x={1010} y={640} h={170} dur={9} />
+                {/* Mountains: bases sink into the ground. */}
+                <g className={styles.px} style={vars({ '--depth': 0.45 })}>
+                  <Mountain
+                    left={-60}
+                    peakX={120}
+                    peakY={440}
+                    right={400}
+                    base={760}
+                    fill="#8fd0b0"
+                  />
+                  <Mountain
+                    left={180}
+                    peakX={300}
+                    peakY={520}
+                    right={520}
+                    base={760}
+                    fill="#79c2a0"
+                  />
+                  <Mountain
+                    left={900}
+                    peakX={1130}
+                    peakY={510}
+                    right={1380}
+                    base={760}
+                    fill="#79c2a0"
+                  />
+                  <Mountain
+                    left={1040}
+                    peakX={1320}
+                    peakY={430}
+                    right={1560}
+                    base={760}
+                    fill="#8fd0b0"
+                  />
                 </g>
 
-                <g className={styles.px} style={vars({ '--depth': 0.7 })}>
-                  <In x={200} dy={140}>
+                {/* Back ground: one continuous sheet, deeper than the frame. */}
+                <g className={styles.px} style={vars({ '--depth': 0.6 })}>
+                  <In x={720} dy={150}>
                     <path
-                      d="M-40 700 C120 624 330 640 500 696 V820 H-40 Z"
-                      fill={MINT}
+                      d="M-160 712 C80 668 300 676 500 706 C640 728 800 728 940 706 C1140 676 1360 668 1600 712 V940 H-160 Z"
+                      fill="#a9e0c1"
                     />
                   </In>
-                  <In x={1180} dy={140}>
-                    <path
-                      d="M880 706 C1030 628 1250 620 1480 690 V820 H880 Z"
-                      fill="#9fdab8"
-                    />
-                  </In>
-                  <Lolly x={64} y={706} s={1.1} fill={GREEN} />
-                  <Pine x={470} y={708} s={0.9} />
-                  <Pine x={1380} y={700} s={1} />
-                  <Lolly x={1000} y={712} s={0.9} fill={PINK} />
+                  <Turbine x={560} y={706} h={170} dur={9} />
+                  <Turbine x={900} y={706} h={150} dur={7} />
                   <Cottage
-                    x={140}
-                    y={742}
-                    w={74}
+                    x={110}
+                    y={732}
+                    w={78}
                     h={62}
                     wall={PAPER}
                     roof={TANGERINE}
                   />
                   <Cottage
-                    x={236}
-                    y={738}
-                    w={62}
-                    h={80}
+                    x={210}
+                    y={728}
+                    w={64}
+                    h={84}
                     wall={PINK}
                     roof={COBALT_INK}
                   />
                   <Cottage
-                    x={326}
-                    y={744}
+                    x={300}
+                    y={730}
                     w={72}
-                    h={56}
+                    h={58}
                     wall={BUTTER}
                     roof={TANGERINE}
+                    chimney={false}
                   />
+                  <Pine x={400} y={734} s={0.85} />
+                  <Pine x={1062} y={736} s={0.7} />
                   <Cottage
-                    x={1120}
-                    y={734}
-                    w={76}
-                    h={64}
+                    x={1130}
+                    y={730}
+                    w={78}
+                    h={66}
                     wall={PAPER}
                     roof={COBALT_INK}
                   />
                   <Cottage
-                    x={1216}
-                    y={738}
+                    x={1228}
+                    y={732}
                     w={66}
-                    h={76}
+                    h={82}
                     wall={MINT}
                     roof={TANGERINE}
                   />
+                  <Cottage
+                    x={1318}
+                    y={730}
+                    w={74}
+                    h={58}
+                    wall={PINK}
+                    roof={COBALT_INK}
+                    chimney={false}
+                  />
+                  <Solar x={990} top={470} ground={734} />
                 </g>
 
-                <g className={styles.px} style={vars({ '--depth': 0.9 })}>
+                {/* Front ground, road and cars. */}
+                <g className={styles.px} style={vars({ '--depth': 0.85 })}>
                   <In x={720} dy={110}>
                     <path
-                      d="M-40 820 V770 C200 736 480 786 720 782 C960 778 1200 738 1480 772 V820 Z"
+                      d="M-160 764 C100 736 380 746 560 772 C680 748 760 748 880 772 C1060 746 1340 736 1600 764 V940 H-160 Z"
                       fill={MINT_DEEP}
                     />
                     <path
-                      d="M300 800 C480 742 900 740 1140 800"
+                      d="M200 840 C440 716 1000 716 1240 840"
                       fill="none"
-                      stroke="#3b3f63"
-                      strokeWidth={42}
-                      strokeLinecap="round"
+                      stroke="#2b2f52"
+                      strokeWidth={96}
                     />
                     <path
-                      d="M330 796 C500 748 900 748 1110 796"
+                      d="M200 840 C440 716 1000 716 1240 840"
+                      fill="none"
+                      stroke="#3b3f63"
+                      strokeWidth={84}
+                    />
+                    <path
+                      d="M200 840 C440 716 1000 716 1240 840"
                       fill="none"
                       stroke={PAPER}
-                      strokeWidth={3}
-                      strokeDasharray="16 12"
-                      opacity={0.8}
+                      strokeWidth={3.5}
+                      strokeDasharray="18 14"
+                      opacity={0.85}
                     />
                   </In>
-                  <Car x={560} y={762} color={COBALT} amp={90} dur={9} />
-                  <Car x={900} y={764} color={TANGERINE} amp={-80} dur={11} />
+                  <Pine x={110} y={796} s={1.1} />
+                  <Lolly x={1350} y={792} s={1.1} fill={PINK} />
+                  <Car x={600} y={760} color={COBALT} amp={90} dur={9} />
+                  <Car
+                    x={860}
+                    y={786}
+                    color={TANGERINE}
+                    amp={-80}
+                    dur={11}
+                    flip
+                  />
                 </g>
               </svg>
             </div>
@@ -1666,10 +2051,10 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                       word={word}
                       reduced={reduced}
                       delay={1.0}
-                      transform="translate(2.2 3.6) skewX(-9)"
-                      stroke="#091232"
-                      strokeWidth={SCRIPT_STROKE + 3.6}
-                      opacity={0.3}
+                      transform="translate(1.4 2.3) skewX(-9)"
+                      stroke={INK}
+                      strokeWidth={SCRIPT_STROKE + SCRIPT_OUTLINE}
+                      opacity={0.38}
                     />
                     <ScriptStrokeLayer
                       word={word}
@@ -1677,7 +2062,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                       delay={0.94}
                       transform="skewX(-9)"
                       stroke={COBALT_INK}
-                      strokeWidth={SCRIPT_STROKE + 3.4}
+                      strokeWidth={SCRIPT_STROKE + SCRIPT_OUTLINE}
                     />
                     <ScriptStrokeLayer
                       word={word}
@@ -1685,7 +2070,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
                       delay={0.9}
                       transform="skewX(-9)"
                       stroke={PAPER}
-                      strokeWidth={SCRIPT_STROKE + 0.8}
+                      strokeWidth={SCRIPT_STROKE}
                     />
                   </svg>
                 </button>
@@ -1736,18 +2121,13 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
               {MADLIB_SLOTS.products[productIndex].word.toLowerCase()}
             </h1>
 
-            <span className={styles.label} aria-hidden>
-              <span className={styles.labelA}>Tech &amp; Builder</span>
-              <span className={styles.labelB}>Paper Town</span>
-            </span>
-
             <button
               type="button"
               className={styles.seeWork}
               onClick={() => scrollToSection('work', reduced)}
             >
               <span>See work</span>
-              <ArrowRight size={18} strokeWidth={2.6} aria-hidden />
+              <ArrowUpRight size={18} strokeWidth={2.6} aria-hidden />
             </button>
 
             {/* Hidden hooks: the About tray peels stickers from these. */}
@@ -1758,7 +2138,13 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
             </div>
           </div>
 
-          {/* ── The touch pill: pull the scene down, or push it back ──── */}
+          <Ornaments />
+        </div>
+
+        {/* ── Screen-right pull tab ───────────────────────────────────── */}
+        <div className={styles.pullWrap}>
+          <span className={styles.pullRibbon} aria-hidden />
+          <span key={act} className={styles.pullBurst} aria-hidden />
           <button
             type="button"
             className={styles.pull}
@@ -1770,9 +2156,22 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
             onKeyDown={onPillKey}
           >
             <span className={styles.pullText}>
-              {act === 'technic' ? 'Pull me' : 'Push back'}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={act}
+                  className={styles.pullLabel}
+                  initial={reduced ? false : { y: 6, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={reduced ? undefined : { y: -6, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: PAPER_EASE }}
+                >
+                  {act === 'technic' ? 'Pull me' : 'Push back'}
+                </motion.span>
+              </AnimatePresence>
             </span>
-            <Hand size={20} strokeWidth={2.4} aria-hidden />
+            <span className={styles.pullIcon} aria-hidden>
+              <ArrowUpRight size={17} strokeWidth={2.6} />
+            </span>
           </button>
         </div>
       </MotionConfig>
