@@ -862,7 +862,6 @@
 .sway,
 .sweep,
 .blink,
-.crank,
 .needle,
 .plunger,
 .plungerTop,
@@ -945,11 +944,14 @@
 }
 
 .crank {
+  transform-box: view-box;
+  transform-origin: 676px 346px;
   animation: crank 3.2s ease-in-out infinite;
 }
 
 .lever {
-  transform-origin: 856px 262px;
+  transform-box: view-box;
+  transform-origin: 866px 272px;
   transform: rotate(var(--lever, 0deg));
   transition: transform 0.9s cubic-bezier(0.3, 1.5, 0.5, 1);
 }
@@ -1111,10 +1113,10 @@
 @keyframes crank {
   0%,
   100% {
-    transform: translateY(-2px) rotate(-6deg);
+    transform: rotate(-6deg);
   }
   50% {
-    transform: translateY(3px) rotate(8deg);
+    transform: rotate(7deg);
   }
 }
 @keyframes needle {

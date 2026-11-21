@@ -75,6 +75,7 @@ export function runPit(pit: HTMLElement): PitRuntime {
     for (const item of items) {
       item.size = item.spec.size * scale
       item.body.r = item.size * HIT
+      item.body.boundR = item.size / 2 + 2
       item.body.mass = item.body.r * item.body.r * 0.01
       item.el.style.width = `${item.size}px`
       item.el.style.height = `${item.size}px`
@@ -129,6 +130,7 @@ export function runPit(pit: HTMLElement): PitRuntime {
       b.vy = 120
       b.w = ((i % 2 ? 1 : -1) * (1.2 + (slot % 3))) / 1.6
       b.a = ((slot * 53) % 360) * (Math.PI / 180)
+      b.entered = false
       item.el.style.visibility = 'visible'
     })
     wake(world)
@@ -171,9 +173,9 @@ export function runPit(pit: HTMLElement): PitRuntime {
     if (!drag || event.pointerId !== drag.pointerId) return
     const p = local(event)
     const { body } = drag.item
-    const r = body.r
-    body.tx = Math.min(world.width - r, Math.max(r, p.x + drag.dx))
-    body.ty = Math.min(world.height - r, Math.max(-world.height, p.y + drag.dy))
+    const margin = body.boundR ?? body.r
+    body.tx = Math.min(world.width - margin, Math.max(margin, p.x + drag.dx))
+    body.ty = Math.min(world.height - margin, Math.max(margin, p.y + drag.dy))
     drag.trail.push({ ...p, t: event.timeStamp })
     if (drag.trail.length > 6) drag.trail.shift()
   }
@@ -229,8 +231,11 @@ export function runPit(pit: HTMLElement): PitRuntime {
     if (!released) return
     fit()
     for (const { body } of items) {
-      body.x = Math.min(world.width - body.r, Math.max(body.r, body.x))
-      body.y = Math.min(world.height - body.r, body.y)
+      const margin = body.boundR ?? body.r
+      body.x = Math.min(world.width - margin, Math.max(margin, body.x))
+      body.y = body.entered
+        ? Math.max(margin, Math.min(world.height - margin, body.y))
+        : Math.min(world.height - margin, body.y)
     }
     wake(world)
     schedule()

@@ -19,8 +19,8 @@
   background-image: radial-gradient(rgb(25 26 46 / 0.16) 1px, transparent 1px);
   background-size: 16px 16px;
   box-shadow: 7px 8px 0 rgb(25 26 46 / 0.14);
-  /* Stickers fall in from above the tray, so it must not clip them. */
-  overflow: visible;
+  /* Strict 4-wall containment inside the tray border. */
+  overflow: hidden;
 }
 
 .label {
