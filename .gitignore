@@ -89,3 +89,6 @@ artifacts/
 
 # Screenshot scratch (arrangement hero verification captures)
 /.riddim-verify/
+
+# Screenshot scratch (diorama hero verification captures)
+/.shots/

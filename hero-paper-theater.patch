@@ -1,0 +1,3620 @@
+From 9ac71404f47951ed5bc65582f03db6c087672fb3 Mon Sep 17 00:00:00 2001
+From: Adit <adit@example.com>
+Date: Sat, 7 Nov 2026 18:34:49 +0000
+Subject: [PATCH] feat(hero): pop-up paper automaton theatre, run by a pull-tab
+
+Replaces the sunrise with a multi-plane paper stage in a preserve-3d stack:
+backdrop, paper gears, an arched frame, a blue ring, floor, clouds, the two
+halves of an orange curtain and layered wings, with the sun demoted to a prop on
+a string. The headline is two cardboard signs held with brass brads. Dragging
+the PULSE. CAD frame (or pressing its PULL tab, which also works from the
+keyboard) drives one 0-1 value: curtains and wings slide apart, gears turn, the
+sun swings, and the INTERFACES letters fold forward on alternating creases. It
+snaps open or shut on a spring.
+
+Keeps the four data-hero-sticker stickers the gravity pit peels into About.
+Pointer tilt, scroll lift and idle-pause move into the new hook. Removes the old
+sunrise scene and its now-dead rules from the shared stylesheet. Rounds computed
+SVG coordinates (hero and diorama gears) to fix a server/client hydration
+mismatch from float formatting.
+---
+ .../studio/diorama/diorama-art.tsx            |   4 +-
+ .../studio/hero/hero-scene.module.css         | 477 ---------
+ .../landing-page/studio/hero/hero-scene.tsx   | 303 ------
+ .../studio/hero/hero-theater.module.css       | 930 ++++++++++++++++++
+ features/landing-page/studio/hero/hero.tsx    | 427 +++++---
+ .../studio/hero/theater-scene.tsx             | 640 ++++++++++++
+ .../studio/hero/use-hero-scene.ts             | 177 ++--
+ .../landing-page/studio/studio.module.css     | 436 --------
+ 8 files changed, 1921 insertions(+), 1473 deletions(-)
+ delete mode 100644 features/landing-page/studio/hero/hero-scene.module.css
+ delete mode 100644 features/landing-page/studio/hero/hero-scene.tsx
+ create mode 100644 features/landing-page/studio/hero/hero-theater.module.css
+ create mode 100644 features/landing-page/studio/hero/theater-scene.tsx
+
+diff --git a/features/landing-page/studio/diorama/diorama-art.tsx b/features/landing-page/studio/diorama/diorama-art.tsx
+index d6f8609..d9e1aaa 100644
+--- a/features/landing-page/studio/diorama/diorama-art.tsx
++++ b/features/landing-page/studio/diorama/diorama-art.tsx
+@@ -322,8 +322,8 @@ function Gear({
+         return (
+           <circle
+             key={i}
+-            cx={cx + Math.cos(a) * rr}
+-            cy={cy + Math.sin(a) * rr}
++            cx={Number((cx + Math.cos(a) * rr).toFixed(2))}
++            cy={Number((cy + Math.sin(a) * rr).toFixed(2))}
+             r={holeRadius}
+             fill={holeFill}
+             stroke={stroke}
+diff --git a/features/landing-page/studio/hero/hero-scene.module.css b/features/landing-page/studio/hero/hero-scene.module.css
+deleted file mode 100644
+index 2f51b70..0000000
+--- a/features/landing-page/studio/hero/hero-scene.module.css
++++ /dev/null
+@@ -1,477 +0,0 @@
+-/* The hero's paper-cut sunrise. Geometry comes from three variables the hero
+-   declares (--sun-size, --sun-x, --ground); everything here is positioned from
+-   the sun's centre, so one number rescales the whole picture. */
+-
+-@property --gap {
+-  syntax: '<length>';
+-  inherits: true;
+-  initial-value: 7px;
+-}
+-
+-/* No z-index here: the clouds and stickers carry their own positive z-index
+-   and join the hero's stacking context, so they pass in front of the copy
+-   while the sky, sun and ground stay behind it. */
+-.scene {
+-  position: absolute;
+-  inset: 0;
+-  overflow: hidden;
+-  pointer-events: none;
+-}
+-
+-/* Flat bands, hard-edged like a screen print. The lightest sit behind the sun. */
+-.sky {
+-  position: absolute;
+-  inset: 0;
+-  background: radial-gradient(
+-    circle at var(--sun-x)
+-      calc(100% - var(--ground) - var(--sun-size) * var(--sun-lift)),
+-    #5266e4 0 calc(var(--sun-size) * 0.5),
+-    #4a5fe0 calc(var(--sun-size) * 0.5) calc(var(--sun-size) * 0.68),
+-    #4358da calc(var(--sun-size) * 0.68) calc(var(--sun-size) * 0.92),
+-    var(--cobalt) calc(var(--sun-size) * 0.92)
+-  );
+-}
+-
+-/* A zero-size anchor on the sun's centre. */
+-.anchor {
+-  position: absolute;
+-  left: var(--sun-x);
+-  top: calc(100% - var(--ground) - var(--sun-size) * var(--sun-lift));
+-  width: 0;
+-  height: 0;
+-}
+-
+-.rays {
+-  position: absolute;
+-  --ray: min(150vmax, 1900px);
+-  left: calc(var(--ray) / -2);
+-  top: calc(var(--ray) / -2);
+-  width: var(--ray);
+-  height: var(--ray);
+-  background: repeating-conic-gradient(
+-    from 0deg,
+-    rgb(255 250 241 / 0.085) 0 6deg,
+-    transparent 6deg 12deg
+-  );
+-  -webkit-mask-image: radial-gradient(circle, #000 0 20%, transparent 56%);
+-  mask-image: radial-gradient(circle, #000 0 20%, transparent 56%);
+-  will-change: rotate;
+-}
+-
+-.dots {
+-  position: absolute;
+-  left: calc(var(--sun-size) * -0.92);
+-  top: calc(var(--sun-size) * -0.92);
+-  width: calc(var(--sun-size) * 1.84);
+-  height: calc(var(--sun-size) * 1.84);
+-  background: radial-gradient(rgb(255 250 241 / 0.55) 1.1px, transparent 1.5px)
+-    0 0 / 16px 16px;
+-  -webkit-mask-image: radial-gradient(
+-    circle,
+-    transparent 36%,
+-    #000 38% 52%,
+-    transparent 56%
+-  );
+-  mask-image: radial-gradient(
+-    circle,
+-    transparent 36%,
+-    #000 38% 52%,
+-    transparent 56%
+-  );
+-  opacity: 0.5;
+-}
+-
+-.farHill {
+-  position: absolute;
+-  inset-inline: -3%;
+-  bottom: calc(var(--ground) - 6px);
+-  height: clamp(6rem, 20vh, 11rem);
+-}
+-
+-.ground {
+-  position: absolute;
+-  inset-inline: -3%;
+-  bottom: -2px;
+-  height: calc(var(--ground) + 2px);
+-}
+-
+-.farHill svg,
+-.ground svg {
+-  display: block;
+-  width: 100%;
+-  height: 100%;
+-}
+-
+-/* ── The sun ───────────────────────────────────────────────────────────── */
+-
+-.sunLift {
+-  position: absolute;
+-  left: calc(var(--sun-size) / -2);
+-  top: calc(var(--sun-size) / -2);
+-  width: var(--sun-size);
+-  height: var(--sun-size);
+-  will-change: translate, scale;
+-}
+-
+-/* Fills the lift wrapper; only the lift is offset from the anchor. */
+-.sunRise {
+-  position: absolute;
+-  inset: 0;
+-  animation: sun-rise 1.5s cubic-bezier(0.34, 1.32, 0.5, 1) 0.15s both;
+-}
+-
+-.sunBody {
+-  position: absolute;
+-  inset: 0;
+-  transform-style: preserve-3d;
+-  transform: perspective(1100px);
+-  animation: slices-open 1.1s var(--ease-out) 0.7s both;
+-  will-change: transform;
+-}
+-
+-.layer {
+-  position: absolute;
+-  inset: 0;
+-}
+-
+-.layer svg {
+-  display: block;
+-  width: 100%;
+-  height: 100%;
+-}
+-
+-.slice {
+-  color: var(--ink);
+-  transform: translateZ(calc(var(--i) * var(--gap) * -1));
+-}
+-
+-/* The shadow the cut-out throws on the sky, set well behind it. */
+-.plate {
+-  color: rgb(25 26 46 / 0.3);
+-  transform: translate3d(
+-    calc(var(--sun-size) * 0.035),
+-    calc(var(--sun-size) * 0.05),
+-    calc(var(--gap) * -8)
+-  );
+-}
+-
+-.face {
+-  transform: translateZ(0);
+-}
+-
+-/* Rings leave the sun on the beat of the headline's word, three times. */
+-.pulse {
+-  position: absolute;
+-  inset: 8%;
+-  border: 2.5px solid var(--butter);
+-  border-radius: 50%;
+-  opacity: 0;
+-  transform: translateZ(calc(var(--gap) * -9));
+-  /* Three rings leave the sun after it has risen, then it is still. */
+-  animation: pulse-out 2.6s cubic-bezier(0.2, 0.7, 0.3, 1) 2.1s 1 both;
+-}
+-
+-.pulse:nth-of-type(2) {
+-  animation-delay: 2.7s;
+-}
+-
+-.pulse:nth-of-type(3) {
+-  animation-delay: 3.3s;
+-}
+-
+-/* The drift also holds while the hero is off screen. */
+-[data-scene-idle='true'] .float {
+-  animation-play-state: paused;
+-}
+-
+-/* ── Items placed from the sun's centre ───────────────────────────────── */
+-
+-.item {
+-  position: absolute;
+-  left: calc(var(--sun-size) * var(--ox) * var(--kx, 1));
+-  /* The cluster is offset by the difference between the sun's current lift and
+-     the lift it was composed at, so it keeps its place over the copy. */
+-  top: calc(
+-    var(--sun-size) *
+-      (var(--oy) * var(--ky, 1) + var(--sun-lift) - var(--items-lift, 0.47))
+-  );
+-  z-index: 3;
+-  will-change: translate;
+-}
+-
+-/* Clouds hang from the top of the scene on desktop, so a change in viewport
+-   height cannot walk one onto the headline or under the bar. Under the
+-   desktop split they go back around the sun with the other marks. */
+-.cloudSlot {
+-  position: absolute;
+-  left: var(--cx);
+-  top: var(--cy);
+-  z-index: 3;
+-  will-change: translate;
+-}
+-
+-@media (max-width: 1023px) {
+-  .cloudSlot {
+-    left: calc(var(--sun-x) + var(--sun-size) * var(--ox) * var(--kx, 1));
+-    top: calc(
+-      100% - var(--ground) - var(--sun-size) * var(--sun-lift) +
+-        var(--sun-size) * var(--oy) * var(--ky, 1)
+-    );
+-  }
+-}
+-
+-.cloud {
+-  width: calc(clamp(6.2rem, 12vw, 10.5rem) * var(--s, 1));
+-  margin: -0.4em 0 0 -3em;
+-  filter: drop-shadow(5px 6px 0 rgb(25 26 46 / 0.28));
+-  animation: drift-in 1.4s var(--ease-out) var(--delay, 0.6s) both;
+-}
+-
+-.cloud svg {
+-  display: block;
+-  width: 100%;
+-}
+-
+-.sticker {
+-  position: relative;
+-  width: clamp(3.1rem, 6.2vw, 5.4rem);
+-  margin: -1.9rem 0 0 -1.9rem;
+-  animation: sticker-pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 1s)
+-    both;
+-}
+-
+-.float {
+-  display: block;
+-  /* A few slow drifts after the entrance, then it rests: nothing here runs
+-     forever, so an idle hero costs no frames. */
+-  animation: bob 6s ease-in-out 2.4s 4 alternate both;
+-}
+-
+-.sticker[data-slot='smiley'] .float {
+-  animation-delay: -1.6s;
+-}
+-.sticker[data-slot='burst'] .float {
+-  animation-delay: -2.4s;
+-}
+-.sticker[data-slot='daisy'] .float {
+-  animation-delay: -3.2s;
+-}
+-.sticker[data-slot='bolt'] .float {
+-  animation-delay: -4.1s;
+-}
+-
+-/* The filter lives on the drawing, not on the element that moves: a filter on
+-   a parent of something animating is re-run every frame, on the drawing it is
+-   rasterised once. Warm rim upper-left, hard ink shadow lower-right. */
+-.float svg {
+-  display: block;
+-  width: 100%;
+-  filter: drop-shadow(3px 5px 0 rgb(25 26 46 / 0.3))
+-    drop-shadow(-1.5px -1.5px 0 rgb(255 210 63 / 0.3));
+-}
+-
+-/* Once the stickers have fallen into the About tray, the hero keeps the
+-   outline they left, so scrolling back up reads as a peeled sheet. */
+-.sticker::before {
+-  content: '';
+-  position: absolute;
+-  inset: 8%;
+-  border: 2px dashed rgb(255 250 241 / 0.7);
+-  border-radius: 50%;
+-  opacity: 0;
+-  transition: opacity 0.4s ease 0.2s;
+-}
+-
+-.sticker[data-peeled='true']::before {
+-  opacity: 1;
+-}
+-
+-.sticker[data-peeled='true'] .float {
+-  opacity: 0;
+-  animation: none;
+-}
+-
+-.sparkle {
+-  display: block;
+-  width: 0.95rem;
+-  margin: -0.5rem 0 0 -0.5rem;
+-  color: var(--butter);
+-  animation: twinkle 3s ease-in-out 2.4s 3;
+-}
+-
+-.sparkPaper {
+-  color: var(--paper-hi);
+-  width: 0.7rem;
+-}
+-
+-.item:nth-of-type(2n) .sparkle {
+-  animation-delay: 3.1s;
+-}
+-
+-/* ── Keyframes ────────────────────────────────────────────────────────── */
+-
+-@keyframes sun-rise {
+-  from {
+-    transform: translateY(58%) scale(0.88);
+-  }
+-}
+-
+-@keyframes slices-open {
+-  from {
+-    --gap: 0px;
+-  }
+-}
+-
+-@keyframes pulse-out {
+-  0% {
+-    transform: translateZ(calc(var(--gap) * -9)) scale(0.8);
+-    opacity: 0.6;
+-  }
+-  70%,
+-  100% {
+-    transform: translateZ(calc(var(--gap) * -9)) scale(1.95);
+-    opacity: 0;
+-  }
+-}
+-
+-@keyframes drift-in {
+-  from {
+-    transform: translateX(-46px);
+-    opacity: 0;
+-  }
+-}
+-
+-@keyframes sticker-pop {
+-  from {
+-    transform: scale(0.2) rotate(-24deg);
+-    opacity: 0;
+-  }
+-}
+-
+-@keyframes bob {
+-  to {
+-    transform: translateY(-9px) rotate(2.5deg);
+-  }
+-}
+-
+-@keyframes twinkle {
+-  0%,
+-  100% {
+-    transform: scale(0.75) rotate(0deg);
+-    opacity: 0.55;
+-  }
+-  50% {
+-    transform: scale(1.15) rotate(18deg);
+-    opacity: 1;
+-  }
+-}
+-
+-/* The Sticker Boot covers the page on a first visit. Hold every entrance until
+-   it has peeled away, or it would play unseen underneath. */
+-:global(html[data-boot='on']) .scene *,
+-:global(html[data-boot='on']) .scene *::before {
+-  animation-play-state: paused;
+-}
+-
+-/* Below the desktop split the sun sits under the copy, so the cluster around
+-   it is squashed toward the sun rather than reaching up into the text. */
+-/* The spread is wider than a laptop, so the outer marks fold in before they
+-   clip instead of at the phone breakpoint. */
+-@media (max-width: 1199px) {
+-  .scene {
+-    --kx: 0.72;
+-  }
+-}
+-
+-@media (max-width: 1023px) {
+-  /* The cluster opens out instead of bunching on the disc: each mark keeps a
+-     clear channel, and the marks themselves shrink so they read as set dressing
+-     rather than props competing with the word. */
+-  .scene {
+-    --ky: 0.54;
+-    --kx: 0.54;
+-  }
+-
+-  /* The bio card sits on the hill down here, so the hill is stretched to wrap
+-     it rather than hugging the paper line. */
+-  .farHill {
+-    height: calc(clamp(18rem, 44vh, 24rem) + 2.7rem);
+-  }
+-}
+-
+-/* A centred sun with a wide word on top leaves no room right of the disc on a
+-   phone, so the two furthest marks step out with the sparkles. */
+-/* On a phone the disc, the word and the card fill the column, so the marks are
+-   spread over the cobalt around them instead of sitting on the disc. `.item`
+-   resolves against the zero-size anchor at the sun's centre, so these are
+-   distances from that centre in rem: they keep their ring position as the phone
+-   grows and never land on the card or the section below. */
+-@media (max-width: 639px) {
+-  /* `.item` resolves against the zero-size anchor at the sun's centre, so these
+-     are distances from that centre. Two marks flank the disc on each side —
+-     the only bands a phone can never fill with type, above the card and below
+-     the word — so nothing lands on copy however tall the viewport gets. */
+-  .item:has([data-slot='smiley']) {
+-    left: -9.6rem;
+-    top: -4.6rem;
+-  }
+-
+-  .item:has([data-slot='bolt']) {
+-    left: -9.6rem;
+-    top: -1rem;
+-  }
+-
+-  .item:has([data-slot='burst']) {
+-    left: 9.5rem;
+-    top: -4.6rem;
+-  }
+-
+-  .item:has([data-slot='daisy']) {
+-    display: block;
+-    left: 9.5rem;
+-    top: -1rem;
+-  }
+-
+-  /* Clouds live on the scene box, not the sun's anchor, so they take the free
+-     gutters either side of the disc and the band above the card. */
+-  .cloudSlot[data-cloud='0'] {
+-    left: 28%;
+-    top: 21%;
+-  }
+-
+-  .cloudSlot[data-cloud='1'] {
+-    left: -6%;
+-    top: 47%;
+-  }
+-
+-  .cloudSlot[data-cloud='2'] {
+-    left: 84%;
+-    top: 46%;
+-  }
+-}
+-
+-@media (max-width: 639px) {
+-  .sparkle,
+-  .sparkPaper,
+-  .sticker[data-slot='daisy'] {
+-    display: none;
+-  }
+-
+-  /* Same die-cut language, a third smaller: at phone width the marks were the
+-     loudest thing on the screen and clipped each other at the disc's edge. */
+-  .sticker {
+-    width: clamp(2.2rem, 9vw, 3.2rem);
+-    margin: -1.35rem 0 0 -1.35rem;
+-  }
+-}
+-
+-@media (prefers-reduced-motion: reduce) {
+-  .scene *,
+-  .scene *::before {
+-    animation: none !important;
+-  }
+-
+-  .sunBody {
+-    transform: none;
+-  }
+-}
+diff --git a/features/landing-page/studio/hero/hero-scene.tsx b/features/landing-page/studio/hero/hero-scene.tsx
+deleted file mode 100644
+index c015b7e..0000000
+--- a/features/landing-page/studio/hero/hero-scene.tsx
++++ /dev/null
+@@ -1,303 +0,0 @@
+-import type { CSSProperties } from 'react'
+-
+-import { Bolt, Burst, Daisy, Smiley, Sparkle, Sun } from '../doodles'
+-import styles from './hero-scene.module.css'
+-
+-/** Layers of cardboard behind the sun's face. Six reads as a thick cut-out. */
+-const SLICES = 6
+-
+-const RAYS = Array.from({ length: 12 }, (_, i) => {
+-  const a = (i / 12) * Math.PI * 2
+-  const r = (n: number) => Math.round(n * 1e6) / 1e6
+-  return {
+-    x1: r(100 + Math.cos(a) * 74),
+-    y1: r(100 + Math.sin(a) * 74),
+-    x2: r(100 + Math.cos(a) * 93),
+-    y2: r(100 + Math.sin(a) * 93),
+-  }
+-})
+-
+-/** The sun's outline as one flat colour: the edge of a die-cut. */
+-function Silhouette() {
+-  return (
+-    <svg viewBox="0 0 200 200" aria-hidden focusable="false">
+-      <g stroke="currentColor" strokeWidth="9.5" strokeLinecap="round">
+-        {RAYS.map((ray) => (
+-          <line key={`${ray.x1}-${ray.y1}`} {...ray} />
+-        ))}
+-      </g>
+-      <circle cx="100" cy="100" r="68.5" fill="currentColor" />
+-    </svg>
+-  )
+-}
+-
+-function Cloud() {
+-  return (
+-    <svg viewBox="0 0 136 80" aria-hidden focusable="false">
+-      <path
+-        d="M22 71C8 71 6 54 20 49C18 33 36 26 47 34C52 14 79 10 89 27C104 17 124 29 118 45C132 48 131 71 113 71Z"
+-        fill="var(--paper-hi)"
+-        stroke="var(--ink)"
+-        strokeWidth="3"
+-        strokeLinejoin="round"
+-      />
+-      <path
+-        d="M34 58C40 56 44 56 50 58"
+-        fill="none"
+-        stroke="var(--ink)"
+-        strokeWidth="2.4"
+-        strokeLinecap="round"
+-        opacity=".3"
+-      />
+-    </svg>
+-  )
+-}
+-
+-/** Wavy edges that stretch to any width; strokes stay a constant 3px. */
+-function Hills() {
+-  return (
+-    <svg
+-      viewBox="0 0 1440 200"
+-      preserveAspectRatio="none"
+-      aria-hidden
+-      focusable="false"
+-    >
+-      <path
+-        d="M0 70C140 18 300 24 470 62C640 100 760 14 960 30C1160 46 1300 96 1440 52V200H0Z"
+-        fill="var(--cobalt-ink)"
+-        stroke="var(--ink)"
+-        strokeWidth="3"
+-        vectorEffect="non-scaling-stroke"
+-      />
+-    </svg>
+-  )
+-}
+-
+-function Ground() {
+-  return (
+-    <svg
+-      viewBox="0 0 1440 200"
+-      preserveAspectRatio="none"
+-      aria-hidden
+-      focusable="false"
+-    >
+-      <path
+-        d="M0 34C160 6 300 46 520 24C720 4 900 40 1100 20C1260 4 1360 26 1440 18V200H0Z"
+-        fill="var(--paper)"
+-        stroke="var(--ink)"
+-        strokeWidth="3"
+-        vectorEffect="non-scaling-stroke"
+-      />
+-    </svg>
+-  )
+-}
+-
+-type Placed = {
+-  /** Offset from the sun's centre, in sun-diameters. */
+-  x: number
+-  y: number
+-}
+-
+-/* Custom properties are written as strings: React serialises a number to the
+-   attribute on the server and keeps it a number on the client, which trips the
+-   hydration check on every scene layer. */
+-const at = ({ x, y }: Placed, extra?: CSSProperties) =>
+-  ({ '--ox': String(x), '--oy': String(y), ...extra }) as CSSProperties
+-
+-/* On desktop the clouds hold the outer margins: the display line runs nearly
+-   edge to edge, so anything near the centre lands on the type. */
+-const CLOUDS = [
+-  {
+-    place: { x: -0.58, y: -0.82 },
+-    sky: { x: '3%', y: '27vh' },
+-    depth: 0.7,
+-    scale: 0.72,
+-    delay: 0.55,
+-  },
+-  {
+-    place: { x: 0.34, y: -0.98 },
+-    sky: { x: '86%', y: '13vh' },
+-    depth: 1.1,
+-    scale: 0.86,
+-    delay: 0.7,
+-  },
+-  {
+-    place: { x: 0.74, y: -0.5 },
+-    sky: { x: '88%', y: '56vh' },
+-    depth: 1.5,
+-    scale: 0.62,
+-    delay: 0.85,
+-  },
+-] as const
+-
+-const SPARKLES = [
+-  { place: { x: -0.2, y: -0.62 }, tone: 'butter', delay: 0 },
+-  { place: { x: 0.62, y: -0.82 }, tone: 'paper', delay: 1.1 },
+-  { place: { x: 0.78, y: 0.1 }, tone: 'butter', delay: 2.1 },
+-  { place: { x: -0.74, y: -0.1 }, tone: 'paper', delay: 0.6 },
+-  { place: { x: 0.12, y: -1.08 }, tone: 'paper', delay: 1.7 },
+-] as const
+-
+-/**
+- * The hero's sky: a paper-cut sunrise built from real depth.
+- *
+- * Planes, back to front: flat cobalt bands and halftone dots, a ring of rays,
+- * a far hill, the sun (a stack of ink cut-outs under its painted face, so it
+- * has an edge when it tilts), clouds and the four stickers that sit in front,
+- * then the paper ground the sun is rising from. A parallax hook moves each
+- * `data-depth` wrapper with the pointer and the scroll. Wrappers move with the
+- * individual `translate` / `rotate` properties and the elements inside run the
+- * entrance with `transform`, so the two never fight over one property.
+- *
+- * Everything is decoration: the scene is hidden from assistive tech, and a
+- * reduced-motion visitor gets the finished picture.
+- */
+-export function HeroScene() {
+-  return (
+-    <div className={styles.scene} aria-hidden data-hero-scene>
+-      <div className={styles.sky} />
+-
+-      <div className={styles.anchor}>
+-        <div className={styles.rays} data-rays />
+-        <div className={styles.dots} />
+-      </div>
+-
+-      {CLOUDS.map((cloud, i) => (
+-        <div
+-          key={i}
+-          className={styles.cloudSlot}
+-          data-depth={cloud.depth}
+-          data-cloud={i}
+-          style={
+-            {
+-              '--ox': String(cloud.place.x),
+-              '--oy': String(cloud.place.y),
+-              '--cx': cloud.sky.x,
+-              '--cy': cloud.sky.y,
+-            } as CSSProperties
+-          }
+-        >
+-          <div
+-            className={styles.cloud}
+-            style={
+-              {
+-                '--s': String(cloud.scale),
+-                '--delay': `${cloud.delay}s`,
+-              } as CSSProperties
+-            }
+-          >
+-            <Cloud />
+-          </div>
+-        </div>
+-      ))}
+-
+-      <div className={styles.anchor}>
+-        <div className={styles.sunLift} data-sun-lift>
+-          <div className={styles.sunRise}>
+-            <div className={styles.sunBody} data-sun-body>
+-              <i className={styles.pulse} />
+-              <i className={styles.pulse} />
+-              <i className={styles.pulse} />
+-              <div className={`${styles.layer} ${styles.plate}`}>
+-                <Silhouette />
+-              </div>
+-              {Array.from({ length: SLICES }, (_, i) => (
+-                <div
+-                  key={i}
+-                  className={`${styles.layer} ${styles.slice}`}
+-                  style={{ '--i': i + 1 } as CSSProperties}
+-                >
+-                  <Silhouette />
+-                </div>
+-              ))}
+-              <div className={`${styles.layer} ${styles.face}`}>
+-                <Sun />
+-              </div>
+-            </div>
+-          </div>
+-        </div>
+-
+-        {SPARKLES.map((spark, i) => (
+-          <div
+-            key={i}
+-            className={styles.item}
+-            data-depth="1.2"
+-            style={at(spark.place)}
+-          >
+-            <Sparkle
+-              className={`${styles.sparkle} ${spark.tone === 'paper' ? styles.sparkPaper : ''}`}
+-            />
+-          </div>
+-        ))}
+-
+-        <StickerSlot
+-          id="smiley"
+-          place={{ x: -0.66, y: -0.63 }}
+-          depth={1.9}
+-          delay={1.0}
+-        >
+-          <Smiley />
+-        </StickerSlot>
+-        <StickerSlot
+-          id="burst"
+-          place={{ x: 1.08, y: -0.68 }}
+-          depth={2.3}
+-          delay={1.12}
+-        >
+-          <Burst text="hi!" />
+-        </StickerSlot>
+-        <StickerSlot
+-          id="daisy"
+-          place={{ x: 0.9, y: -0.2 }}
+-          depth={2.0}
+-          delay={1.24}
+-        >
+-          <Daisy />
+-        </StickerSlot>
+-        <StickerSlot
+-          id="bolt"
+-          place={{ x: -1.15, y: 0.4 }}
+-          depth={2.6}
+-          delay={1.36}
+-        >
+-          <Bolt />
+-        </StickerSlot>
+-      </div>
+-
+-      <div className={styles.farHill} data-depth="0.35">
+-        <Hills />
+-      </div>
+-
+-      <div className={styles.ground}>
+-        <Ground />
+-      </div>
+-    </div>
+-  )
+-}
+-
+-function StickerSlot({
+-  id,
+-  place,
+-  depth,
+-  delay,
+-  children,
+-}: {
+-  id: string
+-  place: Placed
+-  depth: number
+-  delay: number
+-  children: React.ReactNode
+-}) {
+-  return (
+-    <div className={styles.item} data-depth={depth} style={at(place)}>
+-      <div
+-        className={styles.sticker}
+-        data-hero-sticker={id}
+-        data-slot={id}
+-        style={{ '--delay': `${delay}s` } as CSSProperties}
+-      >
+-        <span className={styles.float}>{children}</span>
+-      </div>
+-    </div>
+-  )
+-}
+diff --git a/features/landing-page/studio/hero/hero-theater.module.css b/features/landing-page/studio/hero/hero-theater.module.css
+new file mode 100644
+index 0000000..66b921c
+--- /dev/null
++++ b/features/landing-page/studio/hero/hero-theater.module.css
+@@ -0,0 +1,930 @@
++/* The hero: a pop-up paper theatre.
++
++   Two halves. `.scene` is the stage: depth planes inside a `preserve-3d` box
++   that the pointer tilts (see theater-scene.tsx). `.front` is everything you
++   read and press: two cardboard signs, the paper bio card, the pull-tab.
++
++   Colour is the site's own palette (cobalt, tangerine, butter, paper, ink) and
++   cardboard is the one new material. Shadows are hard and directional, like the
++   rest of the page; the only soft ones are under whole planes, where they stand
++   for distance. */
++
++.hero {
++  --card: #c9a574;
++  --card-lo: #a88252;
++  --card-hi: #dcbe91;
++
++  position: relative;
++  isolation: isolate;
++  display: flex;
++  flex-direction: column;
++  min-height: max(100svh, 40rem);
++  overflow: clip;
++  background: var(--cobalt-ink);
++  color: var(--paper-hi);
++}
++
++.hero :focus-visible {
++  outline: 3px solid var(--butter);
++  outline-offset: 3px;
++}
++
++/* ── The stage ─────────────────────────────────────────────────────────── */
++
++.scene {
++  position: absolute;
++  inset: 0;
++  z-index: 0;
++  overflow: hidden;
++  perspective: 1500px;
++  perspective-origin: 50% 38%;
++  pointer-events: none;
++}
++
++.stage3d {
++  position: absolute;
++  inset: 0;
++  transform-style: preserve-3d;
++  transform: scale(1.05);
++  will-change: transform;
++  /* opacity only: the pointer writes `transform`, and an animation on it would
++     keep overriding that for good */
++  animation: stage-in 1.2s var(--ease-out) backwards;
++}
++
++/* One layer of the stage. `--z` is its distance, `--k` cancels the perspective
++   so it looks flat until the stage tilts and reveals the gap. */
++.plane {
++  position: absolute;
++  inset: 0;
++  transform: translateZ(var(--z, 0px)) scale(var(--k, 1));
++}
++
++.plane svg {
++  display: block;
++  width: 100%;
++  height: 100%;
++  overflow: visible;
++}
++
++.plane[data-shadow] svg {
++  filter: drop-shadow(0 0.9rem 1.2rem rgb(8 12 50 / 0.42));
++}
++
++.cloud {
++  animation: drift 14s ease-in-out infinite alternate;
++  animation-delay: var(--d, 0s);
++}
++
++/* ── Gears, with brass brads for hubs ──────────────────────────────────── */
++
++.gearSlot {
++  position: absolute;
++  aspect-ratio: 1;
++  translate: -50% -50%;
++  transform: translateZ(var(--z, 0px)) scale(var(--k, 1));
++}
++
++.gear {
++  position: relative;
++  width: 100%;
++  height: 100%;
++  filter: drop-shadow(0 0.5rem 0.7rem rgb(8 12 50 / 0.4));
++}
++
++.gearSvg {
++  display: block;
++  width: 100%;
++  height: 100%;
++  animation: spin 90s linear infinite;
++}
++
++.gear .brad {
++  top: 50%;
++  left: 50%;
++  translate: -50% -50%;
++}
++
++.brad {
++  position: absolute;
++  width: 0.72rem;
++  height: 0.72rem;
++  border: 1.5px solid #5a3d08;
++  border-radius: 50%;
++  background: radial-gradient(circle at 35% 30%, #fff1b8, #e0a92a 55%, #8a5e0f);
++  box-shadow: 0.08rem 0.14rem 0 rgb(0 0 0 / 0.35);
++}
++
++.brad[data-corner='tl'] {
++  top: 0.45rem;
++  left: 0.45rem;
++}
++.brad[data-corner='tr'] {
++  top: 0.45rem;
++  right: 0.45rem;
++}
++.brad[data-corner='bl'] {
++  bottom: 0.45rem;
++  left: 0.45rem;
++}
++.brad[data-corner='br'] {
++  right: 0.45rem;
++  bottom: 0.45rem;
++}
++
++/* ── The sun, now just a prop on a string ──────────────────────────────── */
++
++.sunSlot {
++  position: absolute;
++  top: -2px;
++  right: 7%;
++  width: clamp(4.4rem, 8.4vw, 7.6rem);
++}
++
++.sunSwing {
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  transform-origin: 50% 0;
++  animation: swing 5.5s ease-in-out infinite alternate;
++}
++
++.string {
++  display: block;
++  width: 2px;
++  height: clamp(3.4rem, 13vh, 7.4rem);
++  background: var(--ink);
++}
++
++.sunProp {
++  display: block;
++  width: 100%;
++  height: auto;
++  filter: drop-shadow(0.2rem 0.4rem 0 rgb(25 26 46 / 0.35));
++}
++
++/* ── Stickers and sparkles (the About tray peels the stickers off) ──────── */
++
++.item {
++  position: absolute;
++  top: var(--ty);
++  left: var(--lx);
++  z-index: 4;
++  transform: translateZ(60px);
++  will-change: translate;
++}
++
++.sticker {
++  position: relative;
++  width: clamp(3.1rem, 6.2vw, 5.4rem);
++  margin: -1.9rem 0 0 -1.9rem;
++  animation: sticker-pop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 1s)
++    both;
++}
++
++/* The outline left behind when its sticker is peeled off the page. */
++.sticker::before {
++  content: '';
++  position: absolute;
++  inset: 8%;
++  border: 2px dashed rgb(255 250 241 / 0.7);
++  border-radius: 50%;
++  opacity: 0;
++  transition: opacity 0.4s ease 0.2s;
++}
++
++.float {
++  display: block;
++  /* A few slow drifts after the entrance, then it rests: nothing here runs
++     forever, so an idle hero costs no frames. */
++  animation: bob 6s ease-in-out 2.4s 4 alternate both;
++}
++
++.sticker[data-slot='smiley'] .float {
++  animation-delay: -1.6s;
++}
++.sticker[data-slot='burst'] .float {
++  animation-delay: -2.4s;
++}
++.sticker[data-slot='daisy'] .float {
++  animation-delay: -3.2s;
++}
++.sticker[data-slot='bolt'] .float {
++  animation-delay: -4.1s;
++}
++
++.float svg {
++  display: block;
++  width: 100%;
++  filter: drop-shadow(3px 5px 0 rgb(25 26 46 / 0.3))
++    drop-shadow(-1.5px -1.5px 0 rgb(255 210 63 / 0.3));
++}
++
++.sticker[data-peeled='true']::before {
++  opacity: 1;
++}
++
++.sticker[data-peeled='true'] .float {
++  opacity: 0;
++  animation: none;
++}
++
++.sparkle {
++  display: block;
++  width: 0.95rem;
++  margin: -0.5rem 0 0 -0.5rem;
++  color: var(--butter);
++  animation: twinkle 3s ease-in-out 2.4s 3;
++}
++
++.sparkPaper {
++  color: var(--paper-hi);
++  animation-delay: 3.1s;
++}
++
++[data-scene-idle='true'] .float,
++[data-scene-idle='true'] .sparkle,
++[data-scene-idle='true'] .gearSvg,
++[data-scene-idle='true'] .cloud,
++[data-scene-idle='true'] .sunSwing {
++  animation-play-state: paused;
++}
++
++/* ── The front: signs, the pull-tab, the card ──────────────────────────── */
++
++.front {
++  position: absolute;
++  inset: 0;
++  z-index: 3;
++  pointer-events: none;
++}
++
++.planks {
++  position: absolute;
++  inset: 0;
++  transform-style: preserve-3d;
++}
++
++/* A cardboard sign: corrugated board with a stitched edge and a hard shadow. */
++.signA,
++.signB {
++  position: absolute;
++  padding: 0.24em 0.5em 0.3em;
++  border: 2px solid var(--ink);
++  border-radius: 0.65rem;
++  background: repeating-linear-gradient(
++      90deg,
++      rgb(110 72 28 / 0.1) 0 2px,
++      transparent 2px 7px
++    ),
++    linear-gradient(var(--card-hi), var(--card));
++  box-shadow:
++    0 0.45rem 0 var(--card-lo),
++    0 0.45rem 0 2px var(--ink),
++    0 1.2rem 1.8rem rgb(8 12 50 / 0.45);
++  pointer-events: auto;
++  perspective: 900px;
++}
++
++.signA::before,
++.signB::before {
++  content: '';
++  position: absolute;
++  inset: 0.42rem;
++  border: 2px dashed rgb(25 26 46 / 0.4);
++  border-radius: 0.35rem;
++  pointer-events: none;
++}
++
++.signA {
++  top: 30%;
++  left: 50%;
++  translate: -50% -50%;
++  rotate: -0.8deg;
++  font-size: clamp(1.6rem, 5vw, 5.8rem);
++  animation: sign-drop 0.95s cubic-bezier(0.34, 1.35, 0.5, 1) 0.35s backwards;
++}
++
++.signB {
++  top: 60%;
++  left: 52%;
++  translate: -50% -50%;
++  rotate: 1.4deg;
++  font-size: clamp(2rem, 6vw, 7rem);
++  cursor: grab;
++  animation: sign-drop 0.95s cubic-bezier(0.34, 1.35, 0.5, 1) 0.6s backwards;
++}
++
++.signB:active {
++  cursor: grabbing;
++}
++
++/* the struts that hang the first sign */
++.rod {
++  position: absolute;
++  bottom: calc(100% - 0.3rem);
++  width: 0.7rem;
++  height: clamp(4rem, 13vh, 8rem);
++  border: 2px solid var(--ink);
++  border-radius: 3px;
++  background: linear-gradient(90deg, var(--card-hi), var(--card));
++  transform-origin: 50% 100%;
++}
++
++.rod[data-side='left'] {
++  left: 14%;
++}
++.rod[data-side='right'] {
++  right: 14%;
++}
++
++.nameTag {
++  position: absolute;
++  top: -1.7rem;
++  left: -0.8rem;
++  z-index: 2;
++  display: inline-flex;
++  gap: 0.4rem;
++  padding: 0.3rem 0.7rem;
++  border: 2px solid var(--ink);
++  border-radius: 0.35rem;
++  background: var(--tangerine);
++  box-shadow: 0.2rem 0.25rem 0 var(--ink);
++  color: var(--paper-hi);
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-size: 0.72rem;
++  font-weight: 600;
++  letter-spacing: 0.13em;
++  text-transform: uppercase;
++  white-space: nowrap;
++  rotate: -3deg;
++}
++
++/* Letters: cards standing on the sign, folded forward by the pull. */
++.display,
++.pulseWord {
++  position: relative;
++  z-index: 1;
++  display: block;
++  margin: 0;
++  font: inherit;
++}
++
++.letters {
++  display: inline-flex;
++  transform-style: preserve-3d;
++  white-space: nowrap;
++}
++
++.letter {
++  position: relative;
++  display: inline-block;
++  font-family: var(--font-syne), system-ui, sans-serif;
++  font-weight: 800;
++  line-height: 1;
++  letter-spacing: -0.035em;
++  color: var(--paper-hi);
++  text-transform: uppercase;
++  transform-style: preserve-3d;
++  /* an ink outline and a hard extrusion, in em so they scale with the type */
++  text-shadow:
++    -0.03em -0.03em 0 var(--ink),
++    0.03em -0.03em 0 var(--ink),
++    -0.03em 0.03em 0 var(--ink),
++    0.03em 0.03em 0 var(--ink),
++    0.045em 0.08em 0 var(--ink);
++}
++
++.letter[data-tone='butter'] {
++  color: var(--butter);
++}
++
++.letter[data-tone='dot'] {
++  color: var(--tangerine);
++}
++
++/* The "with a" tab and the open-to-work chip, clipped on above the second sign. */
++.withRow {
++  position: absolute;
++  top: -1.9rem;
++  left: 0.3rem;
++  z-index: 2;
++  display: flex;
++  align-items: center;
++  gap: 0.6rem;
++  font-size: 1rem;
++}
++
++.withA {
++  padding: 0.2rem 0.65rem;
++  border: 2px solid var(--ink);
++  border-radius: 0.3rem;
++  background: var(--paper-hi);
++  box-shadow: 0.15rem 0.2rem 0 var(--ink);
++  color: var(--ink);
++  font-family: var(--font-syne), system-ui, sans-serif;
++  font-size: 0.95rem;
++  font-weight: 800;
++  letter-spacing: -0.02em;
++  rotate: -2deg;
++}
++
++.chip {
++  padding: 0.28rem 0.7rem;
++  border: 2px solid var(--ink);
++  border-radius: 999px;
++  background: var(--tangerine);
++  color: var(--paper-hi);
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-size: 0.62rem;
++  font-weight: 600;
++  letter-spacing: 0.11em;
++  text-transform: uppercase;
++  white-space: nowrap;
++  rotate: 2deg;
++}
++
++/* The CAD selection frame round the pull-tab: dashed box and eight grips. */
++.signB::after {
++  content: '';
++  position: absolute;
++  inset: -0.6rem;
++  border: 2px dashed var(--paper-hi);
++  border-radius: 0.2rem;
++  pointer-events: none;
++}
++
++.handle {
++  position: absolute;
++  z-index: 3;
++  width: 0.7rem;
++  height: 0.7rem;
++  border: 2px solid var(--ink);
++  background: var(--paper-hi);
++  pointer-events: none;
++}
++
++.handle[data-handle='tl'] {
++  top: -0.95rem;
++  left: -0.95rem;
++}
++.handle[data-handle='tc'] {
++  top: -0.95rem;
++  left: calc(50% - 0.35rem);
++}
++.handle[data-handle='tr'] {
++  top: -0.95rem;
++  right: -0.95rem;
++}
++.handle[data-handle='ml'] {
++  top: calc(50% - 0.35rem);
++  left: -0.95rem;
++}
++.handle[data-handle='mr'] {
++  top: calc(50% - 0.35rem);
++  right: -0.95rem;
++}
++.handle[data-handle='bl'] {
++  bottom: -0.95rem;
++  left: -0.95rem;
++}
++.handle[data-handle='bc'] {
++  bottom: -0.95rem;
++  left: calc(50% - 0.35rem);
++}
++.handle[data-handle='br'] {
++  right: -0.95rem;
++  bottom: -0.95rem;
++}
++
++/* The lever: a cardboard arm out of the right of the sign, ending in a tab. */
++.arm {
++  position: absolute;
++  top: 50%;
++  left: calc(100% + 0.9rem);
++  width: clamp(2rem, 5vw, 6rem);
++  height: 0.9rem;
++  translate: 0 -50%;
++  border: 2px solid var(--ink);
++  border-radius: 0.2rem;
++  background: linear-gradient(var(--card-hi), var(--card));
++}
++
++.armBrad {
++  position: absolute;
++  top: 50%;
++  left: 0.2rem;
++  width: 0.6rem;
++  height: 0.6rem;
++  translate: 0 -50%;
++  border: 1.5px solid #5a3d08;
++  border-radius: 50%;
++  background: radial-gradient(circle at 35% 30%, #fff1b8, #e0a92a 55%, #8a5e0f);
++}
++
++.armTab {
++  position: absolute;
++  top: 50%;
++  left: 100%;
++  translate: 0 -50%;
++  padding: 0.4rem 0.8rem;
++  border: 2px solid var(--ink);
++  background: var(--paper-hi);
++  box-shadow: 0.2rem 0.25rem 0 var(--ink);
++  color: var(--ink);
++  font-family: var(--font-syne), system-ui, sans-serif;
++  font-size: 0.8rem;
++  font-weight: 800;
++  letter-spacing: 0.06em;
++  text-transform: uppercase;
++  white-space: nowrap;
++}
++
++.pullTab {
++  position: absolute;
++  top: calc(100% + 1.2rem);
++  left: 8%;
++  z-index: 3;
++  padding: 0.5rem 1rem;
++  border: 2px solid var(--ink);
++  background: var(--paper-hi);
++  box-shadow: 0.25rem 0.3rem 0 var(--ink);
++  color: var(--ink);
++  font-family: var(--font-syne), system-ui, sans-serif;
++  font-size: 0.95rem;
++  font-weight: 800;
++  letter-spacing: 0.06em;
++  text-transform: uppercase;
++  white-space: nowrap;
++  cursor: pointer;
++  transition:
++    transform 0.2s var(--ease-spring),
++    box-shadow 0.2s var(--ease-spring),
++    background-color 0.2s ease;
++}
++
++.pullTab span {
++  color: var(--tangerine);
++}
++
++.pullTab:hover {
++  transform: translate(-1px, -1px);
++  box-shadow: 0.35rem 0.4rem 0 var(--ink);
++}
++
++.pullTab:active {
++  transform: translate(2px, 2px);
++  box-shadow: 0.1rem 0.12rem 0 var(--ink);
++}
++
++.pullTab[aria-pressed='true'] {
++  background: var(--butter);
++}
++
++/* ── The paper card ────────────────────────────────────────────────────── */
++
++.card {
++  position: absolute;
++  bottom: clamp(1.4rem, 5vh, 3.4rem);
++  left: clamp(1rem, 3vw, 3rem);
++  width: clamp(17rem, 27vw, 25rem);
++  rotate: -1.2deg;
++  pointer-events: auto;
++}
++
++/* two more sheets underneath, so it reads as a small stack of paper */
++.card::before,
++.card::after {
++  content: '';
++  position: absolute;
++  inset: 0;
++  z-index: -1;
++  border: 2px solid var(--ink);
++  border-radius: 0.5rem;
++  background: var(--paper);
++}
++
++.card::before {
++  rotate: 2.4deg;
++  translate: 0.25rem 0.3rem;
++}
++
++.card::after {
++  rotate: -1.8deg;
++  translate: -0.2rem 0.5rem;
++  background: var(--paper-lo);
++}
++
++.cardInner {
++  position: relative;
++  padding: 1.1rem 1.2rem 1rem;
++  border: 2px solid var(--ink);
++  border-radius: 0.5rem;
++  background: var(--paper-hi);
++  box-shadow: 0.35rem 0.45rem 0 rgb(25 26 46 / 0.45);
++  color: var(--ink);
++}
++
++/* a strip of tape holding it down */
++.cardInner::before {
++  content: '';
++  position: absolute;
++  top: -0.7rem;
++  left: 50%;
++  width: 4.6rem;
++  height: 1.3rem;
++  translate: -50% 0;
++  rotate: -3deg;
++  border: 1px solid rgb(25 26 46 / 0.18);
++  background: var(--butter);
++  opacity: 0.92;
++  clip-path: polygon(1% 0, 100% 5%, 98% 100%, 0 95%);
++}
++
++.cardHead {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 0.35rem 0.55rem;
++  margin-bottom: 0.7rem;
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-size: 0.62rem;
++  font-weight: 500;
++  letter-spacing: 0.14em;
++  text-transform: uppercase;
++  color: #4a4760;
++}
++
++.lede {
++  margin: 0;
++  font-family: var(--font-geist), system-ui, sans-serif;
++  font-size: 0.92rem;
++  line-height: 1.5;
++}
++
++.lede strong {
++  font-weight: 700;
++  background: linear-gradient(transparent 62%, var(--butter) 62%);
++}
++
++.actions {
++  display: flex;
++  flex-wrap: wrap;
++  align-items: center;
++  gap: 0.6rem 1.1rem;
++  margin-top: 1rem;
++}
++
++.cta,
++.link {
++  display: inline-flex;
++  align-items: center;
++  gap: 0.4rem;
++  font-family: var(--font-geist), system-ui, sans-serif;
++  font-size: 0.86rem;
++  font-weight: 600;
++  cursor: pointer;
++}
++
++.cta {
++  padding: 0.62rem 1.05rem;
++  border: 2px solid var(--ink);
++  border-radius: 999px;
++  background: var(--butter);
++  box-shadow: 0.2rem 0.25rem 0 var(--ink);
++  color: var(--ink);
++  transition:
++    transform 0.2s var(--ease-spring),
++    box-shadow 0.2s var(--ease-spring);
++}
++
++.cta:hover {
++  transform: translate(-1px, -1px);
++  box-shadow: 0.3rem 0.35rem 0 var(--ink);
++}
++
++.cta:active {
++  transform: translate(2px, 2px);
++  box-shadow: 0.05rem 0.08rem 0 var(--ink);
++}
++
++.link {
++  padding: 0;
++  border: 0;
++  background: none;
++  color: var(--ink);
++  text-decoration: underline;
++  text-decoration-color: var(--tangerine);
++  text-decoration-thickness: 2px;
++  text-underline-offset: 0.25em;
++}
++
++.facts {
++  display: grid;
++  grid-template-columns: repeat(3, 1fr);
++  gap: 0.6rem;
++  margin: 1rem 0 0;
++  padding-top: 0.8rem;
++  border-top: 2px dashed rgb(25 26 46 / 0.3);
++}
++
++.fact dd {
++  display: flex;
++  flex-direction: column;
++  gap: 0.15rem;
++  margin: 0;
++}
++
++.fact b {
++  font-family: var(--font-syne), system-ui, sans-serif;
++  font-size: 1.3rem;
++  font-weight: 800;
++  line-height: 1;
++  letter-spacing: -0.03em;
++}
++
++.fact span {
++  font-family: var(--font-geist-mono), ui-monospace, monospace;
++  font-size: 0.55rem;
++  letter-spacing: 0.1em;
++  text-transform: uppercase;
++  color: #4a4760;
++}
++
++/* ── Boot: the page's intro holds the stage still until it is done ──────── */
++
++:global(html[data-boot='on']) .scene *,
++:global(html[data-boot='on']) .scene *::before,
++:global(html[data-boot='on']) .planks * {
++  animation-play-state: paused !important;
++}
++
++/* ── Smaller than a laptop ─────────────────────────────────────────────── */
++
++@media (max-width: 1199px) {
++  .signB {
++    left: 50%;
++  }
++
++  .arm {
++    width: clamp(1.6rem, 4vw, 3.5rem);
++  }
++}
++
++/* ── Phones and tablets: the signs stack and the card sits under them ───── */
++
++@media (max-width: 899px) {
++  .hero {
++    min-height: auto;
++    padding-top: 5.4rem;
++  }
++
++  .item {
++    top: var(--tys);
++    left: var(--lxs);
++  }
++
++  .front {
++    position: relative;
++    inset: auto;
++    display: flex;
++    flex-direction: column;
++    gap: 2.6rem;
++    padding: 2.6rem 1rem 3.2rem;
++    pointer-events: auto;
++  }
++
++  .planks {
++    position: relative;
++    inset: auto;
++    display: flex;
++    flex-direction: column;
++    align-items: center;
++    gap: 2.6rem;
++  }
++
++  .signA,
++  .signB {
++    position: relative;
++    top: auto;
++    left: auto;
++    translate: none;
++    max-width: 100%;
++  }
++
++  .signA {
++    font-size: clamp(1.1rem, 7.4vw, 3rem);
++  }
++
++  .signB {
++    font-size: clamp(1.7rem, 12vw, 4.4rem);
++    margin-bottom: 1.4rem;
++  }
++
++  .arm {
++    display: none;
++  }
++
++  .pullTab {
++    left: 50%;
++    translate: -50% 0;
++  }
++
++  .card {
++    position: relative;
++    bottom: auto;
++    left: auto;
++    width: min(100%, 30rem);
++    margin-inline: auto;
++  }
++}
++
++@media (max-width: 479px) {
++  .sunSlot {
++    right: 4%;
++    width: 3.6rem;
++  }
++
++  .sticker {
++    width: 2.7rem;
++  }
++}
++
++/* ── Motion ────────────────────────────────────────────────────────────── */
++
++@keyframes stage-in {
++  from {
++    opacity: 0;
++  }
++}
++
++@keyframes sign-drop {
++  from {
++    opacity: 0;
++    transform: translateY(-3.5rem) rotate(-4deg);
++  }
++}
++
++@keyframes spin {
++  to {
++    transform: rotate(360deg);
++  }
++}
++
++@keyframes drift {
++  from {
++    transform: translateX(calc(var(--dx, 12px) * -1));
++  }
++  to {
++    transform: translateX(var(--dx, 12px));
++  }
++}
++
++@keyframes swing {
++  from {
++    transform: rotate(-5deg);
++  }
++  to {
++    transform: rotate(5deg);
++  }
++}
++
++@keyframes sticker-pop {
++  from {
++    transform: scale(0.2) rotate(-24deg);
++    opacity: 0;
++  }
++}
++
++@keyframes bob {
++  to {
++    transform: translateY(-9px) rotate(2.5deg);
++  }
++}
++
++@keyframes twinkle {
++  0%,
++  100% {
++    transform: scale(0.75) rotate(0deg);
++    opacity: 0.55;
++  }
++  50% {
++    transform: scale(1.15) rotate(18deg);
++    opacity: 1;
++  }
++}
++
++/* Reduced motion keeps the whole picture and the pull itself, which the
++   visitor drives; it removes everything that moves on its own. */
++@media (prefers-reduced-motion: reduce) {
++  .stage3d,
++  .signA,
++  .signB,
++  .sticker,
++  .float,
++  .sparkle,
++  .gearSvg,
++  .cloud,
++  .sunSwing {
++    animation: none;
++  }
++}
+diff --git a/features/landing-page/studio/hero/hero.tsx b/features/landing-page/studio/hero/hero.tsx
+index de7875a..c0a1a80 100644
+--- a/features/landing-page/studio/hero/hero.tsx
++++ b/features/landing-page/studio/hero/hero.tsx
+@@ -1,35 +1,95 @@
+ 'use client'
+ 
+-import { MotionConfig, motion } from 'motion/react'
+ import { ArrowRight, ArrowUpRight } from 'lucide-react'
+-import { useRef, useState } from 'react'
+-import { useReducedMotion } from 'motion/react'
+-
+-import { cn } from '@/lib/utils'
++import {
++  MotionConfig,
++  animate,
++  motion,
++  useMotionValue,
++  useReducedMotion,
++  useTransform,
++  type MotionValue,
++} from 'motion/react'
++import {
++  useRef,
++  useState,
++  useSyncExternalStore,
++  type KeyboardEvent,
++} from 'react'
+ 
+ import { Reveal } from '../reveal'
+ import { HERO_FACTS, scrollToSection } from '../studio-data'
+-import styles from '../studio.module.css'
+-import { HeroScene } from './hero-scene'
++import styles from './hero-theater.module.css'
++import { TheaterScene } from './theater-scene'
+ import { useHeroScene } from './use-hero-scene'
+ 
+ /**
+- * Sunrise, rebuilt as a workbench. The sun is still the page's one loud field,
+- * still rising behind the paper the rest of the site is printed on — but the
+- * type is now laid out like a canvas being worked on: the display line spans
+- * the canopy, the sun sits centred behind it, and the lower-right word carries
+- * a selection frame you can push around. The name tag, the bio dock and the
+- * coordinate readout are the same tactile furniture as the rest of Side A.
++ * A pop-up paper theatre, run by one pull-tab.
++ *
++ * The headline is two cardboard signs on the stage. The lower one, "Pulse.",
++ * is the mechanism: it carries the same CAD selection frame it always had, and
++ * dragging it (or pressing its PULL tab) writes `pull`, a number from 0 to 1.
++ * Everything that moves is a function of that one number: the curtain halves and
++ * wings slide apart, the paper gears turn, the sun swings on its string, and the
++ * letters of "Interfaces" fold forward on alternating creases like an
++ * accordion. Let go and it snaps to open or shut on a spring.
+  *
+- * The scene (`HeroScene`) is untouched decoration; only its composition vars
+- * moved. Everything here is real text, so nothing depends on the marks.
++ * All the type is real text; the letters are split for the fold and hidden from
++ * assistive tech behind a plain-text copy. The pull is also a button, so it
++ * works from the keyboard and without a pointer.
+  */
++
++/** How far the sign travels, in px: enough to feel pulled, never off the stage. */
++const rangeFor = (width: number) =>
++  Math.round(Math.min(240, Math.max(64, width * 0.12)))
++
++function subscribeResize(onChange: () => void) {
++  window.addEventListener('resize', onChange)
++  return () => window.removeEventListener('resize', onChange)
++}
++
++function useRange() {
++  return useSyncExternalStore(
++    subscribeResize,
++    () => rangeFor(window.innerWidth),
++    () => 240,
++  )
++}
++
++/** The eight CAD grips: 4 corners plus 4 edge midpoints. */
++const HANDLES = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'] as const
++
+ export function Hero() {
+   const sectionRef = useRef<HTMLElement>(null)
+   const reduced = useReducedMotion() ?? false
+-  const [coords, setCoords] = useState({ x: 420, y: 180 })
++  const range = useRange()
++  const [open, setOpen] = useState(false)
+   useHeroScene(sectionRef)
+ 
++  const x = useMotionValue(0)
++  const pull = useTransform(x, [0, range], [0, 1], { clamp: true })
++
++  const settle = (to: boolean) => {
++    setOpen(to)
++    animate(
++      x,
++      to ? range : 0,
++      reduced
++        ? { duration: 0 }
++        : { type: 'spring', stiffness: 230, damping: 22, mass: 0.9 },
++    )
++  }
++
++  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
++    if (event.key === 'ArrowRight') {
++      event.preventDefault()
++      settle(true)
++    } else if (event.key === 'ArrowLeft') {
++      event.preventDefault()
++      settle(false)
++    }
++  }
++
+   return (
+     <section
+       id="home"
+@@ -37,150 +97,120 @@ export function Hero() {
+       className={styles.hero}
+       aria-labelledby="hero-title"
+     >
+-      <HeroScene />
++      <TheaterScene pull={pull} />
+ 
+       <MotionConfig reducedMotion="user">
+-        <div className={cn(styles.shell, styles.heroStage)}>
+-          <p className={styles.heroTelemetry}>
+-            x: {Math.round(coords.x)}, y: {Math.round(coords.y)}
+-          </p>
++        <div className={styles.front}>
++          <div className={styles.planks} data-stage-planks>
++            {/* 1 · Interfaces: the first sign, hung from two cardboard struts. */}
++            <div className={styles.signA}>
++              <Rods pull={pull} />
++              <Brads />
++              <span className={styles.nameTag}>
++                <span aria-hidden>✳</span>
++                Aditya Himawan
++              </span>
++              <h1 id="hero-title" className={styles.display}>
++                <span className="sr-only">Interfaces</span>
++                <Letters text="INTERFACES" pull={pull} tone="cream" />
++              </h1>
++            </div>
+ 
+-          {/* 1 · Canopy: the display line, with the name tag pinned to it. */}
+-          <div className={styles.heroCanopy}>
++            {/* 2 · Pulse: the pull-tab. Drag it, or press PULL. */}
+             <motion.div
+-              drag
++              className={styles.signB}
++              drag="x"
++              dragConstraints={{ left: 0, right: range }}
++              dragElastic={0.04}
+               dragMomentum={false}
+-              dragElastic={0.15}
+-              onDrag={(_, info) => setCoords(info.point)}
+-              className={styles.heroSticker}
++              style={{ x }}
++              onDragEnd={() => settle(x.get() > range * 0.45)}
+             >
+-              <span aria-hidden>✳</span>
+-              Aditya Himawan
+-            </motion.div>
++              <Brads />
++              <div className={styles.withRow}>
++                <span className={styles.withA}>with a</span>
++                <span className={styles.chip}>Open to good problems</span>
++              </div>
+ 
+-            <Reveal>
+-              <h1 id="hero-title" className={styles.heroDisplay}>
+-                Interfaces
+-              </h1>
+-            </Reveal>
++              <span className={styles.pulseWord}>
++                <span className="sr-only">Pulse.</span>
++                <Letters text="PULSE." pull={pull} tone="butter" />
++              </span>
++
++              {HANDLES.map((handle) => (
++                <i
++                  key={handle}
++                  className={styles.handle}
++                  data-handle={handle}
++                  aria-hidden
++                />
++              ))}
++
++              <span className={styles.arm} aria-hidden>
++                <i className={styles.armBrad} />
++                <b className={styles.armTab}>Pull ▸</b>
++              </span>
++
++              <button
++                type="button"
++                className={styles.pullTab}
++                aria-pressed={open}
++                aria-label="Pull the stage open"
++                onClick={() => settle(!open)}
++                onKeyDown={onKeyDown}
++              >
++                Pull <span aria-hidden>▸▸</span>
++              </button>
++            </motion.div>
+           </div>
+ 
+-          {/* 2 · Lower band: the dock on the left, the worked word on the right. */}
+-          <div className={styles.heroLower} data-hero-copy>
+-            {/* The reveal lives inside the card: a transform on an ancestor
+-                would make it the containing block, and the card would drop out
+-                of the hero's bottom edge on every breakpoint. */}
+-            <div className={styles.heroDock}>
+-              <Reveal delay={0.12} className={styles.heroDockInner}>
+-                <div className={styles.heroDockHead}>
+-                  <span>Design engineer</span>
+-                  <span aria-hidden>·</span>
+-                  <span>Jakarta, GMT+7</span>
+-                </div>
+-
+-                <p className={styles.heroLede}>
+-                  I&apos;m Aditya, a design engineer working in React and
+-                  TypeScript. I bridge design and code: prototyping in the
+-                  browser, building the design system under the screens, and
+-                  sweating the <strong>motion and type</strong> that make
+-                  software feel alive.
+-                </p>
+-
+-                <div className={styles.heroActions}>
+-                  <button
+-                    type="button"
+-                    className={styles.primaryBtn}
+-                    onClick={() => scrollToSection('work', reduced)}
+-                  >
+-                    See the work
+-                    <ArrowRight size={16} aria-hidden />
+-                  </button>
+-                  <button
+-                    type="button"
+-                    className={styles.ghostLink}
+-                    onClick={() => scrollToSection('contact', reduced)}
+-                  >
+-                    Say hello
+-                    <ArrowUpRight size={15} aria-hidden />
+-                  </button>
+-                </div>
+-
+-                <dl className={styles.heroFacts}>
+-                  {HERO_FACTS.map((fact) => (
+-                    <div key={fact.label} className={styles.heroFact}>
+-                      <dt className="sr-only">{fact.label}</dt>
+-                      <dd>
+-                        <b>{fact.value}</b>
+-                        <span aria-hidden>{fact.label}</span>
+-                      </dd>
+-                    </div>
+-                  ))}
+-                </dl>
+-              </Reveal>
+-            </div>
++          {/* 3 · The paper card with the bio, on top of the stage. */}
++          <div className={styles.card} data-hero-copy>
++            <Reveal delay={0.12} className={styles.cardInner}>
++              <div className={styles.cardHead}>
++                <span>Design engineer</span>
++                <span aria-hidden>·</span>
++                <span>Jakarta, GMT+7</span>
++              </div>
++
++              <p className={styles.lede}>
++                I&apos;m Aditya, a design engineer working in React and
++                TypeScript. I bridge design and code: prototyping in the
++                browser, building the design system under the screens, and
++                sweating the <strong>motion and type</strong> that make software
++                feel alive.
++              </p>
+ 
+-            <Reveal delay={0.2}>
+-              <div className={styles.heroPulseBlock}>
+-                <div className={styles.heroWithRow}>
+-                  <span className={styles.heroWithA}>with a</span>
+-                  <span className={styles.heroChip}>Open to good problems</span>
+-                </div>
+-
+-                <motion.div
+-                  drag
+-                  dragMomentum={false}
+-                  dragElastic={0.1}
+-                  dragConstraints={{
+-                    left: -48,
+-                    right: 32,
+-                    top: -34,
+-                    bottom: 26,
+-                  }}
+-                  onDrag={(_, info) => setCoords(info.point)}
+-                  className={styles.heroPulseBox}
++              <div className={styles.actions}>
++                <button
++                  type="button"
++                  className={styles.cta}
++                  onClick={() => scrollToSection('work', reduced)}
+                 >
+-                  <span className={styles.heroPulse}>
+-                    Pulse<span className={styles.heroPulseDot}>.</span>
+-                  </span>
+-
+-                  <svg
+-                    className={styles.heroScribble}
+-                    viewBox="0 0 400 140"
+-                    preserveAspectRatio="none"
+-                    fill="none"
+-                    aria-hidden
+-                    focusable="false"
+-                  >
+-                    <ellipse
+-                      cx="200"
+-                      cy="70"
+-                      rx="190"
+-                      ry="55"
+-                      stroke="var(--tangerine)"
+-                      strokeWidth="3.5"
+-                      transform="rotate(-2 200 70)"
+-                    />
+-                    <ellipse
+-                      cx="200"
+-                      cy="70"
+-                      rx="184"
+-                      ry="48"
+-                      stroke="var(--tangerine)"
+-                      strokeWidth="2.5"
+-                      transform="rotate(1 200 70)"
+-                    />
+-                  </svg>
+-
+-                  {HANDLES.map((handle) => (
+-                    <i
+-                      key={handle}
+-                      className={styles.heroHandle}
+-                      data-handle={handle}
+-                      aria-hidden
+-                    />
+-                  ))}
+-                </motion.div>
++                  See the work
++                  <ArrowRight size={16} aria-hidden />
++                </button>
++                <button
++                  type="button"
++                  className={styles.link}
++                  onClick={() => scrollToSection('contact', reduced)}
++                >
++                  Say hello
++                  <ArrowUpRight size={15} aria-hidden />
++                </button>
+               </div>
++
++              <dl className={styles.facts}>
++                {HERO_FACTS.map((fact) => (
++                  <div key={fact.label} className={styles.fact}>
++                    <dt className="sr-only">{fact.label}</dt>
++                    <dd>
++                      <b>{fact.value}</b>
++                      <span aria-hidden>{fact.label}</span>
++                    </dd>
++                  </div>
++                ))}
++              </dl>
+             </Reveal>
+           </div>
+         </div>
+@@ -189,5 +219,102 @@ export function Hero() {
+   )
+ }
+ 
+-/** The eight CAD grips: 4 corners plus 4 edge midpoints. */
+-const HANDLES = ['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'] as const
++function Brads() {
++  return (
++    <>
++      {(['tl', 'tr', 'bl', 'br'] as const).map((corner) => (
++        <i
++          key={corner}
++          className={styles.brad}
++          data-corner={corner}
++          aria-hidden
++        />
++      ))}
++    </>
++  )
++}
++
++/** Two cardboard struts hold the sign up; they swing as the stage is pulled. */
++function Rods({ pull }: { pull: MotionValue<number> }) {
++  const left = useTransform(pull, [0, 1], [-14, -4])
++  const right = useTransform(pull, [0, 1], [14, 4])
++  return (
++    <>
++      <motion.i
++        className={styles.rod}
++        data-side="left"
++        style={{ rotate: left }}
++        aria-hidden
++      />
++      <motion.i
++        className={styles.rod}
++        data-side="right"
++        style={{ rotate: right }}
++        aria-hidden
++      />
++    </>
++  )
++}
++
++/**
++ * Letters on an accordion. Each one is a card standing on the sign: as `pull`
++ * rises it comes forward and turns about its own edge, alternately left and
++ * right, so neighbours meet at a crease, and each takes the light differently.
++ */
++function Letters({
++  text,
++  pull,
++  tone,
++}: {
++  text: string
++  pull: MotionValue<number>
++  tone: 'cream' | 'butter'
++}) {
++  return (
++    <span className={styles.letters} aria-hidden>
++      {Array.from(text).map((char, i) => (
++        <Letter
++          key={`${char}-${i}`}
++          char={char}
++          index={i}
++          pull={pull}
++          tone={tone}
++        />
++      ))}
++    </span>
++  )
++}
++
++function Letter({
++  char,
++  index,
++  pull,
++  tone,
++}: {
++  char: string
++  index: number
++  pull: MotionValue<number>
++  tone: 'cream' | 'butter'
++}) {
++  const dir = index % 2 ? 1 : -1
++  const z = useTransform(pull, [0, 1], [0, 26 + (index % 3) * 9])
++  const rotateY = useTransform(pull, [0, 1], [0, dir * 26])
++  const rotateX = useTransform(pull, [0, 1], [0, -7])
++  // Folds that turn toward the light brighten, folds that turn away fall into
++  // shade: that alternation is what makes the creases read as paper.
++  const filter = useTransform(
++    pull,
++    [0, 1],
++    ['brightness(1)', dir > 0 ? 'brightness(0.78)' : 'brightness(1.1)'],
++  )
++
++  return (
++    <motion.span
++      className={styles.letter}
++      data-tone={char === '.' ? 'dot' : tone}
++      style={{ z, rotateY, rotateX, filter }}
++    >
++      {char}
++    </motion.span>
++  )
++}
+diff --git a/features/landing-page/studio/hero/theater-scene.tsx b/features/landing-page/studio/hero/theater-scene.tsx
+new file mode 100644
+index 0000000..d08cb5d
+--- /dev/null
++++ b/features/landing-page/studio/hero/theater-scene.tsx
+@@ -0,0 +1,640 @@
++'use client'
++
++import { motion, useTransform, type MotionValue } from 'motion/react'
++import type { CSSProperties, ReactNode } from 'react'
++
++import { gearPath } from '../diorama/geometry'
++import { Bolt, Burst, Daisy, Smiley, Sparkle, Sun } from '../doodles'
++import styles from './hero-theater.module.css'
++
++/**
++ * The hero's stage: a paper theatre built from real depth.
++ *
++ * Every plane is a full-bleed layer at its own distance from the glass, inside
++ * a `preserve-3d` stage that the pointer tilts, so the planes slide against one
++ * another like cut card. Back to front:
++ *
++ *   backdrop sky and halftone → paper gears → the dark arch frame → the blue
++ *   ring inside it → the floor → clouds → the two halves of the orange curtain
++ *   → the layered wings at either edge → the sun, hung on a string
++ *
++ * `pull` (0 to 1) is the mechanism. Dragging the Pulse frame writes it, and the
++ * curtain halves and wings slide apart, the gears turn, the sun swings. Nothing
++ * here reads as a sunrise any more: the sun is a prop, not the sky.
++ *
++ * Everything is decoration and hidden from assistive tech; the stickers keep the
++ * `data-hero-sticker` hooks the About tray peels them from.
++ */
++
++/** Distance of the eye from the stage, in px. Planes are scaled to cancel it. */
++const EYE = 1500
++/** Bleed, so a tilting stage never shows its own edge. */
++const BLEED = 1
++
++const kFor = (z: number) => ((EYE - z) / EYE) * BLEED
++
++const planeVars = (z: number) =>
++  ({ '--z': `${z}px`, '--k': String(kFor(z)) }) as CSSProperties
++
++const FRAME = 'M-200 -200H1800V1100H-200Z'
++/** An arch opening centred on x = 800 whose springing line is y = 620. */
++const arch = (r: number) =>
++  `M${800 - r} 900V620A${r} ${r} 0 0 1 ${800 + r} 620V900Z`
++
++const INK = '#191a2e'
++
++function Plane({
++  z,
++  shadow,
++  children,
++}: {
++  z: number
++  shadow?: boolean
++  children: ReactNode
++}) {
++  return (
++    <div
++      className={styles.plane}
++      style={planeVars(z)}
++      data-shadow={shadow || undefined}
++    >
++      {children}
++    </div>
++  )
++}
++
++function Art({ children }: { children: ReactNode }) {
++  return (
++    <svg
++      viewBox="0 0 1600 900"
++      preserveAspectRatio="xMidYMax slice"
++      focusable="false"
++      aria-hidden
++    >
++      {children}
++    </svg>
++  )
++}
++
++function Defs() {
++  return (
++    <defs>
++      <radialGradient id="ht-sky" cx="50%" cy="40%" r="72%">
++        <stop offset="0" stopColor="#8aa0fa" />
++        <stop offset="0.5" stopColor="#4d66e6" />
++        <stop offset="1" stopColor="#2c3cae" />
++      </radialGradient>
++      <pattern
++        id="ht-dots"
++        width="26"
++        height="26"
++        patternUnits="userSpaceOnUse"
++      >
++        <circle cx="13" cy="13" r="2.2" fill="#fff" fillOpacity="0.13" />
++      </pattern>
++      <pattern
++        id="ht-fold"
++        width="46"
++        height="10"
++        patternUnits="userSpaceOnUse"
++      >
++        <rect width="46" height="10" fill="#ff6a2b" />
++        <rect x="8" width="9" height="10" fill="#ff8d56" />
++        <rect x="27" width="9" height="10" fill="#d9501a" />
++      </pattern>
++      <pattern id="ht-corr" width="9" height="10" patternUnits="userSpaceOnUse">
++        <rect width="9" height="10" fill="#cba777" />
++        <rect width="3" height="10" fill="#8c6a3a" fillOpacity="0.22" />
++      </pattern>
++    </defs>
++  )
++}
++
++/* ── planes ──────────────────────────────────────────────────────────────── */
++
++function Backdrop() {
++  return (
++    <Art>
++      <Defs />
++      <rect x="-200" y="-200" width="2000" height="1300" fill="url(#ht-sky)" />
++      <rect x="-200" y="-200" width="2000" height="1300" fill="url(#ht-dots)" />
++    </Art>
++  )
++}
++
++/** The dark outer frame: the whole stage minus an arch-shaped opening. */
++function ArchFrame() {
++  return (
++    <Art>
++      <path
++        d={`${FRAME}${arch(560)}`}
++        fillRule="evenodd"
++        fill="#2c3cae"
++        stroke={INK}
++        strokeWidth="4"
++        vectorEffect="non-scaling-stroke"
++      />
++      <path
++        d={`${FRAME}${arch(560)}`}
++        fillRule="evenodd"
++        fill="none"
++        stroke="#fff"
++        strokeOpacity="0.12"
++        strokeWidth="2"
++        transform="translate(-6 -6)"
++        vectorEffect="non-scaling-stroke"
++      />
++    </Art>
++  )
++}
++
++/** The lighter ring between the frame and the curtain. */
++function Ring() {
++  return (
++    <Art>
++      <path
++        d={`${arch(560)}${arch(470)}`}
++        fillRule="evenodd"
++        fill="#4a62e0"
++        stroke={INK}
++        strokeWidth="4"
++        vectorEffect="non-scaling-stroke"
++      />
++    </Art>
++  )
++}
++
++function Floor() {
++  return (
++    <Art>
++      <path
++        d="M-200 792H1800V1100H-200Z"
++        fill="url(#ht-corr)"
++        stroke={INK}
++        strokeWidth="4"
++        vectorEffect="non-scaling-stroke"
++      />
++      <path
++        d="M-200 792H1800V818H-200Z"
++        fill="#a88252"
++        stroke={INK}
++        strokeWidth="3"
++        vectorEffect="non-scaling-stroke"
++      />
++      <path
++        d="M-200 820H1800"
++        stroke="#fff"
++        strokeOpacity="0.28"
++        strokeWidth="2"
++      />
++    </Art>
++  )
++}
++
++const CLOUD =
++  'M22 71C8 71 6 54 20 49C18 33 36 26 47 34C52 14 79 10 89 27C104 17 124 29 118 45C132 48 131 71 113 71Z'
++
++const CLOUDS = [
++  { x: 360, y: 668, s: 1.5, d: 0, dx: 14 },
++  { x: 640, y: 700, s: 1.1, d: -3, dx: -12 },
++  { x: 1010, y: 676, s: 1.35, d: -5, dx: 16 },
++  { x: 1240, y: 704, s: 1, d: -1, dx: -10 },
++] as const
++
++function Clouds() {
++  return (
++    <Art>
++      {CLOUDS.map((cloud, i) => (
++        <g
++          key={i}
++          transform={`translate(${cloud.x} ${cloud.y}) scale(${cloud.s})`}
++        >
++          <g
++            className={styles.cloud}
++            style={
++              { '--dx': `${cloud.dx}px`, '--d': `${cloud.d}s` } as CSSProperties
++            }
++          >
++            <path
++              d={CLOUD}
++              fill="#fffaf1"
++              stroke={INK}
++              strokeWidth="3"
++              strokeLinejoin="round"
++              vectorEffect="non-scaling-stroke"
++            />
++            <path
++              d="M34 58C40 56 44 56 50 58"
++              fill="none"
++              stroke={INK}
++              strokeWidth="2.4"
++              strokeLinecap="round"
++              opacity=".3"
++            />
++          </g>
++        </g>
++      ))}
++    </Art>
++  )
++}
++
++/** One half of the orange curtain, hugging the arch down to the floor. */
++function Drape({ side }: { side: 'left' | 'right' }) {
++  const d =
++    side === 'left'
++      ? 'M330 900V620A470 470 0 0 1 800 150V248A372 372 0 0 0 428 620V900Z'
++      : 'M1270 900V620A470 470 0 0 0 800 150V248A372 372 0 0 1 1172 620V900Z'
++  const tieX = side === 'left' ? 330 : 1074
++  return (
++    <Art>
++      <path
++        d={d}
++        fill="url(#ht-fold)"
++        stroke={INK}
++        strokeWidth="4"
++        strokeLinejoin="round"
++        vectorEffect="non-scaling-stroke"
++      />
++      <path
++        d={d}
++        fill="none"
++        stroke="#fff"
++        strokeOpacity="0.18"
++        strokeWidth="2"
++        transform="translate(4 4)"
++        vectorEffect="non-scaling-stroke"
++      />
++      {/* the tie-back that holds it to the wing */}
++      <rect
++        x={tieX}
++        y="690"
++        width="196"
++        height="26"
++        rx="6"
++        fill="#c29b66"
++        stroke={INK}
++        strokeWidth="3"
++        vectorEffect="non-scaling-stroke"
++      />
++      <path
++        d={`M${tieX + 8} 703H${tieX + 188}`}
++        stroke="#8c6a3a"
++        strokeWidth="2"
++        strokeDasharray="6 5"
++      />
++    </Art>
++  )
++}
++
++const WING_TONES = ['#2c3cae', '#ff6a2b', '#4a62e0'] as const
++
++/** A slat of the stage wings: a tall strip with a rounded inner edge. */
++function Wing({
++  side,
++  tone,
++  inset,
++}: {
++  side: 'left' | 'right'
++  tone: string
++  inset: number
++}) {
++  const w = 190
++  const x = side === 'right' ? 1600 - w + inset : -inset
++  return (
++    <Art>
++      <rect
++        x={x}
++        y="-80"
++        width={w}
++        height="1100"
++        rx="60"
++        fill={tone}
++        stroke={INK}
++        strokeWidth="4"
++        vectorEffect="non-scaling-stroke"
++      />
++      <rect
++        x={x + 14}
++        y="-60"
++        width="10"
++        height="1060"
++        rx="5"
++        fill="#fff"
++        opacity="0.14"
++      />
++    </Art>
++  )
++}
++
++function Gear({
++  pull,
++  x,
++  y,
++  size,
++  turn,
++  fill,
++  z,
++}: {
++  pull: MotionValue<number>
++  x: string
++  y: string
++  size: string
++  turn: number
++  fill: string
++  z: number
++}) {
++  const rotate = useTransform(pull, [0, 1], [0, turn])
++  return (
++    <div
++      className={styles.gearSlot}
++      style={{ left: x, top: y, width: size, ...planeVars(z) }}
++    >
++      <motion.div className={styles.gear} style={{ rotate }}>
++        <svg
++          viewBox="0 0 100 100"
++          className={styles.gearSvg}
++          focusable="false"
++          aria-hidden
++        >
++          <path
++            d={gearPath(50, 50, 48, 40, 14)}
++            fill={fill}
++            stroke={INK}
++            strokeWidth="2.6"
++            strokeLinejoin="round"
++          />
++          <circle
++            cx="50"
++            cy="50"
++            r="31"
++            fill="none"
++            stroke={INK}
++            strokeOpacity="0.4"
++            strokeWidth="1.6"
++          />
++          {Array.from({ length: 6 }, (_, i) => {
++            const a = (i / 6) * Math.PI * 2
++            return (
++              <circle
++                key={i}
++                cx={Number((50 + Math.cos(a) * 20).toFixed(2))}
++                cy={Number((50 + Math.sin(a) * 20).toFixed(2))}
++                r="6.4"
++                fill="#7a5a33"
++                stroke={INK}
++                strokeWidth="1.6"
++              />
++            )
++          })}
++          <circle
++            cx="50"
++            cy="50"
++            r="9"
++            fill={fill}
++            stroke={INK}
++            strokeWidth="2.2"
++          />
++        </svg>
++        <i className={styles.brad} />
++      </motion.div>
++    </div>
++  )
++}
++
++/* ── stickers and sparkles (the About tray peels the stickers off) ───────── */
++
++type Spot = { x: string; y: string; xs?: string; ys?: string }
++
++const spot = ({ x, y, xs, ys }: Spot) =>
++  ({
++    '--lx': x,
++    '--ty': y,
++    '--lxs': xs ?? x,
++    '--tys': ys ?? y,
++  }) as CSSProperties
++
++function StickerSlot({
++  id,
++  place,
++  depth,
++  delay,
++  children,
++}: {
++  id: string
++  place: Spot
++  depth: number
++  delay: number
++  children: ReactNode
++}) {
++  return (
++    <div className={styles.item} data-depth={depth} style={spot(place)}>
++      <div
++        className={styles.sticker}
++        data-hero-sticker={id}
++        data-slot={id}
++        style={{ '--delay': `${delay}s` } as CSSProperties}
++      >
++        <span className={styles.float}>{children}</span>
++      </div>
++    </div>
++  )
++}
++
++const SPARKLES = [
++  { place: { x: '34%', y: '17%' }, tone: 'butter', delay: 0 },
++  { place: { x: '66%', y: '20%' }, tone: 'paper', delay: 1.1 },
++  { place: { x: '44%', y: '70%' }, tone: 'butter', delay: 2.1 },
++  { place: { x: '20%', y: '32%' }, tone: 'paper', delay: 0.6 },
++] as const
++
++/**
++ * `pull` comes from the hero: it is owned by whatever the visitor is dragging,
++ * so the scene only reads it.
++ */
++export function TheaterScene({ pull }: { pull: MotionValue<number> }) {
++  const curtainL = useTransform(pull, [0, 1], [0, -150])
++  const curtainR = useTransform(pull, [0, 1], [0, 150])
++  // Motion writes `transform` itself, so these planes carry their own depth
++  // compensation (`kFor`) instead of the stylesheet's.
++  const curtainScaleX = useTransform(pull, [0, 1], [kFor(56), kFor(56) * 0.82])
++  const ringScale = useTransform(pull, [0, 1], [kFor(-30), kFor(-30) * 1.035])
++  const wingR = [
++    useTransform(pull, [0, 1], [0, 90]),
++    useTransform(pull, [0, 1], [0, 140]),
++    useTransform(pull, [0, 1], [0, 190]),
++  ]
++  const wingL = [
++    useTransform(pull, [0, 1], [0, -90]),
++    useTransform(pull, [0, 1], [0, -140]),
++    useTransform(pull, [0, 1], [0, -190]),
++  ]
++  const sunSwing = useTransform(pull, [0, 1], [0, 18])
++
++  return (
++    <div className={styles.scene} aria-hidden data-hero-scene>
++      <div className={styles.stage3d} data-stage>
++        <Plane z={-170}>
++          <Backdrop />
++        </Plane>
++
++        <Gear
++          pull={pull}
++          x="26%"
++          y="60%"
++          size="clamp(7rem, 15vw, 15rem)"
++          turn={540}
++          fill="#e8b94a"
++          z={-120}
++        />
++        <Gear
++          pull={pull}
++          x="52%"
++          y="14%"
++          size="clamp(3.6rem, 7vw, 7rem)"
++          turn={-900}
++          fill="#d4b283"
++          z={-110}
++        />
++        <Gear
++          pull={pull}
++          x="72%"
++          y="58%"
++          size="clamp(4rem, 8vw, 8rem)"
++          turn={-760}
++          fill="#d4b283"
++          z={-100}
++        />
++
++        <Plane z={-60} shadow>
++          <ArchFrame />
++        </Plane>
++
++        <motion.div
++          className={styles.plane}
++          style={{ z: -30, scale: ringScale }}
++          data-shadow
++        >
++          <Ring />
++        </motion.div>
++
++        <Plane z={0} shadow>
++          <Floor />
++        </Plane>
++
++        <Plane z={26}>
++          <Clouds />
++        </Plane>
++
++        <motion.div
++          className={styles.plane}
++          style={{
++            x: curtainL,
++            z: 56,
++            scaleX: curtainScaleX,
++            scaleY: kFor(56),
++            transformOrigin: '0% 50%',
++          }}
++          data-shadow
++        >
++          <Drape side="left" />
++        </motion.div>
++        <motion.div
++          className={styles.plane}
++          style={{
++            x: curtainR,
++            z: 56,
++            scaleX: curtainScaleX,
++            scaleY: kFor(56),
++            transformOrigin: '100% 50%',
++          }}
++          data-shadow
++        >
++          <Drape side="right" />
++        </motion.div>
++
++        {WING_TONES.map((tone, i) => (
++          <motion.div
++            key={`r${i}`}
++            className={styles.plane}
++            style={{ x: wingR[i], z: 80 + i * 18, scale: kFor(80 + i * 18) }}
++            data-shadow
++          >
++            <Wing side="right" tone={tone} inset={i * 52} />
++          </motion.div>
++        ))}
++        {WING_TONES.map((tone, i) => (
++          <motion.div
++            key={`l${i}`}
++            className={styles.plane}
++            style={{ x: wingL[i], z: 80 + i * 18, scale: kFor(80 + i * 18) }}
++            data-shadow
++          >
++            <Wing side="left" tone={tone} inset={i * 52} />
++          </motion.div>
++        ))}
++
++        {/* the sun, demoted to a prop on a string */}
++        <motion.div
++          className={styles.sunSlot}
++          style={{
++            rotate: sunSwing,
++            z: 70,
++            scale: kFor(70),
++            transformOrigin: '50% 0%',
++          }}
++        >
++          <div className={styles.sunSwing}>
++            <i className={styles.string} />
++            <Sun className={styles.sunProp} />
++          </div>
++        </motion.div>
++
++        {SPARKLES.map((spark, i) => (
++          <div
++            key={i}
++            className={styles.item}
++            data-depth="1.2"
++            style={spot(spark.place)}
++          >
++            <Sparkle
++              className={`${styles.sparkle} ${spark.tone === 'paper' ? styles.sparkPaper : ''}`}
++            />
++          </div>
++        ))}
++
++        <StickerSlot
++          id="smiley"
++          place={{ x: '90%', y: '47%', xs: '86%', ys: '30%' }}
++          depth={1.9}
++          delay={1.0}
++        >
++          <Smiley />
++        </StickerSlot>
++        <StickerSlot
++          id="burst"
++          place={{ x: '77%', y: '27%', xs: '80%', ys: '12%' }}
++          depth={2.3}
++          delay={1.12}
++        >
++          <Burst text="hi!" />
++        </StickerSlot>
++        <StickerSlot
++          id="daisy"
++          place={{ x: '8%', y: '24%', xs: '12%', ys: '14%' }}
++          depth={2.0}
++          delay={1.24}
++        >
++          <Daisy />
++        </StickerSlot>
++        <StickerSlot
++          id="bolt"
++          place={{ x: '16%', y: '45%', xs: '9%', ys: '34%' }}
++          depth={2.6}
++          delay={1.36}
++        >
++          <Bolt />
++        </StickerSlot>
++      </div>
++    </div>
++  )
++}
+diff --git a/features/landing-page/studio/hero/use-hero-scene.ts b/features/landing-page/studio/hero/use-hero-scene.ts
+index 09c2354..c7c6583 100644
+--- a/features/landing-page/studio/hero/use-hero-scene.ts
++++ b/features/landing-page/studio/hero/use-hero-scene.ts
+@@ -2,149 +2,116 @@
+ 
+ import { useEffect, type RefObject } from 'react'
+ 
+-const clamp = (v: number, lo: number, hi: number) =>
+-  Math.min(hi, Math.max(lo, v))
+-
+ /**
+- * Pointer and scroll for the hero's sunrise.
+- *
+- * One rAF loop that runs only while the hero is on screen and something is
+- * still moving. It writes the individual `translate` / `rotate` / `scale`
+- * properties (never `transform`, which the entrance owns), so a frame is a
+- * handful of composited changes and no layout.
++ * Drives the hero stage from the pointer and the scroll, with no React state:
++ * every number goes straight to an element's style.
+  *
+- *  - The pointer is a gentle lamp: each `data-depth` layer slides against it in
+- *    proportion to its depth, and the sun's cut-out tilts toward it, which is
+- *    what makes the stacked slices show an edge.
+- *  - Scroll lifts the sun, turns its rays and lets the layers separate, so
+- *    leaving the hero feels like the sun is climbing.
++ * - The stage (every depth plane) tilts toward the pointer inside its
++ *   perspective, so the planes slide against one another. The signs tilt a
++ *   little less and the bio card not at all, so text stays crisp.
++ * - Anything with `data-depth` (stickers, sparkles) also drifts, further the
++ *   nearer it is.
++ * - Scrolling lifts the card away slowly.
++ * - When the hero leaves the screen the idle animations are paused, so a page
++ *   scrolled elsewhere costs nothing here.
+  *
+- * Touch screens have no hover, so they get the scroll half only. Reduced
+- * motion builds nothing and keeps the finished picture.
++ * Reduced motion switches the tilt and drift off entirely.
+  */
+ export function useHeroScene(ref: RefObject<HTMLElement | null>) {
+   useEffect(() => {
+     const root = ref.current
+     if (!root) return
+-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+ 
++    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
++    const fine = window.matchMedia('(pointer: fine)').matches
++
++    const stage = root.querySelector<HTMLElement>('[data-stage]')
++    const planks = root.querySelector<HTMLElement>('[data-stage-planks]')
++    const copy = root.querySelector<HTMLElement>('[data-hero-copy]')
+     const layers = Array.from(
+       root.querySelectorAll<HTMLElement>('[data-depth]'),
+-    ).map((el) => ({ el, depth: Number(el.dataset.depth) || 0 }))
+-    const rays = root.querySelector<HTMLElement>('[data-rays]')
+-    const sunBody = root.querySelector<HTMLElement>('[data-sun-body]')
+-    const sunLift = root.querySelector<HTMLElement>('[data-sun-lift]')
+-    const copy = root.querySelector<HTMLElement>('[data-hero-copy]')
+-    const scene = root.querySelector<HTMLElement>('[data-hero-scene]')
++    )
+ 
++    // Idle animations only run while the hero is on screen.
++    const watcher = new IntersectionObserver(
++      ([entry]) => {
++        root.dataset.sceneIdle = String(!entry.isIntersecting)
++      },
++      { threshold: 0.05 },
++    )
++    watcher.observe(root)
++
++    let frame = 0
+     let tx = 0
+     let ty = 0
+-    let px = 0
+-    let py = 0
+-    let progress = 0
+-    let height = root.offsetHeight || window.innerHeight
+-    let onScreen = true
+-    let frame = 0
+-    let dirty = true
+-    let disposed = false
+-
+-    const readScroll = () => {
+-      progress = clamp(window.scrollY / Math.max(1, height), 0, 1)
+-      dirty = true
+-    }
++    let cx = 0
++    let cy = 0
+ 
+-    const draw = () => {
+-      frame = 0
+-      if (disposed || !onScreen) return
+-
+-      px += (tx - px) * 0.075
+-      py += (ty - py) * 0.075
+-      const settled = Math.abs(tx - px) < 0.002 && Math.abs(ty - py) < 0.002
++    const paint = () => {
++      cx += (tx - cx) * 0.09
++      cy += (ty - cy) * 0.09
++      const settled = Math.abs(tx - cx) < 0.001 && Math.abs(ty - cy) < 0.001
+       if (settled) {
+-        px = tx
+-        py = ty
++        cx = tx
++        cy = ty
+       }
+ 
+-      for (const { el, depth } of layers) {
+-        const x = -px * depth * 20
+-        const y = -py * depth * 12 + (1 - depth) * progress * 110
+-        el.style.translate = `${x.toFixed(2)}px ${y.toFixed(2)}px`
++      if (stage) {
++        stage.style.transform = `scale(1.05) rotateX(${(-cy * 3.2).toFixed(3)}deg) rotateY(${(cx * 4.4).toFixed(3)}deg)`
+       }
+-      if (sunBody) {
+-        sunBody.style.transform = `perspective(1100px) rotateX(${(-py * 9).toFixed(2)}deg) rotateY(${(px * 14).toFixed(2)}deg)`
++      if (planks) {
++        planks.style.transform = `perspective(1400px) rotateX(${(-cy * 1.3).toFixed(3)}deg) rotateY(${(cx * 1.9).toFixed(3)}deg)`
+       }
+-      if (sunLift) {
+-        sunLift.style.translate = `0 ${(-progress * 84).toFixed(2)}px`
+-        sunLift.style.scale = `${(1 + progress * 0.07).toFixed(4)}`
++      for (const layer of layers) {
++        const depth = Number(layer.dataset.depth) || 1
++        layer.style.translate = `${(cx * depth * -7).toFixed(2)}px ${(cy * depth * -5).toFixed(2)}px`
+       }
+-      if (rays) rays.style.rotate = `${(progress * 55 + px * 5).toFixed(2)}deg`
+-      if (copy) copy.style.translate = `0 ${(progress * 56).toFixed(2)}px`
+-
+-      dirty = false
+-      if (!settled || dirty) schedule()
+-    }
+ 
+-    function schedule() {
+-      if (!frame && !disposed) frame = requestAnimationFrame(draw)
++      frame = settled ? 0 : requestAnimationFrame(paint)
+     }
+ 
+     const onMove = (event: PointerEvent) => {
+-      if (event.pointerType !== 'mouse') return
+-      const rect = root.getBoundingClientRect()
+-      tx = clamp(((event.clientX - rect.left) / rect.width) * 2 - 1, -1, 1)
+-      ty = clamp(((event.clientY - rect.top) / rect.height) * 2 - 1, -1, 1)
+-      schedule()
++      const box = root.getBoundingClientRect()
++      tx = Math.max(
++        -1,
++        Math.min(1, ((event.clientX - box.left) / box.width - 0.5) * 2),
++      )
++      ty = Math.max(
++        -1,
++        Math.min(1, ((event.clientY - box.top) / box.height - 0.5) * 2),
++      )
++      if (!frame) frame = requestAnimationFrame(paint)
+     }
++
+     const onLeave = () => {
+       tx = 0
+       ty = 0
+-      schedule()
++      if (!frame) frame = requestAnimationFrame(paint)
+     }
++
++    let scrollFrame = 0
+     const onScroll = () => {
+-      readScroll()
+-      schedule()
++      if (scrollFrame || !copy) return
++      scrollFrame = requestAnimationFrame(() => {
++        scrollFrame = 0
++        const lift = Math.min(window.scrollY, window.innerHeight) * 0.07
++        copy.style.translate = `0 ${(-lift).toFixed(1)}px`
++      })
+     }
+-    const onResize = () => {
+-      height = root.offsetHeight || window.innerHeight
+-      onScroll()
+-    }
+-
+-    const observer =
+-      typeof IntersectionObserver === 'undefined'
+-        ? null
+-        : new IntersectionObserver(([entry]) => {
+-            onScreen = entry.isIntersecting
+-            if (scene) scene.dataset.sceneIdle = String(!onScreen)
+-            if (onScreen) {
+-              readScroll()
+-              schedule()
+-            }
+-          })
+-    observer?.observe(root)
+ 
+-    root.addEventListener('pointermove', onMove)
+-    root.addEventListener('pointerleave', onLeave)
+-    window.addEventListener('scroll', onScroll, { passive: true })
+-    window.addEventListener('resize', onResize)
+-    readScroll()
+-    schedule()
++    if (!calm && fine) {
++      root.addEventListener('pointermove', onMove)
++      root.addEventListener('pointerleave', onLeave)
++    }
++    if (!calm) window.addEventListener('scroll', onScroll, { passive: true })
+ 
+     return () => {
+-      disposed = true
+-      if (frame) cancelAnimationFrame(frame)
+-      observer?.disconnect()
++      watcher.disconnect()
++      cancelAnimationFrame(frame)
++      cancelAnimationFrame(scrollFrame)
+       root.removeEventListener('pointermove', onMove)
+       root.removeEventListener('pointerleave', onLeave)
+       window.removeEventListener('scroll', onScroll)
+-      window.removeEventListener('resize', onResize)
+-      for (const { el } of layers) el.style.translate = ''
+-      for (const el of [sunBody, sunLift, rays, copy]) {
+-        if (!el) continue
+-        el.style.transform = ''
+-        el.style.translate = ''
+-        el.style.scale = ''
+-        el.style.rotate = ''
+-      }
+     }
+   }, [ref])
+ }
+diff --git a/features/landing-page/studio/studio.module.css b/features/landing-page/studio/studio.module.css
+index 9225560..2a5a3fa 100644
+--- a/features/landing-page/studio/studio.module.css
++++ b/features/landing-page/studio/studio.module.css
+@@ -431,182 +431,14 @@
+ 
+ /* Sunrise: the cobalt sky is the page's one loud field. The three variables
+    below place the sun, and the paper ground it rises from, for the scene. */
+-.hero {
+-  /* The sun is centred now and the type crosses it, so it is sized to the
+-     lower half of the stage rather than to the sky. */
+-  --sun-size: clamp(15rem, min(46vw, 62vh), 38rem);
+-  --sun-x: 50%;
+-  --ground: clamp(2.6rem, 5.2vh, 3.6rem);
+-  /* The disc drops behind the cobalt hill: two thirds of it clears the crest,
+-     the rest is buried, so the hill reads as being in front of it. */
+-  --sun-lift: 0.67;
+-  /* Where the sticker cluster sits, frozen at this lift. */
+-  --items-lift: 0.62;
+-  /* Distance from the hero's bottom edge to the top of the disc. */
+-  --sun-top: calc(var(--sun-lift) + 0.5);
+-
+-  position: relative;
+-  display: flex;
+-  min-height: max(100svh, 40rem);
+-  flex-direction: column;
+-  padding-block: clamp(4.6rem, 5.4vw, 5.6rem) calc(var(--ground) + 1.5rem);
+-  isolation: isolate;
+-  background: var(--cobalt);
+-  color: var(--paper);
+-}
+-
+-.hero :focus-visible {
+-  outline-color: var(--butter);
+-}
+-
+-.heroStage {
+-  position: relative;
+-  z-index: 2;
+-  display: flex;
+-  flex: 1;
+-  flex-direction: column;
+-  justify-content: space-between;
+-  gap: clamp(0.8rem, 1.6vw, 1.4rem);
+-}
+ 
+ /* Live pointer readout. Decorative but honest: it prints the last drag. */
+-.heroTelemetry {
+-  align-self: center;
+-  margin-top: -0.35rem;
+-  /* Offset only: a margin here would eat the stage's free space and drag the
+-     canopy down with it. */
+-  position: relative;
+-  top: 0.95rem;
+-  padding: 0.24rem 0.7rem;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 999px;
+-  background: var(--paper-hi);
+-  color: var(--ink);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 10px;
+-  letter-spacing: 0.08em;
+-  box-shadow: 3px 3px 0 var(--ink);
+-}
+-
+-.heroCanopy {
+-  position: relative;
+-  margin-top: clamp(0.2rem, 1.4vw, 1.2rem);
+-  text-align: center;
+-}
+ 
+ /* The name tag is pinned to the first letter and can be peeled off. */
+-.heroSticker {
+-  position: absolute;
+-  z-index: 4;
+-  left: 2%;
+-  top: -0.6em;
+-  display: inline-flex;
+-  align-items: center;
+-  gap: 0.4rem;
+-  padding: 0.3rem 0.6rem;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 0.4rem;
+-  background: #ff5a1f;
+-  color: var(--ink);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: clamp(8px, 0.72vw, 10px);
+-  letter-spacing: 0.18em;
+-  text-transform: uppercase;
+-  white-space: nowrap;
+-  transform: rotate(-8deg);
+-  box-shadow: 4px 4px 0 var(--ink);
+-  cursor: grab;
+-  touch-action: none;
+-}
+-
+-.heroSticker:active {
+-  cursor: grabbing;
+-}
+ 
+ /* Cut from the same cardboard as the sun: paper face, stepped ink edge. */
+-.heroDisplay {
+-  margin: 0;
+-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+-  /* Sized off the narrowest phone we support: INTERFACES is 10.2× its own
+-     font-size in Syne 800, so 8.4vw still overran a 324px shell at 360. */
+-  font-size: clamp(1.9rem, 8.2vw, 3.4rem);
+-  font-weight: 800;
+-  line-height: 0.9;
+-  letter-spacing: -0.058em;
+-  text-transform: uppercase;
+-  color: var(--paper-hi);
+-  text-shadow:
+-    1px 1px 0 var(--ink),
+-    2px 2px 0 var(--ink),
+-    3px 3px 0 var(--ink),
+-    4px 4px 0 var(--ink),
+-    5px 5px 0 var(--ink);
+-}
+-
+-@media (min-width: 1024px) {
+-  .heroDisplay {
+-    font-size: clamp(4rem, 8vw, 7.2rem);
+-    text-shadow:
+-      1px 1px 0 var(--ink),
+-      2px 2px 0 var(--ink),
+-      3px 3px 0 var(--ink),
+-      4px 4px 0 var(--ink),
+-      5px 5px 0 var(--ink),
+-      6px 6px 0 var(--ink),
+-      7px 7px 0 var(--ink);
+-  }
+-}
+ 
+ /* Lower band: dock left, worked word right. */
+-.heroLower {
+-  display: grid;
+-  grid-template-columns: minmax(0, 20.5rem) minmax(0, 1fr);
+-  align-items: end;
+-  gap: clamp(1rem, 3vw, 3rem);
+-  margin-top: auto;
+-  padding-bottom: clamp(0.4rem, 1.6vw, 1.4rem);
+-}
+-
+-.heroDock {
+-  padding: 1.1rem 1.2rem 1rem;
+-  border: 2px solid rgb(255 250 241 / 0.38);
+-  border-radius: 1.3rem;
+-  background: rgb(255 250 241 / 0.12);
+-  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+-  backdrop-filter: blur(14px) saturate(1.25);
+-  box-shadow: 0 18px 44px rgb(9 14 32 / 0.34);
+-}
+-
+-.heroDockInner {
+-  display: flex;
+-  flex-direction: column;
+-  gap: 0.85rem;
+-}
+-
+-.heroDockHead {
+-  display: flex;
+-  flex-wrap: wrap;
+-  align-items: center;
+-  gap: 0.45rem;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 9px;
+-  letter-spacing: 0.16em;
+-  text-transform: uppercase;
+-  color: var(--paper);
+-}
+-
+-.heroLede {
+-  max-width: 34ch;
+-  font-size: clamp(0.9rem, 1vw, 0.98rem);
+-  line-height: 1.62;
+-  color: var(--paper);
+-  text-wrap: pretty;
+-}
+-
+-.heroLede strong {
+-  color: var(--paper-hi);
+-  font-weight: 650;
+-}
+ 
+ .ghostLink {
+   display: inline-flex;
+@@ -642,14 +474,6 @@
+   transform: translate(2px, -2px);
+ }
+ 
+-.heroActions {
+-  display: flex;
+-  flex-wrap: wrap;
+-  align-items: center;
+-  gap: 0.6rem;
+-  margin-top: 0.15rem;
+-}
+-
+ .primaryBtn {
+   display: inline-flex;
+   align-items: center;
+@@ -689,187 +513,10 @@
+ }
+ 
+ /* On the sky the primary action is the butter tape. */
+-.hero .primaryBtn {
+-  background: var(--butter);
+-}
+-
+-.hero .primaryBtn:hover {
+-  background: var(--paper-hi);
+-}
+-
+-.heroFacts {
+-  display: grid;
+-  grid-template-columns: repeat(3, minmax(0, 1fr));
+-  gap: 0.5rem;
+-  margin-top: 0.3rem;
+-  padding-top: 0.7rem;
+-  border-top: 1.5px solid rgb(255 250 241 / 0.35);
+-}
+-
+-.heroFact b {
+-  display: block;
+-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+-  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+-  line-height: 1;
+-  letter-spacing: -0.04em;
+-  color: var(--paper-hi);
+-}
+-
+-.heroFact span {
+-  display: block;
+-  margin-top: 0.25rem;
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 8px;
+-  line-height: 1.3;
+-  letter-spacing: 0.1em;
+-  text-transform: uppercase;
+-  color: var(--paper);
+-}
+ 
+ /* Right column: the second half of the headline, framed as a selection. */
+-.heroPulseBlock {
+-  display: flex;
+-  flex-direction: column;
+-  align-items: flex-end;
+-  gap: 0.35rem;
+-  justify-self: end;
+-}
+-
+-.heroWithRow {
+-  display: flex;
+-  flex-wrap: wrap;
+-  align-items: center;
+-  justify-content: flex-end;
+-  gap: 0.55rem 0.8rem;
+-}
+-
+-.heroWithA {
+-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+-  font-size: clamp(1.35rem, 3.1vw, 2.9rem);
+-  font-weight: 800;
+-  line-height: 1;
+-  letter-spacing: -0.04em;
+-  text-transform: uppercase;
+-  color: var(--paper-hi);
+-  text-shadow:
+-    1px 1px 0 var(--ink),
+-    2px 2px 0 var(--ink),
+-    3px 3px 0 var(--ink),
+-    4px 4px 0 var(--ink);
+-}
+-
+-.heroChip {
+-  padding: 0.24rem 0.55rem;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 999px;
+-  background: var(--paper-hi);
+-  color: var(--ink);
+-  font-family: var(--font-geist-mono), monospace;
+-  font-size: 9px;
+-  letter-spacing: 0.14em;
+-  text-transform: uppercase;
+-  white-space: nowrap;
+-  box-shadow: 3px 3px 0 var(--ink);
+-}
+ 
+ /* A frame you can shove: dashed rule, eight grips, one orange loop. */
+-.heroPulseBox {
+-  position: relative;
+-  margin-top: 0.3rem;
+-  padding: 0.15rem 0.5rem 0.35rem;
+-  border: 1px dashed rgb(255 250 241 / 0.6);
+-  cursor: grab;
+-  touch-action: none;
+-}
+-
+-.heroPulseBox:active {
+-  cursor: grabbing;
+-}
+-
+-.heroPulse {
+-  position: relative;
+-  z-index: 1;
+-  display: block;
+-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+-  font-size: clamp(2.2rem, 5.8vw, 5.6rem);
+-  font-weight: 800;
+-  line-height: 0.86;
+-  letter-spacing: -0.052em;
+-  text-transform: uppercase;
+-  color: var(--butter);
+-  text-shadow:
+-    1px 1px 0 var(--ink),
+-    2px 2px 0 var(--ink),
+-    3px 3px 0 var(--ink),
+-    4px 4px 0 var(--ink),
+-    5px 5px 0 var(--ink),
+-    6px 6px 0 var(--ink),
+-    7px 7px 0 var(--ink);
+-}
+-
+-.heroPulseDot {
+-  color: var(--paper-hi);
+-}
+-
+-.heroScribble {
+-  position: absolute;
+-  inset: -32% -12% -34% -12%;
+-  z-index: 0;
+-  width: 124%;
+-  height: 166%;
+-  pointer-events: none;
+-  opacity: 0.95;
+-}
+-
+-.heroHandle {
+-  position: absolute;
+-  z-index: 2;
+-  width: 9px;
+-  height: 9px;
+-  border: 1.5px solid var(--ink);
+-  background: #fff;
+-  pointer-events: none;
+-}
+-
+-.heroHandle[data-handle='tl'] {
+-  left: -5px;
+-  top: -5px;
+-}
+-
+-.heroHandle[data-handle='tc'] {
+-  left: calc(50% - 4.5px);
+-  top: -5px;
+-}
+-
+-.heroHandle[data-handle='tr'] {
+-  right: -5px;
+-  top: -5px;
+-}
+-
+-.heroHandle[data-handle='ml'] {
+-  left: -5px;
+-  top: calc(50% - 4.5px);
+-}
+-
+-.heroHandle[data-handle='mr'] {
+-  right: -5px;
+-  top: calc(50% - 4.5px);
+-}
+-
+-.heroHandle[data-handle='bl'] {
+-  left: -5px;
+-  bottom: -5px;
+-}
+-
+-.heroHandle[data-handle='bc'] {
+-  left: calc(50% - 4.5px);
+-  bottom: -5px;
+-}
+-
+-.heroHandle[data-handle='br'] {
+-  right: -5px;
+-  bottom: -5px;
+-}
+ 
+ .tape {
+   position: absolute;
+@@ -884,87 +531,13 @@
+ /* Below the desktop split there is no room to cross the type over the sun, so
+    the disc drops to the horizon and the stage stacks: canopy, dock, word. */
+ @media (max-width: 1023px) {
+-  .hero {
+-    --sun-size: min(64vw, 16rem);
+-    /* The dock sits on the hill below the sun, so the lift is measured from a
+-       taller stage: the disc clears the card by a hair instead of landing on
+-       it, and the hill behind the card is stretched to wrap it. */
+-    --sun-lift: 2.1;
+-    --items-lift: var(--sun-lift);
+-    --dock-space: 0rem;
+-    /* A phone hero is taller than the glass: the extra band goes between the
+-       word and the disc, so the crown of the sun never crowds the type and the
+-       card still lands on the paper line. */
+-    min-height: calc(100svh + 4.5rem);
+-    padding-bottom: calc(var(--ground) + var(--dock-space) + 0.75rem);
+-  }
+-
+   /* The stage drops its own positioning so the card can anchor to the hero and
+      sit under the sun; it keeps z-index because a flex child with z-index
+      stacks whether or not it is positioned. */
+-  .heroStage {
+-    position: static;
+-  }
+ 
+   /* The card stays in flow and is ordered after the worked word: absolutely
+      positioning it here anchored it to the parallax copy block, whose transform
+      made it the containing block, so the card floated up into the sun. */
+-  .heroDock {
+-    order: 2;
+-    padding: 0.95rem 1rem 0.9rem;
+-    border-radius: 1.1rem;
+-  }
+-
+-  .heroDockInner {
+-    gap: 0.7rem;
+-  }
+-
+-  .heroLower {
+-    grid-template-columns: minmax(0, 1fr);
+-    gap: 1.05rem;
+-  }
+-
+-  .heroPulseBlock {
+-    order: 1;
+-    align-items: flex-start;
+-    justify-self: stretch;
+-  }
+-
+-  .heroWithRow {
+-    justify-content: flex-start;
+-    gap: 0.5rem 0.9rem;
+-  }
+-
+-  .heroChip {
+-    font-size: 8px;
+-    letter-spacing: 0.1em;
+-  }
+-
+-  .heroSticker {
+-    left: 0;
+-    top: -1.5em;
+-  }
+-}
+-
+-@media (max-width: 639px) {
+-  .heroTelemetry {
+-    display: none;
+-  }
+-
+-  .heroSticker {
+-    position: static;
+-    display: inline-flex;
+-    margin-bottom: 0.7rem;
+-    transform: rotate(-4deg);
+-  }
+-
+-  .heroCanopy {
+-    text-align: left;
+-  }
+-
+-  .heroDisplay {
+-    text-align: left;
+-  }
+ }
+ 
+ /* ── Marquee ────────────────────────────────────────────────────────────── */
+@@ -2550,15 +2123,6 @@
+ 
+ /* Under 380 the disc is small enough that the fixed lift leaves its lower edge
+    behind the card, so it climbs a little more. */
+-@media (max-width: 379px) {
+-  .hero {
+-    /* The card wraps to more lines down here, so the disc climbs to keep clear
+-       of it; the hill is stretched by the same amount in hero-scene.module.css
+-       so the sun still sits *in* it rather than floating above the crest. */
+-    --sun-lift: 2.17;
+-    --items-lift: var(--sun-lift);
+-  }
+-}
+ 
+ @media (prefers-reduced-motion: reduce) {
+   .marquee,
+-- 
+2.43.0
+

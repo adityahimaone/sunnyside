@@ -1,13 +1,13 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
 import type { DesignCase } from '@/features/case-library'
 import { About } from './about'
 import { ChapterRail } from './chapter-rail'
 import { Contact } from './contact'
 import { Sparkle } from './doodles'
-import { Hero } from './hero'
+import { Hero, type HeroSurface } from './hero'
 import { Projects } from './projects'
 import { Showcase } from './showcase'
 import { SiteFooter } from './site-footer'
@@ -59,6 +59,7 @@ export default function Studio({
   designCases?: readonly DesignCase[]
 } = {}) {
   const { active, scrolled, footerVisible } = usePagePosition()
+  const [heroSurface, setHeroSurface] = useState<HeroSurface>('cobalt')
   const rootRef = useRef<HTMLDivElement>(null)
   useLandingMotion(rootRef)
 
@@ -75,11 +76,12 @@ export default function Studio({
         active={active}
         scrolled={scrolled}
         footerVisible={footerVisible}
+        heroSurface={heroSurface}
       />
       {footerVisible ? null : <ChapterRail active={active} />}
 
       <main>
-        <Hero />
+        <Hero surface={heroSurface} onSurfaceChange={setHeroSurface} />
         <Marquee />
         <About />
         <Showcase />
