@@ -1345,13 +1345,13 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
   const sectionRef = useRef<HTMLElement>(null)
   const reduced = useReducedMotion() ?? false
 
-  const [scene, setScene] = useState<HeroScene>('studio')
-  const [slot1, setSlot1] = useState(0)
-  const [slot2, setSlot2] = useState(0)
-  const [slot3, setSlot3] = useState(0)
+  const [scene, setScene] = useState<HeroScene>('world')
+  const [slot1, setSlot1] = useState(1)
+  const [slot2, setSlot2] = useState(1)
+  const [slot3, setSlot3] = useState(1)
   const [isHeld, setIsHeld] = useState(false)
 
-  const tValue = useMotionValue(0)
+  const tValue = useMotionValue(1)
   const tweenRef = useRef<ReturnType<typeof animate> | null>(null)
 
   useMotionValueEvent(tValue, 'change', (v) => {

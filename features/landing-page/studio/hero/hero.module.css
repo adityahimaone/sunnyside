@@ -7,7 +7,7 @@
    across all three pills, while dynamic profile words auto-cycle when idle. */
 
 .hero {
-  --t: 0;
+  --t: 1;
   --h-ink: var(--ink, #191a2e);
   --h-paper: var(--paper-hi, #fffaf1);
   --h-paper-base: var(--paper, #f3ecdf);
