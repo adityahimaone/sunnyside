@@ -1,633 +1,343 @@
-/* Pop-Up Theatre Diorama Hero:
-   A paper-cut shadow-box stage. Scrolling back from the viewer: the foreground
-   cloud apron the headline sits on, the thick off-white `Aditya` cutout, the
-   smiling paper sun and its balustrade, the royal-blue proscenium with its
-   screen-printed curtains, and the blueprint grid with its amber arch rings. */
+/* Sunnyside Diorama Hero.
+
+   A paper shadow box with a working mechanism. Behind the hills a sky wheel
+   carries the sun on one end and the moon on the other; the pull tab turns it.
+   Everything else is a function of one number, `--t` (0 noon → 1 midnight,
+   negative at dawn), which the component writes on `.window` together with
+   `--ta` (noon → dusk) and `--tb` (dusk → night). No sheet is animated by
+   JavaScript: the entrance is keyframes, the pull is custom properties. */
 
 .hero {
-  --diorama-cobalt-outer: #2548e8;
-  --diorama-cobalt-frame: #1f44d6;
-  --diorama-sky-mat: #a5c4e4;
-  --diorama-paper: #faf9f6;
-  --diorama-cream: #f2e2aa;
-  --diorama-gold: #f7c926;
-  --diorama-amber: #ee9617;
-  --diorama-ink: #111827;
+  --h-ink: var(--ink, #191a2e);
+  --h-paper: var(--paper-hi, #fffaf1);
+  --h-butter: var(--butter, #ffd23f);
+  --h-tangerine: var(--tangerine, #ff6a2b);
+  --h-cobalt: var(--cobalt, #3d53d6);
+  --h-cobalt-ink: var(--cobalt-ink, #2c3cae);
+  --h-pink: var(--pink, #ffb6e1);
+  --h-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --h-display: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  --h-mono: var(--font-geist-mono), ui-monospace, monospace;
 
   position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
   min-height: clamp(700px, calc(100svh - 2.5rem), 980px);
-  background: var(--diorama-cobalt-outer);
+  padding: clamp(4.5rem, 9vh, 5.8rem) clamp(0.8rem, 2.6vw, 2.4rem)
+    clamp(1rem, 2.6vh, 1.8rem);
+  background-color: var(--h-cobalt);
+  /* A dotted paper field around the box: the one loud cobalt wall. */
+  background-image: radial-gradient(
+    rgb(255 250 241 / 0.16) 1.4px,
+    transparent 1.7px
+  );
+  background-size: 22px 22px;
   overflow: hidden;
-  user-select: none;
   isolation: isolate;
-  padding-top: clamp(3.2rem, 6vh, 5rem);
+  user-select: none;
 }
 
 .hero :focus-visible {
-  outline: 2.5px solid var(--diorama-ink);
+  outline: 3px solid var(--h-ink);
   outline-offset: 3px;
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
-.svgDefs {
+.window[data-act='night'] :focus-visible {
+  outline-color: var(--h-butter);
+}
+
+/* ── The box ─────────────────────────────────────────────────────────────── */
+
+.box {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 28rem;
+  padding: clamp(0.4rem, 0.8vw, 0.7rem);
+  border: 3px solid var(--h-ink);
+  border-radius: 30px;
+  background: var(--h-paper);
+  box-shadow: 8px 10px 0 var(--h-ink);
+}
+
+.tape {
   position: absolute;
-  width: 0;
-  height: 0;
+  top: -0.85rem;
+  z-index: 9;
+  width: 5.6rem;
+  height: 1.7rem;
+  background: var(--h-butter);
+  border: 1.5px solid rgb(25 26 46 / 0.22);
+  opacity: 0.94;
   pointer-events: none;
-}
-
-/* ── Outer proscenium side walls ─────────────────────────────────────────── */
-
-.wingLeftOuter,
-.wingRightOuter {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: clamp(1.5rem, 3vw, 2.75rem);
-  background: linear-gradient(180deg, #274ced 0%, #1d3ec4 100%);
-  z-index: 6;
-  pointer-events: none;
-}
-
-.wingLeftOuter {
-  left: 0;
-  box-shadow: 8px 0 22px rgb(9 18 50 / 0.36);
-}
-
-.wingRightOuter {
-  right: 0;
-  box-shadow: -8px 0 22px rgb(9 18 50 / 0.36);
-}
-
-.wingFoldLeft,
-.wingFoldRight {
-  position: absolute;
-  inset: 0;
-  opacity: 0.42;
-  background:
-    linear-gradient(135deg, rgb(255 255 255 / 0.14) 0%, transparent 52%),
-    linear-gradient(35deg, rgb(9 18 50 / 0.28) 0%, transparent 60%);
-}
-
-/* ── Left edge cardstock tab (`physics on/off`) ──────────────────────────── */
-
-.physicsTab {
-  position: absolute;
-  left: 0;
-  top: 45%;
-  transform: translateY(-50%);
-  z-index: 30;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(2.85rem, 4.2vw, 3.85rem);
-  height: clamp(11.5rem, 23vh, 15.5rem);
-  padding: 0;
-  border: 2.5px solid var(--diorama-ink);
-  border-left: 0;
-  border-radius: 0 18px 18px 0;
-  background: var(--diorama-gold);
-  color: var(--diorama-ink);
-  box-shadow:
-    4px 6px 0 var(--diorama-ink),
-    0 12px 24px rgb(9 18 50 / 0.35);
-  cursor: pointer;
-  transition:
-    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.physicsTab::after {
-  content: '';
-  position: absolute;
-  right: -7px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 7px;
-  height: 36%;
-  background: var(--diorama-gold);
-  border-top: 2.5px solid var(--diorama-ink);
-  border-right: 2.5px solid var(--diorama-ink);
-  border-bottom: 2.5px solid var(--diorama-ink);
-  border-radius: 0 8px 8px 0;
-  box-shadow: 3px 4px 0 var(--diorama-ink);
-}
-
-.physicsTab:hover {
-  transform: translateY(-50%) translateX(3px);
-  background: #ffd438;
-}
-
-.physicsTab[aria-pressed='false'] {
-  background: #e9e4d8;
-}
-
-.physicsTab[aria-pressed='false']::after {
-  background: #e9e4d8;
-}
-
-.physicsLabel {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(0.8rem, 1vw, 0.95rem);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  line-height: 1;
-  white-space: nowrap;
-  /* The ascender/descender ink used to poke past the tab's rounded borders at
-     tight sizes; a one-notch-down size keeps the full string clear of the edge. */
-}
-
-/* ── The pull tab (scene swap) ───────────────────────────────────────────── */
-
-/* An occasional, once-per-visit affordance: the tab tugs every few seconds so
-   visitors learn the diorama is pullable. Hover pauses it, reduced motion
-   never starts it. */
-@keyframes tabTug {
-  0%, 6%, 100% { transform: translate(0, 0); }
-  3% { transform: translate(-4px, 1px); }
-}
-
-.upperRightAction .paperPillBtn {
-  animation: tabTug 6.4s ease-in-out 5s infinite;
-}
-
-.upperRightAction .paperPillBtn:hover {
-  animation-play-state: paused;
-}
-
-/* ── Night lighting for the diorama ──────────────────────────────────────── */
-
-/* The glaze is the trick that keeps the swap cheap: the same paper, lit by
-   moonlight. It multiplies over the stage planes only (z 10 sits above the
-   stage props, below the title plane), so the front apron, rail and the
-   Aditya cutout keep their moonlit-cream paper. */
-/* One screen-blend beam under the moon so the top-right keeps its light. */
-.shootingStar {
-  position: absolute;
-  inset: 0;
-  z-index: 11;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.shootingStar::before {
-  content: '';
-  position: absolute;
-  left: 52%;
-  top: 6%;
-  width: clamp(20rem, 34vw, 34rem);
-  height: clamp(20rem, 34vw, 34rem);
-  background: radial-gradient(
-    circle at 32% 24%,
-    rgb(255 244 214 / 0.3) 0%,
-    rgb(255 244 214 / 0.08) 30%,
-    transparent 52%
+  /* Torn ends, the way washi tape lifts off a roll. */
+  clip-path: polygon(
+    0 8%,
+    4% 0,
+    8% 10%,
+    12% 0,
+    100% 0,
+    96% 22%,
+    100% 44%,
+    96% 66%,
+    100% 100%,
+    12% 100%,
+    8% 88%,
+    4% 100%,
+    0 92%,
+    3% 50%
   );
-  mix-blend-mode: screen;
-  opacity: 0;
-  transition: opacity 0.7s ease;
 }
 
-.shootingStar::after {
-  content: '';
-  position: absolute;
-  left: 18%;
-  top: 12%;
-  width: 7rem;
-  height: 2.5px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, #f7e9a8);
-  opacity: 0;
+.tapeLeft {
+  left: 12%;
+  rotate: -3deg;
 }
 
-/* ── Sky-blue recessed diorama viewport ──────────────────────────────────── */
+.tapeRight {
+  right: 14%;
+  rotate: 2.5deg;
+  background: var(--h-pink);
+}
 
-.dioramaViewport {
+.window {
+  --t: 0;
+  --ta: 0%;
+  --tb: 0%;
+  --px: 0;
+  --py: 0;
+  --sy: 0;
+
   position: relative;
   flex: 1;
-  margin-inline: clamp(1.5rem, 3vw, 2.75rem);
-  min-height: 600px;
-  background: var(--diorama-sky-mat);
-  box-shadow:
-    inset 0 12px 24px rgb(9 18 50 / 0.28),
-    inset 14px 0 24px rgb(9 18 50 / 0.22),
-    inset -14px 0 24px rgb(9 18 50 / 0.22);
+  min-width: 0;
+  container-type: size;
+  border: 2.5px solid var(--h-ink);
+  border-radius: 22px;
+  background: var(--c-sky);
+  color: var(--c-fg);
   overflow: hidden;
+  isolation: isolate;
 }
 
-/* ── Act two: the same diorama at night ──────────────────────────────────── */
+/* Before hydration the stage is already at dawn, so the sun's first frame is
+   "behind the hills" and the sunrise has somewhere to start from. A visitor
+   who asked for reduced motion gets the finished noon. */
+@media (prefers-reduced-motion: no-preference) {
+  .window[data-boot='true'] {
+    --t: -0.42;
+    --ta: 100%;
+    --tb: 0%;
+  }
+}
 
-/* Between scenes the stage itself goes dark, like a theater dimming for a
-   scene change: the sheets fold away into a blackout rather than into an empty
-   pale box, and the front sheets (title, apron, rail) stay lit above it. */
-.dioramaViewport::after {
+/* The depth of the box: light falls in from the top and the sides. */
+.window::after {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 12;
+  z-index: 6;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 12px 22px rgb(25 26 46 / 0.3),
+    inset 10px 0 18px rgb(25 26 46 / 0.14),
+    inset -10px 0 18px rgb(25 26 46 / 0.14);
+}
+
+/* ── Scene ───────────────────────────────────────────────────────────────── */
+
+/* One unit is one px of a 1440 × 860 stage, scaled the way the SVGs scale
+   (`slice`, bottom-anchored). The HTML pieces that have to stand on a
+   particular hill — the title, the stickers — are placed in these units. */
+.scene {
+  --u: max(calc(100cqw / 1440), calc(100cqh / 860));
+
+  position: absolute;
+  inset: 0;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.svgBack {
+  z-index: 1;
+}
+
+.svgFront {
+  z-index: 3;
+}
+
+/* Parallax: each layer carries a depth (near = large). The pointer slides
+   layers against each other; scrolling lets the far ones lag the page. */
+.px {
+  translate: calc(var(--px) * var(--depth, 0) * -22px)
+    calc(
+      var(--py) * var(--depth, 0) * -12px + (1 - var(--depth, 0)) * var(--sy) *
+        80px
+    );
+}
+
+/* Printed edge and hard offset shadow: the two things every sheet shares. */
+.ink {
+  stroke: var(--h-ink);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.shade {
+  fill: var(--h-ink);
+  opacity: 0.2;
+}
+
+.mark {
+  stroke: var(--h-ink);
+  stroke-linecap: round;
+}
+
+.ring {
+  stroke: rgb(25 26 46 / 0.3);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.ringIn,
+.pop,
+.sway,
+.bloom,
+.sunRays,
+.upright,
+.star,
+.starGlyph {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.pop,
+.sway,
+.bloom {
+  transform-origin: 50% 100%;
+}
+
+/* ── The sky wheel ───────────────────────────────────────────────────────── */
+
+.wheel {
+  transform-box: view-box;
+  transform-origin: 720px 720px;
+  rotate: calc(var(--t) * 180deg);
+}
+
+.orbit {
+  fill: none;
+  stroke: var(--h-ink);
+  stroke-opacity: 0.3;
+  stroke-width: 2px;
+  stroke-dasharray: 3 12;
+  vector-effect: non-scaling-stroke;
+}
+
+/* The sun and moon ride the rim but stay upright, like a gondola. */
+.upright {
+  rotate: calc(var(--t) * -180deg);
+}
+
+.sunRays {
+  rotate: calc(var(--t) * 110deg);
+}
+
+.star {
+  --lit: clamp(0, calc((var(--t) - var(--at, 0.7)) * 7), 1);
+
+  opacity: var(--lit);
+  scale: var(--lit);
+}
+
+.starGlyph {
+  fill: var(--h-paper);
+}
+
+.shoot {
+  opacity: 0;
+}
+
+.shootTail {
+  stroke: var(--h-paper);
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-opacity: 0.8;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ── Sheets that slide, sway and glow with the time of day ───────────────── */
+
+.slideFar {
+  translate: calc(var(--t) * 22px) 0;
+}
+
+.slideLeft {
+  translate: calc(var(--t) * -26px) 0;
+}
+
+.slideRight {
+  translate: calc(var(--t) * 26px) 0;
+}
+
+.cloudSlide {
+  translate: calc(var(--t) * var(--dir, 1) * 120px) 0;
+}
+
+/* Things standing on a hill lean a little as the sheet under them moves. */
+.sway {
+  rotate: calc(sin(calc(var(--t) * 360deg)) * var(--sw, 1deg));
+}
+
+.glow {
+  fill: var(--h-butter);
+  opacity: clamp(0, calc((var(--t) - 0.5) * 2.4), 0.5);
+}
+
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
   pointer-events: none;
   background: radial-gradient(
-    120% 92% at 50% 46%,
-    rgb(9 16 42 / 0.36) 0%,
-    rgb(9 16 42 / 0.82) 100%
+    125% 92% at 50% 42%,
+    transparent 52%,
+    rgb(12 18 72 / 0.55) 100%
   );
-  opacity: 0;
-  transition: opacity 0.5s ease 0.14s;
+  opacity: clamp(0, calc(var(--t) * 1.3), 1);
 }
 
-.hero[data-folding='true'] .dioramaViewport::after {
-  opacity: 1;
-  transition: opacity 0.34s ease;
-}
+/* ── Title ───────────────────────────────────────────────────────────────── */
 
-/* During a pull the stage sheets fold edge-on, but the garland, the disc and
-   the loose stars are not sheets — they would hang over an empty stage. They
-   fade with the scenery instead and settle back on top of it, slightly after
-   the sheets have tipped up. */
-.buntingWrap,
-.sunCluster,
-.starScatter {
-  transition: opacity 0.34s ease 0.46s;
-}
-
-.hero[data-folding='true'] .buntingWrap,
-.hero[data-folding='true'] .sunCluster,
-.hero[data-folding='true'] .starScatter {
-  opacity: 0;
-  transition: opacity 0.26s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .buntingWrap,
-  .sunCluster,
-  .starScatter,
-  .hero[data-folding='true'] .buntingWrap,
-  .hero[data-folding='true'] .sunCluster,
-  .hero[data-folding='true'] .starScatter {
-    transition: none;
-  }
-}
-
-
-/* Everything here is lighting, not new artwork: the mat cools to navy paper,
-   the glaze multiplies over the stage, the moon fades in over the sun disc and
-   the loose stars pick up a glow. Paper, shadows and edges are untouched. */
-.hero[data-act='night'] {
-  --diorama-sky-mat: #16225a;
-}
-
-.sunSvg {
-  transition: opacity 0.45s ease;
-}
-
-.hero[data-act='night'] .sunSvg {
-  opacity: 0;
-}
-
-.hero[data-act='night'] .moonSvg {
-  opacity: 1;
-}
-
-.hero[data-act='night'] .shootingStar::before {
-  opacity: 1;
-}
-
-.hero[data-act='night'] .cutoutStar {
-  filter: drop-shadow(0 0 7px rgb(255 231 150 / 0.55));
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .hero[data-act='night'] .shootingStar::after {
-    animation: shootAcross 7.5s ease-in 2.4s infinite;
-  }
-}
-
-@keyframes shootAcross {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(16deg);
-    opacity: 0;
-  }
-  6% {
-    opacity: 1;
-  }
-  30% {
-    transform: translate3d(46vw, 20vh, 0) rotate(16deg);
-    opacity: 0;
-  }
-  100% {
-    transform: translate3d(46vw, 20vh, 0) rotate(16deg);
-    opacity: 0;
-  }
-}
-
-.planeCurtains,
-.planeProscenium,
-.planeStageProps {
+/* The cutout stands between the far and near sheets: its foot is tucked
+   behind the front hills at stage y 585. */
+.titlePlane {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.planeCurtains {
+  inset-inline: 0;
+  bottom: calc(var(--u) * 275);
   z-index: 2;
-}
-
-.planeProscenium {
-  z-index: 4;
-}
-
-.planeStageProps {
-  z-index: 8;
-}
-
-.stageSvg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-/* ── Hanging bunting: string and stars in one SVG ─────────────────────────── */
-
-/* Full-stage box on purpose: the bunting's own SVG carries the stage's viewBox
-   and projection, so its pins stay on the blue rail band at any scale. */
-.buntingWrap {
-  position: absolute;
-  inset: 0;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.buntingSvg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-/* ── Smiling paper sun over a stage cloud ────────────────────────────────── */
-
-.sunCluster {
-  position: absolute;
-  left: 62.5%;
-  top: clamp(5%, 8vh, 10%);
-  width: clamp(12.5rem, 20vw, 19rem);
-  aspect-ratio: 380 / 240;
-  pointer-events: none;
-}
-
-.sunDisc {
-  position: absolute;
-  left: 18%;
-  top: -8%;
-  width: 58%;
-  aspect-ratio: 1;
-  filter: drop-shadow(0 8px 10px rgb(9 18 50 / 0.35));
-}
-
-.sunSvg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-/* The moon stacks exactly on the sun disc and the act attribute crossfades
-   between the two — the paper never moves, the light does. */
-.moonSvg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 0.45s ease 0.15s;
-}
-
-.sunCloudCover {
-  position: absolute;
-  left: 0;
-  bottom: 4%;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-
-/* ── Stage balustrade ────────────────────────────────────────────────────── */
-
-.balustrade {
-  position: absolute;
-  left: 10.4%;
-  right: 10.4%;
-  bottom: clamp(23%, 26vh, 29%);
-  height: clamp(3.4rem, 6.8vh, 4.7rem);
-  filter: drop-shadow(0 4px 6px rgb(9 18 50 / 0.26));
-}
-
-/* Behind the foreground apron (16): the cloud banks swallow the rail's ends, so
-   it reads as a railing sitting behind the clouds instead of a ladder pasted
-   over them mid-stage. */
-.planeBalustrade {
-  position: absolute;
-  inset: 0;
-  z-index: 15;
-  pointer-events: none;
-}
-
-/* Narrow viewports crop the stage (preserveAspectRatio slice), which pushes the
-   frame's legs and the bunting's pins off-screen: the rail turns into a
-   floating white grid over the amber bank and the swag gets cut at the viewport
-   edge. Both props only read while the whole frame is in frame. */
-@media (max-width: 1199px) {
-  .planeBalustrade,
-  .buntingWrap {
-    display: none;
-  }
-}
-
-/* End brackets: chunkier than the spindles, sitting on the blue legs so the
-   rail reads as bolted to the proscenium instead of floating mid-stage. */
-.balustrade::before,
-.balustrade::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: clamp(12px, 1.15vw, 17px);
-  border-radius: 4px;
-  background: linear-gradient(
-    90deg,
-    #faf9f6 0%,
-    #faf9f6 62%,
-    #ded7c6 63%,
-    #d5cebc 100%
-  );
-  box-shadow: 2px 0 4px rgb(9 18 50 / 0.14);
-}
-
-.balustrade::before {
-  left: 0;
-}
-
-.balustrade::after {
-  right: 0;
-}
-
-.balustradeTopRail {
-  position: relative;
-  width: 100%;
-  height: 12px;
-  border-radius: 4px;
-  background: var(--diorama-paper);
-  box-shadow:
-    inset 0 -3px 0 #dfd9c8,
-    0 3px 5px rgb(9 18 50 / 0.18);
-}
-
-.balustradeSpindles {
   display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  height: calc(100% - 22px);
-  padding-inline: clamp(1rem, 2.2vw, 2.2rem);
-}
-
-/* A cut baluster, not a slat: one flat face in shadow, the other catching light. */
-.balustradePost {
-  flex: 0 0 auto;
-  width: clamp(9px, 0.9vw, 13px);
-  height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(
-    90deg,
-    #faf9f6 0%,
-    #faf9f6 62%,
-    #ded7c6 63%,
-    #d5cebc 100%
-  );
-  box-shadow: 2px 0 4px rgb(9 18 50 / 0.14);
-}
-
-.balustradeBottomRail {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: 10px;
-  border-radius: 3px;
-  background: #e9e3d4;
-  box-shadow: inset 0 2px 0 #faf9f6;
-}
-
-/* ── Scattered cut-out stars ─────────────────────────────────────────────── */
-
-.starScatter {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.cutoutStar {
-  position: absolute;
-  width: clamp(1.45rem, 2.2vw, 2.15rem);
-  filter: drop-shadow(0 2px 3px rgb(9 18 50 / 0.2));
-  rotate: var(--tilt, 0deg);
-  opacity: 0;
-}
-
-.starScatter[data-still='true'] .cutoutStar {
-  opacity: 1;
-}
-
-.hiddenHook {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.starPos1 {
-  left: 4.2%;
-  top: 26%;
-  width: clamp(1.5rem, 2.3vw, 2.2rem);
-  --tilt: -6deg;
-}
-
-.starPos2 {
-  left: 13.2%;
-  top: 41.5%;
-  width: clamp(1.65rem, 2.5vw, 2.35rem);
-  --tilt: 8deg;
-}
-
-.starPos3 {
-  left: 25.4%;
-  top: 59.5%;
-  width: clamp(1.35rem, 2vw, 1.9rem);
-  --tilt: 4deg;
-}
-
-.starPos4 {
-  left: 78.2%;
-  top: 41%;
-  width: clamp(1.75rem, 2.6vw, 2.45rem);
-  --tilt: -10deg;
-}
-
-.starPos5 {
-  left: 84.5%;
-  top: 48%;
-  width: clamp(1.6rem, 2.4vw, 2.25rem);
-  --tilt: 6deg;
-}
-
-.starPos6 {
-  left: 93.8%;
-  top: 36.5%;
-  width: clamp(1.45rem, 2.1vw, 2rem);
-  --tilt: -8deg;
-}
-
-.starPos7 {
-  left: 79.2%;
-  top: 58.2%;
-  width: clamp(1.15rem, 1.65vw, 1.55rem);
-  --tilt: 5deg;
-}
-
-.starPos8 {
-  left: 69.8%;
-  top: 61.5%;
-  width: clamp(1.15rem, 1.65vw, 1.55rem);
-  --tilt: -7deg;
-}
-
-/* ── The `Aditya` cut-out title ──────────────────────────────────────────── */
-
-/* Centring is done with flex, not `translate(-50%,-50%)`: the parallax writes
-   its own inline `transform`, which would overwrite a CSS one and leave the
-   title parked off to the side. The top margin nudges the whole cutout down
-   so its lower edge tucks behind the foreground apron. */
-.planeTitle {
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 64%;
-  z-index: 14;
-  display: flex;
-  /* Top-anchored, not centred: the title hangs from an explicit offset so its
-     lower edge lands just above the balustrade at every viewport height. */
-  align-items: flex-start;
   justify-content: center;
   pointer-events: none;
 }
 
-.planeTitle > * {
-  width: clamp(22rem, 52vw, 49rem);
-  margin-top: clamp(3.4rem, 26vh, 14.5rem);
+.titlePlane > .px {
+  width: min(calc(var(--u) * 780), 92%);
+}
+
+.titleCut {
+  transform-origin: 50% 100%;
+  rotate: calc(sin(calc(var(--t) * 360deg)) * -1.6deg);
   pointer-events: auto;
 }
 
@@ -638,12 +348,11 @@
   border: 0;
   background: transparent;
   cursor: pointer;
-  filter: drop-shadow(0 14px 18px rgb(9 18 50 / 0.42));
-  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.25s var(--h-ease);
 }
 
 .scriptBtn:hover {
-  transform: scale(1.018) translateY(-2px);
+  transform: scale(1.018) rotate(-0.8deg);
 }
 
 .scriptSvg {
@@ -653,98 +362,209 @@
   overflow: visible;
 }
 
-/* ── Paper pill buttons ──────────────────────────────────────────────────── */
+/* ── Die-cut stickers ────────────────────────────────────────────────────── */
 
-.paperPillBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  min-height: clamp(3.3rem, 5.8vh, 4.1rem);
-  padding: 0.75rem 1.85rem;
-  border: 2.5px solid var(--diorama-ink);
-  border-radius: 999px;
-  background: var(--diorama-gold);
-  color: var(--diorama-ink);
-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
-  font-size: clamp(1.15rem, 1.65vw, 1.5rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  box-shadow:
-    0 6px 0 var(--diorama-ink),
-    0 14px 24px rgb(9 18 50 / 0.34);
-  cursor: pointer;
-  transition:
-    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 0.18s ease,
-    box-shadow 0.18s ease;
-}
-
-.paperPillBtn:hover {
-  transform: translateY(-2px);
-  background: #ffd438;
-  box-shadow:
-    0 8px 0 var(--diorama-ink),
-    0 18px 28px rgb(9 18 50 / 0.38);
-}
-
-.paperPillBtn:active {
-  transform: translateY(2px);
-  box-shadow:
-    0 3px 0 var(--diorama-ink),
-    0 8px 14px rgb(9 18 50 / 0.28);
-}
-
-/* The upper-right pill docks against the proscenium edge. */
-.upperRightAction {
+.stickers {
   position: absolute;
-  top: clamp(1.2rem, 3.2vh, 2.1rem);
-  right: 0;
-  z-index: 24;
-}
-
-.upperRightAction .paperPillBtn {
-  padding: 0.75rem 1.75rem 0.75rem 2rem;
-  border-right: 0;
-  border-radius: 999px 0 0 999px;
-  box-shadow:
-    -4px 6px 0 var(--diorama-ink),
-    0 12px 24px rgb(9 18 50 / 0.36);
-}
-
-.upperRightAction .paperPillBtn:hover {
-  box-shadow:
-    -5px 8px 0 var(--diorama-ink),
-    0 16px 28px rgb(9 18 50 / 0.4);
-}
-
-/* ── Foreground cloud apron ──────────────────────────────────────────────── */
-
-.planeForegroundClouds {
-  position: absolute;
-  inset-inline: -3%;
-  bottom: -2%;
-  height: clamp(15.5rem, 42vh, 24.5rem);
-  z-index: 16;
+  inset: 0;
+  z-index: 5;
   pointer-events: none;
 }
 
-.cloudsSvg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  overflow: visible;
+.sticker {
+  position: absolute;
+  left: calc(50% + (var(--ox) - 720) * var(--u));
+  top: calc(100% - (860 - var(--oy)) * var(--u));
+  width: clamp(3.4rem, 6vw, 5.6rem);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  rotate: var(--r, 0deg);
+  filter: drop-shadow(3px 4px 0 rgb(25 26 46 / 0.28));
 }
 
-/* ── Foreground typography and CTAs ──────────────────────────────────────── */
+.sticker > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.3s ease;
+}
 
-.foregroundContent {
+/* The About tray peels these four. What stays behind is the outline they
+   left on the box. */
+.sticker[data-peeled='true'] > svg {
+  opacity: 0;
+}
+
+.sticker[data-peeled='true']::before {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  border: 2.5px dashed rgb(255 250 241 / 0.85);
+  border-radius: 50%;
+}
+
+.stickerSmiley {
+  --ox: 236;
+  --oy: 440;
+  --r: -9deg;
+}
+
+.stickerBurst {
+  --ox: 1236;
+  --oy: 392;
+  --r: 8deg;
+}
+
+.stickerDaisy {
+  --ox: 150;
+  --oy: 566;
+  --r: 10deg;
+}
+
+.stickerBolt {
+  --ox: 1352;
+  --oy: 536;
+  --r: -12deg;
+}
+
+/* ── Box furniture: tag, parallax chip, pull tab ─────────────────────────── */
+
+.tag,
+.parallaxChip {
+  position: absolute;
+  left: clamp(0.8rem, 1.4vw, 1.2rem);
+  z-index: 8;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 0.7rem;
+  border: 2px solid var(--h-ink);
+  border-radius: 999px;
+  background: var(--h-paper);
+  color: var(--h-ink);
+  font-family: var(--h-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 var(--h-ink);
+}
+
+.tag {
+  top: clamp(0.8rem, 1.6vh, 1.1rem);
+  rotate: -2deg;
+}
+
+.parallaxChip {
+  top: calc(clamp(0.8rem, 1.6vh, 1.1rem) + 2.5rem);
+  cursor: pointer;
+  transition:
+    translate 0.18s var(--h-ease),
+    box-shadow 0.18s var(--h-ease);
+}
+
+.parallaxChip:hover {
+  translate: 0 -1px;
+  box-shadow: 3px 4px 0 var(--h-ink);
+}
+
+.chipDot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 2px solid var(--h-ink);
+  border-radius: 50%;
+  background: transparent;
+}
+
+.parallaxChip[aria-pressed='true'] .chipDot {
+  background: #7fd6a3;
+}
+
+.pull {
+  --track-w: clamp(10.5rem, 17vw, 15rem);
+  --tab-w: 7.7rem;
+
+  position: absolute;
+  top: clamp(0.8rem, 1.6vh, 1.1rem);
+  right: clamp(0.8rem, 1.4vw, 1.2rem);
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.8rem 0.4rem 0.7rem;
+  border: 2.5px solid var(--h-ink);
+  border-radius: 999px;
+  background: var(--h-paper);
+  color: var(--h-ink);
+  box-shadow: 4px 5px 0 var(--h-ink);
+}
+
+.endIcon {
+  display: inline-flex;
+  flex: none;
+}
+
+/* The slot the tab rides in. The tab's position is the time of day. */
+.track {
+  position: relative;
+  flex: none;
+  width: var(--track-w);
+  height: 2.9rem;
+  border-radius: 999px;
+  background-color: var(--h-ink);
+  background-image: radial-gradient(
+    circle,
+    rgb(255 250 241 / 0.3) 1.4px,
+    transparent 1.7px
+  );
+  background-size: 14px 100%;
+  box-shadow: inset 0 3px 0 rgb(0 0 0 / 0.4);
+}
+
+.tab {
+  position: absolute;
+  inset: 4px auto 4px 4px;
+  width: var(--tab-w);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0;
+  border: 2px solid var(--h-ink);
+  border-radius: 999px;
+  background: var(--h-butter);
+  color: var(--h-ink);
+  font-family: var(--h-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: grab;
+  touch-action: none;
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.4);
+  translate: calc(clamp(0, var(--t), 1) * (var(--track-w) - var(--tab-w) - 8px))
+    0;
+}
+
+.tab:active {
+  cursor: grabbing;
+}
+
+.tabArrow {
+  flex: none;
+  rotate: calc(clamp(0, var(--t), 1) * 180deg);
+}
+
+/* ── Headline and CTA ────────────────────────────────────────────────────── */
+
+.foreground {
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  z-index: 22;
-  padding: 0 clamp(2.2rem, 5.2vw, 5.4rem) clamp(1.6rem, 3.8vh, 2.8rem);
+  z-index: 8;
+  padding: 0 clamp(1rem, 2.6vw, 2.2rem) clamp(1rem, 3vh, 1.8rem);
   pointer-events: none;
 }
 
@@ -761,28 +581,51 @@
   gap: 2rem;
 }
 
-.headlineStack {
+/* The headline is a paper label taped to the box, so it stays legible on any
+   hill and in any light. Its paper is the meadow's own. */
+.headlineCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.38rem;
+  gap: 0.42rem;
+  padding: clamp(1rem, 2.2vh, 1.4rem) clamp(1rem, 1.7vw, 1.6rem)
+    clamp(0.95rem, 2vh, 1.3rem);
+  border: 2.5px solid var(--h-ink);
+  border-radius: 20px;
+  background: var(--c-bank);
+  color: var(--c-fg);
+  box-shadow: 6px 8px 0 var(--h-ink);
+  rotate: -1deg;
   pointer-events: auto;
 }
 
-/* The type scale lives here, on the row, so the lead word and the pill scale
+.headlineCard::before {
+  content: '';
+  position: absolute;
+  top: -0.7rem;
+  left: 1.5rem;
+  width: 3.8rem;
+  height: 1.3rem;
+  background: var(--h-butter);
+  border: 1.5px solid rgb(25 26 46 / 0.22);
+  opacity: 0.94;
+  rotate: -6deg;
+}
+
+/* The type scale lives on the row, so the lead word and the pill scale
    together — the pill is set in em against it. */
 .headlineRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.45rem 0.65rem;
-  font-family: var(--font-syne), var(--font-space-grotesk), sans-serif;
+  font-family: var(--h-display);
   font-size: clamp(1.05rem, 1.65vw, 1.48rem);
   font-weight: 800;
   line-height: 1.12;
   letter-spacing: -0.03em;
   text-transform: uppercase;
-  color: var(--diorama-ink);
 }
 
 .leadLabel {
@@ -796,10 +639,10 @@
   align-items: center;
   min-height: 2.25rem;
   padding: 0.2em 0.62em;
-  border: 1.5px solid rgb(17 24 39 / 0.22);
-  border-radius: 0.48rem;
-  background: var(--diorama-gold);
-  color: var(--diorama-ink);
+  border: 2px solid var(--h-ink);
+  border-radius: 0.5rem;
+  background: var(--h-butter);
+  color: var(--h-ink);
   font-family: inherit;
   font-size: 0.9em;
   font-weight: 800;
@@ -807,27 +650,21 @@
   letter-spacing: -0.025em;
   text-transform: uppercase;
   white-space: nowrap;
-  box-shadow:
-    0 4px 10px rgb(17 24 39 / 0.18),
-    0 2px 0 rgb(217 164 18 / 0.85);
+  box-shadow: 0 3px 0 var(--h-ink);
   cursor: pointer;
   overflow: hidden;
   transition:
     transform 0.18s cubic-bezier(0.2, 1.5, 0.3, 1),
-    background-color 0.18s ease,
-    box-shadow 0.18s var(--ease-out);
+    box-shadow 0.18s var(--h-ease);
 }
 
 .swapPill:hover {
   transform: rotate(-1.2deg) translateY(-2px);
-  background: #ffd438;
-  box-shadow:
-    0 6px 14px rgb(17 24 39 / 0.22),
-    0 3px 0 rgb(17 24 39 / 0.35);
+  box-shadow: 0 5px 0 var(--h-ink);
 }
 
-/* The widest candidate, drawn invisibly: it holds the pill open so a swap never
-   reflows the sentence around it. */
+/* The widest candidate, drawn invisibly: it holds the pill open so a swap
+   never reflows the sentence around it. */
 .swapSizer {
   display: inline-flex;
   align-items: center;
@@ -857,8 +694,7 @@
   white-space: nowrap;
 }
 
-/* Holds a Kubai icon at the pill's own type size, or a text glyph. The icons
-   are set at 1em of this, so they sit at ink height beside the word. */
+/* Holds a Kubai icon at the pill's own type size, or a text glyph. */
 .pillIcon {
   display: inline-flex;
   align-items: center;
@@ -869,170 +705,314 @@
 
 .lowerRightAction {
   pointer-events: auto;
-  margin-bottom: clamp(1.8rem, 5.2vh, 3.8rem);
+  margin-bottom: clamp(0.4rem, 1.6vh, 1rem);
+}
+
+.paperPillBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-height: clamp(3.3rem, 5.8vh, 4.1rem);
+  padding: 0.75rem 1.85rem;
+  border: 2.5px solid var(--h-ink);
+  border-radius: 999px;
+  background: var(--h-butter);
+  color: var(--h-ink);
+  font-family: var(--h-display);
+  font-size: clamp(1.15rem, 1.65vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  box-shadow: 0 6px 0 var(--h-ink);
+  cursor: pointer;
+  transition:
+    transform 0.18s var(--h-ease),
+    box-shadow 0.18s var(--h-ease);
+}
+
+.paperPillBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 var(--h-ink);
+}
+
+.paperPillBtn:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 var(--h-ink);
 }
 
 /* ── Entrance and ambient motion ─────────────────────────────────────────── */
 
+@keyframes boxIn {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.975;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+/* A sheet swings up out of the floor and overshoots by a hair. */
+@keyframes rise {
+  from {
+    translate: 0 var(--from, 140px);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    translate: var(--from, -300px) 0;
+    opacity: 0;
+  }
+}
+
+@keyframes ringGrow {
+  from {
+    scale: 0.12;
+    opacity: 0;
+  }
+}
+
+@keyframes popUp {
+  from {
+    scale: 0.5 0;
+    opacity: 0;
+  }
+  55% {
+    scale: 1.06 1.12;
+    opacity: 1;
+  }
+}
+
+@keyframes bloomUp {
+  from {
+    scale: 0.2 0;
+    opacity: 0;
+  }
+  60% {
+    scale: 1.12 1.2;
+    opacity: 1;
+  }
+}
+
+@keyframes stickerPop {
+  from {
+    scale: 0.15;
+    opacity: 0;
+    rotate: calc(var(--r, 0deg) - 60deg);
+  }
+  62% {
+    scale: 1.16;
+    opacity: 1;
+  }
+}
+
 @keyframes copyRise {
   from {
     opacity: 0;
-    translate: 0 14px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
+    translate: 0 18px;
   }
 }
 
-@keyframes sunBob {
-  0%,
-  100% {
-    translate: 0 0;
-    rotate: -2deg;
-  }
-  50% {
-    translate: 0 -6px;
-    rotate: 3deg;
-  }
-}
-
-@keyframes twinkleFloat {
-  0%,
-  100% {
-    translate: 0 0;
-    scale: 1;
-  }
-  50% {
-    translate: 0 -4px;
-    scale: 1.06;
-  }
-}
-
-/* The sparkles settle onto the finished stage, one scrap at a time. These use
-   the independent transform properties so they compose with each star's own
-   resting tilt rather than overwriting it. */
-@keyframes scrapSettle {
+@keyframes pullIn {
   from {
     opacity: 0;
-    translate: 0 -10px;
-    scale: 0.72;
-    rotate: calc(var(--tilt, 0deg) - 14deg);
+    translate: 36px 0;
+  }
+}
+
+@keyframes drift {
+  from {
+    translate: calc(var(--amp, 20px) * -1) 0;
   }
   to {
-    opacity: 1;
-    translate: 0 0;
+    translate: var(--amp, 20px) 0;
+  }
+}
+
+@keyframes tug {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  22% {
+    rotate: -6deg;
+  }
+  48% {
+    rotate: 5deg;
+  }
+  74% {
+    rotate: -3deg;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
     scale: 1;
-    rotate: var(--tilt, 0deg);
+    rotate: 0deg;
+  }
+  50% {
+    scale: 0.72;
+    rotate: 14deg;
+  }
+}
+
+@keyframes shoot {
+  0% {
+    translate: 150px 70px;
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    translate: 600px 200px;
+    opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .foregroundContent:not([data-still='true']) .foregroundRow {
-    animation: copyRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both;
+  .box {
+    animation: boxIn 0.7s var(--h-ease) backwards;
   }
 
-  .starScatter:not([data-still='true']) .cutoutStar {
-    animation: scrapSettle 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+  .ringIn {
+    animation: ringGrow 1s var(--h-ease) var(--d, 0s) backwards;
   }
 
-  .starScatter:not([data-still='true']) .starPos1 {
-    animation-delay: 0.74s;
-  }
-  .starScatter:not([data-still='true']) .starPos2 {
-    animation-delay: 0.78s;
-  }
-  .starScatter:not([data-still='true']) .starPos3 {
-    animation-delay: 0.82s;
-  }
-  .starScatter:not([data-still='true']) .starPos4 {
-    animation-delay: 0.8s;
-  }
-  .starScatter:not([data-still='true']) .starPos5 {
-    animation-delay: 0.86s;
-  }
-  .starScatter:not([data-still='true']) .starPos6 {
-    animation-delay: 0.9s;
-  }
-  .starScatter:not([data-still='true']) .starPos7 {
-    animation-delay: 0.94s;
-  }
-  .starScatter:not([data-still='true']) .starPos8 {
-    animation-delay: 0.98s;
+  .rise {
+    animation:
+      rise 1s cubic-bezier(0.22, 1.16, 0.36, 1) var(--d, 0s) backwards,
+      fadeIn 0.3s linear var(--d, 0s) backwards;
   }
 
-  .hero[data-physics='on'] .sunDisc {
-    animation: sunBob 5.2s ease-in-out infinite;
+  .cloudIn {
+    animation: slideIn 1.3s var(--h-ease) var(--d, 0s) backwards;
   }
 
-  .hero[data-physics='on'] .starPos1 svg,
-  .hero[data-physics='on'] .starPos3 svg,
-  .hero[data-physics='on'] .starPos5 svg,
-  .hero[data-physics='on'] .starPos7 svg {
-    animation: twinkleFloat 4.2s ease-in-out 1.8s infinite;
+  .cloudDrift {
+    animation: drift var(--dur, 34s) ease-in-out 2s infinite alternate;
   }
 
-  .hero[data-physics='on'] .starPos2 svg,
-  .hero[data-physics='on'] .starPos4 svg,
-  .hero[data-physics='on'] .starPos6 svg,
-  .hero[data-physics='on'] .starPos8 svg {
-    animation: twinkleFloat 4.8s ease-in-out 2.4s infinite;
+  .pop {
+    animation: popUp 0.8s cubic-bezier(0.34, 1.45, 0.5, 1) var(--d, 0s)
+      backwards;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .starScatter .cutoutStar {
-    opacity: 1;
+  .bloom {
+    animation: bloomUp 0.85s cubic-bezier(0.34, 1.45, 0.5, 1) var(--d, 0s)
+      backwards;
+  }
+
+  .titleCut {
+    animation: popUp 0.95s cubic-bezier(0.34, 1.3, 0.5, 1) 0.85s backwards;
+  }
+
+  .stickerSmiley {
+    animation: stickerPop 0.8s var(--h-ease) 1.7s backwards;
+  }
+
+  .stickerBurst {
+    animation: stickerPop 0.8s var(--h-ease) 1.82s backwards;
+  }
+
+  .stickerDaisy {
+    animation: stickerPop 0.8s var(--h-ease) 1.94s backwards;
+  }
+
+  .stickerBolt {
+    animation: stickerPop 0.8s var(--h-ease) 2.06s backwards;
+  }
+
+  .tag,
+  .parallaxChip {
+    animation: fadeIn 0.6s ease 1.5s backwards;
+  }
+
+  .pull {
+    animation: pullIn 0.8s var(--h-ease) 1.45s backwards;
+  }
+
+  .tab {
+    animation: tug 1.1s ease-in-out 3s 1 backwards;
+  }
+
+  .foregroundRow {
+    animation: copyRise 0.8s var(--h-ease) 1.3s backwards;
+  }
+
+  .window[data-act='night'] .starGlyph {
+    animation: twinkle 3.4s ease-in-out var(--tw, 0s) infinite;
+  }
+
+  .window[data-act='night'] .shoot {
+    animation: shoot 1.6s cubic-bezier(0.3, 0.6, 0.4, 1) 1.1s 1 both;
+  }
+
+  /* Off screen, nothing should be running. */
+  .window[data-idle='true'] * {
+    animation-play-state: paused !important;
   }
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
+@media (hover: none) {
+  .parallaxChip {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
-  /* The header already carries `Say hi`; at this width the two pills collide,
-     so the pull tab drops to a compact round pill just below the header. */
-  .upperRightAction {
-    display: block;
-    top: 4.9rem;
-    right: 1.1rem;
+  .box {
+    border-radius: 24px;
+    box-shadow: 6px 8px 0 var(--h-ink);
   }
 
-  .upperRightAction .paperPillBtn {
-    border-right: 2.5px solid var(--diorama-ink);
-    border-radius: 999px;
-    padding: 0.85rem 1.05rem;
+  .window {
+    border-radius: 18px;
   }
 
-  .dioramaViewport {
-    margin-inline: 0.9rem;
+  .pull {
+    --track-w: 9.4rem;
+    --tab-w: 6.6rem;
+
+    gap: 0.4rem;
+    padding: 0.32rem 0.55rem;
   }
 
-  .wingLeftOuter,
-  .wingRightOuter {
-    width: 0.9rem;
+  .track {
+    height: 2.6rem;
   }
 
-  .planeTitle {
-    height: 58%;
+  .tab {
+    font-size: 0.85rem;
   }
 
-  .planeTitle > * {
-    width: clamp(18rem, 74vw, 32rem);
+  /* The label column on a phone is taller, so the cutout stands clear of
+     it instead of tucking behind the hills. */
+  .titlePlane {
+    bottom: max(calc(var(--u) * 275), 16.5rem);
   }
 
-  .sunCluster {
-    left: 50%;
-    top: 17%;
-  }
-
-  .foregroundContent {
-    padding: 0 1.5rem 1.5rem;
+  .foreground {
+    padding: 0 0.9rem 0.9rem;
   }
 
   .foregroundRow {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1.25rem;
+    gap: 1.1rem;
+  }
+
+  .headlineCard {
+    box-shadow: 5px 6px 0 var(--h-ink);
   }
 
   .lowerRightAction {
@@ -1041,8 +1021,34 @@
   }
 }
 
-/* Below this the three rows stop fitting on one line at the desktop scale, so
-   the lead words and pills both step down together. */
+@media (max-width: 700px) {
+  .stickerSmiley {
+    --ox: 560;
+    --oy: 440;
+  }
+
+  .stickerBurst {
+    --ox: 884;
+    --oy: 410;
+  }
+
+  .stickerDaisy {
+    --ox: 548;
+    --oy: 575;
+  }
+
+  .stickerBolt {
+    --ox: 902;
+    --oy: 552;
+  }
+
+  .tag {
+    display: none;
+  }
+}
+
+/* Below this the three rows stop fitting on one line at the desktop scale,
+   so the lead words and pills both step down together. */
 @media (max-width: 560px) {
   .headlineRow {
     gap: 0.4rem;

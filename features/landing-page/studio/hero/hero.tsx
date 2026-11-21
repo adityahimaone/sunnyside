@@ -1,26 +1,25 @@
 'use client'
 
-import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowRight, Moon, Sun as SunIcon } from 'lucide-react'
 import { Circle, Diamond, Sparkles, Sun } from 'kubai-icons-react'
 import {
   AnimatePresence,
   MotionConfig,
+  animate,
   motion,
   useMotionValue,
+  useMotionValueEvent,
   useReducedMotion,
   useSpring,
-  useTransform,
 } from 'motion/react'
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
 } from 'react'
 
 import {
@@ -43,6 +42,9 @@ type Props = {
   surface?: HeroSurface
   onSurfaceChange?: (surface: HeroSurface) => void
 }
+
+/* ── The marker wordmark ──────────────────────────────────────────────────
+   The site's single-stroke marker alphabet, laid out as one word. */
 
 const SCRIPT_STROKE = 3.45
 const SCRIPT_SLANT = 0.1584
@@ -122,642 +124,590 @@ const MADLIB_SLOTS = {
 } as const
 
 const PAPER_EASE = [0.22, 1, 0.36, 1] as const
-const PAPER_EASE_IN = [0.55, 0, 0.9, 0.4] as const
 
-function FivePointStar({
+/* ── Time of day ──────────────────────────────────────────────────────────
+   One number drives the whole diorama. `t` runs 0 (noon) → 1 (midnight); the
+   pull tab, the sky wheel, the palette, the stars and the lit windows are all
+   functions of it, written as CSS custom properties on the stage. That is
+   what lets a drag scrub the scene as smoothly as a click plays it.
+
+   Negative `t` is dawn: the page opens at BOOT_T with the sun still behind
+   the hills and the sky peach, then the wheel turns it up to noon. */
+
+const BOOT_T = -0.42
+
+const clamp = (v: number, lo: number, hi: number) =>
+  Math.min(hi, Math.max(lo, v))
+
+function paintTime(el: HTMLElement, t: number) {
+  // `ta` blends noon → dusk (and dawn → noon); `tb` blends dusk → night.
+  const ta = Math.max(clamp(t * 2, 0, 1), clamp(-t * 3, 0, 1))
+  const tb = clamp(t * 2 - 1, 0, 1)
+  el.style.setProperty('--t', t.toFixed(4))
+  el.style.setProperty('--ta', `${(ta * 100).toFixed(2)}%`)
+  el.style.setProperty('--tb', `${(tb * 100).toFixed(2)}%`)
+}
+
+type Triplet = readonly [day: string, dusk: string, night: string]
+
+/* Sunnyside paper in three lights. Every slot keeps its role (sky, hill,
+   roof…) and only the light changes, so the pull reads as the same
+   diorama turning, not a different picture. */
+const PALETTE = {
+  sky: ['#a9c8ff', '#ffb59a', '#141a52'],
+  ring1: ['#bcd3ff', '#ffc8a6', '#1a2169'],
+  ring2: ['#d2e1ff', '#ffd7ad', '#222b85'],
+  ring3: ['#fff0c6', '#ffe6a6', '#2d3bb0'],
+  far: ['#8fb0f5', '#d69bb4', '#27369a'],
+  mid: ['#b7e4c7', '#efb9ae', '#1d5a76'],
+  near: ['#7fcf9d', '#e29f9a', '#17495f'],
+  bank: ['#fffaf1', '#ffe9d8', '#2c3cae'],
+  fg: ['#191a2e', '#191a2e', '#fffaf1'],
+  cloud: ['#fffaf1', '#ffe0d0', '#4f62d8'],
+  win: ['#a9c8ff', '#ffd9a0', '#ffd23f'],
+  title: ['#fffaf1', '#fffaf1', '#ffd23f'],
+  trunk: ['#c9692f', '#b95a3a', '#7a3d3a'],
+  treeA: ['#58b98a', '#d28a7e', '#1c6b66'],
+  treeB: ['#ffb6e1', '#f4a0b8', '#9a5db0'],
+  wallA: ['#fffaf1', '#ffe3cf', '#8b93d6'],
+  wallB: ['#ffb6e1', '#f6a3b3', '#8e5fae'],
+  wallC: ['#ffd23f', '#ffbd5a', '#b88a2e'],
+  roofA: ['#ff6a2b', '#e5532f', '#a03b3a'],
+  roofB: ['#3d53d6', '#5a56b8', '#232f96'],
+} as const satisfies Record<string, Triplet>
+
+type Token = keyof typeof PALETTE
+
+const mixLight = ([day, dusk, night]: Triplet) =>
+  `color-mix(in srgb, color-mix(in srgb, ${day} calc(100% - var(--ta)), ${dusk}) calc(100% - var(--tb)), ${night})`
+
+const PAPER_VARS = Object.fromEntries(
+  Object.entries(PALETTE).map(([token, triplet]) => [
+    `--c-${token}`,
+    mixLight(triplet),
+  ]),
+) as CSSProperties
+
+const fillOf = (token: Token): CSSProperties => ({ fill: `var(--c-${token})` })
+
+const vars = (values: Record<string, string | number>) =>
+  values as CSSProperties
+
+/* ── Paper ────────────────────────────────────────────────────────────────
+   Every shape is a sheet: a flat fill, a printed ink edge, and a hard
+   offset copy underneath standing in for the shadow. No blur, no glass. */
+
+function Paper({
+  d,
+  fill,
+  shade = [0, 8],
   className,
-  fill = '#FFD12E',
-  stroke = '#111827',
-  strokeWidth = 2.6,
-  innerFill,
 }: {
+  d: string
+  fill: Token
+  shade?: readonly [number, number] | null
   className?: string
-  fill?: string
-  stroke?: string
-  strokeWidth?: number
-  innerFill?: string
 }) {
   return (
-    <svg
-      viewBox="0 0 64 64"
-      className={className}
-      aria-hidden
-      focusable="false"
-    >
-      <polygon
-        points="32,4 39.8,22.4 59.6,24 44.4,37 49,56.5 32,46 15,56.5 19.6,37 4.4,24 24.2,22.4"
-        fill={fill}
-        stroke={stroke}
-        strokeWidth={strokeWidth}
-        strokeLinejoin="round"
-      />
-      {innerFill ? (
-        <polygon
-          points="32,15 36.4,25.4 47.6,26.3 39,33.7 41.6,44.7 32,38.8 22.4,44.7 25,33.7 16.4,26.3 27.6,25.4"
-          fill={innerFill}
-          stroke={stroke}
-          strokeWidth={Math.max(1.4, strokeWidth * 0.65)}
-          strokeLinejoin="round"
+    <>
+      {shade ? (
+        <path
+          d={d}
+          className={styles.shade}
+          style={{ translate: `${shade[0]}px ${shade[1]}px` }}
         />
       ) : null}
-    </svg>
+      <path d={d} className={cn(styles.ink, className)} style={fillOf(fill)} />
+    </>
   )
 }
 
-function FourPointSparkle({
-  className,
-  fill = '#FAF9F6',
-  innerFill = '#5E97E8',
-}: {
-  className?: string
-  fill?: string
-  innerFill?: string
-}) {
-  return (
-    <svg
-      viewBox="0 0 48 48"
-      className={className}
-      aria-hidden
-      focusable="false"
-    >
-      <path
-        d="M24 3C26.5 16 32 21.5 45 24C32 26.5 26.5 32 24 45C21.5 32 16 26.5 3 24C16 21.5 21.5 16 24 3Z"
-        fill={fill}
-        stroke="#111827"
-        strokeWidth="2.4"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M24 12C25.2 19 29 22.8 36 24C29 25.2 25.2 29 24 36C22.8 29 19 25.2 12 24C19 22.8 22.8 19 24 12Z"
-        fill={innerFill}
-      />
-    </svg>
-  )
-}
+type Lobe = { cx: number; cy: number; r: number }
 
-function EightPointBurst({
-  className,
-  fill = '#FAF9F6',
-}: {
-  className?: string
-  fill?: string
-}) {
-  return (
-    <svg
-      viewBox="0 0 48 48"
-      className={className}
-      aria-hidden
-      focusable="false"
-    >
-      <polygon
-        points="24,3 28.5,14.8 40,9 34.2,20.5 45,24 34.2,27.5 40,39 28.5,33.2 24,45 19.5,33.2 8,39 13.8,27.5 3,24 13.8,20.5 8,9 19.5,14.8"
-        fill={fill}
-        stroke="#111827"
-        strokeWidth="2.3"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-/* ── Sculpted paper clouds ─────────────────────────────────────────────────
-   A cloud is a list of lobes — circles with their own centre and radius —
-   unioned over a base. The silhouettes are authored rather than generated,
-   which is what lets a bank rise and settle the way a hand-cut paper cloud
-   does: a big shoulder, a few middling swells, a low tail. Puffs that all
-   share one radius can only ever read as a scalloped edge. */
-
-type LobeSpec = {
-  cx: number
-  cy: number
-  r: number
-}
-
-function SculptedCloud({
-  lobes,
-  baseY,
-  leftX,
-  rightX,
-  fill,
-  filter,
-  className,
-}: {
-  lobes: readonly LobeSpec[]
-  baseY: number
-  leftX?: number
-  rightX?: number
-  fill: string
-  filter?: string
-  className?: string
-}) {
-  const minX = leftX ?? Math.min(...lobes.map((l) => l.cx - l.r))
-  const maxX = rightX ?? Math.max(...lobes.map((l) => l.cx + l.r))
-
-  /**
-   * Where the silhouettes of two neighbouring lobes cross — the floor of the
-   * valley between them. Undefined when the lobes do not touch.
-   */
-  const valley = (a: LobeSpec, b: LobeSpec) => {
+/** A cloud outline as one path: arcs over each lobe, valley to valley, then
+ *  a flat base — the cut-paper silhouette with no inner seams. */
+function cloudPath(lobes: readonly Lobe[], baseY: number) {
+  const valley = (a: Lobe, b: Lobe) => {
     const d = Math.hypot(b.cx - a.cx, b.cy - a.cy)
     if (d === 0 || d >= a.r + b.r) return undefined
     const along = (a.r * a.r - b.r * b.r + d * d) / (2 * d)
     const half = Math.sqrt(Math.max(0, a.r * a.r - along * along))
     const ux = (b.cx - a.cx) / d
     const uy = (b.cy - a.cy) / d
-    // Both crossings share a y; the lower one is the valley floor.
     const y = a.cy + uy * along + Math.abs(ux) * half
     const dy = y - a.cy
     const dx = Math.sqrt(Math.max(0, a.r * a.r - dy * dy))
     return { x: a.cx + Math.sign(b.cx - a.cx) * dx, y }
   }
+  const angleOf = (lobe: Lobe, p: { x: number; y: number }) =>
+    Math.atan2(p.y - lobe.cy, p.x - lobe.cx)
 
-  /** Angle of a point on a lobe, in SVG's y-down frame. */
-  const angleOf = (lobe: LobeSpec, point: { x: number; y: number }) =>
-    Math.atan2(point.y - lobe.cy, point.x - lobe.cx)
-
-  /**
-   * The outline as one path: enter each lobe at the valley it shares with the
-   * lobe before it, arc over the top, leave at the valley it shares with the
-   * lobe after it, then close down to the base.
-   *
-   * Drawing the true union — rather than unioning circles over a rectangle — is
-   * what keeps the apron solid. A rect has to start below every valley to fill
-   * them, which for lobes of very different heights means it reaches far above
-   * the low ones and shows as a flat block in the sky.
-   */
-  const start = { x: lobes[0].cx - lobes[0].r, y: lobes[0].cy }
+  const first = lobes[0]
+  const last = lobes[lobes.length - 1]
+  const start = { x: first.cx - first.r, y: first.cy }
   let d = `M ${round(start.x)} ${round(start.y)}`
   let cursor = start
 
   for (let i = 0; i < lobes.length; i += 1) {
     const lobe = lobes[i]
     const next = lobes[i + 1]
-    const end = next
-      ? (valley(lobe, next) ?? { x: lobe.cx + lobe.r, y: lobe.cy })
-      : { x: lobe.cx + lobe.r, y: lobe.cy }
-
-    // Travelling rightwards over a lobe is clockwise in a y-down frame, so the
-    // sweep flag is 1. Whether the arc passes half a circle depends on where
-    // the valley sits, so large-arc has to be derived rather than assumed.
+    const end = (next && valley(lobe, next)) ?? {
+      x: lobe.cx + lobe.r,
+      y: lobe.cy,
+    }
     const swept =
       (angleOf(lobe, end) - angleOf(lobe, cursor) + Math.PI * 2) % (Math.PI * 2)
-    const largeArc = swept > Math.PI ? 1 : 0
-
-    d += ` A ${round(lobe.r)} ${round(lobe.r)} 0 ${largeArc} 1 ${round(end.x)} ${round(end.y)}`
+    d += ` A ${round(lobe.r)} ${round(lobe.r)} 0 ${swept > Math.PI ? 1 : 0} 1 ${round(end.x)} ${round(end.y)}`
     cursor = end
   }
 
-  d += ` L ${round(maxX)} ${round(baseY)} L ${round(minX)} ${round(baseY)} Z`
-
-  return <path className={className} d={d} fill={fill} filter={filter} />
+  d += ` L ${round(last.cx + last.r)} ${round(baseY)} L ${round(start.x)} ${round(baseY)} Z`
+  return d
 }
 
-/* While a scene swap is under way the stage planes share one "fold" flag, so
-   every sheet they own tips back down in the same breath — the front apron, the
-   rail and the title stay put above it. */
-const FoldCtx = createContext(false)
+/* ── Scene geometry (1440 × 860 stage units) ──────────────────────────── */
 
-/* Two palettes, one diorama: the night act is the same paper under moonlight.
-   Every slot keeps its hue but cools and dims — the geometry, shadows and
-   paper edges are untouched, so the swap stays legible as "same theater,
-   different light" rather than a different illustration. */
-const DAY_PAPER = {
-  backdrop: '#1B42CC',
-  ringGold: '#F5C227',
-  ringOrange: '#E59018',
-  paperWhite: '#FAF9F6',
-  cloudAmber: '#EA9316',
-  wedgeGold: '#E5B122',
-  matBlue: '#A1C5E8',
-  shoulderGold: '#EEB826',
-  ringPale: '#F4C129',
-  deepBlue: '#1F44D6',
-  paleBlue: '#D9E7F5',
-  sunCream: '#F1E2B3',
-  fgAmber: '#EE9617',
-  fgCream: '#F2E2AA',
-} as const
+const WHEEL = { cx: 720, cy: 720, r: 430 } as const
 
-const NIGHT_PAPER = {
-  backdrop: '#101C4A',
-  ringGold: '#2E3C80',
-  ringOrange: '#1E2E6E',
-  paperWhite: '#E4E6F2',
-  cloudAmber: '#4F6AB4',
-  wedgeGold: '#223A88',
-  matBlue: '#34509E',
-  shoulderGold: '#3D5AAE',
-  ringPale: '#22347E',
-  deepBlue: '#0E1840',
-  paleBlue: '#7E92C8',
-  sunCream: '#C3C7D6',
-  fgAmber: '#5670BC',
-  fgCream: '#C9CBD8',
-} as const
+const RINGS = [
+  { r: 760, token: 'ring1', delay: 0.08 },
+  { r: 610, token: 'ring2', delay: 0.18 },
+  { r: 480, token: 'ring3', delay: 0.28 },
+] as const
 
-function PaperLayer({
-  delay = 0,
-  from = 42,
-  still,
-  className,
-  children,
-}: {
-  delay?: number
-  from?: number
-  still: boolean
-  className?: string
-  children: ReactNode
-}) {
-  const folded = useContext(FoldCtx)
-  /* The swap reads as the sheets closing themselves down again, deepest first,
-     which is the entrance played backwards — no new motion vocabulary. */
-  const exitDelay = Math.max(0, 0.6 - delay)
-  return (
-    <motion.g
-      className={className}
-      /* A diorama layer does not fade in — it swings up out of the stage floor.
-         The sheet starts edge-on (rotateX 90), hinged along its own bottom edge,
-         and tips forward to flat (0deg), which is what a cut paper plane does
-         when the proscenium is opened. Perspective keeps the far edge smaller
-         than the near one, so it reads as paper in depth, not a scaleY squash. */
-      style={{ originY: 1, transformPerspective: 1400 }}
-      initial={still ? false : { y: from, rotateX: 90, opacity: 0 }}
-      animate={
-        folded ? { y: from, rotateX: 90, opacity: 0 } : { y: 0, rotateX: 0, opacity: 1 }
-      }
-      transition={
-        still
-          ? undefined
-          : {
-              y: folded
-                ? { duration: 0.55, delay: exitDelay, ease: PAPER_EASE_IN }
-                : { duration: 0.92, delay, ease: PAPER_EASE },
-              rotateX: folded
-                ? { duration: 0.55, delay: exitDelay, ease: PAPER_EASE_IN }
-                : { duration: 0.92, delay, ease: PAPER_EASE },
-              opacity: folded
-                ? { duration: 0.24, delay: exitDelay }
-                : { duration: 0.26, delay },
-            }
-      }
-    >
-      {children}
-    </motion.g>
-  )
-}
-
-/* The bunting is drawn in the stage's own 1440 × 860 space so both pins land
-   on the proscenium's top rail band (y 26–70) at every width — a CSS-positioned
-   div drifts off the frame the moment the stage scale changes. The sag stays
-   shallow and left of the arch so the hanging stars never touch it. */
-const BUNTING = {
-  from: { x: 215, y: 50 },
-  control: { x: 345, y: 128 },
-  to: { x: 472, y: 46 },
-  anchors: [0.16, 0.42, 0.68, 0.92],
-} as const
-
-function buntingPoint(t: number) {
-  const mt = 1 - t
+/* The orbit's stitching: dots that ride the wheel, so a pull is visible even
+   where the sun and moon are hidden behind a hill. */
+const ORBIT_DOTS = Array.from({ length: 36 }, (_, i) => {
+  const a = (i / 36) * Math.PI * 2
   return {
-    x:
-      mt * mt * BUNTING.from.x +
-      2 * mt * t * BUNTING.control.x +
-      t * t * BUNTING.to.x,
-    y:
-      mt * mt * BUNTING.from.y +
-      2 * mt * t * BUNTING.control.y +
-      t * t * BUNTING.to.y,
-  }
-}
-
-/** A star whose top vertex sits exactly on the origin, so it hangs from (0,0)
- *  and a rotation about that point swings it from the string instead of
- *  letting its tip drift off the cord. */
-function starPoints(outer: number, inner = outer * 0.48) {
-  const points: string[] = []
-  for (let i = 0; i < 10; i += 1) {
-    const radius = i % 2 === 0 ? outer : inner
-    const angle = (Math.PI / 5) * i - Math.PI / 2
-    const x = Math.cos(angle) * radius
-    const y = Math.sin(angle) * radius + outer
-    points.push(`${round(x)},${round(y)}`)
-  }
-  return points.join(' ')
-}
-
-const BUNTING_STARS = BUNTING.anchors.map((t, i) => {
-  const point = buntingPoint(t)
-  return {
-    ...point,
-    span: [25, 27, 24, 26][i],
-    tilt: [-14, 6, -10, 14][i],
-    sway: 3.2 + (i % 3) * 0.5,
-    delay: 0.78 + i * 0.08,
-    fill: ['#F59E1B', '#FAF9F6', '#F59E1B', '#F7C627'][i],
+    x: round(Math.cos(a) * WHEEL.r),
+    y: round(Math.sin(a) * WHEEL.r),
+    r: i % 3 === 0 ? 4.6 : 2.8,
+    color: i % 3 === 0 ? 'var(--h-tangerine)' : 'var(--h-paper)',
   }
 })
 
-function Bunting({
-  still,
-  shadowId,
-  pin,
-}: {
-  still: boolean
-  shadowId: string
-  pin: string
-}) {
-  return (
-    <div className={styles.buntingWrap} aria-hidden>
-      {/* Same viewBox and projection as the stage planes, so the pins sit on
-          the blue rail band wherever the stage scale puts it. */}
-      <svg
-        viewBox="0 0 1440 860"
-        preserveAspectRatio="xMidYMin slice"
-        className={styles.stageSvg}
-      >
-        <g filter={`url(#${shadowId})`}>
-          <motion.path
-            d={`M${BUNTING.from.x} ${BUNTING.from.y} Q${BUNTING.control.x} ${BUNTING.control.y} ${BUNTING.to.x} ${BUNTING.to.y}`}
-            fill="none"
-            stroke="#FAF9F6"
-            strokeWidth="4.5"
-            strokeLinecap="round"
-            initial={still ? false : { pathLength: 0, opacity: 0.2 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{
-              duration: 0.8,
-              delay: still ? 0 : 0.5,
-              ease: [0.4, 0, 0.2, 1],
-            }}
-          />
-          {/* Both ends are pinned on the blue rail band, so the swag reads as
-              tied rather than cut. */}
-          <circle
-            cx={BUNTING.from.x}
-            cy={BUNTING.from.y}
-            r="3.4"
-            fill={pin}
-          />
-          <circle cx={BUNTING.to.x} cy={BUNTING.to.y} r="3.4" fill={pin} />
-        </g>
+/** `at` is the time of night a star switches on, so they arrive in turn. */
+const STARS = [
+  { x: 120, y: 150, k: 0.7, at: 0.62, tw: 0.2 },
+  { x: 262, y: 300, k: 0.5, at: 0.7, tw: 1.1 },
+  { x: 384, y: 118, k: 0.8, at: 0.58, tw: 0.6 },
+  { x: 520, y: 214, k: 0.45, at: 0.8, tw: 1.7 },
+  { x: 612, y: 92, k: 0.6, at: 0.66, tw: 0.9 },
+  { x: 858, y: 108, k: 0.55, at: 0.74, tw: 1.4 },
+  { x: 982, y: 232, k: 0.75, at: 0.6, tw: 0.3 },
+  { x: 1090, y: 126, k: 0.5, at: 0.84, tw: 1.9 },
+  { x: 1204, y: 304, k: 0.65, at: 0.68, tw: 0.7 },
+  { x: 1312, y: 168, k: 0.8, at: 0.76, tw: 1.2 },
+  { x: 1384, y: 366, k: 0.45, at: 0.88, tw: 0.5 },
+  { x: 62, y: 332, k: 0.6, at: 0.9, tw: 1.6 },
+  { x: 462, y: 404, k: 0.4, at: 0.92, tw: 0.1 },
+  { x: 1012, y: 404, k: 0.45, at: 0.78, tw: 1.0 },
+] as const
 
-        {BUNTING_STARS.map((star, i) => (
-          <motion.g
-            key={i}
-            filter={`url(#${shadowId})`}
-            initial={still ? false : { y: -18, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{
-              duration: 0.62,
-              delay: still ? 0 : star.delay,
-              ease: PAPER_EASE,
-            }}
-          >
-            <motion.g
-              /* Framer overrides inline transformOrigin on SVG targets and
-                 pivots at the viewBox centre, which lifts the tip off the
-                 cord. Its originX/originY are relative to the element's own
-                 box, so 0.5 / 0 pivots the sway exactly at the top vertex. */
-              style={{ originX: 0.5, originY: 0 }}
-              animate={
-                still
-                  ? undefined
-                  : {
-                      rotate: [
-                        star.tilt - star.sway,
-                        star.tilt + star.sway,
-                        star.tilt - star.sway,
-                      ],
-                    }
-              }
-              transition={
-                still
-                  ? undefined
-                  : {
-                      duration: 4.4 + (i % 3) * 0.7,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }
-              }
-            >
-              <polygon
-                points={starPoints(star.span)}
-                transform={`translate(${round(star.x)} ${round(star.y)})`}
-                fill={star.fill}
-              />
-            </motion.g>
-          </motion.g>
-        ))}
-      </svg>
-    </div>
-  )
+const SPARKLE =
+  'M0 -21C2.5 -8 8 -2.5 21 0C8 2.5 2.5 8 0 21C-2.5 8 -8 2.5 -21 0C-8 -2.5 -2.5 -8 0 -21Z'
+
+const CLOUDS = [
+  {
+    id: 'a',
+    lobes: [
+      { cx: 196, cy: 318, r: 30 },
+      { cx: 240, cy: 298, r: 42 },
+      { cx: 294, cy: 310, r: 34 },
+      { cx: 332, cy: 326, r: 22 },
+    ],
+    base: 346,
+    from: -380,
+    delay: 0.62,
+    dir: 1,
+    amp: 22,
+    dur: 36,
+    depth: 0.5,
+  },
+  {
+    id: 'b',
+    lobes: [
+      { cx: 1100, cy: 206, r: 26 },
+      { cx: 1140, cy: 188, r: 40 },
+      { cx: 1196, cy: 196, r: 34 },
+      { cx: 1236, cy: 212, r: 24 },
+    ],
+    base: 232,
+    from: 380,
+    delay: 0.78,
+    dir: -1,
+    amp: 26,
+    dur: 42,
+    depth: 0.56,
+  },
+  {
+    id: 'c',
+    lobes: [
+      { cx: 1030, cy: 500, r: 22 },
+      { cx: 1066, cy: 484, r: 32 },
+      { cx: 1108, cy: 496, r: 25 },
+    ],
+    base: 520,
+    from: 320,
+    delay: 0.94,
+    dir: 1,
+    amp: 16,
+    dur: 30,
+    depth: 0.62,
+  },
+  {
+    id: 'd',
+    lobes: [
+      { cx: 420, cy: 484, r: 20 },
+      { cx: 452, cy: 470, r: 29 },
+      { cx: 492, cy: 482, r: 22 },
+    ],
+    base: 502,
+    from: -320,
+    delay: 1.02,
+    dir: -1,
+    amp: 18,
+    dur: 33,
+    depth: 0.66,
+  },
+] as const
+
+const FAR_HILL =
+  'M-40 860 V640 C60 600 160 570 280 580 C400 590 470 628 600 626 C720 624 800 586 920 580 C1040 574 1130 584 1250 580 C1340 577 1410 590 1480 610 V860 Z'
+const MID_LEFT_HILL =
+  'M-40 860 V700 C60 660 160 640 280 646 C400 652 480 690 600 700 C690 706 760 730 820 760 V860 Z'
+const MID_RIGHT_HILL =
+  'M560 860 V740 C660 720 760 676 900 650 C1020 628 1140 622 1260 640 C1350 654 1420 650 1480 640 V860 Z'
+const BANK =
+  'M-40 860 V704 C80 684 200 676 330 686 C470 698 560 738 740 746 C900 752 1020 730 1160 712 C1280 697 1390 698 1480 712 V860 Z'
+
+type HouseSpec = {
+  x: number
+  y: number
+  w: number
+  h: number
+  wall: Token
+  roof: Token
+  delay: number
+  chimney?: boolean
 }
 
-/* Stage clouds: the amber shoulders beside the arch, and the banks behind the
-   balustrade. */
-const STAGE_CLOUDS = {
-  /* The outermost lobes reach past the proscenium legs (168 / 1272), so the
-     vertical closing edges sit behind the frame instead of slicing the amber. */
-  amberMidLeft: [
-    { cx: 255, cy: 445, r: 95 },
-    { cx: 360, cy: 425, r: 85 },
-    { cx: 462, cy: 448, r: 80 },
-  ],
-  amberMidRight: [
-    { cx: 1000, cy: 448, r: 85 },
-    { cx: 1095, cy: 420, r: 90 },
-    { cx: 1180, cy: 428, r: 95 },
-  ],
-  balustradeBackAmber: [
-    { cx: 455, cy: 556, r: 44 },
-    { cx: 520, cy: 540, r: 52 },
-    { cx: 595, cy: 548, r: 48 },
-    { cx: 675, cy: 542, r: 50 },
-    { cx: 760, cy: 550, r: 48 },
-    { cx: 830, cy: 540, r: 52 },
-  ],
-  balustradeBackGold: [
-    { cx: 872, cy: 560, r: 50 },
-    { cx: 965, cy: 534, r: 66 },
-    { cx: 1055, cy: 518, r: 76 },
-    { cx: 1145, cy: 538, r: 68 },
-  ],
-} as const
+const HOUSES: readonly HouseSpec[] = [
+  { x: 330, y: 604, w: 66, h: 54, wall: 'wallC', roof: 'roofB', delay: 1.05 },
+  { x: 1018, y: 598, w: 70, h: 58, wall: 'wallA', roof: 'roofA', delay: 1.12 },
+  {
+    x: 1104,
+    y: 592,
+    w: 58,
+    h: 78,
+    wall: 'wallB',
+    roof: 'roofB',
+    delay: 1.2,
+    chimney: true,
+  },
+  { x: 1190, y: 590, w: 80, h: 60, wall: 'wallC', roof: 'roofA', delay: 1.28 },
+  { x: 1282, y: 598, w: 54, h: 46, wall: 'wallA', roof: 'roofB', delay: 1.36 },
+]
 
-/* Foreground apron, drawn in a 1440 × 420 box. Back to front: the amber lip on
-   the horizon, the cream sheet that shows as a paper edge beneath it, then the
-   two white banks the headline and the CTA rest on. */
-const FOREGROUND_CLOUDS = {
-  amberWave: [
-    { cx: 480, cy: 235, r: 72 },
-    { cx: 585, cy: 218, r: 78 },
-    { cx: 695, cy: 205, r: 84 },
-    { cx: 810, cy: 222, r: 76 },
-    { cx: 935, cy: 200, r: 88 },
-    { cx: 1045, cy: 175, r: 96 },
-    { cx: 1165, cy: 168, r: 94 },
-    { cx: 1280, cy: 190, r: 86 },
-  ],
-  creamWave: [
-    { cx: 540, cy: 278, r: 74 },
-    { cx: 650, cy: 252, r: 84 },
-    { cx: 760, cy: 276, r: 72 },
-    { cx: 865, cy: 262, r: 82 },
-    { cx: 985, cy: 230, r: 96 },
-    { cx: 1105, cy: 208, r: 104 },
-    { cx: 1225, cy: 185, r: 108 },
-    { cx: 1345, cy: 145, r: 115 },
-    { cx: 1435, cy: 195, r: 98 },
-  ],
-  leftHeroMound: [
-    { cx: -25, cy: 268, r: 115 },
-    { cx: 82, cy: 205, r: 118 },
-    { cx: 175, cy: 128, r: 92 },
-    { cx: 282, cy: 112, r: 110 },
-    { cx: 388, cy: 158, r: 102 },
-    { cx: 492, cy: 215, r: 98 },
-    { cx: 598, cy: 265, r: 96 },
-    { cx: 685, cy: 332, r: 88 },
-    { cx: 795, cy: 382, r: 86 },
-  ],
-  rightWhiteBank: [
-    { cx: 930, cy: 392, r: 76 },
-    { cx: 1035, cy: 332, r: 94 },
-    { cx: 1148, cy: 296, r: 104 },
-    { cx: 1265, cy: 278, r: 108 },
-    { cx: 1385, cy: 265, r: 112 },
-    { cx: 1475, cy: 305, r: 96 },
-  ],
-} as const
+const TREES = [
+  { x: 130, y: 656, s: 1.1, crown: 'treeA', delay: 1.1, lean: 1.6 },
+  { x: 232, y: 650, s: 0.88, crown: 'treeB', delay: 1.18, lean: -1.4 },
+  { x: 440, y: 678, s: 0.68, crown: 'treeA', delay: 1.26, lean: 1.2 },
+  { x: 1332, y: 658, s: 1, crown: 'treeB', delay: 1.3, lean: -1.6 },
+  { x: 1408, y: 652, s: 0.8, crown: 'treeA', delay: 1.38, lean: 1.4 },
+] as const
 
-function PaperSun({ className }: { className?: string }) {
+const FLOWERS = [
+  { x: 600, y: 742, h: 30, petal: 'wallB', delay: 1.5 },
+  { x: 665, y: 750, h: 40, petal: 'wallA', delay: 1.56 },
+  { x: 770, y: 757, h: 28, petal: 'roofA', delay: 1.62 },
+  { x: 870, y: 756, h: 36, petal: 'wallB', delay: 1.68 },
+  { x: 990, y: 745, h: 26, petal: 'wallA', delay: 1.74 },
+  { x: 1090, y: 732, h: 38, petal: 'roofA', delay: 1.8 },
+  { x: 1190, y: 718, h: 30, petal: 'wallB', delay: 1.86 },
+  { x: 1300, y: 710, h: 40, petal: 'wallA', delay: 1.92 },
+  { x: 1390, y: 712, h: 28, petal: 'roofA', delay: 1.98 },
+] as const
+
+/* ── Scene parts ──────────────────────────────────────────────────────── */
+
+function SunArt() {
   const rays = useMemo(
     () =>
       Array.from({ length: 14 }, (_, i) => {
-        const angle = (i / 14) * Math.PI * 2
-        const aLeft = angle - 0.15
-        const aRight = angle + 0.15
-        const rInner = 55
-        const rOuter = i % 2 === 0 ? 86 : 79
-        const x1 = round(100 + Math.cos(aLeft) * rInner)
-        const y1 = round(100 + Math.sin(aLeft) * rInner)
-        const x2 = round(100 + Math.cos(angle) * rOuter)
-        const y2 = round(100 + Math.sin(angle) * rOuter)
-        const x3 = round(100 + Math.cos(aRight) * rInner)
-        const y3 = round(100 + Math.sin(aRight) * rInner)
-        return `${x1},${y1} ${x2},${y2} ${x3},${y3}`
+        const a = (i / 14) * Math.PI * 2 - Math.PI / 2
+        const outer = i % 2 === 0 ? 114 : 98
+        const at = (angle: number, radius: number) =>
+          `${round(Math.cos(angle) * radius)},${round(Math.sin(angle) * radius)}`
+        return `${at(a - 0.15, 62)} ${at(a, outer)} ${at(a + 0.15, 62)}`
       }),
     [],
   )
 
   return (
-    <svg
-      viewBox="0 0 200 200"
-      className={className}
-      aria-hidden
-      focusable="false"
-    >
-      {rays.map((points, i) => (
-        <polygon
-          key={i}
-          points={points}
-          fill={i % 2 === 0 ? '#FFD12E' : '#F59E1B'}
-          stroke="#E08612"
-          strokeWidth="1"
-          strokeLinejoin="round"
-        />
-      ))}
+    <>
+      <g className={styles.sunRays}>
+        {/* An invisible disc keeps the group's box symmetric, so the rays
+            turn about the sun's centre and not about their own bounds. */}
+        <circle r={116} fill="none" />
+        {rays.map((points, i) => (
+          <polygon
+            key={i}
+            points={points}
+            className={styles.ink}
+            style={{
+              fill: i % 2 === 0 ? 'var(--h-butter)' : 'var(--h-tangerine)',
+            }}
+          />
+        ))}
+      </g>
       <circle
-        cx="100"
-        cy="100"
-        r="56"
-        fill="#FFD438"
-        stroke="#F5A623"
-        strokeWidth="2.5"
+        r={66}
+        className={styles.ink}
+        style={{ fill: 'var(--h-butter)' }}
       />
-      <circle cx="81" cy="91" r="5.2" fill="#111827" />
-      <circle cx="119" cy="91" r="5.2" fill="#111827" />
+      <circle cx={-21} cy={-8} r={5.6} fill="var(--h-ink)" />
+      <circle cx={21} cy={-8} r={5.6} fill="var(--h-ink)" />
       <ellipse
-        cx="69"
-        cy="103"
-        rx="7.5"
-        ry="4.5"
-        fill="#F59E1B"
-        opacity="0.78"
+        cx={-37}
+        cy={10}
+        rx={10}
+        ry={6}
+        fill="var(--h-tangerine)"
+        opacity={0.55}
       />
       <ellipse
-        cx="131"
-        cy="103"
-        rx="7.5"
-        ry="4.5"
-        fill="#F59E1B"
-        opacity="0.78"
+        cx={37}
+        cy={10}
+        rx={10}
+        ry={6}
+        fill="var(--h-tangerine)"
+        opacity={0.55}
       />
       <path
-        d="M84 106 Q100 124 116 106"
+        d="M-23 14 Q0 38 23 14"
+        className={styles.mark}
         fill="none"
-        stroke="#111827"
-        strokeWidth="4.6"
-        strokeLinecap="round"
+        strokeWidth={5}
       />
-    </svg>
+    </>
   )
 }
 
-/** The night act's disc: a sleepy crescent with closed eyes, parked where the
- *  sun sits. Both discs stack in the sun cluster and CSS crossfades between
- *  them, so the swap happens on paper, not with new motion. */
-function PaperMoon({ className }: { className?: string }) {
+function MoonArt() {
   return (
-    <svg
-      viewBox="0 0 200 200"
-      className={className}
-      aria-hidden
-      focusable="false"
-    >
-      {/* crescent bite */}
-      <path
-        d="M100 44 A56 56 0 1 0 100 156 A44 44 0 1 1 100 44 Z"
-        fill="#EFE9D6"
-        stroke="#D9D0B4"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
+    <>
+      <circle r={100} fill="var(--h-paper)" opacity={0.14} />
+      <circle
+        r={72}
+        className={styles.ink}
+        style={{ fill: 'var(--h-paper)' }}
       />
-      <circle cx="118" cy="96" r="7" fill="#DAD2B8" />
-      <circle cx="128" cy="122" r="4.6" fill="#DAD2B8" />
-      <circle cx="106" cy="132" r="3.2" fill="#DAD2B8" />
-      {/* closed sleepy eyes + small smile */}
+      <circle cx={26} cy={-24} r={11} fill="#ddd2b6" />
+      <circle cx={34} cy={14} r={7.5} fill="#ddd2b6" />
+      <circle cx={-6} cy={34} r={5} fill="#ddd2b6" />
+      <circle cx={-44} cy={-26} r={4} fill="#ddd2b6" />
       <path
-        d="M74 92 Q81 97 88 92"
+        d="M-30 -6 Q-21 1 -12 -6"
+        className={styles.mark}
         fill="none"
-        stroke="#111827"
-        strokeWidth="3.6"
-        strokeLinecap="round"
+        strokeWidth={4.4}
       />
       <path
-        d="M112 92 Q119 97 126 92"
+        d="M12 -6 Q21 1 30 -6"
+        className={styles.mark}
         fill="none"
-        stroke="#111827"
-        strokeWidth="3.6"
-        strokeLinecap="round"
+        strokeWidth={4.4}
       />
       <path
-        d="M94 106 Q100 111 106 106"
+        d="M-8 12 Q0 19 8 12"
+        className={styles.mark}
         fill="none"
-        stroke="#111827"
-        strokeWidth="3.2"
-        strokeLinecap="round"
+        strokeWidth={4}
       />
-      {/* crumb stars the moon sheds */}
-      <path
-        d="M152 64 L156 74 L166 76 L157 82 L159 92 L152 86 L145 92 L147 82 L138 76 L148 74 Z"
-        fill="#F7C627"
+      <ellipse
+        cx={-34}
+        cy={8}
+        rx={9}
+        ry={5.4}
+        fill="var(--h-pink)"
+        opacity={0.7}
       />
-      <circle cx="64" cy="52" r="3.4" fill="#F7C627" />
-    </svg>
+      <ellipse
+        cx={34}
+        cy={8}
+        rx={9}
+        ry={5.4}
+        fill="var(--h-pink)"
+        opacity={0.7}
+      />
+    </>
   )
 }
+
+function Cloud({ spec }: { spec: (typeof CLOUDS)[number] }) {
+  const d = useMemo(() => cloudPath(spec.lobes, spec.base), [spec])
+  return (
+    <g className={styles.px} style={vars({ '--depth': spec.depth })}>
+      {/* slide: tied to the time of day. in: the entrance. drift: the rest. */}
+      <g className={styles.cloudSlide} style={vars({ '--dir': spec.dir })}>
+        <g
+          className={styles.cloudIn}
+          style={vars({ '--from': `${spec.from}px`, '--d': `${spec.delay}s` })}
+        >
+          <g
+            className={styles.cloudDrift}
+            style={vars({ '--amp': `${spec.amp}px`, '--dur': `${spec.dur}s` })}
+          >
+            <Paper d={d} fill="cloud" shade={[5, 9]} />
+          </g>
+        </g>
+      </g>
+    </g>
+  )
+}
+
+function House({ spec }: { spec: HouseSpec }) {
+  const { x, y, w, h, wall, roof, delay, chimney } = spec
+  const roofH = Math.round(w * 0.5)
+  const body = `M${-w / 2} 0 V${-h} H${w / 2} V0 Z`
+  const lid = `M${-w / 2 - 7} ${-h} L0 ${-h - roofH} L${w / 2 + 7} ${-h} Z`
+  const pane = round(w * 0.22)
+  const paneY = round(-h * 0.72)
+  const paneX = round(w * 0.14)
+
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      <g className={styles.pop} style={vars({ '--d': `${delay}s` })}>
+        <g className={styles.sway} style={vars({ '--sw': '0.8deg' })}>
+          <path
+            d={body}
+            className={styles.shade}
+            style={{ translate: '6px 5px' }}
+          />
+          <path
+            d={lid}
+            className={styles.shade}
+            style={{ translate: '6px 5px' }}
+          />
+          {chimney ? (
+            <rect
+              x={round(w * 0.16)}
+              y={-h - roofH * 0.82}
+              width={10}
+              height={roofH * 0.6}
+              className={styles.ink}
+              style={fillOf('roofA')}
+            />
+          ) : null}
+          <path d={body} className={styles.ink} style={fillOf(wall)} />
+          <path d={lid} className={styles.ink} style={fillOf(roof)} />
+          {[-1, 1].map((side) => {
+            const px = side < 0 ? -paneX - pane : paneX
+            return (
+              <g key={side}>
+                <circle
+                  className={styles.glow}
+                  cx={round(px + pane / 2)}
+                  cy={round(paneY + pane / 2)}
+                  r={round(w * 0.3)}
+                />
+                <rect
+                  x={px}
+                  y={paneY}
+                  width={pane}
+                  height={pane}
+                  rx={2}
+                  className={styles.ink}
+                  style={fillOf('win')}
+                />
+              </g>
+            )
+          })}
+          <rect
+            x={round(-w * 0.1)}
+            y={round(-h * 0.36)}
+            width={round(w * 0.2)}
+            height={round(h * 0.36)}
+            className={styles.ink}
+            style={fillOf('roofA')}
+          />
+        </g>
+      </g>
+    </g>
+  )
+}
+
+function Tree({ spec }: { spec: (typeof TREES)[number] }) {
+  return (
+    <g transform={`translate(${spec.x} ${spec.y}) scale(${spec.s})`}>
+      <g className={styles.pop} style={vars({ '--d': `${spec.delay}s` })}>
+        <g className={styles.sway} style={vars({ '--sw': `${spec.lean}deg` })}>
+          <rect
+            x={-6}
+            y={-40}
+            width={12}
+            height={40}
+            className={styles.ink}
+            style={fillOf('trunk')}
+          />
+          <circle
+            cx={0}
+            cy={-70}
+            r={34}
+            className={styles.ink}
+            style={fillOf(spec.crown)}
+          />
+          <path
+            d="M-18 -78 Q-8 -94 8 -90"
+            className={styles.mark}
+            fill="none"
+            stroke="var(--h-paper)"
+            strokeWidth={4}
+            opacity={0.7}
+          />
+        </g>
+      </g>
+    </g>
+  )
+}
+
+function Flower({ spec }: { spec: (typeof FLOWERS)[number] }) {
+  return (
+    <g transform={`translate(${spec.x} ${spec.y})`}>
+      <g className={styles.bloom} style={vars({ '--d': `${spec.delay}s` })}>
+        <g className={styles.sway} style={vars({ '--sw': '3deg' })}>
+          <path
+            d={`M0 0 V${-spec.h}`}
+            className={styles.ink}
+            fill="none"
+            style={{ stroke: 'var(--h-ink)' }}
+          />
+          {[0, 72, 144, 216, 288].map((deg) => (
+            <circle
+              key={deg}
+              cx={round(Math.sin((deg * Math.PI) / 180) * 9)}
+              cy={round(-spec.h - Math.cos((deg * Math.PI) / 180) * 9)}
+              r={7.5}
+              className={styles.ink}
+              style={fillOf(spec.petal)}
+            />
+          ))}
+          <circle
+            cx={0}
+            cy={-spec.h}
+            r={6.5}
+            className={styles.ink}
+            style={{ fill: 'var(--h-butter)' }}
+          />
+        </g>
+      </g>
+    </g>
+  )
+}
+
+/* ── Headline rows ────────────────────────────────────────────────────── */
 
 type ScriptLayerProps = {
   word: ScriptWord
@@ -766,6 +716,7 @@ type ScriptLayerProps = {
   stroke: string
   strokeWidth: number
   delay?: number
+  opacity?: number
 }
 
 function ScriptStrokeLayer({
@@ -775,31 +726,32 @@ function ScriptStrokeLayer({
   stroke,
   strokeWidth,
   delay = 0,
+  opacity = 1,
 }: ScriptLayerProps) {
   return (
-    <g transform={transform}>
+    <g transform={transform} opacity={opacity}>
       <motion.path
         d={word.main}
         fill="none"
-        stroke={stroke}
+        style={{ stroke }}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
-        initial={reduced ? false : { pathLength: 0, opacity: 0 }}
-        animate={{ pathLength: 1, opacity: 1 }}
-        transition={{ duration: 1.05, delay, ease: [0.22, 1, 0.36, 1] }}
+        initial={reduced ? false : { pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.05, delay, ease: PAPER_EASE }}
       />
       {word.extra.map((d, index) => (
         <motion.path
           key={index}
           d={d}
           fill="none"
-          stroke={stroke}
+          style={{ stroke }}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeLinejoin="round"
-          initial={reduced ? false : { pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
+          initial={reduced ? false : { pathLength: 0 }}
+          animate={{ pathLength: 1 }}
           transition={{
             duration: 0.25,
             delay: delay + 0.95 + index * 0.12,
@@ -811,15 +763,6 @@ function ScriptStrokeLayer({
   )
 }
 
-/**
- * One row of the headline: a fixed lead word and a gold pill holding the word
- * that changes.
- *
- * The pill keeps its width behind an invisible sizer, so a swap never reflows
- * the sentence around it. The words ride a tape behind a clipped window — the
- * retiring word leaves through the top edge while the next rises from below —
- * so the pill is never empty and the two never share the frame.
- */
 type PillIcon = (typeof CRAFT_ICONS)[number]
 
 /** A row's item is either a Kubai icon reference or a plain text glyph. */
@@ -832,8 +775,14 @@ function hasIcon(it: PillItem): it is KubaiItem {
 }
 
 /**
- * Kubai icons get a controlled `hover` pulse on every word change, so they
- * act themselves out without a pointer. Reduced motion keeps the rest pose.
+ * One row of the headline: a fixed lead word and a gold pill holding the word
+ * that changes.
+ *
+ * The pill keeps its width behind an invisible sizer, so a swap never reflows
+ * the sentence around it. The words ride a tape behind a clipped window — the
+ * retiring word leaves through the top edge while the next rises from below.
+ * Kubai icons get a controlled `hover` pulse on every word change, so they act
+ * themselves out without a pointer.
  */
 function HeadlineSwapRow({
   lead,
@@ -917,74 +866,239 @@ function HeadlineSwapRow({
   )
 }
 
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+
+const TRACK_PAD = 4
+
 /**
- * Pop-Up Theatre Diorama Hero.
+ * Sunnyside Diorama Hero.
  *
- * A paper-cut stage in five depth planes: the blueprint grid and arch rings,
- * the royal-blue proscenium with its screen-printed curtains, the sun and
- * balustrade, the thick off-white `Aditya` cutout, and the foreground cloud
- * apron the headline sits on.
+ * A paper shadow box with a working mechanism. A sky wheel hides behind the
+ * hills with the sun on one end and the moon on the other; the pull tab on the
+ * top rail slides it, and everything else — sky, hills, stars, lit windows,
+ * the title's colour — follows one time-of-day value. The page opens on that
+ * wheel turning: the sun climbs out from behind the hills while the paper
+ * sheets rise into place one depth at a time.
  */
 export function Hero({ surface = 'cobalt' }: Props = {}) {
   const sectionRef = useRef<HTMLElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion() ?? false
-  const gridId = useId()
-  const shadowFilterId = useId()
-  const softShadowId = useId()
-  const deepShadowId = useId()
-  const stageClipId = useId()
 
-  const [physicsOn, setPhysicsOn] = useState(true)
   const [act, setAct] = useState<'day' | 'night'>('day')
-  const [folding, setFolding] = useState(false)
+  const [physicsOn, setPhysicsOn] = useState(true)
   const [writeKey, setWriteKey] = useState(0)
   const [phrase, setPhrase] = useState(0)
   const [phraseHeld, setPhraseHeld] = useState(false)
-
-  const P = act === 'night' ? NIGHT_PAPER : DAY_PAPER
   const physicsActive = physicsOn && !reduced
-  // A reduced-motion visit gets the finished diorama, not a slow build of it.
-  const still = reduced
 
-  // "Pull me" plays the whole diorama in reverse: the stage sheets fold down,
-  // the paper swaps to the night palette while everything is edge-on, then the
-  // sheets tip back up. Reduced motion just crossfades the lighting.
-  const foldTimer = useRef<number | undefined>(undefined)
-  useEffect(() => () => window.clearTimeout(foldTimer.current), [])
-  const pullScene = useCallback(() => {
-    if (folding) return
-    if (still) {
-      setAct((a) => (a === 'day' ? 'night' : 'day'))
+  // ── Time of day ───────────────────────────────────────────────────────
+  const progress = useMotionValue(BOOT_T)
+  const tween = useRef<ReturnType<typeof animate> | null>(null)
+  const actRef = useRef<'day' | 'night'>('day')
+
+  useMotionValueEvent(progress, 'change', (t) => {
+    if (stageRef.current) paintTime(stageRef.current, t)
+  })
+
+  // The sunrise: the stage is already at dawn from the first paint (CSS
+  // `data-boot`), so this only has to hand over and turn the wheel.
+  useEffect(() => {
+    const el = stageRef.current
+    if (!el) return
+    if (reduced) {
+      progress.set(0)
+      paintTime(el, 0)
+      delete el.dataset.boot
       return
     }
-    setFolding(true)
-    foldTimer.current = window.setTimeout(() => {
-      setAct((a) => (a === 'day' ? 'night' : 'day'))
-      setFolding(false)
-    }, 1180)
-  }, [folding, still])
+    paintTime(el, BOOT_T)
+    delete el.dataset.boot
+    const controls = animate(progress, 0, {
+      duration: 2.7,
+      delay: 0.3,
+      ease: [0.3, 0, 0.15, 1],
+    })
+    tween.current = controls
+    return () => controls.stop()
+  }, [reduced, progress])
 
-  // Normalized pointer offset in [-1, 1] for the paper parallax
-  const pointerX = useMotionValue(0)
-  const pointerY = useMotionValue(0)
-  const springConfig = { stiffness: 110, damping: 22, mass: 0.7 }
-  const smoothX = useSpring(pointerX, springConfig)
-  const smoothY = useSpring(pointerY, springConfig)
+  const goTo = useCallback(
+    (to: 0 | 1) => {
+      tween.current?.stop()
+      const next = to === 1 ? 'night' : 'day'
+      actRef.current = next
+      setAct(next)
+      if (reduced) {
+        progress.set(to)
+        return
+      }
+      const el = stageRef.current
+      if (el) el.dataset.pulling = 'true'
+      /* A spring, not a tween: the wheel is a heavy paper disc, so it
+         overshoots a few degrees and settles. */
+      tween.current = animate(progress, to, {
+        type: 'spring',
+        stiffness: 46,
+        damping: 9.5,
+        restDelta: 0.0008,
+        restSpeed: 0.004,
+        onComplete: () => {
+          if (stageRef.current) delete stageRef.current.dataset.pulling
+        },
+      })
+    },
+    [progress, reduced],
+  )
 
-  const curtainX = useTransform(smoothX, (v) => v * -10)
-  const curtainY = useTransform(smoothY, (v) => v * -7)
-  const midX = useTransform(smoothX, (v) => v * 6)
-  const midY = useTransform(smoothY, (v) => v * 5)
-  const sunX = useTransform(smoothX, (v) => v * 12)
-  const sunY = useTransform(smoothY, (v) => v * 9)
-  const titleX = useTransform(smoothX, (v) => v * 16)
-  const titleY = useTransform(smoothY, (v) => v * 11)
-  const cloudsFrontX = useTransform(smoothX, (v) => v * 20)
-  const cloudsFrontY = useTransform(smoothY, (v) => v * 8)
+  useEffect(() => () => tween.current?.stop(), [])
 
+  // ── The pull tab: click, key, or drag along its slot ──────────────────
+  const dragRef = useRef<{
+    startX: number
+    startT: number
+    moved: boolean
+  } | null>(null)
+  const swallowClick = useRef(false)
+
+  const toggle = useCallback(
+    () => goTo(actRef.current === 'day' ? 1 : 0),
+    [goTo],
+  )
+
+  const onTabDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return
+    event.currentTarget.setPointerCapture(event.pointerId)
+    tween.current?.stop()
+    dragRef.current = {
+      startX: event.clientX,
+      startT: progress.get(),
+      moved: false,
+    }
+  }
+
+  const onTabMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = dragRef.current
+    const track = trackRef.current
+    if (!drag || !track) return
+    const dx = event.clientX - drag.startX
+    if (!drag.moved && Math.abs(dx) < 5) return
+    drag.moved = true
+    const range = Math.max(
+      1,
+      track.clientWidth - event.currentTarget.offsetWidth - TRACK_PAD * 2,
+    )
+    progress.set(clamp(drag.startT + dx / range, 0, 1))
+  }
+
+  const onTabUp = () => {
+    const drag = dragRef.current
+    dragRef.current = null
+    if (!drag) return
+    swallowClick.current = true
+    if (drag.moved) goTo(progress.get() >= 0.5 ? 1 : 0)
+    else toggle()
+  }
+
+  const onTabClick = () => {
+    // A pointer press already toggled on release; this is the keyboard path.
+    if (swallowClick.current) {
+      swallowClick.current = false
+      return
+    }
+    toggle()
+  }
+
+  const onTabKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'ArrowRight') {
+      event.preventDefault()
+      goTo(1)
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault()
+      goTo(0)
+    }
+  }
+
+  // ── Pointer and scroll parallax ───────────────────────────────────────
+  const pointerX = useSpring(0, { stiffness: 90, damping: 20, mass: 0.7 })
+  const pointerY = useSpring(0, { stiffness: 90, damping: 20, mass: 0.7 })
+  useMotionValueEvent(pointerX, 'change', (v) =>
+    stageRef.current?.style.setProperty('--px', v.toFixed(3)),
+  )
+  useMotionValueEvent(pointerY, 'change', (v) =>
+    stageRef.current?.style.setProperty('--py', v.toFixed(3)),
+  )
+
+  const handleMove = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      if (!physicsActive || event.pointerType !== 'mouse') return
+      const rect = event.currentTarget.getBoundingClientRect()
+      pointerX.set(
+        clamp(((event.clientX - rect.left) / rect.width) * 2 - 1, -1, 1),
+      )
+      pointerY.set(
+        clamp(((event.clientY - rect.top) / rect.height) * 2 - 1, -1, 1),
+      )
+    },
+    [physicsActive, pointerX, pointerY],
+  )
+
+  const handleLeave = useCallback(() => {
+    pointerX.set(0)
+    pointerY.set(0)
+  }, [pointerX, pointerY])
+
+  // Scrolling away lets the layers separate; the far ones lag the page.
+  // The same observer idles the ambient loops while the hero is off-screen.
+  useEffect(() => {
+    const section = sectionRef.current
+    const stage = stageRef.current
+    if (!section || !stage) return
+
+    let frame = 0
+    const write = () => {
+      frame = 0
+      const sy = clamp(window.scrollY / Math.max(1, section.offsetHeight), 0, 1)
+      stage.style.setProperty('--sy', physicsActive ? sy.toFixed(3) : '0')
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(write)
+    }
+
+    const observer =
+      typeof IntersectionObserver === 'undefined'
+        ? null
+        : new IntersectionObserver(([entry]) => {
+            stage.dataset.idle = String(!entry.isIntersecting)
+          })
+    observer?.observe(section)
+
+    write()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      observer?.disconnect()
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [physicsActive])
+
+  const togglePhysics = useCallback(() => {
+    setPhysicsOn((prev) => {
+      if (prev) {
+        pointerX.set(0)
+        pointerY.set(0)
+      }
+      return !prev
+    })
+  }, [pointerX, pointerY])
+
+  // ── Title ─────────────────────────────────────────────────────────────
   const word = useMemo(() => layoutAdityaWord(), [])
   const scriptBox = useMemo(() => {
-    const pad = SCRIPT_STROKE / 2 + 2.8
+    const pad = SCRIPT_STROKE / 2 + 4.6
     const vbX = -1.8 - pad
     const vbY = word.top - pad
     const vbW =
@@ -993,58 +1107,15 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
     return [vbX, vbY, vbW, vbH].map(round).join(' ')
   }, [word])
 
-  const handleStageMove = useCallback(
-    (event: React.PointerEvent<HTMLElement>) => {
-      if (
-        !physicsActive ||
-        event.pointerType !== 'mouse' ||
-        !sectionRef.current
-      )
-        return
-      const rect = sectionRef.current.getBoundingClientRect()
-      const nx = ((event.clientX - rect.left) / rect.width) * 2 - 1
-      const ny = ((event.clientY - rect.top) / rect.height) * 2 - 1
-      pointerX.set(Math.max(-1, Math.min(1, nx)))
-      pointerY.set(Math.max(-1, Math.min(1, ny)))
-    },
-    [physicsActive, pointerX, pointerY],
-  )
+  const replayWrite = useCallback(() => setWriteKey((k) => k + 1), [])
 
-  const handleStageLeave = useCallback(() => {
-    pointerX.set(0)
-    pointerY.set(0)
-  }, [pointerX, pointerY])
+  // ── The headline writes itself ────────────────────────────────────────
+  // All three rows turn over on one beat. It holds whenever a visitor takes
+  // over — pointer over the stack, focus in it, the tab hidden, the hero
+  // scrolled past — and never starts under reduced motion.
+  const advancePhrase = useCallback(() => setPhrase((p) => p + 1), [])
+  const holdPhrase = useCallback((held: boolean) => setPhraseHeld(held), [])
 
-  const togglePhysics = useCallback(() => {
-    setPhysicsOn((prev) => {
-      const next = !prev
-      if (!next) {
-        pointerX.set(0)
-        pointerY.set(0)
-      }
-      return next
-    })
-  }, [pointerX, pointerY])
-
-  const replayWrite = useCallback(() => {
-    setWriteKey((k) => k + 1)
-  }, [])
-
-  const advancePhrase = useCallback(() => {
-    setPhrase((prev) => prev + 1)
-  }, [])
-
-  /**
-   * The headline writes itself.
-   *
-   * All three rows turn over on one beat, so what changes is a whole sentence
-   * rather than three separate widgets each doing their own thing. The lists
-   * differ in length, so the pairings still keep moving.
-   *
-   * It holds whenever a visitor takes over — pointer over the stack, focus in
-   * it, the tab hidden, the hero scrolled past — and never starts under reduced
-   * motion, where the first phrase simply stays put.
-   */
   useEffect(() => {
     if (reduced || phraseHeld) return
     const section = sectionRef.current
@@ -1058,7 +1129,6 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
       window.clearTimeout(timer)
       timer = 0
     }
-
     const schedule = () => {
       stop()
       if (document.hidden || !onScreen || phraseHeld) return
@@ -1090,8 +1160,6 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
     }
   }, [reduced, phraseHeld])
 
-  const holdPhrase = useCallback((held: boolean) => setPhraseHeld(held), [])
-
   const craftIndex = phrase % MADLIB_SLOTS.craft.length
   const tasteIndex = phrase % MADLIB_SLOTS.taste.length
   const productIndex = phrase % MADLIB_SLOTS.products.length
@@ -1102,675 +1170,369 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
       ref={sectionRef}
       className={styles.hero}
       data-surface={surface}
-      data-act={act}
-      data-folding={folding ? 'true' : 'false'}
       data-physics={physicsActive ? 'on' : 'off'}
       aria-labelledby="hero-title"
-      onPointerMove={handleStageMove}
-      onPointerLeave={handleStageLeave}
+      onPointerMove={handleMove}
+      onPointerLeave={handleLeave}
     >
       <MotionConfig reducedMotion="user">
-        {/* Global filters, grid pattern and stage clip for the shadow-box */}
-        <svg className={styles.svgDefs} aria-hidden focusable="false">
-          <defs>
-            <filter
-              id={shadowFilterId}
-              x="-16%"
-              y="-16%"
-              width="132%"
-              height="138%"
-            >
-              <feDropShadow
-                dx="0"
-                dy="7"
-                stdDeviation="5"
-                floodColor="#091232"
-                floodOpacity="0.44"
-              />
-            </filter>
-            <filter
-              id={deepShadowId}
-              x="-16%"
-              y="-18%"
-              width="132%"
-              height="142%"
-            >
-              <feDropShadow
-                dx="0"
-                dy="10"
-                stdDeviation="7.5"
-                floodColor="#091232"
-                floodOpacity="0.46"
-              />
-            </filter>
-            {/* Light touch for the small hanging pieces — the bunting string
-                and its stars. The stage shadow paints a second line under the
-                string and a tail under every star at this scale. */}
-            <filter
-              id={softShadowId}
-              x="-20%"
-              y="-20%"
-              width="140%"
-              height="150%"
-            >
-              <feDropShadow
-                dx="0"
-                dy="2.5"
-                stdDeviation="2.2"
-                floodColor="#091232"
-                floodOpacity="0.26"
-              />
-            </filter>
-            <pattern
-              id={gridId}
-              width="44"
-              height="44"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                d="M 44 0 L 0 0 0 44"
-                fill="none"
-                stroke="rgb(250 249 246 / 0.16)"
-                strokeWidth="1"
-              />
-              <path
-                d="M 11 0 V 44 M 22 0 V 44 M 33 0 V 44 M 0 11 H 44 M 0 22 H 44 M 0 33 H 44"
-                fill="none"
-                stroke="rgb(250 249 246 / 0.06)"
-                strokeWidth="0.75"
-              />
-            </pattern>
-            <clipPath id={stageClipId}>
-              <rect x="146" y="74" width="1148" height="778" rx="18" />
-            </clipPath>
-          </defs>
-        </svg>
+        <div className={styles.box}>
+          <span className={cn(styles.tape, styles.tapeLeft)} aria-hidden />
+          <span className={cn(styles.tape, styles.tapeRight)} aria-hidden />
 
-        {/* Left edge cardstock tab: physics on/off */}
-        <button
-          type="button"
-          className={styles.physicsTab}
-          aria-pressed={physicsOn}
-          onClick={togglePhysics}
-        >
-          <span className={styles.physicsLabel}>physics on/off</span>
-        </button>
-
-        {/* Outer proscenium royal-blue side walls */}
-        <div className={styles.wingLeftOuter} aria-hidden>
-          <div className={styles.wingFoldLeft} />
-        </div>
-        <div className={styles.wingRightOuter} aria-hidden>
-          <div className={styles.wingFoldRight} />
-        </div>
-
-        {/* Sky-blue recessed diorama viewport */}
-        <div className={styles.dioramaViewport}>
-          {/* Night lighting: a screen-blend moonbeam under the disc plus one
-              shooting star. The palette swap does the rest. */}
-          <div className={styles.shootingStar} aria-hidden />
-          {/* Planes 1–3 fold during a scene swap; the apron, rail and title stay */}
-          <FoldCtx.Provider value={folding}>
-          {/* Plane 1: blueprint grid and arch rings */}
-          <motion.div
-            className={styles.planeCurtains}
-            style={physicsActive ? { x: curtainX, y: curtainY } : undefined}
-            aria-hidden
+          <div
+            ref={stageRef}
+            className={styles.window}
+            style={PAPER_VARS}
+            data-boot="true"
+            data-act={act}
           >
-            <svg
-              viewBox="0 0 1440 860"
-              preserveAspectRatio="xMidYMin slice"
-              className={styles.stageSvg}
-            >
-              <g clipPath={`url(#${stageClipId})`}>
-                <PaperLayer still={still} delay={0.8} from={-18}>
-                  <rect
-                    x="130"
-                    y="60"
-                    width="1180"
-                    height="796"
-                    fill={P.backdrop}
-                  />
-                  <rect
-                    x="130"
-                    y="60"
-                    width="1180"
-                    height="796"
-                    fill={`url(#${gridId})`}
-                  />
-                </PaperLayer>
-
-                <PaperLayer still={still} delay={0.56} from={26}>
-                  <path
-                    d="M130 60 H1310 V860 H1085 C1085 270 935 90 710 90 C485 90 335 270 335 860 H130 Z"
-                    fill={P.ringGold}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-
-                <PaperLayer still={still} delay={0.58} from={28}>
-                  <path
-                    d="M130 60 H1310 V860 H1038 C1038 298 900 126 710 126 C520 126 382 298 382 860 H130 Z"
-                    fill={P.ringOrange}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-
-                <PaperLayer still={still} delay={0.6} from={30}>
-                  <g filter={`url(#${shadowFilterId})`}>
-                    <path
-                      d="M382 860 C382 298 520 126 710 126 C900 126 1038 298 1038 860 H1016 C1016 314 884 150 710 150 C536 150 404 314 404 860 Z"
-                      fill={P.paperWhite}
-                    />
-                    <path
-                      d="M495 70 H765 C762 128 722 154 682 128 C654 164 594 164 566 128 C528 152 496 126 495 70 Z"
-                      fill={P.paperWhite}
-                    />
-                  </g>
-                </PaperLayer>
-
-                <PaperLayer still={still} delay={0.62} from={36}>
-                  <SculptedCloud
-                    lobes={STAGE_CLOUDS.amberMidLeft}
-                    baseY={680}
-                    fill={P.cloudAmber}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                  <SculptedCloud
-                    lobes={STAGE_CLOUDS.amberMidRight}
-                    baseY={680}
-                    fill={P.cloudAmber}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-              </g>
-            </svg>
-          </motion.div>
-
-          {/* Plane 2: proscenium frame and screen-printed curtains */}
-          <motion.div
-            className={styles.planeProscenium}
-            style={physicsActive ? { x: midX, y: midY } : undefined}
-            aria-hidden
-          >
-            <svg
-              viewBox="0 0 1440 860"
-              preserveAspectRatio="xMidYMin slice"
-              className={styles.stageSvg}
-            >
-              <g clipPath={`url(#${stageClipId})`}>
-                <PaperLayer still={still} delay={0.64} from={-24}>
-                  <path
-                    d="M148 70 H435 C420 177 358 257 275 317 C242 330 196 341 148 347 Z"
-                    fill={P.wedgeGold}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                  <path
-                    d="M148 70 H410 C395 154 342 216 264 238 C226 243 186 248 148 250 Z"
-                    fill={P.matBlue}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                  {/* The gold shoulder behind the sun used to stop at x 1080
-                      with a hard vertical cut in mid-sky; it now sweeps down
-                      and tucks into the right frame leg instead. */}
-                  <path
-                    d="M720 70 H1272 V318 C1236 250 1160 196 1060 168 C940 136 800 108 720 70 Z"
-                    fill={P.shoulderGold}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-
-                <PaperLayer still={still} delay={0.66} from={32}>
-                  <path
-                    d="M312 310 C302 280 326 252 356 260 C378 226 428 228 446 262 C474 258 494 282 484 310 Z"
-                    fill={P.paperWhite}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                  {/* The right-hand white cloud used to crowd the sun's own
-                      cloud stack; it sits down-right now, filling the sky the
-                      shrunken blue bank opened up. */}
-                  <path
-                    d="M1020 428 C1008 392 1040 360 1076 370 C1102 330 1162 334 1184 372 C1218 368 1240 396 1230 428 Z"
-                    fill={P.paperWhite}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-
-                <PaperLayer still={still} delay={0.68} from={36}>
-                  <path
-                    d="M148 340 C284 340 312 380 296 430 C312 458 292 500 248 512 C214 512 178 505 148 492 Z"
-                    fill={P.paperWhite}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                  <path
-                    d="M1292 344 C1228 344 1178 384 1192 434 C1150 448 1140 504 1182 534 C1208 550 1250 547 1292 538 Z"
-                    fill={P.paperWhite}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-
-                <PaperLayer still={still} delay={0.7} from={38}>
-                  <path
-                    d="M148 474 C310 466 368 508 376 568 C428 568 472 610 478 672 C406 676 276 680 148 680 Z"
-                    fill={P.matBlue}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-
-                <PaperLayer still={still} delay={0.72} from={42}>
-                  <SculptedCloud
-                    lobes={STAGE_CLOUDS.balustradeBackAmber}
-                    baseY={680}
-                    leftX={410}
-                    rightX={830}
-                    fill={P.cloudAmber}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                  <SculptedCloud
-                    lobes={STAGE_CLOUDS.balustradeBackGold}
-                    baseY={680}
-                    leftX={830}
-                    rightX={1310}
-                    fill={P.ringPale}
-                    filter={`url(#${shadowFilterId})`}
-                  />
-                </PaperLayer>
-              </g>
-
-              <PaperLayer still={still} delay={0.4} from={-14}>
-                <path
-                  d="M118 860 V70 C118 44 138 26 164 26 H1276 C1302 26 1322 44 1322 70 V860 H1272 V94 C1272 80 1260 70 1246 70 H194 C180 70 168 80 168 94 V860 Z"
-                  fill={P.deepBlue}
-                  filter={`url(#${deepShadowId})`}
-                />
-                <path
-                  d="M120 855 V70 C120 46 139 28 164 28 H1276 C1301 28 1320 46 1320 70 V855"
-                  fill="none"
-                  stroke="rgb(250 249 246 / 0.24)"
-                  strokeWidth="2"
-                />
-              </PaperLayer>
-
-              <PaperLayer still={still} delay={0.46} from={-20}>
-                <path
-                  d="M846 0 H1018 C1012 40 972 58 934 40 C912 30 902 16 896 0 Z"
-                  fill={P.paleBlue}
-                  filter={`url(#${shadowFilterId})`}
-                />
-                <path
-                  d="M1030 0 H1330 C1330 46 1298 74 1258 66 C1236 96 1188 106 1152 86 C1116 110 1064 104 1040 72 C1024 50 1022 22 1030 0 Z"
-                  fill={P.paperWhite}
-                  filter={`url(#${shadowFilterId})`}
-                />
-              </PaperLayer>
-            </svg>
-          </motion.div>
-
-          {/* Plane 3: sun, balustrade and bunting */}
-          <motion.div
-            className={styles.planeStageProps}
-            style={physicsActive ? { x: sunX, y: sunY } : undefined}
-          >
-            <Bunting still={still} shadowId={softShadowId} pin={P.paperWhite} />
-
-            <div className={styles.sunCluster} aria-hidden>
-              <motion.div
-                className={styles.sunDisc}
-                initial={still ? false : { y: 34, scale: 0.92, opacity: 0 }}
-                animate={{ y: 0, scale: 1, opacity: 1 }}
-                transition={
-                  still
-                    ? undefined
-                    : {
-                        y: { duration: 0.88, delay: 0.52, ease: PAPER_EASE },
-                        scale: {
-                          duration: 0.88,
-                          delay: 0.52,
-                          ease: PAPER_EASE,
-                        },
-                        opacity: { duration: 0.16, delay: 0.52 },
-                      }
-                }
-              >
-                <PaperSun className={styles.sunSvg} />
-                <PaperMoon className={styles.moonSvg} />
-              </motion.div>
-              <motion.svg
-                viewBox="0 0 380 155"
-                className={styles.sunCloudCover}
+            {/* ── Scene ───────────────────────────────────────────────── */}
+            <div className={styles.scene}>
+              {/* Back sheets: sky, the wheel, clouds, the far hill and the
+                  town on it. */}
+              <svg
+                className={cn(styles.svg, styles.svgBack)}
+                viewBox="0 0 1440 860"
+                preserveAspectRatio="xMidYMax slice"
+                aria-hidden
                 focusable="false"
-                initial={still ? false : { y: 26, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={
-                  still
-                    ? undefined
-                    : {
-                        y: { duration: 0.82, delay: 0.58, ease: PAPER_EASE },
-                        opacity: { duration: 0.16, delay: 0.58 },
-                      }
-                }
               >
-                <path
-                  d="M18 112 C12 76 44 52 80 62 C114 22 180 22 214 58 C250 36 300 46 320 80 C352 82 366 106 356 128 H18 Z"
-                  fill={P.sunCream}
-                  filter={`url(#${shadowFilterId})`}
-                />
-                <path
-                  d="M34 128 C28 94 58 72 92 80 C124 44 188 44 218 76 C252 56 298 66 314 96 C342 98 354 116 344 134 H34 Z"
-                  fill={P.paperWhite}
-                  filter={`url(#${shadowFilterId})`}
-                />
-              </motion.svg>
-            </div>
-
-            {/* Cut-out stars, plus the data-hero-sticker hooks the About
-                gravity pit peels from. */}
-            <div className={styles.starScatter} data-still={still} aria-hidden>
-              <div
-                className={cn(styles.cutoutStar, styles.starPos1)}
-                data-hero-sticker="smiley"
-                data-slot="smiley"
-              >
-                <FourPointSparkle fill="#2647D8" innerFill="#74A9F0" />
-                <span className={styles.hiddenHook}>
-                  <Smiley />
-                </span>
-              </div>
-
-              <div
-                className={cn(styles.cutoutStar, styles.starPos2)}
-                data-hero-sticker="burst"
-                data-slot="burst"
-              >
-                <FivePointStar
-                  fill="#FFD12E"
-                  innerFill="#FAF9F6"
-                  stroke="#111827"
-                  strokeWidth={2.6}
-                />
-                <span className={styles.hiddenHook}>
-                  <Burst text="hi!" />
-                </span>
-              </div>
-
-              <div
-                className={cn(styles.cutoutStar, styles.starPos3)}
-                data-hero-sticker="daisy"
-                data-slot="daisy"
-              >
-                <FourPointSparkle fill={P.paperWhite} innerFill="#8AB8EE" />
-                <span className={styles.hiddenHook}>
-                  <Daisy />
-                </span>
-              </div>
-
-              <div
-                className={cn(styles.cutoutStar, styles.starPos4)}
-                data-hero-sticker="bolt"
-                data-slot="bolt"
-              >
-                <FivePointStar
-                  fill="#F5A623"
-                  innerFill="#FFD12E"
-                  stroke="#111827"
-                  strokeWidth={2.6}
-                />
-                <span className={styles.hiddenHook}>
-                  <Bolt />
-                </span>
-              </div>
-
-              <div className={cn(styles.cutoutStar, styles.starPos5)}>
-                <FourPointSparkle fill={P.paperWhite} innerFill="#7EB0EC" />
-              </div>
-
-              <div className={cn(styles.cutoutStar, styles.starPos6)}>
-                <EightPointBurst fill={P.paperWhite} />
-              </div>
-
-              <div className={cn(styles.cutoutStar, styles.starPos7)}>
-                <FourPointSparkle fill={P.paperWhite} innerFill="#F5A623" />
-              </div>
-
-              <div className={cn(styles.cutoutStar, styles.starPos8)}>
-                <FivePointStar
-                  fill={P.paperWhite}
-                  stroke="#111827"
-                  strokeWidth={2.6}
-                />
-              </div>
-            </div>
-          </motion.div>
-
-          </FoldCtx.Provider>
-
-          {/* Plane 4: the thick off-white Aditya cutout */}
-          <motion.div
-            className={styles.planeTitle}
-            style={physicsActive ? { x: titleX, y: titleY } : undefined}
-          >
-            <motion.div
-              /* Same diorama hinge as the stage planes: the cutout tips up from
-                 its baseline instead of sliding, so the title reads as another
-                 sheet of paper in the stack. */
-              style={{ originY: 1, transformPerspective: 1400 }}
-              initial={still ? false : { y: 28, rotateX: 90, opacity: 0 }}
-              animate={{ y: 0, rotateX: 0, opacity: 1 }}
-              transition={
-                still
-                  ? undefined
-                  : {
-                      y: { duration: 0.9, delay: 0.3, ease: PAPER_EASE },
-                      rotateX: { duration: 0.9, delay: 0.3, ease: PAPER_EASE },
-                      opacity: { duration: 0.22, delay: 0.3 },
-                    }
-              }
-            >
-              <button
-                type="button"
-                className={styles.scriptBtn}
-                onClick={replayWrite}
-                aria-label="Aditya — click to replay title animation"
-              >
-                <svg
-                  key={writeKey}
-                  viewBox={scriptBox}
-                  className={styles.scriptSvg}
-                  aria-hidden
-                  focusable="false"
-                >
-                  <ScriptStrokeLayer
-                    word={word}
-                    reduced={reduced}
-                    delay={0.32}
-                    transform="translate(2.1 3.1) skewX(-9)"
-                    stroke="rgb(9 18 50 / 0.38)"
-                    strokeWidth={SCRIPT_STROKE + 2.4}
+                <g className={styles.px} style={vars({ '--depth': 0.1 })}>
+                  <rect
+                    x={-160}
+                    y={-160}
+                    width={1760}
+                    height={1180}
+                    style={fillOf('sky')}
                   />
-                  <ScriptStrokeLayer
-                    word={word}
-                    reduced={reduced}
-                    delay={0.22}
-                    transform="translate(1.15 1.65) skewX(-9)"
-                    stroke="#0F1B4C"
-                    strokeWidth={SCRIPT_STROKE + 2.1}
-                  />
-                  <ScriptStrokeLayer
-                    word={word}
-                    reduced={reduced}
-                    delay={0.1}
-                    transform="skewX(-9)"
-                    stroke="#16296B"
-                    strokeWidth={SCRIPT_STROKE + 1.45}
-                  />
-                  <ScriptStrokeLayer
-                    word={word}
-                    reduced={reduced}
-                    transform="skewX(-9)"
-                    stroke="#FAF9F6"
-                    strokeWidth={SCRIPT_STROKE}
-                  />
-                </svg>
-              </button>
-            </motion.div>
-          </motion.div>
+                  {RINGS.map((ring) => (
+                    <g
+                      key={ring.r}
+                      className={styles.ringIn}
+                      style={vars({ '--d': `${ring.delay}s` })}
+                    >
+                      <circle
+                        cx={WHEEL.cx}
+                        cy={WHEEL.cy}
+                        r={ring.r}
+                        className={styles.ring}
+                        style={fillOf(ring.token)}
+                      />
+                    </g>
+                  ))}
+                </g>
 
-          {/* Plane 5b: the balustrade, above the foreground apron. Its ends
-              land on the proscenium legs — if the apron covered them, the rail
-              would read as floating mid-stage with no anchor. */}
-          <div className={styles.planeBalustrade} aria-hidden>
-            <motion.div
-              className={styles.balustrade}
-              aria-hidden
-              initial={still ? false : { y: 28, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={
-                still
-                  ? undefined
-                  : {
-                      y: { duration: 0.78, delay: 0.64, ease: PAPER_EASE },
-                      opacity: { duration: 0.16, delay: 0.64 },
-                    }
-              }
-            >
-              <div className={styles.balustradeTopRail} />
-              <div className={styles.balustradeSpindles}>
-                {Array.from({ length: 15 }).map((_, i) => (
-                  <span key={i} className={styles.balustradePost} />
+                <g className={styles.px} style={vars({ '--depth': 0.2 })}>
+                  {STARS.map((star, i) => (
+                    <g
+                      key={i}
+                      transform={`translate(${star.x} ${star.y}) scale(${star.k})`}
+                    >
+                      <g
+                        className={styles.star}
+                        style={vars({ '--at': star.at })}
+                      >
+                        <path
+                          d={SPARKLE}
+                          className={styles.starGlyph}
+                          style={vars({ '--tw': `${star.tw}s` })}
+                        />
+                      </g>
+                    </g>
+                  ))}
+                  <g className={styles.shoot}>
+                    <path d="M0 0 L-120 -34" className={styles.shootTail} />
+                    <circle r={4.5} fill="var(--h-paper)" />
+                  </g>
+                </g>
+
+                <g className={styles.px} style={vars({ '--depth': 0.34 })}>
+                  <g className={styles.wheel}>
+                    <circle
+                      cx={WHEEL.cx}
+                      cy={WHEEL.cy}
+                      r={WHEEL.r}
+                      className={styles.orbit}
+                    />
+                    <g transform={`translate(${WHEEL.cx} ${WHEEL.cy})`}>
+                      {ORBIT_DOTS.map((dot, i) => (
+                        <circle
+                          key={i}
+                          cx={dot.x}
+                          cy={dot.y}
+                          r={dot.r}
+                          fill={dot.color}
+                          opacity={0.9}
+                        />
+                      ))}
+                    </g>
+                    <g
+                      transform={`translate(${WHEEL.cx} ${WHEEL.cy - WHEEL.r})`}
+                    >
+                      <g className={styles.upright}>
+                        <SunArt />
+                      </g>
+                    </g>
+                    <g
+                      transform={`translate(${WHEEL.cx} ${WHEEL.cy + WHEEL.r})`}
+                    >
+                      <g className={styles.upright}>
+                        <MoonArt />
+                      </g>
+                    </g>
+                  </g>
+                </g>
+
+                {CLOUDS.map((cloud) => (
+                  <Cloud key={cloud.id} spec={cloud} />
                 ))}
-              </div>
-              <div className={styles.balustradeBottomRail} />
-            </motion.div>
-          </div>
 
-          {/* Upper-right docked stage CTA tab.
-              Kept off the narrow breakpoints: the fixed header already carries
-              this exact action, and below 900px the two pills collide. */}
-          <div className={styles.upperRightAction}>
+                <g className={styles.px} style={vars({ '--depth': 0.5 })}>
+                  <g className={styles.slideFar}>
+                    <g
+                      className={styles.rise}
+                      style={vars({ '--d': '0.4s', '--from': '170px' })}
+                    >
+                      <Paper d={FAR_HILL} fill="far" shade={[0, -12]} />
+                      {HOUSES.map((house) => (
+                        <House key={house.x} spec={house} />
+                      ))}
+                    </g>
+                  </g>
+                </g>
+              </svg>
+
+              {/* The title stands between the far and the near sheets. */}
+              <div className={styles.titlePlane}>
+                <div className={styles.px} style={vars({ '--depth': 0.7 })}>
+                  <div className={styles.titleCut}>
+                    <button
+                      type="button"
+                      className={styles.scriptBtn}
+                      onClick={replayWrite}
+                      aria-label="Aditya — click to replay title animation"
+                    >
+                      <svg
+                        key={writeKey}
+                        viewBox={scriptBox}
+                        className={styles.scriptSvg}
+                        aria-hidden
+                        focusable="false"
+                      >
+                        <ScriptStrokeLayer
+                          word={word}
+                          reduced={reduced}
+                          delay={1.0}
+                          transform="translate(2.4 3.4) skewX(-9)"
+                          stroke="var(--h-ink)"
+                          strokeWidth={SCRIPT_STROKE + 3.8}
+                          opacity={0.32}
+                        />
+                        <ScriptStrokeLayer
+                          word={word}
+                          reduced={reduced}
+                          delay={0.94}
+                          transform="skewX(-9)"
+                          stroke="var(--h-ink)"
+                          strokeWidth={SCRIPT_STROKE + 3.3}
+                        />
+                        <ScriptStrokeLayer
+                          word={word}
+                          reduced={reduced}
+                          delay={0.9}
+                          transform="skewX(-9)"
+                          stroke="var(--c-title)"
+                          strokeWidth={SCRIPT_STROKE + 0.7}
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Near sheets: the two front hills, the planted trees and
+                  flowers, and the meadow bank the headline stands on. */}
+              <svg
+                className={cn(styles.svg, styles.svgFront)}
+                viewBox="0 0 1440 860"
+                preserveAspectRatio="xMidYMax slice"
+                aria-hidden
+                focusable="false"
+              >
+                <g className={styles.px} style={vars({ '--depth': 0.8 })}>
+                  <g className={styles.slideLeft}>
+                    <g
+                      className={styles.rise}
+                      style={vars({ '--d': '0.58s', '--from': '190px' })}
+                    >
+                      <Paper d={MID_LEFT_HILL} fill="mid" shade={[0, -12]} />
+                      {TREES.filter((tree) => tree.x < 700).map((tree) => (
+                        <Tree key={tree.x} spec={tree} />
+                      ))}
+                    </g>
+                  </g>
+                </g>
+
+                <g className={styles.px} style={vars({ '--depth': 0.9 })}>
+                  <g className={styles.slideRight}>
+                    <g
+                      className={styles.rise}
+                      style={vars({ '--d': '0.7s', '--from': '200px' })}
+                    >
+                      <Paper d={MID_RIGHT_HILL} fill="near" shade={[0, -12]} />
+                      {TREES.filter((tree) => tree.x >= 700).map((tree) => (
+                        <Tree key={tree.x} spec={tree} />
+                      ))}
+                    </g>
+                  </g>
+                </g>
+
+                <g className={styles.px} style={vars({ '--depth': 1.05 })}>
+                  {FLOWERS.map((flower) => (
+                    <Flower key={flower.x} spec={flower} />
+                  ))}
+                  <g
+                    className={styles.rise}
+                    style={vars({ '--d': '0.84s', '--from': '230px' })}
+                  >
+                    <Paper d={BANK} fill="bank" shade={[0, -14]} />
+                  </g>
+                </g>
+              </svg>
+
+              <div className={styles.veil} aria-hidden />
+
+              {/* Die-cut stickers pasted on the box. The About tray peels
+                  these four, so the data hooks stay. */}
+              <div className={styles.stickers} aria-hidden>
+                <div
+                  className={cn(styles.sticker, styles.stickerSmiley)}
+                  data-hero-sticker="smiley"
+                  data-slot="smiley"
+                >
+                  <Smiley />
+                </div>
+                <div
+                  className={cn(styles.sticker, styles.stickerBurst)}
+                  data-hero-sticker="burst"
+                  data-slot="burst"
+                >
+                  <Burst text="hi!" />
+                </div>
+                <div
+                  className={cn(styles.sticker, styles.stickerDaisy)}
+                  data-hero-sticker="daisy"
+                  data-slot="daisy"
+                >
+                  <Daisy />
+                </div>
+                <div
+                  className={cn(styles.sticker, styles.stickerBolt)}
+                  data-hero-sticker="bolt"
+                  data-slot="bolt"
+                >
+                  <Bolt />
+                </div>
+              </div>
+            </div>
+
+            {/* ── Controls ───────────────────────────────────────────── */}
+            <div className={styles.tag} aria-hidden>
+              <span>
+                {act === 'day' ? 'Fig. 01 — Daytime' : 'Fig. 02 — Nighttime'}
+              </span>
+            </div>
+
             <button
               type="button"
-              className={styles.paperPillBtn}
-              aria-pressed={act === 'night'}
-              disabled={folding}
-              onClick={pullScene}
+              className={styles.parallaxChip}
+              aria-pressed={physicsOn}
+              onClick={togglePhysics}
             >
-              <span>{act === 'day' ? 'Pull me' : 'Push back'}</span>
-              <ArrowUpRight size={20} strokeWidth={2.5} aria-hidden />
+              <span className={styles.chipDot} aria-hidden />
+              Parallax
             </button>
-          </div>
 
-          {/* Plane 5: foreground cloud apron */}
-          <motion.div
-            className={styles.planeForegroundClouds}
-            style={
-              physicsActive ? { x: cloudsFrontX, y: cloudsFrontY } : undefined
-            }
-            aria-hidden
-          >
-            <svg
-              viewBox="0 0 1440 420"
-              preserveAspectRatio="xMidYMin slice"
-              className={styles.cloudsSvg}
-            >
-              <PaperLayer still={still} delay={0.26} from={52}>
-                <SculptedCloud
-                  lobes={FOREGROUND_CLOUDS.amberWave}
-                  baseY={430}
-                  leftX={380}
-                  rightX={1440}
-                  fill={P.fgAmber}
-                  filter={`url(#${shadowFilterId})`}
-                />
-              </PaperLayer>
-
-              <PaperLayer still={still} delay={0.22} from={54}>
-                <SculptedCloud
-                  lobes={FOREGROUND_CLOUDS.creamWave}
-                  baseY={430}
-                  leftX={450}
-                  rightX={1460}
-                  fill={P.fgCream}
-                  filter={`url(#${deepShadowId})`}
-                />
-              </PaperLayer>
-
-              <PaperLayer still={still} delay={0.18} from={58}>
-                <SculptedCloud
-                  lobes={FOREGROUND_CLOUDS.rightWhiteBank}
-                  baseY={430}
-                  leftX={850}
-                  rightX={1480}
-                  fill={P.paperWhite}
-                  filter={`url(#${deepShadowId})`}
-                />
-              </PaperLayer>
-
-              <PaperLayer still={still} delay={0.14} from={60}>
-                <SculptedCloud
-                  lobes={FOREGROUND_CLOUDS.leftHeroMound}
-                  baseY={430}
-                  leftX={-120}
-                  rightX={880}
-                  fill={P.paperWhite}
-                  filter={`url(#${deepShadowId})`}
-                />
-              </PaperLayer>
-            </svg>
-          </motion.div>
-
-          {/* Plane 6: foreground typography stack and lower-right CTA */}
-          <div
-            className={styles.foregroundContent}
-            data-hero-copy
-            data-still={still}
-          >
-            <div className={styles.shell}>
-              <div className={styles.foregroundRow}>
-                <div
-                  id="hero-title"
-                  className={styles.headlineStack}
-                  role="heading"
-                  aria-level={1}
-                  onPointerEnter={() => holdPhrase(true)}
-                  onPointerLeave={() => holdPhrase(false)}
-                  onFocusCapture={() => holdPhrase(true)}
-                  onBlurCapture={() => holdPhrase(false)}
+            <div className={styles.pull}>
+              <span className={styles.endIcon} aria-hidden>
+                <SunIcon size={24} strokeWidth={2.4} color="#ff6a2b" />
+              </span>
+              <div ref={trackRef} className={styles.track}>
+                <button
+                  type="button"
+                  className={styles.tab}
+                  onPointerDown={onTabDown}
+                  onPointerMove={onTabMove}
+                  onPointerUp={onTabUp}
+                  onPointerCancel={onTabUp}
+                  onClick={onTabClick}
+                  onKeyDown={onTabKey}
                 >
-                  <HeadlineSwapRow
-                    lead="I BRING"
-                    items={MADLIB_SLOTS.craft}
-                    index={craftIndex}
-                    reduced={reduced}
-                    onAdvance={advancePhrase}
-                    onHoverChange={holdPhrase}
+                  <span>{act === 'day' ? 'Pull me' : 'Push back'}</span>
+                  <ArrowRight
+                    size={18}
+                    strokeWidth={2.6}
+                    aria-hidden
+                    className={styles.tabArrow}
                   />
-                  <HeadlineSwapRow
-                    lead="&"
-                    items={MADLIB_SLOTS.taste}
-                    index={tasteIndex}
-                    reduced={reduced}
-                    onAdvance={advancePhrase}
-                    onHoverChange={holdPhrase}
-                  />
-                  <HeadlineSwapRow
-                    lead="TO"
-                    items={MADLIB_SLOTS.products}
-                    index={productIndex}
-                    reduced={reduced}
-                    onAdvance={advancePhrase}
-                    onHoverChange={holdPhrase}
-                  />
-                </div>
+                </button>
+              </div>
+              <span className={styles.endIcon} aria-hidden>
+                <Moon size={22} strokeWidth={2.4} color="#3d53d6" />
+              </span>
+            </div>
 
-                <div className={styles.lowerRightAction}>
-                  <button
-                    type="button"
-                    className={styles.paperPillBtn}
-                    onClick={() => scrollToSection('work', reduced)}
+            {/* ── Headline and CTA ───────────────────────────────────── */}
+            <div className={styles.foreground} data-hero-copy>
+              <div className={styles.shell}>
+                <div className={styles.foregroundRow}>
+                  <div
+                    id="hero-title"
+                    className={styles.headlineCard}
+                    role="heading"
+                    aria-level={1}
+                    onPointerEnter={() => holdPhrase(true)}
+                    onPointerLeave={() => holdPhrase(false)}
+                    onFocusCapture={() => holdPhrase(true)}
+                    onBlurCapture={() => holdPhrase(false)}
                   >
-                    <span>See work</span>
-                    <ArrowRight size={20} strokeWidth={2.5} aria-hidden />
-                  </button>
+                    <HeadlineSwapRow
+                      lead="I BRING"
+                      items={MADLIB_SLOTS.craft}
+                      index={craftIndex}
+                      reduced={reduced}
+                      onAdvance={advancePhrase}
+                      onHoverChange={holdPhrase}
+                    />
+                    <HeadlineSwapRow
+                      lead="&"
+                      items={MADLIB_SLOTS.taste}
+                      index={tasteIndex}
+                      reduced={reduced}
+                      onAdvance={advancePhrase}
+                      onHoverChange={holdPhrase}
+                    />
+                    <HeadlineSwapRow
+                      lead="TO"
+                      items={MADLIB_SLOTS.products}
+                      index={productIndex}
+                      reduced={reduced}
+                      onAdvance={advancePhrase}
+                      onHoverChange={holdPhrase}
+                    />
+                  </div>
+
+                  <div className={styles.lowerRightAction}>
+                    <button
+                      type="button"
+                      className={styles.paperPillBtn}
+                      onClick={() => scrollToSection('work', reduced)}
+                    >
+                      <span>See work</span>
+                      <ArrowRight size={20} strokeWidth={2.5} aria-hidden />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
