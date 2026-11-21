@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, Moon, Sun as SunIcon } from 'lucide-react'
+import { ArrowRight, Hand } from 'lucide-react'
 import { Circle, Diamond, Sparkles, Sun } from 'kubai-icons-react'
 import {
   AnimatePresence,
@@ -20,6 +20,7 @@ import {
   useState,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from 'react'
 
 import {
@@ -32,7 +33,6 @@ import {
 } from '@/components/ui/sticker-slap-footer'
 import { cn } from '@/lib/utils'
 
-import { Bolt, Burst, Daisy, Smiley } from '../doodles'
 import { scrollToSection } from '../studio-data'
 import styles from './hero.module.css'
 
@@ -96,10 +96,9 @@ function layoutAdityaWord(): ScriptWord {
   return { main, extra, width, top, bottom, boxes: [] }
 }
 
-/* The "I BRING" row uses Kubai icons with a palette accent each. They act
-   themselves out on every word change — driven by the controlled `hover`
-   prop with `trigger="none"`, so no pointer is needed. The "&" and "TO" rows
-   keep their original text glyphs. */
+/* The three headline pills. The first row's icons are Kubai icons that act
+   themselves out on every word change (controlled `hover`, `trigger="none"`);
+   the others keep their text glyphs. */
 const CRAFT_ICONS = [
   { Icon: Sparkles, color: '#3d53d6', word: 'SYSTEMS' },
   { Icon: Sun, color: '#ff6a2b', word: 'CRAFT' },
@@ -125,107 +124,436 @@ const MADLIB_SLOTS = {
 
 const PAPER_EASE = [0.22, 1, 0.36, 1] as const
 
-/* ── Time of day ──────────────────────────────────────────────────────────
-   One number drives the whole diorama. `t` runs 0 (noon) → 1 (midnight); the
-   pull tab, the sky wheel, the palette, the stars and the lit windows are all
-   functions of it, written as CSS custom properties on the stage. That is
-   what lets a drag scrub the scene as smoothly as a click plays it.
-
-   Negative `t` is dawn: the page opens at BOOT_T with the sun still behind
-   the hills and the sky peach, then the wheel turns it up to noon. */
-
-const BOOT_T = -0.42
+/* ── Two scenes, one number ───────────────────────────────────────────────
+   The hero opens on a TECHNIC drafting table: a blueprint grid, gears, a
+   protractor, a compass and a dial, all in Sunnyside paper. The pull tab
+   runs `t` from 0 to 1. The technic pieces fold away, an iris opens from the
+   right edge, and a PAPER TOWN builds itself inside it. Both directions are
+   the same scrub, so a drag shows exactly what a click plays. */
 
 const clamp = (v: number, lo: number, hi: number) =>
   Math.min(hi, Math.max(lo, v))
 
-function paintTime(el: HTMLElement, t: number) {
-  // `ta` blends noon → dusk (and dawn → noon); `tb` blends dusk → night.
-  const ta = Math.max(clamp(t * 2, 0, 1), clamp(-t * 3, 0, 1))
-  const tb = clamp(t * 2 - 1, 0, 1)
-  el.style.setProperty('--t', t.toFixed(4))
-  el.style.setProperty('--ta', `${(ta * 100).toFixed(2)}%`)
-  el.style.setProperty('--tb', `${(tb * 100).toFixed(2)}%`)
-}
-
-type Triplet = readonly [day: string, dusk: string, night: string]
-
-/* Sunnyside paper in three lights. Every slot keeps its role (sky, hill,
-   roof…) and only the light changes, so the pull reads as the same
-   diorama turning, not a different picture. */
-const PALETTE = {
-  sky: ['#a9c8ff', '#ffb59a', '#141a52'],
-  ring1: ['#bcd3ff', '#ffc8a6', '#1a2169'],
-  ring2: ['#d2e1ff', '#ffd7ad', '#222b85'],
-  ring3: ['#fff0c6', '#ffe6a6', '#2d3bb0'],
-  far: ['#8fb0f5', '#d69bb4', '#27369a'],
-  mid: ['#b7e4c7', '#efb9ae', '#1d5a76'],
-  near: ['#7fcf9d', '#e29f9a', '#17495f'],
-  bank: ['#fffaf1', '#ffe9d8', '#2c3cae'],
-  fg: ['#191a2e', '#191a2e', '#fffaf1'],
-  cloud: ['#fffaf1', '#ffe0d0', '#4f62d8'],
-  win: ['#a9c8ff', '#ffd9a0', '#ffd23f'],
-  title: ['#fffaf1', '#fffaf1', '#ffd23f'],
-  trunk: ['#c9692f', '#b95a3a', '#7a3d3a'],
-  treeA: ['#58b98a', '#d28a7e', '#1c6b66'],
-  treeB: ['#ffb6e1', '#f4a0b8', '#9a5db0'],
-  wallA: ['#fffaf1', '#ffe3cf', '#8b93d6'],
-  wallB: ['#ffb6e1', '#f6a3b3', '#8e5fae'],
-  wallC: ['#ffd23f', '#ffbd5a', '#b88a2e'],
-  roofA: ['#ff6a2b', '#e5532f', '#a03b3a'],
-  roofB: ['#3d53d6', '#5a56b8', '#232f96'],
-} as const satisfies Record<string, Triplet>
-
-type Token = keyof typeof PALETTE
-
-const mixLight = ([day, dusk, night]: Triplet) =>
-  `color-mix(in srgb, color-mix(in srgb, ${day} calc(100% - var(--ta)), ${dusk}) calc(100% - var(--tb)), ${night})`
-
-const PAPER_VARS = Object.fromEntries(
-  Object.entries(PALETTE).map(([token, triplet]) => [
-    `--c-${token}`,
-    mixLight(triplet),
-  ]),
-) as CSSProperties
-
-const fillOf = (token: Token): CSSProperties => ({ fill: `var(--c-${token})` })
-
 const vars = (values: Record<string, string | number>) =>
   values as CSSProperties
 
-/* ── Paper ────────────────────────────────────────────────────────────────
-   Every shape is a sheet: a flat fill, a printed ink edge, and a hard
-   offset copy underneath standing in for the shadow. No blur, no glass. */
+const INK = '#191a2e'
+const PAPER = '#fffaf1'
+const PAPER_LO = '#f3ecdf'
+const COBALT = '#3d53d6'
+const COBALT_INK = '#2c3cae'
+const TANGERINE = '#ff6a2b'
+const BUTTER = '#ffd23f'
+const PINK = '#ffb6e1'
+const MINT = '#b7e4c7'
+const MINT_DEEP = '#7fcf9d'
+const GREEN = '#58b98a'
+const SKY = '#a9c8ff'
 
-function Paper({
-  d,
-  fill,
-  shade = [0, 8],
-  className,
+const SOFT = 'sunnyside-hero-soft'
+const SOFT_S = 'sunnyside-hero-soft-s'
+const GRID = 'sunnyside-hero-grid'
+
+/** Fades and moves a technic piece away as `t` passes its own threshold. */
+function Out({
+  at = 0,
+  dx = 0,
+  dy = 0,
+  rot = 0,
+  filter = SOFT,
+  children,
 }: {
-  d: string
-  fill: Token
-  shade?: readonly [number, number] | null
-  className?: string
+  at?: number
+  dx?: number
+  dy?: number
+  rot?: number
+  filter?: string | null
+  children: ReactNode
 }) {
   return (
-    <>
-      {shade ? (
-        <path
-          d={d}
-          className={styles.shade}
-          style={{ translate: `${shade[0]}px ${shade[1]}px` }}
-        />
-      ) : null}
-      <path d={d} className={cn(styles.ink, className)} style={fillOf(fill)} />
-    </>
+    <g
+      className={styles.exitA}
+      style={vars({
+        '--at': at,
+        '--dx': `${dx}px`,
+        '--dy': `${dy}px`,
+        '--rot': `${rot}deg`,
+      })}
+      filter={filter ? `url(#${filter})` : undefined}
+    >
+      {children}
+    </g>
   )
 }
 
+/** Raises a town piece out of the ground as `t` passes its threshold. Pieces
+ *  on the right arrive first, because the iris opens from the right. */
+function In({
+  x = 720,
+  at,
+  dy = 110,
+  filter = SOFT,
+  children,
+}: {
+  x?: number
+  at?: number
+  dy?: number
+  filter?: string | null
+  children: ReactNode
+}) {
+  const when = at ?? round(0.2 + (1 - x / 1440) * 0.55)
+  return (
+    <g
+      className={styles.enterB}
+      style={vars({ '--at': when, '--dy': `${dy}px` })}
+      filter={filter ? `url(#${filter})` : undefined}
+    >
+      {children}
+    </g>
+  )
+}
+
+/** The first-load entrance for a piece: a CSS keyframe, kept off the element
+ *  the pull moves so the two never fight over one property. */
+function Enter({
+  kind,
+  delay,
+  fx = 0,
+  fy = 0,
+  r0 = 0,
+  children,
+}: {
+  kind: 'fly' | 'spinIn' | 'sweep' | 'scalePop' | 'draw' | 'fade' | 'open'
+  delay: number
+  fx?: number
+  fy?: number
+  r0?: number
+  children: ReactNode
+}) {
+  return (
+    <g
+      className={styles[kind]}
+      style={vars({
+        '--d': `${delay}s`,
+        '--fx': `${fx}px`,
+        '--fy': `${fy}px`,
+        '--r0': `${r0}deg`,
+      })}
+    >
+      {children}
+    </g>
+  )
+}
+
+/* ── Technic parts ────────────────────────────────────────────────────── */
+
+function gearPath(outer: number, root: number, teeth: number) {
+  const step = (Math.PI * 2) / teeth
+  const at = (angle: number, radius: number) =>
+    `${round(Math.cos(angle) * radius)} ${round(Math.sin(angle) * radius)}`
+  let d = ''
+  for (let i = 0; i < teeth; i += 1) {
+    const a = i * step - Math.PI / 2
+    d += `${i === 0 ? 'M' : 'L'}${at(a - step * 0.3, root)} L${at(a - step * 0.17, outer)} L${at(a + step * 0.17, outer)} L${at(a + step * 0.3, root)} A${root} ${root} 0 0 1 ${at(a + step - step * 0.3, root)} `
+  }
+  return `${d}Z`
+}
+
+type GearSpec = {
+  x: number
+  y: number
+  r: number
+  teeth: number
+  fill: string
+  dir: 1 | -1
+  dur: number
+  delay: number
+  at: number
+  dx: number
+  dy: number
+}
+
+const GEARS: readonly GearSpec[] = [
+  {
+    x: 168,
+    y: 150,
+    r: 74,
+    teeth: 14,
+    fill: MINT,
+    dir: 1,
+    dur: 40,
+    delay: 0.55,
+    at: 0.02,
+    dx: -260,
+    dy: -200,
+  },
+  {
+    x: 274,
+    y: 84,
+    r: 44,
+    teeth: 9,
+    fill: BUTTER,
+    dir: -1,
+    dur: 26,
+    delay: 0.68,
+    at: 0.06,
+    dx: -80,
+    dy: -260,
+  },
+  {
+    x: 72,
+    y: 262,
+    r: 40,
+    teeth: 8,
+    fill: PINK,
+    dir: -1,
+    dur: 24,
+    delay: 0.8,
+    at: 0.1,
+    dx: -260,
+    dy: 60,
+  },
+  {
+    x: 1118,
+    y: 92,
+    r: 48,
+    teeth: 10,
+    fill: MINT,
+    dir: 1,
+    dur: 32,
+    delay: 0.92,
+    at: 0.04,
+    dx: 120,
+    dy: -260,
+  },
+  {
+    x: 1204,
+    y: 158,
+    r: 32,
+    teeth: 7,
+    fill: BUTTER,
+    dir: -1,
+    dur: 20,
+    delay: 1.02,
+    at: 0.08,
+    dx: 260,
+    dy: -120,
+  },
+]
+
+function Gear({ spec }: { spec: GearSpec }) {
+  const d = useMemo(
+    () => gearPath(spec.r, spec.r * 0.8, spec.teeth),
+    [spec.r, spec.teeth],
+  )
+  return (
+    <g transform={`translate(${spec.x} ${spec.y})`}>
+      <Out at={spec.at} dx={spec.dx} dy={spec.dy} rot={spec.dir * 140}>
+        <Enter kind="spinIn" delay={spec.delay}>
+          <g
+            className={spec.dir > 0 ? styles.spinCw : styles.spinCcw}
+            style={vars({ '--dur': `${spec.dur}s` })}
+          >
+            <circle r={spec.r} fill="none" />
+            <path d={d} fill={spec.fill} />
+            <circle r={spec.r * 0.56} fill="rgb(255 250 241 / 0.55)" />
+            <circle r={spec.r * 0.2} fill={INK} opacity={0.82} />
+          </g>
+        </Enter>
+      </Out>
+    </g>
+  )
+}
+
+/** A half-ring protractor, flat edge on y = 0, hub at the origin. */
+function Protractor({
+  radius,
+  inner,
+  fill,
+}: {
+  radius: number
+  inner: number
+  fill: string
+}) {
+  const ticks = useMemo(
+    () =>
+      Array.from({ length: 37 }, (_, i) => {
+        const deg = i * 5
+        const a = (deg * Math.PI) / 180
+        const len = deg % 10 === 0 ? 24 : 14
+        const r1 = radius - 6
+        const r2 = radius - 6 - len
+        return {
+          key: deg,
+          x1: round(-Math.cos(a) * r1),
+          y1: round(-Math.sin(a) * r1),
+          x2: round(-Math.cos(a) * r2),
+          y2: round(-Math.sin(a) * r2),
+        }
+      }),
+    [radius],
+  )
+  return (
+    <g>
+      <path
+        d={`M${-radius} 0 A${radius} ${radius} 0 0 1 ${radius} 0 L${inner} 0 A${inner} ${inner} 0 0 0 ${-inner} 0 Z`}
+        fill={fill}
+      />
+      <rect
+        x={-radius}
+        y={0}
+        width={radius * 2}
+        height={24}
+        rx={6}
+        fill={fill}
+      />
+      {ticks.map((t) => (
+        <line
+          key={t.key}
+          x1={t.x1}
+          y1={t.y1}
+          x2={t.x2}
+          y2={t.y2}
+          stroke={INK}
+          strokeOpacity={0.55}
+          strokeWidth={2}
+          strokeLinecap="round"
+        />
+      ))}
+      <circle cy={12} r={5} fill={INK} opacity={0.5} />
+    </g>
+  )
+}
+
+function Compass() {
+  return (
+    <g>
+      <g className={styles.pivot}>
+        <Enter kind="open" delay={1.05} r0={34}>
+          <path
+            d="M-6 -2 L6 -2 L-58 188 L-70 188 Z"
+            fill={PAPER_LO}
+            stroke={INK}
+            strokeOpacity={0.5}
+            strokeWidth={1.5}
+          />
+          <path d="M-70 188 L-58 188 L-64 214 Z" fill={INK} />
+        </Enter>
+      </g>
+      <g className={styles.pivot}>
+        <Enter kind="open" delay={1.05} r0={-34}>
+          <path
+            d="M-6 -2 L6 -2 L72 182 L60 182 Z"
+            fill={PAPER_LO}
+            stroke={INK}
+            strokeOpacity={0.5}
+            strokeWidth={1.5}
+          />
+          <rect x={58} y={176} width={16} height={26} rx={2} fill={BUTTER} />
+          <path d="M58 202 L74 202 L66 216 Z" fill={INK} />
+        </Enter>
+      </g>
+      <rect x={-7} y={-52} width={14} height={40} rx={7} fill={TANGERINE} />
+      <circle r={17} fill={TANGERINE} />
+      <circle r={7} fill={PAPER} />
+    </g>
+  )
+}
+
+function Dial() {
+  const ticks = useMemo(
+    () =>
+      Array.from({ length: 48 }, (_, i) => {
+        const a = (i / 48) * Math.PI * 2
+        const len = i % 4 === 0 ? 12 : 6
+        return {
+          key: i,
+          x1: round(Math.cos(a) * 112),
+          y1: round(Math.sin(a) * 112),
+          x2: round(Math.cos(a) * (112 + len)),
+          y2: round(Math.sin(a) * (112 + len)),
+        }
+      }),
+    [],
+  )
+  return (
+    <g>
+      {ticks.map((t) => (
+        <line
+          key={t.key}
+          x1={t.x1}
+          y1={t.y1}
+          x2={t.x2}
+          y2={t.y2}
+          stroke={COBALT_INK}
+          strokeOpacity={0.6}
+          strokeWidth={2}
+          strokeLinecap="round"
+        />
+      ))}
+      <circle r={96} fill={TANGERINE} />
+      <circle r={70} fill={PAPER} />
+      <circle r={48} fill={COBALT} />
+      <circle r={30} fill={BUTTER} />
+      <g className={styles.spinCw} style={vars({ '--dur': '14s' })}>
+        <circle r={60} fill="none" />
+        <path
+          d="M0 0 L0 -58"
+          stroke={INK}
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
+        <circle cy={-58} r={6} fill={TANGERINE} />
+      </g>
+      <circle r={9} fill={INK} />
+    </g>
+  )
+}
+
+function Ruler() {
+  return (
+    <g>
+      <rect width={250} height={40} rx={6} fill={PAPER} />
+      {Array.from({ length: 26 }, (_, i) => (
+        <line
+          key={i}
+          x1={10 + i * 9.2}
+          x2={10 + i * 9.2}
+          y1={0}
+          y2={i % 5 === 0 ? 20 : 11}
+          stroke={INK}
+          strokeOpacity={0.55}
+          strokeWidth={1.8}
+        />
+      ))}
+    </g>
+  )
+}
+
+/* ── Town parts ───────────────────────────────────────────────────────── */
+
+const CLOUD_LOBES = {
+  left: [
+    { cx: 150, cy: 168, r: 26 },
+    { cx: 190, cy: 150, r: 38 },
+    { cx: 240, cy: 160, r: 30 },
+    { cx: 274, cy: 174, r: 20 },
+  ],
+  mid: [
+    { cx: 520, cy: 270, r: 20 },
+    { cx: 552, cy: 254, r: 30 },
+    { cx: 592, cy: 266, r: 22 },
+  ],
+  right: [
+    { cx: 1230, cy: 338, r: 22 },
+    { cx: 1264, cy: 320, r: 32 },
+    { cx: 1308, cy: 332, r: 24 },
+  ],
+} as const
+
 type Lobe = { cx: number; cy: number; r: number }
 
-/** A cloud outline as one path: arcs over each lobe, valley to valley, then
- *  a flat base — the cut-paper silhouette with no inner seams. */
+/** A cloud as one outline: arcs over each lobe, valley to valley, flat base. */
 function cloudPath(lobes: readonly Lobe[], baseY: number) {
   const valley = (a: Lobe, b: Lobe) => {
     const d = Math.hypot(b.cx - a.cx, b.cy - a.cy)
@@ -247,7 +575,6 @@ function cloudPath(lobes: readonly Lobe[], baseY: number) {
   const start = { x: first.cx - first.r, y: first.cy }
   let d = `M ${round(start.x)} ${round(start.y)}`
   let cursor = start
-
   for (let i = 0; i < lobes.length; i += 1) {
     const lobe = lobes[i]
     const next = lobes[i + 1]
@@ -260,454 +587,195 @@ function cloudPath(lobes: readonly Lobe[], baseY: number) {
     d += ` A ${round(lobe.r)} ${round(lobe.r)} 0 ${swept > Math.PI ? 1 : 0} 1 ${round(end.x)} ${round(end.y)}`
     cursor = end
   }
-
   d += ` L ${round(last.cx + last.r)} ${round(baseY)} L ${round(start.x)} ${round(baseY)} Z`
   return d
 }
 
-/* ── Scene geometry (1440 × 860 stage units) ──────────────────────────── */
+function TownCloud({
+  lobes,
+  base,
+  x,
+  amp,
+  dur,
+}: {
+  lobes: readonly Lobe[]
+  base: number
+  x: number
+  amp: number
+  dur: number
+}) {
+  const d = useMemo(() => cloudPath(lobes, base), [lobes, base])
+  return (
+    <In x={x} dy={-60}>
+      <g
+        className={styles.drift}
+        style={vars({ '--amp': `${amp}px`, '--dur': `${dur}s` })}
+      >
+        <path d={d} fill={PAPER} />
+      </g>
+    </In>
+  )
+}
 
-const WHEEL = { cx: 720, cy: 720, r: 430 } as const
-
-const RINGS = [
-  { r: 760, token: 'ring1', delay: 0.08 },
-  { r: 610, token: 'ring2', delay: 0.18 },
-  { r: 480, token: 'ring3', delay: 0.28 },
-] as const
-
-/* The orbit's stitching: dots that ride the wheel, so a pull is visible even
-   where the sun and moon are hidden behind a hill. */
-const ORBIT_DOTS = Array.from({ length: 36 }, (_, i) => {
-  const a = (i / 36) * Math.PI * 2
-  return {
-    x: round(Math.cos(a) * WHEEL.r),
-    y: round(Math.sin(a) * WHEEL.r),
-    r: i % 3 === 0 ? 4.6 : 2.8,
-    color: i % 3 === 0 ? 'var(--h-tangerine)' : 'var(--h-paper)',
-  }
-})
-
-/** `at` is the time of night a star switches on, so they arrive in turn. */
-const STARS = [
-  { x: 120, y: 150, k: 0.7, at: 0.62, tw: 0.2 },
-  { x: 262, y: 300, k: 0.5, at: 0.7, tw: 1.1 },
-  { x: 384, y: 118, k: 0.8, at: 0.58, tw: 0.6 },
-  { x: 520, y: 214, k: 0.45, at: 0.8, tw: 1.7 },
-  { x: 612, y: 92, k: 0.6, at: 0.66, tw: 0.9 },
-  { x: 858, y: 108, k: 0.55, at: 0.74, tw: 1.4 },
-  { x: 982, y: 232, k: 0.75, at: 0.6, tw: 0.3 },
-  { x: 1090, y: 126, k: 0.5, at: 0.84, tw: 1.9 },
-  { x: 1204, y: 304, k: 0.65, at: 0.68, tw: 0.7 },
-  { x: 1312, y: 168, k: 0.8, at: 0.76, tw: 1.2 },
-  { x: 1384, y: 366, k: 0.45, at: 0.88, tw: 0.5 },
-  { x: 62, y: 332, k: 0.6, at: 0.9, tw: 1.6 },
-  { x: 462, y: 404, k: 0.4, at: 0.92, tw: 0.1 },
-  { x: 1012, y: 404, k: 0.45, at: 0.78, tw: 1.0 },
-] as const
-
-const SPARKLE =
-  'M0 -21C2.5 -8 8 -2.5 21 0C8 2.5 2.5 8 0 21C-2.5 8 -8 2.5 -21 0C-8 -2.5 -2.5 -8 0 -21Z'
-
-const CLOUDS = [
-  {
-    id: 'a',
-    lobes: [
-      { cx: 196, cy: 318, r: 30 },
-      { cx: 240, cy: 298, r: 42 },
-      { cx: 294, cy: 310, r: 34 },
-      { cx: 332, cy: 326, r: 22 },
-    ],
-    base: 346,
-    from: -380,
-    delay: 0.62,
-    dir: 1,
-    amp: 22,
-    dur: 36,
-    depth: 0.5,
-  },
-  {
-    id: 'b',
-    lobes: [
-      { cx: 1100, cy: 206, r: 26 },
-      { cx: 1140, cy: 188, r: 40 },
-      { cx: 1196, cy: 196, r: 34 },
-      { cx: 1236, cy: 212, r: 24 },
-    ],
-    base: 232,
-    from: 380,
-    delay: 0.78,
-    dir: -1,
-    amp: 26,
-    dur: 42,
-    depth: 0.56,
-  },
-  {
-    id: 'c',
-    lobes: [
-      { cx: 1030, cy: 500, r: 22 },
-      { cx: 1066, cy: 484, r: 32 },
-      { cx: 1108, cy: 496, r: 25 },
-    ],
-    base: 520,
-    from: 320,
-    delay: 0.94,
-    dir: 1,
-    amp: 16,
-    dur: 30,
-    depth: 0.62,
-  },
-  {
-    id: 'd',
-    lobes: [
-      { cx: 420, cy: 484, r: 20 },
-      { cx: 452, cy: 470, r: 29 },
-      { cx: 492, cy: 482, r: 22 },
-    ],
-    base: 502,
-    from: -320,
-    delay: 1.02,
-    dir: -1,
-    amp: 18,
-    dur: 33,
-    depth: 0.66,
-  },
-] as const
-
-const FAR_HILL =
-  'M-40 860 V640 C60 600 160 570 280 580 C400 590 470 628 600 626 C720 624 800 586 920 580 C1040 574 1130 584 1250 580 C1340 577 1410 590 1480 610 V860 Z'
-const MID_LEFT_HILL =
-  'M-40 860 V700 C60 660 160 640 280 646 C400 652 480 690 600 700 C690 706 760 730 820 760 V860 Z'
-const MID_RIGHT_HILL =
-  'M560 860 V740 C660 720 760 676 900 650 C1020 628 1140 622 1260 640 C1350 654 1420 650 1480 640 V860 Z'
-const BANK =
-  'M-40 860 V704 C80 684 200 676 330 686 C470 698 560 738 740 746 C900 752 1020 730 1160 712 C1280 697 1390 698 1480 712 V860 Z'
-
-type HouseSpec = {
+function Cottage({
+  x,
+  y,
+  w,
+  h,
+  wall,
+  roof,
+}: {
   x: number
   y: number
   w: number
   h: number
-  wall: Token
-  roof: Token
-  delay: number
-  chimney?: boolean
-}
-
-const HOUSES: readonly HouseSpec[] = [
-  { x: 330, y: 604, w: 66, h: 54, wall: 'wallC', roof: 'roofB', delay: 1.05 },
-  { x: 1018, y: 598, w: 70, h: 58, wall: 'wallA', roof: 'roofA', delay: 1.12 },
-  {
-    x: 1104,
-    y: 592,
-    w: 58,
-    h: 78,
-    wall: 'wallB',
-    roof: 'roofB',
-    delay: 1.2,
-    chimney: true,
-  },
-  { x: 1190, y: 590, w: 80, h: 60, wall: 'wallC', roof: 'roofA', delay: 1.28 },
-  { x: 1282, y: 598, w: 54, h: 46, wall: 'wallA', roof: 'roofB', delay: 1.36 },
-]
-
-const TREES = [
-  { x: 130, y: 656, s: 1.1, crown: 'treeA', delay: 1.1, lean: 1.6 },
-  { x: 232, y: 650, s: 0.88, crown: 'treeB', delay: 1.18, lean: -1.4 },
-  { x: 440, y: 678, s: 0.68, crown: 'treeA', delay: 1.26, lean: 1.2 },
-  { x: 1332, y: 658, s: 1, crown: 'treeB', delay: 1.3, lean: -1.6 },
-  { x: 1408, y: 652, s: 0.8, crown: 'treeA', delay: 1.38, lean: 1.4 },
-] as const
-
-const FLOWERS = [
-  { x: 600, y: 742, h: 30, petal: 'wallB', delay: 1.5 },
-  { x: 665, y: 750, h: 40, petal: 'wallA', delay: 1.56 },
-  { x: 770, y: 757, h: 28, petal: 'roofA', delay: 1.62 },
-  { x: 870, y: 756, h: 36, petal: 'wallB', delay: 1.68 },
-  { x: 990, y: 745, h: 26, petal: 'wallA', delay: 1.74 },
-  { x: 1090, y: 732, h: 38, petal: 'roofA', delay: 1.8 },
-  { x: 1190, y: 718, h: 30, petal: 'wallB', delay: 1.86 },
-  { x: 1300, y: 710, h: 40, petal: 'wallA', delay: 1.92 },
-  { x: 1390, y: 712, h: 28, petal: 'roofA', delay: 1.98 },
-] as const
-
-/* ── Scene parts ──────────────────────────────────────────────────────── */
-
-function SunArt() {
-  const rays = useMemo(
-    () =>
-      Array.from({ length: 14 }, (_, i) => {
-        const a = (i / 14) * Math.PI * 2 - Math.PI / 2
-        const outer = i % 2 === 0 ? 114 : 98
-        const at = (angle: number, radius: number) =>
-          `${round(Math.cos(angle) * radius)},${round(Math.sin(angle) * radius)}`
-        return `${at(a - 0.15, 62)} ${at(a, outer)} ${at(a + 0.15, 62)}`
-      }),
-    [],
-  )
-
+  wall: string
+  roof: string
+}) {
+  const roofH = Math.round(w * 0.5)
+  const pane = round(w * 0.2)
   return (
-    <>
-      <g className={styles.sunRays}>
-        {/* An invisible disc keeps the group's box symmetric, so the rays
-            turn about the sun's centre and not about their own bounds. */}
-        <circle r={116} fill="none" />
-        {rays.map((points, i) => (
-          <polygon
-            key={i}
-            points={points}
-            className={styles.ink}
-            style={{
-              fill: i % 2 === 0 ? 'var(--h-butter)' : 'var(--h-tangerine)',
-            }}
-          />
-        ))}
+    <In x={x} dy={90} filter={SOFT_S}>
+      <g transform={`translate(${x} ${y})`}>
+        <rect x={-w / 2} y={-h} width={w} height={h} fill={wall} />
+        <path
+          d={`M${-w / 2 - 7} ${-h} L0 ${-h - roofH} L${w / 2 + 7} ${-h} Z`}
+          fill={roof}
+        />
+        <rect
+          x={round(-w * 0.34)}
+          y={round(-h * 0.7)}
+          width={pane}
+          height={pane}
+          rx={2}
+          fill={COBALT}
+        />
+        <rect
+          x={round(w * 0.14)}
+          y={round(-h * 0.7)}
+          width={pane}
+          height={pane}
+          rx={2}
+          fill={COBALT}
+        />
+        <rect
+          x={round(-w * 0.11)}
+          y={round(-h * 0.36)}
+          width={round(w * 0.22)}
+          height={round(h * 0.36)}
+          rx={2}
+          fill={TANGERINE}
+        />
       </g>
-      <circle
-        r={66}
-        className={styles.ink}
-        style={{ fill: 'var(--h-butter)' }}
-      />
-      <circle cx={-21} cy={-8} r={5.6} fill="var(--h-ink)" />
-      <circle cx={21} cy={-8} r={5.6} fill="var(--h-ink)" />
-      <ellipse
-        cx={-37}
-        cy={10}
-        rx={10}
-        ry={6}
-        fill="var(--h-tangerine)"
-        opacity={0.55}
-      />
-      <ellipse
-        cx={37}
-        cy={10}
-        rx={10}
-        ry={6}
-        fill="var(--h-tangerine)"
-        opacity={0.55}
-      />
-      <path
-        d="M-23 14 Q0 38 23 14"
-        className={styles.mark}
-        fill="none"
-        strokeWidth={5}
-      />
-    </>
+    </In>
   )
 }
 
-function MoonArt() {
+function Lolly({
+  x,
+  y,
+  s,
+  fill,
+}: {
+  x: number
+  y: number
+  s: number
+  fill: string
+}) {
   return (
-    <>
-      <circle r={100} fill="var(--h-paper)" opacity={0.14} />
-      <circle
-        r={72}
-        className={styles.ink}
-        style={{ fill: 'var(--h-paper)' }}
-      />
-      <circle cx={26} cy={-24} r={11} fill="#ddd2b6" />
-      <circle cx={34} cy={14} r={7.5} fill="#ddd2b6" />
-      <circle cx={-6} cy={34} r={5} fill="#ddd2b6" />
-      <circle cx={-44} cy={-26} r={4} fill="#ddd2b6" />
-      <path
-        d="M-30 -6 Q-21 1 -12 -6"
-        className={styles.mark}
-        fill="none"
-        strokeWidth={4.4}
-      />
-      <path
-        d="M12 -6 Q21 1 30 -6"
-        className={styles.mark}
-        fill="none"
-        strokeWidth={4.4}
-      />
-      <path
-        d="M-8 12 Q0 19 8 12"
-        className={styles.mark}
-        fill="none"
-        strokeWidth={4}
-      />
-      <ellipse
-        cx={-34}
-        cy={8}
-        rx={9}
-        ry={5.4}
-        fill="var(--h-pink)"
-        opacity={0.7}
-      />
-      <ellipse
-        cx={34}
-        cy={8}
-        rx={9}
-        ry={5.4}
-        fill="var(--h-pink)"
-        opacity={0.7}
-      />
-    </>
+    <In x={x} dy={80} filter={SOFT_S}>
+      <g transform={`translate(${x} ${y}) scale(${s})`}>
+        <rect x={-5} y={-36} width={10} height={36} fill="#c9692f" />
+        <circle cy={-60} r={28} fill={fill} />
+        <circle cx={-9} cy={-70} r={7} fill="rgb(255 250 241 / 0.4)" />
+      </g>
+    </In>
   )
 }
 
-function Cloud({ spec }: { spec: (typeof CLOUDS)[number] }) {
-  const d = useMemo(() => cloudPath(spec.lobes, spec.base), [spec])
+function Pine({ x, y, s }: { x: number; y: number; s: number }) {
   return (
-    <g className={styles.px} style={vars({ '--depth': spec.depth })}>
-      {/* slide: tied to the time of day. in: the entrance. drift: the rest. */}
-      <g className={styles.cloudSlide} style={vars({ '--dir': spec.dir })}>
-        <g
-          className={styles.cloudIn}
-          style={vars({ '--from': `${spec.from}px`, '--d': `${spec.delay}s` })}
-        >
-          <g
-            className={styles.cloudDrift}
-            style={vars({ '--amp': `${spec.amp}px`, '--dur': `${spec.dur}s` })}
-          >
-            <Paper d={d} fill="cloud" shade={[5, 9]} />
+    <In x={x} dy={80} filter={SOFT_S}>
+      <g transform={`translate(${x} ${y}) scale(${s})`}>
+        <rect x={-4} y={-14} width={8} height={14} fill="#c9692f" />
+        <path d="M0 -92 L26 -48 H-26 Z" fill="#3ea06f" />
+        <path d="M0 -70 L32 -22 H-32 Z" fill={GREEN} />
+      </g>
+    </In>
+  )
+}
+
+function Turbine({
+  x,
+  y,
+  h,
+  dur,
+}: {
+  x: number
+  y: number
+  h: number
+  dur: number
+}) {
+  return (
+    <In x={x} dy={120} filter={SOFT_S}>
+      <g transform={`translate(${x} ${y})`}>
+        <path d={`M-6 0 L-2.5 ${-h} L2.5 ${-h} L6 0 Z`} fill={PAPER} />
+        <g transform={`translate(0 ${-h})`}>
+          <g className={styles.spinCw} style={vars({ '--dur': `${dur}s` })}>
+            <circle r={68} fill="none" />
+            {[0, 120, 240].map((deg) => (
+              <path
+                key={deg}
+                d="M0 0 C7 -12 7 -48 0 -66 C-7 -48 -7 -12 0 0 Z"
+                fill={PAPER}
+                transform={`rotate(${deg})`}
+              />
+            ))}
+            <circle r={8} fill={BUTTER} />
           </g>
         </g>
       </g>
-    </g>
+    </In>
   )
 }
 
-function House({ spec }: { spec: HouseSpec }) {
-  const { x, y, w, h, wall, roof, delay, chimney } = spec
-  const roofH = Math.round(w * 0.5)
-  const body = `M${-w / 2} 0 V${-h} H${w / 2} V0 Z`
-  const lid = `M${-w / 2 - 7} ${-h} L0 ${-h - roofH} L${w / 2 + 7} ${-h} Z`
-  const pane = round(w * 0.22)
-  const paneY = round(-h * 0.72)
-  const paneX = round(w * 0.14)
-
+function Car({
+  x,
+  y,
+  color,
+  amp,
+  dur,
+}: {
+  x: number
+  y: number
+  color: string
+  amp: number
+  dur: number
+}) {
   return (
-    <g transform={`translate(${x} ${y})`}>
-      <g className={styles.pop} style={vars({ '--d': `${delay}s` })}>
-        <g className={styles.sway} style={vars({ '--sw': '0.8deg' })}>
+    <In x={x} dy={60} filter={SOFT_S}>
+      <g transform={`translate(${x} ${y})`}>
+        <g
+          className={styles.drive}
+          style={vars({ '--amp': `${amp}px`, '--dur': `${dur}s` })}
+        >
           <path
-            d={body}
-            className={styles.shade}
-            style={{ translate: '6px 5px' }}
+            d="M-40 0 V-14 Q-40 -22 -30 -22 H-20 L-9 -40 H22 L33 -22 H42 Q50 -22 50 -14 V0 Z"
+            fill={color}
           />
-          <path
-            d={lid}
-            className={styles.shade}
-            style={{ translate: '6px 5px' }}
-          />
-          {chimney ? (
-            <rect
-              x={round(w * 0.16)}
-              y={-h - roofH * 0.82}
-              width={10}
-              height={roofH * 0.6}
-              className={styles.ink}
-              style={fillOf('roofA')}
-            />
-          ) : null}
-          <path d={body} className={styles.ink} style={fillOf(wall)} />
-          <path d={lid} className={styles.ink} style={fillOf(roof)} />
-          {[-1, 1].map((side) => {
-            const px = side < 0 ? -paneX - pane : paneX
-            return (
-              <g key={side}>
-                <circle
-                  className={styles.glow}
-                  cx={round(px + pane / 2)}
-                  cy={round(paneY + pane / 2)}
-                  r={round(w * 0.3)}
-                />
-                <rect
-                  x={px}
-                  y={paneY}
-                  width={pane}
-                  height={pane}
-                  rx={2}
-                  className={styles.ink}
-                  style={fillOf('win')}
-                />
-              </g>
-            )
-          })}
-          <rect
-            x={round(-w * 0.1)}
-            y={round(-h * 0.36)}
-            width={round(w * 0.2)}
-            height={round(h * 0.36)}
-            className={styles.ink}
-            style={fillOf('roofA')}
-          />
+          <path d="M-5 -34 H8 V-22 H-13 Z" fill={SKY} />
+          <path d="M12 -34 H20 L27 -22 H12 Z" fill={SKY} />
+          <circle cx={-22} cy={0} r={10} fill={INK} />
+          <circle cx={30} cy={0} r={10} fill={INK} />
+          <circle cx={-22} cy={0} r={4} fill={PAPER} />
+          <circle cx={30} cy={0} r={4} fill={PAPER} />
         </g>
       </g>
-    </g>
+    </In>
   )
 }
 
-function Tree({ spec }: { spec: (typeof TREES)[number] }) {
-  return (
-    <g transform={`translate(${spec.x} ${spec.y}) scale(${spec.s})`}>
-      <g className={styles.pop} style={vars({ '--d': `${spec.delay}s` })}>
-        <g className={styles.sway} style={vars({ '--sw': `${spec.lean}deg` })}>
-          <rect
-            x={-6}
-            y={-40}
-            width={12}
-            height={40}
-            className={styles.ink}
-            style={fillOf('trunk')}
-          />
-          <circle
-            cx={0}
-            cy={-70}
-            r={34}
-            className={styles.ink}
-            style={fillOf(spec.crown)}
-          />
-          <path
-            d="M-18 -78 Q-8 -94 8 -90"
-            className={styles.mark}
-            fill="none"
-            stroke="var(--h-paper)"
-            strokeWidth={4}
-            opacity={0.7}
-          />
-        </g>
-      </g>
-    </g>
-  )
-}
-
-function Flower({ spec }: { spec: (typeof FLOWERS)[number] }) {
-  return (
-    <g transform={`translate(${spec.x} ${spec.y})`}>
-      <g className={styles.bloom} style={vars({ '--d': `${spec.delay}s` })}>
-        <g className={styles.sway} style={vars({ '--sw': '3deg' })}>
-          <path
-            d={`M0 0 V${-spec.h}`}
-            className={styles.ink}
-            fill="none"
-            style={{ stroke: 'var(--h-ink)' }}
-          />
-          {[0, 72, 144, 216, 288].map((deg) => (
-            <circle
-              key={deg}
-              cx={round(Math.sin((deg * Math.PI) / 180) * 9)}
-              cy={round(-spec.h - Math.cos((deg * Math.PI) / 180) * 9)}
-              r={7.5}
-              className={styles.ink}
-              style={fillOf(spec.petal)}
-            />
-          ))}
-          <circle
-            cx={0}
-            cy={-spec.h}
-            r={6.5}
-            className={styles.ink}
-            style={{ fill: 'var(--h-butter)' }}
-          />
-        </g>
-      </g>
-    </g>
-  )
-}
-
-/* ── Headline rows ────────────────────────────────────────────────────── */
+/* ── Headline pills ───────────────────────────────────────────────────── */
 
 type ScriptLayerProps = {
   word: ScriptWord
@@ -733,7 +801,7 @@ function ScriptStrokeLayer({
       <motion.path
         d={word.main}
         fill="none"
-        style={{ stroke }}
+        stroke={stroke}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -746,7 +814,7 @@ function ScriptStrokeLayer({
           key={index}
           d={d}
           fill="none"
-          style={{ stroke }}
+          stroke={stroke}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -775,16 +843,12 @@ function hasIcon(it: PillItem): it is KubaiItem {
 }
 
 /**
- * One row of the headline: a fixed lead word and a gold pill holding the word
- * that changes.
- *
- * The pill keeps its width behind an invisible sizer, so a swap never reflows
- * the sentence around it. The words ride a tape behind a clipped window — the
- * retiring word leaves through the top edge while the next rises from below.
- * Kubai icons get a controlled `hover` pulse on every word change, so they act
- * themselves out without a pointer.
+ * One white pill of the headline: a lead word, an icon and the word that
+ * changes. The pill holds its width behind an invisible sizer, so a swap never
+ * reflows its neighbours; the retiring word leaves through the top edge while
+ * the next rises from below.
  */
-function HeadlineSwapRow({
+function SwapPill({
   lead,
   items,
   index,
@@ -828,18 +892,18 @@ function HeadlineSwapRow({
     )
 
   return (
-    <div className={styles.headlineRow}>
-      <span className={styles.leadLabel}>{lead}</span>
-      <button
-        type="button"
-        className={styles.swapPill}
-        onClick={onAdvance}
-        onPointerEnter={() => onHoverChange(true)}
-        onPointerLeave={() => onHoverChange(false)}
-        onFocus={() => onHoverChange(true)}
-        onBlur={() => onHoverChange(false)}
-        aria-label={`${lead} ${current.word}. Choose the next word`}
-      >
+    <button
+      type="button"
+      className={styles.pill}
+      onClick={onAdvance}
+      onPointerEnter={() => onHoverChange(true)}
+      onPointerLeave={() => onHoverChange(false)}
+      onFocus={() => onHoverChange(true)}
+      onBlur={() => onHoverChange(false)}
+      aria-label={`${lead} ${current.word}. Choose the next word`}
+    >
+      <span className={styles.pillLead}>{lead}</span>
+      <span className={styles.pillBody}>
         <span className={styles.swapSizer} aria-hidden>
           <span className={styles.pillIcon}>{renderIcon(widest, false)}</span>
           <span>{widest.word}</span>
@@ -848,7 +912,7 @@ function HeadlineSwapRow({
           <AnimatePresence initial={false}>
             <motion.span
               key={current.word}
-              className={styles.swapPillInner}
+              className={styles.swapInner}
               initial={reduced ? false : { y: '100%' }}
               animate={{ y: '0%' }}
               exit={reduced ? undefined : { y: '-100%' }}
@@ -861,92 +925,60 @@ function HeadlineSwapRow({
             </motion.span>
           </AnimatePresence>
         </span>
-      </button>
-    </div>
+      </span>
+    </button>
   )
 }
 
 /* ── Hero ─────────────────────────────────────────────────────────────── */
 
-const TRACK_PAD = 4
+const PULL_RANGE = 56
 
 /**
  * Sunnyside Diorama Hero.
  *
- * A paper shadow box with a working mechanism. A sky wheel hides behind the
- * hills with the sun on one end and the moon on the other; the pull tab on the
- * top rail slides it, and everything else — sky, hills, stars, lit windows,
- * the title's colour — follows one time-of-day value. The page opens on that
- * wheel turning: the sun climbs out from behind the hills while the paper
- * sheets rise into place one depth at a time.
+ * Opens on a technic drafting table and, on the pull, builds a paper town.
+ * Both scenes are layers of cut paper with soft shadows; one number (`--t`)
+ * runs between them, so the vertical pull pill on the right can be clicked,
+ * keyed or dragged, and the scene follows the finger.
  */
 export function Hero({ surface = 'cobalt' }: Props = {}) {
   const sectionRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
-  const trackRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion() ?? false
 
-  const [act, setAct] = useState<'day' | 'night'>('day')
+  const [act, setAct] = useState<'technic' | 'town'>('technic')
   const [physicsOn, setPhysicsOn] = useState(true)
   const [writeKey, setWriteKey] = useState(0)
   const [phrase, setPhrase] = useState(0)
   const [phraseHeld, setPhraseHeld] = useState(false)
   const physicsActive = physicsOn && !reduced
 
-  // ── Time of day ───────────────────────────────────────────────────────
-  const progress = useMotionValue(BOOT_T)
+  // ── The pull ──────────────────────────────────────────────────────────
+  const progress = useMotionValue(0)
   const tween = useRef<ReturnType<typeof animate> | null>(null)
-  const actRef = useRef<'day' | 'night'>('day')
+  const actRef = useRef<'technic' | 'town'>('technic')
 
   useMotionValueEvent(progress, 'change', (t) => {
-    if (stageRef.current) paintTime(stageRef.current, t)
+    stageRef.current?.style.setProperty('--t', t.toFixed(4))
   })
-
-  // The sunrise: the stage is already at dawn from the first paint (CSS
-  // `data-boot`), so this only has to hand over and turn the wheel.
-  useEffect(() => {
-    const el = stageRef.current
-    if (!el) return
-    if (reduced) {
-      progress.set(0)
-      paintTime(el, 0)
-      delete el.dataset.boot
-      return
-    }
-    paintTime(el, BOOT_T)
-    delete el.dataset.boot
-    const controls = animate(progress, 0, {
-      duration: 2.7,
-      delay: 0.3,
-      ease: [0.3, 0, 0.15, 1],
-    })
-    tween.current = controls
-    return () => controls.stop()
-  }, [reduced, progress])
 
   const goTo = useCallback(
     (to: 0 | 1) => {
       tween.current?.stop()
-      const next = to === 1 ? 'night' : 'day'
+      const next = to === 1 ? 'town' : 'technic'
       actRef.current = next
       setAct(next)
       if (reduced) {
         progress.set(to)
         return
       }
-      const el = stageRef.current
-      if (el) el.dataset.pulling = 'true'
-      /* A spring, not a tween: the wheel is a heavy paper disc, so it
-         overshoots a few degrees and settles. */
       tween.current = animate(progress, to, {
         type: 'spring',
-        stiffness: 46,
-        damping: 9.5,
+        stiffness: 52,
+        damping: 14,
         restDelta: 0.0008,
         restSpeed: 0.004,
-        onComplete: () => {
-          if (stageRef.current) delete stageRef.current.dataset.pulling
-        },
       })
     },
     [progress, reduced],
@@ -954,45 +986,39 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
 
   useEffect(() => () => tween.current?.stop(), [])
 
-  // ── The pull tab: click, key, or drag along its slot ──────────────────
   const dragRef = useRef<{
-    startX: number
+    startY: number
     startT: number
     moved: boolean
   } | null>(null)
   const swallowClick = useRef(false)
 
   const toggle = useCallback(
-    () => goTo(actRef.current === 'day' ? 1 : 0),
+    () => goTo(actRef.current === 'technic' ? 1 : 0),
     [goTo],
   )
 
-  const onTabDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+  const onPillDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return
     event.currentTarget.setPointerCapture(event.pointerId)
     tween.current?.stop()
     dragRef.current = {
-      startX: event.clientX,
+      startY: event.clientY,
       startT: progress.get(),
       moved: false,
     }
   }
 
-  const onTabMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+  const onPillMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const drag = dragRef.current
-    const track = trackRef.current
-    if (!drag || !track) return
-    const dx = event.clientX - drag.startX
-    if (!drag.moved && Math.abs(dx) < 5) return
+    if (!drag) return
+    const dy = event.clientY - drag.startY
+    if (!drag.moved && Math.abs(dy) < 5) return
     drag.moved = true
-    const range = Math.max(
-      1,
-      track.clientWidth - event.currentTarget.offsetWidth - TRACK_PAD * 2,
-    )
-    progress.set(clamp(drag.startT + dx / range, 0, 1))
+    progress.set(clamp(drag.startT + dy / PULL_RANGE, 0, 1))
   }
 
-  const onTabUp = () => {
+  const onPillUp = () => {
     const drag = dragRef.current
     dragRef.current = null
     if (!drag) return
@@ -1001,7 +1027,7 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
     else toggle()
   }
 
-  const onTabClick = () => {
+  const onPillClick = () => {
     // A pointer press already toggled on release; this is the keyboard path.
     if (swallowClick.current) {
       swallowClick.current = false
@@ -1010,11 +1036,11 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
     toggle()
   }
 
-  const onTabKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (event.key === 'ArrowRight') {
+  const onPillKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'ArrowDown') {
       event.preventDefault()
       goTo(1)
-    } else if (event.key === 'ArrowLeft') {
+    } else if (event.key === 'ArrowUp') {
       event.preventDefault()
       goTo(0)
     }
@@ -1049,8 +1075,8 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
     pointerY.set(0)
   }, [pointerX, pointerY])
 
-  // Scrolling away lets the layers separate; the far ones lag the page.
-  // The same observer idles the ambient loops while the hero is off-screen.
+  // Scrolling away lets the layers separate; the far ones lag the page. The
+  // same observer idles the ambient loops while the hero is off-screen.
   useEffect(() => {
     const section = sectionRef.current
     const stage = stageRef.current
@@ -1110,8 +1136,8 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
   const replayWrite = useCallback(() => setWriteKey((k) => k + 1), [])
 
   // ── The headline writes itself ────────────────────────────────────────
-  // All three rows turn over on one beat. It holds whenever a visitor takes
-  // over — pointer over the stack, focus in it, the tab hidden, the hero
+  // All three pills turn over on one beat. It holds whenever a visitor takes
+  // over — pointer over the row, focus in it, the tab hidden, the hero
   // scrolled past — and never starts under reduced motion.
   const advancePhrase = useCallback(() => setPhrase((p) => p + 1), [])
   const holdPhrase = useCallback((held: boolean) => setPhraseHeld(held), [])
@@ -1176,367 +1202,578 @@ export function Hero({ surface = 'cobalt' }: Props = {}) {
       onPointerLeave={handleLeave}
     >
       <MotionConfig reducedMotion="user">
-        <div className={styles.box}>
-          <span className={cn(styles.tape, styles.tapeLeft)} aria-hidden />
-          <span className={cn(styles.tape, styles.tapeRight)} aria-hidden />
+        {/* Left edge tab: parallax on / off */}
+        <button
+          type="button"
+          className={styles.physicsTab}
+          aria-pressed={physicsOn}
+          onClick={togglePhysics}
+        >
+          <span className={styles.physicsLabel}>physics on/off</span>
+        </button>
 
-          <div
-            ref={stageRef}
-            className={styles.window}
-            style={PAPER_VARS}
-            data-boot="true"
-            data-act={act}
-          >
-            {/* ── Scene ───────────────────────────────────────────────── */}
-            <div className={styles.scene}>
-              {/* Back sheets: sky, the wheel, clouds, the far hill and the
-                  town on it. */}
+        <div ref={stageRef} className={styles.box} data-act={act}>
+          <span className={styles.figure} aria-hidden>
+            {act === 'technic' ? 'Fig. 01 — Technic' : 'Fig. 02 — Paper town'}
+          </span>
+
+          <div className={styles.window}>
+            {/* ── Technic: the drafting table ─────────────────────────── */}
+            <div className={cn(styles.layer, styles.sceneA)}>
               <svg
-                className={cn(styles.svg, styles.svgBack)}
-                viewBox="0 0 1440 860"
-                preserveAspectRatio="xMidYMax slice"
+                className={styles.svg}
+                viewBox="0 0 1440 800"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden
+                focusable="false"
+              >
+                <defs>
+                  <filter
+                    id={SOFT}
+                    x="-20%"
+                    y="-20%"
+                    width="140%"
+                    height="150%"
+                  >
+                    <feDropShadow
+                      dx="0"
+                      dy="8"
+                      stdDeviation="7"
+                      floodColor="#091232"
+                      floodOpacity="0.3"
+                    />
+                  </filter>
+                  <filter
+                    id={SOFT_S}
+                    x="-20%"
+                    y="-20%"
+                    width="140%"
+                    height="150%"
+                  >
+                    <feDropShadow
+                      dx="0"
+                      dy="4"
+                      stdDeviation="3.5"
+                      floodColor="#091232"
+                      floodOpacity="0.3"
+                    />
+                  </filter>
+                  <pattern
+                    id={GRID}
+                    width="48"
+                    height="48"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d="M48 0H0V48"
+                      fill="none"
+                      stroke={COBALT}
+                      strokeOpacity="0.2"
+                      strokeWidth="1.2"
+                    />
+                    <path
+                      d="M12 0V48M24 0V48M36 0V48M0 12H48M0 24H48M0 36H48"
+                      fill="none"
+                      stroke={COBALT}
+                      strokeOpacity="0.07"
+                      strokeWidth="0.8"
+                    />
+                  </pattern>
+                </defs>
+
+                <g className={styles.px} style={vars({ '--depth': 0.1 })}>
+                  <rect
+                    x={-80}
+                    y={-80}
+                    width={1600}
+                    height={960}
+                    fill={PAPER_LO}
+                  />
+                  <Enter kind="fade" delay={0.1}>
+                    <rect
+                      x={-80}
+                      y={-80}
+                      width={1600}
+                      height={960}
+                      fill={`url(#${GRID})`}
+                    />
+                  </Enter>
+                </g>
+
+                <g className={styles.px} style={vars({ '--depth': 0.25 })}>
+                  <Out at={0.04} dx={-620} dy={0} rot={0}>
+                    <Enter kind="fly" delay={0.15} fx={-640}>
+                      <path
+                        d="M-80 -80 H800 L470 880 H-80 Z"
+                        fill={TANGERINE}
+                      />
+                      <path
+                        d="M-80 -80 H800 L470 880 H-80 Z"
+                        fill={`url(#${GRID})`}
+                        opacity={0.6}
+                      />
+                    </Enter>
+                  </Out>
+                  <Out at={0.12} dx={420} dy={260} rot={0}>
+                    <Enter kind="fly" delay={0.3} fy={320}>
+                      <rect
+                        x={1010}
+                        y={500}
+                        width={470}
+                        height={330}
+                        rx={46}
+                        fill={MINT}
+                      />
+                    </Enter>
+                  </Out>
+                </g>
+
+                {/* Blueprint construction lines through the title. */}
+                <g className={styles.px} style={vars({ '--depth': 0.3 })}>
+                  <Out at={0.02} filter={null}>
+                    <Enter kind="fade" delay={1.1}>
+                      <g
+                        fill="none"
+                        stroke={COBALT}
+                        strokeOpacity={0.5}
+                        strokeWidth={2}
+                        strokeDasharray="10 9"
+                      >
+                        <circle cx={720} cy={400} r={250} />
+                        <path d="M420 400 H1020 M720 120 V680" />
+                      </g>
+                    </Enter>
+                  </Out>
+                </g>
+
+                <g className={styles.px} style={vars({ '--depth': 0.5 })}>
+                  {GEARS.map((spec) => (
+                    <Gear key={`${spec.x}-${spec.y}`} spec={spec} />
+                  ))}
+                </g>
+
+                <g className={styles.px} style={vars({ '--depth': 0.6 })}>
+                  <g transform="translate(230 700) rotate(-26)">
+                    <Out at={0.1} dx={-420} dy={120} rot={-30}>
+                      <Enter kind="sweep" delay={0.75}>
+                        <Protractor radius={200} inner={118} fill={BUTTER} />
+                      </Enter>
+                    </Out>
+                  </g>
+                  <g transform="translate(1330 70) rotate(58)">
+                    <Out at={0.08} dx={420} dy={-160} rot={36}>
+                      <Enter kind="sweep" delay={0.85}>
+                        <Protractor radius={190} inner={132} fill={TANGERINE} />
+                      </Enter>
+                    </Out>
+                  </g>
+                  <g transform="translate(970 280)">
+                    <Out at={0.14} dx={0} dy={-480} rot={0}>
+                      <Compass />
+                    </Out>
+                  </g>
+                </g>
+
+                {/* Wires and sketch lines draw themselves. */}
+                <g className={styles.px} style={vars({ '--depth': 0.7 })}>
+                  <Out at={0.1} filter={null}>
+                    <g fill="none" strokeLinecap="round" strokeWidth={7}>
+                      <Enter kind="draw" delay={1.15}>
+                        <path
+                          d="M420 668 C520 612 600 724 720 690 S900 640 960 704"
+                          stroke={MINT_DEEP}
+                          pathLength={1}
+                        />
+                      </Enter>
+                      <Enter kind="draw" delay={1.3}>
+                        <path
+                          d="M400 700 C500 668 640 760 760 722 S920 690 1000 736"
+                          stroke={PINK}
+                          pathLength={1}
+                        />
+                      </Enter>
+                    </g>
+                    <circle cx={420} cy={668} r={9} fill={PAPER} />
+                    <circle cx={960} cy={704} r={9} fill={PAPER} />
+                  </Out>
+                  <g transform="translate(420 748)">
+                    <Out at={0.16} dx={-260} dy={200} rot={0}>
+                      <Enter kind="fly" delay={1.3} fy={160}>
+                        <Ruler />
+                      </Enter>
+                    </Out>
+                  </g>
+                  <g transform="translate(1240 650)">
+                    <Out at={0.18} dx={260} dy={260} rot={40}>
+                      <Enter kind="scalePop" delay={1.2}>
+                        <Dial />
+                      </Enter>
+                    </Out>
+                  </g>
+                </g>
+              </svg>
+            </div>
+
+            {/* ── Paper town: opens in an iris from the pull side ─────── */}
+            <div className={cn(styles.layer, styles.sceneB)}>
+              <svg
+                className={styles.svg}
+                viewBox="0 0 1440 800"
+                preserveAspectRatio="xMidYMid slice"
                 aria-hidden
                 focusable="false"
               >
                 <g className={styles.px} style={vars({ '--depth': 0.1 })}>
                   <rect
-                    x={-160}
-                    y={-160}
-                    width={1760}
-                    height={1180}
-                    style={fillOf('sky')}
+                    x={-80}
+                    y={-80}
+                    width={1600}
+                    height={960}
+                    fill={COBALT}
                   />
-                  {RINGS.map((ring) => (
-                    <g
-                      key={ring.r}
-                      className={styles.ringIn}
-                      style={vars({ '--d': `${ring.delay}s` })}
-                    >
-                      <circle
-                        cx={WHEEL.cx}
-                        cy={WHEEL.cy}
-                        r={ring.r}
-                        className={styles.ring}
-                        style={fillOf(ring.token)}
-                      />
-                    </g>
-                  ))}
+                  <rect
+                    x={-80}
+                    y={-80}
+                    width={1600}
+                    height={960}
+                    fill={`url(#${GRID})`}
+                    opacity={0.5}
+                  />
                 </g>
 
+                {/* The sun arch, with its stitched tick ring. */}
                 <g className={styles.px} style={vars({ '--depth': 0.2 })}>
-                  {STARS.map((star, i) => (
-                    <g
-                      key={i}
-                      transform={`translate(${star.x} ${star.y}) scale(${star.k})`}
-                    >
-                      <g
-                        className={styles.star}
-                        style={vars({ '--at': star.at })}
-                      >
-                        <path
-                          d={SPARKLE}
-                          className={styles.starGlyph}
-                          style={vars({ '--tw': `${star.tw}s` })}
-                        />
-                      </g>
-                    </g>
-                  ))}
-                  <g className={styles.shoot}>
-                    <path d="M0 0 L-120 -34" className={styles.shootTail} />
-                    <circle r={4.5} fill="var(--h-paper)" />
-                  </g>
-                </g>
-
-                <g className={styles.px} style={vars({ '--depth': 0.34 })}>
-                  <g className={styles.wheel}>
-                    <circle
-                      cx={WHEEL.cx}
-                      cy={WHEEL.cy}
-                      r={WHEEL.r}
-                      className={styles.orbit}
-                    />
-                    <g transform={`translate(${WHEEL.cx} ${WHEEL.cy})`}>
-                      {ORBIT_DOTS.map((dot, i) => (
+                  <g transform="translate(720 660)">
+                    <In at={0.3} dy={200}>
+                      <circle r={360} fill={BUTTER} />
+                      <circle r={326} fill="#ffe27a" />
+                      <circle r={262} fill={BUTTER} />
+                      <circle r={150} fill="#fff1b8" />
+                      <g className={styles.spinSlow}>
                         <circle
-                          key={i}
-                          cx={dot.x}
-                          cy={dot.y}
-                          r={dot.r}
-                          fill={dot.color}
-                          opacity={0.9}
+                          r={344}
+                          fill="none"
+                          stroke={TANGERINE}
+                          strokeOpacity={0.55}
+                          strokeWidth={7}
+                          strokeDasharray="2 11"
                         />
-                      ))}
-                    </g>
-                    <g
-                      transform={`translate(${WHEEL.cx} ${WHEEL.cy - WHEEL.r})`}
-                    >
-                      <g className={styles.upright}>
-                        <SunArt />
                       </g>
-                    </g>
-                    <g
-                      transform={`translate(${WHEEL.cx} ${WHEEL.cy + WHEEL.r})`}
-                    >
-                      <g className={styles.upright}>
-                        <MoonArt />
-                      </g>
-                    </g>
+                    </In>
                   </g>
+                  {[
+                    [330, 170],
+                    [1290, 120],
+                  ].map(([x, y]) => (
+                    <In key={x} x={x} dy={-120} filter={SOFT_S}>
+                      <path
+                        d={`M${x} ${y - 20} l6 14 15 1 -11 10 4 15 -14 -8 -14 8 4 -15 -11 -10 15 -1 z`}
+                        fill={BUTTER}
+                      />
+                    </In>
+                  ))}
+                  <In x={360} dy={-140} filter={SOFT_S}>
+                    <path
+                      d="M360 224 l24 -14 24 14 v28 l-24 14 -24 -14 z"
+                      fill={PINK}
+                    />
+                  </In>
+                  <In x={250} dy={-120} filter={SOFT_S}>
+                    <circle
+                      cx={250}
+                      cy={330}
+                      r={26}
+                      fill="none"
+                      stroke={MINT}
+                      strokeWidth={13}
+                    />
+                  </In>
                 </g>
 
-                {CLOUDS.map((cloud) => (
-                  <Cloud key={cloud.id} spec={cloud} />
-                ))}
+                <g className={styles.px} style={vars({ '--depth': 0.35 })}>
+                  <TownCloud
+                    lobes={CLOUD_LOBES.left}
+                    base={186}
+                    x={210}
+                    amp={20}
+                    dur={34}
+                  />
+                  <TownCloud
+                    lobes={CLOUD_LOBES.mid}
+                    base={286}
+                    x={560}
+                    amp={16}
+                    dur={29}
+                  />
+                  <TownCloud
+                    lobes={CLOUD_LOBES.right}
+                    base={354}
+                    x={1270}
+                    amp={22}
+                    dur={38}
+                  />
+                  {/* Solar panel on its post */}
+                  <In x={1120} dy={130} filter={SOFT_S}>
+                    <rect
+                      x={1114}
+                      y={262}
+                      width={12}
+                      height={150}
+                      fill={PAPER}
+                    />
+                    <path
+                      d="M1030 250 L1180 218 L1220 296 L1070 330 Z"
+                      fill={COBALT_INK}
+                    />
+                    <path
+                      d="M1050 246 L1200 214 M1058 262 L1208 230 M1066 278 L1216 246 M1074 294 L1224 262 M1080 240 L1118 322 M1112 232 L1150 314 M1144 224 L1182 306"
+                      stroke={SKY}
+                      strokeOpacity={0.7}
+                      strokeWidth={1.8}
+                    />
+                  </In>
+                </g>
 
                 <g className={styles.px} style={vars({ '--depth': 0.5 })}>
-                  <g className={styles.slideFar}>
-                    <g
-                      className={styles.rise}
-                      style={vars({ '--d': '0.4s', '--from': '170px' })}
-                    >
-                      <Paper d={FAR_HILL} fill="far" shade={[0, -12]} />
-                      {HOUSES.map((house) => (
-                        <House key={house.x} spec={house} />
-                      ))}
-                    </g>
-                  </g>
+                  <In x={140} dy={160}>
+                    <path
+                      d="M-40 640 L100 470 L160 530 L240 444 L380 640 Z"
+                      fill="#8fd0b0"
+                    />
+                    <path
+                      d="M100 470 L72 504 L100 496 L124 510 Z M240 444 L216 478 L240 470 L262 484 Z"
+                      fill={PAPER}
+                    />
+                  </In>
+                  <In x={1290} dy={160}>
+                    <path
+                      d="M1060 640 L1200 450 L1264 520 L1336 430 L1480 640 Z"
+                      fill="#8fd0b0"
+                    />
+                    <path
+                      d="M1200 450 L1176 486 L1200 478 L1224 492 Z M1336 430 L1312 466 L1336 458 L1360 472 Z"
+                      fill={PAPER}
+                    />
+                  </In>
+                  <Turbine x={430} y={640} h={190} dur={7} />
+                  <Turbine x={1010} y={640} h={170} dur={9} />
                 </g>
-              </svg>
 
-              {/* The title stands between the far and the near sheets. */}
-              <div className={styles.titlePlane}>
-                <div className={styles.px} style={vars({ '--depth': 0.7 })}>
-                  <div className={styles.titleCut}>
-                    <button
-                      type="button"
-                      className={styles.scriptBtn}
-                      onClick={replayWrite}
-                      aria-label="Aditya — click to replay title animation"
-                    >
-                      <svg
-                        key={writeKey}
-                        viewBox={scriptBox}
-                        className={styles.scriptSvg}
-                        aria-hidden
-                        focusable="false"
-                      >
-                        <ScriptStrokeLayer
-                          word={word}
-                          reduced={reduced}
-                          delay={1.0}
-                          transform="translate(2.4 3.4) skewX(-9)"
-                          stroke="var(--h-ink)"
-                          strokeWidth={SCRIPT_STROKE + 3.8}
-                          opacity={0.32}
-                        />
-                        <ScriptStrokeLayer
-                          word={word}
-                          reduced={reduced}
-                          delay={0.94}
-                          transform="skewX(-9)"
-                          stroke="var(--h-ink)"
-                          strokeWidth={SCRIPT_STROKE + 3.3}
-                        />
-                        <ScriptStrokeLayer
-                          word={word}
-                          reduced={reduced}
-                          delay={0.9}
-                          transform="skewX(-9)"
-                          stroke="var(--c-title)"
-                          strokeWidth={SCRIPT_STROKE + 0.7}
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Near sheets: the two front hills, the planted trees and
-                  flowers, and the meadow bank the headline stands on. */}
-              <svg
-                className={cn(styles.svg, styles.svgFront)}
-                viewBox="0 0 1440 860"
-                preserveAspectRatio="xMidYMax slice"
-                aria-hidden
-                focusable="false"
-              >
-                <g className={styles.px} style={vars({ '--depth': 0.8 })}>
-                  <g className={styles.slideLeft}>
-                    <g
-                      className={styles.rise}
-                      style={vars({ '--d': '0.58s', '--from': '190px' })}
-                    >
-                      <Paper d={MID_LEFT_HILL} fill="mid" shade={[0, -12]} />
-                      {TREES.filter((tree) => tree.x < 700).map((tree) => (
-                        <Tree key={tree.x} spec={tree} />
-                      ))}
-                    </g>
-                  </g>
+                <g className={styles.px} style={vars({ '--depth': 0.7 })}>
+                  <In x={200} dy={140}>
+                    <path
+                      d="M-40 700 C120 624 330 640 500 696 V820 H-40 Z"
+                      fill={MINT}
+                    />
+                  </In>
+                  <In x={1180} dy={140}>
+                    <path
+                      d="M880 706 C1030 628 1250 620 1480 690 V820 H880 Z"
+                      fill="#9fdab8"
+                    />
+                  </In>
+                  <Lolly x={64} y={706} s={1.1} fill={GREEN} />
+                  <Pine x={470} y={708} s={0.9} />
+                  <Pine x={1380} y={700} s={1} />
+                  <Lolly x={1000} y={712} s={0.9} fill={PINK} />
+                  <Cottage
+                    x={140}
+                    y={742}
+                    w={74}
+                    h={62}
+                    wall={PAPER}
+                    roof={TANGERINE}
+                  />
+                  <Cottage
+                    x={236}
+                    y={738}
+                    w={62}
+                    h={80}
+                    wall={PINK}
+                    roof={COBALT_INK}
+                  />
+                  <Cottage
+                    x={326}
+                    y={744}
+                    w={72}
+                    h={56}
+                    wall={BUTTER}
+                    roof={TANGERINE}
+                  />
+                  <Cottage
+                    x={1120}
+                    y={734}
+                    w={76}
+                    h={64}
+                    wall={PAPER}
+                    roof={COBALT_INK}
+                  />
+                  <Cottage
+                    x={1216}
+                    y={738}
+                    w={66}
+                    h={76}
+                    wall={MINT}
+                    roof={TANGERINE}
+                  />
                 </g>
 
                 <g className={styles.px} style={vars({ '--depth': 0.9 })}>
-                  <g className={styles.slideRight}>
-                    <g
-                      className={styles.rise}
-                      style={vars({ '--d': '0.7s', '--from': '200px' })}
-                    >
-                      <Paper d={MID_RIGHT_HILL} fill="near" shade={[0, -12]} />
-                      {TREES.filter((tree) => tree.x >= 700).map((tree) => (
-                        <Tree key={tree.x} spec={tree} />
-                      ))}
-                    </g>
-                  </g>
-                </g>
-
-                <g className={styles.px} style={vars({ '--depth': 1.05 })}>
-                  {FLOWERS.map((flower) => (
-                    <Flower key={flower.x} spec={flower} />
-                  ))}
-                  <g
-                    className={styles.rise}
-                    style={vars({ '--d': '0.84s', '--from': '230px' })}
-                  >
-                    <Paper d={BANK} fill="bank" shade={[0, -14]} />
-                  </g>
+                  <In x={720} dy={110}>
+                    <path
+                      d="M-40 820 V770 C200 736 480 786 720 782 C960 778 1200 738 1480 772 V820 Z"
+                      fill={MINT_DEEP}
+                    />
+                    <path
+                      d="M300 800 C480 742 900 740 1140 800"
+                      fill="none"
+                      stroke="#3b3f63"
+                      strokeWidth={42}
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M330 796 C500 748 900 748 1110 796"
+                      fill="none"
+                      stroke={PAPER}
+                      strokeWidth={3}
+                      strokeDasharray="16 12"
+                      opacity={0.8}
+                    />
+                  </In>
+                  <Car x={560} y={762} color={COBALT} amp={90} dur={9} />
+                  <Car x={900} y={764} color={TANGERINE} amp={-80} dur={11} />
                 </g>
               </svg>
+            </div>
 
-              <div className={styles.veil} aria-hidden />
+            {/* ── The name, with its selection box ───────────────────── */}
+            <div className={styles.titleStage}>
+              <div className={styles.titleWrap}>
+                <button
+                  type="button"
+                  className={styles.scriptBtn}
+                  onClick={replayWrite}
+                  aria-label="Aditya — click to replay title animation"
+                >
+                  <svg
+                    key={writeKey}
+                    viewBox={scriptBox}
+                    className={styles.scriptSvg}
+                    aria-hidden
+                    focusable="false"
+                  >
+                    <ScriptStrokeLayer
+                      word={word}
+                      reduced={reduced}
+                      delay={1.0}
+                      transform="translate(2.2 3.6) skewX(-9)"
+                      stroke="#091232"
+                      strokeWidth={SCRIPT_STROKE + 3.6}
+                      opacity={0.3}
+                    />
+                    <ScriptStrokeLayer
+                      word={word}
+                      reduced={reduced}
+                      delay={0.94}
+                      transform="skewX(-9)"
+                      stroke={COBALT_INK}
+                      strokeWidth={SCRIPT_STROKE + 3.4}
+                    />
+                    <ScriptStrokeLayer
+                      word={word}
+                      reduced={reduced}
+                      delay={0.9}
+                      transform="skewX(-9)"
+                      stroke={PAPER}
+                      strokeWidth={SCRIPT_STROKE + 0.8}
+                    />
+                  </svg>
+                </button>
 
-              {/* Die-cut stickers pasted on the box. The About tray peels
-                  these four, so the data hooks stay. */}
-              <div className={styles.stickers} aria-hidden>
-                <div
-                  className={cn(styles.sticker, styles.stickerSmiley)}
-                  data-hero-sticker="smiley"
-                  data-slot="smiley"
-                >
-                  <Smiley />
-                </div>
-                <div
-                  className={cn(styles.sticker, styles.stickerBurst)}
-                  data-hero-sticker="burst"
-                  data-slot="burst"
-                >
-                  <Burst text="hi!" />
-                </div>
-                <div
-                  className={cn(styles.sticker, styles.stickerDaisy)}
-                  data-hero-sticker="daisy"
-                  data-slot="daisy"
-                >
-                  <Daisy />
-                </div>
-                <div
-                  className={cn(styles.sticker, styles.stickerBolt)}
-                  data-hero-sticker="bolt"
-                  data-slot="bolt"
-                >
-                  <Bolt />
+                {/* The designer's selection box: technic only. */}
+                <div className={styles.select} aria-hidden>
+                  <span className={styles.selectRotate} />
+                  {['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].map((h) => (
+                    <span key={h} className={cn(styles.handle, styles[h])} />
+                  ))}
+                  <span className={styles.selectDot} />
                 </div>
               </div>
             </div>
 
-            {/* ── Controls ───────────────────────────────────────────── */}
-            <div className={styles.tag} aria-hidden>
-              <span>
-                {act === 'day' ? 'Fig. 01 — Daytime' : 'Fig. 02 — Nighttime'}
-              </span>
+            {/* ── Furniture ───────────────────────────────────────────── */}
+            <div className={styles.pillRow}>
+              <SwapPill
+                lead="I BRING"
+                items={MADLIB_SLOTS.craft}
+                index={craftIndex}
+                reduced={reduced}
+                onAdvance={advancePhrase}
+                onHoverChange={holdPhrase}
+              />
+              <SwapPill
+                lead="&"
+                items={MADLIB_SLOTS.taste}
+                index={tasteIndex}
+                reduced={reduced}
+                onAdvance={advancePhrase}
+                onHoverChange={holdPhrase}
+              />
+              <SwapPill
+                lead="TO"
+                items={MADLIB_SLOTS.products}
+                index={productIndex}
+                reduced={reduced}
+                onAdvance={advancePhrase}
+                onHoverChange={holdPhrase}
+              />
             </div>
+
+            <h1 id="hero-title" className={styles.srOnly}>
+              Aditya — I bring{' '}
+              {MADLIB_SLOTS.craft[craftIndex].word.toLowerCase()} and{' '}
+              {MADLIB_SLOTS.taste[tasteIndex].word.toLowerCase()} to{' '}
+              {MADLIB_SLOTS.products[productIndex].word.toLowerCase()}
+            </h1>
+
+            <span className={styles.label} aria-hidden>
+              <span className={styles.labelA}>Tech &amp; Builder</span>
+              <span className={styles.labelB}>Paper Town</span>
+            </span>
 
             <button
               type="button"
-              className={styles.parallaxChip}
-              aria-pressed={physicsOn}
-              onClick={togglePhysics}
+              className={styles.seeWork}
+              onClick={() => scrollToSection('work', reduced)}
             >
-              <span className={styles.chipDot} aria-hidden />
-              Parallax
+              <span>See work</span>
+              <ArrowRight size={18} strokeWidth={2.6} aria-hidden />
             </button>
 
-            <div className={styles.pull}>
-              <span className={styles.endIcon} aria-hidden>
-                <SunIcon size={24} strokeWidth={2.4} color="#ff6a2b" />
-              </span>
-              <div ref={trackRef} className={styles.track}>
-                <button
-                  type="button"
-                  className={styles.tab}
-                  onPointerDown={onTabDown}
-                  onPointerMove={onTabMove}
-                  onPointerUp={onTabUp}
-                  onPointerCancel={onTabUp}
-                  onClick={onTabClick}
-                  onKeyDown={onTabKey}
-                >
-                  <span>{act === 'day' ? 'Pull me' : 'Push back'}</span>
-                  <ArrowRight
-                    size={18}
-                    strokeWidth={2.6}
-                    aria-hidden
-                    className={styles.tabArrow}
-                  />
-                </button>
-              </div>
-              <span className={styles.endIcon} aria-hidden>
-                <Moon size={22} strokeWidth={2.4} color="#3d53d6" />
-              </span>
-            </div>
-
-            {/* ── Headline and CTA ───────────────────────────────────── */}
-            <div className={styles.foreground} data-hero-copy>
-              <div className={styles.shell}>
-                <div className={styles.foregroundRow}>
-                  <div
-                    id="hero-title"
-                    className={styles.headlineCard}
-                    role="heading"
-                    aria-level={1}
-                    onPointerEnter={() => holdPhrase(true)}
-                    onPointerLeave={() => holdPhrase(false)}
-                    onFocusCapture={() => holdPhrase(true)}
-                    onBlurCapture={() => holdPhrase(false)}
-                  >
-                    <HeadlineSwapRow
-                      lead="I BRING"
-                      items={MADLIB_SLOTS.craft}
-                      index={craftIndex}
-                      reduced={reduced}
-                      onAdvance={advancePhrase}
-                      onHoverChange={holdPhrase}
-                    />
-                    <HeadlineSwapRow
-                      lead="&"
-                      items={MADLIB_SLOTS.taste}
-                      index={tasteIndex}
-                      reduced={reduced}
-                      onAdvance={advancePhrase}
-                      onHoverChange={holdPhrase}
-                    />
-                    <HeadlineSwapRow
-                      lead="TO"
-                      items={MADLIB_SLOTS.products}
-                      index={productIndex}
-                      reduced={reduced}
-                      onAdvance={advancePhrase}
-                      onHoverChange={holdPhrase}
-                    />
-                  </div>
-
-                  <div className={styles.lowerRightAction}>
-                    <button
-                      type="button"
-                      className={styles.paperPillBtn}
-                      onClick={() => scrollToSection('work', reduced)}
-                    >
-                      <span>See work</span>
-                      <ArrowRight size={20} strokeWidth={2.5} aria-hidden />
-                    </button>
-                  </div>
-                </div>
-              </div>
+            {/* Hidden hooks: the About tray peels stickers from these. */}
+            <div className={styles.hooks} aria-hidden>
+              {(['smiley', 'burst', 'daisy', 'bolt'] as const).map((slot) => (
+                <span key={slot} data-hero-sticker={slot} data-slot={slot} />
+              ))}
             </div>
           </div>
+
+          {/* ── The touch pill: pull the scene down, or push it back ──── */}
+          <button
+            type="button"
+            className={styles.pull}
+            onPointerDown={onPillDown}
+            onPointerMove={onPillMove}
+            onPointerUp={onPillUp}
+            onPointerCancel={onPillUp}
+            onClick={onPillClick}
+            onKeyDown={onPillKey}
+          >
+            <span className={styles.pullText}>
+              {act === 'technic' ? 'Pull me' : 'Push back'}
+            </span>
+            <Hand size={20} strokeWidth={2.4} aria-hidden />
+          </button>
         </div>
       </MotionConfig>
     </section>

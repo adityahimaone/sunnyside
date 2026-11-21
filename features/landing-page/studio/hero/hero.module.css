@@ -1,11 +1,13 @@
 /* Sunnyside Diorama Hero.
 
-   A paper shadow box with a working mechanism. Behind the hills a sky wheel
-   carries the sun on one end and the moon on the other; the pull tab turns it.
-   Everything else is a function of one number, `--t` (0 noon → 1 midnight,
-   negative at dawn), which the component writes on `.window` together with
-   `--ta` (noon → dusk) and `--tb` (dusk → night). No sheet is animated by
-   JavaScript: the entrance is keyframes, the pull is custom properties. */
+   A bevelled cobalt frame around a paper window with two scenes in it. The
+   TECHNIC drafting table is what the page opens on; the PAPER TOWN opens in
+   an iris from the right edge when the touch pill is pulled. One custom
+   property, `--t` (0 → 1), runs between them. It is written on `.box` by the
+   component, so a click, a key or a drag all scrub the same thing.
+
+   The first-load entrance is plain keyframes, kept on separate elements from
+   the ones `--t` moves, so the two never fight over a property. */
 
 .hero {
   --h-ink: var(--ink, #191a2e);
@@ -14,7 +16,6 @@
   --h-tangerine: var(--tangerine, #ff6a2b);
   --h-cobalt: var(--cobalt, #3d53d6);
   --h-cobalt-ink: var(--cobalt-ink, #2c3cae);
-  --h-pink: var(--pink, #ffb6e1);
   --h-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --h-display: var(--font-syne), var(--font-space-grotesk), sans-serif;
   --h-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -24,139 +25,157 @@
   flex-direction: column;
   width: 100%;
   min-height: clamp(700px, calc(100svh - 2.5rem), 980px);
-  padding: clamp(4.5rem, 9vh, 5.8rem) clamp(0.8rem, 2.6vw, 2.4rem)
+  padding: clamp(4.5rem, 9vh, 5.8rem) clamp(1rem, 2.8vw, 2.6rem)
     clamp(1rem, 2.6vh, 1.8rem);
-  background-color: var(--h-cobalt);
-  /* A dotted paper field around the box: the one loud cobalt wall. */
-  background-image: radial-gradient(
-    rgb(255 250 241 / 0.16) 1.4px,
-    transparent 1.7px
+  background: radial-gradient(
+    120% 90% at 50% 40%,
+    var(--h-cobalt) 0%,
+    var(--h-cobalt-ink) 100%
   );
-  background-size: 22px 22px;
   overflow: hidden;
   isolation: isolate;
   user-select: none;
 }
 
 .hero :focus-visible {
-  outline: 3px solid var(--h-ink);
+  outline: 3px solid var(--h-butter);
   outline-offset: 3px;
   border-radius: 12px;
 }
 
-.window[data-act='night'] :focus-visible {
-  outline-color: var(--h-butter);
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
-/* ── The box ─────────────────────────────────────────────────────────────── */
+/* ── Left edge tab: physics on/off ───────────────────────────────────────── */
+
+.physicsTab {
+  position: absolute;
+  left: 0;
+  top: 46%;
+  z-index: 12;
+  translate: 0 -50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(2.3rem, 3vw, 2.8rem);
+  height: clamp(8rem, 18vh, 10.5rem);
+  padding: 0;
+  border: 2px solid rgb(255 250 241 / 0.75);
+  border-left: 0;
+  border-radius: 0 999px 999px 0;
+  background: var(--h-cobalt-ink);
+  color: var(--h-paper);
+  box-shadow: 0 8px 18px rgb(9 18 50 / 0.4);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    translate 0.2s var(--h-ease);
+}
+
+.physicsTab:hover {
+  translate: 3px -50%;
+}
+
+.physicsTab[aria-pressed='false'] {
+  background: transparent;
+  color: rgb(255 250 241 / 0.7);
+}
+
+.physicsLabel {
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  font-family: var(--h-display);
+  font-size: clamp(0.72rem, 0.9vw, 0.85rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+/* ── The frame ───────────────────────────────────────────────────────────── */
 
 .box {
-  position: relative;
-  display: flex;
-  flex: 1;
-  min-height: 28rem;
-  padding: clamp(0.4rem, 0.8vw, 0.7rem);
-  border: 3px solid var(--h-ink);
-  border-radius: 30px;
-  background: var(--h-paper);
-  box-shadow: 8px 10px 0 var(--h-ink);
-}
-
-.tape {
-  position: absolute;
-  top: -0.85rem;
-  z-index: 9;
-  width: 5.6rem;
-  height: 1.7rem;
-  background: var(--h-butter);
-  border: 1.5px solid rgb(25 26 46 / 0.22);
-  opacity: 0.94;
-  pointer-events: none;
-  /* Torn ends, the way washi tape lifts off a roll. */
-  clip-path: polygon(
-    0 8%,
-    4% 0,
-    8% 10%,
-    12% 0,
-    100% 0,
-    96% 22%,
-    100% 44%,
-    96% 66%,
-    100% 100%,
-    12% 100%,
-    8% 88%,
-    4% 100%,
-    0 92%,
-    3% 50%
-  );
-}
-
-.tapeLeft {
-  left: 12%;
-  rotate: -3deg;
-}
-
-.tapeRight {
-  right: 14%;
-  rotate: 2.5deg;
-  background: var(--h-pink);
-}
-
-.window {
   --t: 0;
-  --ta: 0%;
-  --tb: 0%;
   --px: 0;
   --py: 0;
   --sy: 0;
 
   position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 28rem;
+  padding: 1.7rem clamp(0.65rem, 1.2vw, 1rem) clamp(0.65rem, 1.2vw, 1rem);
+  border-radius: 46px;
+  background: linear-gradient(160deg, #5069f0 0%, #3a50d8 45%, #2c3cae 100%);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.32),
+    inset 0 -8px 16px rgb(9 18 50 / 0.34),
+    0 22px 44px rgb(9 18 50 / 0.5);
+}
+
+.figure {
+  position: absolute;
+  top: 0.55rem;
+  left: 50%;
+  translate: -50% 0;
+  font-family: var(--h-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: rgb(255 250 241 / 0.85);
+  white-space: nowrap;
+}
+
+.window {
+  position: relative;
   flex: 1;
   min-width: 0;
-  container-type: size;
-  border: 2.5px solid var(--h-ink);
-  border-radius: 22px;
-  background: var(--c-sky);
-  color: var(--c-fg);
+  border-radius: 32px;
+  background: #f3ecdf;
   overflow: hidden;
   isolation: isolate;
 }
 
-/* Before hydration the stage is already at dawn, so the sun's first frame is
-   "behind the hills" and the sunrise has somewhere to start from. A visitor
-   who asked for reduced motion gets the finished noon. */
-@media (prefers-reduced-motion: no-preference) {
-  .window[data-boot='true'] {
-    --t: -0.42;
-    --ta: 100%;
-    --tb: 0%;
-  }
-}
-
-/* The depth of the box: light falls in from the top and the sides. */
+/* The depth of the window: the rim of the frame casts into it. */
 .window::after {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 6;
+  z-index: 7;
   border-radius: inherit;
   pointer-events: none;
   box-shadow:
-    inset 0 12px 22px rgb(25 26 46 / 0.3),
-    inset 10px 0 18px rgb(25 26 46 / 0.14),
-    inset -10px 0 18px rgb(25 26 46 / 0.14);
+    inset 0 10px 20px rgb(9 18 50 / 0.34),
+    inset 8px 0 16px rgb(9 18 50 / 0.18),
+    inset -8px 0 16px rgb(9 18 50 / 0.18),
+    inset 0 -6px 12px rgb(9 18 50 / 0.2);
 }
 
-/* ── Scene ───────────────────────────────────────────────────────────────── */
+/* ── Scenes ──────────────────────────────────────────────────────────────── */
 
-/* One unit is one px of a 1440 × 860 stage, scaled the way the SVGs scale
-   (`slice`, bottom-anchored). The HTML pieces that have to stand on a
-   particular hill — the title, the stickers — are placed in these units. */
-.scene {
-  --u: max(calc(100cqw / 1440), calc(100cqh / 860));
-
+.layer {
   position: absolute;
   inset: 0;
+}
+
+.sceneA {
+  z-index: 1;
+}
+
+/* The iris opens from the pull side as `--t` runs 0 → 0.8. */
+.sceneB {
+  z-index: 2;
+  clip-path: circle(calc(clamp(0, var(--t) * 1.25, 1) * 150%) at 100% 50%);
 }
 
 .svg {
@@ -167,187 +186,307 @@
   display: block;
 }
 
-.svgBack {
-  z-index: 1;
-}
-
-.svgFront {
-  z-index: 3;
-}
-
 /* Parallax: each layer carries a depth (near = large). The pointer slides
    layers against each other; scrolling lets the far ones lag the page. */
 .px {
-  translate: calc(var(--px) * var(--depth, 0) * -22px)
+  translate: calc(var(--px) * var(--depth, 0) * -20px)
     calc(
-      var(--py) * var(--depth, 0) * -12px + (1 - var(--depth, 0)) * var(--sy) *
-        80px
+      var(--py) * var(--depth, 0) * -10px + (1 - var(--depth, 0)) * var(--sy) *
+        70px
     );
 }
 
-/* Printed edge and hard offset shadow: the two things every sheet shares. */
-.ink {
-  stroke: var(--h-ink);
-  stroke-width: 2.5px;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
+/* Technic pieces fold away as `--t` passes their own threshold. */
+.exitA {
+  --p: clamp(0, calc((var(--t) - var(--at, 0)) * 3.2), 1);
+
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: calc(1 - var(--p));
+  translate: calc(var(--dx, 0px) * var(--p)) calc(var(--dy, 0px) * var(--p));
+  rotate: calc(var(--rot, 0deg) * var(--p));
+  scale: calc(1 - var(--p) * 0.12);
 }
 
-.shade {
-  fill: var(--h-ink);
-  opacity: 0.2;
+/* Town pieces rise out of the ground in turn, right to left. */
+.enterB {
+  --p: clamp(0, calc((var(--t) - var(--at, 0.5)) * 3.2), 1);
+
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  opacity: var(--p);
+  translate: 0 calc((1 - var(--p)) * var(--dy, 110px));
+  scale: calc(0.72 + 0.28 * var(--p));
 }
 
-.mark {
-  stroke: var(--h-ink);
-  stroke-linecap: round;
-}
+/* ── First-load entrance wrappers and ambient motion ─────────────────────── */
 
-.ring {
-  stroke: rgb(25 26 46 / 0.3);
-  stroke-width: 2px;
-  vector-effect: non-scaling-stroke;
-}
-
-.ringIn,
-.pop,
-.sway,
-.bloom,
-.sunRays,
-.upright,
-.star,
-.starGlyph {
+.fly,
+.spinIn,
+.sweep,
+.scalePop,
+.fade,
+.spinCw,
+.spinCcw,
+.spinSlow,
+.drift,
+.drive {
   transform-box: fill-box;
   transform-origin: center;
 }
 
-.pop,
-.sway,
-.bloom {
+.sweep {
   transform-origin: 50% 100%;
 }
 
-/* ── The sky wheel ───────────────────────────────────────────────────────── */
-
-.wheel {
+/* The compass legs hinge about the user-space origin, which is its hinge. */
+.open {
   transform-box: view-box;
-  transform-origin: 720px 720px;
-  rotate: calc(var(--t) * 180deg);
+  transform-origin: 0 0;
 }
 
-.orbit {
-  fill: none;
-  stroke: var(--h-ink);
-  stroke-opacity: 0.3;
-  stroke-width: 2px;
-  stroke-dasharray: 3 12;
-  vector-effect: non-scaling-stroke;
+.pivot {
+  overflow: visible;
 }
 
-/* The sun and moon ride the rim but stay upright, like a gondola. */
-.upright {
-  rotate: calc(var(--t) * -180deg);
+.draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
 }
 
-.sunRays {
-  rotate: calc(var(--t) * 110deg);
+@keyframes kFly {
+  from {
+    translate: var(--fx, 0px) var(--fy, 0px);
+  }
 }
 
-.star {
-  --lit: clamp(0, calc((var(--t) - var(--at, 0.7)) * 7), 1);
-
-  opacity: var(--lit);
-  scale: var(--lit);
+@keyframes kSpinIn {
+  from {
+    rotate: -220deg;
+    scale: 0.2;
+    opacity: 0;
+  }
 }
 
-.starGlyph {
-  fill: var(--h-paper);
+@keyframes kSweep {
+  from {
+    rotate: -80deg;
+    opacity: 0;
+  }
 }
 
-.shoot {
-  opacity: 0;
+@keyframes kScalePop {
+  from {
+    scale: 0.2;
+    opacity: 0;
+  }
+  60% {
+    scale: 1.08;
+    opacity: 1;
+  }
 }
 
-.shootTail {
-  stroke: var(--h-paper);
-  stroke-width: 3px;
-  stroke-linecap: round;
-  stroke-opacity: 0.8;
-  vector-effect: non-scaling-stroke;
+@keyframes kDraw {
+  from {
+    stroke-dashoffset: 1;
+  }
 }
 
-/* ── Sheets that slide, sway and glow with the time of day ───────────────── */
-
-.slideFar {
-  translate: calc(var(--t) * 22px) 0;
+@keyframes kFade {
+  from {
+    opacity: 0;
+  }
 }
 
-.slideLeft {
-  translate: calc(var(--t) * -26px) 0;
+@keyframes kOpen {
+  from {
+    rotate: var(--r0, 0deg);
+  }
 }
 
-.slideRight {
-  translate: calc(var(--t) * 26px) 0;
+@keyframes kSpin {
+  to {
+    rotate: 360deg;
+  }
 }
 
-.cloudSlide {
-  translate: calc(var(--t) * var(--dir, 1) * 120px) 0;
+@keyframes kDrift {
+  from {
+    translate: calc(var(--amp, 20px) * -1) 0;
+  }
+  to {
+    translate: var(--amp, 20px) 0;
+  }
 }
 
-/* Things standing on a hill lean a little as the sheet under them moves. */
-.sway {
-  rotate: calc(sin(calc(var(--t) * 360deg)) * var(--sw, 1deg));
+@keyframes kDrive {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: var(--amp, 80px) 0;
+  }
 }
 
-.glow {
-  fill: var(--h-butter);
-  opacity: clamp(0, calc((var(--t) - 0.5) * 2.4), 0.5);
+@keyframes kBoxIn {
+  from {
+    opacity: 0;
+    translate: 0 20px;
+    scale: 0.975;
+  }
 }
 
-.veil {
+@keyframes kRise {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+
+@keyframes kSelect {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+}
+
+@keyframes kHandle {
+  from {
+    scale: 0;
+  }
+}
+
+@keyframes kTug {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  22% {
+    rotate: -5deg;
+  }
+  48% {
+    rotate: 4deg;
+  }
+  74% {
+    rotate: -2deg;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .box {
+    animation: kBoxIn 0.7s var(--h-ease) backwards;
+  }
+
+  .fly {
+    animation: kFly 1.1s var(--h-ease) var(--d, 0s) backwards;
+  }
+
+  .spinIn {
+    animation: kSpinIn 1.2s cubic-bezier(0.22, 1.1, 0.36, 1) var(--d, 0s)
+      backwards;
+  }
+
+  .sweep {
+    animation: kSweep 1.2s var(--h-ease) var(--d, 0s) backwards;
+  }
+
+  .scalePop {
+    animation: kScalePop 0.9s cubic-bezier(0.34, 1.4, 0.5, 1) var(--d, 0s)
+      backwards;
+  }
+
+  .draw {
+    animation: kDraw 1.3s ease-in-out var(--d, 0s) backwards;
+  }
+
+  .fade {
+    animation: kFade 0.9s ease var(--d, 0s) backwards;
+  }
+
+  .open {
+    animation: kOpen 1.1s cubic-bezier(0.34, 1.3, 0.5, 1) var(--d, 0s) backwards;
+  }
+
+  .spinCw {
+    animation: kSpin var(--dur, 30s) linear infinite;
+  }
+
+  .spinCcw {
+    animation: kSpin var(--dur, 30s) linear infinite reverse;
+  }
+
+  .spinSlow {
+    animation: kSpin 90s linear infinite;
+  }
+
+  .drift {
+    animation: kDrift var(--dur, 34s) ease-in-out infinite alternate;
+  }
+
+  .drive {
+    animation: kDrive var(--dur, 9s) ease-in-out infinite alternate;
+  }
+
+  .titleWrap {
+    animation: kRise 0.8s var(--h-ease) 0.8s backwards;
+  }
+
+  .select {
+    animation: kSelect 0.7s ease 2.2s backwards;
+  }
+
+  .handle {
+    animation: kHandle 0.45s cubic-bezier(0.34, 1.6, 0.5, 1) 2.7s backwards;
+  }
+
+  .pillRow,
+  .label,
+  .seeWork {
+    animation: kRise 0.8s var(--h-ease) 1.5s backwards;
+  }
+
+  .pull {
+    animation: kFade 0.8s ease 1.7s backwards;
+  }
+
+  .pull::before {
+    animation: kTug 1.1s ease-in-out 3.2s 1 backwards;
+  }
+
+  /* Only the visible scene, and only on screen, should be running. */
+  .box[data-act='technic'] .sceneB *,
+  .box[data-act='town'] .sceneA *,
+  .box[data-idle='true'] * {
+    animation-play-state: paused !important;
+  }
+}
+
+/* ── The name ────────────────────────────────────────────────────────────── */
+
+.titleStage {
   position: absolute;
   inset: 0;
   z-index: 4;
-  pointer-events: none;
-  background: radial-gradient(
-    125% 92% at 50% 42%,
-    transparent 52%,
-    rgb(12 18 72 / 0.55) 100%
-  );
-  opacity: clamp(0, calc(var(--t) * 1.3), 1);
-}
-
-/* ── Title ───────────────────────────────────────────────────────────────── */
-
-/* The cutout stands between the far and near sheets: its foot is tucked
-   behind the front hills at stage y 585. */
-.titlePlane {
-  position: absolute;
-  inset-inline: 0;
-  bottom: calc(var(--u) * 275);
-  z-index: 2;
-  display: flex;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  padding: 4.2rem 1rem 3.6rem;
   pointer-events: none;
 }
 
-.titlePlane > .px {
-  width: min(calc(var(--u) * 780), 92%);
-}
-
-.titleCut {
-  transform-origin: 50% 100%;
-  rotate: calc(sin(calc(var(--t) * 360deg)) * -1.6deg);
-  pointer-events: auto;
+.titleWrap {
+  position: relative;
+  width: clamp(17rem, 50%, 44rem);
 }
 
 .scriptBtn {
+  position: relative;
   display: block;
   width: 100%;
   padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
+  pointer-events: auto;
   transition: transform 0.25s var(--h-ease);
 }
 
@@ -362,309 +501,158 @@
   overflow: visible;
 }
 
-/* ── Die-cut stickers ────────────────────────────────────────────────────── */
-
-.stickers {
+/* The designer's selection box. It belongs to the drafting table, so it goes
+   with it. */
+.select {
   position: absolute;
-  inset: 0;
-  z-index: 5;
+  inset: -16% -5% -20% -4%;
+  border: 2px dashed var(--h-cobalt);
+  opacity: clamp(0, calc(1 - var(--t) * 4), 1);
   pointer-events: none;
 }
 
-.sticker {
+.handle {
   position: absolute;
-  left: calc(50% + (var(--ox) - 720) * var(--u));
-  top: calc(100% - (860 - var(--oy)) * var(--u));
-  width: clamp(3.4rem, 6vw, 5.6rem);
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  rotate: var(--r, 0deg);
-  filter: drop-shadow(3px 4px 0 rgb(25 26 46 / 0.28));
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid var(--h-cobalt);
+  border-radius: 2px;
+  background: var(--h-paper);
 }
 
-.sticker > svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  transition: opacity 0.3s ease;
+.nw {
+  top: -0.4rem;
+  left: -0.4rem;
 }
 
-/* The About tray peels these four. What stays behind is the outline they
-   left on the box. */
-.sticker[data-peeled='true'] > svg {
-  opacity: 0;
+.n {
+  top: -0.4rem;
+  left: calc(50% - 0.4rem);
 }
 
-.sticker[data-peeled='true']::before {
+.ne {
+  top: -0.4rem;
+  right: -0.4rem;
+}
+
+.e {
+  top: calc(50% - 0.4rem);
+  right: -0.4rem;
+}
+
+.se {
+  bottom: -0.4rem;
+  right: -0.4rem;
+}
+
+.s {
+  bottom: -0.4rem;
+  left: calc(50% - 0.4rem);
+}
+
+.sw {
+  bottom: -0.4rem;
+  left: -0.4rem;
+}
+
+.w {
+  top: calc(50% - 0.4rem);
+  left: -0.4rem;
+}
+
+.selectRotate {
+  position: absolute;
+  top: -2.5rem;
+  left: 50%;
+  width: 0.9rem;
+  height: 0.9rem;
+  translate: -50% 0;
+  border: 2px solid var(--h-cobalt);
+  border-radius: 50%;
+  background: var(--h-paper);
+}
+
+.selectRotate::after {
   content: '';
   position: absolute;
-  inset: 8%;
-  border: 2.5px dashed rgb(255 250 241 / 0.85);
-  border-radius: 50%;
+  top: 100%;
+  left: calc(50% - 1px);
+  width: 2px;
+  height: 1.2rem;
+  background: var(--h-cobalt);
 }
 
-.stickerSmiley {
-  --ox: 236;
-  --oy: 440;
-  --r: -9deg;
-}
-
-.stickerBurst {
-  --ox: 1236;
-  --oy: 392;
-  --r: 8deg;
-}
-
-.stickerDaisy {
-  --ox: 150;
-  --oy: 566;
-  --r: 10deg;
-}
-
-.stickerBolt {
-  --ox: 1352;
-  --oy: 536;
-  --r: -12deg;
-}
-
-/* ── Box furniture: tag, parallax chip, pull tab ─────────────────────────── */
-
-.tag,
-.parallaxChip {
+.selectDot {
   position: absolute;
-  left: clamp(0.8rem, 1.4vw, 1.2rem);
+  top: -0.2rem;
+  right: -2.8rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: var(--h-cobalt);
+  box-shadow: 0 0 0 5px rgb(61 83 214 / 0.18);
+}
+
+/* ── Headline pills, label, CTA ──────────────────────────────────────────── */
+
+.pillRow {
+  position: absolute;
+  top: clamp(0.8rem, 2vh, 1.3rem);
+  left: clamp(1rem, 2vw, 1.6rem);
+  right: clamp(1rem, 2vw, 1.6rem);
   z-index: 8;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 0.7rem;
+  pointer-events: none;
+}
+
+.pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.42rem 0.7rem;
-  border: 2px solid var(--h-ink);
+  gap: 0.5rem;
+  padding: 0.62rem 1.1rem;
+  border: 0;
   border-radius: 999px;
-  background: var(--h-paper);
+  background: rgb(255 250 241 / 0.97);
   color: var(--h-ink);
-  font-family: var(--h-mono);
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 1;
+  font-family: var(--h-display);
+  font-size: clamp(0.88rem, 1.25vw, 1.12rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
-  box-shadow: 3px 3px 0 var(--h-ink);
-}
-
-.tag {
-  top: clamp(0.8rem, 1.6vh, 1.1rem);
-  rotate: -2deg;
-}
-
-.parallaxChip {
-  top: calc(clamp(0.8rem, 1.6vh, 1.1rem) + 2.5rem);
+  white-space: nowrap;
+  box-shadow:
+    0 6px 14px rgb(9 18 50 / 0.28),
+    inset 0 -2px 0 rgb(25 26 46 / 0.08);
   cursor: pointer;
+  pointer-events: auto;
   transition:
     translate 0.18s var(--h-ease),
     box-shadow 0.18s var(--h-ease);
 }
 
-.parallaxChip:hover {
-  translate: 0 -1px;
-  box-shadow: 3px 4px 0 var(--h-ink);
+.pill:hover {
+  translate: 0 -2px;
+  box-shadow:
+    0 9px 18px rgb(9 18 50 / 0.32),
+    inset 0 -2px 0 rgb(25 26 46 / 0.08);
 }
 
-.chipDot {
-  width: 0.55rem;
-  height: 0.55rem;
-  border: 2px solid var(--h-ink);
-  border-radius: 50%;
-  background: transparent;
-}
-
-.parallaxChip[aria-pressed='true'] .chipDot {
-  background: #7fd6a3;
-}
-
-.pull {
-  --track-w: clamp(10.5rem, 17vw, 15rem);
-  --tab-w: 7.7rem;
-
-  position: absolute;
-  top: clamp(0.8rem, 1.6vh, 1.1rem);
-  right: clamp(0.8rem, 1.4vw, 1.2rem);
-  z-index: 8;
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.4rem 0.8rem 0.4rem 0.7rem;
-  border: 2.5px solid var(--h-ink);
-  border-radius: 999px;
-  background: var(--h-paper);
-  color: var(--h-ink);
-  box-shadow: 4px 5px 0 var(--h-ink);
-}
-
-.endIcon {
-  display: inline-flex;
-  flex: none;
-}
-
-/* The slot the tab rides in. The tab's position is the time of day. */
-.track {
-  position: relative;
-  flex: none;
-  width: var(--track-w);
-  height: 2.9rem;
-  border-radius: 999px;
-  background-color: var(--h-ink);
-  background-image: radial-gradient(
-    circle,
-    rgb(255 250 241 / 0.3) 1.4px,
-    transparent 1.7px
-  );
-  background-size: 14px 100%;
-  box-shadow: inset 0 3px 0 rgb(0 0 0 / 0.4);
-}
-
-.tab {
-  position: absolute;
-  inset: 4px auto 4px 4px;
-  width: var(--tab-w);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  padding: 0;
-  border: 2px solid var(--h-ink);
-  border-radius: 999px;
-  background: var(--h-butter);
-  color: var(--h-ink);
-  font-family: var(--h-display);
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  white-space: nowrap;
-  cursor: grab;
-  touch-action: none;
-  box-shadow: 0 3px 0 rgb(0 0 0 / 0.4);
-  translate: calc(clamp(0, var(--t), 1) * (var(--track-w) - var(--tab-w) - 8px))
-    0;
-}
-
-.tab:active {
-  cursor: grabbing;
-}
-
-.tabArrow {
-  flex: none;
-  rotate: calc(clamp(0, var(--t), 1) * 180deg);
-}
-
-/* ── Headline and CTA ────────────────────────────────────────────────────── */
-
-.foreground {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  z-index: 8;
-  padding: 0 clamp(1rem, 2.6vw, 2.2rem) clamp(1rem, 3vh, 1.8rem);
-  pointer-events: none;
-}
-
-.shell {
-  width: 100%;
-  max-width: 1360px;
-  margin-inline: auto;
-}
-
-.foregroundRow {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-/* The headline is a paper label taped to the box, so it stays legible on any
-   hill and in any light. Its paper is the meadow's own. */
-.headlineCard {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.42rem;
-  padding: clamp(1rem, 2.2vh, 1.4rem) clamp(1rem, 1.7vw, 1.6rem)
-    clamp(0.95rem, 2vh, 1.3rem);
-  border: 2.5px solid var(--h-ink);
-  border-radius: 20px;
-  background: var(--c-bank);
-  color: var(--c-fg);
-  box-shadow: 6px 8px 0 var(--h-ink);
-  rotate: -1deg;
-  pointer-events: auto;
-}
-
-.headlineCard::before {
-  content: '';
-  position: absolute;
-  top: -0.7rem;
-  left: 1.5rem;
-  width: 3.8rem;
-  height: 1.3rem;
-  background: var(--h-butter);
-  border: 1.5px solid rgb(25 26 46 / 0.22);
-  opacity: 0.94;
-  rotate: -6deg;
-}
-
-/* The type scale lives on the row, so the lead word and the pill scale
-   together — the pill is set in em against it. */
-.headlineRow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.45rem 0.65rem;
-  font-family: var(--h-display);
-  font-size: clamp(1.05rem, 1.65vw, 1.48rem);
-  font-weight: 800;
-  line-height: 1.12;
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
-}
-
-.leadLabel {
+.pillLead {
   display: inline-block;
-  white-space: nowrap;
-}
-
-.swapPill {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.25rem;
-  padding: 0.2em 0.62em;
-  border: 2px solid var(--h-ink);
-  border-radius: 0.5rem;
-  background: var(--h-butter);
-  color: var(--h-ink);
-  font-family: inherit;
-  font-size: 0.9em;
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.025em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  box-shadow: 0 3px 0 var(--h-ink);
-  cursor: pointer;
-  overflow: hidden;
-  transition:
-    transform 0.18s cubic-bezier(0.2, 1.5, 0.3, 1),
-    box-shadow 0.18s var(--h-ease);
-}
-
-.swapPill:hover {
-  transform: rotate(-1.2deg) translateY(-2px);
-  box-shadow: 0 5px 0 var(--h-ink);
 }
 
 /* The widest candidate, drawn invisibly: it holds the pill open so a swap
-   never reflows the sentence around it. */
+   never reflows its neighbours. */
+.pillBody {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+}
+
 .swapSizer {
   display: inline-flex;
   align-items: center;
@@ -673,28 +661,22 @@
   white-space: nowrap;
 }
 
-/* The one-word window. The retiring word leaves through the top edge as the
-   next rises from below, both on one curve, so the pill is never empty. */
 .swapWindow {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: inherit;
 }
 
-.swapPillInner {
+.swapInner {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.42rem;
-  padding: 0 0.62em;
-  will-change: transform;
   white-space: nowrap;
+  will-change: transform;
 }
 
-/* Holds a Kubai icon at the pill's own type size, or a text glyph. */
 .pillIcon {
   display: inline-flex;
   align-items: center;
@@ -703,370 +685,205 @@
   line-height: 1;
 }
 
-.lowerRightAction {
-  pointer-events: auto;
-  margin-bottom: clamp(0.4rem, 1.6vh, 1rem);
+.label,
+.seeWork {
+  position: absolute;
+  bottom: clamp(0.9rem, 2.4vh, 1.5rem);
+  z-index: 8;
 }
 
-.paperPillBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  min-height: clamp(3.3rem, 5.8vh, 4.1rem);
-  padding: 0.75rem 1.85rem;
-  border: 2.5px solid var(--h-ink);
+.label {
+  left: clamp(1rem, 2vw, 1.6rem);
+  display: inline-grid;
+  padding: 0.7rem 1.2rem;
   border-radius: 999px;
-  background: var(--h-butter);
+  background: rgb(255 250 241 / 0.97);
   color: var(--h-ink);
   font-family: var(--h-display);
-  font-size: clamp(1.15rem, 1.65vw, 1.5rem);
+  font-size: clamp(0.85rem, 1.1vw, 1rem);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  box-shadow:
+    0 6px 14px rgb(9 18 50 / 0.28),
+    inset 0 -2px 0 rgb(25 26 46 / 0.08);
+}
+
+.labelA,
+.labelB {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+
+.labelA {
+  opacity: clamp(0, calc(1 - var(--t) * 3), 1);
+}
+
+.labelB {
+  opacity: clamp(0, calc((var(--t) - 0.5) * 3), 1);
+}
+
+.seeWork {
+  right: clamp(1rem, 2vw, 1.6rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.72rem 1.3rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--h-cobalt-ink);
+  color: var(--h-paper);
+  font-family: var(--h-display);
+  font-size: clamp(0.9rem, 1.2vw, 1.08rem);
+  font-weight: 800;
   line-height: 1;
-  box-shadow: 0 6px 0 var(--h-ink);
+  box-shadow:
+    0 8px 16px rgb(9 18 50 / 0.34),
+    inset 0 2px 0 rgb(255 255 255 / 0.2);
   cursor: pointer;
   transition:
-    transform 0.18s var(--h-ease),
+    translate 0.18s var(--h-ease),
     box-shadow 0.18s var(--h-ease);
 }
 
-.paperPillBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 0 var(--h-ink);
+.seeWork:hover {
+  translate: 0 -2px;
+  box-shadow:
+    0 11px 20px rgb(9 18 50 / 0.38),
+    inset 0 2px 0 rgb(255 255 255 / 0.2);
 }
 
-.paperPillBtn:active {
-  transform: translateY(3px);
-  box-shadow: 0 3px 0 var(--h-ink);
+.seeWork:active {
+  translate: 0 2px;
 }
 
-/* ── Entrance and ambient motion ─────────────────────────────────────────── */
-
-@keyframes boxIn {
-  from {
-    opacity: 0;
-    translate: 0 18px;
-    scale: 0.975;
-  }
+.hooks {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
+/* ── The touch pill ──────────────────────────────────────────────────────── */
+
+/* A vertical pill docked on the right of the frame, like a touch handle. Its
+   position follows `--t`: pulling it down pulls the town up. */
+.pull {
+  position: absolute;
+  top: 50%;
+  right: calc(-1 * clamp(0.5rem, 0.9vw, 0.8rem));
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  width: clamp(3rem, 3.6vw, 3.5rem);
+  height: 9.8rem;
+  margin-top: -4.9rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffe066 0%, var(--h-butter) 100%);
+  color: var(--h-ink);
+  box-shadow:
+    0 12px 22px rgb(9 18 50 / 0.42),
+    inset 0 2px 0 rgb(255 255 255 / 0.6),
+    inset 0 -3px 0 rgb(0 0 0 / 0.12);
+  cursor: grab;
+  touch-action: none;
+  translate: 0 calc(clamp(0, var(--t), 1) * 3.5rem);
 }
 
-/* A sheet swings up out of the floor and overshoots by a hair. */
-@keyframes rise {
-  from {
-    translate: 0 var(--from, 140px);
-  }
+.pull:active {
+  cursor: grabbing;
 }
 
-@keyframes slideIn {
-  from {
-    translate: var(--from, -300px) 0;
-    opacity: 0;
-  }
+/* A little paper fold on the pill's face, so the wiggle hint has something
+   of its own to turn. */
+.pull::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: inherit;
+  border: 1.5px solid rgb(25 26 46 / 0.14);
+  pointer-events: none;
 }
 
-@keyframes ringGrow {
-  from {
-    scale: 0.12;
-    opacity: 0;
-  }
-}
-
-@keyframes popUp {
-  from {
-    scale: 0.5 0;
-    opacity: 0;
-  }
-  55% {
-    scale: 1.06 1.12;
-    opacity: 1;
-  }
-}
-
-@keyframes bloomUp {
-  from {
-    scale: 0.2 0;
-    opacity: 0;
-  }
-  60% {
-    scale: 1.12 1.2;
-    opacity: 1;
-  }
-}
-
-@keyframes stickerPop {
-  from {
-    scale: 0.15;
-    opacity: 0;
-    rotate: calc(var(--r, 0deg) - 60deg);
-  }
-  62% {
-    scale: 1.16;
-    opacity: 1;
-  }
-}
-
-@keyframes copyRise {
-  from {
-    opacity: 0;
-    translate: 0 18px;
-  }
-}
-
-@keyframes pullIn {
-  from {
-    opacity: 0;
-    translate: 36px 0;
-  }
-}
-
-@keyframes drift {
-  from {
-    translate: calc(var(--amp, 20px) * -1) 0;
-  }
-  to {
-    translate: var(--amp, 20px) 0;
-  }
-}
-
-@keyframes tug {
-  0%,
-  100% {
-    rotate: 0deg;
-  }
-  22% {
-    rotate: -6deg;
-  }
-  48% {
-    rotate: 5deg;
-  }
-  74% {
-    rotate: -3deg;
-  }
-}
-
-@keyframes twinkle {
-  0%,
-  100% {
-    scale: 1;
-    rotate: 0deg;
-  }
-  50% {
-    scale: 0.72;
-    rotate: 14deg;
-  }
-}
-
-@keyframes shoot {
-  0% {
-    translate: 150px 70px;
-    opacity: 0;
-  }
-  14% {
-    opacity: 1;
-  }
-  100% {
-    translate: 600px 200px;
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .box {
-    animation: boxIn 0.7s var(--h-ease) backwards;
-  }
-
-  .ringIn {
-    animation: ringGrow 1s var(--h-ease) var(--d, 0s) backwards;
-  }
-
-  .rise {
-    animation:
-      rise 1s cubic-bezier(0.22, 1.16, 0.36, 1) var(--d, 0s) backwards,
-      fadeIn 0.3s linear var(--d, 0s) backwards;
-  }
-
-  .cloudIn {
-    animation: slideIn 1.3s var(--h-ease) var(--d, 0s) backwards;
-  }
-
-  .cloudDrift {
-    animation: drift var(--dur, 34s) ease-in-out 2s infinite alternate;
-  }
-
-  .pop {
-    animation: popUp 0.8s cubic-bezier(0.34, 1.45, 0.5, 1) var(--d, 0s)
-      backwards;
-  }
-
-  .bloom {
-    animation: bloomUp 0.85s cubic-bezier(0.34, 1.45, 0.5, 1) var(--d, 0s)
-      backwards;
-  }
-
-  .titleCut {
-    animation: popUp 0.95s cubic-bezier(0.34, 1.3, 0.5, 1) 0.85s backwards;
-  }
-
-  .stickerSmiley {
-    animation: stickerPop 0.8s var(--h-ease) 1.7s backwards;
-  }
-
-  .stickerBurst {
-    animation: stickerPop 0.8s var(--h-ease) 1.82s backwards;
-  }
-
-  .stickerDaisy {
-    animation: stickerPop 0.8s var(--h-ease) 1.94s backwards;
-  }
-
-  .stickerBolt {
-    animation: stickerPop 0.8s var(--h-ease) 2.06s backwards;
-  }
-
-  .tag,
-  .parallaxChip {
-    animation: fadeIn 0.6s ease 1.5s backwards;
-  }
-
-  .pull {
-    animation: pullIn 0.8s var(--h-ease) 1.45s backwards;
-  }
-
-  .tab {
-    animation: tug 1.1s ease-in-out 3s 1 backwards;
-  }
-
-  .foregroundRow {
-    animation: copyRise 0.8s var(--h-ease) 1.3s backwards;
-  }
-
-  .window[data-act='night'] .starGlyph {
-    animation: twinkle 3.4s ease-in-out var(--tw, 0s) infinite;
-  }
-
-  .window[data-act='night'] .shoot {
-    animation: shoot 1.6s cubic-bezier(0.3, 0.6, 0.4, 1) 1.1s 1 both;
-  }
-
-  /* Off screen, nothing should be running. */
-  .window[data-idle='true'] * {
-    animation-play-state: paused !important;
-  }
+.pullText {
+  writing-mode: vertical-rl;
+  font-family: var(--h-display);
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1;
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
 @media (hover: none) {
-  .parallaxChip {
+  .physicsTab {
     display: none;
   }
 }
 
 @media (max-width: 900px) {
   .box {
-    border-radius: 24px;
-    box-shadow: 6px 8px 0 var(--h-ink);
+    padding-top: 1.5rem;
+    border-radius: 34px;
   }
 
   .window {
-    border-radius: 18px;
+    border-radius: 24px;
+  }
+
+  .titleStage {
+    padding: 6.4rem 0.8rem 4.8rem;
+  }
+
+  .titleWrap {
+    width: clamp(15rem, 78%, 30rem);
   }
 
   .pull {
-    --track-w: 9.4rem;
-    --tab-w: 6.6rem;
-
-    gap: 0.4rem;
-    padding: 0.32rem 0.55rem;
+    width: 2.8rem;
+    height: 7.6rem;
+    margin-top: -3.8rem;
+    gap: 0.5rem;
   }
 
-  .track {
-    height: 2.6rem;
-  }
-
-  .tab {
-    font-size: 0.85rem;
-  }
-
-  /* The label column on a phone is taller, so the cutout stands clear of
-     it instead of tucking behind the hills. */
-  .titlePlane {
-    bottom: max(calc(var(--u) * 275), 16.5rem);
-  }
-
-  .foreground {
-    padding: 0 0.9rem 0.9rem;
-  }
-
-  .foregroundRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.1rem;
-  }
-
-  .headlineCard {
-    box-shadow: 5px 6px 0 var(--h-ink);
-  }
-
-  .lowerRightAction {
-    align-self: flex-end;
-    margin-bottom: 0;
+  .pullText {
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 700px) {
-  .stickerSmiley {
-    --ox: 560;
-    --oy: 440;
-  }
-
-  .stickerBurst {
-    --ox: 884;
-    --oy: 410;
-  }
-
-  .stickerDaisy {
-    --ox: 548;
-    --oy: 575;
-  }
-
-  .stickerBolt {
-    --ox: 902;
-    --oy: 552;
-  }
-
-  .tag {
-    display: none;
-  }
-}
-
-/* Below this the three rows stop fitting on one line at the desktop scale,
-   so the lead words and pills both step down together. */
-@media (max-width: 560px) {
-  .headlineRow {
+  .pillRow {
     gap: 0.4rem;
   }
 
-  .leadLabel {
-    font-size: clamp(1rem, 4.6vw, 1.35rem);
+  .pill {
+    gap: 0.35rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.78rem;
   }
 
-  .swapPill {
-    height: clamp(2rem, 8.4vw, 2.35rem);
-    padding: 0 0.62rem;
-    font-size: clamp(0.95rem, 4.3vw, 1.2rem);
+  .label {
+    display: none;
   }
 
-  .lowerRightAction .paperPillBtn {
-    min-height: 2.9rem;
-    padding: 0.6rem 1.3rem;
-    font-size: 1rem;
+  .seeWork {
+    padding: 0.62rem 1.1rem;
+    font-size: 0.9rem;
+  }
+
+  .select {
+    inset: -18% -6% -22% -5%;
+  }
+
+  .selectDot {
+    display: none;
   }
 }
