@@ -17,8 +17,12 @@ export type Body = {
   y: number
   vx: number
   vy: number
-  /** Collision radius. */
+  /** Collision radius against other stickers. */
   r: number
+  /** Outer visual radius used for 4-wall frame containment (defaults to `r`). */
+  boundR?: number
+  /** True once the body has entered inside the top boundary after initial drop. */
+  entered: boolean
   /** Heavier bodies shove lighter ones. */
   mass: number
   /** Rotation in radians, and angular velocity in rad/s. */
@@ -56,6 +60,7 @@ const MAX_SPEED = 3200
 export function createBody(
   init: Pick<Body, 'id' | 'x' | 'y' | 'r'> & Partial<Body>,
 ): Body {
+  const margin = init.boundR ?? init.r
   return {
     vx: 0,
     vy: 0,
@@ -66,6 +71,7 @@ export function createBody(
     held: false,
     tx: init.x,
     ty: init.y,
+    entered: init.y >= margin,
     ...init,
   }
 }
@@ -96,14 +102,20 @@ const clamp = (v: number, lo: number, hi: number) =>
 
 function collideBounds(world: World, body: Body) {
   const { width, height, bounce } = world
-  if (body.x < body.r) {
-    body.x = body.r
+  const margin = body.boundR ?? body.r
+  if (body.x < margin) {
+    body.x = margin
     if (body.vx < 0) body.vx *= -bounce
-  } else if (body.x > width - body.r) {
-    body.x = width - body.r
+  } else if (body.x > width - margin) {
+    body.x = width - margin
     if (body.vx > 0) body.vx *= -bounce
   }
-  const floor = height - body.r
+  if (body.y >= margin) body.entered = true
+  if (body.entered && body.y < margin) {
+    body.y = margin
+    if (body.vy < 0) body.vy *= -bounce * 0.7
+  }
+  const floor = height - margin
   if (body.y > floor) {
     body.y = floor
     if (body.vy > 0) body.vy = body.vy > 140 ? -body.vy * bounce * 0.7 : 0

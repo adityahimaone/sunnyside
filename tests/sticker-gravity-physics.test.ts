@@ -100,4 +100,29 @@ describe('sticker gravity world', () => {
     expect(pick(world, 105, 100)?.id).toBe('front')
     expect(pick(world, 290, 290)).toBeNull()
   })
+
+  it('keeps shaken bodies strictly contained inside all four frame borders', () => {
+    const bodies = [
+      createBody({ id: 's1', x: 120, y: 160, r: 24, boundR: 32 }),
+      createBody({ id: 's2', x: 190, y: 160, r: 22, boundR: 30 }),
+      createBody({ id: 's3', x: 250, y: 160, r: 26, boundR: 34 }),
+    ]
+    const world = createWorld(360, 220, bodies)
+    run(world, 2)
+    for (const body of bodies) {
+      expect(body.entered).toBe(true)
+    }
+
+    shake(world, 1.5)
+    for (let t = 0; t < 3; t += 1 / 60) {
+      stepWorld(world, 1 / 60)
+      for (const body of bodies) {
+        const margin = body.boundR ?? body.r
+        expect(body.x).toBeGreaterThanOrEqual(margin - 0.01)
+        expect(body.x).toBeLessThanOrEqual(world.width - margin + 0.01)
+        expect(body.y).toBeGreaterThanOrEqual(margin - 0.01)
+        expect(body.y).toBeLessThanOrEqual(world.height - margin + 0.01)
+      }
+    }
+  })
 })

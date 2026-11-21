@@ -568,18 +568,18 @@ export function BuildArt() {
         </text>
       </g>
 
-      {/* ladder */}
+      {/* ladder — anchored firmly from scaffold beam up to the dome rim */}
       <g stroke={CARD} strokeWidth="0.9" fill="#c9a874">
         <path
-          d="M180 272L175 314M191 270L186 313"
+          d="M186 268L175 314M197 268L186 314"
           fill="none"
           strokeWidth="2.2"
           stroke="#b08a56"
         />
-        {[280, 288, 296, 304].map((y, i) => (
+        {[276, 285, 294, 303].map((y, i) => (
           <path
             key={y}
-            d={`M${179 - i * 0.9} ${y}H${190 - i * 0.9}`}
+            d={`M${184.5 - i * 2.1} ${y}H${195.5 - i * 2.1}`}
             fill="none"
             strokeWidth="1.5"
             stroke="#8a6a3c"
@@ -642,11 +642,11 @@ export function BuildArt() {
         />
       </g>
 
-      {/* scaffold beam, with a tick pattern like a ruler */}
+      {/* scaffold beam, extended so all 5 tag coils sit solidly on top */}
       <rect
         x="160"
         y="313"
-        width="238"
+        width="254"
         height="8"
         rx="1"
         fill="#c5a26c"
@@ -655,7 +655,7 @@ export function BuildArt() {
         filter="url(#dg-s1)"
       />
       <path
-        d="M162 317H396"
+        d="M162 317H412"
         stroke="#5a4326"
         strokeWidth="2.2"
         strokeDasharray="1 2.6"
@@ -722,7 +722,7 @@ export function BuildArt() {
         />
       </g>
 
-      {/* the pie-chart gauge on a cardboard arm */}
+      {/* the pie-chart gauge on a riveted cardboard arm */}
       <g filter="url(#dg-s2)">
         <path
           d="M485 326L488 303Q490 296 498 296L502 296L500 326Z"
@@ -730,6 +730,18 @@ export function BuildArt() {
           stroke={CARD}
           strokeWidth="0.9"
         />
+        <rect
+          x="479"
+          y="323"
+          width="27"
+          height="6"
+          rx="2"
+          fill="#c9a572"
+          stroke={CARD}
+          strokeWidth="0.9"
+        />
+        <circle cx="484" cy="326" r="1.2" fill={CARD} />
+        <circle cx="501" cy="326" r="1.2" fill={CARD} />
         <g className={s.slowSpin} style={vars({ '--dur': '30s' })}>
           <circle
             cx="504"
@@ -834,7 +846,7 @@ export function MotionArt() {
         strokeOpacity="0.28"
       />
 
-      {/* belt */}
+      {/* belt — upper loop around pulleys + lower drive belt wrapped cleanly to the right gear */}
       <g fill="none" stroke="#2c2630" strokeLinejoin="round">
         <path
           d="M697 198L727 187A14 14 0 0 1 747 201L751 262A12 12 0 0 1 739 275L705 262A55 55 0 0 0 697 198Z"
@@ -847,7 +859,17 @@ export function MotionArt() {
           strokeDasharray="1.2 7"
           className={s.belt}
         />
-        <path d="M703 266L722 300M692 277L712 304" strokeWidth="0.9" />
+        <path
+          d="M703 266L744 303A19 19 0 0 1 714 326L690 278"
+          strokeWidth="1.4"
+        />
+        <path
+          d="M703 266L744 303A19 19 0 0 1 714 326L690 278"
+          stroke="#f1c64a"
+          strokeWidth="0.85"
+          strokeDasharray="1.2 6"
+          className={s.belt}
+        />
       </g>
       {/* pulleys */}
       <g filter="url(#dg-s2)">
@@ -907,22 +929,42 @@ export function MotionArt() {
         />
       </g>
 
-      {/* post, discs and crank under the sun */}
+      {/* post, discs and crank under the sun — post seated firmly into the oval base */}
       <g filter="url(#dg-s2)">
+        <ellipse
+          cx="661"
+          cy="376"
+          rx="39"
+          ry="6"
+          fill="#c9a572"
+          stroke={CARD}
+          strokeWidth="0.9"
+        />
+        <ellipse cx="661" cy="376" rx="39" ry="6" fill="url(#dg-corrugate)" />
         <rect
           x="654"
           y="288"
           width="13"
-          height="56"
+          height="86"
           fill="#c7a574"
           stroke={CARD}
           strokeWidth="0.9"
         />
         <path
-          d="M658 290V342M663 290V342"
+          d="M658 290V372M663 290V372"
           stroke={CARD}
           strokeWidth="0.5"
           opacity="0.6"
+        />
+        <rect
+          x="648"
+          y="368"
+          width="25"
+          height="6"
+          rx="2"
+          fill="#b99468"
+          stroke={CARD}
+          strokeWidth="0.8"
         />
         {[338, 343, 348].map((y, i) => (
           <ellipse
@@ -936,32 +978,30 @@ export function MotionArt() {
             strokeWidth="0.8"
           />
         ))}
-        <ellipse
-          cx="661"
-          cy="376"
-          rx="39"
-          ry="6"
-          fill="#c9a572"
-          stroke={CARD}
-          strokeWidth="0.9"
-        />
-        <ellipse cx="661" cy="376" rx="39" ry="6" fill="url(#dg-corrugate)" />
-        <path
-          d="M676 346L702 352"
-          stroke={CARD}
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-        <path
-          d="M676 346L702 352"
-          stroke="#c7a574"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-        />
         <g className={s.crank}>
+          <path
+            d="M676 346L702 352"
+            stroke={CARD}
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+          <path
+            d="M676 346L702 352"
+            stroke="#c7a574"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+          />
+          <circle
+            cx="676"
+            cy="346"
+            r="2.4"
+            fill="#e9e0cc"
+            stroke={CARD}
+            strokeWidth="0.8"
+          />
           <rect
             x="699"
-            y="350"
+            y="348.5"
             width="21"
             height="7.5"
             rx="3.2"
@@ -1162,7 +1202,7 @@ export function MotionArt() {
         </g>
       </g>
 
-      {/* weather card (the words and sliders are HTML on top) and its lever */}
+      {/* weather card (the words and sliders are HTML on top), side-mounted lever & wired pedestal */}
       <rect
         x="764"
         y="237"
@@ -1174,28 +1214,74 @@ export function MotionArt() {
         strokeWidth="1"
         filter="url(#dg-s2)"
       />
-      <path
-        d="M817 308C819 330 812 350 816 376"
-        fill="none"
-        stroke="#2f3a55"
-        strokeWidth="1.6"
+      {/* Brass cable grommet on bottom of weather card -> curved power cord -> pedestal terminal */}
+      <g fill="none" strokeLinecap="round">
+        <path
+          d="M814 307C814 328 844 334 844 352C844 360 836 363 827 363"
+          stroke="#192138"
+          strokeWidth="3"
+          opacity="0.32"
+        />
+        <path
+          d="M814 307C814 328 844 334 844 352C844 360 836 363 827 363"
+          stroke="#2f3a55"
+          strokeWidth="1.8"
+        />
+        <path
+          d="M814 307C814 328 844 334 844 352C844 360 836 363 827 363"
+          stroke="#9ec0ff"
+          strokeWidth="0.9"
+          strokeDasharray="1.5 9"
+          opacity="0.85"
+          className={s.signal}
+        />
+      </g>
+      {/* Bottom card grommet */}
+      <rect
+        x="810"
+        y="305"
+        width="8"
+        height="4.5"
+        rx="1.5"
+        fill="#b99468"
+        stroke={CARD}
+        strokeWidth="0.8"
+      />
+      {/* Side-mounted lever bracket on right edge of weather card (clear of all 3 sliders) */}
+      <rect
+        x="863"
+        y="264"
+        width="5"
+        height="16"
+        rx="1.5"
+        fill="#b99468"
+        stroke={CARD}
+        strokeWidth="0.8"
       />
       <g className={s.lever}>
         <path
-          d="M856 262L833 328"
+          d="M866 272L866 325"
           stroke={CARD}
           strokeWidth="5"
           strokeLinecap="round"
         />
         <path
-          d="M856 262L833 328"
+          d="M866 272L866 325"
           stroke="#cfb58a"
           strokeWidth="3.2"
           strokeLinecap="round"
         />
         <circle
-          cx="833"
-          cy="328"
+          cx="866"
+          cy="272"
+          r="2.4"
+          fill="#e9e0cc"
+          stroke={CARD}
+          strokeWidth="0.8"
+        />
+        <circle
+          cx="866"
+          cy="325"
           r="5"
           fill="#e0c9a0"
           stroke={CARD}
@@ -1203,10 +1289,19 @@ export function MotionArt() {
         />
       </g>
 
-      {/* the stand the play button sits on */}
+      {/* twin-legged pedestal the play button sits on + right cable terminal */}
       <g filter="url(#dg-s1)" stroke={CARD} strokeWidth="0.8">
-        <path d="M726 382L737 366H760V382Z" fill="#b99468" />
+        <path d="M728 379L739 366H758V379Z" fill="#b99468" />
+        <path d="M808 379V366H825L836 379Z" fill="#b99468" />
         <rect x="737" y="360" width="90" height="6" rx="2" fill="#c9a572" />
+        <rect
+          x="825"
+          y="360.5"
+          width="4.5"
+          height="5"
+          rx="1.2"
+          fill="#b99468"
+        />
       </g>
     </Layer>
   )
@@ -1231,10 +1326,10 @@ export function RestArt({ folderCount }: { folderCount: number }) {
         fill="url(#dg-tan)"
         filter="url(#dg-s3)"
       />
-      <rect x="578" y="378" width="327" height="10" fill="#b48f5f" />
-      <rect x="578" y="378" width="327" height="10" fill="url(#dg-corrugate)" />
+      <rect x="578" y="378" width="320" height="10" fill="#b48f5f" />
+      <rect x="578" y="378" width="320" height="10" fill="url(#dg-corrugate)" />
       <path
-        d="M578 386.5H905"
+        d="M578 386.5H898"
         stroke="#5f4528"
         strokeWidth="1.3"
         strokeDasharray="1.4 1.8"
@@ -1243,7 +1338,7 @@ export function RestArt({ folderCount }: { folderCount: number }) {
       <rect
         x="578"
         y="378"
-        width="327"
+        width="320"
         height="1.2"
         fill="#e8d2ab"
         opacity="0.8"
@@ -1592,30 +1687,37 @@ export function SystemsArt() {
         </g>
       </g>
 
-      {/* the cords */}
+      {/* the cords — anchored directly into plunger & Lever B base sockets and gatehouse wall grommets */}
       <g fill="none" strokeLinecap="round">
+        {/* Left cord: red plunger right base socket (251, 485) -> gatehouse lower grommet (345, 513) */}
         <path
-          d="M258 477C268 482 270 506 290 512C310 516 330 513 345 513"
+          d="M251 485C266 488 272 508 292 512C312 516 328 513 345 513"
           stroke="#8a5f38"
           strokeWidth="3.2"
           opacity="0.5"
         />
         <path
-          d="M258 477C268 482 270 506 290 512C310 516 330 513 345 513"
+          d="M251 485C266 488 272 508 292 512C312 516 328 513 345 513"
           stroke="#d1a06c"
           strokeWidth="2"
         />
+        {/* Right cord: Lever B right base socket (326, 484) -> curving cleanly up to gatehouse grommet (345, 434) */}
         <path
-          d="M299 474C312 476 332 472 338 462C342 452 340 430 345 418"
+          d="M326 484C336 484 338 470 338 456C338 444 340 436 345 434"
           stroke="#8a5f38"
           strokeWidth="3.2"
           opacity="0.5"
         />
         <path
-          d="M299 474C312 476 332 472 338 462C342 452 340 430 345 418"
+          d="M326 484C336 484 338 470 338 456C338 444 340 436 345 434"
           stroke="#d1a06c"
           strokeWidth="2"
         />
+      </g>
+      {/* Cable sockets on red plunger base & Lever B base */}
+      <g fill="#b99468" stroke={CARD} strokeWidth="0.8">
+        <circle cx="251" cy="485" r="2.6" />
+        <circle cx="326" cy="484" r="2.6" />
       </g>
 
       {/* the main panel, rounded at the top right */}
@@ -1665,25 +1767,25 @@ export function SystemsArt() {
       </g>
       <g fill="none" strokeLinecap="round">
         <path
-          d="M494 403V457"
+          d="M496 402V456"
           stroke="#8a6a1c"
           strokeWidth="2.8"
           opacity="0.45"
         />
-        <path d="M494 403V457" stroke="#e3b64a" strokeWidth="1.8" />
+        <path d="M496 402V456" stroke="#e3b64a" strokeWidth="1.8" />
         <path
-          d="M514 403V470C514 490 500 497 483 500"
+          d="M514 402V470C514 490 501 498 485 500"
           stroke="#1f2f80"
           strokeWidth="2.8"
           opacity="0.45"
         />
         <path
-          d="M514 403V470C514 490 500 497 483 500"
+          d="M514 402V470C514 490 501 498 485 500"
           stroke="#3f5fd0"
           strokeWidth="1.8"
         />
         <path
-          d="M494 403V457M514 403V470"
+          d="M496 402V456M514 402V470"
           stroke="#fff"
           strokeWidth="1"
           strokeDasharray="1 9"
@@ -1691,10 +1793,16 @@ export function SystemsArt() {
           className={s.signal}
         />
       </g>
+      {/* Tile & junction grommets */}
+      <g fill="#b99468" stroke="#7c5c34" strokeWidth="0.7">
+        <circle cx="496" cy="402" r="1.8" />
+        <circle cx="514" cy="402" r="1.8" />
+        <circle cx="485" cy="500" r="2.2" />
+      </g>
       <rect
-        x="493"
+        x="490"
         y="455"
-        width="22"
+        width="30"
         height="12"
         rx="2"
         fill="#cba577"
@@ -1702,15 +1810,25 @@ export function SystemsArt() {
         strokeWidth="0.8"
         filter="url(#dg-s1)"
       />
+      <circle cx="496" cy="461" r="1.5" fill="#7c5c34" />
+      <circle cx="514" cy="461" r="1.5" fill="#7c5c34" />
 
-      {/* the flag pole */}
+      {/* the flag pole — extends cleanly above the top ribbon with a finial cap */}
       <path
-        d="M531 410V493"
+        d="M531 385V493"
         stroke="#e8e0cf"
         strokeWidth="2.4"
         strokeLinecap="round"
       />
-      <path d="M531 410V493" stroke="#9c9380" strokeWidth="0.6" />
+      <path d="M531 385V493" stroke="#9c9380" strokeWidth="0.6" />
+      <circle
+        cx="531"
+        cy="384"
+        r="2.4"
+        fill="#e8e0cf"
+        stroke="#9c9380"
+        strokeWidth="0.9"
+      />
       <circle
         cx="531"
         cy="494"
@@ -1768,6 +1886,11 @@ export function SystemsArt() {
           strokeWidth="1"
           className={s.doorR}
         />
+      </g>
+      {/* Gatehouse left wall cable entry grommets */}
+      <g fill="#b99468" stroke={CARD} strokeWidth="0.8">
+        <rect x="342" y="431.5" width="4.5" height="5" rx="1.2" />
+        <rect x="342" y="510.5" width="4.5" height="5" rx="1.2" />
       </g>
       <g fill="none" stroke="#cf7c9f" strokeWidth="0.9">
         <rect x="447" y="480" width="13" height="6.4" rx="1.4" />
