@@ -1,20 +1,14 @@
 'use client'
 
-import {
-  AnimatePresence,
-  motion,
-  useReducedMotion,
-  useScroll,
-} from 'motion/react'
-import { ArrowUpRight, Menu, X } from 'lucide-react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { ArrowUpRight, Menu, Sparkles, X } from 'lucide-react'
 import Link from 'next/link'
-import { type CSSProperties, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import {
   SunnysideMark,
   SunnysideWordmark,
 } from '@/components/ui/sunnyside-logo'
-import archive from '@/features/archive/archive.module.css'
 import { cn } from '@/lib/utils'
 
 import type { HeroSurface } from './hero'
@@ -28,15 +22,18 @@ type Props = {
   heroSurface?: HeroSurface
 }
 
+export type IslandSurfaceMode = 'auto' | 'black' | 'glass'
+
 const NAV = CHAPTERS.filter((chapter) => chapter.id !== 'home')
+
+const EASE_OUT_UI: [number, number, number, number] = [0.23, 1, 0.32, 1]
+const EASE_DRAWER: [number, number, number, number] = [0.32, 0.72, 0, 1]
 
 /**
  * The menu's destinations.
  *
- * These are places, not chapters: the design system, the archive rooms and the
- * practice manual. The chapter list still exists, one step below, because a
- * phone reader
- * loses every section jump if the only menu becomes a route index.
+ * Rendered inside the expanded Supaste-style notch island drawer as visual
+ * shelf cards, paired with the chapter pill bar above them.
  */
 const DESTINATIONS = [
   {
@@ -44,22 +41,56 @@ const DESTINATIONS = [
     label: 'Sunnyside',
     note: 'the specimen',
     number: '00',
+    tone: 'butter',
+    tag: 'Tokens & Type',
   },
   {
     href: '/design-system',
     label: 'Design System',
     note: 'the case library',
     number: '01',
+    tone: 'cobalt',
+    tag: 'Systems',
   },
-  { href: '/projects', label: 'Projects', note: 'the shelf', number: '02' },
-  { href: '/bookmarks', label: 'Bookmarks', note: 'the crate', number: '03' },
-  { href: '/skills', label: 'Skills', note: 'the toolbox', number: '04' },
-  { href: '/blog', label: 'Blog', note: 'field notes', number: '05' },
+  {
+    href: '/projects',
+    label: 'Projects',
+    note: 'the shelf',
+    number: '02',
+    tone: 'tangerine',
+    tag: 'Selected Work',
+  },
+  {
+    href: '/bookmarks',
+    label: 'Bookmarks',
+    note: 'the crate',
+    number: '03',
+    tone: 'mint',
+    tag: 'Curated Links',
+  },
+  {
+    href: '/skills',
+    label: 'Skills',
+    note: 'the toolbox',
+    number: '04',
+    tone: 'sky',
+    tag: 'Capabilities',
+  },
+  {
+    href: '/blog',
+    label: 'Blog',
+    note: 'field notes',
+    number: '05',
+    tone: 'pink',
+    tag: 'Essays',
+  },
   {
     href: '/design-engineering',
     label: 'Practice',
     note: 'the field manual',
     number: '06',
+    tone: 'paper',
+    tag: 'Handbook',
   },
 ] as const
 
@@ -70,26 +101,38 @@ export function SiteHeader({
   heroSurface = 'cobalt',
 }: Props) {
   const reduced = useReducedMotion() ?? false
-  const { scrollYProgress } = useScroll()
   const [open, setOpen] = useState(false)
+  const [surfaceMode, setSurfaceMode] = useState<IslandSurfaceMode>('auto')
   const triggerRef = useRef<HTMLButtonElement>(null)
-  const closeRef = useRef<HTMLButtonElement>(null)
-  const panelRef = useRef<HTMLDivElement>(null)
+  const islandRef = useRef<HTMLDivElement>(null)
+
+  // Resolve effective surface ('black' or 'glass'):
+  // In 'auto' mode, the island is pitch black on the hero (like Supaste's top notch)
+  // and when the drawer is open, and shifts to liquid glass once scrolled onto the paper chapters.
+  const onHero = active === 'home' && !scrolled && heroSurface === 'cobalt'
+  const resolvedSurface: 'black' | 'glass' =
+    surfaceMode === 'auto' ? (open || onHero ? 'black' : 'glass') : surfaceMode
+
+  // When liquid glass is over the blue hero at the top, keep light foreground text;
+  // when over the warm paper chapters, use dark ink text.
+  const glassTone: 'on-dark' | 'on-light' =
+    active === 'home' && heroSurface === 'cobalt' && !scrolled
+      ? 'on-dark'
+      : 'on-light'
 
   useEffect(() => {
     if (!open) return
-    const trigger = triggerRef.current
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    closeRef.current?.focus()
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setOpen(false)
+        triggerRef.current?.focus()
         return
       }
       if (event.key !== 'Tab') return
-      const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
+      const focusable = islandRef.current?.querySelectorAll<HTMLElement>(
         'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
       )
       if (!focusable?.length) return
@@ -107,185 +150,358 @@ export function SiteHeader({
     return () => {
       document.body.style.overflow = previous
       document.removeEventListener('keydown', onKey)
-      trigger?.focus()
     }
   }, [open])
 
   const go = (id: string) => {
+    const wasOpen = open
     setOpen(false)
-    // Let the overlay leave before the page moves under it.
-    window.setTimeout(() => scrollToSection(id, reduced), reduced ? 0 : 180)
+    window.setTimeout(
+      () => scrollToSection(id, reduced),
+      wasOpen && !reduced ? 140 : 0,
+    )
   }
 
   return (
     <>
+      <AnimatePresence>
+        {open ? (
+          <motion.div
+            key="island-backdrop"
+            className={styles.islandBackdrop}
+            initial={reduced ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: EASE_OUT_UI }}
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
+        ) : null}
+      </AnimatePresence>
+
       <header
-        className={cn(archive.header, footerVisible && styles.headerHidden)}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-        }}
+        className={cn(
+          styles.islandHeader,
+          footerVisible && styles.headerHidden,
+        )}
         inert={footerVisible}
       >
         <motion.div
-          aria-hidden
-          className={archive.progress}
-          style={{ scaleX: scrollYProgress }}
-        />
-        <div
+          ref={islandRef}
+          layout={!reduced}
+          transition={{
+            layout: {
+              type: 'spring',
+              duration: 0.38,
+              bounce: 0.1,
+            },
+          }}
           className={cn(
-            archive.bar,
-            scrolled && archive.barScrolled,
-            active === 'home' && heroSurface === 'cobalt' && archive.barHero,
+            styles.island,
+            open && styles.islandOpen,
+            scrolled && styles.islandScrolled,
           )}
+          data-surface={resolvedSurface}
+          data-glass-tone={glassTone}
+          data-open={open ? 'true' : 'false'}
+          role={open ? 'dialog' : undefined}
+          aria-modal={open ? 'true' : undefined}
+          aria-label={open ? 'Site navigation' : undefined}
         >
-          <div className={archive.inner}>
+          {/* Unified single-element surface + concave top ears (zero seam in Liquid Glass & Black) */}
+          <span className={styles.islandSurface} aria-hidden="true" />
+          {/* Continuous specular rim that curves smoothly through both concave top ears */}
+          <span className={styles.islandRim} aria-hidden="true" />
+
+          {/* Top bar of the island (always visible, anchors both collapsed & expanded states) */}
+          <motion.div layout="position" className={styles.islandBar}>
             <a
               href="#home"
-              className={archive.brand}
+              className={styles.islandBrand}
               aria-label="Sunnyside, Aditya Himawan, back to the top"
               onClick={(event) => {
                 event.preventDefault()
                 go('home')
               }}
             >
-              <SunnysideMark className={archive.mark} />
-              <span className={archive.brandText}>
-                <SunnysideWordmark className={archive.brandWord} />
-                <span className={archive.brandRole}>Aditya Himawan</span>
+              <SunnysideMark className={styles.islandMark} />
+              <span className={styles.islandBrandText}>
+                <SunnysideWordmark className={styles.islandBrandWord} />
               </span>
             </a>
 
-            <nav className={archive.nav} aria-label="Chapters">
-              {NAV.map((chapter) => (
-                <button
-                  key={chapter.id}
-                  type="button"
-                  className={archive.navLink}
-                  aria-current={active === chapter.id ? 'location' : undefined}
-                  onClick={() => go(chapter.id)}
-                >
-                  {chapter.label}
-                </button>
-              ))}
+            <nav className={styles.islandNav} aria-label="Chapters">
+              {NAV.map((chapter) => {
+                const isActive = active === chapter.id
+                return (
+                  <button
+                    key={chapter.id}
+                    type="button"
+                    className={styles.islandNavLink}
+                    aria-current={isActive ? 'location' : undefined}
+                    onClick={() => go(chapter.id)}
+                  >
+                    {isActive ? (
+                      <motion.span
+                        layoutId="island-nav-pill"
+                        className={styles.islandNavActivePill}
+                        transition={{
+                          type: 'spring',
+                          duration: 0.34,
+                          bounce: 0.12,
+                        }}
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                    <span className={styles.islandNavLinkLabel}>
+                      {chapter.label}
+                    </span>
+                  </button>
+                )
+              })}
             </nav>
 
-            <div className={archive.headerTools}>
+            <div className={styles.islandActions}>
               <button
                 type="button"
-                className={archive.cta}
+                className={styles.islandCta}
                 onClick={() => go('contact')}
               >
-                <span className={archive.ctaLabel}>Say hi</span>
-                <ArrowUpRight size={15} strokeWidth={2} aria-hidden />
+                <span>Say hi</span>
+                <ArrowUpRight size={14} strokeWidth={2.2} aria-hidden />
               </button>
+
               <button
                 ref={triggerRef}
                 type="button"
-                className={cn(archive.menuButton, archive.menuButtonWide)}
-                aria-label="Open the chapter menu"
+                className={styles.islandMenuBtn}
+                aria-label={
+                  open ? 'Close the navigation menu' : 'Open the chapter menu'
+                }
                 aria-expanded={open}
                 aria-controls="chapter-menu"
-                onClick={() => setOpen(true)}
+                onClick={() => setOpen((prev) => !prev)}
               >
-                <Menu size={17} strokeWidth={2} aria-hidden />
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {open ? (
+                    <motion.span
+                      key="close"
+                      className={styles.islandMenuIcon}
+                      initial={
+                        reduced
+                          ? { opacity: 0 }
+                          : { opacity: 0, scale: 0.85, rotate: -45 }
+                      }
+                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                      exit={
+                        reduced
+                          ? { opacity: 0 }
+                          : { opacity: 0, scale: 0.85, rotate: 45 }
+                      }
+                      transition={{ duration: 0.16, ease: EASE_OUT_UI }}
+                    >
+                      <X size={16} strokeWidth={2.2} aria-hidden />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="menu"
+                      className={styles.islandMenuIcon}
+                      initial={
+                        reduced
+                          ? { opacity: 0 }
+                          : { opacity: 0, scale: 0.85, rotate: 45 }
+                      }
+                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                      exit={
+                        reduced
+                          ? { opacity: 0 }
+                          : { opacity: 0, scale: 0.85, rotate: -45 }
+                      }
+                      transition={{ duration: 0.16, ease: EASE_OUT_UI }}
+                    >
+                      <Menu size={16} strokeWidth={2.2} aria-hidden />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </button>
             </div>
-          </div>
-        </div>
-      </header>
+          </motion.div>
 
-      <AnimatePresence>
-        {open ? (
-          <motion.div
-            ref={panelRef}
-            id="chapter-menu"
-            className={cn(archive.menuPanel, styles.menuPanel)}
-            initial={reduced ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Site navigation"
-          >
-            <div className={styles.menuContent}>
-              <div className={cn(archive.menuTop, styles.menuTop)}>
-                <span className={archive.menuLabel}>
-                  Aditya Himawan, Side A
-                </span>
-                <button
-                  ref={closeRef}
-                  type="button"
-                  className={archive.menuClose}
-                  onClick={() => setOpen(false)}
-                  aria-label="Close the menu"
-                >
-                  <X size={19} aria-hidden />
-                </button>
-              </div>
-
-              <motion.nav
-                className={cn(archive.menuNav, styles.menuNav)}
-                aria-label="Site"
-                style={{ '--rows': DESTINATIONS.length } as CSSProperties}
-                initial={reduced ? false : { y: 16, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+          {/* Seamless Expanded Island Tray (Supaste notch drawer) */}
+          <AnimatePresence initial={false}>
+            {open ? (
+              <motion.div
+                id="chapter-menu"
+                key="chapter-menu"
+                className={styles.islandTray}
+                initial={
+                  reduced ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.98 }
+                }
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={
+                  reduced ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.985 }
+                }
                 transition={{
-                  duration: 0.28,
-                  delay: 0.04,
-                  ease: [0.22, 1, 0.36, 1],
+                  duration: 0.24,
+                  ease: EASE_DRAWER,
                 }}
               >
-                {DESTINATIONS.map((destination) => (
-                  <Link
-                    key={destination.href}
-                    href={destination.href}
-                    className={cn(archive.menuLink, styles.menuLink)}
-                    onClick={() => setOpen(false)}
+                <div className={styles.islandTrayInner}>
+                  {/* Row 1: Supaste-style horizontal pill tabs for page chapters + surface switcher */}
+                  <motion.div
+                    className={styles.islandTrayToolbar}
+                    initial={reduced ? false : { opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.22,
+                      delay: 0.03,
+                      ease: EASE_OUT_UI,
+                    }}
                   >
-                    <span className={styles.menuLinkCopy}>
-                      {destination.label}
-                      <small className={styles.menuLinkNote}>
-                        {destination.note}
-                      </small>
-                    </span>
-                    <span className={cn(archive.menuNum, styles.menuNum)}>
-                      {destination.number}
-                    </span>
-                  </Link>
-                ))}
-              </motion.nav>
-
-              <div className={cn(archive.menuFoot, styles.menuFoot)}>
-                <div className={archive.menuFootLinks}>
-                  <Link
-                    href="/music"
-                    className={archive.menuFootLink}
-                    onClick={() => setOpen(false)}
-                  >
-                    Mixtape
-                  </Link>
-                  {SOCIALS.map((social) => (
-                    <a
-                      key={social.label}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={archive.menuFootLink}
+                    <div
+                      className={styles.islandChapterPills}
+                      role="group"
+                      aria-label="Jump to page section"
                     >
-                      {social.label}
-                    </a>
-                  ))}
+                      {CHAPTERS.map((chapter) => {
+                        const isCurrent = active === chapter.id
+                        return (
+                          <button
+                            key={chapter.id}
+                            type="button"
+                            className={styles.islandChapterPill}
+                            data-active={isCurrent ? 'true' : 'false'}
+                            onClick={() => go(chapter.id)}
+                          >
+                            <span>{chapter.label}</span>
+                            <span className={styles.islandChapterCount}>
+                              {chapter.number}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    <div
+                      className={styles.islandSurfacePills}
+                      role="group"
+                      aria-label="Navbar surface theme"
+                    >
+                      <button
+                        type="button"
+                        className={styles.islandSurfaceChoice}
+                        data-selected={
+                          resolvedSurface === 'black' ? 'true' : 'false'
+                        }
+                        onClick={() => setSurfaceMode('black')}
+                      >
+                        Black
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.islandSurfaceChoice}
+                        data-selected={
+                          resolvedSurface === 'glass' ? 'true' : 'false'
+                        }
+                        onClick={() => setSurfaceMode('glass')}
+                      >
+                        <Sparkles size={11} aria-hidden />
+                        Liquid Glass
+                      </button>
+                    </div>
+                  </motion.div>
+
+                  {/* Row 2: Supaste-style visual card shelf for site destinations */}
+                  <nav
+                    className={styles.islandCardsGrid}
+                    aria-label="Site destinations"
+                  >
+                    {DESTINATIONS.map((destination, index) => (
+                      <motion.div
+                        key={destination.href}
+                        initial={
+                          reduced ? false : { opacity: 0, y: 8, scale: 0.96 }
+                        }
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{
+                          duration: 0.24,
+                          delay: 0.04 + index * 0.025,
+                          ease: EASE_OUT_UI,
+                        }}
+                      >
+                        <Link
+                          href={destination.href}
+                          className={styles.islandCard}
+                          data-tone={destination.tone}
+                          onClick={() => setOpen(false)}
+                        >
+                          <div className={styles.islandCardPreview}>
+                            <span className={styles.islandCardNum}>
+                              {destination.number}
+                            </span>
+                            <span className={styles.islandCardTag}>
+                              {destination.tag}
+                            </span>
+                            <ArrowUpRight
+                              size={15}
+                              className={styles.islandCardArrow}
+                              aria-hidden
+                            />
+                          </div>
+                          <div className={styles.islandCardBody}>
+                            <span className={styles.islandCardTitle}>
+                              {destination.label}
+                            </span>
+                            <span className={styles.islandCardNote}>
+                              {destination.note}
+                            </span>
+                          </div>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </nav>
+
+                  {/* Row 3: Compact footer bar inside the expanded island */}
+                  <motion.div
+                    className={styles.islandTrayFoot}
+                    initial={reduced ? false : { opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.22,
+                      delay: 0.14,
+                      ease: EASE_OUT_UI,
+                    }}
+                  >
+                    <div className={styles.islandFootLinks}>
+                      <Link
+                        href="/music"
+                        className={styles.islandFootLink}
+                        onClick={() => setOpen(false)}
+                      >
+                        Mixtape
+                      </Link>
+                      {SOCIALS.map((social) => (
+                        <a
+                          key={social.label}
+                          href={social.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.islandFootLink}
+                        >
+                          {social.label}
+                        </a>
+                      ))}
+                    </div>
+                    <span className={styles.islandFootMeta}>
+                      Aditya Himawan · Side A · Jakarta, GMT+7
+                    </span>
+                  </motion.div>
                 </div>
-                <span className={archive.menuNote}>Jakarta, GMT+7</span>
-              </div>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </motion.div>
+      </header>
     </>
   )
 }
