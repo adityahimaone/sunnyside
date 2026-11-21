@@ -109,7 +109,7 @@ export function SiteHeader({
   // Resolve effective surface ('black' or 'glass'):
   // In 'auto' mode, the island is pitch black on the hero (like Supaste's top notch)
   // and when the drawer is open, and shifts to liquid glass once scrolled onto the paper chapters.
-  const onHero = active === 'home' && !scrolled && heroSurface === 'cobalt'
+  const onHero = active === 'home' && !scrolled
   const resolvedSurface: 'black' | 'glass' =
     surfaceMode === 'auto' ? (open || onHero ? 'black' : 'glass') : surfaceMode
 
