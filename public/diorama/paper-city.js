@@ -1,14 +1,14 @@
 /* paper-city · a hero: a paper city on the blue cutting mat.
-   One elevated figure-8 railway, turned across the mat, crosses itself on a
-   bridge: two trains run it forever, one over the other. Cobalt towers,
-   gabled houses, a roundabout park, a road with a bus and two cars. Words:
-   INTERFACES on the bridge, SIDE A EXPRESS on the orange train, a billboard
-   (tap it to change the message). */
+   One elevated figure-8 railway (two rounded rectangles joined by a diagonal
+   crossing), turned across the mat: two trains run it forever, one over the
+   other. Cobalt towers, gabled houses, a roundabout park, a road with a bus
+   and two cars. Words: INTERFACES on the bridge, SIDE A EXPRESS on the orange
+   train, a billboard (tap it to change the message). */
 Diorama.figure({
   name: 'paper-city',
   size: 'hero',
   title: 'Paper City',
-  means: 'A figure-8 railway crosses itself on a bridge; two trains ride it while a bus and cars circle the park.',
+  means: 'A rounded-rectangle figure-8 railway crosses itself on a bridge; two trains ride it while a bus and cars circle the park.',
   hint: 'Hover a train or a tower; tap the billboard to change its message.',
   theme: {
     base: 'print',
@@ -29,21 +29,81 @@ Diorama.figure({
   still: 9,
   build: function (o) {
     var D = o.D, pal = o.pal, hot = [], R = 7;
-    var TAU = Math.PI * 2;
     var rnd = function () { R = (R * 16807) % 2147483647; return R / 2147483647; };
 
-    /* ---------- the figure-8 centreline, resampled by arc length ---------- */
-    var A = 17, B = 25, TH = -0.78, CS = Math.cos(TH), SN = Math.sin(TH);
-    function raw(t, out) {
-      var s = Math.sin(t), c = Math.cos(t), k = 1 + s * s, u = A * c / k, v = B * s * c / k;
-      out.x = u * CS - v * SN; out.z = u * SN + v * CS; out.y = 3.7 - 2.1 * s; return out;
+    /* ---------- the rounded-rectangle figure-8 centreline ---------- */
+    var TH = -0.35, CS = Math.cos(TH), SN = Math.sin(TH);
+    function rot(u, v) { return [u * CS - v * SN, u * SN + v * CS]; }
+    function uv(x, z) { return [x * CS + z * SN, -x * SN + z * CS]; }
+
+    var VERTS = [[-5, 9], [5, -9], [23, -9], [23, 9], [5, 9], [-5, -9], [-23, -9], [-23, 9]];
+    var R_FILLET = 4.5, NV = VERTS.length, corners = [], i, k;
+    for (i = 0; i < NV; i++) {
+      var pPrev = VERTS[(i - 1 + NV) % NV], pCurr = VERTS[i], pNext = VERTS[(i + 1) % NV];
+      var dx1 = pPrev[0] - pCurr[0], dv1 = pPrev[1] - pCurr[1], l1 = Math.hypot(dx1, dv1);
+      var dx2 = pNext[0] - pCurr[0], dv2 = pNext[1] - pCurr[1], l2 = Math.hypot(dx2, dv2);
+      var u1 = [dx1 / l1, dv1 / l1], u2 = [dx2 / l2, dv2 / l2];
+      var cosT = Math.max(-0.9999, Math.min(0.9999, u1[0] * u2[0] + u1[1] * u2[1]));
+      var halfT = Math.acos(cosT) / 2, tanH = Math.tan(halfT);
+      var d = R_FILLET / tanH, r = R_FILLET, maxD = Math.min(l1, l2) * 0.45;
+      if (d > maxD) { d = maxD; r = d * tanH; }
+      var t1 = [pCurr[0] + u1[0] * d, pCurr[1] + u1[1] * d];
+      var t2 = [pCurr[0] + u2[0] * d, pCurr[1] + u2[1] * d];
+      var bx = u1[0] + u2[0], bv = u1[1] + u2[1], bl = Math.hypot(bx, bv);
+      var distBO = r / Math.sin(halfT);
+      var org = [pCurr[0] + bx / bl * distBO, pCurr[1] + bv / bl * distBO];
+      var a1 = Math.atan2(t1[1] - org[1], t1[0] - org[0]);
+      var a2 = Math.atan2(t2[1] - org[1], t2[0] - org[0]);
+      var da = a2 - a1;
+      while (da > Math.PI) da -= Math.PI * 2;
+      while (da < -Math.PI) da += Math.PI * 2;
+      corners.push({ t1: t1, t2: t2, org: org, r: r, a1: a1, da: da });
     }
-    var tmp = { x: 0, y: 0, z: 0 }, dense = [], acc = [0], i, L = 0, prev = null;
-    for (i = 0; i <= 3000; i++) {
-      raw(i / 3000 * TAU, tmp);
-      if (prev) { L += Math.sqrt(Math.pow(tmp.x - prev[0], 2) + Math.pow(tmp.y - prev[1], 2) + Math.pow(tmp.z - prev[2], 2)); acc.push(L); }
-      prev = [tmp.x, tmp.y, tmp.z]; dense.push(prev);
+
+    /* dense planar sampling in (u,v), keeping track of the first diagonal's midpoint */
+    var uvPts = [], accUV = [0], L_uv = 0, sBridgeUV = 0, bridgeMark = false;
+    function pushUV(u, v) {
+      if (uvPts.length) {
+        var pr = uvPts[uvPts.length - 1];
+        L_uv += Math.hypot(u - pr[0], v - pr[1]);
+        accUV.push(L_uv);
+      }
+      uvPts.push([u, v]);
     }
+    for (i = 0; i < NV; i++) {
+      var c0 = corners[i], c1 = corners[(i + 1) % NV];
+      var nArc = Math.max(12, Math.ceil(Math.abs(c0.da) * c0.r / 0.04));
+      for (k = 0; k < nArc; k++) {
+        var ang = c0.a1 + c0.da * (k / nArc);
+        pushUV(c0.org[0] + Math.cos(ang) * c0.r, c0.org[1] + Math.sin(ang) * c0.r);
+      }
+      var slen = Math.hypot(c1.t1[0] - c0.t2[0], c1.t1[1] - c0.t2[1]);
+      var nSeg = Math.max(8, Math.ceil(slen / 0.04));
+      for (k = 0; k < nSeg; k++) {
+        var fSeg = k / nSeg;
+        pushUV(c0.t2[0] + (c1.t1[0] - c0.t2[0]) * fSeg, c0.t2[1] + (c1.t1[1] - c0.t2[1]) * fSeg);
+        if (i === 0 && !bridgeMark && fSeg >= 0.5) { sBridgeUV = L_uv; bridgeMark = true; }
+      }
+    }
+    /* close planar loop back to first point */
+    L_uv += Math.hypot(uvPts[0][0] - uvPts[uvPts.length - 1][0], uvPts[0][1] - uvPts[uvPts.length - 1][1]);
+
+    /* elevate the first diagonal (-3,9)->(3,-9) over the second diagonal (3,9)->(-3,-9) */
+    var dense = [], acc = [0], L = 0, prev = null, sBridge = 0, bestBridgeDist = 1e9;
+    for (i = 0; i <= uvPts.length; i++) {
+      var idx = i % uvPts.length, pt = uvPts[idx], sUV = i === uvPts.length ? L_uv : accUV[idx];
+      var ds = Math.abs(sUV - sBridgeUV); ds = Math.min(ds, L_uv - ds);
+      var y = 3.2;
+      if (ds < 9) {
+        var w = 1 - ds / 9, sm = w * w * (3 - 2 * w);
+        y = 3.2 + 4.2 * sm;
+      }
+      var xz = rot(pt[0], pt[1]);
+      if (prev) { L += Math.hypot(xz[0] - prev[0], y - prev[1], xz[1] - prev[2]); acc.push(L); }
+      if (i < uvPts.length && ds < bestBridgeDist) { bestBridgeDist = ds; sBridge = L; }
+      prev = [xz[0], y, xz[1]]; dense.push(prev);
+    }
+
     var DS = .4, M = Math.round(L / DS), PX = [], PY = [], PZ = [], j = 0, d0, f;
     for (i = 0; i < M; i++) {
       var s0 = i * L / M; while (acc[j + 1] < s0) j++;
@@ -54,8 +114,8 @@ Diorama.figure({
     }
     var STEP = L / M;
     function at(s, out) {
-      s = ((s % L) + L) % L; var k = Math.floor(s / STEP), g = s / STEP - k, k2 = (k + 1) % M; k = k % M;
-      out.x = PX[k] + (PX[k2] - PX[k]) * g; out.y = PY[k] + (PY[k2] - PY[k]) * g; out.z = PZ[k] + (PZ[k2] - PZ[k]) * g; return out;
+      s = ((s % L) + L) % L; var kk = Math.floor(s / STEP), g = s / STEP - kk, k2 = (kk + 1) % M; kk = kk % M;
+      out.x = PX[kk] + (PX[k2] - PX[kk]) * g; out.y = PY[kk] + (PY[k2] - PY[kk]) * g; out.z = PZ[kk] + (PZ[k2] - PZ[kk]) * g; return out;
     }
     var pa = { x: 0, y: 0, z: 0 }, pb = { x: 0, y: 0, z: 0 };
     /* pose a group centred at arc length s on the rail, spanning 2h */
@@ -66,14 +126,14 @@ Diorama.figure({
       g.rotation.y = Math.atan2(-dz, dx); g.rotation.z = Math.atan2(dy, Math.sqrt(dx * dx + dz * dz));
     }
     /* horizontal distance from a ground point to the nearest rail sample */
-    function railDist(x, z, skipLow) {
-      var m = 1e9, k, dx, dz, dd;
-      for (k = 0; k < M; k += 2) { dx = PX[k] - x; dz = PZ[k] - z; dd = dx * dx + dz * dz; if (dd < m) m = dd; }
+    function railDist(x, z) {
+      var m = 1e9, kk, dx, dz, dd;
+      for (kk = 0; kk < M; kk += 2) { dx = PX[kk] - x; dz = PZ[kk] - z; dd = dx * dx + dz * dz; if (dd < m) m = dd; }
       return Math.sqrt(m);
     }
 
     /* ---------- the track: deck, rails, piers ---------- */
-    var SEG = 3, k;
+    var SEG = 3;
     for (k = 0; k < M; k += SEG) {
       var a = k, b = (k + SEG) % M, dx = PX[b] - PX[a], dy = PY[b] - PY[a], dz = PZ[b] - PZ[a], len = Math.sqrt(dx * dx + dy * dy + dz * dz);
       var g = D.group((PX[a] + PX[b]) / 2, (PY[a] + PY[b]) / 2, (PZ[a] + PZ[b]) / 2);
@@ -83,7 +143,7 @@ Diorama.figure({
       D.box(len + .1, .1, .12, pal.mist, 0, .05, -.72, g, { shadow: false });
     }
     /* piers where the deck is high enough, away from the other branch */
-    var pierAt = 6, lastPier = -99, px = { x: 0, y: 0, z: 0 }, pq = { x: 0, y: 0, z: 0 };
+    var pierAt = 6, px = { x: 0, y: 0, z: 0 }, pq = { x: 0, y: 0, z: 0 };
     for (var ps = 1.5; ps < L; ps += pierAt) {
       at(ps, px); if (px.y < 1.2) continue;
       var cl = 99, kk, ddx, ddz;
@@ -109,21 +169,20 @@ Diorama.figure({
       D.box(CAR - .2, .22, 1.5, pal.ink, 0, .22, 0, g, { shadow: false });
       D.box(CAR - .5, .38, 1.48, pal.sky, 0, 1.0, 0, g, { shadow: false });
       if (text) {
-        var l1 = D.label(text, CAR - .4, .5, { color: pal.ink, size: 60 }); l1.position.set(0, .56, .74); g.add(l1);
-        var l2 = D.label(text, CAR - .4, .5, { color: pal.ink, size: 60 }); l2.position.set(0, .56, -.74); l2.rotation.y = Math.PI; g.add(l2);
+        var l1 = D.label(text, CAR - .4, .5, { color: pal.ink, size: 58 }); l1.position.set(0, .56, .74); g.add(l1);
+        var l2 = D.label(text, CAR - .4, .5, { color: pal.ink, size: 58 }); l2.position.set(0, .56, -.74); l2.rotation.y = Math.PI; g.add(l2);
       }
       return g;
     }
     function train(name, n, body, roof, texts) {
       var t = D.group(0, 0, 0); t.name = name; var cars = [];
-      for (var c = 0; c < n; c++) cars.push(car(t, c === 0 ? body : body, c === 0 ? pal.ink : roof, texts ? texts[c] : null));
+      for (var c = 0; c < n; c++) cars.push(car(t, body, c === 0 ? pal.ink : roof, texts ? texts[c] : null));
       hot.push(t); return { g: t, cars: cars };
     }
     var orange = train('orange express', 5, pal.coral, pal.paper, [null, 'SIDE A', 'EXPRESS', null, null]);
     var yellow = train('yellow local', 4, pal.mustard, pal.paper, null);
 
     /* ---------- the city ---------- */
-    function uv(x, z) { return [x * CS + z * SN, -x * SN + z * CS]; }
     function inPoly(poly, x, z) {
       var inside = false, n = poly.length, q, w;
       for (q = 0, w = n - 1; q < n; w = q++) {
@@ -131,12 +190,10 @@ Diorama.figure({
       }
       return inside;
     }
-    /* the two loops as polygons, for "which loop is this lot in" */
-    var loopA = [], loopB = [], cA = [0, 0], cB = [0, 0], tt;
-    for (tt = 0; tt < 40; tt++) {
-      raw(Math.PI / 2 + tt / 40 * Math.PI, tmp); loopA.push([tmp.x, tmp.z]); cA[0] += tmp.x / 40; cA[1] += tmp.z / 40;
-      raw(-Math.PI / 2 + tt / 40 * Math.PI, tmp); loopB.push([tmp.x, tmp.z]); cB[0] += tmp.x / 40; cB[1] += tmp.z / 40;
-    }
+    /* the two rectangular loop interiors (inset 3 from rail centreline), in rotated world coords */
+    var loopA = [[-20, 6], [-7, 6], [-3.5, 0], [-7, -6], [-20, -6]].map(function (q) { return rot(q[0], q[1]); });
+    var loopB = [[7, -6], [20, -6], [20, 6], [7, 6], [3.5, 0]].map(function (q) { return rot(q[0], q[1]); });
+    var cA = rot(-13.5, 0), cB = rot(13.5, 0);
 
     function house(x, z, yaw, wall, roof, s) {
       s = s || 1; var g = D.group(x, 0, z); g.rotation.y = yaw;
@@ -178,24 +235,22 @@ Diorama.figure({
       g.name = kind === 'spire' ? 'spire tower' : kind === 'fin' ? 'fin tower' : 'tower'; hot.push(g); return g;
     }
 
-    /* the road ring inside loop A, a scaled copy of the loop */
-    var ringPts = [], RS = .56;
-    for (tt = 0; tt < 40; tt += 2) ringPts.push([cA[0] + (loopA[tt][0] - cA[0]) * RS, cA[1] + (loopA[tt][1] - cA[1]) * RS]);
-    var ring = D.path(ringPts, true, 3.2), ringSegs = [];
-    for (tt = 0; tt < ringPts.length; tt++) {
-      var r0 = ringPts[tt], r1 = ringPts[(tt + 1) % ringPts.length], rl = Math.sqrt(Math.pow(r1[0] - r0[0], 2) + Math.pow(r1[1] - r0[1], 2));
-      var rg = D.group((r0[0] + r1[0]) / 2, 0, (r0[1] + r1[1]) / 2); rg.rotation.y = Math.atan2(-(r1[1] - r0[1]), r1[0] - r0[0]);
-      D.box(rl + .5, .05, 1.8, pal.asphalt, 0, .03, 0, rg, { shadow: false });
+    /* the road ring inside loop A: a rounded rectangle inset ~5.5 from the rail */
+    var ringPts = [[-18.2, 4.6], [-8.8, 4.6], [-8.8, -4.6], [-18.2, -4.6]].map(function (q) { return rot(q[0], q[1]); });
+    var ring = D.path(ringPts, true, 3), tt, nRing = 28;
+    for (tt = 0; tt < nRing; tt++) {
+      var q0 = ring.at(tt / nRing * ring.length), q1 = ring.at(((tt + 1) % nRing) / nRing * ring.length);
+      var rl = Math.hypot(q1.x - q0.x, q1.z - q0.z);
+      var rg = D.group((q0.x + q1.x) / 2, 0, (q0.z + q1.z) / 2); rg.rotation.y = Math.atan2(-(q1.z - q0.z), q1.x - q0.x);
+      D.box(rl + .45, .05, 1.8, pal.asphalt, 0, .03, 0, rg, { shadow: false });
     }
-    var ringR = 0; for (tt = 0; tt < ringPts.length; tt++) ringR = Math.max(ringR, Math.sqrt(Math.pow(ringPts[tt][0] - cA[0], 2) + Math.pow(ringPts[tt][1] - cA[1], 2)));
     /* the park in the middle */
-    var parkR = Math.max(2.4, ringR * .42);
+    var parkR = 2.4;
     D.cyl(parkR, parkR, .08, pal.grass, cA[0], .04, cA[1], null, 28);
     D.props.tree(cA[0] + parkR * .35, cA[1] + parkR * .2, null, { r: .7, kind: 'round' });
     D.props.tree(cA[0] - parkR * .4, cA[1] - parkR * .25, null, { r: .6, kind: 'round' });
     D.props.bush(cA[0] - parkR * .1, cA[1] + parkR * .5, null, { r: .35 });
     D.cyl(.7, .7, .3, pal.paper, cA[0], .2, cA[1], null, 16); D.cyl(.5, .5, .1, pal.sky, cA[0], .38, cA[1], null, 16);
-    function ringDist(x, z) { var m = 1e9, q; for (q = 0; q < ringPts.length; q++) m = Math.min(m, Math.hypot(ringPts[q][0] - x, ringPts[q][1] - z)); return m; }
 
     /* vehicles */
     function bus() {
@@ -212,12 +267,12 @@ Diorama.figure({
     var vehicles = [bus(), minicar(pal.coral), minicar(pal.cobalt)];
 
     /* lots */
-    var lotList = [], gx, gz, kinds = ['house', 'house', 'tower', 'house', 'tower', 'step'];
+    var lotList = [], gx, gz;
     var WALLS = [pal.paper, pal.mustard, pal.paper, pal.coral], ROOFS = [pal.coral, pal.mustard, pal.coral, pal.ink];
-    var nT = 0, nH = 0, spireDone = false, finDone = false;
+    var spireDone = false, finDone = false;
     for (gx = -34; gx <= 34; gx += 3.6) for (gz = -34; gz <= 34; gz += 3.6) {
       var jx = gx + (rnd() - .5) * 1.2, jz = gz + (rnd() - .5) * 1.2, q2 = uv(jx, jz);
-      if (Math.abs(q2[0]) > A + 8 || Math.abs(q2[1]) > 17) continue;
+      if (Math.abs(q2[0]) > 30 || Math.abs(q2[1]) > 17) continue;
       if (railDist(jx, jz) < 3.9) continue;
       if (Math.hypot(jx, jz) < 12) continue;
       if (inPoly(loopA, jx, jz)) continue;
@@ -238,11 +293,11 @@ Diorama.figure({
         else if (rnd() < .3) kind = 'step';
         tower(x, z, h, kind, 0); return;
       }
-      var hs = house(x, z, yaw, WALLS[n % 4], ROOFS[(n + 1) % 4], .9 + rnd() * .3);
+      house(x, z, yaw, WALLS[n % 4], ROOFS[(n + 1) % 4], .9 + rnd() * .3);
       if (rnd() < .4) D.props.tree(x + 1.7, z + 1.5, null, { r: .45, kind: 'pine' });
     });
 
-    tower(cB[0] - 1.5, cB[1] + .5, 6, 'step', 0); house(cB[0] + 2.2, cB[1] - 1.8, 0.6, pal.paper, pal.coral, .9);
+    tower(cB[0] - 1.5, cB[1] + .5, 8.5, 'spire', 0); house(cB[0] + 2.2, cB[1] - 1.8, 0.6, pal.paper, pal.coral, .9);
     D.props.tree(cB[0] + 1.4, cB[1] + 2.4, null, { r: .6, kind: 'round' });
     /* billboard: on a post beside the right-hand loop */
     var board = D.group(bb.x, 0, bb.z); board.rotation.y = 0; board.name = 'billboard'; hot.push(board);
@@ -255,17 +310,17 @@ Diorama.figure({
     var b1 = D.label('NOW', 5.2, 1.0, { color: pal.ink, size: 58 }); b1.position.set(0, .55, 0); msgB.add(b1);
     var b2 = D.label('BOARDING', 5.2, 1.2, { color: pal.cobalt, size: 58 }); b2.position.set(0, -.6, 0); msgB.add(b2);
 
-    /* INTERFACES on the bridge: at the high crossing, laid along the deck */
-    var bridge = D.group(0, 0, 0); at(3 * L / 4 + 1.8, pa); at(3 * L / 4 + 2.8, pb);
+    /* INTERFACES on the bridge: at the high crossing */
+    var bridge = D.group(0, 0, 0); at(sBridge, pa); at(sBridge + 1, pb);
     var byaw = Math.atan2(-(pb.z - pa.z), pb.x - pa.x);
     var bTop = pa.y;
     bridge.position.set(pa.x, bTop + .05, pa.z); bridge.rotation.y = byaw;
-    D.box(10.8, .3, 1.5, pal.ink, 0, -.1, 2.0, bridge, { shadow: false });
-    D.box(10.8, 3.3, .24, pal.ink, 0, 1.75, 2.55, bridge);
-    var layers = [], ly;
+    D.box(10.8, .3, .9, pal.ink, 0, -.1, 1.1, bridge, { shadow: false });
+    D.box(10.8, 2.9, .24, pal.ink, 0, 1.45, 1.45, bridge);
+    var ly;
     for (ly = 0; ly < 3; ly++) {
-      var lab = D.label('INTERFACES', 10.2, 2.6, { color: ly === 2 ? pal.paper : '#4a4d78', size: 78, weight: 900 });
-      lab.position.set(0, 1.75, 2.7 + ly * .08); bridge.add(lab); layers.push(lab);
+      var lab = D.label('INTERFACES', 10.0, 2.2, { color: ly === 2 ? pal.paper : '#4a4d78', size: 64, weight: 900 });
+      lab.position.set(0, 1.45, 1.6 + ly * .08); bridge.add(lab);
     }
     /* clouds */
     var clouds = [D.props.cloud(-24, 8, -14, null, { r: 1.6 }), D.props.cloud(10, 9, 16, null, { r: 1.3 }), D.props.cloud(24, 8.5, -6, null, { r: 1.1 })];
@@ -273,7 +328,7 @@ Diorama.figure({
     /* ---------- the parts ---------- */
     var lift = hot.map(function () { return D.spring(120, 14); });
     return { hot: hot, lift: lift, orange: orange, yellow: yellow, at: at, pose: pose, L: L, GAP: GAP, CAR: CAR, ring: ring, vehicles: vehicles, clouds: clouds,
-      board: board, msgA: msgA, msgB: msgB, msgSet: -1 };
+      board: board, msgA: msgA, msgB: msgB };
   },
   tick: function (ctx) {
     var p = ctx.parts, t = ctx.t, L = p.L, speed = 3.2, d = t * speed, c, i, v, dist, RT = p.ring.length / 1.7;
