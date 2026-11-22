@@ -66,3 +66,9 @@
   text-transform: uppercase;
   color: rgb(255 250 241 / 0.78);
 }
+
+.stage :global(text) {
+  letter-spacing: 0;
+  font-kerning: none;
+  text-rendering: geometricPrecision;
+}
