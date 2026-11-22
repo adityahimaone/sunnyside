@@ -1189,7 +1189,7 @@ const MAT_CORNERS = [
   [1398, 858],
 ] as const
 
-function CuttingMatMarks() {
+export function CuttingMatMarks() {
   return (
     <div className={styles.cuttingMatOverlay} aria-hidden="true">
       <svg
