@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { CuttingMatMarks, type HeroSurface } from '../hero/hero'
+import { mountPaperCity, type PaperCityController } from './paper-city-scene'
 import styles from './hero-city.module.css'
 
 type Props = {
@@ -10,73 +11,25 @@ type Props = {
   onSurfaceChange?: (surface: HeroSurface) => void
 }
 
-type DioramaFigure = { name: string }
-type DioramaContext = { destroy: () => void }
-type DioramaKernel = {
-  figures: DioramaFigure[]
-  mount: (fig: DioramaFigure, opts: { el: HTMLElement }) => DioramaContext
-}
-type DioramaWindow = Window & { Diorama?: DioramaKernel }
-
-/* The kernel and the figure are plain scripts in public/diorama/. The figure
-   file there is the source of truth: edit it in place. */
-const KERNEL_SRC = '/diorama/diorama.js'
-const FIGURE_SRC = '/diorama/paper-city.js'
-const FIGURE_NAME = 'paper-city'
-
-function loadScript(src: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[data-diorama-src="${src}"]`,
-    )
-    if (existing) {
-      if (existing.dataset.loaded === 'true') resolve()
-      else {
-        existing.addEventListener('load', () => resolve())
-        existing.addEventListener('error', () => reject(new Error(src)))
-      }
-      return
-    }
-    const el = document.createElement('script')
-    el.src = src
-    el.async = false
-    el.dataset.dioramaSrc = src
-    el.addEventListener('load', () => {
-      el.dataset.loaded = 'true'
-      resolve()
-    })
-    el.addEventListener('error', () => reject(new Error(src)))
-    document.head.appendChild(el)
-  })
-}
-
 /**
- * Paper City: an elevated figure-8 railway on the blue cutting mat. Two
- * trains run it, a bus circles the park, and the words sit on the bridge, the
- * orange train and the billboard.
+ * Paper City 3D Isometric Hero (Three.js Orthographic Miniature over the Blue Cutting Mat).
  */
 export function HeroCity({ surface = 'cobalt' }: Props = {}) {
   const stageRef = useRef<HTMLDivElement>(null)
+  const controllerRef = useRef<PaperCityController | null>(null)
+  const [readout, setReadout] = useState('side a express · with a pulse')
 
   useEffect(() => {
     const el = stageRef.current
     if (!el) return
-    let ctx: DioramaContext | null = null
-    let cancelled = false
-
-    loadScript(KERNEL_SRC)
-      .then(() => loadScript(FIGURE_SRC))
-      .then(() => {
-        if (cancelled) return
-        const kernel = (window as DioramaWindow).Diorama
-        const fig = kernel?.figures.find((f) => f.name === FIGURE_NAME)
-        if (kernel && fig) ctx = kernel.mount(fig, { el })
-      })
-      .catch(() => {})
-
+    const ctrl = mountPaperCity({
+      el,
+      onReadout: (text) => setReadout(text),
+    })
+    controllerRef.current = ctrl
     return () => {
-      cancelled = true
-      ctx?.destroy()
+      ctrl?.dispose()
+      controllerRef.current = null
     }
   }, [])
 
@@ -96,11 +49,29 @@ export function HeroCity({ surface = 'cobalt' }: Props = {}) {
           ref={stageRef}
           className={styles.stage}
           role="img"
-          aria-label="An isometric paper city: a figure-8 railway crosses itself on a bridge, two trains ride it, and a bus circles a park."
+          aria-label="An isometric 3D paper city on a blue cutting mat: a figure-8 railway arches over the INTERFACES bridge while two trains, a bus, and cars move through the city."
         />
-        <p className={styles.hint}>
-          Hover a train or tower · tap the billboard
-        </p>
+        <div className={styles.hudBar}>
+          <span className={styles.readout} aria-live="polite">
+            {readout}
+          </span>
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.actionBtn}
+              onClick={() => controllerRef.current?.toggleBillboard()}
+            >
+              Flip Billboard
+            </button>
+            <button
+              type="button"
+              className={styles.actionBtn}
+              onClick={() => controllerRef.current?.boostTrains()}
+            >
+              Express Boost
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   )
