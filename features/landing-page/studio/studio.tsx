@@ -7,7 +7,8 @@ import { About } from './about'
 import { ChapterRail } from './chapter-rail'
 import { Contact } from './contact'
 import { Sparkle } from './doodles'
-import { Hero, type HeroSurface } from './hero'
+import { type HeroSurface } from './hero'
+import { HeroCity } from './hero-city'
 import { Projects } from './projects'
 import { Showcase } from './showcase'
 import { SiteFooter } from './site-footer'
@@ -81,7 +82,7 @@ export default function Studio({
       {footerVisible ? null : <ChapterRail active={active} />}
 
       <main>
-        <Hero surface={heroSurface} onSurfaceChange={setHeroSurface} />
+        <HeroCity surface={heroSurface} onSurfaceChange={setHeroSurface} />
         <Marquee />
         <About />
         <Showcase />
