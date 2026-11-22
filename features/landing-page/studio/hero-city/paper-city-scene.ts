@@ -55,7 +55,7 @@ const PAL = {
   trunk: '#7c5230',
   steel: '#e8ebff',
   ballast: '#2e3252',
-  asphalt: '#f6efe2',
+  asphalt: '#181a28',
 } as const
 
 export function mountPaperCity({
@@ -261,7 +261,7 @@ export function mountPaperCity({
     })
   }
 
-  /* ── Isometric Plinth Pads & Decorative Green Lawns ────────────────────── */
+  /* ── Isometric Plinth Pads & Decorative Lawns ──────────────────────────── */
   const addPlinth = (
     w: number,
     d: number,
@@ -293,24 +293,28 @@ export function mountPaperCity({
     z: number,
     baseY = 0.22,
   ) => {
-    addBox(w + 0.16, 0.06, d + 0.16, PAL.paper, x, baseY + 0.03, z, world)
-    addBox(w, 0.08, d, PAL.grass, x, baseY + 0.06, z, world)
+    const lg = new THREE.Group()
+    lg.position.set(x, baseY, z)
+    addBox(w + 0.16, 0.06, d + 0.16, PAL.paper, 0, 0.03, 0, lg)
+    addBox(w, 0.08, d, PAL.grass, 0, 0.06, 0, lg)
+    world.add(lg)
+    return lg
   }
 
-  // City zone plinths + green lawn patches
-  addPlinth(11.4, 11.4, -7.8, 8.0, 0.22) // Zone 1: Left loop
-  addLawnPatch(6.6, 8.8, -7.8, 8.2, 0.22) // Zone 1 green neighborhood yard
+  // City zone plinths + green lawn patches (sized with clean pillar & road clearance)
+  addPlinth(10.0, 10.0, -7.8, 7.6, 0.22) // Zone 1: Left loop
+  addLawnPatch(6.8, 8.2, -7.6, 7.8, 0.22) // Zone 1 green neighborhood yard
 
-  addPlinth(10.6, 11.4, -6.0, -7.6, 0.22) // Zone 2: Upper-center skyline
-  addLawnPatch(4.8, 6.4, -8.2, -5.8, 0.22) // Zone 2 upper park lawn
-  addLawnPatch(4.2, 4.2, -4.2, -11.0, 0.22)
+  addPlinth(10.0, 10.0, -6.2, -7.4, 0.22) // Zone 2: Upper-center skyline
+  addLawnPatch(4.8, 6.2, -8.2, -5.8, 0.22) // Zone 2 upper park lawn
+  addLawnPatch(4.0, 3.8, -4.4, -10.2, 0.22)
 
-  addPlinth(11.8, 10.6, 8.2, -6.8, 0.22) // Zone 3: Right tower block & billboard
-  addLawnPatch(5.2, 3.8, 9.2, -9.8, 0.22) // Zone 3 green garden under billboard
-  addLawnPatch(3.6, 3.4, 5.2, -9.6, 0.22)
+  addPlinth(11.0, 9.8, 8.0, -6.8, 0.22) // Zone 3: Right tower block & billboard
+  addLawnPatch(5.2, 3.6, 9.0, -9.5, 0.22) // Zone 3 green garden under billboard
+  addLawnPatch(3.6, 3.4, 5.2, -9.4, 0.22)
 
-  addPlinth(10.8, 3.4, 7.2, 3.0, 0.18) // Zone 4: Bus stop & house sidewalk strip
-  addLawnPatch(9.8, 1.3, 7.2, 2.35, 0.18) // Zone 4 green verge strip behind bus stop
+  addPlinth(10.8, 2.8, 7.2, 2.7, 0.18) // Zone 4: Bus stop & house sidewalk strip (clean margin from street curb)
+  addLawnPatch(9.8, 1.3, 7.2, 2.25, 0.18) // Zone 4 green verge strip behind bus stop
 
   /* ── Continuous Figure-8 Railway (C2 Smooth Ramps & INTERFACES Above Rail) ── */
   const VERTS: [number, number][] = [
@@ -612,6 +616,10 @@ export function mountPaperCity({
     [0.45, 0.16],
   ]
 
+  const railwayGroup = new THREE.Group()
+  railwayGroup.userData.dropWave = 'viaduct'
+  world.add(railwayGroup)
+
   const buildTrackSegment = (frames: Frame3D[], closed: boolean) => {
     const deckMesh = new THREE.Mesh(
       sweepProfile(frames, deckProfile, closed),
@@ -619,14 +627,14 @@ export function mountPaperCity({
     )
     deckMesh.castShadow = true
     deckMesh.receiveShadow = true
-    world.add(deckMesh)
+    railwayGroup.add(deckMesh)
 
     const ballastMesh = new THREE.Mesh(
       sweepProfile(frames, ballastProfile, closed),
       mat(PAL.ballast),
     )
     ballastMesh.receiveShadow = true
-    world.add(ballastMesh)
+    railwayGroup.add(ballastMesh)
 
     const railL = new THREE.Mesh(
       sweepProfile(frames, leftRailProfile, closed),
@@ -636,7 +644,7 @@ export function mountPaperCity({
       sweepProfile(frames, rightRailProfile, closed),
       mat(PAL.steel),
     )
-    world.add(railL, railR)
+    railwayGroup.add(railL, railR)
 
     for (const side of [-1.08, 1.08]) {
       const curbPts = frames.map((fr) =>
@@ -644,7 +652,7 @@ export function mountPaperCity({
       )
       if (closed) curbPts.push(curbPts[0].clone())
       const lg = own(new THREE.BufferGeometry().setFromPoints(curbPts))
-      world.add(new THREE.Line(lg, edgeMat))
+      railwayGroup.add(new THREE.Line(lg, edgeMat))
     }
   }
 
@@ -664,11 +672,12 @@ export function mountPaperCity({
     sleeperInst.setMatrixAt(i, dummy.matrix)
   }
   sleeperInst.instanceMatrix.needsUpdate = true
-  world.add(sleeperInst)
+  railwayGroup.add(sleeperInst)
 
   /* ── INTERFACES Upper Grand Viaduct (x = 0, z in [-7.6, 7.6]) ─────────── */
   const buildInterfacesViaduct = () => {
     const g = new THREE.Group()
+    g.userData.dropWave = 'viaduct'
     g.position.set(0, 0, 0)
 
     const sh = new THREE.Shape()
@@ -735,6 +744,7 @@ export function mountPaperCity({
     nArches: number,
   ) => {
     const g = new THREE.Group()
+    g.userData.dropWave = 'viaduct'
     const totalW = xEnd - xStart
     const cx = (xStart + xEnd) * 0.5
     g.position.set(cx, 0, 0)
@@ -785,7 +795,7 @@ export function mountPaperCity({
   buildMultiArchViaduct(-12.2, -2.4, 3)
   buildMultiArchViaduct(2.4, 13.0, 3)
 
-  // 3. Cylindrical Flanged Viaduct Pillars (auto-fitted to exact 3D track height!)
+  // 3. Cylindrical Flanged Viaduct Pillars (zero collision with roads or plinths)
   const pillarXZ: [number, number][] = [
     [0, -9.8],
     [0.8, -12.8],
@@ -800,8 +810,8 @@ export function mountPaperCity({
     [-13.6, 11.0],
     [-10.8, 13.8],
     [-7.2, 14.0],
-    [-3.4, 13.6],
-    [-0.4, 10.6],
+    [-3.8, 13.8],
+    [-0.8, 12.6],
   ]
   const baseGeo = own(new THREE.CylinderGeometry(0.66, 0.74, 0.24, 16))
   const capGeo = own(new THREE.CylinderGeometry(0.68, 0.56, 0.32, 16))
@@ -809,6 +819,7 @@ export function mountPaperCity({
     const deckY = nearestTrackY(px, pz)
     const h = Math.max(1.2, deckY - 0.36)
     const pg = new THREE.Group()
+    pg.userData.dropWave = 'viaduct'
     pg.position.set(px, 0, pz)
     const shaft = new THREE.Mesh(
       own(new THREE.CylinderGeometry(0.46, 0.52, h, 16)),
@@ -1507,107 +1518,339 @@ export function mountPaperCity({
     world.add(g)
   }
 
-  /* ── ZONE 1: Inside Left Loop (Large Unobstructed Profile Card, Houses & Gardens) */
+  /* ── Sunnyside Studio Pack: Die-Cut 3D Stickers, Stamps & Milestone Signs ─ */
+  const buildDieCutSticker = (
+    kind: 'sun' | 'smiley' | 'flower' | 'star',
+    x: number,
+    y: number,
+    z: number,
+    scale = 1,
+    rotY = 0,
+    tiltX = -Math.PI / 2,
+    parent: THREE.Object3D = world,
+  ) => {
+    const sg = new THREE.Group()
+    sg.position.set(x, y, z)
+    sg.rotation.order = 'YXZ'
+    sg.rotation.y = rotY
+    sg.rotation.x = tiltX
+
+    // Die-cut white paper backing disc + ink rim
+    const rim = new THREE.Mesh(
+      own(
+        new THREE.CylinderGeometry(0.84 * scale, 0.86 * scale, 0.1 * scale, 24),
+      ),
+      mat(PAL.paper),
+    )
+    rim.rotation.x = Math.PI / 2
+    rim.castShadow = true
+    addEdges(rim, 25)
+    sg.add(rim)
+
+    if (kind === 'sun') {
+      const tile = new THREE.Mesh(
+        own(
+          new THREE.CylinderGeometry(
+            0.68 * scale,
+            0.68 * scale,
+            0.13 * scale,
+            24,
+          ),
+        ),
+        mat('#3d53d6'),
+      )
+      tile.rotation.x = Math.PI / 2
+      tile.position.z = 0.02 * scale
+      sg.add(tile)
+
+      for (let r = 0; r < 12; r++) {
+        const ang = (r * Math.PI * 2) / 12
+        const ray = new THREE.Mesh(
+          own(new THREE.BoxGeometry(0.11 * scale, 0.24 * scale, 0.14 * scale)),
+          mat(PAL.butter),
+        )
+        ray.position.set(
+          Math.cos(ang) * 0.48 * scale,
+          Math.sin(ang) * 0.48 * scale,
+          0.04 * scale,
+        )
+        ray.rotation.z = ang - Math.PI / 2
+        sg.add(ray)
+      }
+      const core = new THREE.Mesh(
+        own(
+          new THREE.CylinderGeometry(
+            0.32 * scale,
+            0.32 * scale,
+            0.16 * scale,
+            20,
+          ),
+        ),
+        mat(PAL.butter, PAL.butter, 0.2),
+      )
+      core.rotation.x = Math.PI / 2
+      core.position.z = 0.05 * scale
+      sg.add(core)
+    } else if (kind === 'smiley') {
+      const face = new THREE.Mesh(
+        own(
+          new THREE.CylinderGeometry(
+            0.68 * scale,
+            0.68 * scale,
+            0.13 * scale,
+            24,
+          ),
+        ),
+        mat(PAL.butter),
+      )
+      face.rotation.x = Math.PI / 2
+      face.position.z = 0.02 * scale
+      addEdges(face, 28)
+      sg.add(face)
+      for (const ex of [-0.22, 0.22]) {
+        addBox(
+          0.12 * scale,
+          0.18 * scale,
+          0.15 * scale,
+          PAL.ink,
+          ex * scale,
+          0.14 * scale,
+          0.04 * scale,
+          sg,
+          { edges: false },
+        )
+      }
+      addBox(
+        0.38 * scale,
+        0.1 * scale,
+        0.15 * scale,
+        PAL.ink,
+        0,
+        -0.18 * scale,
+        0.04 * scale,
+        sg,
+        { edges: false },
+      )
+    } else if (kind === 'flower') {
+      for (let p = 0; p < 5; p++) {
+        const ang = (p * Math.PI * 2) / 5
+        const petal = new THREE.Mesh(
+          own(
+            new THREE.CylinderGeometry(
+              0.3 * scale,
+              0.3 * scale,
+              0.13 * scale,
+              16,
+            ),
+          ),
+          mat(PAL.pink),
+        )
+        petal.rotation.x = Math.PI / 2
+        petal.position.set(
+          Math.cos(ang) * 0.34 * scale,
+          Math.sin(ang) * 0.34 * scale,
+          0.02 * scale,
+        )
+        sg.add(petal)
+      }
+      const center = new THREE.Mesh(
+        own(
+          new THREE.CylinderGeometry(
+            0.24 * scale,
+            0.24 * scale,
+            0.16 * scale,
+            16,
+          ),
+        ),
+        mat(PAL.butter),
+      )
+      center.rotation.x = Math.PI / 2
+      center.position.z = 0.05 * scale
+      sg.add(center)
+    } else {
+      // 8-point starburst
+      for (let s = 0; s < 2; s++) {
+        const starBox = new THREE.Mesh(
+          own(new THREE.BoxGeometry(0.88 * scale, 0.88 * scale, 0.13 * scale)),
+          mat(s === 0 ? PAL.tangerine : PAL.butter),
+        )
+        starBox.rotation.z = (s * Math.PI) / 4
+        starBox.position.z = (0.02 + s * 0.02) * scale
+        addEdges(starBox, 25)
+        sg.add(starBox)
+      }
+    }
+
+    parent.add(sg)
+    return sg
+  }
+
+  const makeMilestoneTexture = (num: string, label: string, accent: string) => {
+    const c = document.createElement('canvas')
+    c.width = 512
+    c.height = 192
+    const ctx = c.getContext('2d')!
+    ctx.fillStyle = '#fffaf1'
+    ctx.fillRect(0, 0, c.width, c.height)
+    ctx.strokeStyle = '#191a2e'
+    ctx.lineWidth = 12
+    ctx.strokeRect(10, 10, c.width - 20, c.height - 20)
+
+    ctx.fillStyle = accent
+    ctx.fillRect(16, 16, 136, c.height - 32)
+    ctx.fillStyle = '#191a2e'
+    ctx.fillRect(148, 16, 8, c.height - 32)
+
+    ctx.fillStyle = '#191a2e'
+    ctx.font = '900 72px ui-monospace, monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(num, 84, c.height / 2 + 4)
+
+    ctx.font = '900 54px system-ui, -apple-system, sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(label, 182, c.height / 2 + 4)
+
+    const tex = own(new THREE.CanvasTexture(c))
+    tex.colorSpace = THREE.SRGBColorSpace
+    return tex
+  }
+
+  const buildMilestoneSign = (
+    num: string,
+    label: string,
+    accent: string,
+    x: number,
+    z: number,
+    yaw = 0,
+    baseY = 0.22,
+  ) => {
+    const mg = new THREE.Group()
+    mg.position.set(x, baseY, z)
+    mg.rotation.y = yaw
+    addBox(0.14, 1.05, 0.14, PAL.ink, -0.55, 0.52, 0, mg)
+    addBox(0.14, 1.05, 0.14, PAL.ink, 0.55, 0.52, 0, mg)
+    const signMat = own(
+      new THREE.MeshBasicMaterial({
+        map: makeMilestoneTexture(num, label, accent),
+      }),
+    )
+    const sideM = mat(PAL.paper)
+    const board = new THREE.Mesh(own(new THREE.BoxGeometry(1.75, 0.68, 0.16)), [
+      sideM,
+      sideM,
+      sideM,
+      sideM,
+      signMat,
+      signMat,
+    ])
+    board.position.y = 1.05
+    board.castShadow = true
+    addEdges(board, 20)
+    mg.add(board)
+    world.add(mg)
+    return mg
+  }
+
+  const buildApprovedStamp = (
+    x: number,
+    z: number,
+    yaw = -0.18,
+    baseY = 0.22,
+  ) => {
+    const c = document.createElement('canvas')
+    c.width = 512
+    c.height = 192
+    const ctx = c.getContext('2d')!
+    ctx.fillStyle = '#ffb6e1'
+    ctx.fillRect(0, 0, c.width, c.height)
+    ctx.strokeStyle = '#191a2e'
+    ctx.lineWidth = 14
+    ctx.strokeRect(12, 12, c.width - 24, c.height - 24)
+    ctx.setLineDash([14, 10])
+    ctx.lineWidth = 4
+    ctx.strokeRect(28, 28, c.width - 56, c.height - 56)
+    ctx.setLineDash([])
+    ctx.fillStyle = '#191a2e'
+    ctx.font = '900 54px ui-monospace, monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('★ APPROVED / CRAFT', c.width / 2, c.height / 2 + 3)
+    const tex = own(new THREE.CanvasTexture(c))
+    tex.colorSpace = THREE.SRGBColorSpace
+    const topMat = own(new THREE.MeshBasicMaterial({ map: tex }))
+    const sideM = mat(PAL.pink)
+    const sg = new THREE.Group()
+    sg.position.set(x, baseY, z)
+    sg.rotation.y = yaw
+    const tile = new THREE.Mesh(own(new THREE.BoxGeometry(2.35, 0.12, 0.92)), [
+      sideM,
+      sideM,
+      topMat,
+      sideM,
+      sideM,
+      sideM,
+    ])
+    tile.position.y = 0.06
+    tile.castShadow = true
+    addEdges(tile, 20)
+    sg.add(tile)
+    world.add(sg)
+    return sg
+  }
+
+  /* ── ZONE 1: Large Centered Profile Card (Focused Typography, No Pills) ── */
   const makeCardTexture = () => {
     const c = document.createElement('canvas')
     c.width = 1280
-    c.height = 920
+    c.height = 900
     const ctx = c.getContext('2d')!
     ctx.fillStyle = '#fffaf1'
     ctx.fillRect(0, 0, c.width, c.height)
 
-    // Tactile Sunnyside sticker card border
+    // Tactile Sunnyside card border
     ctx.strokeStyle = '#191a2e'
-    ctx.lineWidth = 10
+    ctx.lineWidth = 14
     ctx.strokeRect(20, 20, c.width - 40, c.height - 40)
 
-    // Inner subtle paper rule
-    ctx.strokeStyle = '#e9dfcf'
-    ctx.lineWidth = 4
-    ctx.strokeRect(38, 38, c.width - 76, c.height - 76)
-
-    // Top Sunnyside butter header tape strip
-    ctx.fillStyle = '#ffd23f'
-    ctx.beginPath()
-    ctx.roundRect(68, 62, 600, 72, 36)
-    ctx.fill()
-    ctx.strokeStyle = '#191a2e'
-    ctx.lineWidth = 5
-    ctx.stroke()
-
-    // Tangerine pulse dot inside header pill
+    // Top-left tangerine accent bar
     ctx.fillStyle = '#ff6a2b'
-    ctx.beginPath()
-    ctx.arc(112, 98, 14, 0, Math.PI * 2)
-    ctx.fill()
+    ctx.fillRect(84, 96, 120, 14)
 
-    ctx.fillStyle = '#191a2e'
-    ctx.font = '800 32px ui-monospace, monospace'
+    // Role Title: Design Engineer
+    ctx.fillStyle = '#df4e22'
+    ctx.font = '800 44px ui-monospace, monospace'
     ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
-    ctx.fillText('DESIGN ENGINEER · SIDE A', 146, 99)
+    ctx.fillText('DESIGN ENGINEER', 84, 168)
 
     // Giant, ultra-readable Name Headline
-    ctx.font = '900 120px system-ui, -apple-system, sans-serif'
+    ctx.font = '900 132px system-ui, -apple-system, sans-serif'
     ctx.fillStyle = '#191a2e'
-    ctx.fillText('Aditya Himawan', 68, 246)
+    ctx.fillText('Aditya Himawan', 80, 296)
 
-    // Divider line
-    ctx.fillStyle = '#e9dfcf'
-    ctx.fillRect(68, 316, c.width - 136, 6)
+    // Crisp editorial divider line with butter accent segment
+    ctx.fillStyle = '#191a2e'
+    ctx.fillRect(84, 396, c.width - 168, 6)
+    ctx.fillStyle = '#ffd23f'
+    ctx.fillRect(84, 402, 260, 12)
 
-    // Key important notes only — big, bold, high-contrast
-    const drawNote = (y: number, dotColor: string, text: string) => {
-      ctx.fillStyle = dotColor
-      ctx.beginPath()
-      ctx.roundRect(68, y - 22, 30, 30, 8)
-      ctx.fill()
-      ctx.strokeStyle = '#191a2e'
-      ctx.lineWidth = 4
-      ctx.stroke()
+    // Focused, large, high-impact selling statement (no buttons, no pills)
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.font = '800 72px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#191a2e'
+    ctx.fillText('Crafting interfaces with', 84, 520)
 
-      ctx.fillStyle = '#191a2e'
-      ctx.font = '800 56px system-ui, -apple-system, sans-serif'
-      ctx.textAlign = 'left'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(text, 122, y - 4)
-    }
+    // Highlighted second line with warm butter underline wash
+    ctx.fillStyle = '#ffd23f'
+    ctx.fillRect(80, 622, 870, 32)
+    ctx.fillStyle = '#191a2e'
+    ctx.fillText('warmth, motion & clarity —', 84, 616)
 
-    drawNote(404, '#ff6a2b', 'Design Systems & UI Craft')
-    drawNote(498, '#2b9e7c', 'Interactive 3D & Motion')
-    drawNote(592, '#ffd23f', 'Figma to Production Code')
-
-    // Large tactile sticker pill badges with hard ink shadow
-    const drawBadge = (
-      x: number,
-      y: number,
-      w: number,
-      h: number,
-      bg: string,
-      text: string,
-      fg: string,
-    ) => {
-      ctx.fillStyle = '#191a2e'
-      ctx.beginPath()
-      ctx.roundRect(x + 8, y + 8, w, h, h / 2)
-      ctx.fill()
-
-      ctx.fillStyle = bg
-      ctx.beginPath()
-      ctx.roundRect(x, y, w, h, h / 2)
-      ctx.fill()
-      ctx.strokeStyle = '#191a2e'
-      ctx.lineWidth = 6
-      ctx.stroke()
-
-      ctx.fillStyle = fg
-      ctx.font = '800 38px ui-monospace, monospace'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(text, x + w / 2, y + h / 2 + 2)
-    }
-    drawBadge(68, 682, 390, 96, '#ff6a2b', 'CRAFT + CODE', '#fffaf1')
-    drawBadge(492, 682, 360, 96, '#b7e4c7', 'SUNNYSIDE', '#191a2e')
+    ctx.fillStyle = '#34385e'
+    ctx.font = '800 68px system-ui, -apple-system, sans-serif'
+    ctx.fillText('from design system to code.', 84, 716)
 
     const tex = own(new THREE.CanvasTexture(c))
     tex.colorSpace = THREE.SRGBColorSpace
@@ -1615,17 +1858,20 @@ export function mountPaperCity({
     return tex
   }
 
+  // Enlarged profile card (9.2 x 6.5) centered inside the left loop
   const cardGroup = new THREE.Group()
-  cardGroup.position.set(-11.2, 0.22, 7.8)
+  cardGroup.position.set(-8.3, 0.22, 5.7)
   cardGroup.rotation.y = Math.PI / 2
   const cardFaceMat = own(
     new THREE.MeshBasicMaterial({ map: makeCardTexture() }),
   )
   const cardSideMat = mat(PAL.creamLo)
-  // Elevated on a stepped architectural pedestal so neither passing trains nor houses ever block any text
-  addBox(8.2, 1.15, 0.92, PAL.slate, 0, 0.58, -0.04, cardGroup)
-  addBox(8.5, 0.22, 1.04, PAL.butter, 0, 1.18, -0.04, cardGroup)
-  const cardBody = new THREE.Mesh(own(new THREE.BoxGeometry(9.8, 7.0, 0.52)), [
+  // Stepped architectural pedestal
+  addBox(7.8, 1.85, 0.96, PAL.slate, 0, 0.92, -0.04, cardGroup)
+  addBox(8.2, 0.24, 1.12, PAL.butter, 0, 1.94, -0.04, cardGroup)
+  // Offset hard ink shadow plate behind the profile card
+  addBox(9.28, 6.58, 0.2, PAL.ink, 0.16, 5.26, -0.26, cardGroup)
+  const cardBody = new THREE.Mesh(own(new THREE.BoxGeometry(9.2, 6.5, 0.52)), [
     cardSideMat,
     cardSideMat,
     mat(PAL.paper),
@@ -1633,7 +1879,7 @@ export function mountPaperCity({
     cardFaceMat,
     cardSideMat,
   ])
-  cardBody.position.y = 4.65
+  cardBody.position.y = 5.36
   cardBody.castShadow = true
   cardBody.receiveShadow = true
   addEdges(cardBody, 20)
@@ -1641,132 +1887,306 @@ export function mountPaperCity({
   world.add(cardGroup)
   registerHot(cardGroup, 'Aditya Himawan · Design Engineer', 'card')
 
-  // Positioned cleanly in front-right of the card so the entire card face is 100% readable
+  // Low courtyard cottages positioned neatly in front of the centered card
   const leftHouses: [number, number, string, string][] = [
-    [-7.8, 11.5, PAL.paper, PAL.mustard],
-    [-7.8, 8.2, PAL.cream, PAL.tangerine],
-    [-5.5, 11.4, PAL.paper, PAL.tangerine],
-    [-5.5, 8.2, PAL.paper, PAL.mustard],
-    [-6.2, 4.8, PAL.cream, PAL.tangerine],
+    [-8.6, 10.7, PAL.paper, PAL.mustard],
+    [-6.3, 10.7, PAL.cream, PAL.tangerine],
+    [-6.3, 8.1, PAL.paper, PAL.tangerine],
+    [-4.3, 9.6, PAL.paper, PAL.mustard],
   ]
   for (const [hx, hz, wall, roof] of leftHouses) {
-    buildGabledHouse(hx, hz, 0, wall, roof, 0.92)
+    buildGabledHouse(hx, hz, 0, wall, roof, 0.86)
   }
-  for (let fz = 6.2; fz <= 12.4; fz += 0.45) {
-    addBox(0.1, 0.42, 0.18, PAL.paper, -9.6, 0.43, fz, world)
-  }
-  for (let fx = -9.4; fx <= -4.6; fx += 0.45) {
-    addBox(0.18, 0.42, 0.1, PAL.paper, fx, 0.43, 12.85, world)
-  }
-  buildTree(-9.0, 4.6, 0.62, 'spring')
-  buildTree(-9.6, 12.2, 0.52, 'gold')
-  buildBush(-6.8, 9.8, 0.36, PAL.grassHi)
-  buildBush(-6.8, 6.4, 0.34, PAL.pink)
-  buildFlowerBed(-4.5, 9.8, Math.PI / 2)
-  buildStreetLamp(-4.6, 12.2)
 
-  // Left loop skyscrapers: high-contrast terracotta/ivory & teal spire
-  buildSkyscraper(-3.3, 7.6, 2.35, 2.35, 6.2, 'bands-terracotta')
-  buildSkyscraper(-3.3, 3.8, 2.55, 2.55, 8.4, 'spire-teal')
+  const fenceGroup = new THREE.Group()
+  for (let fz = 4.2; fz <= 11.8; fz += 0.48) {
+    addBox(0.1, 0.42, 0.18, PAL.paper, -11.4, 0.43, fz, fenceGroup)
+  }
+  for (let fx = -11.2; fx <= -4.2; fx += 0.48) {
+    addBox(0.18, 0.42, 0.1, PAL.paper, fx, 0.43, 12.15, fenceGroup)
+  }
+  world.add(fenceGroup)
+
+  buildTree(-11.2, 4.2, 0.6, 'spring')
+  buildTree(-10.8, 11.4, 0.54, 'gold')
+  buildBush(-7.5, 9.4, 0.34, PAL.grassHi)
+  buildBush(-5.4, 6.8, 0.34, PAL.pink)
+  buildFlowerBed(-4.2, 7.6, Math.PI / 2)
+  buildStreetLamp(-4.4, 11.6)
+  // Die-cut Smiley sticker on the Zone 1 lawn + Milestone Sign 01
+  buildDieCutSticker('smiley', -10.8, 0.34, 8.6, 0.72, Math.PI * 0.25)
+  buildMilestoneSign('01', 'ABOUT', PAL.butter, -11.0, 12.1, Math.PI * 0.18)
+
+  // Left loop skyscrapers placed cleanly to the right of the enlarged card face
+  buildSkyscraper(-2.7, 5.6, 1.95, 1.95, 4.6, 'bands-terracotta')
+  buildSkyscraper(-3.2, 2.7, 2.2, 2.2, 8.0, 'spire-teal')
 
   /* ── ZONE 2: Upper-Center Skyline & Park Terrace ───────────────────────── */
   buildSkyscraper(-5.0, -4.6, 2.65, 2.65, 7.8, 'bands-charcoal')
   buildSkyscraper(-2.8, -8.4, 2.5, 2.5, 9.2, 'spire-charcoal')
   buildGabledHouse(-9.2, -3.5, Math.PI / 2, PAL.paper, PAL.mustard, 0.94)
   buildGabledHouse(-7.0, -7.2, 0, PAL.cream, PAL.tangerine, 0.9)
-  buildGabledHouse(-2.8, -12.2, Math.PI / 2, PAL.paper, PAL.tangerine, 0.94)
+  buildGabledHouse(-2.8, -11.4, Math.PI / 2, PAL.paper, PAL.tangerine, 0.92)
   buildTree(-9.4, -6.2, 0.68, 'round')
   buildTree(-8.0, -5.2, 0.56, 'spring')
   buildTree(-5.6, -10.6, 0.62, 'tall')
   buildTree(-6.8, -4.2, 0.5, 'gold')
-  buildBush(-4.5, -12.0, 0.38, PAL.grassHi)
+  buildBush(-4.5, -11.4, 0.38, PAL.grassHi)
   buildFlowerBed(-8.6, -8.2, 0)
   buildStreetLamp(-3.6, -3.2)
+  buildDieCutSticker('flower', -8.8, 0.34, -9.8, 0.76, Math.PI * 0.15)
+  buildMilestoneSign('02', 'SHOW & TELL', PAL.pink, -10.4, -5.0, Math.PI * 0.35)
 
-  /* ── ZONE 3: Right Quadrant, Gardens & Interactive Billboard (Scaled Up) ─── */
-  const makeBillboardTexture = (alt: boolean) => {
+  /* ── ZONE 3: Auto-Cycling Sunnyside Billboard (Zero Pole Collision, No Sun) */
+  const BILLBOARD_SLIDES = [
+    {
+      bg: '#ffd23f',
+      chipBg: '#fffaf1',
+      chip: 'OPEN TO GOOD PROBLEMS',
+      line1: 'WITH A',
+      line2: 'PULSE.',
+      accent: '#ff6a2b',
+      readout: 'with a pulse',
+    },
+    {
+      bg: '#fffaf1',
+      chipBg: '#ffd23f',
+      chip: 'DESIGN SYSTEMS · MOTION',
+      line1: 'CRAFT &',
+      line2: 'CLARITY.',
+      accent: '#2b9e7c',
+      readout: 'craft & clarity',
+    },
+    {
+      bg: '#b7e4c7',
+      chipBg: '#fffaf1',
+      chip: 'EXPRESS LINE · TRACK 01',
+      line1: 'NOW',
+      line2: 'BOARDING.',
+      accent: '#df4e22',
+      readout: 'now boarding',
+    },
+  ] as const
+
+  const makeBillboardTexture = (slideIdx: number) => {
+    const slide = BILLBOARD_SLIDES[slideIdx % BILLBOARD_SLIDES.length]
     const c = document.createElement('canvas')
     c.width = 1024
-    c.height = 512
+    c.height = 540
     const ctx = c.getContext('2d')!
-    ctx.fillStyle = '#ffcf40'
+    ctx.fillStyle = slide.bg
     ctx.fillRect(0, 0, c.width, c.height)
 
-    // Bold industrial ink border & inner guide
-    ctx.strokeStyle = '#141626'
+    // Bold Sunnyside double ink border
+    ctx.strokeStyle = '#191a2e'
     ctx.lineWidth = 14
     ctx.strokeRect(18, 18, c.width - 36, c.height - 36)
-    ctx.lineWidth = 2
-    ctx.strokeRect(32, 32, c.width - 64, c.height - 64)
+    ctx.lineWidth = 3
+    ctx.strokeRect(34, 34, c.width - 68, c.height - 68)
 
+    // Top studio pill chip
+    ctx.fillStyle = '#191a2e'
+    ctx.beginPath()
+    ctx.roundRect(262, 52, 508, 56, 28)
+    ctx.fill()
+    ctx.fillStyle = slide.chipBg
+    ctx.beginPath()
+    ctx.roundRect(258, 48, 508, 56, 28)
+    ctx.fill()
+    ctx.strokeStyle = '#191a2e'
+    ctx.lineWidth = 4
+    ctx.stroke()
+
+    ctx.fillStyle = slide.accent
+    ctx.beginPath()
+    ctx.arc(296, 76, 10, 0, Math.PI * 2)
+    ctx.fill()
+
+    ctx.fillStyle = '#191a2e'
+    ctx.font = '800 24px ui-monospace, monospace'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.font = '900 136px system-ui, -apple-system, sans-serif'
-    ctx.fillStyle = '#141626'
-    ctx.fillText(alt ? 'NOW' : 'WITH A', c.width / 2, 168)
+    ctx.fillText(slide.chip, 524, 77)
 
-    ctx.font = '900 144px system-ui, -apple-system, sans-serif'
-    ctx.lineWidth = 16
-    ctx.strokeStyle = '#141626'
-    const line2 = alt ? 'BOARDING.' : 'PULSE.'
-    ctx.strokeText(line2, c.width / 2, 348)
-    ctx.fillStyle = alt ? '#2b9e7c' : '#df4e22'
-    ctx.fillText(line2, c.width / 2, 348)
+    // Line 1 Headline
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.font = '900 116px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#191a2e'
+    ctx.fillText(slide.line1, c.width / 2, 192)
+
+    // Hand-drawn Sunnyside double scribble ring around Line 2
+    ctx.save()
+    ctx.translate(c.width / 2, 372)
+    ctx.rotate(-0.025)
+    ctx.strokeStyle = slide.accent
+    ctx.lineWidth = 6
+    ctx.beginPath()
+    ctx.ellipse(0, 0, 396, 96, 0, 0, Math.PI * 2)
+    ctx.stroke()
+    ctx.rotate(0.04)
+    ctx.lineWidth = 3.5
+    ctx.beginPath()
+    ctx.ellipse(0, 0, 382, 84, 0, 0, Math.PI * 2)
+    ctx.stroke()
+    ctx.restore()
+
+    // Line 2 Display Word with hard offset ink shadow
+    ctx.font = '900 132px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#191a2e'
+    ctx.fillText(slide.line2, c.width / 2 + 8, 380)
+    ctx.lineWidth = 14
+    ctx.strokeStyle = '#191a2e'
+    ctx.strokeText(slide.line2, c.width / 2, 372)
+    ctx.fillStyle = slide.accent
+    ctx.fillText(slide.line2, c.width / 2, 372)
 
     const tex = own(new THREE.CanvasTexture(c))
     tex.colorSpace = THREE.SRGBColorSpace
-    tex.anisotropy = 4
+    tex.anisotropy = 8
     return tex
   }
 
-  const bbTexA = makeBillboardTexture(false)
-  const bbTexB = makeBillboardTexture(true)
-  const bbFaceMat = own(new THREE.MeshBasicMaterial({ map: bbTexA }))
+  const makeTickerTexture = () => {
+    const c = document.createElement('canvas')
+    c.width = 768
+    c.height = 112
+    const ctx = c.getContext('2d')!
+    ctx.fillStyle = '#191a2e'
+    ctx.fillRect(0, 0, c.width, c.height)
+    ctx.strokeStyle = '#ffd23f'
+    ctx.lineWidth = 8
+    ctx.strokeRect(6, 6, c.width - 12, c.height - 12)
+    ctx.fillStyle = '#b7e4c7'
+    ctx.beginPath()
+    ctx.arc(54, c.height / 2, 14, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.fillStyle = '#fffaf1'
+    ctx.font = '800 36px ui-monospace, monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(
+      '00 / SIDE A · LIVE STUDIO FEED',
+      c.width / 2 + 16,
+      c.height / 2 + 2,
+    )
+    const tex = own(new THREE.CanvasTexture(c))
+    tex.colorSpace = THREE.SRGBColorSpace
+    return tex
+  }
+
+  const bbSlideTextures = [
+    makeBillboardTexture(0),
+    makeBillboardTexture(1),
+    makeBillboardTexture(2),
+  ]
+  const bbFaceMat = own(
+    new THREE.MeshBasicMaterial({ map: bbSlideTextures[0] }),
+  )
+  const tickerMat = own(
+    new THREE.MeshBasicMaterial({ map: makeTickerTexture() }),
+  )
 
   const boardGroup = new THREE.Group()
-  boardGroup.position.set(9.2, 0.22, -10.5)
-  // Sturdy dual support pylon framework
-  for (const px of [-2.4, 2.4]) {
-    addBox(1.1, 0.24, 1.1, PAL.paper, px, 0.12, 0, boardGroup)
-    addBox(0.65, 5.4, 0.65, PAL.slate, px, 2.7, 0, boardGroup)
+  boardGroup.position.set(9.2, 0.22, -10.3)
+  // Sturdy dual support pylon framework terminating BELOW the billboard casing
+  // and recessed at z = -0.14 so poles NEVER collide or z-fight with the screen!
+  for (const px of [-2.5, 2.5]) {
+    addBox(1.2, 0.28, 1.2, PAL.paper, px, 0.14, -0.1, boardGroup)
+    addBox(0.92, 0.42, 0.92, PAL.butter, px, 0.42, -0.1, boardGroup)
+    addBox(0.56, 3.9, 0.52, PAL.slate, px, 2.15, -0.14, boardGroup)
   }
-  // Billboard structural framing
-  addBox(8.2, 4.4, 0.48, PAL.tangerine, 0, 6.4, 0, boardGroup)
-  addBox(8.5, 0.3, 0.88, PAL.tangerine, 0, 4.25, 0.18, boardGroup)
-  addBox(8.0, 4.2, 0.2, PAL.paper, 0.1, 6.5, -0.28, boardGroup)
+  addBox(5.2, 0.22, 0.22, PAL.slateHi, 0, 2.1, -0.2, boardGroup)
+  addBox(5.2, 0.22, 0.22, PAL.slateHi, 0, 3.3, -0.2, boardGroup)
+
+  // Offset dark ink shadow backing plate + Tangerine outer frame + raised paper board
+  addBox(8.6, 4.65, 0.24, PAL.ink, 0.2, 6.45, -0.32, boardGroup)
+  addBox(8.5, 4.6, 0.5, PAL.tangerine, 0, 6.62, 0, boardGroup)
+  addBox(8.05, 4.15, 0.18, PAL.paper, 0, 6.62, 0.24, boardGroup)
 
   const bbFace = new THREE.Mesh(
-    own(new THREE.PlaneGeometry(7.6, 3.8)),
+    own(new THREE.PlaneGeometry(7.75, 3.92)),
     bbFaceMat,
   )
-  bbFace.position.set(0, 6.4, 0.26)
+  bbFace.position.set(0, 6.62, 0.36)
   boardGroup.add(bbFace)
+
+  // Catwalk maintenance grate + low safety handrail placed cleanly below the screen
+  addBox(8.9, 0.22, 0.96, PAL.butter, 0, 4.2, 0.32, boardGroup)
+  addBox(8.96, 0.08, 1.0, PAL.ink, 0, 4.06, 0.32, boardGroup)
+  for (let gx = -4.1; gx <= 4.1; gx += 1.36) {
+    addBox(0.08, 0.28, 0.08, PAL.ink, gx, 4.44, 0.74, boardGroup)
+  }
+  addBox(8.4, 0.08, 0.08, PAL.ink, 0, 4.58, 0.74, boardGroup)
+
+  // Side maintenance ladder
+  for (const lx of [-4.45, -4.15]) {
+    addBox(0.08, 3.8, 0.08, PAL.ink, lx, 2.3, 0.32, boardGroup)
+  }
+  for (let ly = 0.8; ly <= 3.8; ly += 0.5) {
+    addBox(0.36, 0.07, 0.07, PAL.ink, -4.3, ly, 0.32, boardGroup)
+  }
+
+  // Three gooseneck studio floodlights mounted along the top rim
+  for (const fx of [-2.6, 0, 2.6]) {
+    addBox(0.28, 0.32, 0.28, PAL.ink, fx, 9.04, 0.08, boardGroup)
+    addBox(0.12, 0.12, 0.86, PAL.ink, fx, 9.16, 0.48, boardGroup)
+    addBox(0.58, 0.22, 0.42, PAL.slate, fx, 9.04, 0.84, boardGroup)
+    addBox(0.46, 0.12, 0.32, PAL.butter, fx, 8.94, 0.84, boardGroup, {
+      edges: false,
+      emissive: PAL.butter,
+      emissiveIntensity: 0.85,
+    })
+  }
+
+  // Lower sub-banner ticker plaque ("00 / SIDE A · LIVE STUDIO FEED")
+  const tickerSide = mat(PAL.ink)
+  const tickerBox = new THREE.Mesh(
+    own(new THREE.BoxGeometry(5.6, 0.76, 0.28)),
+    [tickerSide, tickerSide, tickerSide, tickerSide, tickerMat, tickerSide],
+  )
+  tickerBox.position.set(0, 3.48, 0.26)
+  addEdges(tickerBox, 20)
+  boardGroup.add(tickerBox)
+
   world.add(boardGroup)
   registerHot(boardGroup, 'with a pulse billboard', 'billboard')
 
   // High-contrast ivory, teal-patina, and charcoal towers in front of billboard
-  buildSkyscraper(4.4, -5.8, 3.2, 2.3, 4.5, 'ivory')
-  buildSkyscraper(7.6, -4.4, 2.45, 2.45, 6.0, 'teal')
-  buildSkyscraper(11.2, -3.8, 2.55, 2.55, 7.6, 'ivory')
+  const z3TowerA = buildSkyscraper(4.4, -5.8, 3.2, 2.3, 4.3, 'ivory')
+  // Rooftop Sun Club solar disc on the flat ivory tower
+  buildDieCutSticker(
+    'sun',
+    0,
+    0.36 + 4.3 + 0.34,
+    0,
+    0.85,
+    0,
+    -Math.PI / 2,
+    z3TowerA,
+  )
+  buildSkyscraper(7.6, -4.4, 2.4, 2.4, 5.2, 'teal')
+  buildSkyscraper(11.2, -3.8, 2.45, 2.45, 6.4, 'ivory')
   addBox(1.5, 2.5, 1.5, PAL.butter, 12.8, 0.22 + 1.25, -3.8, world)
   addBox(1.4, 1.6, 1.4, PAL.tangerine, 12.8, 0.22 + 0.8, -2.2, world)
 
   // Trees & gardens in Zone 3 courtyard
-  buildTree(5.2, -9.6, 0.65, 'round')
-  buildTree(7.4, -9.2, 0.56, 'gold')
+  buildTree(5.2, -9.4, 0.65, 'round')
+  buildTree(7.4, -9.0, 0.56, 'gold')
   buildTree(12.2, -8.8, 0.6, 'spring')
   buildBush(11.0, -8.8, 0.36, PAL.grassHi)
   buildFlowerBed(8.8, -8.2, 0)
   buildStreetLamp(6.0, -3.0)
+  buildMilestoneSign('03', 'WORK', PAL.tangerine, 3.6, -2.6, -Math.PI * 0.15)
 
-  /* ── ZONE 4: Front Street, Crosswalk, Bus Stop, Vehicles & Mini Park ───── */
+  /* ── ZONE 4: Front Street (Collision-Free), Crosswalks, Bus Stop & Park ── */
   const roadWaypoints: [number, number][] = [
-    [-1.8, 5.4],
+    [-1.4, 5.4],
     [13.0, 5.4],
-    [13.0, 10.2],
-    [-1.8, 10.2],
+    [13.0, 9.7],
+    [-1.4, 9.7],
   ]
-  const R_ROAD = 1.6
+  const R_ROAD = 1.45
   const roadPts: THREE.Vector3[] = []
   for (let i = 0; i < 4; i++) {
     const pPrev = roadWaypoints[(i + 3) % 4]
@@ -1803,17 +2223,19 @@ export function mountPaperCity({
   const roadFrames = buildFrames(roadSampled, true)
 
   const roadCurbProfile: [number, number][] = [
-    [-1.02, 0.0],
-    [1.02, 0.0],
-    [1.02, 0.08],
-    [-1.02, 0.08],
+    [-0.98, 0.0],
+    [0.98, 0.0],
+    [0.98, 0.08],
+    [-0.98, 0.08],
   ]
   const roadSurfaceProfile: [number, number][] = [
-    [-0.86, 0.08],
-    [0.86, 0.08],
-    [0.86, 0.12],
-    [-0.86, 0.12],
+    [-0.86, 0.06],
+    [0.86, 0.06],
+    [0.86, 0.14],
+    [-0.86, 0.14],
   ]
+  const roadGroup = new THREE.Group()
+  roadGroup.userData.dropWave = 'ground'
   const roadCurbMesh = new THREE.Mesh(
     sweepProfile(roadFrames, roadCurbProfile, true),
     mat(PAL.creamLo),
@@ -1824,17 +2246,58 @@ export function mountPaperCity({
     mat(PAL.asphalt),
   )
   roadSurfMesh.receiveShadow = true
-  world.add(roadCurbMesh, roadSurfMesh)
+  roadGroup.add(roadCurbMesh, roadSurfMesh)
 
-  // Center green boulevard median island inside the road loop!
-  addLawnPatch(10.6, 2.2, 5.6, 7.8, 0.02)
-  buildTree(2.4, 7.8, 0.52, 'spring', world, 0.14)
-  buildTree(5.6, 7.8, 0.56, 'gold', world, 0.14)
-  buildTree(8.8, 7.8, 0.52, 'round', world, 0.14)
-  buildFlowerBed(4.0, 7.8, 0, 0.14)
-  buildFlowerBed(7.2, 7.8, 0, 0.14)
-  buildStreetLamp(1.2, 7.8, 0.14)
-  buildStreetLamp(10.0, 7.8, 0.14)
+  // Crisp white zebra crosswalk stripes across the street near viaduct & bus stop
+  for (const cx of [2.1, 7.8]) {
+    for (let sz = -0.6; sz <= 0.6; sz += 0.3) {
+      addBox(0.68, 0.025, 0.16, PAL.paper, cx, 0.155, 5.4 + sz, roadGroup, {
+        edges: false,
+        shadow: false,
+      })
+    }
+  }
+
+  // Crisp white dashed center line markings on the northern dark asphalt straightaway
+  const northDashes = [
+    -0.6, 0.3, 1.2, 3.2, 4.1, 5.0, 5.9, 6.8, 8.8, 9.7, 10.6, 11.5, 12.3,
+  ]
+  for (const dx of northDashes) {
+    addBox(0.48, 0.025, 0.08, PAL.paper, dx, 0.155, 5.4, roadGroup, {
+      edges: false,
+      shadow: false,
+    })
+  }
+
+  // Southern straight zebra crosswalk near the botanical fountain park
+  for (let sz = -0.6; sz <= 0.6; sz += 0.3) {
+    addBox(0.68, 0.025, 0.16, PAL.paper, 4.2, 0.155, 9.7 + sz, roadGroup, {
+      edges: false,
+      shadow: false,
+    })
+  }
+
+  // Crisp white dashed center line markings on the southern dark asphalt straightaway
+  const southDashes = [
+    -0.6, 0.3, 1.2, 2.1, 3.0, 5.4, 6.3, 7.2, 8.1, 9.0, 9.9, 10.8, 11.7, 12.4,
+  ]
+  for (const dx of southDashes) {
+    addBox(0.48, 0.025, 0.08, PAL.paper, dx, 0.155, 9.7, roadGroup, {
+      edges: false,
+      shadow: false,
+    })
+  }
+  world.add(roadGroup)
+
+  // Center green boulevard median island inside the road loop (raised above street)
+  addLawnPatch(10.4, 1.85, 5.8, 7.55, 0.14)
+  buildTree(2.5, 7.55, 0.5, 'spring', world, 0.26)
+  buildTree(5.8, 7.55, 0.54, 'gold', world, 0.26)
+  buildTree(9.0, 7.55, 0.5, 'round', world, 0.26)
+  buildFlowerBed(4.1, 7.55, 0, 0.26)
+  buildFlowerBed(7.4, 7.55, 0, 0.26)
+  buildStreetLamp(1.4, 7.55, 0.26)
+  buildStreetLamp(10.2, 7.55, 0.26)
 
   // Roadside house, teal bus stop shelter, trees, and orange ticket kiosk
   buildGabledHouse(4.4, 3.0, 0, PAL.paper, PAL.tangerine, 0.88)
@@ -1854,13 +2317,17 @@ export function mountPaperCity({
 
   addBox(0.88, 1.45, 0.78, PAL.tangerine, 10.2, 0.18 + 0.72, 3.1, world)
 
-  // Expanded Front Mini Park + adjacent botanical lawn
+  // Sunnyside "APPROVED / CRAFT" rose stamp tile & Milestone Sign 04
+  buildApprovedStamp(11.4, 12.2, -0.22, 0.02)
+  buildMilestoneSign('04', 'SKILLS', PAL.mint, 11.4, 7.55, 0, 0.26)
+
+  // Expanded Front Mini Park + adjacent botanical lawn + Die-cut stickers
   const parkGroup = new THREE.Group()
-  parkGroup.position.set(5.4, 0, 13.6)
-  addBox(7.8, 0.18, 4.8, PAL.cream, 0, 0.09, 0, parkGroup)
-  addBox(7.3, 0.1, 4.3, PAL.grass, 0, 0.2, 0, parkGroup)
+  parkGroup.position.set(5.4, 0, 13.5)
+  addBox(7.8, 0.18, 4.6, PAL.cream, 0, 0.09, 0, parkGroup)
+  addBox(7.3, 0.1, 4.1, PAL.grass, 0, 0.2, 0, parkGroup)
   addBox(7.34, 0.04, 0.78, PAL.paper, 0, 0.26, 0, parkGroup, { edges: false })
-  addBox(0.78, 0.04, 4.34, PAL.paper, 0, 0.26, 0, parkGroup, { edges: false })
+  addBox(0.78, 0.04, 4.14, PAL.paper, 0, 0.26, 0, parkGroup, { edges: false })
 
   const basin = new THREE.Mesh(
     own(new THREE.CylinderGeometry(0.98, 1.04, 0.28, 20)),
@@ -1879,12 +2346,22 @@ export function mountPaperCity({
   )
   sunCenter.position.y = 0.56
   parkGroup.add(basin, water, sunCenter)
-  buildTree(-2.4, -1.25, 0.65, 'round', parkGroup, 0.24)
-  buildTree(2.4, 1.15, 0.58, 'tall', parkGroup, 0.24)
-  buildTree(-2.2, 1.25, 0.5, 'gold', parkGroup, 0.24)
-  buildTree(2.3, -1.2, 0.52, 'spring', parkGroup, 0.24)
-  buildBush(-1.2, 1.4, 0.32, PAL.grassHi, 0.24, parkGroup)
-  buildBush(1.2, -1.4, 0.32, PAL.mustard, 0.24, parkGroup)
+  buildTree(-2.4, -1.2, 0.65, 'round', parkGroup, 0.24)
+  buildTree(2.4, 1.1, 0.58, 'tall', parkGroup, 0.24)
+  buildTree(-2.2, 1.2, 0.5, 'gold', parkGroup, 0.24)
+  buildTree(2.3, -1.15, 0.52, 'spring', parkGroup, 0.24)
+  buildBush(-1.2, 1.35, 0.32, PAL.grassHi, 0.24, parkGroup)
+  buildBush(1.2, -1.35, 0.32, PAL.mustard, 0.24, parkGroup)
+  buildDieCutSticker(
+    'flower',
+    -1.45,
+    0.28,
+    -1.15,
+    0.55,
+    0.3,
+    -Math.PI / 2,
+    parkGroup,
+  )
   // Park benches
   addBox(0.75, 0.22, 0.28, PAL.butter, -1.35, 0.34, -0.58, parkGroup)
   addBox(0.75, 0.22, 0.28, PAL.tangerine, 1.35, 0.34, 0.58, parkGroup)
@@ -1907,8 +2384,14 @@ export function mountPaperCity({
       [-0.82, -0.58],
       [0.82, -0.58],
     ]) {
-      const w = new THREE.Mesh(wheelCylGeo, mat(PAL.ink))
+      const w = new THREE.Mesh(wheelCylGeo, mat(PAL.slateHi))
       w.position.set(wx, 0.22, wz)
+      const hub = new THREE.Mesh(
+        own(new THREE.CylinderGeometry(0.08, 0.08, 0.16, 8)),
+        mat(PAL.steel),
+      )
+      hub.rotateX(Math.PI / 2)
+      w.add(hub)
       g.add(w)
       wheels.push(w)
     }
@@ -1931,9 +2414,15 @@ export function mountPaperCity({
       [-0.46, -0.4],
       [0.46, -0.4],
     ]) {
-      const w = new THREE.Mesh(wheelCylGeo, mat(PAL.ink))
+      const w = new THREE.Mesh(wheelCylGeo, mat(PAL.slateHi))
       w.scale.setScalar(0.8)
       w.position.set(wx, 0.16, wz)
+      const hub = new THREE.Mesh(
+        own(new THREE.CylinderGeometry(0.065, 0.065, 0.16, 8)),
+        mat(PAL.steel),
+      )
+      hub.rotateX(Math.PI / 2)
+      w.add(hub)
       g.add(w)
       wheels.push(w)
     }
@@ -2045,7 +2534,8 @@ export function mountPaperCity({
   const pointerNDC = new THREE.Vector2(0, 0)
   let pointerInside = false
   let hoveredItem: HotItem | null = null
-  let billboardAlt = false
+  let manualSlideOffset = 0
+  let activeSlideIdx = 0
   let trainBoost = 0
   let tiltX = 0
   let tiltY = 0
@@ -2086,8 +2576,9 @@ export function mountPaperCity({
   }
 
   const toggleBillboard = () => {
-    billboardAlt = !billboardAlt
-    bbFaceMat.map = billboardAlt ? bbTexB : bbTexA
+    manualSlideOffset = (manualSlideOffset + 1) % bbSlideTextures.length
+    activeSlideIdx = (activeSlideIdx + 1) % bbSlideTextures.length
+    bbFaceMat.map = bbSlideTextures[activeSlideIdx]
     bbFaceMat.needsUpdate = true
   }
 
@@ -2109,9 +2600,127 @@ export function mountPaperCity({
   canvas.addEventListener('pointerleave', onPointerLeave)
   canvas.addEventListener('click', onClick)
 
+  /* ── Sky-Drop Entrance Choreography (Staged Structural Wave + Shuffle) ─── */
+  type SkyDropEntry = {
+    obj: THREE.Object3D
+    baseY: number
+    baseRotZ: number
+    delay: number
+    duration: number
+    dropHeight: number
+    tiltZ: number
+  }
+
+  const seededRand = (seed: number) => {
+    const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453
+    return x - Math.floor(x)
+  }
+
+  const evalSkyDrop = (
+    elapsed: number,
+    delay: number,
+    duration: number,
+    dropHeight: number,
+  ) => {
+    if (elapsed <= delay) {
+      return { visible: false, yOffset: dropHeight, tiltFactor: 1 }
+    }
+    if (elapsed >= delay + duration) {
+      return { visible: true, yOffset: 0, tiltFactor: 0 }
+    }
+    const u = (elapsed - delay) / duration
+    const impactU = 0.66
+    let yOffset = 0
+    if (u < impactU) {
+      const f = u / impactU
+      yOffset = dropHeight * (1 - f * f)
+    } else {
+      const b = (u - impactU) / (1 - impactU)
+      yOffset = Math.sin(b * Math.PI) * (1 - b * 0.45) * (dropHeight * 0.082)
+    }
+    const tiltFactor = u < impactU ? 1 - u / impactU : 0
+    return { visible: true, yOffset, tiltFactor }
+  }
+
+  const hotGroupSet = new Set(hotItems.map((h) => h.group))
+  const vehicleGroupSet = new Set(roadVehicles.map((rv) => rv.group))
+  const skyDropEntries: SkyDropEntry[] = []
+  const hotDropMap = new Map<THREE.Group, SkyDropEntry>()
+
+  const railwayIdx = world.children.indexOf(railwayGroup)
+  world.children.forEach((child, idx) => {
+    if (
+      child === shadowPlane ||
+      child === orangeGroup ||
+      child === yellowGroup ||
+      vehicleGroupSet.has(child as THREE.Group)
+    ) {
+      return
+    }
+
+    const r1 = seededRand(idx * 3 + 1)
+    const r2 = seededRand(idx * 3 + 2)
+    const r3 = seededRand(idx * 3 + 3)
+
+    let minDelay = 0.82
+    let maxDelay = 1.42
+    let duration = 0.48
+    let dropHeight = 21 + r2 * 5
+
+    if (
+      child.userData.dropWave === 'ground' ||
+      (railwayIdx > 0 && idx < railwayIdx)
+    ) {
+      // Wave 1: Plinths, lawns, washi tapes & street roadbed (0.00s - 0.28s)
+      minDelay = 0.0
+      maxDelay = 0.28
+      duration = 0.42
+      dropHeight = 16 + r2 * 4
+    } else if (child.userData.dropWave === 'viaduct') {
+      // Wave 2: Viaduct arches, railway track & support pillars (0.20s - 0.62s)
+      minDelay = 0.2
+      maxDelay = 0.62
+      duration = 0.46
+      dropHeight = 19 + r2 * 4
+    } else if (hotGroupSet.has(child as THREE.Group)) {
+      // Wave 3: Skyscrapers, cottages, Profile Card, Billboard, Park (0.45s - 1.18s)
+      minDelay = 0.45
+      maxDelay = 1.18
+      duration = 0.52
+      dropHeight = 22 + r2 * 6
+    }
+
+    const entry: SkyDropEntry = {
+      obj: child,
+      baseY: child.position.y,
+      baseRotZ: child.rotation.z,
+      delay: minDelay + r1 * (maxDelay - minDelay),
+      duration,
+      dropHeight,
+      tiltZ: (r3 - 0.5) * 0.11,
+    }
+    skyDropEntries.push(entry)
+    if (hotGroupSet.has(child as THREE.Group)) {
+      hotDropMap.set(child as THREE.Group, entry)
+    }
+  })
+
+  // Wave 5: Trains & Road Vehicles land last (1.20s - 1.78s)
+  const orangeDropDelays = orangeCars.map(
+    (_, i) => 1.18 + seededRand(500 + i) * 0.32,
+  )
+  const yellowDropDelays = yellowCars.map(
+    (_, i) => 1.24 + seededRand(600 + i) * 0.32,
+  )
+  const roadDropDelays = roadVehicles.map(
+    (_, i) => 1.28 + seededRand(700 + i) * 0.3,
+  )
+
   /* ── Animation Clock & Frame Step ──────────────────────────────────────── */
+  const reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   const STILL_TIME = 20
   let simTime = STILL_TIME
+  let introTime = reducedQuery.matches ? 999 : 0
   let railDist = STILL_TIME * 3.4
   const roadPos = new THREE.Vector3()
   const roadNext = new THREE.Vector3()
@@ -2122,8 +2731,26 @@ export function mountPaperCity({
     const speed = 3.4 + trainBoost
     railDist = dt === 0 ? t * 3.4 : railDist + speed * dt
 
+    // Automatically cycle billboard slides on a timer sequence without requiring clicks
+    const autoSteps =
+      t === STILL_TIME || t === 14
+        ? 0
+        : Math.floor(Math.max(0, t - STILL_TIME) / 3.0)
+    const nextSlide =
+      (((autoSteps + manualSlideOffset) % bbSlideTextures.length) +
+        bbSlideTextures.length) %
+      bbSlideTextures.length
+    if (nextSlide !== activeSlideIdx) {
+      activeSlideIdx = nextSlide
+      bbFaceMat.map = bbSlideTextures[activeSlideIdx]
+      bbFaceMat.needsUpdate = true
+    }
+
     for (let c = 0; c < orangeCars.length; c++) {
       poseOnRail(orangeCars[c], railDist - c * CAR_GAP, CAR_LEN * 0.44)
+      const drop = evalSkyDrop(introTime, orangeDropDelays[c], 0.48, 18)
+      orangeCars[c].visible = drop.visible
+      orangeCars[c].position.y += drop.yOffset
     }
     for (let c = 0; c < yellowCars.length; c++) {
       poseOnRail(
@@ -2131,14 +2758,20 @@ export function mountPaperCity({
         railDist + L * 0.5 - c * CAR_GAP,
         CAR_LEN * 0.44,
       )
+      const drop = evalSkyDrop(introTime, yellowDropDelays[c], 0.48, 18)
+      yellowCars[c].visible = drop.visible
+      yellowCars[c].position.y += drop.yOffset
     }
 
-    for (const rv of roadVehicles) {
+    for (let rIdx = 0; rIdx < roadVehicles.length; rIdx++) {
+      const rv = roadVehicles[rIdx]
       const u = (((t * 0.055 + rv.offset) % 1) + 1) % 1
       const uNext = (u + 0.008) % 1
       roadCurve.getPointAt(u, roadPos)
       roadCurve.getPointAt(uNext, roadNext)
-      rv.group.position.set(roadPos.x, 0.12, roadPos.z)
+      const drop = evalSkyDrop(introTime, roadDropDelays[rIdx], 0.46, 16)
+      rv.group.visible = drop.visible
+      rv.group.position.set(roadPos.x, 0.14 + drop.yOffset, roadPos.z)
       rv.group.rotation.y = Math.atan2(
         -(roadNext.z - roadPos.z),
         roadNext.x - roadPos.x,
@@ -2151,13 +2784,40 @@ export function mountPaperCity({
       cl.group.position.x = cl.baseX + Math.sin(t * 0.28 + cl.phase) * 2.2
     }
 
+    // Apply sky-drop to all non-hot static items
+    for (const entry of skyDropEntries) {
+      if (hotDropMap.has(entry.obj as THREE.Group)) continue
+      const drop = evalSkyDrop(
+        introTime,
+        entry.delay,
+        entry.duration,
+        entry.dropHeight,
+      )
+      entry.obj.visible = drop.visible
+      entry.obj.position.y = entry.baseY + drop.yOffset
+      entry.obj.rotation.z = entry.baseRotZ + entry.tiltZ * drop.tiltFactor
+    }
+
     const stepDt = Math.min(0.05, dt || 0.016)
     for (const item of hotItems) {
       const target = hoveredItem === item ? 0.38 : 0
       const force = (target - item.lift) * 140 - item.vel * 16
       item.vel += force * stepDt
       item.lift += item.vel * stepDt
-      item.group.position.y = item.baseY + item.lift
+      const entry = hotDropMap.get(item.group)
+      if (entry) {
+        const drop = evalSkyDrop(
+          introTime,
+          entry.delay,
+          entry.duration,
+          entry.dropHeight,
+        )
+        item.group.visible = drop.visible
+        item.group.position.y = item.baseY + item.lift + drop.yOffset
+        item.group.rotation.z = entry.baseRotZ + entry.tiltZ * drop.tiltFactor
+      } else {
+        item.group.position.y = item.baseY + item.lift
+      }
     }
 
     const targetTiltX = pointerInside ? pointerNDC.x * 0.038 : 0
@@ -2174,16 +2834,13 @@ export function mountPaperCity({
       } else {
         const pct = Math.round(((((railDist % L) + L) % L) / L) * 100)
         onReadout(
-          `side a express · ${pct}% lap · ${
-            billboardAlt ? 'now boarding' : 'with a pulse'
-          }`,
+          `side a express · ${pct}% lap · ${BILLBOARD_SLIDES[activeSlideIdx].readout}`,
         )
       }
     }
   }
 
   /* ── Lifecycle: Resize, Reduced Motion, Offscreen Pause & Cleanup ─────── */
-  const reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   let disposed = false
   let inView = true
   let rafId = 0
@@ -2194,6 +2851,7 @@ export function mountPaperCity({
     const dt = Math.min(0.05, (now - lastNow) / 1000)
     lastNow = now
     simTime += dt
+    introTime += dt
     stepScene(simTime, dt)
     if (!reducedQuery.matches && inView && !document.hidden) {
       rafId = requestAnimationFrame(tickLoop)
@@ -2209,6 +2867,7 @@ export function mountPaperCity({
         cancelAnimationFrame(rafId)
         rafId = 0
       }
+      introTime = 999
       stepScene(STILL_TIME, 0)
       return
     }
@@ -2246,6 +2905,7 @@ export function mountPaperCity({
   const controller: PaperCityController = {
     seek: (seconds: number) => {
       simTime = seconds
+      introTime = seconds < 10 ? seconds : 999
       railDist = seconds * 3.4
       stepScene(seconds, 0)
     },

@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { CuttingMatMarks, type HeroSurface } from '../hero/hero'
-import { mountPaperCity, type PaperCityController } from './paper-city-scene'
+import { mountPaperCity } from './paper-city-scene'
 import styles from './hero-city.module.css'
 
 type Props = {
@@ -16,20 +16,13 @@ type Props = {
  */
 export function HeroCity({ surface = 'cobalt' }: Props = {}) {
   const stageRef = useRef<HTMLDivElement>(null)
-  const controllerRef = useRef<PaperCityController | null>(null)
-  const [readout, setReadout] = useState('side a express · with a pulse')
 
   useEffect(() => {
     const el = stageRef.current
     if (!el) return
-    const ctrl = mountPaperCity({
-      el,
-      onReadout: (text) => setReadout(text),
-    })
-    controllerRef.current = ctrl
+    const ctrl = mountPaperCity({ el })
     return () => {
       ctrl?.dispose()
-      controllerRef.current = null
     }
   }, [])
 
@@ -51,27 +44,6 @@ export function HeroCity({ surface = 'cobalt' }: Props = {}) {
           role="img"
           aria-label="An isometric 3D paper city on a blue cutting mat: a figure-8 railway arches over the INTERFACES bridge while two trains, a bus, and cars move through the city."
         />
-        <div className={styles.hudBar}>
-          <span className={styles.readout} aria-live="polite">
-            {readout}
-          </span>
-          <div className={styles.actions}>
-            <button
-              type="button"
-              className={styles.actionBtn}
-              onClick={() => controllerRef.current?.toggleBillboard()}
-            >
-              Flip Billboard
-            </button>
-            <button
-              type="button"
-              className={styles.actionBtn}
-              onClick={() => controllerRef.current?.boostTrains()}
-            >
-              Express Boost
-            </button>
-          </div>
-        </div>
       </div>
     </section>
   )
