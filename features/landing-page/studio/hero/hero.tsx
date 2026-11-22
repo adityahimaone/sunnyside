@@ -1176,95 +1176,118 @@ const MAT_RULER_NUMS = Array.from({ length: 24 }, (_, i) => ({
   x: 60 + i * 57.4,
 }))
 
+const MAT_TICKS = Array.from({ length: 97 }, (_, i) => ({
+  index: i,
+  x: 60 + i * 14.35,
+  major: i % 4 === 0,
+}))
+
+const MAT_CORNERS = [
+  [42, 42],
+  [1398, 42],
+  [42, 858],
+  [1398, 858],
+] as const
+
 export function CuttingMatMarks() {
   return (
     <div className={styles.cuttingMatOverlay} aria-hidden="true">
-      <div className={styles.matFrame}>
-        {/* Top ruler numbers 01..24 */}
-        <div className={`${styles.matRulerRow} ${styles.matRulerTop}`}>
-          {MAT_RULER_NUMS.map((n) => (
-            <span key={n.index}>{n.label}</span>
-          ))}
-        </div>
+      <svg
+        className={styles.cuttingMatSvg}
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="none"
+        focusable="false"
+      >
+        {/* Inner mat hairline border */}
+        <rect
+          x={24}
+          y={22}
+          width={1392}
+          height={856}
+          rx={18}
+          fill="none"
+          stroke={PAPER}
+          strokeOpacity={0.26}
+          strokeWidth={1.3}
+          vectorEffect="non-scaling-stroke"
+        />
 
-        {/* Bottom ruler numbers 01..24 */}
-        <div className={`${styles.matRulerRow} ${styles.matRulerBottom}`}>
-          {MAT_RULER_NUMS.map((n) => (
-            <span key={n.index}>{n.label}</span>
+        {/* Top & bottom ruler tick bars */}
+        <g stroke={PAPER} strokeLinecap="round">
+          {MAT_TICKS.map((t) => (
+            <g key={t.index}>
+              <line
+                x1={t.x}
+                x2={t.x}
+                y1={22}
+                y2={t.major ? 35 : 29}
+                strokeOpacity={t.major ? 0.44 : 0.22}
+                strokeWidth={t.major ? 1.3 : 0.9}
+                vectorEffect="non-scaling-stroke"
+              />
+              <line
+                x1={t.x}
+                x2={t.x}
+                y1={878}
+                y2={t.major ? 865 : 871}
+                strokeOpacity={t.major ? 0.44 : 0.22}
+                strokeWidth={t.major ? 1.3 : 0.9}
+                vectorEffect="non-scaling-stroke"
+              />
+            </g>
           ))}
-        </div>
+        </g>
+
+        {/* Monospace ruler numbers 01..24 */}
+        <g
+          fill={PAPER}
+          fillOpacity={0.42}
+          fontFamily="var(--font-geist-mono), ui-monospace, monospace"
+          fontSize="10.5"
+          fontWeight="600"
+          textAnchor="middle"
+        >
+          {MAT_RULER_NUMS.map((n) => (
+            <g key={n.index}>
+              <text x={n.x} y={48}>
+                {n.label}
+              </text>
+              <text x={n.x} y={859}>
+                {n.label}
+              </text>
+            </g>
+          ))}
+        </g>
+
+        {/* Cutting-mat 30° / 45° / 60° protractor guide arcs */}
+        <g
+          fill="none"
+          stroke={PAPER}
+          strokeOpacity={0.15}
+          strokeWidth={1.2}
+          strokeDasharray="6 6"
+        >
+          <path d="M 720 878 A 420 420 0 0 1 1140 458" />
+          <path d="M 720 878 A 420 420 0 0 0 300 458" />
+          <line x1={720} y1={878} x2={1140} y2={458} />
+          <line x1={720} y1={878} x2={300} y2={458} />
+          <line x1={720} y1={878} x2={1084} y2={668} />
+          <line x1={720} y1={878} x2={356} y2={668} />
+          <line x1={720} y1={878} x2={930} y2={514} />
+          <line x1={720} y1={878} x2={510} y2={514} />
+        </g>
 
         {/* Corner registration crosshairs (+) */}
-        <svg
-          className={`${styles.matCornerCross} ${styles.matCornerTL}`}
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <line x1="8" y1="0" x2="8" y2="16" />
-          <line x1="0" y1="8" x2="16" y2="8" />
-          <circle cx="8" cy="8" r="3.5" />
-        </svg>
-        <svg
-          className={`${styles.matCornerCross} ${styles.matCornerTR}`}
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <line x1="8" y1="0" x2="8" y2="16" />
-          <line x1="0" y1="8" x2="16" y2="8" />
-          <circle cx="8" cy="8" r="3.5" />
-        </svg>
-        <svg
-          className={`${styles.matCornerCross} ${styles.matCornerBL}`}
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <line x1="8" y1="0" x2="8" y2="16" />
-          <line x1="0" y1="8" x2="16" y2="8" />
-          <circle cx="8" cy="8" r="3.5" />
-        </svg>
-        <svg
-          className={`${styles.matCornerCross} ${styles.matCornerBR}`}
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <line x1="8" y1="0" x2="8" y2="16" />
-          <line x1="0" y1="8" x2="16" y2="8" />
-          <circle cx="8" cy="8" r="3.5" />
-        </svg>
-
-        {/* Background drafting guide arcs & radial angles */}
-        <svg
-          className={styles.cuttingMatSvg}
-          viewBox="0 0 1440 900"
-          preserveAspectRatio="none"
-          focusable="false"
-        >
-          <g
-            fill="none"
-            stroke={PAPER}
-            strokeOpacity={0.16}
-            strokeWidth={1.2}
-            strokeDasharray="6 6"
-          >
-            <path d="M 720 872 A 420 420 0 0 1 1140 452" />
-            <path d="M 720 872 A 420 420 0 0 0 300 452" />
-            <line x1={720} y1={872} x2={1140} y2={452} />
-            <line x1={720} y1={872} x2={300} y2={452} />
-            <line x1={720} y1={872} x2={1084} y2={662} />
-            <line x1={720} y1={872} x2={356} y2={662} />
-            <line x1={720} y1={872} x2={930} y2={508} />
-            <line x1={720} y1={872} x2={510} y2={508} />
-          </g>
-        </svg>
-      </div>
+        <g stroke={PAPER} strokeOpacity={0.42} strokeWidth={1.4}>
+          {MAT_CORNERS.map(([cx, cy]) => (
+            <g key={`${cx}-${cy}`} transform={`translate(${cx} ${cy})`}>
+              <line x1={-8} y1={0} x2={8} y2={0} />
+              <line x1={0} y1={-8} x2={0} y2={8} />
+              <circle r={4} fill="none" />
+            </g>
+          ))}
+        </g>
+      </svg>
     </div>
   )
 }

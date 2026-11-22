@@ -31,29 +31,31 @@ type RoadVehicle = {
 /* High-contrast Sunnyside palette: no mid-blue on buildings so nothing
    collides with the #2b3da8 cobalt cutting-mat background. */
 const PAL = {
-  ink: '#141626',
-  slate: '#1f233b',
-  slateHi: '#2f3556',
+  ink: '#191a2e',
+  slate: '#232642',
+  slateHi: '#34385e',
   paper: '#fffaf1',
-  cream: '#f5ede0',
-  creamLo: '#e2d5c0',
+  cream: '#f3ecdf',
+  creamLo: '#e9dfcf',
   sandstone: '#eadbc4',
   teal: '#2b9e7c',
   tealHi: '#48bd99',
   tealLo: '#1d7359',
-  skyGlass: '#b8dcff',
+  mint: '#b7e4c7',
+  pink: '#ffb6e1',
+  skyGlass: '#a9c8ff',
   warmGlass: '#ffe58f',
   butter: '#ffd23f',
-  mustard: '#f2b72c',
+  mustard: '#f4b928',
   tangerine: '#ff6a2b',
   terracotta: '#df4e22',
-  grass: '#3ca650',
-  grassHi: '#56bf68',
-  leafLo: '#287a38',
+  grass: '#38a855',
+  grassHi: '#58c474',
+  leafLo: '#26783a',
   trunk: '#7c5230',
-  steel: '#dde4f7',
-  ballast: '#363b5c',
-  asphalt: '#f7f0e2',
+  steel: '#e8ebff',
+  ballast: '#2e3252',
+  asphalt: '#f6efe2',
 } as const
 
 export function mountPaperCity({
@@ -124,7 +126,7 @@ export function mountPaperCity({
 
   const addEdges = (
     mesh: THREE.Mesh,
-    thresholdAngle = 24,
+    thresholdAngle = 38,
   ): THREE.LineSegments => {
     const eg = own(new THREE.EdgesGeometry(mesh.geometry, thresholdAngle))
     const lines = new THREE.LineSegments(eg, edgeMat)
@@ -133,12 +135,45 @@ export function mountPaperCity({
     return lines
   }
 
-  const boxGeoCache = new Map<string, THREE.BoxGeometry>()
+  const boxGeoCache = new Map<string, THREE.BufferGeometry>()
   const getBoxGeo = (w: number, h: number, d: number) => {
     const k = `${w.toFixed(3)}:${h.toFixed(3)}:${d.toFixed(3)}`
     let g = boxGeoCache.get(k)
     if (!g) {
-      g = own(new THREE.BoxGeometry(w, h, d))
+      const minDim = Math.min(w, h, d)
+      if (minDim >= 0.34) {
+        // Tactile rounded-edge geometry so buildings, trains, and vehicles have smooth chamfered/rounded corners
+        const r = Math.min(0.11, minDim * 0.16)
+        const iw = Math.max(0.02, w - r * 2)
+        const ih = Math.max(0.02, h - r * 2)
+        const id = Math.max(0.02, d - r * 2)
+        const sh = new THREE.Shape()
+        const hw = iw / 2
+        const hh = ih / 2
+        const cr = Math.min(r * 0.6, hw * 0.4, hh * 0.4)
+        sh.moveTo(-hw + cr, -hh)
+        sh.lineTo(hw - cr, -hh)
+        sh.quadraticCurveTo(hw, -hh, hw, -hh + cr)
+        sh.lineTo(hw, hh - cr)
+        sh.quadraticCurveTo(hw, hh, hw - cr, hh)
+        sh.lineTo(-hw + cr, hh)
+        sh.quadraticCurveTo(-hw, hh, -hw, hh - cr)
+        sh.lineTo(-hw, -hh + cr)
+        sh.quadraticCurveTo(-hw, -hh, -hw + cr, -hh)
+        const ext = new THREE.ExtrudeGeometry(sh, {
+          depth: id,
+          bevelEnabled: true,
+          bevelThickness: r,
+          bevelSize: r,
+          bevelSegments: 2,
+          curveSegments: 3,
+        })
+        ext.translate(0, 0, -id / 2)
+        ext.computeVertexNormals()
+        g = own(ext)
+      } else {
+        g = own(new THREE.BoxGeometry(w, h, d))
+      }
       boxGeoCache.set(k, g)
     }
     return g
@@ -277,16 +312,16 @@ export function mountPaperCity({
   addPlinth(10.8, 3.4, 7.2, 3.0, 0.18) // Zone 4: Bus stop & house sidewalk strip
   addLawnPatch(9.8, 1.3, 7.2, 2.35, 0.18) // Zone 4 green verge strip behind bus stop
 
-  /* ── Continuous Figure-8 Railway (INTERFACES Bridge ABOVE at x = 0) ────── */
+  /* ── Continuous Figure-8 Railway (C2 Smooth Ramps & INTERFACES Above Rail) ── */
   const VERTS: [number, number][] = [
-    [0, 14], // 0: start of upper INTERFACES bridge
-    [0, -14], // 1: end of upper INTERFACES spine
-    [15, -14], // 2: right back loop corner
-    [15, 0], // 3: right side corner
-    [-14, 0], // 4: crossing track end (passing through (0,0) under the bridge)
-    [-14, 14], // 5: left front loop corner
+    [0, 14],
+    [0, -14],
+    [15, -14],
+    [15, 0],
+    [-14, 0],
+    [-14, 14],
   ]
-  const R_FILLET = 4.0
+  const R_FILLET = 4.2
   const NV = VERTS.length
 
   type Corner = {
@@ -341,41 +376,62 @@ export function mountPaperCity({
     corners.push({ t1, t2, org, r, a1, da })
   }
 
-  // Smooth, continuous 3D rail elevation profile:
-  // - Flat plateau at UPPER_Y = 5.80 across the entire INTERFACES viaduct (z in [-7.5, 7.5])
-  // - Flat level at LOWER_Y = 3.20 across the lower loop and intersection (z = 0, y = 3.20)
-  // - Generous, gentle cubic easing ramps at the transitions
-  const getTrackY = (segIdx: number, x: number, z: number): number => {
-    if (segIdx === 0) {
-      // Upper INTERFACES bridge spine along x = 0:
-      // Flat level at 5.80 across all 10 letters of INTERFACES (z from 14.0 down to -7.0)!
-      if (z >= -7.0) {
-        return 5.8
+  // First build the 2D closed path and cumulative 2D arc-length so the elevation
+  // ramp is parameterized by continuous arc-length (zero segment boundary steps!)
+  const xzPts: [number, number][] = []
+  const accXZ: number[] = [0]
+  let L_xz = 0
+  let sBridgeXZ = 0
+  let bridgeMark = false
+  const pushXZ = (x: number, z: number) => {
+    if (xzPts.length > 0) {
+      const pr = xzPts[xzPts.length - 1]
+      L_xz += Math.hypot(x - pr[0], z - pr[1])
+      accXZ.push(L_xz)
+    }
+    xzPts.push([x, z])
+  }
+
+  for (let i = 0; i < NV; i++) {
+    const c0 = corners[i]
+    const c1 = corners[(i + 1) % NV]
+    const nArc = Math.max(20, Math.ceil((Math.abs(c0.da) * c0.r) / 0.04))
+    for (let k = 0; k < nArc; k++) {
+      const ang = c0.a1 + c0.da * (k / nArc)
+      pushXZ(c0.org[0] + Math.cos(ang) * c0.r, c0.org[1] + Math.sin(ang) * c0.r)
+    }
+    const slen = Math.hypot(c1.t1[0] - c0.t2[0], c1.t1[1] - c0.t2[1])
+    const nSeg = Math.max(16, Math.ceil(slen / 0.04))
+    for (let k = 0; k < nSeg; k++) {
+      const fSeg = k / nSeg
+      const sx = c0.t2[0] + (c1.t1[0] - c0.t2[0]) * fSeg
+      const sz = c0.t2[1] + (c1.t1[1] - c0.t2[1]) * fSeg
+      pushXZ(sx, sz)
+      if (i === 0 && !bridgeMark && sz <= 0) {
+        sBridgeXZ = L_xz
+        bridgeMark = true
       }
-      // Way down: smooth cubic ramp down from 5.80 to 3.20 between z = -7.0 and z = -14.0
-      const w = (-7.0 - z) / (14.0 - 7.0)
-      return 5.8 - 2.6 * (w * w * (3 - 2 * w))
     }
-    if (segIdx === 1 || segIdx === 2 || segIdx === 3) {
-      // Right loop and lower crossing track through (0, 0)
-      return 3.2
+  }
+  L_xz += Math.hypot(
+    xzPts[0][0] - xzPts[xzPts.length - 1][0],
+    xzPts[0][1] - xzPts[xzPts.length - 1][1],
+  )
+
+  const LOW_Y = 3.2
+  const HIGH_Y = 5.8
+  const FLAT_HALF_SPAN = 6.2
+  const RAMP_END_SPAN = 20.5
+
+  const elevationAtArcDistance = (ds: number): number => {
+    if (ds <= FLAT_HALF_SPAN) return HIGH_Y
+    if (ds < RAMP_END_SPAN) {
+      const w = 1 - (ds - FLAT_HALF_SPAN) / (RAMP_END_SPAN - FLAT_HALF_SPAN)
+      // Quintic C2 smoothstep: zero 1st and 2nd derivative at both ends
+      const sm = w * w * w * (w * (w * 6 - 15) + 10)
+      return LOW_Y + (HIGH_Y - LOW_Y) * sm
     }
-    if (segIdx === 4) {
-      // Left loop around profile card & cottage houses:
-      // Constant level height at 3.20 across the entire area!
-      return 3.2
-    }
-    if (segIdx === 5) {
-      // Left loop top curve from [-14, 14] to [0, 14]:
-      // Flat at 3.20 until x = -7.0
-      if (x <= -7.0) {
-        return 3.2
-      }
-      // Dedicated way up: smooth ramp up from 3.20 to 5.80 between x = -7.0 and x = 0.0
-      const w = (x - -7.0) / (0.0 - -7.0)
-      return 3.2 + 2.6 * (w * w * (3 - 2 * w))
-    }
-    return 3.2
+    return LOW_Y
   }
 
   const dense: [number, number, number][] = []
@@ -383,45 +439,22 @@ export function mountPaperCity({
   let L = 0
   let prev: [number, number, number] | null = null
 
-  for (let i = 0; i < NV; i++) {
-    const c0 = corners[i]
-    const c1 = corners[(i + 1) % NV]
-    const nArc = Math.max(16, Math.ceil((Math.abs(c0.da) * c0.r) / 0.04))
-    for (let k = 0; k < nArc; k++) {
-      const ang = c0.a1 + c0.da * (k / nArc)
-      const x = c0.org[0] + Math.cos(ang) * c0.r
-      const z = c0.org[1] + Math.sin(ang) * c0.r
-      const y = getTrackY(i, x, z)
-      if (prev) {
-        L += Math.hypot(x - prev[0], y - prev[1], z - prev[2])
-        acc.push(L)
-      }
-      prev = [x, y, z]
-      dense.push(prev)
+  for (let i = 0; i <= xzPts.length; i++) {
+    const idx = i % xzPts.length
+    const pt = xzPts[idx]
+    const sXZ = i === xzPts.length ? L_xz : accXZ[idx]
+    let ds = Math.abs(sXZ - sBridgeXZ)
+    ds = Math.min(ds, L_xz - ds)
+    const y = elevationAtArcDistance(ds)
+    if (prev) {
+      L += Math.hypot(pt[0] - prev[0], y - prev[1], pt[1] - prev[2])
+      acc.push(L)
     }
-    const slen = Math.hypot(c1.t1[0] - c0.t2[0], c1.t1[1] - c0.t2[1])
-    const nSeg = Math.max(12, Math.ceil(slen / 0.04))
-    for (let k = 0; k < nSeg; k++) {
-      const fSeg = k / nSeg
-      const x = c0.t2[0] + (c1.t1[0] - c0.t2[0]) * fSeg
-      const z = c0.t2[1] + (c1.t1[1] - c0.t2[1]) * fSeg
-      const y = getTrackY(i, x, z)
-      if (prev) {
-        L += Math.hypot(x - prev[0], y - prev[1], z - prev[2])
-        acc.push(L)
-      }
-      prev = [x, y, z]
-      dense.push(prev)
-    }
-  }
-  if (prev && dense.length > 0) {
-    const p0 = dense[0]
-    L += Math.hypot(p0[0] - prev[0], p0[1] - prev[1], p0[2] - prev[2])
-    acc.push(L)
-    dense.push(p0)
+    prev = [pt[0], y, pt[1]]
+    dense.push(prev)
   }
 
-  const M = 400
+  const M = 440
   const PX: number[] = []
   const PY: number[] = []
   const PZ: number[] = []
@@ -436,6 +469,19 @@ export function mountPaperCity({
     PZ.push(dense[jIdx][2] + (dense[jIdx + 1][2] - dense[jIdx][2]) * f)
   }
   const STEP = L / M
+
+  const nearestTrackY = (qx: number, qz: number): number => {
+    let bestD = Infinity
+    let bestY = LOW_Y
+    for (let i = 0; i < M; i++) {
+      const d = Math.hypot(PX[i] - qx, PZ[i] - qz)
+      if (d < bestD) {
+        bestD = d
+        bestY = PY[i]
+      }
+    }
+    return bestY
+  }
 
   const atRail = (s: number, out: THREE.Vector3) => {
     const sn = ((s % L) + L) % L
@@ -606,7 +652,7 @@ export function mountPaperCity({
 
   // Instanced sleepers (cross-ties) along the figure-8 loop
   const nSleepers = Math.floor(L / 0.58)
-  const sleeperGeo = getBoxGeo(0.18, 0.04, 1.38)
+  const sleeperGeo = own(new THREE.BoxGeometry(0.18, 0.04, 1.38))
   const sleeperInst = own(
     new THREE.InstancedMesh(sleeperGeo, mat(PAL.creamLo), nSleepers),
   )
@@ -620,14 +666,12 @@ export function mountPaperCity({
   sleeperInst.instanceMatrix.needsUpdate = true
   world.add(sleeperInst)
 
-  /* ── INTERFACES Upper Grand Viaduct (x = 0, z in [-7.6, 7.6], height 5.75) ── */
-  // 1. Triple-Arch Classical Viaduct carrying the flat upper track & INTERFACES letters
+  /* ── INTERFACES Upper Grand Viaduct (x = 0, z in [-7.6, 7.6]) ─────────── */
   const buildInterfacesViaduct = () => {
     const g = new THREE.Group()
     g.position.set(0, 0, 0)
 
     const sh = new THREE.Shape()
-    // Shape in Z-Y plane: X in Shape = Z in world, Y in Shape = Y in world
     sh.moveTo(-7.6, 0)
     sh.lineTo(-6.1, 0)
     // Arch 1: Terrace promenade arch at z = -4.8
@@ -645,8 +689,13 @@ export function mountPaperCity({
     sh.absarc(5.4, 2.5, 1.8, Math.PI, 0, true)
     sh.lineTo(7.2, 0)
     sh.lineTo(7.6, 0)
-    sh.lineTo(7.6, 5.75)
-    sh.lineTo(-7.6, 5.75)
+    // Contour top edge to match exact underside of upper bridge deck
+    const nTop = 32
+    for (let ti = 0; ti <= nTop; ti++) {
+      const sz = 7.6 - (ti / nTop) * 15.2
+      const topY = elevationAtArcDistance(Math.abs(sz)) - 0.36
+      sh.lineTo(sz, topY)
+    }
     sh.closePath()
 
     const geo = own(
@@ -659,19 +708,20 @@ export function mountPaperCity({
     geo.translate(0, 0, -1.08)
     geo.rotateY(Math.PI / 2)
 
-    // Warm architectural limestone / sandstone structure
     const mesh = new THREE.Mesh(geo, mat(PAL.cream))
     mesh.castShadow = true
     mesh.receiveShadow = true
     addEdges(mesh, 20)
     g.add(mesh)
 
-    // Classical pier footings, butter-gold belt course & coping cornice
+    // Classical pier footings, butter-gold belt course & upper parapet beam for INTERFACES letters
     for (const pz of [-6.85, -2.7, 2.75, 7.4]) {
       addBox(2.36, 0.28, 1.3, PAL.paper, 0, 0.14, pz, g)
       addBox(2.28, 0.18, 1.2, PAL.butter, 0, 3.2, pz, g)
-      addBox(2.32, 0.16, 1.25, PAL.paper, 0, 5.65, pz, g)
     }
+    // Dedicated elevated signage shelf along the front-right edge of the upper rail deck
+    addBox(0.56, 0.28, 12.2, PAL.slate, 1.12, HIGH_Y + 0.02, 0, g)
+    addBox(0.62, 0.1, 12.3, PAL.butter, 1.12, HIGH_Y + 0.18, 0, g)
 
     world.add(g)
     registerHot(g, 'interfaces grand viaduct')
@@ -689,11 +739,11 @@ export function mountPaperCity({
     const cx = (xStart + xEnd) * 0.5
     g.position.set(cx, 0, 0)
 
-    const H = 3.04
+    const H = LOW_Y - 0.36
     const pierW = 0.85
     const span = (totalW - pierW * (nArches + 1)) / nArches
     const archR = span * 0.5
-    const springY = Math.max(0.85, H - archR - 0.38)
+    const springY = Math.max(0.8, H - archR - 0.35)
 
     const sh = new THREE.Shape()
     sh.moveTo(-totalW / 2, 0)
@@ -732,38 +782,36 @@ export function mountPaperCity({
     }
     world.add(g)
   }
-  buildMultiArchViaduct(-12.8, -2.4, 3)
-  buildMultiArchViaduct(2.4, 13.5, 3)
+  buildMultiArchViaduct(-12.2, -2.4, 3)
+  buildMultiArchViaduct(2.4, 13.0, 3)
 
-  // 3. Cylindrical Flanged Viaduct Pillars under outer curves & ramps
-  const pillarCoords: [number, number, number][] = [
-    // Right loop & ramp down
-    [0, -10.0, 4.8],
-    [0, -13.0, 3.4],
-    [3.8, -14.0, 3.2],
-    [7.8, -14.0, 3.2],
-    [11.8, -14.0, 3.2],
-    [15.0, -11.0, 3.2],
-    [15.0, -7.0, 3.2],
-    [15.0, -3.0, 3.2],
-    // Left loop (all level at 3.20)
-    [-14.0, 3.5, 3.2],
-    [-14.0, 7.5, 3.2],
-    [-14.0, 11.5, 3.2],
-    [-11.5, 14.0, 3.2],
-    [-8.0, 14.0, 3.2],
-    // Way up ramp (from x = -7.0 to 0.0)
-    [-4.5, 14.0, 4.4],
-    [-1.5, 14.0, 5.5],
+  // 3. Cylindrical Flanged Viaduct Pillars (auto-fitted to exact 3D track height!)
+  const pillarXZ: [number, number][] = [
+    [0, -9.8],
+    [0.8, -12.8],
+    [4.2, -14.0],
+    [8.0, -14.0],
+    [11.8, -13.6],
+    [14.8, -10.5],
+    [15.0, -6.8],
+    [14.6, -3.2],
+    [-13.8, 3.4],
+    [-14.0, 7.2],
+    [-13.6, 11.0],
+    [-10.8, 13.8],
+    [-7.2, 14.0],
+    [-3.4, 13.6],
+    [-0.4, 10.6],
   ]
-  const baseGeo = own(new THREE.CylinderGeometry(0.66, 0.72, 0.24, 14))
-  const capGeo = own(new THREE.CylinderGeometry(0.68, 0.56, 0.32, 14))
-  for (const [px, pz, deckY] of pillarCoords) {
+  const baseGeo = own(new THREE.CylinderGeometry(0.66, 0.74, 0.24, 16))
+  const capGeo = own(new THREE.CylinderGeometry(0.68, 0.56, 0.32, 16))
+  for (const [px, pz] of pillarXZ) {
+    const deckY = nearestTrackY(px, pz)
     const h = Math.max(1.2, deckY - 0.36)
     const pg = new THREE.Group()
     pg.position.set(px, 0, pz)
     const shaft = new THREE.Mesh(
-      own(new THREE.CylinderGeometry(0.46, 0.52, h, 14)),
+      own(new THREE.CylinderGeometry(0.46, 0.52, h, 16)),
       mat(PAL.slate),
     )
     shaft.position.y = h * 0.5
@@ -777,7 +825,7 @@ export function mountPaperCity({
     world.add(pg)
   }
 
-  /* ── INTERFACES True 3D Extruded Block Letters on the Upper Bridge ─────── */
+  /* ── INTERFACES True 3D Extruded Block Letters ABOVE the Rail Deck ─────── */
   const poly = (pts: [number, number][]) => {
     const sh = new THREE.Shape()
     pts.forEach(([x, y], idx) => {
@@ -950,29 +998,32 @@ export function mountPaperCity({
     }
   }
 
-  // Position 10 block letters across the flat upper bridge fascia
-  // Flat height at y = 4.18 (letter top at y = 5.83, flush with top deck balustrade)
-  // Front face at x = 1.10 (train runs on track at x = 0 with width 1.4, so zero clipping!)
+  // Stand all 10 letters ON TOP of the upper rail deck parapet (y = HIGH_Y + 0.22 = 6.02, ABOVE the rail!)
+  // Positioned at x = 1.04 so the train on x = 0 (width 1.36) glides smoothly behind the letters with zero clipping
   const word = 'INTERFACES'
-  const letterFaceMat = mat(PAL.paper, PAL.paper, 0.15)
+  const letterFaceMat = mat(PAL.paper, PAL.paper, 0.18)
   const letterSideMat = mat(PAL.ink)
   for (let i = 0; i < word.length; i++) {
-    const lz = (4.5 - i) * 1.15
-    const ly = 4.18
+    const lz = (4.5 - i) * 1.18
+    const ly = HIGH_Y + 0.22
     const lg = new THREE.Group()
-    lg.position.set(1.1, ly, lz)
+    lg.position.set(1.04, ly, lz)
     lg.rotation.y = Math.PI / 2
 
     const lGeo = own(
       new THREE.ExtrudeGeometry(makeLetterShape(word[i]), {
-        depth: 0.32,
-        bevelEnabled: false,
+        depth: 0.44,
+        bevelEnabled: true,
+        bevelThickness: 0.03,
+        bevelSize: 0.03,
+        bevelSegments: 2,
       }),
     )
+    lGeo.translate(0, 0, -0.22)
     const lMesh = new THREE.Mesh(lGeo, [letterFaceMat, letterSideMat])
     lMesh.castShadow = true
     lMesh.receiveShadow = true
-    addEdges(lMesh, 15)
+    addEdges(lMesh, 24)
     lg.add(lMesh)
     world.add(lg)
   }
@@ -1169,7 +1220,10 @@ export function mountPaperCity({
     const rGeo = own(
       new THREE.ExtrudeGeometry(rShape, {
         depth: rw,
-        bevelEnabled: false,
+        bevelEnabled: true,
+        bevelThickness: 0.04,
+        bevelSize: 0.04,
+        bevelSegments: 2,
       }),
     )
     rGeo.translate(0, 0, -rw / 2)
@@ -1279,14 +1333,29 @@ export function mountPaperCity({
       addBox(w * 0.76, h2, d * 0.76, c2, 0, 0.36 + h1 + h2 / 2, 0, g)
       addBox(w * 0.82, 0.14, d * 0.82, PAL.paper, 0, 0.36 + h1 + h2, 0, g)
       addBox(w * 0.5, h3, d * 0.5, c2, 0, 0.36 + h1 + h2 + h3 / 2, 0, g)
-      const cone = new THREE.Mesh(
-        own(new THREE.ConeGeometry(w * 0.24, 1.9, 4)),
+      const dome = new THREE.Mesh(
+        own(
+          new THREE.SphereGeometry(
+            w * 0.23,
+            16,
+            12,
+            0,
+            Math.PI * 2,
+            0,
+            Math.PI * 0.55,
+          ),
+        ),
         mat(PAL.butter),
       )
-      cone.position.y = 0.36 + h + 0.95
-      cone.rotation.y = Math.PI / 4
+      dome.position.y = 0.36 + h
+      dome.castShadow = true
+      g.add(dome)
+      const cone = new THREE.Mesh(
+        own(new THREE.ConeGeometry(w * 0.14, 1.85, 16)),
+        mat(PAL.butter),
+      )
+      cone.position.y = 0.36 + h + 1.05
       cone.castShadow = true
-      addEdges(cone)
       g.add(cone)
       addBox(0.09, 1.5, 0.09, PAL.ink, 0, 0.36 + h + 2.4, 0, g)
     } else if (kind === 'bands-terracotta' || kind === 'bands-charcoal') {
@@ -1368,7 +1437,7 @@ export function mountPaperCity({
   }
 
   /* ── Decorative Trees, Bushes, Flower Beds, Benches & Streetlamps ──────── */
-  const foliageGeo = own(new THREE.IcosahedronGeometry(1, 1))
+  const foliageGeo = own(new THREE.SphereGeometry(1, 16, 12))
   const buildTree = (
     x: number,
     z: number,
@@ -1423,70 +1492,92 @@ export function mountPaperCity({
     world.add(g)
   }
 
+  const lampGlobeGeo = own(new THREE.SphereGeometry(0.17, 14, 10))
   const buildStreetLamp = (x: number, z: number, baseY = 0.22) => {
     const g = new THREE.Group()
     g.position.set(x, baseY, z)
     addBox(0.18, 0.12, 0.18, PAL.ink, 0, 0.06, 0, g)
     addBox(0.07, 1.35, 0.07, PAL.ink, 0, 0.72, 0, g, { edges: false })
-    addBox(0.26, 0.22, 0.26, PAL.butter, 0, 1.46, 0, g, {
-      emissive: PAL.butter,
-      emissiveIntensity: 0.55,
-    })
+    const globe = new THREE.Mesh(
+      lampGlobeGeo,
+      mat(PAL.butter, PAL.butter, 0.65),
+    )
+    globe.position.y = 1.48
+    g.add(globe)
     world.add(g)
   }
 
-  /* ── ZONE 1: Inside Left Loop (Design Engineer Profile Card, Houses & Gardens) */
+  /* ── ZONE 1: Inside Left Loop (Large Unobstructed Profile Card, Houses & Gardens) */
   const makeCardTexture = () => {
     const c = document.createElement('canvas')
-    c.width = 1024
-    c.height = 768
+    c.width = 1280
+    c.height = 920
     const ctx = c.getContext('2d')!
-    ctx.fillStyle = '#fffcf6'
+    ctx.fillStyle = '#fffaf1'
     ctx.fillRect(0, 0, c.width, c.height)
 
-    // Inner paper border
-    ctx.strokeStyle = '#e8decb'
-    ctx.lineWidth = 4
-    ctx.strokeRect(32, 32, c.width - 64, c.height - 64)
+    // Tactile Sunnyside sticker card border
+    ctx.strokeStyle = '#191a2e'
+    ctx.lineWidth = 10
+    ctx.strokeRect(20, 20, c.width - 40, c.height - 40)
 
-    // Header eyebrow tag with orange beacon
-    ctx.fillStyle = '#df4e22'
+    // Inner subtle paper rule
+    ctx.strokeStyle = '#e9dfcf'
+    ctx.lineWidth = 4
+    ctx.strokeRect(38, 38, c.width - 76, c.height - 76)
+
+    // Top Sunnyside butter header tape strip
+    ctx.fillStyle = '#ffd23f'
     ctx.beginPath()
-    ctx.arc(68, 82, 9, 0, Math.PI * 2)
+    ctx.roundRect(68, 62, 600, 72, 36)
+    ctx.fill()
+    ctx.strokeStyle = '#191a2e'
+    ctx.lineWidth = 5
+    ctx.stroke()
+
+    // Tangerine pulse dot inside header pill
+    ctx.fillStyle = '#ff6a2b'
+    ctx.beginPath()
+    ctx.arc(112, 98, 14, 0, Math.PI * 2)
     ctx.fill()
 
-    ctx.fillStyle = '#141626'
-    ctx.font = '700 28px ui-monospace, monospace'
+    ctx.fillStyle = '#191a2e'
+    ctx.font = '800 32px ui-monospace, monospace'
     ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
-    ctx.fillText('DESIGN ENGINEER · SUNNYSIDE', 94, 82)
+    ctx.fillText('DESIGN ENGINEER · SIDE A', 146, 99)
 
-    // Divider rule
-    ctx.fillStyle = 'rgba(20, 22, 38, 0.14)'
-    ctx.fillRect(60, 118, c.width - 120, 3)
+    // Giant, ultra-readable Name Headline
+    ctx.font = '900 120px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#191a2e'
+    ctx.fillText('Aditya Himawan', 68, 246)
 
-    // Name headline
-    ctx.font = '900 82px system-ui, -apple-system, sans-serif'
-    ctx.fillStyle = '#141626'
-    ctx.fillText('Aditya Himawan', 60, 196)
+    // Divider line
+    ctx.fillStyle = '#e9dfcf'
+    ctx.fillRect(68, 316, c.width - 136, 6)
 
-    // Role subtitle badge
-    ctx.font = '700 36px system-ui, -apple-system, sans-serif'
-    ctx.fillStyle = '#df4e22'
-    ctx.fillText('Design Engineer', 60, 260)
+    // Key important notes only — big, bold, high-contrast
+    const drawNote = (y: number, dotColor: string, text: string) => {
+      ctx.fillStyle = dotColor
+      ctx.beginPath()
+      ctx.roundRect(68, y - 22, 30, 30, 8)
+      ctx.fill()
+      ctx.strokeStyle = '#191a2e'
+      ctx.lineWidth = 4
+      ctx.stroke()
 
-    // Simplified profile copy
-    ctx.font = '600 30px system-ui, -apple-system, sans-serif'
-    ctx.fillStyle = '#3a3f55'
-    ctx.fillText(
-      '• Interfaces with a pulse — craft, code & tactile 3D',
-      60,
-      336,
-    )
-    ctx.fillText('• Systems architecture, micro-interactions & WebGL', 60, 396)
-    ctx.fillText('• Bridging Figma precision to production TSX', 60, 456)
+      ctx.fillStyle = '#191a2e'
+      ctx.font = '800 56px system-ui, -apple-system, sans-serif'
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(text, 122, y - 4)
+    }
 
-    // Mini pill button badges drawn on card
+    drawNote(404, '#ff6a2b', 'Design Systems & UI Craft')
+    drawNote(498, '#2b9e7c', 'Interactive 3D & Motion')
+    drawNote(592, '#ffd23f', 'Figma to Production Code')
+
+    // Large tactile sticker pill badges with hard ink shadow
     const drawBadge = (
       x: number,
       y: number,
@@ -1496,36 +1587,45 @@ export function mountPaperCity({
       text: string,
       fg: string,
     ) => {
+      ctx.fillStyle = '#191a2e'
+      ctx.beginPath()
+      ctx.roundRect(x + 8, y + 8, w, h, h / 2)
+      ctx.fill()
+
       ctx.fillStyle = bg
       ctx.beginPath()
       ctx.roundRect(x, y, w, h, h / 2)
       ctx.fill()
-      ctx.strokeStyle = '#141626'
-      ctx.lineWidth = 3
+      ctx.strokeStyle = '#191a2e'
+      ctx.lineWidth = 6
       ctx.stroke()
+
       ctx.fillStyle = fg
-      ctx.font = '700 24px ui-monospace, monospace'
+      ctx.font = '800 38px ui-monospace, monospace'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(text, x + w / 2, y + h / 2 + 1)
+      ctx.fillText(text, x + w / 2, y + h / 2 + 2)
     }
-    drawBadge(60, 520, 230, 62, '#df4e22', 'CODE + UI', '#ffffff')
-    drawBadge(310, 520, 240, 62, '#ffd15c', 'SIDE A STUDIO', '#141626')
+    drawBadge(68, 682, 390, 96, '#ff6a2b', 'CRAFT + CODE', '#fffaf1')
+    drawBadge(492, 682, 360, 96, '#b7e4c7', 'SUNNYSIDE', '#191a2e')
 
     const tex = own(new THREE.CanvasTexture(c))
     tex.colorSpace = THREE.SRGBColorSpace
-    tex.anisotropy = 4
+    tex.anisotropy = 8
     return tex
   }
 
   const cardGroup = new THREE.Group()
-  cardGroup.position.set(-12.2, 0.22, 8.0)
+  cardGroup.position.set(-11.2, 0.22, 7.8)
   cardGroup.rotation.y = Math.PI / 2
   const cardFaceMat = own(
     new THREE.MeshBasicMaterial({ map: makeCardTexture() }),
   )
   const cardSideMat = mat(PAL.creamLo)
-  const cardBody = new THREE.Mesh(getBoxGeo(7.8, 5.8, 0.48), [
+  // Elevated on a stepped architectural pedestal so neither passing trains nor houses ever block any text
+  addBox(8.2, 1.15, 0.92, PAL.slate, 0, 0.58, -0.04, cardGroup)
+  addBox(8.5, 0.22, 1.04, PAL.butter, 0, 1.18, -0.04, cardGroup)
+  const cardBody = new THREE.Mesh(own(new THREE.BoxGeometry(9.8, 7.0, 0.52)), [
     cardSideMat,
     cardSideMat,
     mat(PAL.paper),
@@ -1533,43 +1633,41 @@ export function mountPaperCity({
     cardFaceMat,
     cardSideMat,
   ])
-  cardBody.position.y = 2.9
+  cardBody.position.y = 4.65
   cardBody.castShadow = true
   cardBody.receiveShadow = true
-  addEdges(cardBody)
+  addEdges(cardBody, 20)
   cardGroup.add(cardBody)
-  // Tactile 3D pill button accents on the plinth
-  addBox(2.2, 0.58, 0.18, PAL.tangerine, -1.8, 1.45, 0.28, cardGroup)
-  addBox(2.2, 0.58, 0.18, PAL.butter, 0.85, 1.45, 0.28, cardGroup)
   world.add(cardGroup)
   registerHot(cardGroup, 'Aditya Himawan · Design Engineer', 'card')
 
+  // Positioned cleanly in front-right of the card so the entire card face is 100% readable
   const leftHouses: [number, number, string, string][] = [
-    [-9.2, 11.4, PAL.paper, PAL.mustard],
-    [-9.2, 8.2, PAL.cream, PAL.tangerine],
-    [-6.5, 11.4, PAL.paper, PAL.tangerine],
-    [-6.5, 8.2, PAL.paper, PAL.mustard],
-    [-6.5, 4.8, PAL.cream, PAL.tangerine],
+    [-7.8, 11.5, PAL.paper, PAL.mustard],
+    [-7.8, 8.2, PAL.cream, PAL.tangerine],
+    [-5.5, 11.4, PAL.paper, PAL.tangerine],
+    [-5.5, 8.2, PAL.paper, PAL.mustard],
+    [-6.2, 4.8, PAL.cream, PAL.tangerine],
   ]
   for (const [hx, hz, wall, roof] of leftHouses) {
-    buildGabledHouse(hx, hz, 0, wall, roof, 0.94)
+    buildGabledHouse(hx, hz, 0, wall, roof, 0.92)
   }
-  for (let fz = 6.8; fz <= 12.4; fz += 0.45) {
-    addBox(0.1, 0.42, 0.18, PAL.paper, -10.55, 0.43, fz, world)
+  for (let fz = 6.2; fz <= 12.4; fz += 0.45) {
+    addBox(0.1, 0.42, 0.18, PAL.paper, -9.6, 0.43, fz, world)
   }
-  for (let fx = -10.2; fx <= -5.2; fx += 0.45) {
+  for (let fx = -9.4; fx <= -4.6; fx += 0.45) {
     addBox(0.18, 0.42, 0.1, PAL.paper, fx, 0.43, 12.85, world)
   }
-  buildTree(-9.0, 4.8, 0.62, 'spring')
-  buildTree(-10.4, 5.8, 0.52, 'gold')
-  buildBush(-7.8, 9.8, 0.34, PAL.grassHi)
-  buildBush(-7.8, 6.4, 0.32, PAL.mustard)
-  buildFlowerBed(-5.2, 9.8, Math.PI / 2)
-  buildStreetLamp(-5.2, 12.2)
+  buildTree(-9.0, 4.6, 0.62, 'spring')
+  buildTree(-9.6, 12.2, 0.52, 'gold')
+  buildBush(-6.8, 9.8, 0.36, PAL.grassHi)
+  buildBush(-6.8, 6.4, 0.34, PAL.pink)
+  buildFlowerBed(-4.5, 9.8, Math.PI / 2)
+  buildStreetLamp(-4.6, 12.2)
 
-  // Left loop skyscrapers: high-contrast terracotta/ivory & teal spire (no blue!)
-  buildSkyscraper(-3.6, 7.6, 2.35, 2.35, 6.2, 'bands-terracotta')
-  buildSkyscraper(-3.6, 3.8, 2.55, 2.55, 8.4, 'spire-teal')
+  // Left loop skyscrapers: high-contrast terracotta/ivory & teal spire
+  buildSkyscraper(-3.3, 7.6, 2.35, 2.35, 6.2, 'bands-terracotta')
+  buildSkyscraper(-3.3, 3.8, 2.55, 2.55, 8.4, 'spire-teal')
 
   /* ── ZONE 2: Upper-Center Skyline & Park Terrace ───────────────────────── */
   buildSkyscraper(-5.0, -4.6, 2.65, 2.65, 7.8, 'bands-charcoal')
@@ -1775,7 +1873,12 @@ export function mountPaperCity({
     mat(PAL.skyGlass),
   )
   water.position.y = 0.46
-  parkGroup.add(basin, water)
+  const sunCenter = new THREE.Mesh(
+    own(new THREE.SphereGeometry(0.24, 16, 12)),
+    mat(PAL.butter, PAL.butter, 0.35),
+  )
+  sunCenter.position.y = 0.56
+  parkGroup.add(basin, water, sunCenter)
   buildTree(-2.4, -1.25, 0.65, 'round', parkGroup, 0.24)
   buildTree(2.4, 1.15, 0.58, 'tall', parkGroup, 0.24)
   buildTree(-2.2, 1.25, 0.5, 'gold', parkGroup, 0.24)

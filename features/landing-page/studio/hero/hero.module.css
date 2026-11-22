@@ -70,93 +70,19 @@
   border: 0;
 }
 
-/* ── Cutting-Mat Markings Overlay (Responsive & High-Contrast for Mac M1) ── */
+/* ── Cutting-Mat Markings Overlay ───────────────────────────────────────── */
 
 .cuttingMatOverlay {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
 }
 
 .cuttingMatSvg {
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.matFrame {
-  position: absolute;
-  inset: clamp(14px, 1.8vw, 24px);
-  border: 1.5px solid rgb(255 250 241 / 0.45);
-  border-radius: 16px;
-  pointer-events: none;
-}
-
-.matRulerRow {
-  position: absolute;
-  left: 36px;
-  right: 36px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: #fffaf1;
-  opacity: 0.68;
-  letter-spacing: 0.05em;
-  user-select: none;
-  pointer-events: none;
-}
-
-@media (max-width: 768px) {
-  .matRulerRow span:nth-child(even) {
-    display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .matRulerRow span:not(:nth-child(4n + 1)) {
-    display: none;
-  }
-}
-
-.matRulerTop {
-  top: 6px;
-}
-
-.matRulerBottom {
-  bottom: 6px;
-}
-
-.matCornerCross {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  color: rgb(255 250 241 / 0.55);
-  pointer-events: none;
-}
-
-.matCornerTL {
-  top: 10px;
-  left: 10px;
-}
-
-.matCornerTR {
-  top: 10px;
-  right: 10px;
-}
-
-.matCornerBL {
-  bottom: 10px;
-  left: 10px;
-}
-
-.matCornerBR {
-  bottom: 10px;
-  right: 10px;
 }
 
 .heroContainer {
