@@ -279,14 +279,14 @@ export function mountPaperCity({
 
   /* ── Continuous Figure-8 Railway (INTERFACES Bridge ABOVE at x = 0) ────── */
   const VERTS: [number, number][] = [
-    [0, 15],
-    [0, -15],
-    [16, -15],
-    [16, 0],
-    [-15, 0],
-    [-15, 15],
+    [0, 14], // 0: start of upper INTERFACES bridge
+    [0, -14], // 1: end of upper INTERFACES spine
+    [15, -14], // 2: right back loop corner
+    [15, 0], // 3: right side corner
+    [-14, 0], // 4: crossing track end (passing through (0,0) under the bridge)
+    [-14, 14], // 5: left front loop corner
   ]
-  const R_FILLET = 4.2
+  const R_FILLET = 4.0
   const NV = VERTS.length
 
   type Corner = {
@@ -341,19 +341,47 @@ export function mountPaperCity({
     corners.push({ t1, t2, org, r, a1, da })
   }
 
-  const xzPts: [number, number][] = []
-  const accXZ: number[] = [0]
-  let L_xz = 0
-  let sBridgeXZ = 0
-  let bridgeMark = false
-  const pushXZ = (x: number, z: number) => {
-    if (xzPts.length > 0) {
-      const pr = xzPts[xzPts.length - 1]
-      L_xz += Math.hypot(x - pr[0], z - pr[1])
-      accXZ.push(L_xz)
+  // Smooth, continuous 3D rail elevation profile:
+  // - Flat plateau at UPPER_Y = 5.80 across the entire INTERFACES viaduct (z in [-7.5, 7.5])
+  // - Flat level at LOWER_Y = 3.20 across the lower loop and intersection (z = 0, y = 3.20)
+  // - Generous, gentle cubic easing ramps at the transitions
+  const getTrackY = (segIdx: number, x: number, z: number): number => {
+    if (segIdx === 0) {
+      // Upper INTERFACES bridge spine along x = 0:
+      // Flat level at 5.80 across all 10 letters of INTERFACES (z from 14.0 down to -7.0)!
+      if (z >= -7.0) {
+        return 5.8
+      }
+      // Way down: smooth cubic ramp down from 5.80 to 3.20 between z = -7.0 and z = -14.0
+      const w = (-7.0 - z) / (14.0 - 7.0)
+      return 5.8 - 2.6 * (w * w * (3 - 2 * w))
     }
-    xzPts.push([x, z])
+    if (segIdx === 1 || segIdx === 2 || segIdx === 3) {
+      // Right loop and lower crossing track through (0, 0)
+      return 3.2
+    }
+    if (segIdx === 4) {
+      // Left loop around profile card & cottage houses:
+      // Constant level height at 3.20 across the entire area!
+      return 3.2
+    }
+    if (segIdx === 5) {
+      // Left loop top curve from [-14, 14] to [0, 14]:
+      // Flat at 3.20 until x = -7.0
+      if (x <= -7.0) {
+        return 3.2
+      }
+      // Dedicated way up: smooth ramp up from 3.20 to 5.80 between x = -7.0 and x = 0.0
+      const w = (x - -7.0) / (0.0 - -7.0)
+      return 3.2 + 2.6 * (w * w * (3 - 2 * w))
+    }
+    return 3.2
   }
+
+  const dense: [number, number, number][] = []
+  const acc: number[] = [0]
+  let L = 0
+  let prev: [number, number, number] | null = null
 
   for (let i = 0; i < NV; i++) {
     const c0 = corners[i]
@@ -361,57 +389,39 @@ export function mountPaperCity({
     const nArc = Math.max(16, Math.ceil((Math.abs(c0.da) * c0.r) / 0.04))
     for (let k = 0; k < nArc; k++) {
       const ang = c0.a1 + c0.da * (k / nArc)
-      pushXZ(c0.org[0] + Math.cos(ang) * c0.r, c0.org[1] + Math.sin(ang) * c0.r)
+      const x = c0.org[0] + Math.cos(ang) * c0.r
+      const z = c0.org[1] + Math.sin(ang) * c0.r
+      const y = getTrackY(i, x, z)
+      if (prev) {
+        L += Math.hypot(x - prev[0], y - prev[1], z - prev[2])
+        acc.push(L)
+      }
+      prev = [x, y, z]
+      dense.push(prev)
     }
     const slen = Math.hypot(c1.t1[0] - c0.t2[0], c1.t1[1] - c0.t2[1])
     const nSeg = Math.max(12, Math.ceil(slen / 0.04))
     for (let k = 0; k < nSeg; k++) {
       const fSeg = k / nSeg
-      const sx = c0.t2[0] + (c1.t1[0] - c0.t2[0]) * fSeg
-      const sz = c0.t2[1] + (c1.t1[1] - c0.t2[1]) * fSeg
-      pushXZ(sx, sz)
-      /* Segment 0->1 (x = 0 spine, [0,15]->[0,-15]) is the upper INTERFACES bridge! */
-      if (i === 0 && !bridgeMark && sz <= 0) {
-        sBridgeXZ = L_xz
-        bridgeMark = true
+      const x = c0.t2[0] + (c1.t1[0] - c0.t2[0]) * fSeg
+      const z = c0.t2[1] + (c1.t1[1] - c0.t2[1]) * fSeg
+      const y = getTrackY(i, x, z)
+      if (prev) {
+        L += Math.hypot(x - prev[0], y - prev[1], z - prev[2])
+        acc.push(L)
       }
+      prev = [x, y, z]
+      dense.push(prev)
     }
   }
-  L_xz += Math.hypot(
-    xzPts[0][0] - xzPts[xzPts.length - 1][0],
-    xzPts[0][1] - xzPts[xzPts.length - 1][1],
-  )
-
-  const LOW_Y = 3.4
-  const HIGH_Y = 6.25
-  const dense: [number, number, number][] = []
-  const acc: number[] = [0]
-  let L = 0
-  let prev: [number, number, number] | null = null
-  for (let i = 0; i <= xzPts.length; i++) {
-    const idx = i % xzPts.length
-    const pt = xzPts[idx]
-    const sXZ = i === xzPts.length ? L_xz : accXZ[idx]
-    let ds = Math.abs(sXZ - sBridgeXZ)
-    ds = Math.min(ds, L_xz - ds)
-    let y = LOW_Y
-    // Smooth elevated bridge plateau across the x = 0 INTERFACES spine
-    if (ds <= 3.6) {
-      y = HIGH_Y
-    } else if (ds < 11.2) {
-      const w = 1 - (ds - 3.6) / (11.2 - 3.6)
-      const sm = w * w * (3 - 2 * w)
-      y = LOW_Y + (HIGH_Y - LOW_Y) * sm
-    }
-    if (prev) {
-      L += Math.hypot(pt[0] - prev[0], y - prev[1], pt[1] - prev[2])
-      acc.push(L)
-    }
-    prev = [pt[0], y, pt[1]]
-    dense.push(prev)
+  if (prev && dense.length > 0) {
+    const p0 = dense[0]
+    L += Math.hypot(p0[0] - prev[0], p0[1] - prev[1], p0[2] - prev[2])
+    acc.push(L)
+    dense.push(p0)
   }
 
-  const M = 380
+  const M = 400
   const PX: number[] = []
   const PY: number[] = []
   const PZ: number[] = []
@@ -457,18 +467,6 @@ export function mountPaperCity({
     g.rotation.order = 'YXZ'
     g.rotation.y = Math.atan2(-dz, dx)
     g.rotation.z = Math.atan2(dy, Math.hypot(dx, dz))
-  }
-
-  // Helper to get exact upper bridge deck height at any z along x = 0
-  const bridgeHeightAtZ = (z: number) => {
-    const ds = Math.abs(z)
-    if (ds <= 3.6) return HIGH_Y
-    if (ds < 11.2) {
-      const w = 1 - (ds - 3.6) / (11.2 - 3.6)
-      const sm = w * w * (3 - 2 * w)
-      return LOW_Y + (HIGH_Y - LOW_Y) * sm
-    }
-    return LOW_Y
   }
 
   /* ── Sweep Continuous 3D Track Profiles (No External Stubs) ────────────── */
@@ -622,63 +620,63 @@ export function mountPaperCity({
   sleeperInst.instanceMatrix.needsUpdate = true
   world.add(sleeperInst)
 
-  /* ── Extruded Semicircular Viaduct Arches (Warm Sandstone & Slate) ────── */
-  // 1. Central Grand Arch Viaduct under the upper INTERFACES bridge (x = 0, z in [1.6, 9.2])
-  const buildCentralArchViaduct = () => {
+  /* ── INTERFACES Upper Grand Viaduct (x = 0, z in [-7.6, 7.6], height 5.75) ── */
+  // 1. Triple-Arch Classical Viaduct carrying the flat upper track & INTERFACES letters
+  const buildInterfacesViaduct = () => {
     const g = new THREE.Group()
-    g.position.set(0, 0, 5.4)
-    const W = 7.2
-    const archR = 1.85
-    const archH = 2.05
+    g.position.set(0, 0, 0)
+
     const sh = new THREE.Shape()
-    sh.moveTo(-W / 2, 0)
-    sh.lineTo(-archR, 0)
-    sh.lineTo(-archR, archH)
-    sh.absarc(0, archH, archR, Math.PI, 0, true)
-    sh.lineTo(archR, 0)
-    sh.lineTo(W / 2, 0)
-    // Follow the exact underside of the upper bridge ramp so the viaduct never pokes through the track
-    const nTop = 20
-    for (let ti = 0; ti <= nTop; ti++) {
-      const sz = W / 2 - (ti / nTop) * W
-      const worldZ = 5.4 - sz
-      sh.lineTo(sz, bridgeHeightAtZ(worldZ) - 0.35)
-    }
+    // Shape in Z-Y plane: X in Shape = Z in world, Y in Shape = Y in world
+    sh.moveTo(-7.6, 0)
+    sh.lineTo(-6.1, 0)
+    // Arch 1: Terrace promenade arch at z = -4.8
+    sh.lineTo(-6.1, 2.9)
+    sh.absarc(-4.8, 2.9, 1.3, Math.PI, 0, true)
+    sh.lineTo(-3.5, 0)
+    sh.lineTo(-1.9, 0)
+    // Arch 2: Railway crossing portal at z = 0.0 (lower track passes at y = 3.20)
+    sh.lineTo(-1.9, 3.2)
+    sh.absarc(0.0, 3.2, 1.9, Math.PI, 0, true)
+    sh.lineTo(1.9, 0)
+    sh.lineTo(3.6, 0)
+    // Arch 3: Street portal arch at z = 5.4 (street & bus pass at y = 0.02)
+    sh.lineTo(3.6, 2.5)
+    sh.absarc(5.4, 2.5, 1.8, Math.PI, 0, true)
+    sh.lineTo(7.2, 0)
+    sh.lineTo(7.6, 0)
+    sh.lineTo(7.6, 5.75)
+    sh.lineTo(-7.6, 5.75)
     sh.closePath()
 
     const geo = own(
       new THREE.ExtrudeGeometry(sh, {
-        depth: 2.02,
+        depth: 2.16,
         bevelEnabled: false,
         curveSegments: 24,
       }),
     )
-    geo.translate(0, 0, -1.01)
+    geo.translate(0, 0, -1.08)
     geo.rotateY(Math.PI / 2)
 
-    // Warm teal-patina / sandstone architectural bridge that pops against the blue cutting mat
-    const mesh = new THREE.Mesh(geo, mat(PAL.teal))
+    // Warm architectural limestone / sandstone structure
+    const mesh = new THREE.Mesh(geo, mat(PAL.cream))
     mesh.castShadow = true
     mesh.receiveShadow = true
     addEdges(mesh, 20)
     g.add(mesh)
 
-    // Cream stone pier footings, tangerine belt course & louvered vent grilles
-    for (const pz of [-2.75, 2.75]) {
-      addBox(2.24, 0.28, 2.0, PAL.paper, 0, 0.14, pz, g)
-      addBox(2.14, 0.2, 1.9, PAL.butter, 0, 3.35, pz, g)
-      addBox(0.1, 0.65, 0.65, PAL.paper, 1.03, 2.85, pz, g)
-      for (let sl = -0.16; sl <= 0.16; sl += 0.16) {
-        addBox(0.13, 0.05, 0.48, PAL.ink, 1.04, 2.85 + sl, pz, g, {
-          edges: false,
-          shadow: false,
-        })
-      }
+    // Classical pier footings, butter-gold belt course & coping cornice
+    for (const pz of [-6.85, -2.7, 2.75, 7.4]) {
+      addBox(2.36, 0.28, 1.3, PAL.paper, 0, 0.14, pz, g)
+      addBox(2.28, 0.18, 1.2, PAL.butter, 0, 3.2, pz, g)
+      addBox(2.32, 0.16, 1.25, PAL.paper, 0, 5.65, pz, g)
     }
+
     world.add(g)
-    registerHot(g, 'interfaces grand arch viaduct')
+    registerHot(g, 'interfaces grand viaduct')
   }
-  buildCentralArchViaduct()
+  buildInterfacesViaduct()
 
   // 2. Dark Multi-Arch Viaduct Walls under the z = 0 lower train spine
   const buildMultiArchViaduct = (
@@ -734,20 +732,29 @@ export function mountPaperCity({
     }
     world.add(g)
   }
-  buildMultiArchViaduct(-11.8, -2.4, 3)
-  buildMultiArchViaduct(2.4, 13.2, 3)
+  buildMultiArchViaduct(-12.8, -2.4, 3)
+  buildMultiArchViaduct(2.4, 13.5, 3)
 
-  // 3. Cylindrical Flanged Viaduct Pillars under outer curves (auto-sized to track height)
+  // 3. Cylindrical Flanged Viaduct Pillars under outer curves & ramps
   const pillarCoords: [number, number, number][] = [
-    [-14.7, 4.2, LOW_Y],
-    [-14.5, 10.8, LOW_Y],
-    [-10.8, 14.7, LOW_Y],
-    [-4.2, 14.8, LOW_Y],
-    [0, -4.5, bridgeHeightAtZ(-4.5)],
-    [0, -9.8, bridgeHeightAtZ(-9.8)],
-    [11.5, -14.8, LOW_Y],
-    [15.7, -10.8, LOW_Y],
-    [15.7, -4.2, LOW_Y],
+    // Right loop & ramp down
+    [0, -10.0, 4.8],
+    [0, -13.0, 3.4],
+    [3.8, -14.0, 3.2],
+    [7.8, -14.0, 3.2],
+    [11.8, -14.0, 3.2],
+    [15.0, -11.0, 3.2],
+    [15.0, -7.0, 3.2],
+    [15.0, -3.0, 3.2],
+    // Left loop (all level at 3.20)
+    [-14.0, 3.5, 3.2],
+    [-14.0, 7.5, 3.2],
+    [-14.0, 11.5, 3.2],
+    [-11.5, 14.0, 3.2],
+    [-8.0, 14.0, 3.2],
+    // Way up ramp (from x = -7.0 to 0.0)
+    [-4.5, 14.0, 4.4],
+    [-1.5, 14.0, 5.5],
   ]
   const baseGeo = own(new THREE.CylinderGeometry(0.66, 0.72, 0.24, 14))
   const capGeo = own(new THREE.CylinderGeometry(0.68, 0.56, 0.32, 14))
@@ -943,23 +950,25 @@ export function mountPaperCity({
     }
   }
 
+  // Position 10 block letters across the flat upper bridge fascia
+  // Flat height at y = 4.18 (letter top at y = 5.83, flush with top deck balustrade)
+  // Front face at x = 1.10 (train runs on track at x = 0 with width 1.4, so zero clipping!)
   const word = 'INTERFACES'
-  const letterFaceMat = mat(PAL.paper, PAL.paper, 0.18)
+  const letterFaceMat = mat(PAL.paper, PAL.paper, 0.15)
   const letterSideMat = mat(PAL.ink)
   for (let i = 0; i < word.length; i++) {
-    const lz = 5.65 - i * 1.26
-    const ly = bridgeHeightAtZ(lz) + 0.1
+    const lz = (4.5 - i) * 1.15
+    const ly = 4.18
     const lg = new THREE.Group()
-    lg.position.set(1.02, ly, lz)
+    lg.position.set(1.1, ly, lz)
     lg.rotation.y = Math.PI / 2
 
     const lGeo = own(
       new THREE.ExtrudeGeometry(makeLetterShape(word[i]), {
-        depth: 0.62,
+        depth: 0.32,
         bevelEnabled: false,
       }),
     )
-    lGeo.translate(0, 0, -0.31)
     const lMesh = new THREE.Mesh(lGeo, [letterFaceMat, letterSideMat])
     lMesh.castShadow = true
     lMesh.receiveShadow = true
@@ -1426,28 +1435,82 @@ export function mountPaperCity({
     world.add(g)
   }
 
-  /* ── ZONE 1: Inside Left Loop (about/intro Card, 5 Houses, Gardens, 2 Towers) */
+  /* ── ZONE 1: Inside Left Loop (Design Engineer Profile Card, Houses & Gardens) */
   const makeCardTexture = () => {
     const c = document.createElement('canvas')
-    c.width = 720
-    c.height = 520
+    c.width = 1024
+    c.height = 768
     const ctx = c.getContext('2d')!
-    ctx.fillStyle = PAL.paper
+    ctx.fillStyle = '#fffcf6'
     ctx.fillRect(0, 0, c.width, c.height)
 
-    ctx.fillStyle = PAL.creamLo
-    ctx.fillRect(48, 42, c.width - 96, 10)
+    // Inner paper border
+    ctx.strokeStyle = '#e8decb'
+    ctx.lineWidth = 4
+    ctx.strokeRect(32, 32, c.width - 64, c.height - 64)
 
-    ctx.fillStyle = PAL.ink
-    ctx.font = '900 76px system-ui, -apple-system, sans-serif'
+    // Header eyebrow tag with orange beacon
+    ctx.fillStyle = '#df4e22'
+    ctx.beginPath()
+    ctx.arc(68, 82, 9, 0, Math.PI * 2)
+    ctx.fill()
+
+    ctx.fillStyle = '#141626'
+    ctx.font = '700 28px ui-monospace, monospace'
     ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
-    ctx.fillText('about/intro', 54, 118)
+    ctx.fillText('DESIGN ENGINEER · SUNNYSIDE', 94, 82)
 
-    ctx.fillStyle = '#afa89c'
-    ctx.fillRect(54, 184, 570, 20)
-    ctx.fillRect(54, 224, 520, 20)
-    ctx.fillRect(54, 264, 440, 20)
+    // Divider rule
+    ctx.fillStyle = 'rgba(20, 22, 38, 0.14)'
+    ctx.fillRect(60, 118, c.width - 120, 3)
+
+    // Name headline
+    ctx.font = '900 82px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#141626'
+    ctx.fillText('Aditya Himawan', 60, 196)
+
+    // Role subtitle badge
+    ctx.font = '700 36px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#df4e22'
+    ctx.fillText('Design Engineer', 60, 260)
+
+    // Simplified profile copy
+    ctx.font = '600 30px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#3a3f55'
+    ctx.fillText(
+      '• Interfaces with a pulse — craft, code & tactile 3D',
+      60,
+      336,
+    )
+    ctx.fillText('• Systems architecture, micro-interactions & WebGL', 60, 396)
+    ctx.fillText('• Bridging Figma precision to production TSX', 60, 456)
+
+    // Mini pill button badges drawn on card
+    const drawBadge = (
+      x: number,
+      y: number,
+      w: number,
+      h: number,
+      bg: string,
+      text: string,
+      fg: string,
+    ) => {
+      ctx.fillStyle = bg
+      ctx.beginPath()
+      ctx.roundRect(x, y, w, h, h / 2)
+      ctx.fill()
+      ctx.strokeStyle = '#141626'
+      ctx.lineWidth = 3
+      ctx.stroke()
+      ctx.fillStyle = fg
+      ctx.font = '700 24px ui-monospace, monospace'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(text, x + w / 2, y + h / 2 + 1)
+    }
+    drawBadge(60, 520, 230, 62, '#df4e22', 'CODE + UI', '#ffffff')
+    drawBadge(310, 520, 240, 62, '#ffd15c', 'SIDE A STUDIO', '#141626')
 
     const tex = own(new THREE.CanvasTexture(c))
     tex.colorSpace = THREE.SRGBColorSpace
@@ -1456,13 +1519,13 @@ export function mountPaperCity({
   }
 
   const cardGroup = new THREE.Group()
-  cardGroup.position.set(-12.0, 0.22, 8.2)
+  cardGroup.position.set(-12.2, 0.22, 8.0)
   cardGroup.rotation.y = Math.PI / 2
   const cardFaceMat = own(
     new THREE.MeshBasicMaterial({ map: makeCardTexture() }),
   )
   const cardSideMat = mat(PAL.creamLo)
-  const cardBody = new THREE.Mesh(getBoxGeo(7.0, 5.2, 0.52), [
+  const cardBody = new THREE.Mesh(getBoxGeo(7.8, 5.8, 0.48), [
     cardSideMat,
     cardSideMat,
     mat(PAL.paper),
@@ -1470,15 +1533,16 @@ export function mountPaperCity({
     cardFaceMat,
     cardSideMat,
   ])
-  cardBody.position.y = 2.6
+  cardBody.position.y = 2.9
   cardBody.castShadow = true
   cardBody.receiveShadow = true
   addEdges(cardBody)
   cardGroup.add(cardBody)
-  addBox(2.05, 0.56, 0.18, PAL.tangerine, -1.7, 1.55, 0.3, cardGroup)
-  addBox(2.05, 0.56, 0.18, PAL.butter, 0.75, 1.55, 0.3, cardGroup)
+  // Tactile 3D pill button accents on the plinth
+  addBox(2.2, 0.58, 0.18, PAL.tangerine, -1.8, 1.45, 0.28, cardGroup)
+  addBox(2.2, 0.58, 0.18, PAL.butter, 0.85, 1.45, 0.28, cardGroup)
   world.add(cardGroup)
-  registerHot(cardGroup, 'about/intro card', 'card')
+  registerHot(cardGroup, 'Aditya Himawan · Design Engineer', 'card')
 
   const leftHouses: [number, number, string, string][] = [
     [-9.2, 11.4, PAL.paper, PAL.mustard],
@@ -1521,32 +1585,35 @@ export function mountPaperCity({
   buildFlowerBed(-8.6, -8.2, 0)
   buildStreetLamp(-3.6, -3.2)
 
-  /* ── ZONE 3: Right Quadrant, Gardens & Interactive Billboard ───────────── */
+  /* ── ZONE 3: Right Quadrant, Gardens & Interactive Billboard (Scaled Up) ─── */
   const makeBillboardTexture = (alt: boolean) => {
     const c = document.createElement('canvas')
-    c.width = 768
-    c.height = 384
+    c.width = 1024
+    c.height = 512
     const ctx = c.getContext('2d')!
-    ctx.fillStyle = PAL.butter
+    ctx.fillStyle = '#ffcf40'
     ctx.fillRect(0, 0, c.width, c.height)
 
-    ctx.strokeStyle = PAL.ink
-    ctx.lineWidth = 10
-    ctx.strokeRect(14, 14, c.width - 28, c.height - 28)
+    // Bold industrial ink border & inner guide
+    ctx.strokeStyle = '#141626'
+    ctx.lineWidth = 14
+    ctx.strokeRect(18, 18, c.width - 36, c.height - 36)
+    ctx.lineWidth = 2
+    ctx.strokeRect(32, 32, c.width - 64, c.height - 64)
 
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.font = '900 112px system-ui, -apple-system, sans-serif'
-    ctx.fillStyle = PAL.ink
-    ctx.fillText(alt ? 'NOW' : 'WITH A', c.width / 2, 124)
+    ctx.font = '900 136px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#141626'
+    ctx.fillText(alt ? 'NOW' : 'WITH A', c.width / 2, 168)
 
-    ctx.font = '900 116px system-ui, -apple-system, sans-serif'
-    ctx.lineWidth = 14
-    ctx.strokeStyle = PAL.ink
-    const line2 = alt ? 'BOARDING' : 'PULSE.'
-    ctx.strokeText(line2, c.width / 2, 262)
-    ctx.fillStyle = alt ? PAL.teal : PAL.tangerine
-    ctx.fillText(line2, c.width / 2, 262)
+    ctx.font = '900 144px system-ui, -apple-system, sans-serif'
+    ctx.lineWidth = 16
+    ctx.strokeStyle = '#141626'
+    const line2 = alt ? 'BOARDING.' : 'PULSE.'
+    ctx.strokeText(line2, c.width / 2, 348)
+    ctx.fillStyle = alt ? '#2b9e7c' : '#df4e22'
+    ctx.fillText(line2, c.width / 2, 348)
 
     const tex = own(new THREE.CanvasTexture(c))
     tex.colorSpace = THREE.SRGBColorSpace
@@ -1559,18 +1626,22 @@ export function mountPaperCity({
   const bbFaceMat = own(new THREE.MeshBasicMaterial({ map: bbTexA }))
 
   const boardGroup = new THREE.Group()
-  boardGroup.position.set(9.5, 0.22, -10.5)
-  addBox(1.3, 0.24, 1.3, PAL.paper, 0, 0.12, 0, boardGroup)
-  addBox(0.76, 5.2, 0.76, PAL.slate, 0, 2.6, 0, boardGroup)
-  addBox(6.7, 3.6, 0.44, PAL.tangerine, 0, 6.25, 0, boardGroup)
-  addBox(7.0, 0.26, 0.78, PAL.tangerine, 0, 4.45, 0.16, boardGroup)
-  addBox(6.5, 3.5, 0.18, PAL.paper, 0.12, 6.38, -0.26, boardGroup)
+  boardGroup.position.set(9.2, 0.22, -10.5)
+  // Sturdy dual support pylon framework
+  for (const px of [-2.4, 2.4]) {
+    addBox(1.1, 0.24, 1.1, PAL.paper, px, 0.12, 0, boardGroup)
+    addBox(0.65, 5.4, 0.65, PAL.slate, px, 2.7, 0, boardGroup)
+  }
+  // Billboard structural framing
+  addBox(8.2, 4.4, 0.48, PAL.tangerine, 0, 6.4, 0, boardGroup)
+  addBox(8.5, 0.3, 0.88, PAL.tangerine, 0, 4.25, 0.18, boardGroup)
+  addBox(8.0, 4.2, 0.2, PAL.paper, 0.1, 6.5, -0.28, boardGroup)
 
   const bbFace = new THREE.Mesh(
-    own(new THREE.PlaneGeometry(6.15, 3.05)),
+    own(new THREE.PlaneGeometry(7.6, 3.8)),
     bbFaceMat,
   )
-  bbFace.position.set(0, 6.25, 0.24)
+  bbFace.position.set(0, 6.4, 0.26)
   boardGroup.add(bbFace)
   world.add(boardGroup)
   registerHot(boardGroup, 'with a pulse billboard', 'billboard')
@@ -1840,8 +1911,9 @@ export function mountPaperCity({
     const maxY = Math.max(...corners3D.map((v) => v.y))
     camCenterX = (minX + maxX) * 0.5
     camCenterY = (minY + maxY) * 0.5
-    camSpanX = (maxX - minX) * 0.92
-    camSpanY = (maxY - minY) * 0.92
+    // Scaled-up diorama view for impactful desktop and Mac M1 screens
+    camSpanX = (maxX - minX) * 0.76
+    camSpanY = (maxY - minY) * 0.76
   }
 
   const fitFrustum = () => {

@@ -8,8 +8,8 @@
   justify-content: center;
   width: 100%;
   min-height: clamp(640px, 100svh, 960px);
-  padding: clamp(4.2rem, 7.5vh, 5.2rem) clamp(0.5rem, 3vw, 3rem)
-    clamp(1rem, 2.5vh, 1.8rem);
+  padding: clamp(3.6rem, 5.8vh, 4.6rem) clamp(0.5rem, 2.5vw, 2.5rem)
+    clamp(0.8rem, 2vh, 1.4rem);
   background-color: #2b3da8;
   background-image:
     linear-gradient(to right, rgb(255 250 241 / 0.14) 1px, transparent 1px),
@@ -48,7 +48,7 @@
 .stageWrap {
   position: relative;
   z-index: 1;
-  width: min(100%, 1380px, calc((100svh - 8.5rem) * 1.48));
+  width: min(100%, 1440px, calc((100svh - 7rem) * 1.56));
   min-width: min(100%, 340px);
   margin-inline: auto;
 }
@@ -72,15 +72,18 @@
   display: inline-flex;
   align-items: center;
   min-height: 32px;
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.85rem;
   border-radius: 999px;
-  background: rgb(20 22 38 / 0.55);
-  border: 1px solid rgb(255 250 241 / 0.22);
+  background: rgb(18 20 34 / 0.88);
+  border: 1px solid rgb(255 250 241 / 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 0.7rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #fffaf1;
+  box-shadow: 0 4px 14px rgb(10 12 24 / 0.35);
 }
 
 .actions {
