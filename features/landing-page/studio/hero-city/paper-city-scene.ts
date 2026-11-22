@@ -28,28 +28,31 @@ type RoadVehicle = {
   offset: number
 }
 
+/* High-contrast Sunnyside palette: no mid-blue on buildings so nothing
+   collides with the #2b3da8 cobalt cutting-mat background. */
 const PAL = {
   ink: '#141626',
-  slate: '#232742',
-  slateHi: '#343a5e',
+  slate: '#1f233b',
+  slateHi: '#2f3556',
   paper: '#fffaf1',
   cream: '#f5ede0',
-  creamLo: '#e4d7c3',
-  sandEdge: '#cbbba2',
-  cerulean: '#4f73ff',
-  ceruleanHi: '#7594ff',
-  ceruleanDeep: '#243a9e',
-  skyGlass: '#a8c2ff',
+  creamLo: '#e2d5c0',
+  sandstone: '#eadbc4',
+  teal: '#2b9e7c',
+  tealHi: '#48bd99',
+  tealLo: '#1d7359',
+  skyGlass: '#b8dcff',
+  warmGlass: '#ffe58f',
   butter: '#ffd23f',
   mustard: '#f2b72c',
   tangerine: '#ff6a2b',
-  terracotta: '#e55322',
+  terracotta: '#df4e22',
   grass: '#3ca650',
-  leafHi: '#62c468',
-  leafLo: '#2a7d3b',
+  grassHi: '#56bf68',
+  leafLo: '#287a38',
   trunk: '#7c5230',
-  steel: '#d4dcf2',
-  ballast: '#383d5e',
+  steel: '#dde4f7',
+  ballast: '#363b5c',
   asphalt: '#f7f0e2',
 } as const
 
@@ -115,7 +118,7 @@ export function mountPaperCity({
     new THREE.LineBasicMaterial({
       color: PAL.ink,
       transparent: true,
-      opacity: 0.82,
+      opacity: 0.85,
     }),
   )
 
@@ -175,31 +178,31 @@ export function mountPaperCity({
   scene.add(world)
 
   /* ── Studio Isometric Lighting ─────────────────────────────────────────── */
-  const hemi = new THREE.HemisphereLight('#fffDF6', '#4a5a9e', 1.45)
+  const hemi = new THREE.HemisphereLight('#fffdf6', '#5666a8', 1.5)
   scene.add(hemi)
 
-  const sun = new THREE.DirectionalLight('#fff5e0', 2.05)
-  sun.position.set(-18, 34, 22)
+  const sun = new THREE.DirectionalLight('#fff5e0', 2.1)
+  sun.position.set(-18, 36, 22)
   sun.castShadow = true
   sun.shadow.mapSize.set(1536, 1536)
   sun.shadow.bias = -0.0004
   sun.shadow.normalBias = 0.03
-  sun.shadow.camera.left = -26
-  sun.shadow.camera.right = 26
-  sun.shadow.camera.top = 24
-  sun.shadow.camera.bottom = -24
+  sun.shadow.camera.left = -24
+  sun.shadow.camera.right = 24
+  sun.shadow.camera.top = 22
+  sun.shadow.camera.bottom = -22
   sun.shadow.camera.near = 1
   sun.shadow.camera.far = 75
   scene.add(sun)
 
-  const fill = new THREE.DirectionalLight('#9ab6ff', 0.65)
+  const fill = new THREE.DirectionalLight('#b5cbff', 0.65)
   fill.position.set(22, 14, -18)
   scene.add(fill)
 
   /* ── Shadow-Catcher Ground over the Blue Cutting Mat ───────────────────── */
   const shadowPlane = new THREE.Mesh(
     own(new THREE.PlaneGeometry(64, 64)),
-    own(new THREE.ShadowMaterial({ color: '#0c1238', opacity: 0.24 })),
+    own(new THREE.ShadowMaterial({ color: '#0c1238', opacity: 0.25 })),
   )
   shadowPlane.rotation.x = -Math.PI / 2
   shadowPlane.position.y = 0.005
@@ -223,7 +226,7 @@ export function mountPaperCity({
     })
   }
 
-  /* ── Isometric Sidewalk Plinth Pads (Prevents Blue-on-Blue Collision) ──── */
+  /* ── Isometric Plinth Pads & Decorative Green Lawns ────────────────────── */
   const addPlinth = (
     w: number,
     d: number,
@@ -248,13 +251,33 @@ export function mountPaperCity({
     return g
   }
 
-  // Plinths under the 4 city zones so buildings never collide with the blue cutting mat
-  addPlinth(11.4, 11.4, -7.8, 8.0, 0.22) // Zone 1: Left loop neighborhood & towers
-  addPlinth(10.2, 11.2, -6.0, -7.6, 0.22) // Zone 2: Upper-center skyline
-  addPlinth(11.8, 10.6, 8.2, -6.8, 0.22) // Zone 3: Right tower block & billboard
-  addPlinth(10.6, 3.2, 7.2, 3.0, 0.18) // Zone 4: Bus stop & house sidewalk strip
+  const addLawnPatch = (
+    w: number,
+    d: number,
+    x: number,
+    z: number,
+    baseY = 0.22,
+  ) => {
+    addBox(w + 0.16, 0.06, d + 0.16, PAL.paper, x, baseY + 0.03, z, world)
+    addBox(w, 0.08, d, PAL.grass, x, baseY + 0.06, z, world)
+  }
 
-  /* ── Continuous Figure-8 Railway Geometry ──────────────────────────────── */
+  // City zone plinths + green lawn patches
+  addPlinth(11.4, 11.4, -7.8, 8.0, 0.22) // Zone 1: Left loop
+  addLawnPatch(6.6, 8.8, -7.8, 8.2, 0.22) // Zone 1 green neighborhood yard
+
+  addPlinth(10.6, 11.4, -6.0, -7.6, 0.22) // Zone 2: Upper-center skyline
+  addLawnPatch(4.8, 6.4, -8.2, -5.8, 0.22) // Zone 2 upper park lawn
+  addLawnPatch(4.2, 4.2, -4.2, -11.0, 0.22)
+
+  addPlinth(11.8, 10.6, 8.2, -6.8, 0.22) // Zone 3: Right tower block & billboard
+  addLawnPatch(5.2, 3.8, 9.2, -9.8, 0.22) // Zone 3 green garden under billboard
+  addLawnPatch(3.6, 3.4, 5.2, -9.6, 0.22)
+
+  addPlinth(10.8, 3.4, 7.2, 3.0, 0.18) // Zone 4: Bus stop & house sidewalk strip
+  addLawnPatch(9.8, 1.3, 7.2, 2.35, 0.18) // Zone 4 green verge strip behind bus stop
+
+  /* ── Continuous Figure-8 Railway (INTERFACES Bridge ABOVE at x = 0) ────── */
   const VERTS: [number, number][] = [
     [0, 15],
     [0, -15],
@@ -321,8 +344,8 @@ export function mountPaperCity({
   const xzPts: [number, number][] = []
   const accXZ: number[] = [0]
   let L_xz = 0
-  let sArchXZ = 0
-  let archMark = false
+  let sBridgeXZ = 0
+  let bridgeMark = false
   const pushXZ = (x: number, z: number) => {
     if (xzPts.length > 0) {
       const pr = xzPts[xzPts.length - 1]
@@ -347,9 +370,10 @@ export function mountPaperCity({
       const sx = c0.t2[0] + (c1.t1[0] - c0.t2[0]) * fSeg
       const sz = c0.t2[1] + (c1.t1[1] - c0.t2[1]) * fSeg
       pushXZ(sx, sz)
-      if (i === 3 && !archMark && sx <= 0) {
-        sArchXZ = L_xz
-        archMark = true
+      /* Segment 0->1 (x = 0 spine, [0,15]->[0,-15]) is the upper INTERFACES bridge! */
+      if (i === 0 && !bridgeMark && sz <= 0) {
+        sBridgeXZ = L_xz
+        bridgeMark = true
       }
     }
   }
@@ -358,6 +382,8 @@ export function mountPaperCity({
     xzPts[0][1] - xzPts[xzPts.length - 1][1],
   )
 
+  const LOW_Y = 3.4
+  const HIGH_Y = 6.25
   const dense: [number, number, number][] = []
   const acc: number[] = [0]
   let L = 0
@@ -366,13 +392,16 @@ export function mountPaperCity({
     const idx = i % xzPts.length
     const pt = xzPts[idx]
     const sXZ = i === xzPts.length ? L_xz : accXZ[idx]
-    let ds = Math.abs(sXZ - sArchXZ)
+    let ds = Math.abs(sXZ - sBridgeXZ)
     ds = Math.min(ds, L_xz - ds)
-    let y = 3.6
-    if (ds < 6.8) {
-      const w = 1 - ds / 6.8
+    let y = LOW_Y
+    // Smooth elevated bridge plateau across the x = 0 INTERFACES spine
+    if (ds <= 3.6) {
+      y = HIGH_Y
+    } else if (ds < 11.2) {
+      const w = 1 - (ds - 3.6) / (11.2 - 3.6)
       const sm = w * w * (3 - 2 * w)
-      y = 3.6 + 3.25 * sm
+      y = LOW_Y + (HIGH_Y - LOW_Y) * sm
     }
     if (prev) {
       L += Math.hypot(pt[0] - prev[0], y - prev[1], pt[1] - prev[2])
@@ -430,7 +459,19 @@ export function mountPaperCity({
     g.rotation.z = Math.atan2(dy, Math.hypot(dx, dz))
   }
 
-  /* ── Sweep Continuous 3D Track Profiles (Zero Sawtooth Gaps) ───────────── */
+  // Helper to get exact upper bridge deck height at any z along x = 0
+  const bridgeHeightAtZ = (z: number) => {
+    const ds = Math.abs(z)
+    if (ds <= 3.6) return HIGH_Y
+    if (ds < 11.2) {
+      const w = 1 - (ds - 3.6) / (11.2 - 3.6)
+      const sm = w * w * (3 - 2 * w)
+      return LOW_Y + (HIGH_Y - LOW_Y) * sm
+    }
+    return LOW_Y
+  }
+
+  /* ── Sweep Continuous 3D Track Profiles (No External Stubs) ────────────── */
   type Frame3D = {
     p: THREE.Vector3
     r: THREE.Vector3
@@ -498,7 +539,6 @@ export function mountPaperCity({
   )
   const loopFrames = buildFrames(loopPts, true)
 
-  // Deck cross-section with raised side parapet curbs
   const deckProfile: [number, number][] = [
     [-1.08, -0.36],
     [1.08, -0.36],
@@ -554,7 +594,6 @@ export function mountPaperCity({
     )
     world.add(railL, railR)
 
-    // Crisp outer curb edge ribbons
     for (const side of [-1.08, 1.08]) {
       const curbPts = frames.map((fr) =>
         fr.p.clone().addScaledVector(fr.r, side).addScaledVector(fr.u, 0.14),
@@ -567,27 +606,7 @@ export function mountPaperCity({
 
   buildTrackSegment(loopFrames, true)
 
-  // Static extensions continuing the two orthogonal spines to the mat edges
-  const extTopRight = buildFrames(
-    [
-      new THREE.Vector3(0, 3.6, -11.5),
-      new THREE.Vector3(0, 3.6, -16.5),
-      new THREE.Vector3(0, 3.6, -21.5),
-    ],
-    false,
-  )
-  const extBottomRight = buildFrames(
-    [
-      new THREE.Vector3(12.5, 3.6, 0),
-      new THREE.Vector3(17.0, 3.6, 0),
-      new THREE.Vector3(21.5, 3.6, 0),
-    ],
-    false,
-  )
-  buildTrackSegment(extTopRight, false)
-  buildTrackSegment(extBottomRight, false)
-
-  // Instanced sleepers (cross-ties) along the entire figure-8
+  // Instanced sleepers (cross-ties) along the figure-8 loop
   const nSleepers = Math.floor(L / 0.58)
   const sleeperGeo = getBoxGeo(0.18, 0.04, 1.38)
   const sleeperInst = own(
@@ -603,15 +622,14 @@ export function mountPaperCity({
   sleeperInst.instanceMatrix.needsUpdate = true
   world.add(sleeperInst)
 
-  /* ── Extruded Semicircular Viaduct Arches ──────────────────────────────── */
-  // 1. Central Cerulean Arch Viaduct under INTERFACES (x = 0, z in [1.5, 9.3])
+  /* ── Extruded Semicircular Viaduct Arches (Warm Sandstone & Slate) ────── */
+  // 1. Central Grand Arch Viaduct under the upper INTERFACES bridge (x = 0, z in [1.6, 9.2])
   const buildCentralArchViaduct = () => {
     const g = new THREE.Group()
     g.position.set(0, 0, 5.4)
-    const W = 7.6
-    const H = 3.24
-    const archR = 1.75
-    const archH = 1.45
+    const W = 7.2
+    const archR = 1.85
+    const archH = 2.05
     const sh = new THREE.Shape()
     sh.moveTo(-W / 2, 0)
     sh.lineTo(-archR, 0)
@@ -619,44 +637,50 @@ export function mountPaperCity({
     sh.absarc(0, archH, archR, Math.PI, 0, true)
     sh.lineTo(archR, 0)
     sh.lineTo(W / 2, 0)
-    sh.lineTo(W / 2, H)
-    sh.lineTo(-W / 2, H)
+    // Follow the exact underside of the upper bridge ramp so the viaduct never pokes through the track
+    const nTop = 20
+    for (let ti = 0; ti <= nTop; ti++) {
+      const sz = W / 2 - (ti / nTop) * W
+      const worldZ = 5.4 - sz
+      sh.lineTo(sz, bridgeHeightAtZ(worldZ) - 0.35)
+    }
     sh.closePath()
 
     const geo = own(
       new THREE.ExtrudeGeometry(sh, {
-        depth: 2.04,
+        depth: 2.02,
         bevelEnabled: false,
         curveSegments: 24,
       }),
     )
-    geo.translate(0, 0, -1.02)
-    // Rotate so shape X is world Z and shape extrusion Z is world X
+    geo.translate(0, 0, -1.01)
     geo.rotateY(Math.PI / 2)
 
-    const mesh = new THREE.Mesh(geo, mat(PAL.cerulean))
+    // Warm teal-patina / sandstone architectural bridge that pops against the blue cutting mat
+    const mesh = new THREE.Mesh(geo, mat(PAL.teal))
     mesh.castShadow = true
     mesh.receiveShadow = true
     addEdges(mesh, 20)
     g.add(mesh)
 
-    // Cream stone pier footings & louvered vent grilles on camera-facing +x side
-    for (const pz of [-2.85, 2.85]) {
-      addBox(2.22, 0.24, 2.05, PAL.cream, 0, 0.12, pz, g)
-      addBox(0.1, 0.62, 0.62, PAL.paper, 1.04, 2.45, pz, g)
+    // Cream stone pier footings, tangerine belt course & louvered vent grilles
+    for (const pz of [-2.75, 2.75]) {
+      addBox(2.24, 0.28, 2.0, PAL.paper, 0, 0.14, pz, g)
+      addBox(2.14, 0.2, 1.9, PAL.butter, 0, 3.35, pz, g)
+      addBox(0.1, 0.65, 0.65, PAL.paper, 1.03, 2.85, pz, g)
       for (let sl = -0.16; sl <= 0.16; sl += 0.16) {
-        addBox(0.13, 0.05, 0.46, PAL.ink, 1.05, 2.45 + sl, pz, g, {
+        addBox(0.13, 0.05, 0.48, PAL.ink, 1.04, 2.85 + sl, pz, g, {
           edges: false,
           shadow: false,
         })
       }
     }
     world.add(g)
-    registerHot(g, 'cerulean arch viaduct')
+    registerHot(g, 'interfaces grand arch viaduct')
   }
   buildCentralArchViaduct()
 
-  // 2. Dark Multi-Arch Viaduct Walls under the z = 0 train spine
+  // 2. Dark Multi-Arch Viaduct Walls under the z = 0 lower train spine
   const buildMultiArchViaduct = (
     xStart: number,
     xEnd: number,
@@ -667,11 +691,11 @@ export function mountPaperCity({
     const cx = (xStart + xEnd) * 0.5
     g.position.set(cx, 0, 0)
 
-    const H = 3.24
+    const H = 3.04
     const pierW = 0.85
     const span = (totalW - pierW * (nArches + 1)) / nArches
     const archR = span * 0.5
-    const springY = Math.max(0.9, H - archR - 0.42)
+    const springY = Math.max(0.85, H - archR - 0.38)
 
     const sh = new THREE.Shape()
     sh.moveTo(-totalW / 2, 0)
@@ -704,49 +728,49 @@ export function mountPaperCity({
     addEdges(mesh, 20)
     g.add(mesh)
 
-    // Cream pier footings
     for (let i = 0; i <= nArches; i++) {
       const px = -totalW / 2 + pierW * 0.5 + i * (span + pierW)
-      addBox(pierW + 0.24, 0.2, 1.96, PAL.creamLo, px, 0.1, 0, g)
+      addBox(pierW + 0.24, 0.22, 1.96, PAL.cream, px, 0.11, 0, g)
     }
     world.add(g)
   }
-  buildMultiArchViaduct(-11.8, -2.5, 3)
-  buildMultiArchViaduct(2.5, 13.2, 3)
+  buildMultiArchViaduct(-11.8, -2.4, 3)
+  buildMultiArchViaduct(2.4, 13.2, 3)
 
-  // 3. Cylindrical Flanged Viaduct Pillars under outer curves
-  const cylGeo = own(new THREE.CylinderGeometry(0.46, 0.52, 3.24, 14))
-  const capGeo = own(new THREE.CylinderGeometry(0.68, 0.56, 0.32, 14))
-  const baseGeo = own(new THREE.CylinderGeometry(0.66, 0.72, 0.24, 14))
-  const pillarCoords: [number, number][] = [
-    [-14.7, 4.2],
-    [-14.5, 10.8],
-    [-10.8, 14.7],
-    [-4.2, 14.8],
-    [0, -6.5],
-    [0, -11.5],
-    [0, -18.5],
-    [11.5, -14.8],
-    [15.7, -10.8],
-    [15.7, -4.2],
-    [18.5, 0],
+  // 3. Cylindrical Flanged Viaduct Pillars under outer curves (auto-sized to track height)
+  const pillarCoords: [number, number, number][] = [
+    [-14.7, 4.2, LOW_Y],
+    [-14.5, 10.8, LOW_Y],
+    [-10.8, 14.7, LOW_Y],
+    [-4.2, 14.8, LOW_Y],
+    [0, -4.5, bridgeHeightAtZ(-4.5)],
+    [0, -9.8, bridgeHeightAtZ(-9.8)],
+    [11.5, -14.8, LOW_Y],
+    [15.7, -10.8, LOW_Y],
+    [15.7, -4.2, LOW_Y],
   ]
-  for (const [px, pz] of pillarCoords) {
+  const baseGeo = own(new THREE.CylinderGeometry(0.66, 0.72, 0.24, 14))
+  const capGeo = own(new THREE.CylinderGeometry(0.68, 0.56, 0.32, 14))
+  for (const [px, pz, deckY] of pillarCoords) {
+    const h = Math.max(1.2, deckY - 0.36)
     const pg = new THREE.Group()
     pg.position.set(px, 0, pz)
-    const shaft = new THREE.Mesh(cylGeo, mat(PAL.slate))
-    shaft.position.y = 1.62
+    const shaft = new THREE.Mesh(
+      own(new THREE.CylinderGeometry(0.46, 0.52, h, 14)),
+      mat(PAL.slate),
+    )
+    shaft.position.y = h * 0.5
     shaft.castShadow = true
     const cap = new THREE.Mesh(capGeo, mat(PAL.ink))
-    cap.position.y = 3.1
-    const footing = new THREE.Mesh(baseGeo, mat(PAL.creamLo))
+    cap.position.y = h - 0.12
+    const footing = new THREE.Mesh(baseGeo, mat(PAL.cream))
     footing.position.y = 0.12
     addEdges(footing, 25)
     pg.add(shaft, cap, footing)
     world.add(pg)
   }
 
-  /* ── INTERFACES True 3D Extruded Block Letters on the Bridge ───────────── */
+  /* ── INTERFACES True 3D Extruded Block Letters on the Upper Bridge ─────── */
   const poly = (pts: [number, number][]) => {
     const sh = new THREE.Shape()
     pts.forEach(([x, y], idx) => {
@@ -923,9 +947,10 @@ export function mountPaperCity({
   const letterFaceMat = mat(PAL.paper, PAL.paper, 0.18)
   const letterSideMat = mat(PAL.ink)
   for (let i = 0; i < word.length; i++) {
-    const lz = 5.65 - i * 1.3
+    const lz = 5.65 - i * 1.26
+    const ly = bridgeHeightAtZ(lz) + 0.1
     const lg = new THREE.Group()
-    lg.position.set(0.95, 3.74, lz)
+    lg.position.set(1.02, ly, lz)
     lg.rotation.y = Math.PI / 2
 
     const lGeo = own(
@@ -981,7 +1006,6 @@ export function mountPaperCity({
     const g = new THREE.Group()
     parent.add(g)
 
-    // Lower dark chassis & bogies
     addBox(CAR_LEN - 0.16, 0.22, 1.38, PAL.ink, 0, 0.25, 0, g)
     for (const bx of [-0.82, 0.82]) {
       for (const bz of [-0.62, 0.62]) {
@@ -991,10 +1015,7 @@ export function mountPaperCity({
       }
     }
 
-    // Main car body
     addBox(CAR_LEN, 1.02, 1.44, spec.bodyColor, 0, 0.84, 0, g)
-
-    // Roof + raised HVAC pods
     addBox(CAR_LEN - 0.2, 0.14, 1.3, spec.roofColor, 0, 1.42, 0, g)
     if (!spec.isCargo) {
       addBox(0.65, 0.1, 0.68, PAL.creamLo, -0.45, 1.52, 0, g)
@@ -1002,25 +1023,21 @@ export function mountPaperCity({
     }
 
     if (spec.hasTurret) {
-      // Raised locomotive cab cupola like the yellow train in reference
       addBox(1.1, 0.36, 1.16, spec.bodyColor, 0.2, 1.62, 0, g)
       addBox(1.14, 0.22, 1.2, PAL.ink, 0.2, 1.62, 0, g, { edges: false })
     }
 
     if (spec.isCamper) {
-      // Two-tone cream upper band
       addBox(CAR_LEN + 0.02, 0.46, 1.46, PAL.paper, 0, 1.08, 0, g)
     }
 
     if (spec.isCargo) {
-      // Vertical cargo ribs
       for (let rx = -0.9; rx <= 0.9; rx += 0.45) {
-        addBox(0.1, 0.86, 1.48, PAL.ceruleanHi, rx, 0.84, 0, g, {
+        addBox(0.1, 0.86, 1.48, PAL.tealHi, rx, 0.84, 0, g, {
           edges: false,
         })
       }
     } else {
-      // Recessed passenger windows along both sides
       for (let wx = -0.84; wx <= 0.84; wx += 0.56) {
         addBox(0.42, 0.36, 1.47, PAL.paper, wx, 1.02, 0, g, { edges: false })
         addBox(0.36, 0.3, 1.49, PAL.skyGlass, wx, 1.02, 0, g, { edges: false })
@@ -1028,7 +1045,6 @@ export function mountPaperCity({
     }
 
     if (spec.isLead) {
-      // Wrap-around front cab windshield & glowing headlights (+x nose)
       addBox(0.12, 0.38, 1.24, PAL.ink, CAR_LEN / 2 + 0.02, 1.02, 0, g)
       for (const hz of [-0.42, 0.42]) {
         addBox(0.08, 0.16, 0.2, PAL.butter, CAR_LEN / 2 + 0.03, 0.54, hz, g, {
@@ -1038,7 +1054,6 @@ export function mountPaperCity({
         })
       }
     } else {
-      // Inter-car dark accordion gangway connector
       addBox(0.28, 0.88, 1.05, PAL.slate, CAR_LEN / 2 + 0.14, 0.8, 0, g)
     }
 
@@ -1061,7 +1076,6 @@ export function mountPaperCity({
     return g
   }
 
-  // Train 1: Orange Express (5 cars matching reference: orange lead, SIDE A, EXPRESS, cerulean cargo car, camper coach)
   const orangeGroup = new THREE.Group()
   world.add(orangeGroup)
   const orangeCars = [
@@ -1078,7 +1092,7 @@ export function mountPaperCity({
       orangeGroup,
     ),
     buildTrainCar(
-      { bodyColor: PAL.cerulean, roofColor: PAL.cream, isCargo: true },
+      { bodyColor: PAL.teal, roofColor: PAL.cream, isCargo: true },
       orangeGroup,
     ),
     buildTrainCar(
@@ -1088,7 +1102,6 @@ export function mountPaperCity({
   ]
   registerHot(orangeGroup, 'side a express train', 'train')
 
-  // Train 2: Yellow Local (4 cars matching reference: mustard turret locomotive + 3 tangerine coaches)
   const yellowGroup = new THREE.Group()
   world.add(yellowGroup)
   const yellowCars = [
@@ -1116,7 +1129,7 @@ export function mountPaperCity({
   ]
   registerHot(yellowGroup, 'yellow local train', 'train')
 
-  /* ── Sculpted Architectural Helpers (Houses & Skyscrapers) ─────────────── */
+  /* ── Sculpted Architectural Helpers (High-Contrast Palette, Zero Blue) ─── */
   const buildGabledHouse = (
     x: number,
     z: number,
@@ -1133,12 +1146,9 @@ export function mountPaperCity({
     const h = 1.38 * scale
     const d = 1.85 * scale
 
-    // Foundation step
     addBox(w + 0.14, 0.14, d + 0.14, PAL.creamLo, 0, 0.07, 0, g)
-    // Main walls
     addBox(w, h, d, wallColor, 0, 0.14 + h / 2, 0, g)
 
-    // Extruded pitched roof with overhanging eaves
     const rw = w + 0.34
     const rh = 0.96 * scale
     const rd = d + 0.32
@@ -1162,7 +1172,6 @@ export function mountPaperCity({
     addEdges(rMesh)
     g.add(rMesh)
 
-    // Chimney
     addBox(
       0.34,
       0.65,
@@ -1174,7 +1183,6 @@ export function mountPaperCity({
       g,
     )
 
-    // Front door + porch step + framed windows
     addBox(
       0.42,
       0.78,
@@ -1187,7 +1195,6 @@ export function mountPaperCity({
     )
     addBox(0.56, 0.1, 0.28, PAL.creamLo, -0.42 * scale, 0.09, d / 2 + 0.12, g)
 
-    // Front & side windows with cream frames
     addBox(
       0.52,
       0.48,
@@ -1202,7 +1209,7 @@ export function mountPaperCity({
       0.4,
       0.36,
       0.09,
-      PAL.skyGlass,
+      PAL.warmGlass,
       0.44 * scale,
       0.14 + 0.82 * scale,
       d / 2 + 0.02,
@@ -1216,7 +1223,7 @@ export function mountPaperCity({
       0.09,
       0.34,
       0.36,
-      PAL.skyGlass,
+      PAL.warmGlass,
       w / 2 + 0.02,
       0.14 + 0.82 * scale,
       0,
@@ -1237,99 +1244,85 @@ export function mountPaperCity({
     w: number,
     d: number,
     h: number,
-    kind: 'spire' | 'fin' | 'bands' | 'ivory' | 'plain',
+    kind:
+      | 'spire-teal'
+      | 'spire-charcoal'
+      | 'bands-terracotta'
+      | 'bands-charcoal'
+      | 'ivory'
+      | 'teal',
   ) => {
     const g = new THREE.Group()
     g.position.set(x, 0.22, z)
 
-    // High-contrast stone lobby plinth at base of every skyscraper
-    addBox(w + 0.28, 0.34, d + 0.28, PAL.paper, 0, 0.17, 0, g)
+    // Warm cream limestone base lobby
+    addBox(w + 0.28, 0.36, d + 0.28, PAL.paper, 0, 0.18, 0, g)
 
-    if (kind === 'spire') {
+    if (kind === 'spire-teal' || kind === 'spire-charcoal') {
+      const isTeal = kind === 'spire-teal'
+      const c1 = isTeal ? PAL.teal : PAL.slate
+      const c2 = isTeal ? PAL.tealHi : PAL.slateHi
       const h1 = h * 0.48
       const h2 = h * 0.28
       const h3 = h * 0.24
-      addBox(w, h1, d, PAL.cerulean, 0, 0.34 + h1 / 2, 0, g)
-      addBox(w + 0.16, 0.16, d + 0.16, PAL.paper, 0, 0.34 + h1, 0, g)
-      addBox(
-        w * 0.76,
-        h2,
-        d * 0.76,
-        PAL.ceruleanHi,
-        0,
-        0.34 + h1 + h2 / 2,
-        0,
-        g,
-      )
-      addBox(w * 0.82, 0.14, d * 0.82, PAL.paper, 0, 0.34 + h1 + h2, 0, g)
-      addBox(
-        w * 0.5,
-        h3,
-        d * 0.5,
-        PAL.ceruleanHi,
-        0,
-        0.34 + h1 + h2 + h3 / 2,
-        0,
-        g,
-      )
+      addBox(w, h1, d, c1, 0, 0.36 + h1 / 2, 0, g)
+      addBox(w + 0.16, 0.16, d + 0.16, PAL.paper, 0, 0.36 + h1, 0, g)
+      addBox(w * 0.76, h2, d * 0.76, c2, 0, 0.36 + h1 + h2 / 2, 0, g)
+      addBox(w * 0.82, 0.14, d * 0.82, PAL.paper, 0, 0.36 + h1 + h2, 0, g)
+      addBox(w * 0.5, h3, d * 0.5, c2, 0, 0.36 + h1 + h2 + h3 / 2, 0, g)
       const cone = new THREE.Mesh(
         own(new THREE.ConeGeometry(w * 0.24, 1.9, 4)),
         mat(PAL.butter),
       )
-      cone.position.y = 0.34 + h + 0.95
+      cone.position.y = 0.36 + h + 0.95
       cone.rotation.y = Math.PI / 4
       cone.castShadow = true
       addEdges(cone)
       g.add(cone)
-      addBox(0.09, 1.5, 0.09, PAL.ink, 0, 0.34 + h + 2.4, 0, g)
-    } else if (kind === 'fin') {
-      addBox(w, h, d, PAL.cerulean, 0, 0.34 + h / 2, 0, g)
-      addBox(w + 0.18, 0.26, d + 0.18, PAL.ink, 0, 0.34 + h + 0.13, 0, g)
-      // Prominent cream architectural fin wing
-      addBox(
-        0.58,
-        h + 1.15,
-        d * 0.86,
-        PAL.paper,
-        w / 2 + 0.24,
-        0.34 + (h + 1.15) / 2,
-        0,
-        g,
-      )
-    } else if (kind === 'bands') {
-      addBox(w, h, d, PAL.cerulean, 0, 0.34 + h / 2, 0, g)
-      addBox(w + 0.2, 0.24, d + 0.2, PAL.paper, 0, 0.34 + h + 0.12, 0, g)
-      addBox(w * 0.58, 0.65, d * 0.58, PAL.ceruleanHi, 0, 0.34 + h + 0.56, 0, g)
-      // Horizontal wrap-around white spandrel stripes like reference
+      addBox(0.09, 1.5, 0.09, PAL.ink, 0, 0.36 + h + 2.4, 0, g)
+    } else if (kind === 'bands-terracotta' || kind === 'bands-charcoal') {
+      const bodyC = kind === 'bands-terracotta' ? PAL.tangerine : PAL.slate
+      const capC = kind === 'bands-terracotta' ? PAL.butter : PAL.tealHi
+      addBox(w, h, d, bodyC, 0, 0.36 + h / 2, 0, g)
+      addBox(w + 0.2, 0.24, d + 0.2, PAL.paper, 0, 0.36 + h + 0.12, 0, g)
+      addBox(w * 0.58, 0.65, d * 0.58, capC, 0, 0.36 + h + 0.56, 0, g)
       const nBands = Math.floor(h / 1.05)
       for (let b = 1; b < nBands; b++) {
-        addBox(w + 0.08, 0.16, d + 0.08, PAL.paper, 0, 0.34 + b * 1.05, 0, g, {
+        addBox(w + 0.08, 0.18, d + 0.08, PAL.paper, 0, 0.36 + b * 1.05, 0, g, {
           edges: false,
         })
       }
+      // Rooftop mini garden on banded tower
+      addBox(w * 0.82, 0.08, d * 0.82, PAL.grassHi, 0, 0.36 + h + 0.26, 0, g)
     } else if (kind === 'ivory') {
-      addBox(w, h, d, PAL.paper, 0, 0.34 + h / 2, 0, g)
-      addBox(w + 0.18, 0.26, d + 0.18, PAL.ink, 0, 0.34 + h + 0.13, 0, g)
-      addBox(w * 0.45, 0.72, d * 0.45, PAL.butter, 0, 0.34 + h + 0.6, 0, g)
+      addBox(w, h, d, PAL.paper, 0, 0.36 + h / 2, 0, g)
+      addBox(w + 0.18, 0.26, d + 0.18, PAL.ink, 0, 0.36 + h + 0.13, 0, g)
+      addBox(w * 0.48, 0.72, d * 0.48, PAL.butter, 0, 0.36 + h + 0.6, 0, g)
     } else {
-      addBox(w, h, d, PAL.cerulean, 0, 0.34 + h / 2, 0, g)
-      addBox(w + 0.2, 0.26, d + 0.2, PAL.ink, 0, 0.34 + h + 0.13, 0, g)
+      addBox(w, h, d, PAL.teal, 0, 0.36 + h / 2, 0, g)
+      addBox(w + 0.2, 0.26, d + 0.2, PAL.ink, 0, 0.36 + h + 0.13, 0, g)
       addBox(
-        w * 0.42,
+        w * 0.45,
         0.72,
-        d * 0.42,
-        PAL.paper,
+        d * 0.45,
+        PAL.tangerine,
         -0.15,
-        0.34 + h + 0.6,
+        0.36 + h + 0.6,
         -0.15,
         g,
       )
     }
 
-    if (kind !== 'bands') {
-      const bodyH = kind === 'spire' ? h * 0.48 : h
+    if (kind !== 'bands-terracotta' && kind !== 'bands-charcoal') {
+      const isSpire = kind === 'spire-teal' || kind === 'spire-charcoal'
+      const bodyH = isSpire ? h * 0.48 : h
       const nFl = Math.max(2, Math.floor(bodyH / 1.25))
-      const winColor = kind === 'ivory' ? PAL.slate : PAL.paper
+      const winColor =
+        kind === 'ivory'
+          ? PAL.slate
+          : kind === 'spire-charcoal'
+            ? PAL.warmGlass
+            : PAL.paper
       for (let fl = 0; fl < nFl; fl++) {
         const wy = 1.15 + fl * 1.22
         if (wy > bodyH - 0.3) break
@@ -1361,24 +1354,29 @@ export function mountPaperCity({
     }
 
     world.add(g)
-    registerHot(g, kind === 'spire' ? 'spire skyscraper' : 'skyscraper')
+    registerHot(g, kind.startsWith('spire') ? 'spire skyscraper' : 'skyscraper')
     return g
   }
 
-  /* ── Low-Poly Faceted Trees & Bushes ───────────────────────────────────── */
+  /* ── Decorative Trees, Bushes, Flower Beds, Benches & Streetlamps ──────── */
   const foliageGeo = own(new THREE.IcosahedronGeometry(1, 1))
   const buildTree = (
     x: number,
     z: number,
     r = 0.65,
-    kind: 'round' | 'tall' | 'gold' = 'round',
+    kind: 'round' | 'tall' | 'gold' | 'spring' = 'round',
     parent: THREE.Object3D = world,
-    baseY = 0.22,
+    baseY = 0.28,
   ) => {
     const g = new THREE.Group()
     g.position.set(x, baseY, z)
     addBox(0.18, 0.55, 0.18, PAL.trunk, 0, 0.27, 0, g)
-    const cColor = kind === 'gold' ? PAL.mustard : PAL.grass
+    const cColor =
+      kind === 'gold'
+        ? PAL.mustard
+        : kind === 'spring'
+          ? PAL.grassHi
+          : PAL.grass
     const crown = new THREE.Mesh(foliageGeo, mat(cColor))
     crown.position.y = kind === 'tall' ? 1.05 : 0.85
     crown.scale.set(r, kind === 'tall' ? r * 1.45 : r * 0.95, r)
@@ -1388,7 +1386,47 @@ export function mountPaperCity({
     parent.add(g)
   }
 
-  /* ── ZONE 1: Inside Left Loop (about/intro Card, 5 Houses, 2 Towers) ───── */
+  const buildBush = (
+    x: number,
+    z: number,
+    r = 0.36,
+    color: string = PAL.grassHi,
+    baseY = 0.28,
+    parent: THREE.Object3D = world,
+  ) => {
+    const m = new THREE.Mesh(foliageGeo, mat(color))
+    m.position.set(x, baseY + r * 0.65, z)
+    m.scale.set(r * 1.15, r * 0.8, r)
+    m.castShadow = true
+    addEdges(m, 30)
+    parent.add(m)
+  }
+
+  const buildFlowerBed = (x: number, z: number, yaw = 0, baseY = 0.28) => {
+    const g = new THREE.Group()
+    g.position.set(x, baseY, z)
+    g.rotation.y = yaw
+    addBox(1.5, 0.16, 0.62, PAL.paper, 0, 0.08, 0, g)
+    addBox(1.34, 0.18, 0.46, PAL.grass, 0, 0.12, 0, g)
+    addBox(0.24, 0.18, 0.24, PAL.tangerine, -0.4, 0.24, 0, g)
+    addBox(0.24, 0.18, 0.24, PAL.butter, 0, 0.25, 0, g)
+    addBox(0.24, 0.18, 0.24, PAL.tangerine, 0.4, 0.24, 0, g)
+    world.add(g)
+  }
+
+  const buildStreetLamp = (x: number, z: number, baseY = 0.22) => {
+    const g = new THREE.Group()
+    g.position.set(x, baseY, z)
+    addBox(0.18, 0.12, 0.18, PAL.ink, 0, 0.06, 0, g)
+    addBox(0.07, 1.35, 0.07, PAL.ink, 0, 0.72, 0, g, { edges: false })
+    addBox(0.26, 0.22, 0.26, PAL.butter, 0, 1.46, 0, g, {
+      emissive: PAL.butter,
+      emissiveIntensity: 0.55,
+    })
+    world.add(g)
+  }
+
+  /* ── ZONE 1: Inside Left Loop (about/intro Card, 5 Houses, Gardens, 2 Towers) */
   const makeCardTexture = () => {
     const c = document.createElement('canvas')
     c.width = 720
@@ -1397,7 +1435,6 @@ export function mountPaperCity({
     ctx.fillStyle = PAL.paper
     ctx.fillRect(0, 0, c.width, c.height)
 
-    // Top window accent bar
     ctx.fillStyle = PAL.creamLo
     ctx.fillRect(48, 42, c.width - 96, 10)
 
@@ -1407,7 +1444,6 @@ export function mountPaperCity({
     ctx.textBaseline = 'middle'
     ctx.fillText('about/intro', 54, 118)
 
-    // Three crisp skeleton lines positioned in upper-middle so buttons stay visible above houses
     ctx.fillStyle = '#afa89c'
     ctx.fillRect(54, 184, 570, 20)
     ctx.fillRect(54, 224, 520, 20)
@@ -1439,7 +1475,6 @@ export function mountPaperCity({
   cardBody.receiveShadow = true
   addEdges(cardBody)
   cardGroup.add(cardBody)
-  // Extruded 3D pill buttons placed high enough to clear the house roofs
   addBox(2.05, 0.56, 0.18, PAL.tangerine, -1.7, 1.55, 0.3, cardGroup)
   addBox(2.05, 0.56, 0.18, PAL.butter, 0.75, 1.55, 0.3, cardGroup)
   world.add(cardGroup)
@@ -1447,37 +1482,46 @@ export function mountPaperCity({
 
   const leftHouses: [number, number, string, string][] = [
     [-9.2, 11.4, PAL.paper, PAL.mustard],
-    [-9.2, 8.2, PAL.paper, PAL.tangerine],
+    [-9.2, 8.2, PAL.cream, PAL.tangerine],
     [-6.5, 11.4, PAL.paper, PAL.tangerine],
     [-6.5, 8.2, PAL.paper, PAL.mustard],
-    [-6.5, 4.8, PAL.paper, PAL.tangerine],
+    [-6.5, 4.8, PAL.cream, PAL.tangerine],
   ]
   for (const [hx, hz, wall, roof] of leftHouses) {
     buildGabledHouse(hx, hz, 0, wall, roof, 0.94)
   }
-  // White picket fences framing the neighborhood
-  for (let fz = 7.0; fz <= 12.4; fz += 0.45) {
+  for (let fz = 6.8; fz <= 12.4; fz += 0.45) {
     addBox(0.1, 0.42, 0.18, PAL.paper, -10.55, 0.43, fz, world)
   }
-  for (let fx = -10.2; fx <= -5.4; fx += 0.45) {
+  for (let fx = -10.2; fx <= -5.2; fx += 0.45) {
     addBox(0.18, 0.42, 0.1, PAL.paper, fx, 0.43, 12.85, world)
   }
-  buildTree(-8.8, 4.5, 0.55, 'gold')
+  buildTree(-9.0, 4.8, 0.62, 'spring')
+  buildTree(-10.4, 5.8, 0.52, 'gold')
+  buildBush(-7.8, 9.8, 0.34, PAL.grassHi)
+  buildBush(-7.8, 6.4, 0.32, PAL.mustard)
+  buildFlowerBed(-5.2, 9.8, Math.PI / 2)
+  buildStreetLamp(-5.2, 12.2)
 
-  buildSkyscraper(-3.6, 7.6, 2.35, 2.35, 6.2, 'bands')
-  buildSkyscraper(-3.6, 3.8, 2.55, 2.55, 8.4, 'spire')
+  // Left loop skyscrapers: high-contrast terracotta/ivory & teal spire (no blue!)
+  buildSkyscraper(-3.6, 7.6, 2.35, 2.35, 6.2, 'bands-terracotta')
+  buildSkyscraper(-3.6, 3.8, 2.55, 2.55, 8.4, 'spire-teal')
 
-  /* ── ZONE 2: Upper-Center Skyline ──────────────────────────────────────── */
-  buildSkyscraper(-5.0, -4.6, 2.65, 2.65, 7.8, 'bands')
-  buildSkyscraper(-2.8, -8.4, 2.5, 2.5, 9.2, 'spire')
+  /* ── ZONE 2: Upper-Center Skyline & Park Terrace ───────────────────────── */
+  buildSkyscraper(-5.0, -4.6, 2.65, 2.65, 7.8, 'bands-charcoal')
+  buildSkyscraper(-2.8, -8.4, 2.5, 2.5, 9.2, 'spire-charcoal')
   buildGabledHouse(-9.2, -3.5, Math.PI / 2, PAL.paper, PAL.mustard, 0.94)
-  buildGabledHouse(-7.0, -7.2, 0, PAL.paper, PAL.mustard, 0.9)
+  buildGabledHouse(-7.0, -7.2, 0, PAL.cream, PAL.tangerine, 0.9)
   buildGabledHouse(-2.8, -12.2, Math.PI / 2, PAL.paper, PAL.tangerine, 0.94)
-  buildTree(-8.8, -6.2, 0.62, 'round')
-  buildTree(-5.6, -10.4, 0.55, 'tall')
-  buildTree(-6.8, -4.2, 0.48, 'gold')
+  buildTree(-9.4, -6.2, 0.68, 'round')
+  buildTree(-8.0, -5.2, 0.56, 'spring')
+  buildTree(-5.6, -10.6, 0.62, 'tall')
+  buildTree(-6.8, -4.2, 0.5, 'gold')
+  buildBush(-4.5, -12.0, 0.38, PAL.grassHi)
+  buildFlowerBed(-8.6, -8.2, 0)
+  buildStreetLamp(-3.6, -3.2)
 
-  /* ── ZONE 3: Right Quadrant & Interactive Billboard ────────────────────── */
+  /* ── ZONE 3: Right Quadrant, Gardens & Interactive Billboard ───────────── */
   const makeBillboardTexture = (alt: boolean) => {
     const c = document.createElement('canvas')
     c.width = 768
@@ -1501,7 +1545,7 @@ export function mountPaperCity({
     ctx.strokeStyle = PAL.ink
     const line2 = alt ? 'BOARDING' : 'PULSE.'
     ctx.strokeText(line2, c.width / 2, 262)
-    ctx.fillStyle = alt ? PAL.cerulean : PAL.tangerine
+    ctx.fillStyle = alt ? PAL.teal : PAL.tangerine
     ctx.fillText(line2, c.width / 2, 262)
 
     const tex = own(new THREE.CanvasTexture(c))
@@ -1516,13 +1560,10 @@ export function mountPaperCity({
 
   const boardGroup = new THREE.Group()
   boardGroup.position.set(9.5, 0.22, -10.5)
-  // Steel pillar & base plate
-  addBox(1.3, 0.24, 1.3, PAL.creamLo, 0, 0.12, 0, boardGroup)
-  addBox(0.76, 5.2, 0.76, PAL.cerulean, 0, 2.6, 0, boardGroup)
-  // Tangerine frame & cantilevered catwalk
+  addBox(1.3, 0.24, 1.3, PAL.paper, 0, 0.12, 0, boardGroup)
+  addBox(0.76, 5.2, 0.76, PAL.slate, 0, 2.6, 0, boardGroup)
   addBox(6.7, 3.6, 0.44, PAL.tangerine, 0, 6.25, 0, boardGroup)
   addBox(7.0, 0.26, 0.78, PAL.tangerine, 0, 4.45, 0.16, boardGroup)
-  // White backing card behind sign (like reference multi-sheet billboard)
   addBox(6.5, 3.5, 0.18, PAL.paper, 0.12, 6.38, -0.26, boardGroup)
 
   const bbFace = new THREE.Mesh(
@@ -1534,15 +1575,22 @@ export function mountPaperCity({
   world.add(boardGroup)
   registerHot(boardGroup, 'with a pulse billboard', 'billboard')
 
-  // White arched viaduct building & high-contrast towers in front of billboard
+  // High-contrast ivory, teal-patina, and charcoal towers in front of billboard
   buildSkyscraper(4.4, -5.8, 3.2, 2.3, 4.5, 'ivory')
-  buildSkyscraper(7.6, -4.4, 2.45, 2.45, 6.0, 'plain')
+  buildSkyscraper(7.6, -4.4, 2.45, 2.45, 6.0, 'teal')
   buildSkyscraper(11.2, -3.8, 2.55, 2.55, 7.6, 'ivory')
   addBox(1.5, 2.5, 1.5, PAL.butter, 12.8, 0.22 + 1.25, -3.8, world)
   addBox(1.4, 1.6, 1.4, PAL.tangerine, 12.8, 0.22 + 0.8, -2.2, world)
 
-  /* ── ZONE 4: Front Street, Bus Stop, Vehicles & Mini Park ──────────────── */
-  // Smooth continuous ground road loop passing under the central Cerulean Arch
+  // Trees & gardens in Zone 3 courtyard
+  buildTree(5.2, -9.6, 0.65, 'round')
+  buildTree(7.4, -9.2, 0.56, 'gold')
+  buildTree(12.2, -8.8, 0.6, 'spring')
+  buildBush(11.0, -8.8, 0.36, PAL.grassHi)
+  buildFlowerBed(8.8, -8.2, 0)
+  buildStreetLamp(6.0, -3.0)
+
+  /* ── ZONE 4: Front Street, Crosswalk, Bus Stop, Vehicles & Mini Park ───── */
   const roadWaypoints: [number, number][] = [
     [-1.8, 5.4],
     [13.0, 5.4],
@@ -1609,12 +1657,25 @@ export function mountPaperCity({
   roadSurfMesh.receiveShadow = true
   world.add(roadCurbMesh, roadSurfMesh)
 
-  // Roadside house, glass-and-cerulean bus stop shelter, and orange kiosk
-  buildGabledHouse(4.4, 2.8, 0, PAL.paper, PAL.tangerine, 0.88)
+  // Center green boulevard median island inside the road loop!
+  addLawnPatch(10.6, 2.2, 5.6, 7.8, 0.02)
+  buildTree(2.4, 7.8, 0.52, 'spring', world, 0.14)
+  buildTree(5.6, 7.8, 0.56, 'gold', world, 0.14)
+  buildTree(8.8, 7.8, 0.52, 'round', world, 0.14)
+  buildFlowerBed(4.0, 7.8, 0, 0.14)
+  buildFlowerBed(7.2, 7.8, 0, 0.14)
+  buildStreetLamp(1.2, 7.8, 0.14)
+  buildStreetLamp(10.0, 7.8, 0.14)
+
+  // Roadside house, teal bus stop shelter, trees, and orange ticket kiosk
+  buildGabledHouse(4.4, 3.0, 0, PAL.paper, PAL.tangerine, 0.88)
+  buildTree(2.5, 2.6, 0.56, 'round', world, 0.24)
+  buildTree(6.1, 2.5, 0.48, 'gold', world, 0.24)
+  buildTree(11.5, 2.6, 0.54, 'spring', world, 0.24)
 
   const busStop = new THREE.Group()
-  busStop.position.set(7.8, 0.18, 3.0)
-  addBox(2.3, 0.16, 1.15, PAL.cerulean, 0, 1.48, 0, busStop)
+  busStop.position.set(7.8, 0.18, 3.1)
+  addBox(2.3, 0.16, 1.15, PAL.teal, 0, 1.48, 0, busStop)
   addBox(0.1, 1.42, 0.1, PAL.ink, -0.98, 0.71, -0.42, busStop)
   addBox(0.1, 1.42, 0.1, PAL.ink, 0.98, 0.71, -0.42, busStop)
   addBox(1.85, 1.1, 0.06, PAL.skyGlass, 0, 0.78, -0.42, busStop)
@@ -1622,33 +1683,39 @@ export function mountPaperCity({
   world.add(busStop)
   registerHot(busStop, 'bus stop shelter')
 
-  addBox(0.88, 1.45, 0.78, PAL.tangerine, 10.2, 0.18 + 0.72, 3.05, world)
+  addBox(0.88, 1.45, 0.78, PAL.tangerine, 10.2, 0.18 + 0.72, 3.1, world)
 
-  // Front Mini Park
+  // Expanded Front Mini Park + adjacent botanical lawn
   const parkGroup = new THREE.Group()
-  parkGroup.position.set(4.8, 0, 13.5)
-  addBox(5.6, 0.18, 4.8, PAL.cream, 0, 0.09, 0, parkGroup)
-  addBox(5.2, 0.1, 4.4, PAL.grass, 0, 0.2, 0, parkGroup)
-  addBox(5.24, 0.04, 0.78, PAL.paper, 0, 0.26, 0, parkGroup, { edges: false })
-  addBox(0.78, 0.04, 4.44, PAL.paper, 0, 0.26, 0, parkGroup, { edges: false })
+  parkGroup.position.set(5.4, 0, 13.6)
+  addBox(7.8, 0.18, 4.8, PAL.cream, 0, 0.09, 0, parkGroup)
+  addBox(7.3, 0.1, 4.3, PAL.grass, 0, 0.2, 0, parkGroup)
+  addBox(7.34, 0.04, 0.78, PAL.paper, 0, 0.26, 0, parkGroup, { edges: false })
+  addBox(0.78, 0.04, 4.34, PAL.paper, 0, 0.26, 0, parkGroup, { edges: false })
 
   const basin = new THREE.Mesh(
-    own(new THREE.CylinderGeometry(0.95, 1.0, 0.28, 20)),
+    own(new THREE.CylinderGeometry(0.98, 1.04, 0.28, 20)),
     mat(PAL.paper),
   )
   basin.position.y = 0.34
   addEdges(basin, 25)
   const water = new THREE.Mesh(
-    own(new THREE.CylinderGeometry(0.72, 0.72, 0.1, 20)),
+    own(new THREE.CylinderGeometry(0.74, 0.74, 0.1, 20)),
     mat(PAL.skyGlass),
   )
   water.position.y = 0.46
   parkGroup.add(basin, water)
-  buildTree(-1.7, -1.25, 0.62, 'round', parkGroup, 0.24)
-  buildTree(1.75, 1.15, 0.54, 'tall', parkGroup, 0.24)
-  buildTree(-1.65, 1.25, 0.46, 'gold', parkGroup, 0.24)
+  buildTree(-2.4, -1.25, 0.65, 'round', parkGroup, 0.24)
+  buildTree(2.4, 1.15, 0.58, 'tall', parkGroup, 0.24)
+  buildTree(-2.2, 1.25, 0.5, 'gold', parkGroup, 0.24)
+  buildTree(2.3, -1.2, 0.52, 'spring', parkGroup, 0.24)
+  buildBush(-1.2, 1.4, 0.32, PAL.grassHi, 0.24, parkGroup)
+  buildBush(1.2, -1.4, 0.32, PAL.mustard, 0.24, parkGroup)
+  // Park benches
+  addBox(0.75, 0.22, 0.28, PAL.butter, -1.35, 0.34, -0.58, parkGroup)
+  addBox(0.75, 0.22, 0.28, PAL.tangerine, 1.35, 0.34, 0.58, parkGroup)
   world.add(parkGroup)
-  registerHot(parkGroup, 'mini park')
+  registerHot(parkGroup, 'fountain botanical park')
 
   // Sculpted Bus & Mini Cars
   const roadVehicles: RoadVehicle[] = []
@@ -1702,7 +1769,7 @@ export function mountPaperCity({
 
   buildBus(0)
   buildMiniCar(PAL.tangerine, 0.36)
-  buildMiniCar(PAL.paper, 0.68)
+  buildMiniCar(PAL.tealHi, 0.68)
 
   /* ── Sculpted Floating Clouds ──────────────────────────────────────────── */
   const clouds: { group: THREE.Group; baseX: number; phase: number }[] = []
@@ -1736,14 +1803,14 @@ export function mountPaperCity({
   const BASE_EL = (35.264 * Math.PI) / 180
   const CAM_DIST = 64
   const SCENE_BOUNDS = new THREE.Box3(
-    new THREE.Vector3(-16.2, -0.2, -15.8),
-    new THREE.Vector3(16.6, 10.4, 15.6),
+    new THREE.Vector3(-16.0, -0.2, -15.6),
+    new THREE.Vector3(16.4, 10.4, 15.6),
   )
 
   let camCenterX = 0
   let camCenterY = 0
-  let camSpanX = 38
-  let camSpanY = 26
+  let camSpanX = 36
+  let camSpanY = 24
 
   const updateCameraBounds = (az: number, elAng: number) => {
     camera.position.set(
@@ -1891,7 +1958,6 @@ export function mountPaperCity({
       )
     }
 
-    // Road vehicles around front avenue
     for (const rv of roadVehicles) {
       const u = (((t * 0.055 + rv.offset) % 1) + 1) % 1
       const uNext = (u + 0.008) % 1
@@ -1906,12 +1972,10 @@ export function mountPaperCity({
       for (const w of rv.wheels) w.rotation.z = -spinAngle
     }
 
-    // Gentle cloud drift
     for (const cl of clouds) {
       cl.group.position.x = cl.baseX + Math.sin(t * 0.28 + cl.phase) * 2.2
     }
 
-    // Smooth hover lift springs
     const stepDt = Math.min(0.05, dt || 0.016)
     for (const item of hotItems) {
       const target = hoveredItem === item ? 0.38 : 0
@@ -1921,7 +1985,6 @@ export function mountPaperCity({
       item.group.position.y = item.baseY + item.lift
     }
 
-    // Subtle camera pointer parallax
     const targetTiltX = pointerInside ? pointerNDC.x * 0.038 : 0
     const targetTiltY = pointerInside ? pointerNDC.y * 0.024 : 0
     tiltX += (targetTiltX - tiltX) * 0.1
@@ -2002,7 +2065,6 @@ export function mountPaperCity({
   document.addEventListener('visibilitychange', syncRunState)
   reducedQuery.addEventListener('change', syncRunState)
 
-  // Initial deterministic frame
   stepScene(STILL_TIME, 0)
   syncRunState()
 
