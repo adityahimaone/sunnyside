@@ -2472,8 +2472,8 @@ export function mountPaperCity({
   const BASE_EL = (35.264 * Math.PI) / 180
   const CAM_DIST = 64
   const SCENE_BOUNDS = new THREE.Box3(
-    new THREE.Vector3(-16.0, -0.2, -15.6),
-    new THREE.Vector3(16.4, 10.4, 15.6),
+    new THREE.Vector3(-16.5, -0.4, -16.0),
+    new THREE.Vector3(16.8, 11.2, 16.5),
   )
 
   let camCenterX = 0
@@ -2509,9 +2509,9 @@ export function mountPaperCity({
     const maxY = Math.max(...corners3D.map((v) => v.y))
     camCenterX = (minX + maxX) * 0.5
     camCenterY = (minY + maxY) * 0.5
-    // Scaled-up diorama view for impactful desktop and Mac M1 screens
-    camSpanX = (maxX - minX) * 0.76
-    camSpanY = (maxY - minY) * 0.76
+    // Generous frustum margin so the bottom park corner, railway edges, and clouds never clip
+    camSpanX = (maxX - minX) * 0.94
+    camSpanY = (maxY - minY) * 0.94
   }
 
   const fitFrustum = () => {
