@@ -10,6 +10,9 @@ export type PaperCityController = {
 type MountOptions = {
   el: HTMLElement
   onReadout?: (text: string) => void
+  introDelay?: number
+  onToggleScale?: () => void
+  onIntroComplete?: () => void
 }
 
 type HotItem = {
@@ -61,6 +64,9 @@ const PAL = {
 export function mountPaperCity({
   el,
   onReadout,
+  introDelay = 0,
+  onToggleScale,
+  onIntroComplete,
 }: MountOptions): PaperCityController | null {
   let renderer: THREE.WebGLRenderer
   try {
@@ -2509,9 +2515,8 @@ export function mountPaperCity({
   }
 
   const fitFrustum = () => {
-    const rect = el.getBoundingClientRect()
-    const w = Math.max(280, rect.width || 960)
-    const h = Math.max(220, rect.height || Math.round(w * (2 / 3)))
+    const w = Math.max(280, el.clientWidth || 960)
+    const h = Math.max(220, el.clientHeight || Math.round(w * (2 / 3)))
     renderer.setSize(w, h, false)
     const aspect = w / h
     let halfW = camSpanX * 0.5
@@ -2566,7 +2571,7 @@ export function mountPaperCity({
       if (matched) break
     }
     hoveredItem = matched
-    canvas.style.cursor = matched ? 'pointer' : 'default'
+    canvas.style.cursor = 'pointer'
   }
 
   const onPointerLeave = () => {
@@ -2592,8 +2597,9 @@ export function mountPaperCity({
     } else if (hoveredItem?.kind === 'train') {
       boostTrains()
     } else {
-      toggleBillboard()
+      trainBoost = Math.max(trainBoost, 2.2)
     }
+    onToggleScale?.()
   }
 
   canvas.addEventListener('pointermove', onPointerMove)
@@ -2715,12 +2721,19 @@ export function mountPaperCity({
   const roadDropDelays = roadVehicles.map(
     (_, i) => 1.28 + seededRand(700 + i) * 0.3,
   )
+  const maxIntroEnd = Math.max(
+    ...skyDropEntries.map((e) => e.delay + e.duration),
+    ...orangeDropDelays.map((d) => d + 0.48),
+    ...yellowDropDelays.map((d) => d + 0.48),
+    ...roadDropDelays.map((d) => d + 0.46),
+  )
 
   /* ── Animation Clock & Frame Step ──────────────────────────────────────── */
   const reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   const STILL_TIME = 20
   let simTime = STILL_TIME
-  let introTime = reducedQuery.matches ? 999 : 0
+  let introTime = reducedQuery.matches ? 999 : -Math.max(0, introDelay)
+  let introCompleted = reducedQuery.matches
   let railDist = STILL_TIME * 3.4
   const roadPos = new THREE.Vector3()
   const roadNext = new THREE.Vector3()
@@ -2827,6 +2840,11 @@ export function mountPaperCity({
     updateCameraBounds(BASE_AZ + tiltX, BASE_EL + tiltY)
 
     renderer.render(scene, camera)
+
+    if (!introCompleted && introTime >= maxIntroEnd + 0.65) {
+      introCompleted = true
+      onIntroComplete?.()
+    }
 
     if (onReadout) {
       if (hoveredItem) {

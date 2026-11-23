@@ -45,17 +45,108 @@
   border: 0;
 }
 
+.backdropWordmark {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: clamp(1rem, 4vw, 3.5rem);
+  pointer-events: none;
+  user-select: none;
+  transition:
+    opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.backdropWordmark[data-parted='true'] {
+  opacity: 0.96;
+  transform: scale(1);
+}
+
+.backdropWordmark[data-settled='true'] {
+  opacity: 0.82;
+  transform: scale(1.04);
+}
+
+.backdropSvg {
+  width: min(88vw, 1280px);
+  height: auto;
+  overflow: visible;
+  color: #fffaf1;
+}
+
+.wordHalf {
+  transition: transform 0.82s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
 .stageWrap {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   width: min(100%, 1440px, calc((100svh - 7rem) * 1.56));
   min-width: min(100%, 340px);
   margin-inline: auto;
+  transform-origin: center center;
+  transition:
+    transform 0.88s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.45s ease;
+  will-change: transform;
+  cursor: pointer;
+  border-radius: 1.5rem;
+}
+
+.stageWrap:focus-visible {
+  outline: 2.5px solid #ffd23f;
+  outline-offset: 6px;
+}
+
+.stageWrap[data-writing='true'] {
+  opacity: 0;
+  transform: scale(0.32);
+  pointer-events: none;
+}
+
+.stageWrap[data-compact='true'][data-writing='false'] {
+  opacity: 1;
+  transform: scale(0.36);
+}
+
+.stageWrap[data-compact='false'] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.stageWrap[data-compact='true'][data-writing='false']:hover {
+  transform: scale(0.39);
+}
+
+.stageWrap[data-compact='false']:hover {
+  transform: scale(1.015);
 }
 
 .stage {
   width: 100%;
   aspect-ratio: 3 / 2;
   touch-action: pan-y;
+}
+
+@media (max-width: 640px) {
+  .stageWrap[data-compact='true'][data-writing='false'] {
+    transform: scale(0.42);
+  }
+
+  .stageWrap[data-compact='true'][data-writing='false']:hover {
+    transform: scale(0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdropWordmark,
+  .wordHalf,
+  .stageWrap {
+    transition: none;
+  }
 }
 
