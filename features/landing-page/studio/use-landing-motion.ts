@@ -5,15 +5,16 @@ import { useEffect, type RefObject } from 'react'
 /**
  * Side A's scroll choreography.
  *
- * Everything here is transform/opacity only and lives in one GSAP context:
- * the tape band tilts as it crosses the viewport, section numbers and rules
- * draw, the study prints fan in, the release covers drift inside their frames,
- * and the postcard floats. The hero has its own pointer and scroll loop
- * (`hero/use-hero-scene`). The reduced-motion query never builds the
- * timelines; it returns the finished page exactly as CSS has it.
+ * Everything here is transform/opacity only and lives in one GSAP context,
+ * initialized during browser idle time so it never competes with critical
+ * hydration. Dead legacy selectors and transforms owned by `StickerJourney`
+ * (`marquee`, `about-photo`) are excluded so two loops never fight over one DOM
+ * element. Reduced motion skips building the timelines altogether.
  */
 export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
     let cancelled = false
     let revert = () => {}
 
@@ -37,27 +38,6 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
         (context) => {
           if (context.conditions?.reduce) return
 
-          // The tape band turns a little as it crosses the viewport.
-          const marquee = q('[data-marquee]')
-          if (marquee.length) {
-            gsap.fromTo(
-              marquee,
-              { rotate: -2, scale: 1.03, yPercent: 0 },
-              {
-                rotate: 0.7,
-                scale: 1.045,
-                yPercent: -3,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: marquee[0],
-                  start: 'top bottom',
-                  end: 'bottom top',
-                  scrub: 1,
-                },
-              },
-            )
-          }
-
           // Chapter opener: the number lands, the rule draws.
           q('[data-head-number]').forEach((el) => {
             gsap.from(el, {
@@ -79,25 +59,11 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
             })
           })
 
-          // About: the photo and the now-card drift at different speeds.
-          const photo = q('[data-about-photo]')
-          if (photo.length) {
-            gsap.to(photo, {
-              y: -36,
-              rotate: -0.8,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: photo[0],
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: 1,
-              },
-            })
-          }
+          // About: the now-card drifts gently (`photo` drift is owned by StickerJourney).
           const now = q('[data-about-now]')
           if (now.length) {
             gsap.to(now, {
-              y: 30,
+              y: 24,
               ease: 'none',
               scrollTrigger: {
                 trigger: now[0],
@@ -128,7 +94,7 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
             })
           }
 
-          // Work: a large sun turns behind the shelf, and each cover drifts.
+          // Work: a large sun turns behind the shelf.
           const workSun = q('[data-work-sun]')
           if (workSun.length) {
             gsap.to(workSun, {
@@ -143,37 +109,6 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
               },
             })
           }
-          q('[data-project-card]').forEach((card) => {
-            const image = card.querySelector('[data-project-media] img')
-            if (!image) return
-            gsap.fromTo(
-              image,
-              { yPercent: -4, scale: 1.08 },
-              {
-                yPercent: 4,
-                scale: 1.08,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: card,
-                  start: 'top bottom',
-                  end: 'bottom top',
-                  scrub: 1,
-                },
-              },
-            )
-          })
-
-          // Skill chips settle one after another, once.
-          q('[data-skill-chips]').forEach((list) => {
-            gsap.from(list.children, {
-              y: 9,
-              opacity: 0,
-              duration: 0.4,
-              ease: 'power2.out',
-              stagger: 0.035,
-              scrollTrigger: { trigger: list, start: 'top 92%', once: true },
-            })
-          })
 
           // Contact postcard keeps a little altitude.
           const postcard = q('[data-contact-postcard]')
@@ -198,9 +133,15 @@ export function useLandingMotion(rootRef: RefObject<HTMLElement | null>) {
       }
     }
 
-    void start()
+    const hasIdle = 'requestIdleCallback' in window
+    const idleId = hasIdle
+      ? window.requestIdleCallback(() => void start(), { timeout: 1200 })
+      : window.setTimeout(() => void start(), 200)
+
     return () => {
       cancelled = true
+      if (hasIdle) window.cancelIdleCallback(idleId)
+      else window.clearTimeout(idleId)
       revert()
     }
   }, [rootRef])

@@ -54,16 +54,19 @@
 /* Inside the observatory the station's own ink is the only reliable contrast:
    the floors alternate cobalt, butter, pink, and cream. */
 
-/* A fixed, non-interactive paper tooth. Static paint, never inside a scroller. */
+/* A fixed, non-interactive paper tooth. Uses a pre-baked 64×64 RGBA ink-alpha
+   WebP tile instead of live SVG feTurbulence + mix-blend-mode: multiply so the
+   compositor never re-evaluates turbulence or reads back the WebGL backdrop. */
 .grain::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 80;
   pointer-events: none;
-  opacity: 0.055;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.65;
+  background-image: url('/paper-grain.webp');
+  background-size: 96px 96px;
+  background-repeat: repeat;
 }
 
 .shell {
@@ -170,11 +173,13 @@
   z-index: 0;
   pointer-events: none;
   background: var(--island-bg);
-  -webkit-mask-image:
-    radial-gradient(circle 16px at 0 100%, transparent 15.5px, #000 16.2px),
+  -webkit-mask-image: radial-gradient(
+      circle 16px at 0 100%,
+      transparent 15.5px,
+      #000 16.2px
+    ),
     radial-gradient(circle 16px at 100% 100%, transparent 15.5px, #000 16.2px),
-    linear-gradient(#000, #000),
-    linear-gradient(#000, #000),
+    linear-gradient(#000, #000), linear-gradient(#000, #000),
     radial-gradient(
       circle var(--island-r) at 100% 0,
       #000 calc(var(--island-r) - 0.5px),
@@ -185,11 +190,13 @@
       #000 calc(var(--island-r) - 0.5px),
       transparent calc(var(--island-r) + 0.3px)
     );
-  mask-image:
-    radial-gradient(circle 16px at 0 100%, transparent 15.5px, #000 16.2px),
+  mask-image: radial-gradient(
+      circle 16px at 0 100%,
+      transparent 15.5px,
+      #000 16.2px
+    ),
     radial-gradient(circle 16px at 100% 100%, transparent 15.5px, #000 16.2px),
-    linear-gradient(#000, #000),
-    linear-gradient(#000, #000),
+    linear-gradient(#000, #000), linear-gradient(#000, #000),
     radial-gradient(
       circle var(--island-r) at 100% 0,
       #000 calc(var(--island-r) - 0.5px),
@@ -218,14 +225,16 @@
     16.5px 16px,
     16.5px 16px,
     calc(100% - 31px) calc(100% - var(--island-r) + 0.5px),
-    calc(100% - 31px - (var(--island-r) * 2) + 1px) calc(var(--island-r) + 0.5px),
+    calc(100% - 31px - (var(--island-r) * 2) + 1px)
+      calc(var(--island-r) + 0.5px),
     calc(var(--island-r) + 0.5px) calc(var(--island-r) + 0.5px),
     calc(var(--island-r) + 0.5px) calc(var(--island-r) + 0.5px);
   mask-size:
     16.5px 16px,
     16.5px 16px,
     calc(100% - 31px) calc(100% - var(--island-r) + 0.5px),
-    calc(100% - 31px - (var(--island-r) * 2) + 1px) calc(var(--island-r) + 0.5px),
+    calc(100% - 31px - (var(--island-r) * 2) + 1px)
+      calc(var(--island-r) + 0.5px),
     calc(var(--island-r) + 0.5px) calc(var(--island-r) + 0.5px),
     calc(var(--island-r) + 0.5px) calc(var(--island-r) + 0.5px);
   -webkit-mask-repeat: no-repeat;
@@ -311,8 +320,7 @@
   --island-cta-fg: var(--ink);
   --island-btn-bg: rgb(255 255 255 / 0.14);
   --island-btn-border: rgb(255 255 255 / 0.28);
-  --island-bg:
-    radial-gradient(
+  --island-bg: radial-gradient(
       120% 180% at 50% -40%,
       rgb(255 255 255 / 0.32),
       transparent 65%
@@ -336,8 +344,7 @@
   --island-cta-fg: #fffaf1;
   --island-btn-bg: rgb(25 26 46 / 0.06);
   --island-btn-border: rgb(25 26 46 / 0.15);
-  --island-bg:
-    radial-gradient(
+  --island-bg: radial-gradient(
       120% 180% at 50% -50%,
       rgb(255 255 255 / 0.78),
       transparent 65%
@@ -363,17 +370,12 @@
   --island-cta-fg: var(--ink);
   --island-btn-bg: rgb(255 255 255 / 0.12);
   --island-btn-border: rgb(255 255 255 / 0.24);
-  --island-bg:
-    radial-gradient(
+  --island-bg: radial-gradient(
       130% 140% at 50% -20%,
       rgb(255 255 255 / 0.24),
       transparent 60%
     ),
-    linear-gradient(
-      180deg,
-      rgb(18 21 38 / 0.76) 0%,
-      rgb(13 15 28 / 0.68) 100%
-    );
+    linear-gradient(180deg, rgb(18 21 38 / 0.76) 0%, rgb(13 15 28 / 0.68) 100%);
   --island-shadow: 0 28px 64px -16px rgb(6 7 14 / 0.65);
 }
 
@@ -1692,6 +1694,7 @@
   position: relative;
   padding-block: clamp(5.5rem, 11vw, 9rem);
   background: var(--paper-hi);
+  contain: layout style;
 }
 
 .aboutGrid {
@@ -2780,6 +2783,7 @@
   position: relative;
   padding-block: clamp(5.5rem, 11vw, 9rem);
   overflow: clip;
+  contain: layout style;
 }
 
 .contactGrid {

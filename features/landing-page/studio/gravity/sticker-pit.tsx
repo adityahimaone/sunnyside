@@ -4,7 +4,7 @@ import { useReducedMotion } from 'motion/react'
 import { useEffect, useRef, type CSSProperties } from 'react'
 
 import { PIT_STICKERS, type PitSpec } from './pit-config'
-import { runPit, type PitRuntime } from './pit-runtime'
+import type { PitRuntime } from './pit-runtime'
 import { StickerArt } from './sticker-art'
 import styles from './sticker-pit.module.css'
 
@@ -20,9 +20,8 @@ function Art({ spec }: { spec: PitSpec }) {
  * shapes they left behind, and they are also where the stickers sit when
  * motion is reduced, so the tray is complete without the physics.
  *
- * Everything inside is decoration. The one control, "Shake the tray", is a
- * real button so the toy has a keyboard and screen-reader path, and the
- * stickers themselves are hidden from assistive tech.
+ * The 2D rigid-body engine (`pit-runtime`) is loaded lazily only when the tray
+ * approaches the viewport so it adds zero cost to initial hydration.
  */
 export function StickerPit() {
   const reduced = useReducedMotion() ?? false
@@ -32,9 +31,41 @@ export function StickerPit() {
   useEffect(() => {
     if (reduced || !pitRef.current) return
     const pit = pitRef.current
-    pit.dataset.live = 'true'
-    runtime.current = runPit(pit)
+    let cancelled = false
+
+    const boot = () => {
+      if (cancelled || runtime.current) return
+      void import('./pit-runtime').then(({ runPit }) => {
+        if (cancelled || !pitRef.current) return
+        pit.dataset.live = 'true'
+        runtime.current = runPit(pit)
+      })
+    }
+
+    if (typeof IntersectionObserver === 'undefined') {
+      boot()
+      return () => {
+        cancelled = true
+        runtime.current?.stop()
+        runtime.current = null
+        delete pit.dataset.live
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          observer.disconnect()
+          boot()
+        }
+      },
+      { rootMargin: '260px 0px' },
+    )
+    observer.observe(pit)
+
     return () => {
+      cancelled = true
+      observer.disconnect()
       runtime.current?.stop()
       runtime.current = null
       delete pit.dataset.live

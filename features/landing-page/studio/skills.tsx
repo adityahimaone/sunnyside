@@ -1,22 +1,31 @@
 'use client'
 
-import { useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentType,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 
 import { cn } from '@/lib/utils'
 
-import {
-  BuildArt,
-  DioramaDefs,
-  MotionArt,
-  RestArt,
-  SystemsArt,
-} from './diorama/diorama-art'
-import { BookBase, Leaf } from './diorama/book'
 import { useBookScroll } from './diorama/book-scroll'
 import styles from './diorama/diorama.module.css'
 import { at, atRight, fs, u, vars } from './diorama/geometry'
 import { SectionHead, SectionNext } from './section-head'
 import { SKILL_GROUPS } from './studio-data'
+
+type DioramaArtBundle = {
+  DioramaDefs: ComponentType
+  BookBase: ComponentType
+  Leaf: ComponentType
+  BuildArt: ComponentType
+  MotionArt: ComponentType
+  RestArt: ComponentType<{ folderCount: number }>
+  SystemsArt: ComponentType
+}
 
 type StationId = 'all' | 'build' | 'motion' | 'systems' | 'rest'
 
@@ -118,10 +127,58 @@ export function Skills() {
   const [playing, setPlaying] = useState(false)
   const [pressed, setPressed] = useState(false)
   const [ribbon, setRibbon] = useState(0)
+  const [art, setArt] = useState<DioramaArtBundle | null>(null)
 
   const stage = useRef<HTMLDivElement>(null)
   const rail = useRef<HTMLDivElement>(null)
   useBookScroll(rail, stage)
+
+  useEffect(() => {
+    const el = rail.current
+    if (!el || art) return
+    let cancelled = false
+
+    const loadArt = () => {
+      void Promise.all([
+        import('./diorama/diorama-art'),
+        import('./diorama/book'),
+      ]).then(([artMod, bookMod]) => {
+        if (cancelled) return
+        setArt({
+          DioramaDefs: artMod.DioramaDefs,
+          BuildArt: artMod.BuildArt,
+          MotionArt: artMod.MotionArt,
+          RestArt: artMod.RestArt,
+          SystemsArt: artMod.SystemsArt,
+          BookBase: bookMod.BookBase,
+          Leaf: bookMod.Leaf,
+        })
+      })
+    }
+
+    if (typeof IntersectionObserver === 'undefined') {
+      loadArt()
+      return () => {
+        cancelled = true
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          observer.disconnect()
+          loadArt()
+        }
+      },
+      { rootMargin: '950px 0px' },
+    )
+    observer.observe(el)
+
+    return () => {
+      cancelled = true
+      observer.disconnect()
+    }
+  }, [art])
 
   const build = SKILL_GROUPS.find((group) => group.id === 'build')!
   const motionGroup = SKILL_GROUPS.find((group) => group.id === 'motion')!
@@ -175,7 +232,7 @@ export function Skills() {
                 data-running={running}
                 style={vars({ '--lever': `${lever.toFixed(1)}deg` })}
               >
-                <DioramaDefs />
+                {art ? <art.DioramaDefs /> : null}
 
                 <div className={styles.controller}>
                   <div className={styles.controllerTop}>
@@ -212,10 +269,10 @@ export function Skills() {
                 <div className={styles.book}>
                   <div className={styles.scene}>
                     <div className={styles.layerBase}>
-                      <BookBase />
+                      {art ? <art.BookBase /> : null}
                     </div>
                     <div className={styles.shade} />
-                    <Leaf />
+                    {art ? <art.Leaf /> : null}
 
                     {/* 04 · The rest */}
                     <Card
@@ -227,7 +284,9 @@ export function Skills() {
                         data-id="rest"
                         style={vars({ '--depth': 0.45, '--n': 0 })}
                       >
-                        <RestArt folderCount={folders.length} />
+                        {art ? (
+                          <art.RestArt folderCount={folders.length} />
+                        ) : null}
                         <Eyebrow
                           x={610}
                           y={401}
@@ -295,7 +354,7 @@ export function Skills() {
                         data-id="build"
                         style={vars({ '--depth': 0.8, '--n': 1 })}
                       >
-                        <BuildArt />
+                        {art ? <art.BuildArt /> : null}
                         <Eyebrow
                           x={172}
                           y={129}
@@ -359,7 +418,7 @@ export function Skills() {
                         data-id="motion"
                         style={vars({ '--depth': 0.8, '--n': 2 })}
                       >
-                        <MotionArt />
+                        {art ? <art.MotionArt /> : null}
                         <Eyebrow
                           x={565}
                           y={129}
@@ -468,7 +527,7 @@ export function Skills() {
                         data-id="systems"
                         style={vars({ '--depth': 1.35, '--n': 3 })}
                       >
-                        <SystemsArt />
+                        {art ? <art.SystemsArt /> : null}
                         <Eyebrow
                           x={357}
                           y={334}

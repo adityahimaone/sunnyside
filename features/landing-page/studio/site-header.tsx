@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/sunnyside-logo'
 import { cn } from '@/lib/utils'
 
-import type { HeroSurface } from './hero'
+import type { HeroSurface } from './hero/cutting-mat-marks'
 import { CHAPTERS, SOCIALS, scrollToSection } from './studio-data'
 import styles from './studio.module.css'
 
@@ -365,6 +365,7 @@ export function SiteHeader({
                     >
                       <Link
                         href={destination.href}
+                        prefetch={open ? undefined : false}
                         className={styles.islandCard}
                         data-tone={destination.tone}
                         onClick={() => setOpen(false)}
@@ -400,6 +401,7 @@ export function SiteHeader({
                   <div className={styles.islandFootLinks}>
                     <Link
                       href="/music"
+                      prefetch={open ? undefined : false}
                       className={styles.islandFootLink}
                       onClick={() => setOpen(false)}
                     >

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type CSSProperties, useEffect, useRef, useState } from 'react'
 
+import { GlassFilter } from '@/components/ui/liquid-glass'
 import {
   SunnysideMark,
   SunnysideWordmark,
@@ -117,6 +118,11 @@ export function ArchiveHeader() {
 
   return (
     <>
+      <GlassFilter
+        id="liquid-glass-bar"
+        scale={22}
+        baseFrequency="0.005 0.014"
+      />
       <header className={styles.header}>
         <motion.div
           aria-hidden

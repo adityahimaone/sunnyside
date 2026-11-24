@@ -166,12 +166,13 @@ export function About() {
                     />
                     <div className={styles.photoFrame}>
                       <Image
-                        src="/memoji-1.png"
+                        src="/memoji-1.webp"
                         alt="Aditya's memoji, half hidden behind a laptop"
                         width={420}
                         height={420}
                         sizes="(min-width: 1024px) 22rem, 80vw"
-                        priority={false}
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                     <div className={styles.photoCaption}>

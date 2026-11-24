@@ -2,10 +2,12 @@
 
 import React, {
   createContext,
+  useCallback,
   useContext,
-  useState,
-  useRef,
   useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react'
 
 interface AudioContextType {
@@ -22,6 +24,7 @@ interface AudioContextType {
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined)
+const AUDIO_SOURCE = '/music/edge-of-desire-sunrise-mix.weba'
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false)
@@ -30,21 +33,29 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [playbackRate, setPlaybackRate] = useState(1.0)
   const [currentTrack, setCurrentTrack] = useState('The Portfolio Mix')
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const audioSource = '/music/edge-of-desire-sunrise-mix.weba'
+  const endedHandlerRef = useRef<(() => void) | null>(null)
 
-  useEffect(() => {
-    const audio = new Audio(audioSource)
-    audioRef.current = audio
+  const ensureAudio = useCallback(() => {
+    if (audioRef.current) return audioRef.current
+    const audio = new Audio(AUDIO_SOURCE)
     audio.preload = 'none'
     audio.loop = true
-    audio.volume = volume
+    audio.volume = isMuted ? 0 : volume
     audio.playbackRate = playbackRate
-
     const handleEnded = () => setIsPlaying(false)
+    endedHandlerRef.current = handleEnded
     audio.addEventListener('ended', handleEnded)
+    audioRef.current = audio
+    return audio
+  }, [isMuted, playbackRate, volume])
 
+  useEffect(() => {
     return () => {
-      audio.removeEventListener('ended', handleEnded)
+      const audio = audioRef.current
+      if (!audio) return
+      if (endedHandlerRef.current) {
+        audio.removeEventListener('ended', endedHandlerRef.current)
+      }
       audio.pause()
       audioRef.current = null
     }
@@ -62,14 +73,13 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
   }, [playbackRate])
 
-  const togglePlay = () => {
-    if (!audioRef.current) return
-
+  const togglePlay = useCallback(() => {
+    const audio = ensureAudio()
     if (isPlaying) {
-      audioRef.current.pause()
+      audio.pause()
       setIsPlaying(false)
     } else {
-      const playPromise = audioRef.current.play()
+      const playPromise = audio.play()
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
@@ -78,34 +88,40 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
               'Jonas Blue & Malive - Edge Of Desire (Sunrise Mix)',
             )
           })
-          .catch((error) => {
-            console.error('Playback failed:', error)
+          .catch(() => {
             setIsPlaying(false)
           })
       }
     }
-  }
+  }, [ensureAudio, isPlaying])
 
-  const toggleMute = () => setIsMuted((prev) => !prev)
+  const toggleMute = useCallback(() => setIsMuted((prev) => !prev), [])
 
-  return (
-    <AudioContext.Provider
-      value={{
-        isPlaying,
-        togglePlay,
-        isMuted,
-        toggleMute,
-        volume,
-        setVolume,
-        playbackRate,
-        setPlaybackRate,
-        currentTrack,
-        audioRef,
-      }}
-    >
-      {children}
-    </AudioContext.Provider>
+  const value = useMemo(
+    () => ({
+      isPlaying,
+      togglePlay,
+      isMuted,
+      toggleMute,
+      volume,
+      setVolume,
+      playbackRate,
+      setPlaybackRate,
+      currentTrack,
+      audioRef,
+    }),
+    [
+      currentTrack,
+      isMuted,
+      isPlaying,
+      playbackRate,
+      toggleMute,
+      togglePlay,
+      volume,
+    ],
   )
+
+  return <AudioContext.Provider value={value}>{children}</AudioContext.Provider>
 }
 
 export function useAudio() {

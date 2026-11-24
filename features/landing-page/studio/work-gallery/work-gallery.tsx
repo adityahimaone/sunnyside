@@ -26,10 +26,8 @@ import { Reveal } from '../reveal'
 import {
   ARCHIVE_LINKS,
   DEFAULT_YARN,
-  FEATURED_PROJECT_ITEMS,
   FEATURED_SYSTEM_SLUGS,
   GALLERY_ITEMS,
-  PROJECT_GALLERY_ITEMS,
   SYSTEM_GALLERY_ITEMS,
   YARN_HEX,
   YARN_SPOOLS,
@@ -310,6 +308,8 @@ function CoverPlate({
         fill
         sizes={sizes}
         preload={eager}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
         className={styles.cover}
         style={{ objectPosition: item.position }}
         onLoad={onLoad}
@@ -334,7 +334,6 @@ type PieceProps = {
   onPin: (id: string) => void
   onStamp: (id: string) => void
   onOpen: (item: GalleryItem) => void
-  onPan: (event: PointerEvent<HTMLElement>, reset?: boolean) => void
   onPeek: (item: GalleryItem, element: HTMLElement) => void
   onPeekEnd: () => void
   drop: number
@@ -351,7 +350,6 @@ function PaperPiece({
   onPin,
   onStamp,
   onOpen,
-  onPan,
   onPeek,
   onPeekEnd,
   drop,
@@ -361,16 +359,11 @@ function PaperPiece({
   const tape = meta.tape
   /** The print only lifts off the artwork, not off the whole card. */
   const artRef = useRef<HTMLSpanElement>(null)
+  const panRef = useRef<HTMLSpanElement>(null)
+  const artBoxRef = useRef<DOMRect | null>(null)
 
-  const overArt = (event: PointerEvent<HTMLElement>) => {
-    const box = artRef.current?.getBoundingClientRect()
-    if (!box) return false
-    return (
-      event.clientX >= box.left &&
-      event.clientX <= box.right &&
-      event.clientY >= box.top &&
-      event.clientY <= box.bottom
-    )
+  const refreshArtBox = () => {
+    artBoxRef.current = artRef.current?.getBoundingClientRect() ?? null
   }
 
   return (
@@ -387,17 +380,36 @@ function PaperPiece({
           '--cell-drop': `${drop}rem`,
         } as CSSProperties
       }
+      onPointerEnter={(event) => {
+        if (event.pointerType === 'mouse') refreshArtBox()
+      }}
       onPointerMove={(event) => {
-        onPan(event)
-        if (event.pointerType === 'touch') return
+        if (event.pointerType !== 'mouse') return
+        const box = artBoxRef.current ?? (refreshArtBox(), artBoxRef.current)
+        if (!box) return
+        const media = panRef.current
+        if (media && box.width > 0 && box.height > 0) {
+          const x = ((event.clientX - box.left) / box.width - 0.5) * -10
+          const y = ((event.clientY - box.top) / box.height - 0.5) * -8
+          media.style.setProperty('--pan-x', `${x.toFixed(2)}px`)
+          media.style.setProperty('--pan-y', `${y.toFixed(2)}px`)
+        }
         // The card is clickable edge to edge, so the pointer target is the
-        // overlay button, not the artwork: hit-test the frame's box instead of
-        // trusting `event.target`.
-        if (overArt(event)) onPeek(item, event.currentTarget)
+        // overlay button, not the artwork: hit-test the cached frame box.
+        const insideArt =
+          event.clientX >= box.left &&
+          event.clientX <= box.right &&
+          event.clientY >= box.top &&
+          event.clientY <= box.bottom
+        if (insideArt) onPeek(item, event.currentTarget)
         else onPeekEnd()
       }}
-      onPointerLeave={(event) => {
-        onPan(event, true)
+      onPointerLeave={() => {
+        artBoxRef.current = null
+        if (panRef.current) {
+          panRef.current.style.setProperty('--pan-x', '0px')
+          panRef.current.style.setProperty('--pan-y', '0px')
+        }
         onPeekEnd()
       }}
       aria-labelledby={`${item.id}-piece-title`}
@@ -442,7 +454,7 @@ function PaperPiece({
       </span>
 
       <span className={styles.frame} data-frame ref={artRef}>
-        <span className={styles.panTarget} data-pan-target>
+        <span className={styles.panTarget} data-pan-target ref={panRef}>
           <CoverPlate
             item={item}
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 60vw, 78vw"
@@ -941,24 +953,6 @@ export function WorkGallery({
     setDragging(false)
   }
 
-  /** Mouse parallax on the print inside a tile. Decoration only. */
-  const pan = (event: PointerEvent<HTMLElement>, reset = false) => {
-    if (event.pointerType !== 'mouse') return
-    const media =
-      event.currentTarget.querySelector<HTMLElement>('[data-pan-target]')
-    if (!media) return
-    if (reset) {
-      media.style.setProperty('--pan-x', '0px')
-      media.style.setProperty('--pan-y', '0px')
-      return
-    }
-    const rect = media.getBoundingClientRect()
-    const x = ((event.clientX - rect.left) / rect.width - 0.5) * -10
-    const y = ((event.clientY - rect.top) / rect.height - 0.5) * -8
-    media.style.setProperty('--pan-x', `${x.toFixed(2)}px`)
-    media.style.setProperty('--pan-y', `${y.toFixed(2)}px`)
-  }
-
   const peel = useCallback(
     (id: string) =>
       setPeeled((current) => {
@@ -1301,7 +1295,6 @@ export function WorkGallery({
                     onPin={tieYarn}
                     onStamp={toggle}
                     onOpen={setActive}
-                    onPan={pan}
                     onPeek={peekLater}
                     onPeekEnd={closePeek}
                     drop={dropFor(item.id)}
@@ -1335,8 +1328,6 @@ export function WorkGallery({
             </div>
 
             <MatStickers peeled={peeled} onPeel={peel} bounds={boardRef} />
-
-            <AnimatePresence></AnimatePresence>
 
             <AnimatePresence>
               {peek ? (

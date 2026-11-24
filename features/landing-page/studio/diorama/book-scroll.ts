@@ -106,6 +106,8 @@ export function useBookScroll(
     let frame = 0
     let last = 0
     let listening = false
+    let nearViewport = true
+    let io: IntersectionObserver | null = null
 
     const apply = (p: number) => {
       const state = bookState(p)
@@ -144,14 +146,24 @@ export function useBookScroll(
       }
     }
 
-    const stop = () => {
-      cancelAnimationFrame(frame)
-      frame = 0
-      if (listening) {
+    const setScrollListeners = (active: boolean) => {
+      if (active && !listening) {
+        window.addEventListener('scroll', kick, { passive: true })
+        window.addEventListener('resize', kick)
+        listening = true
+      } else if (!active && listening) {
         window.removeEventListener('scroll', kick)
         window.removeEventListener('resize', kick)
         listening = false
       }
+    }
+
+    const stop = () => {
+      cancelAnimationFrame(frame)
+      frame = 0
+      io?.disconnect()
+      io = null
+      setScrollListeners(false)
       for (const name of VARS) stageEl.style.removeProperty(name)
       for (const id of POP_IDS) {
         delete stageEl.dataset[`up${id[0].toUpperCase()}${id.slice(1)}`]
@@ -164,16 +176,48 @@ export function useBookScroll(
       // Arriving mid-page (a reload, a #skills link) shows the right page at once.
       current = target
       apply(current)
-      window.addEventListener('scroll', kick, { passive: true })
-      window.addEventListener('resize', kick)
-      listening = true
+
+      if (typeof IntersectionObserver === 'undefined') {
+        setScrollListeners(true)
+        return
+      }
+
+      io = new IntersectionObserver(
+        (entries) => {
+          nearViewport = entries.some((entry) => entry.isIntersecting)
+          if (nearViewport) {
+            setScrollListeners(true)
+            kick()
+          } else {
+            setScrollListeners(false)
+          }
+        },
+        { rootMargin: '320px 0px' },
+      )
+      io.observe(railEl)
     }
 
     const sync = () => (query.matches ? start() : stop())
     sync()
     query.addEventListener('change', sync)
 
+    // Offscreen animation sleep gate on both desktop and mobile viewports.
+    const visibilityIo =
+      typeof IntersectionObserver === 'undefined'
+        ? null
+        : new IntersectionObserver(
+            (entries) => {
+              stageEl.dataset.inview = String(
+                entries.some((entry) => entry.isIntersecting),
+              )
+            },
+            { rootMargin: '160px 0px' },
+          )
+    visibilityIo?.observe(railEl)
+
     return () => {
+      visibilityIo?.disconnect()
+      delete stageEl.dataset.inview
       query.removeEventListener('change', sync)
       stop()
     }

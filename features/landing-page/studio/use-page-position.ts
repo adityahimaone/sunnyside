@@ -11,10 +11,11 @@ type PagePosition = {
 }
 
 /**
- * One scroll read for the header, the chapter rail and the progress line.
- * Change-only updates, rAF-throttled, and every listener gets a cleanup. The
- * boundaries are geometric rather than magical ratios so the active chapter
- * matches what the reader can actually see.
+ * One scroll read for the header and the chapter rail.
+ *
+ * Chapter and footer document-space Y offsets are cached on layout/resize so
+ * scroll frames only read `window.scrollY` and `window.innerHeight` — zero
+ * forced `getBoundingClientRect()` layout reads during scroll.
  */
 export function usePagePosition(): PagePosition {
   const [state, setState] = useState<PagePosition>({
@@ -25,25 +26,47 @@ export function usePagePosition(): PagePosition {
 
   useEffect(() => {
     let frame = 0
+    let measureTimer = 0
+    let chapterTops: Array<{ id: ChapterId; top: number }> = []
+    let footerTop: number | null = null
+    let vh = window.innerHeight
 
-    const evaluate = () => {
-      frame = 0
-      const line = window.innerHeight * 0.38
-      let current: ChapterId = 'home'
+    const measureOffsets = () => {
+      vh = window.innerHeight
+      const sy = window.scrollY
+      chapterTops = []
       for (const chapter of CHAPTERS) {
         const el = document.getElementById(chapter.id)
         if (!el) continue
-        if (el.getBoundingClientRect().top <= line) current = chapter.id
+        chapterTops.push({
+          id: chapter.id,
+          top: el.getBoundingClientRect().top + sy,
+        })
+      }
+      const footer = document.getElementById('outro')
+      footerTop = footer ? footer.getBoundingClientRect().top + sy : null
+    }
+
+    const evaluate = () => {
+      frame = 0
+      // Re-measure lazily if dynamic sections mounted after the initial pass.
+      if (chapterTops.length < CHAPTERS.length || footerTop === null) {
+        measureOffsets()
       }
 
-      const footer = document.getElementById('outro')
-      const footerVisible = footer
-        ? footer.getBoundingClientRect().top < window.innerHeight - 96
-        : false
+      const sy = window.scrollY
+      const line = sy + vh * 0.38
+      let current: ChapterId = 'home'
+      for (const chapter of chapterTops) {
+        if (chapter.top <= line) current = chapter.id
+      }
+
+      const footerVisible =
+        footerTop !== null ? footerTop - sy < vh - 96 : false
 
       const next = {
         active: current,
-        scrolled: window.scrollY > 24,
+        scrolled: sy > 24,
         footerVisible,
       }
 
@@ -60,13 +83,31 @@ export function usePagePosition(): PagePosition {
       if (!frame) frame = requestAnimationFrame(evaluate)
     }
 
+    const onLayoutChange = () => {
+      window.clearTimeout(measureTimer)
+      measureTimer = window.setTimeout(() => {
+        measureOffsets()
+        schedule()
+      }, 120)
+    }
+
+    measureOffsets()
     evaluate()
+
+    const ro =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(onLayoutChange)
+    ro?.observe(document.body)
+
     window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', schedule)
+    window.addEventListener('resize', onLayoutChange)
     return () => {
+      window.clearTimeout(measureTimer)
       if (frame) cancelAnimationFrame(frame)
+      ro?.disconnect()
       window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
+      window.removeEventListener('resize', onLayoutChange)
     }
   }, [])
 

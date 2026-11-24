@@ -122,6 +122,31 @@ const SYSTEM_SWATCHES: Record<string, readonly string[]> = {
   vitrine: ['#0b0d12', '#1c2230', '#4e6d94', '#d8e4f0'],
 }
 
+/**
+ * Lightweight 960×720 WebP card thumbnails served from the same origin when
+ * `images: { unoptimized: true }` is active, avoiding multi-megabyte full-board
+ * PNG downloads while falling back to `item.cover` for future cases.
+ */
+const SYSTEM_CARD_COVERS: Readonly<Record<string, string>> = {
+  sunnyside: '/work/systems/sunnyside.webp',
+  jakarta: '/work/systems/jakarta.webp',
+  clearing: '/work/systems/clearing.webp',
+  ledger: '/work/systems/ledger.webp',
+  huginn: '/work/systems/huginn.webp',
+  vesper: '/work/systems/vesper.webp',
+  arete: '/work/systems/arete.webp',
+  tavola: '/work/systems/tavola.webp',
+  'wildflower-wind': '/work/systems/wildflower-wind.webp',
+  bluewater: '/work/systems/bluewater.webp',
+  porphyry: '/work/systems/porphyry.webp',
+  strand: '/work/systems/strand.webp',
+  cove: '/work/systems/cove.webp',
+  hachure: '/work/systems/hachure.webp',
+  riso: '/work/systems/riso.webp',
+  vitrine: '/work/systems/vitrine.webp',
+  halation: '/work/systems/halation.webp',
+}
+
 const slugify = (value: string) =>
   value
     .toLowerCase()
@@ -228,7 +253,7 @@ export function buildSystemGalleryItems(
       tags: item.tags,
       href: item.href,
       cta: 'Open the case',
-      cover: item.cover,
+      cover: SYSTEM_CARD_COVERS[slug] ?? item.cover,
       coverAlt: item.coverAlt,
       position: 'top center',
       swatches: SYSTEM_SWATCHES[slug] ?? [],

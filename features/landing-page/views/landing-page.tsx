@@ -6,7 +6,7 @@ export default function LandingPage({
   archiveRepos,
   designCases,
 }: {
-  archiveRepos: readonly ArchiveRepo[]
+  archiveRepos?: readonly ArchiveRepo[]
   designCases?: readonly DesignCase[]
 }) {
   void archiveRepos

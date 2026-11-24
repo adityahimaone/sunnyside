@@ -81,12 +81,20 @@ export function mountPaperCity({
     return null
   }
 
-  const dpr = Math.min(window.devicePixelRatio || 1, 2)
+  const isCompactViewport = window.innerWidth <= 768
+  const dpr = Math.min(
+    window.devicePixelRatio || 1,
+    isCompactViewport ? 1.5 : 2,
+  )
   renderer.setPixelRatio(dpr)
   renderer.setClearColor(0x000000, 0)
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.shadowMap.enabled = true
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  renderer.shadowMap.type = isCompactViewport
+    ? THREE.PCFShadowMap
+    : THREE.PCFSoftShadowMap
+  renderer.shadowMap.autoUpdate = false
+  renderer.shadowMap.needsUpdate = true
   renderer.toneMapping = THREE.NoToneMapping
 
   const canvas = renderer.domElement
@@ -225,7 +233,8 @@ export function mountPaperCity({
   const sun = new THREE.DirectionalLight('#fff5e0', 2.1)
   sun.position.set(-18, 36, 22)
   sun.castShadow = true
-  sun.shadow.mapSize.set(1536, 1536)
+  const shadowRes = isCompactViewport ? 1024 : 1536
+  sun.shadow.mapSize.set(shadowRes, shadowRes)
   sun.shadow.bias = -0.0004
   sun.shadow.normalBias = 0.03
   sun.shadow.camera.left = -24
@@ -2538,44 +2547,44 @@ export function mountPaperCity({
   const raycaster = new THREE.Raycaster()
   const pointerNDC = new THREE.Vector2(0, 0)
   let pointerInside = false
+  let pointerDirty = false
   let hoveredItem: HotItem | null = null
   let manualSlideOffset = 0
   let activeSlideIdx = 0
   let trainBoost = 0
   let tiltX = 0
   let tiltY = 0
+  let shadowFrameTick = 0
+  let lastReadoutText = ''
 
-  const findHot = (obj: THREE.Object3D | null): HotItem | null => {
-    let curr: THREE.Object3D | null = obj
-    while (curr) {
-      const found = hotItems.find((h) => h.group === curr)
-      if (found) return found
-      curr = curr.parent
-    }
-    return null
+  // Index only Mesh descendants of interactive HotItems (skipping LineSegments
+  // edge helpers, InstancedMesh sleepers, ground planes, and static scenery)
+  // so raycasting never walks thousands of edge segments on raw pointermove.
+  const meshToHot = new Map<THREE.Object3D, HotItem>()
+  const hotMeshes: THREE.Mesh[] = []
+  for (const item of hotItems) {
+    item.group.traverse((node) => {
+      if (node instanceof THREE.Mesh) {
+        meshToHot.set(node, item)
+        hotMeshes.push(node)
+      }
+    })
   }
 
   const onPointerMove = (e: PointerEvent) => {
+    if (e.pointerType === 'touch') return
     const rect = canvas.getBoundingClientRect()
     if (rect.width <= 0 || rect.height <= 0) return
     pointerNDC.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
     pointerNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
     pointerInside = true
-
-    raycaster.setFromCamera(pointerNDC, camera)
-    const hits = raycaster.intersectObjects(world.children, true)
-    let matched: HotItem | null = null
-    for (const hit of hits) {
-      if (hit.object === shadowPlane) continue
-      matched = findHot(hit.object)
-      if (matched) break
-    }
-    hoveredItem = matched
+    pointerDirty = true
     canvas.style.cursor = 'pointer'
   }
 
   const onPointerLeave = () => {
     pointerInside = false
+    pointerDirty = false
     hoveredItem = null
     canvas.style.cursor = 'default'
   }
@@ -2839,6 +2848,24 @@ export function mountPaperCity({
     tiltY += (targetTiltY - tiltY) * 0.1
     updateCameraBounds(BASE_AZ + tiltX, BASE_EL + tiltY)
 
+    if (pointerDirty && pointerInside) {
+      pointerDirty = false
+      raycaster.setFromCamera(pointerNDC, camera)
+      const hits = raycaster.intersectObjects(hotMeshes, false)
+      hoveredItem =
+        hits.length > 0 ? (meshToHot.get(hits[0].object) ?? null) : null
+    }
+
+    // Refresh shadow map every frame during sky-drop or hover lift, then
+    // throttle shadow-map passes to every 3rd frame during steady train cruise.
+    const anyLift = hotItems.some(
+      (item) => Math.abs(item.lift) > 0.004 || Math.abs(item.vel) > 0.01,
+    )
+    shadowFrameTick = (shadowFrameTick + 1) % 3
+    if (dt === 0 || !introCompleted || anyLift || shadowFrameTick === 0) {
+      renderer.shadowMap.needsUpdate = true
+    }
+
     renderer.render(scene, camera)
 
     if (!introCompleted && introTime >= maxIntroEnd + 0.65) {
@@ -2847,13 +2874,12 @@ export function mountPaperCity({
     }
 
     if (onReadout) {
-      if (hoveredItem) {
-        onReadout(`${hoveredItem.name} · active`)
-      } else {
-        const pct = Math.round(((((railDist % L) + L) % L) / L) * 100)
-        onReadout(
-          `side a express · ${pct}% lap · ${BILLBOARD_SLIDES[activeSlideIdx].readout}`,
-        )
+      const nextText = hoveredItem
+        ? `${hoveredItem.name} · active`
+        : `side a express · ${BILLBOARD_SLIDES[activeSlideIdx].readout}`
+      if (nextText !== lastReadoutText) {
+        lastReadoutText = nextText
+        onReadout(nextText)
       }
     }
   }

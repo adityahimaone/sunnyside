@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from 'motion/react'
 import { useMemo } from 'react'
 
-import { layoutScript, round } from '@/components/ui/sticker-slap-footer'
+import { layoutScript, round } from '@/lib/script-alphabet'
 
 import { useInView } from './use-in-view'
 
