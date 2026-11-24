@@ -29,8 +29,11 @@
   padding: clamp(4.8rem, 8.5vh, 5.75rem) clamp(1rem, 4.8vw, 5.25rem)
     clamp(1.6rem, 3.5vh, 2.5rem);
   background-color: #2b3da8;
-  background-image:
-    linear-gradient(to right, rgb(255 250 241 / 0.14) 1px, transparent 1px),
+  background-image: linear-gradient(
+      to right,
+      rgb(255 250 241 / 0.14) 1px,
+      transparent 1px
+    ),
     linear-gradient(to bottom, rgb(255 250 241 / 0.14) 1px, transparent 1px),
     linear-gradient(to right, rgb(255 250 241 / 0.055) 1px, transparent 1px),
     linear-gradient(to bottom, rgb(255 250 241 / 0.055) 1px, transparent 1px),
@@ -128,8 +131,7 @@
   border: 0;
   background: transparent;
   color: var(--h-paper);
-  font-family:
-    var(--font-hero-display), var(--font-space-grotesk), sans-serif;
+  font-family: var(--font-hero-display), var(--font-space-grotesk), sans-serif;
   font-size: 1em;
   font-weight: 700;
   line-height: 0.88;
@@ -284,11 +286,7 @@
 }
 
 .exitA {
-  --p: clamp(
-    0,
-    (var(--t) - var(--at, 0)) / max(0.05, 0.45 - var(--at, 0)),
-    1
-  );
+  --p: clamp(0, (var(--t) - var(--at, 0)) / max(0.05, 0.45 - var(--at, 0)), 1);
   transform: translate(
       calc(var(--dx, 0px) * var(--p)),
       calc(var(--dy, 0px) * var(--p))
@@ -316,8 +314,7 @@
       calc(135px + var(--t) * 185px),
       calc(136px - var(--t) * 10px)
     )
-    rotate(calc(var(--t) * 360deg))
-    scale(calc(1 + var(--t) * 0.24));
+    rotate(calc(var(--t) * 360deg)) scale(calc(1 + var(--t) * 0.24));
   transform-origin: 0 0;
 }
 

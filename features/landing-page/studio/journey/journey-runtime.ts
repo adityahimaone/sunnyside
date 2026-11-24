@@ -258,15 +258,22 @@ export function runJourney(layer: HTMLElement): () => void {
       photo.style.translate = `0 ${(0.5 - q) * 20}px`
     }
     if (marquee) {
-      const target = Math.max(-2.4, Math.min(2.4, velocity / 700))
-      swing = lerp(swing, target, 0.14)
-      marquee.style.rotate = `${swing}deg`
-      const track = marquee.firstElementChild
-      const anim =
-        track && typeof track.getAnimations === 'function'
-          ? track.getAnimations()[0]
-          : undefined
-      if (anim) anim.playbackRate = 1 + Math.min(5, Math.abs(velocity) / 450)
+      const mRect = marquee.getBoundingClientRect()
+      const mVisible = mRect.bottom >= -40 && mRect.top <= vh + 40
+      const track = marquee.firstElementChild as HTMLElement | null
+      if (track) {
+        track.style.animationPlayState = mVisible ? '' : 'paused'
+      }
+      if (mVisible) {
+        const target = Math.max(-2.4, Math.min(2.4, velocity / 700))
+        swing = lerp(swing, target, 0.14)
+        marquee.style.rotate = `${swing}deg`
+        const anim =
+          track && typeof track.getAnimations === 'function'
+            ? track.getAnimations()[0]
+            : undefined
+        if (anim) anim.playbackRate = 1 + Math.min(5, Math.abs(velocity) / 450)
+      }
     }
   }
 
@@ -372,7 +379,8 @@ export function runJourney(layer: HTMLElement): () => void {
       el.style.rotate = ''
       el.style.scale = ''
     }
-    const track = marquee?.firstElementChild
+    const track = marquee?.firstElementChild as HTMLElement | null
+    if (track) track.style.animationPlayState = ''
     const anim =
       track && typeof track.getAnimations === 'function'
         ? track.getAnimations()[0]

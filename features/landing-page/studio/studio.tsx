@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useRef, useState } from 'react'
 
 import type { DesignCase } from '@/features/case-library'
@@ -7,17 +8,28 @@ import { About } from './about'
 import { ChapterRail } from './chapter-rail'
 import { Contact } from './contact'
 import { Sparkle } from './doodles'
-import { type HeroSurface } from './hero'
+import type { HeroSurface } from './hero/cutting-mat-marks'
 import { HeroCity } from './hero-city'
-import { Projects } from './projects'
-import { Showcase } from './showcase'
-import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
-import { Skills } from './skills'
-import { StickerJourney } from './journey/sticker-journey'
 import { useLandingMotion } from './use-landing-motion'
 import { usePagePosition } from './use-page-position'
 import styles from './studio.module.css'
+
+/* SSR stays enabled on content chapters so the server HTML, SEO landmarks, and
+   `scripts/inline-critical-css.mjs` class set remain complete with zero CLS,
+   while splitting heavy interactive bundles out of the critical hydration path. */
+const Showcase = dynamic(() => import('./showcase').then((mod) => mod.Showcase))
+const Projects = dynamic(() => import('./projects').then((mod) => mod.Projects))
+const Skills = dynamic(() => import('./skills').then((mod) => mod.Skills))
+const SiteFooter = dynamic(() =>
+  import('./site-footer').then((mod) => mod.SiteFooter),
+)
+/* Purely decorative scroll-driven flyer overlay (`aria-hidden`); skipping SSR
+   keeps 30+ spark DOM nodes out of initial HTML and defers `journey-runtime`. */
+const StickerJourney = dynamic(
+  () => import('./journey/sticker-journey').then((mod) => mod.StickerJourney),
+  { ssr: false },
+)
 
 const MARQUEE_WORDS = [
   'Design engineering',

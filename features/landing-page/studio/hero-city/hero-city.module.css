@@ -12,8 +12,11 @@
   padding: clamp(3.6rem, 5.8vh, 4.6rem) clamp(0.5rem, 2.5vw, 2.5rem)
     clamp(0.8rem, 2vh, 1.4rem);
   background-color: #2b3da8;
-  background-image:
-    linear-gradient(to right, rgb(255 250 241 / 0.14) 1px, transparent 1px),
+  background-image: linear-gradient(
+      to right,
+      rgb(255 250 241 / 0.14) 1px,
+      transparent 1px
+    ),
     linear-gradient(to bottom, rgb(255 250 241 / 0.14) 1px, transparent 1px),
     linear-gradient(to right, rgb(255 250 241 / 0.055) 1px, transparent 1px),
     linear-gradient(to bottom, rgb(255 250 241 / 0.055) 1px, transparent 1px),
@@ -131,6 +134,69 @@
   width: 100%;
   aspect-ratio: 3 / 2;
   touch-action: pan-y;
+  opacity: 0;
+  transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stageWrap[data-ready='true'] .stage {
+  opacity: 1;
+}
+
+.matHud {
+  position: absolute;
+  bottom: clamp(1.35rem, 2.8vh, 2.05rem);
+  left: 50%;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  max-width: calc(100vw - 2.5rem);
+  padding: 0.32rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 250 241 / 0.22);
+  background: rgb(20 26 68 / 0.72);
+  color: rgb(255 250 241 / 0.88);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 6px);
+  transition:
+    opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.matHud[data-visible='true'] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.matHudDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #ffd23f;
+  flex-shrink: 0;
+}
+
+.matHudText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.matHudHint {
+  padding-left: 0.5rem;
+  border-left: 1px solid rgb(255 250 241 / 0.2);
+  color: rgb(255 250 241 / 0.62);
+}
+
+@media (max-width: 640px) {
+  .matHudHint {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -180,8 +246,9 @@
 @media (prefers-reduced-motion: reduce) {
   .backdropWordmark,
   .wordHalf,
-  .stageWrap {
+  .stageWrap,
+  .stage,
+  .matHud {
     transition: none;
   }
 }
-
