@@ -10,6 +10,7 @@ import { Contact } from './contact'
 import { Sparkle } from './doodles'
 import type { HeroSurface } from './hero/cutting-mat-marks'
 import { HeroCity } from './hero-city'
+import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
 import { useLandingMotion } from './use-landing-motion'
 import { usePagePosition } from './use-page-position'
@@ -21,9 +22,6 @@ import styles from './studio.module.css'
 const Showcase = dynamic(() => import('./showcase').then((mod) => mod.Showcase))
 const Projects = dynamic(() => import('./projects').then((mod) => mod.Projects))
 const Skills = dynamic(() => import('./skills').then((mod) => mod.Skills))
-const SiteFooter = dynamic(() =>
-  import('./site-footer').then((mod) => mod.SiteFooter),
-)
 /* Purely decorative scroll-driven flyer overlay (`aria-hidden`); skipping SSR
    keeps 30+ spark DOM nodes out of initial HTML and defers `journey-runtime`. */
 const StickerJourney = dynamic(

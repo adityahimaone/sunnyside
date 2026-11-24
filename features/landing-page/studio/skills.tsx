@@ -142,18 +142,25 @@ export function Skills() {
       void Promise.all([
         import('./diorama/diorama-art'),
         import('./diorama/book'),
-      ]).then(([artMod, bookMod]) => {
-        if (cancelled) return
-        setArt({
-          DioramaDefs: artMod.DioramaDefs,
-          BuildArt: artMod.BuildArt,
-          MotionArt: artMod.MotionArt,
-          RestArt: artMod.RestArt,
-          SystemsArt: artMod.SystemsArt,
-          BookBase: bookMod.BookBase,
-          Leaf: bookMod.Leaf,
+      ])
+        .then(([artMod, bookMod]) => {
+          if (cancelled) return
+          const bundle: DioramaArtBundle = {
+            DioramaDefs: artMod.DioramaDefs,
+            BuildArt: artMod.BuildArt,
+            MotionArt: artMod.MotionArt,
+            RestArt: artMod.RestArt,
+            SystemsArt: artMod.SystemsArt,
+            BookBase: bookMod.BookBase,
+            Leaf: bookMod.Leaf,
+          }
+          if (Object.values(bundle).every((fn) => typeof fn === 'function')) {
+            setArt(bundle)
+          }
         })
-      })
+        .catch(() => {
+          // Keep the accessible HTML skill controls interactive if SVG art fails to load.
+        })
     }
 
     if (typeof IntersectionObserver === 'undefined') {

@@ -23,9 +23,30 @@ export function SiteFooter() {
     let cancelled = false
 
     const load = () => {
-      void import('@/components/ui/sticker-slap-footer').then((mod) => {
-        if (!cancelled) setFooter(() => mod.default)
-      })
+      void import('@/components/ui/sticker-slap-footer')
+        .then((mod) => {
+          if (cancelled) return
+          const raw = mod as unknown as {
+            StickerSlapFooter?: unknown
+            default?: unknown
+          }
+          const nestedDefault =
+            raw.default && typeof raw.default === 'object'
+              ? (raw.default as { default?: unknown }).default
+              : undefined
+          const candidate =
+            typeof raw.StickerSlapFooter === 'function'
+              ? (raw.StickerSlapFooter as FooterComp)
+              : typeof raw.default === 'function'
+                ? (raw.default as FooterComp)
+                : typeof nestedDefault === 'function'
+                  ? (nestedDefault as FooterComp)
+                  : null
+          if (candidate) setFooter(() => candidate)
+        })
+        .catch(() => {
+          // Keep the semantic fallback <footer> mounted if the chunk fails to load.
+        })
     }
 
     if (typeof IntersectionObserver === 'undefined') {

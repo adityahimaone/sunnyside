@@ -90,9 +90,7 @@ export function mountPaperCity({
   renderer.setClearColor(0x000000, 0)
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.shadowMap.enabled = true
-  renderer.shadowMap.type = isCompactViewport
-    ? THREE.PCFShadowMap
-    : THREE.PCFSoftShadowMap
+  renderer.shadowMap.type = THREE.PCFShadowMap
   renderer.shadowMap.autoUpdate = false
   renderer.shadowMap.needsUpdate = true
   renderer.toneMapping = THREE.NoToneMapping

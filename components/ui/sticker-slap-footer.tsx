@@ -698,7 +698,7 @@ const linkProps = (href?: string) => ({
 
 type Placed = { x: number; y: number }
 
-export default function StickerSlapFooter({
+export function StickerSlapFooter({
   wordmark = 'sunny',
   logoWordmark = wordmark,
   homeHref = '#',
@@ -1375,3 +1375,5 @@ export default function StickerSlapFooter({
     </footer>
   )
 }
+
+export default StickerSlapFooter

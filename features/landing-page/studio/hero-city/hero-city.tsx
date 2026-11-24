@@ -1,13 +1,29 @@
 'use client'
 
-import { motion, useReducedMotion } from 'motion/react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { motion } from 'motion/react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 
 import { layoutScript, round, TRACK } from '@/lib/script-alphabet'
 
 import { CuttingMatMarks, type HeroSurface } from '../hero/cutting-mat-marks'
 import type { PaperCityController } from './paper-city-scene'
 import styles from './hero-city.module.css'
+
+const subscribeReducedMotion = (onStoreChange: () => void) => {
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+  mq.addEventListener('change', onStoreChange)
+  return () => mq.removeEventListener('change', onStoreChange)
+}
+const getReducedMotionSnapshot = () =>
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+const getReducedMotionServerSnapshot = () => false
 
 type Props = {
   surface?: HeroSurface
@@ -30,14 +46,16 @@ const PART_SHIFT = 6.5
  * backdrop stroke animation so WebGL never blocks critical hydration.
  */
 export function HeroCity({ surface = 'cobalt' }: Props = {}) {
-  const reduced = useReducedMotion() ?? false
+  const reduced = useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot,
+  )
   const stageRef = useRef<HTMLDivElement>(null)
   const readoutRef = useRef<HTMLSpanElement>(null)
-  const [phase, setPhase] = useState<IntroPhase>(() =>
-    reduced ? 'settled' : 'writing',
-  )
+  const [phase, setPhase] = useState<IntroPhase>('writing')
   const [sceneReady, setSceneReady] = useState(false)
-  const [isCompact, setIsCompact] = useState<boolean>(() => !reduced)
+  const [isCompact, setIsCompact] = useState<boolean>(true)
   const [userToggled, setUserToggled] = useState(false)
   const userToggledRef = useRef(false)
 
