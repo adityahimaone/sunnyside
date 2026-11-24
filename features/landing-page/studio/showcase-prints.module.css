@@ -1,0 +1,408 @@
+/* ── Sun Club ───────────────────────────────────────────────────────────── */
+
+.sunRoot {
+  background: var(--sun-bg, var(--cobalt));
+  color: var(--sun-fg, var(--paper));
+  transition:
+    background-color 0.28s ease,
+    color 0.28s ease;
+}
+
+.sunInteractive {
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.sunInteractive:active {
+  cursor: grabbing;
+}
+
+.sunRays {
+  background: repeating-conic-gradient(
+    from 8deg,
+    var(--sun-rays, var(--butter)) 0 7deg,
+    transparent 7deg 14deg
+  );
+  transform: rotate(
+    calc(var(--ray-angle, 0deg) + var(--pointer-angle, 0deg) * 0.25)
+  );
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.sunInteractive .sunRays {
+  transition: transform 0.08s linear;
+}
+
+.sunDisc {
+  background: var(--sun-disc, var(--tangerine));
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.28s ease;
+}
+
+.sunDisc::after {
+  color: var(--sun-disc-fg, var(--ink));
+}
+
+.sunDiscBtn {
+  cursor: pointer;
+}
+
+.sunDiscBtn:hover {
+  transform: scale(1.04) rotate(-3deg);
+}
+
+.sunDiscBtn[data-pulsing='true'] {
+  transform: scale(1.07) rotate(-6deg);
+}
+
+.sunDiscBtn:focus-visible {
+  outline: 2.5px solid var(--paper);
+  outline-offset: -5px;
+}
+
+.barcode i {
+  transform-origin: bottom center;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 14ms);
+}
+
+:global([data-study]):hover .sunRays,
+:global([data-study]):focus-within .sunRays {
+  transform: rotate(
+    calc(14deg + var(--ray-angle, 0deg) + var(--pointer-angle, 0deg) * 0.35)
+  );
+}
+
+:global([data-study]):hover .sunDisc,
+:global([data-study]):focus-within .sunDisc {
+  transform: scale(1.04) rotate(-4deg);
+}
+
+:global([data-study]):hover .barcode i:nth-child(odd) {
+  transform: scaleY(1.25);
+}
+
+/* ── Peel Here ──────────────────────────────────────────────────────────── */
+
+.peelRoot {
+  --peel-accent: rgb(25 26 46 / 0.35);
+}
+
+.peelStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.peelReset {
+  padding: 0.14rem 0.45rem;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--butter);
+  color: var(--ink);
+  font-size: 7.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.16s ease;
+}
+
+.peelReset:hover {
+  transform: translateY(-1px);
+}
+
+.peelReset:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: 2px;
+}
+
+.peelGrid {
+  gap: 0.45rem;
+}
+
+.peelCellPreview,
+.peelCellBtn {
+  border-color: var(--peel-accent, rgb(25 26 46 / 0.35));
+}
+
+.peelSticker {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  transition:
+    transform 0.36s cubic-bezier(0.34, 1.45, 0.64, 1),
+    opacity 0.24s ease;
+  transition-delay: calc(var(--i, 0) * 18ms);
+}
+
+:global([data-study]):hover .peelCellPreview .peelSticker,
+:global([data-study]):focus-within .peelCellPreview .peelSticker {
+  transform: translateY(-3px) rotate(var(--sticker-tilt, 4deg)) scale(1.07);
+}
+
+.peelCellBtn {
+  background: transparent;
+  cursor: pointer;
+  overflow: visible;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.peelCellBtn:hover {
+  background: rgb(25 26 46 / 0.04);
+}
+
+.peelCellBtn:hover .peelSticker {
+  transform: translateY(-3px) rotate(var(--sticker-tilt, 4deg)) scale(1.07);
+}
+
+.peelCellBtn:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: -3px;
+}
+
+.peelSlot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.peelCellBtn[data-peeled='true'] {
+  background: rgb(25 26 46 / 0.03);
+}
+
+.peelCellBtn[data-peeled='true'] .peelSlot {
+  opacity: 0.72;
+}
+
+.peelCellBtn[data-peeled='true'] .peelSticker {
+  opacity: 0;
+  transform: translate(14px, -18px) rotate(16deg) scale(0.76);
+  transition-delay: 0ms;
+}
+
+/* ── Type Tray ──────────────────────────────────────────────────────────── */
+
+.typeRoot {
+  background: var(--type-bg, var(--butter));
+  color: var(--type-fg, var(--ink));
+  transition:
+    background-color 0.28s ease,
+    color 0.28s ease;
+}
+
+.typeBigPreview {
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:global([data-study]):hover .typeBigPreview,
+:global([data-study]):focus-within .typeBigPreview {
+  transform: translateY(-4px) scale(1.03);
+}
+
+.typeBigBtn {
+  display: block;
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.typeBigBtn:hover {
+  transform: translateY(-3px) scale(1.02);
+}
+
+.typeBigBtn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.typeSnapIn {
+  animation: glyphSnap 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes glyphSnap {
+  from {
+    opacity: 0.35;
+    transform: translateY(6px) scale(0.95);
+  }
+}
+
+.typeRows {
+  border-top-color: var(--type-fg, var(--ink));
+}
+
+.typeRowBtn {
+  width: 100%;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  border-bottom-color: var(--type-line, rgb(25 26 46 / 0.35));
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    padding-inline 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.typeRowBtn:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+
+.typeRowBtn[data-selected='true'] {
+  padding-inline: 0.35rem;
+  background: rgb(255 255 255 / 0.22);
+}
+
+.typeRowBtn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.typeRowMeta {
+  opacity: 0.72;
+}
+
+/* ── Spring Study ───────────────────────────────────────────────────────── */
+
+.springRoot {
+  background: var(--spring-bg, var(--mint));
+  color: var(--spring-fg, var(--ink));
+  transition:
+    background-color 0.28s ease,
+    color 0.28s ease;
+}
+
+.springStageBtn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-block: auto;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.springStageBtn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.springReplay {
+  padding: 0.16rem 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.springReplay:hover {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.springReplay:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.springPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.18rem 0.48rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.springPill:hover {
+  background: rgb(255 255 255 / 0.25);
+}
+
+.springPill[data-active='true'] {
+  border-color: currentColor;
+  background: rgb(255 255 255 / 0.34);
+}
+
+.springPill:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.springDotLegend {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* ── Reduced Motion ─────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .sunRays,
+  .sunDisc,
+  .barcode i,
+  .peelSticker,
+  .typeBigPreview,
+  .typeBigBtn,
+  .typeSnapIn {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  :global([data-study]):hover .sunRays,
+  :global([data-study]):focus-within .sunRays,
+  :global([data-study]):hover .sunDisc,
+  :global([data-study]):focus-within .sunDisc,
+  :global([data-study]):hover .barcode i:nth-child(odd),
+  :global([data-study]):hover .peelCellPreview .peelSticker,
+  :global([data-study]):focus-within .peelCellPreview .peelSticker,
+  :global([data-study]):hover .typeBigPreview,
+  :global([data-study]):focus-within .typeBigPreview {
+    transform: none;
+  }
+}

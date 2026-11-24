@@ -2144,15 +2144,45 @@
   border: 2px solid var(--ink);
   border-radius: 18px;
   box-shadow: 8px 9px 0 rgb(25 26 46 / 0.12);
+  transform: perspective(900px) skewX(var(--drag-skew, 0deg))
+    rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg))
+    translateY(var(--card-lift, 0px)) rotate(var(--card-rot, 0deg));
   transition:
-    transform 0.4s var(--ease-out),
-    box-shadow 0.4s var(--ease-out);
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s var(--ease-out);
   will-change: transform;
 }
 
-.studyCard:hover .studyPrint,
+.studyPrint::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle at var(--sheen-x, 50%) var(--sheen-y, 50%),
+    rgb(255 250 241 / 0.24),
+    transparent 58%
+  );
+  transition: opacity 0.28s ease;
+}
+
+.studyCard[data-tilting='true'] .studyPrint {
+  --card-lift: -7px;
+  box-shadow: 12px 16px 0 rgb(25 26 46 / 0.16);
+  transition:
+    transform 0.1s ease-out,
+    box-shadow 0.25s var(--ease-out);
+}
+
+.studyCard[data-tilting='true'] .studyPrint::after {
+  opacity: 1;
+}
+
 .studyCard:focus-within .studyPrint {
-  transform: translateY(-7px) rotate(-1.2deg);
+  --card-lift: -7px;
+  --card-rot: -1deg;
   box-shadow: 12px 16px 0 rgb(25 26 46 / 0.15);
 }
 
@@ -2622,16 +2652,93 @@
 
 .dialogSwatches {
   display: flex;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.45rem;
   margin-top: 1.4rem;
 }
 
-.dialogSwatches i {
+.dialogSwatchBtn {
   display: block;
   width: 1.7rem;
   height: 1.7rem;
   border: 1.5px solid var(--ink);
   border-radius: 50%;
+  cursor: pointer;
+  transition:
+    transform 0.18s var(--ease-out),
+    box-shadow 0.18s ease;
+}
+
+.dialogSwatchBtn:hover {
+  transform: translateY(-2px) scale(1.06);
+}
+
+.dialogSwatchBtn[data-active='true'] {
+  transform: scale(1.1);
+  box-shadow:
+    0 0 0 2px var(--paper-hi),
+    0 0 0 4px var(--ink);
+}
+
+.dialogSwatchBtn:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: 3px;
+}
+
+.dialogNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.dialogNavCount {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dialogNavBtns {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dialogNavBtn {
+  display: grid;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    transform 0.18s var(--ease-out),
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.dialogNavBtn:hover {
+  background: var(--butter);
+  transform: translateY(-2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.dialogNavBtn:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+.dialogNavBtn:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: 2px;
 }
 
 /* ── Work ───────────────────────────────────────────────────────────────── */
@@ -3299,7 +3406,18 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pulseWord::after {
+  .pulseWord::after,
+  .dialogPanel {
     animation: none;
+  }
+
+  .studyPrint,
+  .studyPrint::after {
+    transition: none;
+    transform: none;
+  }
+
+  .studyCard[data-tilting='true'] .studyPrint::after {
+    opacity: 0;
   }
 }
