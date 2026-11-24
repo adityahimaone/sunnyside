@@ -85,6 +85,49 @@ const SEEDS: Seed[] = [
     ],
   },
   {
+    slug: 'social-vault',
+    title: 'Social Vault',
+    description:
+      'A personal vault for everything saved from X and Threads: one-click saves from the browser, full-text search, and three layers of auto-tagging — rules, a small decision model, and an agent review queue — plus a password lock for the nsfw tag.',
+    cover: '/work/social-vault-cover.gif',
+    url: 'https://vault.adityahimaone.space',
+    genre: 'Developer tools',
+    problem: 'Local-first tools',
+    year: 2026,
+    role: 'Design and build',
+    stack: ['Go', 'SQLite', 'React', 'Vite', 'TypeScript'],
+    highlights: [
+      'Save from X and Threads in one click',
+      'Full-text search across every save',
+      'Three layers of auto-tagging, none of them loud',
+      'A review queue for the tags the model doubts',
+      'MCP server, so agents can tag too',
+      'The nsfw tag stays locked until you unlock it',
+    ],
+    githubSlug: 'social-vault',
+  },
+  {
+    slug: 'tailmon',
+    title: 'Tailscale Monitor',
+    description:
+      'A live monitor for a nine-device Tailscale fleet: online state, key expiry, traffic and per-host telemetry in one glass dashboard, with light and dark themes and a password gate.',
+    cover: '/work/tailmon-cover.gif',
+    url: 'https://devices.adityahimaone.space',
+    genre: 'Developer tools',
+    problem: 'Internal tools',
+    year: 2026,
+    role: 'Design and build',
+    stack: ['Go', 'Tailscale', 'systemd', 'nginx'],
+    highlights: [
+      'Nine devices, one glance',
+      'Key expiry warned before it bites',
+      'Traffic per node, not just totals',
+      'Per-host telemetry over SSH',
+      'Light and dark, both legible',
+      'A password gate, no account to lose',
+    ],
+  },
+  {
     slug: 'kanon',
     title: 'Kanon',
     description:
@@ -315,6 +358,8 @@ const SEEDS: Seed[] = [
  */
 const ORDER: readonly string[] = [
   'switchyard',
+  'social-vault',
+  'tailmon',
   'kanon',
   'hayoloka',
   'api-playground',
