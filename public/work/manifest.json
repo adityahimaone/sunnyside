@@ -5,6 +5,16 @@
     "mode": "live 16:10 board capture, inset 28px on cream with 14px radius (edges no longer touch the frame)"
   },
   {
+    "slug": "social-vault",
+    "cover": "/work/social-vault-cover.gif",
+    "mode": "live 16:10 animated capture (GIF), features tour: grid, search, inspector, auto-tagging, nsfw lock"
+  },
+  {
+    "slug": "tailmon",
+    "cover": "/work/tailmon-cover.gif",
+    "mode": "live 16:10 animated capture (GIF), features tour: overview, device fleet, dark theme"
+  },
+  {
     "slug": "primarindo-asia",
     "cover": "/work/primarindo-asia-cover.webp",
     "mode": "live 16:10 zoomed (116kb)"
