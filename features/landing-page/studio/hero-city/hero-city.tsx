@@ -52,7 +52,6 @@ export function HeroCity({ surface = 'cobalt' }: Props = {}) {
     getReducedMotionServerSnapshot,
   )
   const stageRef = useRef<HTMLDivElement>(null)
-  const readoutRef = useRef<HTMLSpanElement>(null)
   const [phase, setPhase] = useState<IntroPhase>('writing')
   const [sceneReady, setSceneReady] = useState(false)
   const [isCompact, setIsCompact] = useState<boolean>(true)
@@ -122,11 +121,6 @@ export function HeroCity({ surface = 'cobalt' }: Props = {}) {
         el: stageRef.current,
         introDelay: remainingDelay,
         onToggleScale: toggleScale,
-        onReadout: (text) => {
-          if (readoutRef.current) {
-            readoutRef.current.textContent = text
-          }
-        },
         onIntroComplete: () => {
           if (cancelled) return
           setPhase('settled')
@@ -280,22 +274,6 @@ export function HeroCity({ surface = 'cobalt' }: Props = {}) {
           role="img"
           aria-label="An isometric 3D paper city on a blue cutting mat: a figure-8 railway arches over the INTERFACES bridge while two trains, a bus, and cars move through the city."
         />
-      </div>
-
-      <div
-        className={styles.matHud}
-        data-visible={
-          sceneReady && effectivePhase !== 'writing' ? 'true' : 'false'
-        }
-        aria-hidden="true"
-      >
-        <span className={styles.matHudDot} />
-        <span ref={readoutRef} className={styles.matHudText}>
-          side a express · paper city
-        </span>
-        <span className={styles.matHudHint}>
-          {effectiveCompact ? 'click to expand' : 'click to compact'}
-        </span>
       </div>
     </section>
   )
