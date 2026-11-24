@@ -6,155 +6,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { Bolt, Burst, Daisy, Heart, Smiley, Sparkle, Sun } from './doodles'
 import { Reveal } from './reveal'
 import { SectionHead } from './section-head'
+import { STUDY_SWATCHES, StudyPrint, type StudyAccent } from './showcase-prints'
 import { SHOWCASE_STUDIES, type ShowcaseStudy } from './studio-data'
 import styles from './studio.module.css'
-
-function SunClubPrint() {
-  return (
-    <div className={styles.printSun}>
-      <div className={styles.printSunRays} aria-hidden />
-      <div className={styles.printSunDisc} aria-hidden />
-      <div className={styles.printSunTop}>
-        <span>Sun Club / est. 2026</span>
-        <span>No. 001</span>
-      </div>
-      <p className={styles.printSunTitle} aria-hidden>
-        Sun
-        <br />
-        Club
-      </p>
-      <div className={styles.printSunFoot}>
-        <span>Members only</span>
-        <span className={styles.barcode} aria-hidden>
-          {Array.from({ length: 18 }, (_, i) => (
-            <i key={i} />
-          ))}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function PeelPrint() {
-  const stickers = [
-    <Smiley key="smiley" className="w-[78%]" />,
-    <Daisy key="daisy" className="w-[80%]" />,
-    <Heart key="heart" className="w-[78%]" />,
-    <Bolt key="bolt" className="w-[76%]" />,
-    <Burst key="wow" text="wow" className="w-[92%]" />,
-    <Burst key="hi" text="hi!" className="w-[92%]" />,
-    <Sun key="sun" className="w-[86%]" />,
-    <Sparkle key="spark" className="w-[52%] text-[var(--tangerine)]" />,
-    <Smiley key="smiley2" className="w-[78%]" />,
-  ]
-
-  return (
-    <div className={styles.printPeel}>
-      <div className={styles.printPeelTop}>
-        <b>Peel here</b>
-        <span>9 die-cuts</span>
-      </div>
-      <div className={styles.peelGrid} aria-hidden>
-        {stickers.map((sticker, index) => (
-          <span key={index} className={styles.peelCell}>
-            {sticker}
-          </span>
-        ))}
-      </div>
-      <p className={styles.peelCaption}>Drawn in code · cut, don&apos;t tear</p>
-    </div>
-  )
-}
-
-function TypePrint() {
-  return (
-    <div className={styles.printType}>
-      <div className={styles.printTypeTop}>
-        <span>Type tray / 2025</span>
-        <span>3 voices</span>
-      </div>
-      <p className={styles.typeBig} aria-hidden>
-        Aa
-      </p>
-      <div className={styles.typeRows}>
-        <div className={styles.typeRow}>
-          <span
-            style={{
-              fontFamily: 'var(--font-syne), sans-serif',
-              fontWeight: 700,
-            }}
-          >
-            Syne · display
-          </span>
-          <span>700 / 800</span>
-        </div>
-        <div className={styles.typeRow}>
-          <span style={{ fontFamily: 'var(--font-geist), sans-serif' }}>
-            Geist · reading
-          </span>
-          <span>400 / 500</span>
-        </div>
-        <div className={styles.typeRow}>
-          <span style={{ fontFamily: 'var(--font-geist-mono), monospace' }}>
-            Geist Mono · labels
-          </span>
-          <span>500</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function SpringPrint() {
-  return (
-    <div className={styles.printSpring}>
-      <div className={styles.printSpringTop}>
-        <span>Spring study / 2025</span>
-        <span>Same distance</span>
-      </div>
-      <svg className={styles.springSvg} viewBox="0 0 200 130" aria-hidden>
-        <g className={styles.grid}>
-          <path d="M10 20H190M10 65H190M10 110H190" />
-          <path d="M10 14V116M60 14V116M110 14V116M160 14V116" />
-        </g>
-        <path className={styles.curveSoft} d="M10 110C70 110 130 20 190 20" />
-        <path className={styles.curveSnap} d="M10 110C38 110 62 20 190 20" />
-        <path className={styles.curveLoose} d="M10 110C105 110 94 -2 190 20" />
-        <circle cx="190" cy="20" r="4" fill="var(--cobalt)" />
-        <circle cx="190" cy="20" r="4" fill="var(--tangerine)" opacity=".5" />
-      </svg>
-      <div className={styles.printSpringFoot}>
-        <span>soft</span>
-        <span>snap</span>
-        <span>loose</span>
-      </div>
-    </div>
-  )
-}
-
-function StudyPrint({ id }: { id: string }) {
-  switch (id) {
-    case 'sun-club':
-      return <SunClubPrint />
-    case 'peel-here':
-      return <PeelPrint />
-    case 'type-tray':
-      return <TypePrint />
-    default:
-      return <SpringPrint />
-  }
-}
-
-const SWATCHES = [
-  'var(--cobalt)',
-  'var(--tangerine)',
-  'var(--butter)',
-  'var(--pink)',
-  'var(--mint)',
-]
 
 export function Showcase() {
   const reduced = useReducedMotion() ?? false
@@ -163,14 +19,36 @@ export function Showcase() {
   const drag = useRef<{
     startX: number
     startLeft: number
+    lastX: number
+    lastTime: number
     moved: boolean
     id: number
   } | null>(null)
+  const skewTimer = useRef<number | null>(null)
   const moved = useRef(false)
   const [dragging, setDragging] = useState(false)
   const [active, setActive] = useState<ShowcaseStudy | null>(null)
+  const [swatch, setSwatch] = useState<StudyAccent | null>(null)
+  const [springHoverCount, setSpringHoverCount] = useState(0)
   const [progress, setProgress] = useState(0)
   const [edges, setEdges] = useState({ start: true, end: false })
+
+  const selectStudy = useCallback((study: ShowcaseStudy | null) => {
+    setActive(study)
+    setSwatch(null)
+  }, [])
+
+  const stepModal = useCallback(
+    (direction: -1 | 1) => {
+      if (!active) return
+      const index = SHOWCASE_STUDIES.findIndex((item) => item.id === active.id)
+      if (index === -1) return
+      const nextIndex =
+        (index + direction + SHOWCASE_STUDIES.length) % SHOWCASE_STUDIES.length
+      selectStudy(SHOWCASE_STUDIES[nextIndex])
+    },
+    [active, selectStudy],
+  )
 
   const measure = useCallback(() => {
     const el = trackRef.current
@@ -195,6 +73,14 @@ export function Showcase() {
   }, [measure])
 
   useEffect(() => {
+    return () => {
+      if (skewTimer.current !== null) {
+        window.clearTimeout(skewTimer.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
     if (active && !dialog.open) {
@@ -207,6 +93,21 @@ export function Showcase() {
       document.body.style.overflow = ''
     }
   }, [active])
+
+  useEffect(() => {
+    if (!active) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        stepModal(-1)
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault()
+        stepModal(1)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [active, stepModal])
 
   const step = () => {
     const el = trackRef.current
@@ -221,6 +122,14 @@ export function Showcase() {
     })
   }
 
+  const resetSkew = useCallback(() => {
+    if (skewTimer.current !== null) {
+      window.clearTimeout(skewTimer.current)
+      skewTimer.current = null
+    }
+    trackRef.current?.style.setProperty('--drag-skew', '0deg')
+  }, [])
+
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== 'mouse' || event.button !== 0) return
     const el = trackRef.current
@@ -228,6 +137,8 @@ export function Showcase() {
     drag.current = {
       startX: event.clientX,
       startLeft: el.scrollLeft,
+      lastX: event.clientX,
+      lastTime: performance.now(),
       moved: false,
       id: event.pointerId,
     }
@@ -248,6 +159,23 @@ export function Showcase() {
       setDragging(true)
     }
     el.scrollLeft = state.startLeft - dx
+
+    if (!reduced) {
+      const now = performance.now()
+      const dt = Math.max(8, now - state.lastTime)
+      const vx = (event.clientX - state.lastX) / dt
+      const skew = Math.max(-4.5, Math.min(4.5, -vx * 14))
+      el.style.setProperty('--drag-skew', `${skew.toFixed(2)}deg`)
+      state.lastX = event.clientX
+      state.lastTime = now
+
+      if (skewTimer.current !== null) {
+        window.clearTimeout(skewTimer.current)
+      }
+      skewTimer.current = window.setTimeout(() => {
+        el.style.setProperty('--drag-skew', '0deg')
+      }, 90)
+    }
   }
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -255,6 +183,7 @@ export function Showcase() {
     if (!state || state.id !== event.pointerId) return
     drag.current = null
     setDragging(false)
+    resetSkew()
     if (state.moved) {
       moved.current = true
       window.setTimeout(() => {
@@ -262,6 +191,39 @@ export function Showcase() {
       }, 0)
     }
   }
+
+  const onCardPointerMove = (event: React.PointerEvent<HTMLElement>) => {
+    if (reduced || event.pointerType !== 'mouse' || drag.current?.moved) return
+    const card = event.currentTarget
+    const rect = card.getBoundingClientRect()
+    if (!rect.width || !rect.height) return
+    const nx = (event.clientX - rect.left) / rect.width - 0.5
+    const ny = (event.clientY - rect.top) / rect.height - 0.5
+    const rx = (-ny * 7).toFixed(2)
+    const ry = (nx * 7).toFixed(2)
+    const sx = ((nx + 0.5) * 100).toFixed(1)
+    const sy = ((ny + 0.5) * 100).toFixed(1)
+    const pointerAngle = (nx * 24).toFixed(2)
+
+    card.dataset.tilting = 'true'
+    card.style.setProperty('--tilt-rx', `${rx}deg`)
+    card.style.setProperty('--tilt-ry', `${ry}deg`)
+    card.style.setProperty('--sheen-x', `${sx}%`)
+    card.style.setProperty('--sheen-y', `${sy}%`)
+    card.style.setProperty('--pointer-angle', `${pointerAngle}deg`)
+  }
+
+  const onCardPointerLeave = (event: React.PointerEvent<HTMLElement>) => {
+    const card = event.currentTarget
+    delete card.dataset.tilting
+    card.style.setProperty('--tilt-rx', '0deg')
+    card.style.setProperty('--tilt-ry', '0deg')
+    card.style.setProperty('--pointer-angle', '0deg')
+  }
+
+  const activeIndex = active
+    ? SHOWCASE_STUDIES.findIndex((item) => item.id === active.id)
+    : -1
 
   return (
     <section
@@ -328,9 +290,29 @@ export function Showcase() {
         onPointerCancel={endDrag}
       >
         {SHOWCASE_STUDIES.map((study) => (
-          <article key={study.id} className={styles.studyCard} data-study>
+          <article
+            key={study.id}
+            className={styles.studyCard}
+            data-study
+            onPointerEnter={
+              study.id === 'spring-study'
+                ? (event) => {
+                    if (!reduced && event.pointerType === 'mouse') {
+                      setSpringHoverCount((c) => c + 1)
+                    }
+                  }
+                : undefined
+            }
+            onPointerMove={onCardPointerMove}
+            onPointerLeave={onCardPointerLeave}
+            onPointerCancel={onCardPointerLeave}
+          >
             <div className={styles.studyPrint} aria-hidden>
-              <StudyPrint id={study.id} />
+              <StudyPrint
+                id={study.id}
+                reduced={reduced}
+                hoverPulse={study.id === 'spring-study' ? springHoverCount : 0}
+              />
             </div>
             <div className={styles.studyMeta}>
               <div>
@@ -346,7 +328,7 @@ export function Showcase() {
               className={styles.studyButton}
               onClick={() => {
                 if (moved.current) return
-                setActive(study)
+                selectStudy(study)
               }}
               aria-label={`Open ${study.title}, ${study.year}. ${study.tags.join(', ')}.`}
             />
@@ -376,9 +358,9 @@ export function Showcase() {
         ref={dialogRef}
         className={styles.dialog}
         aria-labelledby="study-title"
-        onClose={() => setActive(null)}
+        onClose={() => selectStudy(null)}
         onClick={(event) => {
-          if (event.target === dialogRef.current) setActive(null)
+          if (event.target === dialogRef.current) selectStudy(null)
         }}
       >
         {active ? (
@@ -386,14 +368,20 @@ export function Showcase() {
             <button
               type="button"
               className={styles.dialogClose}
-              onClick={() => setActive(null)}
+              onClick={() => selectStudy(null)}
               aria-label="Close study"
             >
               <X size={18} />
             </button>
             <div className={styles.dialogGrid}>
               <div className={styles.dialogPrint}>
-                <StudyPrint id={active.id} />
+                <StudyPrint
+                  key={active.id}
+                  id={active.id}
+                  interactive
+                  reduced={reduced}
+                  accent={swatch}
+                />
               </div>
               <div className={styles.dialogNotes}>
                 <p className={styles.dialogKicker}>
@@ -411,10 +399,54 @@ export function Showcase() {
                   <b>The bit I like</b>
                   {active.favourite}
                 </p>
-                <div className={styles.dialogSwatches} aria-label="Palette">
-                  {SWATCHES.map((color) => (
-                    <i key={color} style={{ background: color }} />
-                  ))}
+                <div
+                  className={styles.dialogSwatches}
+                  role="group"
+                  aria-label="Try palette on print"
+                >
+                  {STUDY_SWATCHES.map((item) => {
+                    const isSelected = swatch === item.id
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={styles.dialogSwatchBtn}
+                        style={{ background: item.color }}
+                        data-active={isSelected ? 'true' : 'false'}
+                        aria-pressed={isSelected}
+                        aria-label={`Preview ${item.label} palette`}
+                        onClick={() =>
+                          setSwatch((curr) =>
+                            curr === item.id ? null : item.id,
+                          )
+                        }
+                      />
+                    )
+                  })}
+                </div>
+                <div className={styles.dialogNav}>
+                  <span className={styles.dialogNavCount}>
+                    {String(activeIndex + 1).padStart(2, '0')} /{' '}
+                    {String(SHOWCASE_STUDIES.length).padStart(2, '0')}
+                  </span>
+                  <div className={styles.dialogNavBtns}>
+                    <button
+                      type="button"
+                      className={styles.dialogNavBtn}
+                      onClick={() => stepModal(-1)}
+                      aria-label="Previous study"
+                    >
+                      <ArrowLeft size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.dialogNavBtn}
+                      onClick={() => stepModal(1)}
+                      aria-label="Next study"
+                    >
+                      <ArrowRight size={15} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
