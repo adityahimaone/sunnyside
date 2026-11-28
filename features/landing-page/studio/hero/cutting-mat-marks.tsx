@@ -22,12 +22,49 @@ const MAT_TICKS = Array.from({ length: 97 }, (_, i) => ({
   major: i % 4 === 0,
 }))
 
+// Mobile ticks mirror the desktop set at half density: 12 numbered majors
+// (one per mobile label) with 3 minor ticks between them, same span.
+const MAT_TICKS_MOBILE = Array.from({ length: 49 }, (_, i) => ({
+  index: i,
+  x: 60 + i * 28.7,
+  major: i % 4 === 0,
+}))
+
 const MAT_CORNERS = [
   [42, 42],
   [1398, 42],
   [42, 858],
   [1398, 858],
 ] as const
+
+function TickLines({ ticks }: { ticks: typeof MAT_TICKS }) {
+  return (
+    <>
+      {ticks.map((t) => (
+        <g key={t.index}>
+          <line
+            x1={t.x}
+            x2={t.x}
+            y1={22}
+            y2={t.major ? 35 : 29}
+            strokeOpacity={t.major ? 0.44 : 0.22}
+            strokeWidth={t.major ? 1.3 : 0.9}
+            vectorEffect="non-scaling-stroke"
+          />
+          <line
+            x1={t.x}
+            x2={t.x}
+            y1={878}
+            y2={t.major ? 865 : 871}
+            strokeOpacity={t.major ? 0.44 : 0.22}
+            strokeWidth={t.major ? 1.3 : 0.9}
+            vectorEffect="non-scaling-stroke"
+          />
+        </g>
+      ))}
+    </>
+  )
+}
 
 /**
  * Blue Cutting-Mat Markings Overlay shared by HeroCity and Hero without pulling
@@ -64,35 +101,18 @@ export function CuttingMatMarks() {
           vectorEffect="non-scaling-stroke"
         />
 
-        {/* Top & bottom ruler tick bars */}
-        <g stroke={PAPER} strokeLinecap="round">
-          {MAT_TICKS.map((t) => (
-            <g key={t.index}>
-              <line
-                x1={t.x}
-                x2={t.x}
-                y1={22}
-                y2={t.major ? 35 : 29}
-                strokeOpacity={t.major ? 0.44 : 0.22}
-                strokeWidth={t.major ? 1.3 : 0.9}
-                vectorEffect="non-scaling-stroke"
-              />
-              <line
-                x1={t.x}
-                x2={t.x}
-                y1={878}
-                y2={t.major ? 865 : 871}
-                strokeOpacity={t.major ? 0.44 : 0.22}
-                strokeWidth={t.major ? 1.3 : 0.9}
-                vectorEffect="non-scaling-stroke"
-              />
-            </g>
-          ))}
+        {/* Top & bottom ruler tick bars: 24 numbered majors on desktop,
+            12 on mobile, matching the numbers on each breakpoint. */}
+        <g stroke={PAPER} strokeLinecap="round" className="max-sm:hidden">
+          <TickLines ticks={MAT_TICKS} />
+        </g>
+        <g stroke={PAPER} strokeLinecap="round" className="hidden max-sm:block">
+          <TickLines ticks={MAT_TICKS_MOBILE} />
         </g>
 
         {/* Monospace ruler numbers: 01..24 on desktop, 01..12 on mobile.
             The 1440-wide ruler is squeezed to phone width, so 24 labels
-            collide and blur. Mobile labels sit on every other major tick,
+            collide and blur. Mobile labels sit on every mobile major tick,
             so the ruler still spans the full mat width. */}
         <g
           fill={PAPER}
