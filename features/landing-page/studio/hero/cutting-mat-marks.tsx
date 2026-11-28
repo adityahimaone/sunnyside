@@ -82,7 +82,10 @@ export function CuttingMatMarks() {
           ))}
         </g>
 
-        {/* Monospace ruler numbers 01..24 */}
+        {/* Monospace ruler numbers 01..24 on desktop, 12 on mobile: the
+            1440-wide ruler is squeezed to phone width, so 24 labels collide
+            and blur. Even numbers hide below the `sm` breakpoint, leaving
+            01, 03, … 23 aligned with the major ticks. */}
         <g
           fill={PAPER}
           fillOpacity={0.42}
@@ -92,7 +95,10 @@ export function CuttingMatMarks() {
           textAnchor="middle"
         >
           {MAT_RULER_NUMS.map((n) => (
-            <g key={n.index}>
+            <g
+              key={n.index}
+              className={n.index % 2 === 0 ? 'max-sm:hidden' : undefined}
+            >
               <text x={n.x} y={48}>
                 {n.label}
               </text>
