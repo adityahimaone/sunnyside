@@ -8,6 +8,14 @@ const MAT_RULER_NUMS = Array.from({ length: 24 }, (_, i) => ({
   x: 60 + i * 57.4,
 }))
 
+// Mobile shows 01..12, one label per two major ticks, so the ruler still
+// spans the full mat width instead of stopping halfway.
+const MAT_RULER_NUMS_MOBILE = Array.from({ length: 12 }, (_, i) => ({
+  index: i + 1,
+  label: String(i + 1).padStart(2, '0'),
+  x: 60 + i * 114.8,
+}))
+
 const MAT_TICKS = Array.from({ length: 97 }, (_, i) => ({
   index: i,
   x: 60 + i * 14.35,
@@ -82,10 +90,10 @@ export function CuttingMatMarks() {
           ))}
         </g>
 
-        {/* Monospace ruler numbers 01..24 on desktop, 12 on mobile: the
-            1440-wide ruler is squeezed to phone width, so 24 labels collide
-            and blur. Even numbers hide below the `sm` breakpoint, leaving
-            01, 03, … 23 aligned with the major ticks. */}
+        {/* Monospace ruler numbers: 01..24 on desktop, 01..12 on mobile.
+            The 1440-wide ruler is squeezed to phone width, so 24 labels
+            collide and blur. Mobile labels sit on every other major tick,
+            so the ruler still spans the full mat width. */}
         <g
           fill={PAPER}
           fillOpacity={0.42}
@@ -93,12 +101,30 @@ export function CuttingMatMarks() {
           fontSize="10.5"
           fontWeight="600"
           textAnchor="middle"
+          className="max-sm:hidden"
         >
           {MAT_RULER_NUMS.map((n) => (
-            <g
-              key={n.index}
-              className={n.index % 2 === 0 ? 'max-sm:hidden' : undefined}
-            >
+            <g key={n.index}>
+              <text x={n.x} y={48}>
+                {n.label}
+              </text>
+              <text x={n.x} y={859}>
+                {n.label}
+              </text>
+            </g>
+          ))}
+        </g>
+        <g
+          fill={PAPER}
+          fillOpacity={0.42}
+          fontFamily="var(--font-geist-mono), ui-monospace, monospace"
+          fontSize="10.5"
+          fontWeight="600"
+          textAnchor="middle"
+          className="hidden max-sm:block"
+        >
+          {MAT_RULER_NUMS_MOBILE.map((n) => (
+            <g key={n.index}>
               <text x={n.x} y={48}>
                 {n.label}
               </text>
